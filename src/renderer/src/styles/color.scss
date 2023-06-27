@@ -1,0 +1,57 @@
+:root{
+  --bg: #fff;
+  --nav: #F9FBFE;
+  --b1: rgb(229 231 235 / 0.8);
+  --md-text: rgba(32,34,36,.9);
+  --tree-bg: #EFF1F4;
+  --md-code-bg: #242425;
+  --md-bg-mute: rgba(0, 0, 0, .07);
+  --md-high: rgba(60,60,60,.3);
+}
+.dark{
+  --bg: #222222;
+  --nav: #24262A;
+  --b1: rgb(229 231 235 / 0.1);
+  --md-text: rgba(255, 255, 255, 0.85);
+  --tree-bg: #2A2D31;
+  --md-code-bg: #1c1c1c;
+  --md-bg-mute: rgba(255, 255, 255, .1);
+  --md-high: #6b7280;
+}
+
+.def-bg{
+  background: var(--bg);
+}
+.tree-bg{
+  background: var(--tree-bg);
+}
+.nav{
+  background: var(--nav);
+}
+.b1{
+  border-color: var(--b1);
+}
+.md-text{
+  color: var(--md-text);
+}
+html{
+  background: var(--bg);
+}
+
+.input{
+  @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-zinc-900 bg-white
+  h-7 rounded px-2 border dark:border-zinc-700 border-gray-500/30 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
+}
+
+.high-block{
+  animation: high .3s .1s forwards;
+}
+
+@keyframes high {
+  from {
+    background: rgba(6,182,212, 0);
+  }
+  to{
+    background: rgba(6,182,212, .5);
+  }
+}
