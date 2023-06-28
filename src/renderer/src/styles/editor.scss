@@ -17,9 +17,6 @@
 
 a {
   text-decoration: none;
-  &:hover{
-    @apply text-blue-700;
-  }
 }
 .edit-area{
   padding-bottom: 128px;
@@ -223,7 +220,7 @@ ol.m-list {
   &.tab-4{
     tab-size: 4;
   }
-  font-size: 0.8125em;
+  font-size: 0.85em;
   position: relative;
   line-height: 22px;
   direction: ltr;
@@ -249,6 +246,7 @@ ol.m-list {
   pre{
     white-space: pre;
     padding: 10px 0;
+    position: relative;
   }
   code{
     width: fit-content;
@@ -259,34 +257,46 @@ ol.m-list {
     word-break: normal;
     hyphens: none;
   }
-  &.num {
-    &:before{
-      content: '';
-      width: 1px;
-      height: 100%;
-      position: absolute;
-      left: 32px;
-      top: 0;
-      background: rgba(0,0,0,.5);
-    }
-    .code-line {
-      padding: 0 24px 0 48px;
-      &:before {
-        content: attr(data-line);
-        position: absolute;
+  .code-line-list{
+    background: var(--md-code-bg);
+    counter-reset: step;
+    border-radius: 4px;
+    counter-increment: step 0;
+    height: 100%;
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    padding-top: 10px;
+    width:32px;
+    top: 0;
+    border-right: 1px solid rgba(0,0,0,.5);
+    > div{
+      &:before{
+        content: counter(step);
+        counter-increment: step;
         color: rgba(255, 255, 255, .5);
-        font-size: 1em;
-        left: 0;
-        top: 0;
-        height: 100%;
-        width: 32px;
-        text-align: center;
       }
+      font-size: .93em;
+      left: 0;
+      top: 0;
+      height: 22px;
+      width: 32px;
+      text-align: center;
     }
   }
+  code{
 
+  }
+  &.num {
+    code{
+      padding-left: 48px;
+    }
+  }
+  code{
+    padding-left: 24px;
+  }
   .code-line {
-    padding: 0 24px;
+    padding-right: 24px;
     position: relative;
     //width: calc(100% + 24px);
   }

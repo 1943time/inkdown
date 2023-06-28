@@ -19,6 +19,9 @@
   --md-high: #6b7280;
 }
 
+a:hover {
+  @apply text-blue-700;
+}
 .def-bg{
   background: var(--bg);
 }

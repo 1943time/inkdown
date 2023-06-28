@@ -89,7 +89,7 @@ export const EditorFrame = observer(({tab}: {
                       MainApi.openInFolder(tab.current?.filePath || '')
                     }}
                   >
-                    <FolderOpenOutlined /> 在Finder中显示
+                    <FolderOpenOutlined/> 在Finder中显示
                   </div>
                 </div>
               }

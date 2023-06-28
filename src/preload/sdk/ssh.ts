@@ -67,10 +67,19 @@ export class SshApi implements ServerSdk {
   }
   async uploadFileByText(name, content) {
     if (!this.ssh) this.ssh = await this.connect()
-    const sourcePath = join(__dirname, '../../resources/lib')
-    const current = join(sourcePath, `current${parse(name).ext}`)
-    writeFileSync(current, content, {encoding: 'utf-8'})
-    await this.ssh!.putFile(current, join(this.config.target, name))
+    await this.ssh.mkdir(join(this.config.target, 'docs'))
+    return this.ssh.withSFTP(sftp => {
+      return new Promise((resolve, reject) => {
+        sftp.writeFile(join(this.config.target, name), content, res => {
+          resolve()
+          if (res instanceof Error) {
+            reject(res)
+          } else {
+            resolve()
+          }
+        })
+      })
+    })
   }
   async syncDoc(name: string, content: string, title: string): Promise<any> {
     if (!this.ssh) {this.ssh = await this.connect()}

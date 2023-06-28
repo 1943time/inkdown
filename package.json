@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "1943time",
+  "homepage": "https://github.com/1943time/bluestone",
   "scripts": {
     "format": "prettier --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
@@ -17,7 +18,7 @@
     "build:mac": "electron-vite build && electron-builder --mac --config",
     "build:linux": "electron-vite build && electron-builder --linux --config",
     "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
-    "sync-css": "cp -f src/renderer/src/styles/color.scss ../bs-preview/src/styles && cp -f src/renderer/src/styles/editor.scss ../bs-preview/src/styles"
+    "sync-css": "cp -f src/renderer/src/styles/color.scss ../bsp/src/styles && cp -f src/renderer/src/styles/editor.scss ../bsp/src/styles"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
@@ -34,7 +35,7 @@
     "xml2js": "^0.6.0"
   },
   "devDependencies": {
-    "@ant-design/icons": "^5.1.4",
+    "@ant-design/icons": "^5.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^1.2.3",
     "@types/mime-types": "^2.1.1",

@@ -6,7 +6,6 @@ import {useMEditor} from '../../hooks/editor'
 import {CodeLineNode, CodeNode, ElementProps} from '../../el'
 import {cacheLine} from '../plugins/useHighlight'
 import {Mermaid} from './CodeUI/Mermaid'
-import {Transforms} from 'slate'
 import {Katex} from './CodeUI/Katex/Katex'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
@@ -33,13 +32,6 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     update({language: state().lang})
   }, [props.element, props.element.children])
 
-  useEffect(() => {
-    props.element.children.forEach((el, i) => {
-      Transforms.setNodes(editor, {num: i + 1}, {
-        at: ReactEditor.findPath(editor, el)
-      })
-    })
-  }, [props.element.children.length])
   const child = useMemo(() => {
     return (
       <code>{props.children}</code>
@@ -99,6 +91,13 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             </>
           }
         </div>
+        {configStore.config.codeLineNumber &&
+          <div className={'code-line-list'}>
+            {(props.children || []).map((c, i) =>
+              <div key={i}/>
+            )}
+          </div>
+        }
         <pre
           data-bl-type={'code'}
           className={'text-gray-200'}
@@ -126,7 +125,6 @@ export const CodeLine = observer((props: ElementProps<CodeLineNode>) => {
       <div
         className={`code-line`}
         data-be={'code-line'}
-        data-line={props.element.num}
         {...props.attributes}>
         {props.children}
       </div>

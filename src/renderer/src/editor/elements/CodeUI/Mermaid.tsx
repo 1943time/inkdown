@@ -32,7 +32,6 @@ export const Mermaid = observer((props: {
 
   useUpdateEffect(() => {
     setTimeout(() => {
-      console.log('render')
       render()
     })
   }, [configStore.config.dark])

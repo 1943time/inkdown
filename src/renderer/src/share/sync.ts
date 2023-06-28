@@ -74,26 +74,46 @@ export class Sync {
   get time() {
     return dayjs().format('YYYY-MM-DD HH:mm:ss')
   }
-
+  private async withShareSchema(schema: any[]) {
+    const data:any[] = []
+    for (let s of schema) {
+      const item:any = {...s}
+      if (s.type === 'code') {
+        item.code = s.children.map(n => Node.string(n)).join('\n')
+      }
+      if (s.type === 'head') {
+        item.id  = getHeadId(s)
+        item.title = Node.string(s)
+      }
+      if (s.children?.length) {
+        item.children = await this.withShareSchema(s.children)
+      }
+      data.push(item)
+    }
+    return data
+  }
   async syncDoc(filePath: string, schema: any[]) {
     this.currentDocFilePath = filePath
     if (schema) {
       this.currentDocFilePath = filePath
-      const html = await this.getBaseHtml(schema)
-      window.api.copyToClipboard(html)
       const p = parse(filePath)
       const name = p.name
+      const schemaData = {
+        schema: await this.withShareSchema(schema),
+        title:name
+      }
+      window.api.copyToClipboard(JSON.stringify(schemaData))
       const code = await window.api.fs.readFile(filePath, {encoding: 'utf-8'})
       const hash = window.api.md5(code)
       const doc = await db.doc.where('filePath').equals(filePath).first()
       if (doc && hash === doc.hash) return true
       const pathHash = window.api.md5(filePath)
-      await this.sdk.syncDoc('docs/' + pathHash + '.html', html, name)
+      await this.sdk.uploadFileByText('docs/' + pathHash + '.json', JSON.stringify(schemaData))
       if (doc) {
         await db.doc.where('id').equals(doc.id!).modify({hash})
       } else {
         await db.doc.add({
-          id: pathHash, hash, filePath, name, updated: dayjs().format('YYYY-MM-DD HH:mm:ss')
+          id: pathHash, hash, filePath, name, updated: this.time
         })
       }
       this.sdk.dispose()
@@ -106,92 +126,88 @@ export class Sync {
       return this.syncAutoEbook(config)
     }
   }
-  private async getBaseHtml(schema: any, mode:'doc' | 'book' = 'doc') {
-    let html = await this.getDocHtml(schema)
-    let leadingStr = this.getLeadingHtml(schema)
-    return `${this.configHtml}${mode === 'book' ? '<div class="director"></div>' : ''}<div class="content">${html}</div>${leadingStr}`
-  }
+
   private async syncAutoEbook(config: EbookConfig) {
-    this.currentBookConfig = config
-    const root = treeStore.root.filePath!
-    const ignores = config.ignorePaths ? config.ignorePaths.split(',').map(p => join(root, p)) : []
-    let chapterRecords:Chapter[] = []
-    let book: Book | undefined
-    const sdk = new window.api.sdk()
-    if (config.id) {
-      chapterRecords = await db.chapter.where('bookId').equals(config.id).toArray()
-      book = await db.book.get(config.id!)
-      if (book) {
-        db.book.update(config.id!, {
-          strategy: config.strategy,
-          name: config.name,
-          ignorePaths: config.ignorePaths,
-          updated: this.time
-        })
-        if (book.path !== config.path) {
-          sdk.removeFile(join(book.path, 'map.json'))
-          sdk.removeFile(join(book.path, 'text.json'))
-        }
-      }
-    }
-    if (!book) {
-      const id = await db.book.add({
-        filePath: root,
-        strategy: config.strategy,
-        name: config.name,
-        ignorePaths: config.ignorePaths,
-        path: config.path,
-        updated: this.time
-      })
-      book = await db.book.get(id)
-    }
-    const chapters = this.getChaptersByDirectory(treeStore.root!, ignores)
-    const recordsMap = new Map(chapterRecords.map(c => [c.path, c]))
-    const stack = chapters.slice()
-    let pathSet = new Set<string>()
-    await db.chapter.where('bookId').equals(book!.id!).delete()
-    let first = true
-    let change = false
-    while (stack.length) {
-      const item = stack.shift()!
-      if (item.folder) {
-        stack.unshift(...item.children!)
-      } else {
-        const ps = parse(item.filePath)
-        let path = join(config.path, item.filePath.replace(root + sep, '')).replace(/\.\w+$/, '') + '.html'
-        if (first) {
-          path = join(config.path, 'index.html')
-          first = false
-        }
-        pathSet.add(path)
-        item.path = path
-        item.name = ps.name
-        await db.chapter.add({
-          id: window.api.md5(book!.id! + item.filePath),
-          path,
-          filePath: item.filePath,
-          hash: item.hash,
-          name: ps.name,
-          zhName: '',
-          bookId: book!.id!,
-          updated: this.time
-        })
-        if (!recordsMap.get(path) || recordsMap.get(path)!.hash !== item.hash) {
-          change = true
-          const html = await this.getBaseHtml(item.schema, 'book')
-          await sdk.syncDoc(path, html, config.name, 'book')
-        }
-      }
-    }
-    const removeChapters = chapterRecords.filter(c => !c.folder && !pathSet.has(c.path!))
-    for (let c of removeChapters) {
-      await sdk.removeFile(c.path!)
-    }
-    // if (change) {
-      const map = this.getTreeMap(chapters)
-      await sdk.uploadFileByText(join(config.path, 'map.json'), JSON.stringify(map))
+    // this.currentBookConfig = config
+    // const root = treeStore.root.filePath!
+    // const ignores = config.ignorePaths ? config.ignorePaths.split(',').map(p => join(root, p)) : []
+    // let chapterRecords:Chapter[] = []
+    // let book: Book | undefined
+    // const sdk = new window.api.sdk()
+    // if (config.id) {
+    //   chapterRecords = await db.chapter.where('bookId').equals(config.id).toArray()
+    //   book = await db.book.get(config.id!)
+    //   if (book) {
+    //     db.book.update(config.id!, {
+    //       strategy: config.strategy,
+    //       name: config.name,
+    //       ignorePaths: config.ignorePaths,
+    //       updated: this.time
+    //     })
+    //     if (book.path !== config.path) {
+    //       sdk.removeFile(join(book.path, 'map.json'))
+    //       sdk.removeFile(join(book.path, 'text.json'))
+    //     }
+    //   }
     // }
-    sdk.dispose()
+    // if (!book) {
+    //   const id = await db.book.add({
+    //     filePath: root,
+    //     strategy: config.strategy,
+    //     name: config.name,
+    //     ignorePaths: config.ignorePaths,
+    //     path: config.path,
+    //     updated: this.time
+    //   })
+    //   book = await db.book.get(id)
+    // }
+    // const chapters = this.getChaptersByDirectory(treeStore.root!, ignores)
+    // const recordsMap = new Map(chapterRecords.map(c => [c.path, c]))
+    // const stack = chapters.slice()
+    // let pathSet = new Set<string>()
+    // await db.chapter.where('bookId').equals(book!.id!).delete()
+    // let first = true
+    // let change = false
+    // while (stack.length) {
+    //   const item = stack.shift()!
+    //   if (item.folder) {
+    //     stack.unshift(...item.children!)
+    //   } else {
+    //     const ps = parse(item.filePath)
+    //     let path = join(config.path, item.filePath.replace(root + sep, '')).replace(/\.\w+$/, '') + '.html'
+    //     if (first) {
+    //       path = join(config.path, 'index.html')
+    //       first = false
+    //     }
+    //     pathSet.add(path)
+    //     item.path = path
+    //     item.name = ps.name
+    //     await db.chapter.add({
+    //       id: window.api.md5(book!.id! + item.filePath),
+    //       path,
+    //       filePath: item.filePath,
+    //       hash: item.hash,
+    //       name: ps.name,
+    //       zhName: '',
+    //       bookId: book!.id!,
+    //       updated: this.time
+    //     })
+    //     if (!recordsMap.get(path) || recordsMap.get(path)!.hash !== item.hash) {
+    //       change = true
+    //       const html = await this.getBaseHtml(item.schema, 'book')
+    //       await sdk.syncDoc(path, html, config.name, 'book')
+    //     }
+    //   }
+    // }
+    // const removeChapters = chapterRecords.filter(c => !c.folder && !pathSet.has(c.path!))
+    // for (let c of removeChapters) {
+    //   await sdk.removeFile(c.path!)
+    // }
+    // // if (change) {
+    //   const map = this.getTreeMap(chapters)
+    //   await sdk.uploadFileByText(join(config.path, 'map.json'), JSON.stringify(map))
+    // // }
+    // sdk.dispose()
   }
   private getTreeMap(chapters: ChapterItem[]) {
     let map:any[] = []
@@ -227,68 +243,6 @@ export class Sync {
       if (id) str += `<div class="leading-item" style="padding-left: ${(h.level - 2) * 16}px" data-anchor="${id}"><a href="#${id}">${id}</a></div>`
     }
     return `<div class="leading"><div class="leading-title">On this page</div><div class="leading-list">${str}</div></div>`
-  }
-  private async getDocHtml(schema: Els[]) {
-    let str = ''
-    for (let e of schema) {
-      switch (e.type) {
-        case 'head':
-          const id = getHeadId(e)
-          str += `<a href="#${id}" class="heading"><h${e.level}><span class="anchor" id="${id}"></span>${await this.getDocHtml(e.children || [])}</h${e.level}><a>`
-          break
-        case 'paragraph':
-          str += `<p>${await this.getDocHtml(e.children || [])}</p>`
-          break
-        case 'blockquote':
-          str += `<blockquote>${await this.getDocHtml(e.children || [])}</blockquote>`
-          break
-        case 'hr':
-          str += '<hr class="m-hr"/>'
-          break
-        case 'list':
-          let tag = e.order ? 'ol' : 'ul'
-          str += `<${tag} class="m-list">${await this.getDocHtml(e.children || [])}</${tag}>`
-          break
-        case 'list-item':
-          str += `<li class="m-list-item">${await this.getDocHtml(e.children || [])}</li>`
-          break
-        case 'table':
-          let head = ''
-          for (let h of e.children[0].children) {
-            head += `<th>${await this.getDocHtml(h.children || [])}</th>`
-          }
-          str += `<table><thead><tr>${head}</tr></thead><tbody>${await this.getDocHtml(e.children?.slice(1) || [])}</tbody></table>`
-          break
-        case 'table-row':
-          str += `<tr>${await this.getDocHtml(e.children)}</tr>`
-          break
-        case 'table-cell':
-          str += `<td>${await this.getDocHtml(e.children)}</td>`
-          break
-        case 'media':
-          const url = await this.uploadFile(e.url)
-          str += `<img alt="${e.alt}" src="${url}"/>`
-          break
-        case 'code':
-          if (e.language === 'mermaid') {
-            str += `<div class="mermaid-container pre hide" data-code="${e.children.map(n => Node.string(n)).join('\n')}"></div>`
-          } else {
-            const code = e.children.map(n => Node.string(n)).join('\n')
-            str += `<pre class="code-highlight tab-${configStore.config.codeTabSize}" data-lang="${e.language}"><code>${encodeHtml(code)}</code></pre>`
-          }
-          break
-      }
-      if (e.text) {
-        let text = e.text
-        if (e.strikethrough) text = `<del>${text}</del>`
-        if (e.bold) text = `<strong>${text}</strong>`
-        if (e.code) text = `<code class="inline-code">${text}</code>`
-        if (e.italic) text = `<i>${text}</i>`
-        if (e.url) text = `<a href="${e.url}" target="_blank">${text}</a>`
-        str += text
-      }
-    }
-    return str
   }
   private async exist(path: string) {
     try {

@@ -15,8 +15,11 @@ class ConfigStore {
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4
   }
+  timer = 0
   constructor() {
-    makeAutoObservable(this)
+    makeAutoObservable(this, {
+      timer: false
+    })
     window.electron.ipcRenderer.on('openSet', () => {
       this.initial()
       runInAction(() => {
@@ -25,7 +28,29 @@ class ConfigStore {
     })
     window.electron.ipcRenderer.on('changeConfig',  action((e, key: any, value: any) => {
       this.config[key] = value
+      if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
     }))
+  }
+  private syncConfig() {
+    clearTimeout(this.timer)
+    this.timer = window.setTimeout(() => {
+      MainApi.getServerConfig().then(async res => {
+        if (res) {
+          const sdk = new window.api.sdk()
+          try {
+            await sdk.uploadFileByText('config.json', JSON.stringify({
+              codeTheme: this.config.codeTheme,
+              codeTabSize: this.config.codeTabSize,
+              codeLineNumber: this.config.codeLineNumber
+            }))
+          } catch (e) {
+            console.error('set share config fail')
+          } finally {
+            sdk.dispose()
+          }
+        }
+      })
+    }, 3000)
   }
   async setTheme(theme: typeof this.config.theme) {
     const dark = await MainApi.getSystemDark()
@@ -66,6 +91,7 @@ class ConfigStore {
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
     ipcRenderer.send('setStore', `config.${key}`, value)
+    if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
   }
   initial(set = false) {
     return new Promise(resolve => {
