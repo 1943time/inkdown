@@ -1,6 +1,6 @@
 import {NodeSSH} from 'node-ssh'
 import {ServerSdk} from './index'
-import {join, parse} from 'path'
+import {join, parse, sep} from 'path'
 import {writeFileSync} from 'fs'
 const ssh = new NodeSSH()
 const config = {
@@ -67,7 +67,8 @@ export class SshApi implements ServerSdk {
   }
   async uploadFileByText(name, content) {
     if (!this.ssh) this.ssh = await this.connect()
-    await this.ssh.mkdir(join(this.config.target, 'docs'))
+    const dir = name.split(sep).slice(-1).join(sep)
+    if (dir) await this.ssh.mkdir(join(this.config.target, dir))
     return this.ssh.withSFTP(sftp => {
       return new Promise((resolve, reject) => {
         sftp.writeFile(join(this.config.target, name), content, res => {

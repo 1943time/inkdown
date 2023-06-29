@@ -276,6 +276,7 @@ export class TreeStore {
 
   getSchema(file: IFileItem) {
     if (file?.ext !== 'md' && file?.ext !== 'markdown') return
+    if (this.schemaMap.get(file)) return this.schemaMap.get(file)
     this.schemaMap.set(file, {
       state: markdownParser(file.filePath).schema
     })

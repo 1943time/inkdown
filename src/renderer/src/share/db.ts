@@ -19,8 +19,9 @@ export interface Book{
 }
 
 export interface Chapter {
-  id?: string
+  id?: number
   filePath: string
+  path: string
   bookId: number
   hash?: string
   folder?: boolean
@@ -28,7 +29,6 @@ export interface Chapter {
   sort?: number
   zhName?: string
   name: string
-  path?: string
   updated: string
 }
 
@@ -48,7 +48,7 @@ class Db extends Dexie {
     this.version(1).stores({
       doc: '&id,name,filePath,hash,updated',
       book: '++id,[filePath+path],name,strategy,filePath,ignorePaths,updated',
-      chapter: '&id,filePath,bookId,folder,path,hash,parentId,sort,name,zhName,updated',
+      chapter: '++id,filePath,bookId,folder,path,hash,parentId,sort,name,zhName,updated',
       file: '++id,filePath,hash'
     })
   }
