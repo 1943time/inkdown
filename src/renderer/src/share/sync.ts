@@ -1,7 +1,7 @@
 import {parse, isAbsolute, join, basename, sep} from 'path'
 import {Book, Chapter, db} from './db'
 import dayjs from 'dayjs'
-import {CustomLeaf, Elements, HeadNode} from '../el'
+import {CustomLeaf, Elements} from '../el'
 import {Node} from 'slate'
 import {configStore} from '../store/config'
 import {mediaType} from '../editor/utils/dom'
@@ -9,7 +9,6 @@ import {remove as removeDiacritics} from 'diacritics'
 import {treeStore} from '../store/tree'
 import {IFileItem} from '../index'
 import {readFileSync} from 'fs'
-import {has} from 'mobx'
 type Els = Elements & CustomLeaf
 
 const rControl = /[\u0000-\u001f]/g
@@ -58,16 +57,8 @@ export const getSlugifyName = (path: string) => slugify(basename(path).replace(/
 export const getHeadId = (node: any) => slugify(findText(node))
 export class Sync {
   sdk = new window.api.sdk()
-  currentDocFilePath = ''
   currentBookConfig: any
-  get configHtml() {
-    let config = `
-      <input type="hidden" name="codeTheme" value="${configStore.config.codeTheme}"/>
-      <input type="hidden" name="codeLineNumber" value="${configStore.config.codeLineNumber}"/>
-    `
-    if (this.currentBookConfig) config += `<input type="hidden" name="prefix" value="${this.currentBookConfig.path}"/>`
-    return config
-  }
+  private readonly prefix = 'books'
   get time() {
     return dayjs().format('YYYY-MM-DD HH:mm:ss')
   }
@@ -84,7 +75,7 @@ export class Sync {
       }
 
       if (s.type === 'media') {
-        s.src = await this.uploadFile(s.url, docPath)
+        item.src = await this.uploadFile(s.url, docPath)
       }
 
       if (s.children?.length) {
@@ -145,8 +136,8 @@ export class Sync {
           updated: this.time
         })
         if (book.path !== config.path) {
-          sdk.removeFile(join(book.path, 'map.json'))
-          sdk.removeFile(join(book.path, 'text.json'))
+          sdk.removeFile(join(this.prefix, book.path, 'map.json'))
+          sdk.removeFile(join(this.prefix, book.path, 'text.json'))
         }
       }
     }
@@ -169,7 +160,13 @@ export class Sync {
       sdk,
       ignorePath: ignores
     })
-    await sdk.uploadFileByText(`${config.path}/map.json`, JSON.stringify(map))
+
+    await sdk.uploadFileByText(`${this.prefix}/${config.path}/map.json`, JSON.stringify({
+      title: book!.name,
+      path: book!.path,
+      map
+    }))
+
     const insertSet = new Set<string>()
     const stack = map.slice()
     while (stack.length) {
@@ -180,10 +177,17 @@ export class Sync {
         stack.push(...cur.children!)
       }
     }
+    const removeChapters = await db.chapter.where('bookId').equals(book!.id!).filter(item => {
+      return !insertSet.has(item.path)
+    }).toArray()
+
+    for (let c of removeChapters) {
+      await sdk.removeFile(`${this.prefix}/${config.path}/${c.path}.json`)
+    }
+
     await db.chapter.where('bookId').equals(book!.id!).filter(item => {
       return !insertSet.has(item.path)
     }).delete()
-
     sdk.dispose()
   }
   private async getMapByDirectory(ctx: {
@@ -204,6 +208,7 @@ export class Sync {
         chapters.push({
           folder: true,
           name: ps.name,
+          path: window.api.md5(c.filePath),
           children: await this.getMapByDirectory({
             ...ctx,
             item: c
@@ -218,7 +223,11 @@ export class Sync {
         }
         const hash = window.api.md5(readFileSync(c.filePath, {encoding: 'utf-8'}))
         if (!ctx.records.get(path) || ctx.records.get(path)!.hash !== hash) {
-          await ctx.sdk.uploadFileByText(`${ctx.book.path}/${path}.json`, await this.withShareSchema(treeStore.getSchema(c)?.state || [], c.filePath))
+          const shareSchema = await this.withShareSchema(treeStore.getSchema(c)?.state || [], c.filePath)
+          await ctx.sdk.uploadFileByText(`${this.prefix}/${ctx.book.path}/${path}.json`, JSON.stringify({
+            title: ps.name,
+            schema: shareSchema
+          }))
           if (!ctx.records.get(path)) {
             await db.chapter.add({
               hash,

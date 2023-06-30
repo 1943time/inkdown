@@ -37,7 +37,7 @@ export const ShareSet = observer(() => {
   })
   const [api, contextHolder] = notification.useNotification()
   const getDocUrl = useCallback(() => {
-    return `${state.config?.domain || 'https://***'}/docs/${state.docPathHash}.html`
+    return `${state.config?.domain || 'https://***'}/doc/${state.docPathHash}`
   }, [])
   const copyDocUrl = useCallback(() => {
     window.api.copyToClipboard(getDocUrl())
@@ -185,16 +185,63 @@ export const ShareSet = observer(() => {
                       </div>
                     }
                     {state.books.map(b =>
-                      <div className={'w-full flex items-center px-5 py-1 border-b border-gray-200/10 text-blue-500 mb-4'} key={b.id!}>
-                        <a className={'flex-1'} href={`${state.config.domain}/${b.path}`} target={'_blank'}>
+                      <div className={'w-full flex items-center px-3 py-1 border-b border-gray-200/10 text-blue-500 mb-4'} key={b.id!}>
+                        <a className={'flex-1 max-w-[240px] break-all'} href={`${state.config.domain}/book/${b.path}`} target={'_blank'}>
                           <ReadOutlined />
                           <span className={'ml-1'}>{b.name}</span>
                         </a>
-                        <div className={'flex w-28 justify-between'}>
-                          <a>
-                            <SyncOutlined />
+                        <div className={'flex w-28 justify-between flex-shrink-0 ml-4'}>
+                          <a onClick={async () => {
+                            const sync = new Sync()
+                            setState({syncing: true})
+                            try {
+                              await sync.syncEbook({
+                                id: b.id!,
+                                name: b.name,
+                                path: b.path,
+                                strategy: b.strategy,
+                                ignorePaths: b.ignorePaths
+                              })
+                              const key = 'Date' + Date.now()
+                              api.success({
+                                key,
+                                message: '同步成功',
+                                duration: 2,
+                                btn: (
+                                  <Space>
+                                    <Button
+                                      onClick={() => {
+                                        api.destroy(key)
+                                        window.api.copyToClipboard(`${state.config.domain}/book/${b.path}`)
+                                      }}
+                                    >
+                                      复制链接
+                                    </Button>
+                                    <Button
+                                      type={'primary'}
+                                      onClick={() => {
+                                        window.open(`${state.config.domain}/book/${b.path}`)
+                                        api.destroy(key)
+                                      }}
+                                    >
+                                      打开
+                                    </Button>
+                                  </Space>
+                                )
+                              })
+                            } catch (e) {
+                              console.error(e)
+                              message$.next({
+                                type: 'warning',
+                                content: '同步失败'
+                              })
+                            } finally {
+                              setState({syncing: false})
+                            }
+                          }} className={`${state.syncing ? 'text-gray-600 cursor-not-allowed' : ''}`}>
+                            <SyncOutlined className={`${state.syncing ? 'animate-spin' : ''}`}/>
                             <span className={'ml-1'}>
-                              同步
+                              同步{state.syncing ? '中' : ''}
                             </span>
                           </a>
                           <a onClick={() => {

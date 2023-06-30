@@ -92,8 +92,9 @@ export class AliApi implements ServerSdk {
     })
     return http.delete(`https://${this.config.bucket}.${this.config.region}.aliyuncs.com/${name}`, {
       headers: header
-    })
+    }).catch(() => {})
   }
+
   uploadFile(name: string, filePath: string, contentType?: string) {
     const header = this.getHeaders({
       method: 'PUT',

@@ -7,6 +7,7 @@
   --md-code-bg: #242425;
   --md-bg-mute: rgba(0, 0, 0, .07);
   --md-high: rgba(60,60,60,.3);
+  --md-border: #b9b9b9;
 }
 .dark{
   --bg: #222222;
@@ -17,11 +18,9 @@
   --md-code-bg: #1c1c1c;
   --md-bg-mute: rgba(255, 255, 255, .1);
   --md-high: #6b7280;
+  --md-border: #3f3f46;
 }
 
-a:hover {
-  @apply text-blue-700;
-}
 .def-bg{
   background: var(--bg);
 }

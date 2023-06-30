@@ -2,6 +2,7 @@ import {NodeSSH} from 'node-ssh'
 import {ServerSdk} from './index'
 import {join, parse, sep} from 'path'
 import {writeFileSync} from 'fs'
+import {SFTPWrapper} from 'ssh2'
 const ssh = new NodeSSH()
 const config = {
   host: '47.243.113.100',
@@ -65,14 +66,21 @@ export class SshApi implements ServerSdk {
       this.ssh = null
     }
   }
+  private remoteExists(sftp: SFTPWrapper, filePath: string) {
+    return new Promise((resolve, reject) => {
+      sftp.exists(filePath, (res) => {
+        resolve(res)
+      })
+    })
+  }
   async uploadFileByText(name, content) {
     if (!this.ssh) this.ssh = await this.connect()
-    const dir = name.split(sep).slice(-1).join(sep)
-    if (dir) await this.ssh.mkdir(join(this.config.target, dir))
-    return this.ssh.withSFTP(sftp => {
-      return new Promise((resolve, reject) => {
+    const dir = name.split(sep).slice(0, -1).join(sep)
+    return this.ssh.withSFTP(async sftp => {
+      return new Promise(async (resolve, reject) => {
+        const exist = await this.remoteExists(sftp, join(this.config.target, dir))
+        if (!exist) await this.ssh!.mkdir(join(this.config.target, dir))
         sftp.writeFile(join(this.config.target, name), content, res => {
-          resolve()
           if (res instanceof Error) {
             reject(res)
           } else {

@@ -2,10 +2,29 @@ import {observer} from 'mobx-react-lite'
 import {Button, Modal, Table, Tabs} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
-import {db} from './db'
-import {CopyOutlined} from '@ant-design/icons'
+import {Book, db} from './db'
 import {MainApi} from '../api/main'
 import {extname} from 'path'
+import {message$} from '../utils'
+
+const removeBook = async (id: number) => {
+  const chapters = await db.chapter.where('bookId').equals(id).toArray()
+  const book = await db.book.get(id)
+  const sdk = new window.api.sdk()
+  if (book) {
+    await db.book.delete(book.id!)
+    await db.chapter.where('bookId').equals(id).delete()
+    await sdk.removeFile(`books/${book.path}/map.json`)
+    await sdk.removeFile(`books/${book.path}/text.json`)
+    if (chapters.length) {
+      for (let c of chapters) {
+        await sdk.removeFile(`books/${book.path}/${c.path}.json`)
+      }
+    }
+    await sdk.removeFile(`books/${book.path}`)
+  }
+}
+
 export const Record = observer((props: {
   open: boolean
   onClose: () => void
@@ -15,6 +34,8 @@ export const Record = observer((props: {
     activeKey: 'doc',
     docs: [] as any[],
     files: [] as any[],
+    books: [] as Book[],
+    bookPage: 1,
     docPage: 1,
     filePage: 1,
     config: null as any
@@ -29,11 +50,17 @@ export const Record = observer((props: {
     setState({files: data})
   }, [])
 
+  const getBooks = useCallback(async () => {
+    const data = await db.book.offset((state.bookPage - 1) * 15).limit(15).toArray()
+    setState({books: data})
+  }, [])
+
   useEffect(() => {
     if (props.open) {
       setState({docPage: 1, filePage: 1})
       if (state.activeKey === 'doc') getDocs()
       if (state.activeKey === 'file') getFiles()
+      if (state.activeKey === 'book') getBooks()
       MainApi.getServerConfig().then(res => setState({config: res}))
     }
   }, [props.open])
@@ -53,6 +80,7 @@ export const Record = observer((props: {
           setState({activeKey: k})
           if (k === 'file' && !state.files.length) getFiles()
           if (k === 'doc' && !state.docs.length) getDocs()
+          if (k === 'book' && !state.books.length) getBooks()
         }}
         items={[
           {
@@ -106,6 +134,7 @@ export const Record = observer((props: {
                                 await sdk.removeFile('docs/' + record.id + '.html')
                                 sdk.dispose()
                                 await db.doc.delete(record.id)
+                                message$.next({type: 'success', content: '删除成功'})
                                 getDocs()
                               }
                             })
@@ -122,7 +151,72 @@ export const Record = observer((props: {
           },
           {
             key: 'book',
-            label: '电子书'
+            label: '电子书',
+            children: (
+              <div>
+                <Table
+                  size={'small'}
+                  dataSource={state.books}
+                  rowKey={'id'}
+                  pagination={{
+                    pageSize: 15,
+                    current: state.bookPage,
+                    onChange: page => {
+                      setState({bookPage: page})
+                      getBooks()
+                    }
+                  }}
+                  columns={[
+                    {
+                      title: '名称',
+                      dataIndex: 'name',
+                      render: (v, record) => (
+                        <a
+                          className={'text-blue-500'}
+                          onClick={() => window.open(`${state.config?.domain}/book/${record.path}`)}
+                        >{v}</a>
+                      )
+                    },
+                    {
+                      title: '文件路径',
+                      dataIndex: 'filePath'
+                    },
+                    {
+                      title: '同步策略',
+                      dataIndex: 'strategy',
+                      render: v => v === 'auto' ? '自动生成' : '自定义'
+                    },
+                    {
+                      title: '更新时间',
+                      dataIndex: 'updated'
+                    },
+                    {
+                      title: '删除',
+                      key: 'handle',
+                      render: (v, record) => (
+                        <Button
+                          size={'small'} danger type={'link'}
+                          onClick={() => {
+                            modal.confirm({
+                              title: '提示',
+                              content: '将同时删除远程文件与所有章节，点击确认删除',
+                              onOk: async () => {
+                                return removeBook(record.id!).then(() => {
+                                  message$.next({type: 'success', content: '删除成功'})
+                                  getBooks()
+                                })
+                              }
+                            })
+                          }}
+                        >
+                          删除
+                        </Button>
+                      )
+                    }
+                  ]}
+                />
+              </div>
+            )
           },
           {
             key: 'file',

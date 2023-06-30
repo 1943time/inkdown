@@ -9,7 +9,6 @@
   --md-c-tip-b: #047857;
   --md-c-danger-b: #dc2626;
   --md-bg-alt: #101010;
-  --md-border: #3f3f46;
   --md-pure: black;
   --shadow: rgba(0, 0, 0, .3);
   --md-high-line: rgba(11, 18, 24, .5);
@@ -209,6 +208,7 @@ ol.m-list {
   height: 1px;
   background: var(--md-border);
   margin: 2em 0;
+  border: none;
 }
 
 .code-highlight {
