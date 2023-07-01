@@ -4,22 +4,6 @@ import {join, parse, sep} from 'path'
 import {writeFileSync} from 'fs'
 import {SFTPWrapper} from 'ssh2'
 const ssh = new NodeSSH()
-const config = {
-  host: '47.243.113.100',
-  username: 'root',
-  password: 'Best1151',
-  target: '/opt/blog/.next'
-}
-
-export const ssh_test = () => {
-  ssh.connect({
-    host: config.host,
-    username: config.username,
-    password: config.password
-  }).then(res => {
-    console.log('connected')
-  })
-}
 
 interface Config {
   host: string
@@ -34,16 +18,15 @@ export class SshApi implements ServerSdk {
   constructor(
     private readonly config: Config
   ) {}
-  reset(): Promise<any> {
-    return Promise.resolve(undefined)
-  }
+
   async connect() {
-    return await ssh.connect({
+    this.ssh = await ssh.connect({
       host: this.config.host,
       username: this.config.username,
       password: this.config.password,
       port: this.config.port
     })
+    return this.ssh
   }
 
   async uploadFile(name: string, filePath: string, contentType?: string): Promise<any> {
@@ -54,12 +37,7 @@ export class SshApi implements ServerSdk {
     if (!this.ssh) this.ssh = await this.connect()
     await this.ssh!.execCommand(`rm -rf ${join(this.config.target, name)}`)
   }
-  async initial(files?: { name: string; filePath: string; contentType: string }[]): Promise<any> {
-    if (!this.ssh) this.ssh = await this.connect()
-    await this.ssh!.putFiles(files!.map(f => {
-      return {local: f.filePath, remote: join(this.config.target, f.name)}
-    }))
-  }
+
   dispose() {
     if (this.ssh) {
       this.ssh.dispose()
@@ -89,12 +67,5 @@ export class SshApi implements ServerSdk {
         })
       })
     })
-  }
-  async syncDoc(name: string, content: string, title: string): Promise<any> {
-    if (!this.ssh) {this.ssh = await this.connect()}
-    const sourcePath = join(__dirname, '../../resources/lib')
-    const current = join(sourcePath, 'current.html')
-    writeFileSync(current, content, {encoding: 'utf-8'})
-    await this.ssh!.putFile(current, join(this.config.target, name))
   }
 }

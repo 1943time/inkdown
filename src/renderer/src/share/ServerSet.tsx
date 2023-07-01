@@ -40,7 +40,7 @@ export const ServerSet = observer((props: {
             await window.electron.ipcRenderer.invoke('saveServerConfig', v)
             const sdk = new window.api.sdk()
             await sdk.connect()
-            await sdk.initial()
+            await sdk.reset()
             sdk.dispose()
             message$.next({
               type: 'success',
@@ -48,6 +48,9 @@ export const ServerSet = observer((props: {
             })
             await db.doc.clear()
             await db.file.clear()
+            await db.chapter.filter(o => true).modify({
+              hash: ''
+            })
             props.onClose()
           } catch (e) {
             console.error('e', e)

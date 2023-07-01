@@ -15,7 +15,6 @@ export function useHighlight(store?: EditorStore) {
     if (Element.isElement(node) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
       const ranges = store?.highlightCache.get(node) || []
       if (node.type === 'code-line') {
-        // console.log('node', node, cacheLine.get(node))
         ranges.push(...cacheLine.get(node) || [])
       }
       return ranges
@@ -41,6 +40,7 @@ export const SetNodeToDecorations = observer(() => {
       }
     })
     for (let c of codes) {
+      if (c.code.length > 50000) continue
       const lang = c.node[0].language || ''
       if (!window.api.langSet.has(lang)) continue
       const el = c.node[0]

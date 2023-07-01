@@ -11,7 +11,6 @@ declare global {
     electron: ElectronAPI
     api: {
       sdk: typeof Sdk,
-      test: () => void
       md5: (str: string | Buffer) => string
       copyToClipboard: (str: string) => string
       highlightCode(code: string, lang: string): IThemedToken[][]

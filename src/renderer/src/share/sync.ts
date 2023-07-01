@@ -1,18 +1,15 @@
-import {parse, isAbsolute, join, basename, sep} from 'path'
+import {basename, isAbsolute, join, parse, sep} from 'path'
 import {Book, Chapter, db} from './db'
 import dayjs from 'dayjs'
 import {CustomLeaf, Elements} from '../el'
 import {Node} from 'slate'
-import {configStore} from '../store/config'
 import {mediaType} from '../editor/utils/dom'
-import {remove as removeDiacritics} from 'diacritics'
 import {treeStore} from '../store/tree'
 import {IFileItem} from '../index'
 import {readFileSync} from 'fs'
-type Els = Elements & CustomLeaf
+import {findText, getSectionTexts, slugify} from './utils'
 
-const rControl = /[\u0000-\u001f]/g
-const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'<>,.?/]+/g
+type Els = Elements & CustomLeaf
 
 interface ChapterItem {
   folder: boolean
@@ -27,37 +24,13 @@ interface EbookConfig {
   strategy: 'auto' | 'custom'
   ignorePaths: string
 }
-export const slugify = (str: string): string => {
-  return (
-    removeDiacritics(str)
-      .replace(rControl, '')
-      .replace(rSpecial, '-')
-      .replace(/\-{2,}/g, '-')
-      .replace(/^\-+|\-+$/g, '')
-      .replace(/^(\d)/, '_$1')
-      .toLowerCase()
-  )
-}
-
-const findText = (node: any) => {
-  let stack = node.children.slice()
-  let text = ''
-  while (stack.length) {
-    const n = stack.shift()!
-    if (n.text) {
-      text += n.text
-    } else if (n.children?.length) {
-      stack.unshift(...n.children.slice())
-    }
-  }
-  return text
-}
 
 export const getSlugifyName = (path: string) => slugify(basename(path).replace(/\.\w+(#.*)?/, ''))
 export const getHeadId = (node: any) => slugify(findText(node))
 export class Sync {
   sdk = new window.api.sdk()
   currentBookConfig: any
+  currentSections:any[] = []
   private readonly prefix = 'books'
   get time() {
     return dayjs().format('YYYY-MM-DD HH:mm:ss')
@@ -113,6 +86,7 @@ export class Sync {
     return ''
   }
   async syncEbook(config: EbookConfig) {
+    this.currentSections = []
     if (config.strategy === 'auto') {
       return this.syncAutoEbook(config)
     }
@@ -167,6 +141,10 @@ export class Sync {
       map
     }))
 
+    if (this.currentSections.length) {
+      await sdk.uploadFileByText(`${this.prefix}/${config.path}/text.json`, JSON.stringify(this.currentSections))
+    }
+    console.log('json', this.currentSections)
     const insertSet = new Set<string>()
     const stack = map.slice()
     while (stack.length) {
@@ -222,8 +200,13 @@ export class Sync {
           path: path
         }
         const hash = window.api.md5(readFileSync(c.filePath, {encoding: 'utf-8'}))
+        const shareSchema = await this.withShareSchema(treeStore.getSchema(c)?.state || [], c.filePath)
+        this.currentSections.push({
+          section: getSectionTexts(shareSchema).sections,
+          path: path,
+          name: ps.name
+        })
         if (!ctx.records.get(path) || ctx.records.get(path)!.hash !== hash) {
-          const shareSchema = await this.withShareSchema(treeStore.getSchema(c)?.state || [], c.filePath)
           await ctx.sdk.uploadFileByText(`${this.prefix}/${ctx.book.path}/${path}.json`, JSON.stringify({
             title: ps.name,
             schema: shareSchema

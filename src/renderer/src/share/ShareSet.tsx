@@ -192,6 +192,7 @@ export const ShareSet = observer(() => {
                         </a>
                         <div className={'flex w-28 justify-between flex-shrink-0 ml-4'}>
                           <a onClick={async () => {
+                            if (state.syncing) return
                             const sync = new Sync()
                             setState({syncing: true})
                             try {
@@ -245,11 +246,12 @@ export const ShareSet = observer(() => {
                             </span>
                           </a>
                           <a onClick={() => {
+                            if (state.syncing) return
                             setState({popOpen: false})
                             setTimeout(() => {
                               setState({ebookOpen: true, selectedBookId: b.id!})
                             }, 200)
-                          }}>
+                          }} className={`${state.syncing ? 'text-gray-600 cursor-not-allowed' : ''}`}>
                             <EditOutlined />
                             <span className={'ml-1'}>编辑</span>
                           </a>

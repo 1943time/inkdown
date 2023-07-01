@@ -75,6 +75,12 @@ export const Ebook = observer((props: {
                 </Form.Item>
               </>
             }
+            {form.getFieldValue('strategy') === 'custom' &&
+              <>
+                <Form.Item label={''}>
+                </Form.Item>
+              </>
+            }
             </>
           }
         </Form.Item>

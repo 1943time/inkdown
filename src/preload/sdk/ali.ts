@@ -58,32 +58,7 @@ export class AliApi implements ServerSdk {
     }
     return res
   }
-  async initial(files: {name: string, filePath: string, contentType: string}[]) {
-    return Promise.all(files.map(f => {
-      return this.uploadFile(f.name, f.filePath, f.contentType)
-    }))
-  }
 
-  async reset(files) {
-    return Promise.all(files!.map(f => {
-      return this.uploadFile(f.name, f.filePath, f.contentType)
-    }))
-  }
-  async syncDoc(name: string, content: string) {
-    const header = this.getHeaders({
-      method: 'PUT',
-      bucket: this.config.bucket,
-      headers: {
-        'Content-Type': 'text/html'
-      },
-      object: name
-    })
-    await http.put(`https://${this.config.bucket}.${this.config.region}.aliyuncs.com/${name}`, {
-      headers: header,
-      body: content
-    })
-    return `${this.config.domain}/${name}`
-  }
   async removeFile(name: string) {
     const header = this.getHeaders({
       method: 'DELETE',

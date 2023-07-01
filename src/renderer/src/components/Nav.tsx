@@ -40,9 +40,6 @@ export const Nav = observer(() => {
           </div>
           <div
             className={'hide-scrollbar overflow-x-auto ml-3 dark:text-gray-400/80 text-gray-500 text-sm flex items-center h-full w-[calc(100%_130px)]'}
-            onClick={() => {
-              window.api.test()
-            }}
           >
             {!!paths.length &&
               <>

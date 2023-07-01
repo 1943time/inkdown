@@ -8,7 +8,6 @@ let highlighter:Highlighter | null = null
 import * as chokidar from 'chokidar'
 import {Sdk} from './sdk'
 import {createHash} from 'crypto'
-import {ssh_test} from './sdk/ssh'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null
@@ -18,7 +17,6 @@ const api = {
   baseUrl: '',
   langSet,
   sdk: Sdk,
-  test: ssh_test,
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
