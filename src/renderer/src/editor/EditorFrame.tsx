@@ -29,11 +29,18 @@ export const EditorFrame = observer(({tab}: {
     return store
   }, [])
   useEffect(() => {
-    window.addEventListener('keydown', e => {
-      if (e.metaKey && e.key === 'f') {
+    const keydown = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === 'f' && treeStore.currentTab.current) {
         store.setOpenSearch(true)
       }
-    })
+      if (e.key.toLowerCase() === 'escape' && store.openSearch) {
+        store.setOpenSearch(false)
+      }
+    }
+    window.addEventListener('keydown', keydown)
+    return () => {
+      window.removeEventListener('keydown', keydown)
+    }
   }, [])
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
   const size = useMemo(() => {

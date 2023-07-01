@@ -2,6 +2,7 @@ import {ElementProps, ListItemNode, ListNode} from '../../el'
 import {createElement, useMemo} from 'react'
 import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'
+import {useEditorStore} from '../store'
 
 export function List({element, attributes, children}: ElementProps<ListNode>) {
   const tag = element.order ? 'ol' : 'ul'
@@ -12,6 +13,7 @@ export function List({element, attributes, children}: ElementProps<ListNode>) {
 
 export function ListItem({element, children, attributes}: ElementProps<ListItemNode>) {
   const [, update] = useMEditor(element)
+  const store = useEditorStore()
   const isTask = typeof element.checked === 'boolean'
   return useMemo(() => (
     <li
@@ -28,5 +30,5 @@ export function ListItem({element, children, attributes}: ElementProps<ListItemN
       }
       {children}
     </li>
-  ), [element, element.children])
+  ), [element, element.children, store.refreshHighlight])
 }

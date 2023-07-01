@@ -70,7 +70,7 @@ export class EditorStore {
   offsetTop(node: HTMLElement) {
     let top = this.openSearch ? 46 : 0
     const doc = this.doc
-    while (doc.contains(node.offsetParent) && doc !== node) {
+    while (doc?.contains(node.offsetParent) && doc !== node) {
       top += node.offsetTop
       node = node.offsetParent as HTMLElement
     }

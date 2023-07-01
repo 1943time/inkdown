@@ -40,7 +40,7 @@ export const SetNodeToDecorations = observer(() => {
       }
     })
     for (let c of codes) {
-      if (c.code.length > 50000) continue
+      if (c.code.length > 20000) continue
       const lang = c.node[0].language || ''
       if (!window.api.langSet.has(lang)) continue
       const el = c.node[0]

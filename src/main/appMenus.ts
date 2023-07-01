@@ -268,6 +268,11 @@ export const createAppMenus = () => {
             })
           }
         },
+        {
+          label: '搜索',
+          id: 'search',
+          accelerator: `${cmd}+f`
+        },
         {type: 'separator'},
         {role: 'reload'},
         {role: 'toggleDevTools'}

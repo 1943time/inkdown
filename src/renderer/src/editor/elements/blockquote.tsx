@@ -1,6 +1,8 @@
 import {BlockQuoteNode, ElementProps} from '../../el'
 import {useMemo} from 'react'
+import {useEditorStore} from '../store'
 export function Blockquote(props: ElementProps<BlockQuoteNode>) {
+  const store = useEditorStore()
   return useMemo(() => (
     <blockquote
       data-be={'code-line'}
@@ -8,5 +10,5 @@ export function Blockquote(props: ElementProps<BlockQuoteNode>) {
     >
       {props.children}
     </blockquote>
-  ),[props.element.children])
+  ),[props.element.children, store.refreshHighlight])
 }
