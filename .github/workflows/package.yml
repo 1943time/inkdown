@@ -1,0 +1,65 @@
+name: Package
+
+on:
+  push:
+    tags: v*
+  workflow_dispatch:
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: 'mac'
+
+    runs-on: ${{ matrix.os }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 16.x
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install
+        run: |
+          pnpm install --no-frozen-lockfile
+
+      - name: Set env
+        if: matrix.platform == 'mac'
+        run: |
+          echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
+          echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
+          echo "CSC_LINK=${{ secrets.CERTIFICATE_OSX_APPLICATION }}" >> $GITHUB_ENV
+          echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
+          echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
+
+#      - name: Build
+#        run: |
+#          npm run build:mac
+
+      - name: Electron-Mac
+        if: matrix.platform == 'mac'
+        run: |
+          npm run build:mac
+          mv dist/latest-mac.yml out/latest-mac-arm64.yml
+#      - name: Upload to COS
+#        if: contains(github.ref_name, '-next-') != true
+#        run: |
+#          coscmd upload -r out / --include out/Yank-Note*.*,out/latest*.yml
+      - name: GH Release
+        uses: softprops/action-gh-release@v0.1.5
+        with:
+          prerelease: true
+          files: |
+            dist/BlueStone*.*
+            dist/latest*.yml

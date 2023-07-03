@@ -31,7 +31,7 @@ export function Webview() {
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={editor}
-          value={[]}
+          initialValue={[]}
         >
           <SetNodeToDecorations/>
           <Placeholder/>

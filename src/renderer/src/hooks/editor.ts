@@ -21,5 +21,5 @@ export const useMEditor = (el: BaseElement) => {
 }
 
 export const useEditorUtils = (editor: Editor) => {
-  return useMemo(() => new EditorUtils(editor), [editor])
+  return useMemo(() => new EditorUtils(), [editor])
 }

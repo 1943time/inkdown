@@ -6,7 +6,6 @@ import {
   FileTextOutlined,
   FolderOpenOutlined
 } from '@ant-design/icons'
-import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 
 export const Empty = observer(() => {

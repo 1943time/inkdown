@@ -1,7 +1,8 @@
-appId: com.electron.app
-productName: bluestone
+appId: bluestone
+productName: BlueStone
 directories:
   buildResources: build
+afterSign: build/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -11,11 +12,10 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/*
-afterSign: build/notarize.js
 win:
   executableName: bluestone
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -41,3 +41,4 @@ npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
+

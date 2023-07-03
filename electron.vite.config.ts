@@ -1,18 +1,18 @@
 import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin,bytecodePlugin } from 'electron-vite'
+import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import commonjsExternals from 'vite-plugin-commonjs-externals';
 
 const externals = ['path', /^electron(\/.+)?$/, 'fs', 'crypto']
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin(), bytecodePlugin()],
+    plugins: [externalizeDepsPlugin()],
     server: {
       port: 5175
     }
   },
   preload: {
-    plugins: [externalizeDepsPlugin(), bytecodePlugin()]
+    plugins: [externalizeDepsPlugin()]
   },
   renderer: {
     resolve: {
@@ -23,7 +23,7 @@ export default defineConfig({
     plugins: [
       react(),
       // @ts-ignore
-      commonjsExternals.default({
+      commonjsExternals({
         externals
       })
     ]

@@ -237,6 +237,7 @@ export class EditorStore {
           const p = parse(file.name)
           const name = nanoid() + p.ext
           let targetPath = ''
+          let mediaUrl = ''
           if (treeStore.root) {
             const imageDir = join(treeStore.root!.filePath, '.images')
             if (!existsSync(imageDir)) {
@@ -244,14 +245,16 @@ export class EditorStore {
               await MainApi.mkdirp(imageDir)
             }
             targetPath = join(imageDir, name)
+            mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, name))
           } else {
             const path = await MainApi.getCachePath()
             const imageDir = join(path, 'images')
             if (!existsSync(imageDir)) mkdirSync(imageDir)
             targetPath = join(imageDir, name)
+            mediaUrl = targetPath
           }
           writeFileSync(targetPath, base64Image, {encoding: 'base64'})
-          this.insertInlineNode(targetPath)
+          this.insertInlineNode(mediaUrl)
         }
       }
     }

@@ -8,8 +8,7 @@ import {treeStore} from '../../store/tree'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {Path} from 'slate'
-import {existsSync, readFileSync} from 'fs'
-import {mediaType} from '../utils/dom'
+import {isAbsolute} from 'path'
 import {getImageData} from '../../utils'
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const store = useEditorStore()
@@ -22,7 +21,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   useEffect(() => {
     let realUrl = element.url
     if (!element.url.startsWith('http') && !element.url.startsWith('file:') && treeStore.openNote) {
-      const file = element.url.startsWith('/') ? element.url : join(treeStore.openNote.filePath, '..', element.url)
+      const file = isAbsolute(element.url) ? element.url : join(treeStore.currentTab.current!.filePath, '..', element.url)
       const data = getImageData(file)
       if (data) {
         realUrl = data
