@@ -16,6 +16,7 @@ export const TreeRender = observer(() => {
   }, [])
   return (
     <div
+      onContextMenu={e => e.stopPropagation()}
       className={'pt-5'}
     >
       <div

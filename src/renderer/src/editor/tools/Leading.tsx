@@ -90,7 +90,7 @@ export const Heading = observer(({note}: {
     <div
       className={`${configStore.config.showLeading ? '' : 'hidden'} sticky ${store.openSearch ? 'top-[46px] h-[calc(100vh_-_86px)]' : 'top-0 h-[calc(100vh_-_40px)]'} pl-4 border-l b1 flex-shrink-0`}
       ref={e => {
-        box.current = e?.parentElement?.parentElement || undefined
+        box.current = e?.parentElement?.parentElement?.parentElement || undefined
       }}
     >
       <div className={`w-56 h-full pt-10 pb-10 pr-4 overflow-y-auto`}>

@@ -4,8 +4,14 @@ import {TreeTop} from './ui/TreeTop'
 import {TreeEmpty} from './ui/TreeEmpty'
 import {TreeRender} from './ui/TreeRender'
 import {FullSearch} from '../FullSearch'
+import {useCallback} from 'react'
+import {MainApi} from '../../api/main'
 
 export const Tree = observer(() => {
+  const context = useCallback(() => {
+    treeStore.setState({ctxNode: null})
+    MainApi.openTreeContextMenu({type: 'rootFolder'})
+  }, [])
   return (
     <div className={'relative z-[60]'}>
       <TreeTop/>
@@ -14,7 +20,10 @@ export const Tree = observer(() => {
         style={{width: treeStore.fold ? 0 : treeStore.width}}
       >
         <div style={{width: treeStore.width}} className={'h-full border-t b1'}>
-          <div className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'}`}>
+          <div
+            className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'}`}
+            onContextMenu={context}
+          >
             {!!treeStore.root ?
               <TreeRender/> :
               <TreeEmpty/>
