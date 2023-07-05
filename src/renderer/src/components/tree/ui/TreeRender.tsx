@@ -16,7 +16,6 @@ export const TreeRender = observer(() => {
   }, [])
   return (
     <div
-      onContextMenu={e => e.stopPropagation()}
       className={'pt-5'}
     >
       <div
@@ -28,7 +27,6 @@ export const TreeRender = observer(() => {
         onDrop={e => {
           treeStore.moveNode(treeStore.root)
         }}
-        onContextMenu={context}
       >
         <span className={'font-bold text-[15px]'}>{treeStore.root.filename}</span>
         <div
@@ -37,7 +35,10 @@ export const TreeRender = observer(() => {
           <PlusCircleOutlined className={'cursor-pointer'}/>
         </div>
       </div>
-      <div className={'px-3 pb-10'}>
+      <div
+        className={'px-3'}
+        onContextMenu={e => e.stopPropagation()}
+      >
         <RenderItem items={treeStore.root.children!} level={0}/>
       </div>
     </div>

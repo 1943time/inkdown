@@ -5,8 +5,7 @@ import {Elements} from '../../../el'
 export class BackspaceKey {
   constructor(
     private readonly editor: Editor
-  ) {
-  }
+  ) {}
 
   range() {
     const sel = this.editor.selection

@@ -20,9 +20,6 @@ export const getOffsetLeft = (dom: HTMLElement, target: HTMLElement = document.b
   return left
 }
 
-export const getContainer = () => document.querySelector('#content') as HTMLDivElement
-
-
 export const slugify = (str: string): string => {
   return (
     removeDiacritics(str)

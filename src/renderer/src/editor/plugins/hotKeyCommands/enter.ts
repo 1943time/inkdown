@@ -100,18 +100,29 @@ export class EnterKey {
       e.preventDefault()
       const nextPath = Path.next(parentPath)
       if (Editor.hasPath(this.editor, nextPath)) {
-        Transforms.select(this.editor, Editor.start(this.editor, nextPath))
-        Transforms.delete(this.editor, {at: Path.hasPrevious(path) ? path : parentPath})
-      } else if (Path.hasPrevious(path)) {
-        Transforms.insertNodes(this.editor, {
-          type: 'list-item',
-          checked: typeof parent.checked === 'boolean' ? false : undefined,
-          children: [EditorUtils.p]
-        }, {select: true, at: Path.next(parentPath)})
-        Transforms.delete(this.editor, {at: path})
+        const index = parentPath[parentPath.length - 1]
+        if (index === 0) {
+          Transforms.delete(this.editor, {at: parentPath})
+          Transforms.insertNodes(this.editor, EditorUtils.p, {
+            at: Path.parent(parentPath),
+            select: true
+          })
+        } else {
+          const ulPath = Path.parent(parentPath)
+          Transforms.liftNodes(this.editor, {
+            at: parentPath
+          })
+          Transforms.delete(this.editor, {
+            at: Path.next(ulPath)
+          })
+          Transforms.insertNodes(this.editor, EditorUtils.p, {
+            at: Path.next(ulPath),
+            select: true
+          })
+        }
       } else {
-        const list = Editor.parent(this.editor, parentPath)
-        const top = Editor.parent(this.editor, list[1])
+        const ul = Editor.parent(this.editor, parentPath)
+        const top = Editor.parent(this.editor, ul[1])
         if (top[0].type === 'list-item') {
           Transforms.insertNodes(this.editor, {
             type: 'list-item',
@@ -120,10 +131,14 @@ export class EnterKey {
           }, {select: true, at: Path.next(top[1])})
         } else {
           Transforms.insertNodes(this.editor, EditorUtils.p, {
-            at: Path.next(list[1]), select: true
+            at: Path.next(ul[1]), select: true
           })
         }
-        Transforms.delete(this.editor, {at: parentPath})
+        if (Path.hasPrevious(parentPath)) {
+          Transforms.delete(this.editor, {at: parentPath})
+        } else {
+          Transforms.delete(this.editor, {at: ul[1]})
+        }
       }
     }
   }

@@ -92,7 +92,7 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
   }
   if (TEXT_TAGS[nodeName]) {
     const attrs = TEXT_TAGS[nodeName](el)
-    return children.map(child => jsx('text', attrs, child))
+    return children.map(child => jsx('text', attrs, child)).filter(c => !!c.text)
   }
   return children
 }
@@ -206,7 +206,9 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
-  if (inner) return false
+  console.log('task', parsed.querySelector('.m-list-item.task'))
+  if (inner && !parsed.querySelector('.m-list-item.task')) return false
+  console.log('frag', fragment)
   Transforms.insertFragment(editor, fragment)
   return true
 }
