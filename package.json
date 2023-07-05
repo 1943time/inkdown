@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "./out/main/index.js",
+  "license": "AGPL-3.0",
   "author": "1943time",
   "homepage": "https://github.com/1943time/bluestone",
   "scripts": {
@@ -15,8 +16,8 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run npmbuild && electron-builder --win --config",
-    "build:mac": "electron-vite build && electron-builder --mac --arm64 --config",
-    "build:linux": "electron-vite build && electron-builder --linux --config",
+    "build:mac": "electron-builder --mac --arm64 --config",
+    "build:linux": "electron-builder --linux --config",
     "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
     "sync-css": "cp -f src/renderer/src/styles/color.scss ../bsp/src/styles && cp -f src/renderer/src/styles/editor.scss ../bsp/src/styles"
   },

@@ -24,3 +24,7 @@
 [contenteditable="true"] {
   outline: none;
 }
+
+.anticon[tabindex]{
+  cursor: default;
+}

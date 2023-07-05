@@ -8,7 +8,7 @@ import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOption
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
-
+import {AppUpdate} from './update'
 type WinOptions = {
   width?: number
   height?: number
@@ -21,6 +21,8 @@ const options:BrowserWindowConstructorOptions =  {
   show: false,
   autoHideMenuBar: true,
   ...(process.platform === 'linux' ? { icon } : {}),
+  minWidth: 700,
+  minHeight: 400,
   webPreferences: {
     preload: join(__dirname, '../preload/index.js'),
     sandbox: false,
@@ -73,6 +75,7 @@ app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
   registerApi()
+  new AppUpdate()
   ipcMain.on('create-window', () => createWindow())
   // console.log(app.getPath('userData'))
   app.commandLine.appendSwitch('lang', 'zh-CN')

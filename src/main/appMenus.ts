@@ -42,6 +42,12 @@ export const createAppMenus = () => {
             // win.webContents.send('showAbout')
           }
         },
+        {
+          label: '检测更新',
+          click: () => {
+            ipcMain.emit('check-updated')
+          }
+        },
         {type: 'separator'},
         {
           label: '偏好设置',

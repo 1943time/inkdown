@@ -2,7 +2,7 @@ appId: bluestone
 productName: BlueStone
 directories:
   buildResources: build
-afterSign: build/notarize.js
+afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -10,10 +10,11 @@ files:
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!scripts/*'
 asarUnpack:
   - resources/*
 win:
-  executableName: bluestone
+  executableName: BlueStone
 nsis:
   artifactName: BlueStone-${os}-${arch}-${version}.${ext}
   shortcutName: ${productName}
@@ -27,7 +28,7 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
 linux:
   target:
     - AppImage
@@ -36,9 +37,9 @@ linux:
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
-
+  provider: github
+  owner: '1943time'
+  repo: 'bluestone'
