@@ -57,6 +57,9 @@ export const Nav = observer(() => {
                     {i === paths.length - 1 && !['md', 'markdown'].includes(treeStore.openNote?.ext!) &&
                       <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{treeStore.openNote?.ext}</sup>
                     }
+                    {i === paths.length - 1 && ['md', 'markdown'].includes(treeStore.openNote?.ext!) && treeStore.currentTab?.store?.docChanged &&
+                      <sup className={'ml-0.5'}>*</sup>
+                    }
                   </Fragment>
                 )}
               </>

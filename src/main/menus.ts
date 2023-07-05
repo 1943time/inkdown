@@ -13,11 +13,11 @@ export const registerMenus = () => {
         enabled: !!filePath,
         click: (e, win) => win?.webContents.send('print-to-pdf')
       },
-      {
-        label: '导出html',
-        enabled: !!filePath,
-        click: (e, win) => win?.webContents.send('print-to-html')
-      },
+      // {
+      //   label: '导出html',
+      //   enabled: !!filePath,
+      //   click: (e, win) => win?.webContents.send('print-to-html')
+      // },
       {
         type: 'separator'
       },

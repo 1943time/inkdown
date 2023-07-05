@@ -58,33 +58,32 @@ export const EditorFrame = observer(({tab}: {
           store.setState(state => state.container = dom)
         }}
       >
-        <div className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}>
+        <div
+          className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}>
           {tab.current ?
             <>
-              {mt === 'markdown' &&
-                <>
-                  <div
-                    className={'max-w-[900px] flex-1 content px-14'}
-                  >
-                    <MEditor note={tab.current}/>
-                  </div>
-                  <Heading note={tab.current}/>
-                </>
-              }
+              <div className={`flex-1 flex justify-center items-start h-full ${mt === 'markdown' ? '' : 'hidden'}`}>
+                <div
+                  className={'max-w-[900px] flex-1 content px-14'}
+                >
+                  <MEditor note={tab.current}/>
+                </div>
+                <Heading note={tab.current}/>
+              </div>
               {mt !== 'other' && mt !== 'markdown' &&
                 <>
-                {mt === 'image' ?
-                  <div style={{height: size.height}} className={'flex items-center justify-center px-14 py-5'}>
-                    <img src={getImageData(tab.current?.filePath)} alt=""/>
-                  </div> :
-                  (
-                    <div style={{
-                      ...size
-                    }}>
-                      <iframe className={'w-full h-full px-14 py-5'} src={tab.current.filePath}/>
-                    </div>
-                  )
-                }
+                  {mt === 'image' ?
+                    <div style={{height: size.height}} className={'flex items-center justify-center px-14 py-5'}>
+                      <img src={getImageData(tab.current?.filePath)} alt=""/>
+                    </div> :
+                    (
+                      <div style={{
+                        ...size
+                      }}>
+                        <iframe className={'w-full h-full px-14 py-5'} src={tab.current.filePath}/>
+                      </div>
+                    )
+                  }
                 </>
               }
               {mt === 'other' &&

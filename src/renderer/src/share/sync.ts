@@ -31,6 +31,7 @@ export class Sync {
   sdk = new window.api.sdk()
   currentBookConfig: any
   currentSections:any[] = []
+  currentBook?: Book
   private readonly prefix = 'books'
   get time() {
     return dayjs().format('YYYY-MM-DD HH:mm:ss')
@@ -53,6 +54,25 @@ export class Sync {
 
       if (s.children?.length) {
         item.children = await this.withShareSchema(s.children, docPath)
+      }
+      if (s.url && !s.url.startsWith('http')) {
+        let targetPath = isAbsolute(s.url) ? s.url : join(docPath, '..', s.url)
+        let hash = ''
+        if (/#.*$/.test(targetPath)) {
+          const part =targetPath.split('#')
+          targetPath = part[0]
+          hash = '#' + slugify(part[1])
+        }
+        const exist = await this.exist(targetPath)
+        if (exist) {
+          if (this.currentBook) {
+            item.href = `/book/${this.currentBook.path}/${window.api.md5(targetPath)}${hash}`
+          } else {
+            item.href = `/doc/${window.api.md5(targetPath)}${hash}`
+          }
+        }
+      } else {
+        item.href = s.url
       }
       data.push(item)
     }
@@ -115,6 +135,7 @@ export class Sync {
         }
       }
     }
+    this.currentBook = book
     if (!book) {
       const id = await db.book.add({
         filePath: root,
@@ -144,7 +165,7 @@ export class Sync {
     if (this.currentSections.length) {
       await sdk.uploadFileByText(`${this.prefix}/${config.path}/text.json`, JSON.stringify(this.currentSections))
     }
-    console.log('json', this.currentSections)
+
     const insertSet = new Set<string>()
     const stack = map.slice()
     while (stack.length) {
@@ -167,6 +188,7 @@ export class Sync {
       return !insertSet.has(item.path)
     }).delete()
     sdk.dispose()
+    this.currentBook = undefined
   }
   private async getMapByDirectory(ctx: {
     item: IFileItem,
@@ -194,12 +216,12 @@ export class Sync {
         })
       } else if (c.ext === 'md') {
         const path = window.api.md5(c.filePath)
+        const hash = window.api.md5(readFileSync(c.filePath, {encoding: 'utf-8'}))
         const chapter: ChapterItem = {
           folder: false,
           name: ps.name,
           path: path
         }
-        const hash = window.api.md5(readFileSync(c.filePath, {encoding: 'utf-8'}))
         const shareSchema = await this.withShareSchema(treeStore.getSchema(c)?.state || [], c.filePath)
         this.currentSections.push({
           section: getSectionTexts(shareSchema).sections,

@@ -21,17 +21,16 @@ export class AppUpdate {
   }
   constructor() {
     setTimeout(() => {
-      this.checkUpdate()
+      autoUpdater.checkForUpdatesAndNotify()
     }, 3000)
 
     ipcMain.on('check-updated', () => {
       this.manual = true
-      this.checkUpdate()
+      autoUpdater.checkForUpdatesAndNotify()
     })
 
     ipcMain.on('start-update', () => {
       this.cancelToken = new CancellationToken()
-      log.info('start-update--')
       autoUpdater.downloadUpdate(this.cancelToken)
     })
 
@@ -61,8 +60,5 @@ export class AppUpdate {
     autoUpdater.on('update-downloaded', (info) => {
       this.win?.webContents.send('update-downloaded', info)
     })
-  }
-  checkUpdate() {
-    autoUpdater.checkForUpdatesAndNotify()
   }
 }

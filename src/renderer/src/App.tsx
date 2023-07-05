@@ -29,7 +29,7 @@ const App = observer(() => {
   useEffect(() => {
     Promise.allSettled([
       window.api.ready(),
-      configStore.initial(true)
+      configStore.initial()
     ]).then(() => {
       setReady(true)
     })

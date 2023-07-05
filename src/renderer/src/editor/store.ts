@@ -27,6 +27,7 @@ export class EditorStore {
   focus = false
   openSearch = false
   focusSearch = false
+  docChanged = false
   searchRanges: (Range[])[] = []
   highlightCache = new Map<object, Range[]>()
   private searchTimer = 0

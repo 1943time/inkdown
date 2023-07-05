@@ -41,10 +41,11 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(editor)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
-  const changed = useRef(false)
   const save = useCallback(async () => {
-    if (nodeRef.current && changed.current) {
-      changed.current = false
+    if (nodeRef.current && store.docChanged) {
+      runInAction(() => {
+        store.docChanged = false
+      })
       treeStore.watcher.pause()
       const root = Editor.node(editor, [])
       const schema = treeStore.schemaMap.get(nodeRef.current)
@@ -69,12 +70,12 @@ export const MEditor = observer(({note}: {
         state: v,
         history: editor.history
       })
-      runInAction(() => {
-        note.refresh = !note.refresh
-      })
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
-      changed.current = true
+      runInAction(() => {
+        note.refresh = !note.refresh
+        store.docChanged = true
+      })
       clearTimeout(saveTimer.current)
       saveTimer.current = window.setTimeout(() => {
         save()
@@ -147,6 +148,13 @@ export const MEditor = observer(({note}: {
           e.preventDefault()
         }
       }
+    }
+  }, [])
+
+  useEffect(() => {
+    window.electron.ipcRenderer.on('save-doc', save)
+    return () => {
+      window.electron.ipcRenderer.removeListener('save-doc', save)
     }
   }, [])
   return (

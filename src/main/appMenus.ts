@@ -97,10 +97,13 @@ export const createAppMenus = () => {
         {type: 'separator'},
         {
           label: '导出PDF',
+          click: (e, win) => {
+            win?.webContents.send('print-to-pdf')
+          }
         },
-        {
-          label: '导出HTML'
-        }
+        // {
+        //   label: '导出HTML'
+        // }
       ]
     },
     {
@@ -111,12 +114,18 @@ export const createAppMenus = () => {
         {role: 'undo'},
         {role: 'redo'},
         {type: 'separator'},
+        {
+          label: 'save',
+          accelerator: `${cmd}+s`,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')
+          }
+        },
         {role: 'copy'},
         {role: 'paste'},
         {role: 'cut'},
         {role: 'delete'},
-        {role: 'selectAll'},
-        // {type: 'separator'}
+        {role: 'selectAll'}
       ]
     },
     {

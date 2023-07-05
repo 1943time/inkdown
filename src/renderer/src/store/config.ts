@@ -93,7 +93,7 @@ class ConfigStore {
     ipcRenderer.send('setStore', `config.${key}`, value)
     if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
   }
-  initial(set = false) {
+  initial() {
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
         if (res.dark) document.documentElement.classList.add('dark')
