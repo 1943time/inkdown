@@ -2,7 +2,7 @@ appId: bluestone
 productName: BlueStone
 directories:
   buildResources: build
-afterSign: scripts/notarize.js
+#afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -13,6 +13,9 @@ files:
   - '!scripts/*'
 asarUnpack:
   - resources/*
+fileAssociations:
+  ext: md
+  role: Editor
 win:
   executableName: BlueStone
 nsis:

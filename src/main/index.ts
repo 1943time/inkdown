@@ -77,6 +77,42 @@ function createWindow(initial?: WinOptions): void {
   windows.set(window.id, initial || {})
 }
 
+let waitOpenFile = ''
+app.on('will-finish-launching', () => {
+  // Event fired When someone drags files onto the icon while your app is running
+  app.on("open-file", (event, file) => {
+    if (app.isReady() === false) {
+      waitOpenFile = file
+    } else {
+      openFiles(file)
+    }
+    event.preventDefault()
+  });
+});
+
+const openFiles = (filePath: string) => {
+  try {
+    const win = Array.from(windows).find(w => {
+      return (w[1].openFile === filePath || w[1].openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
+    })
+    if (win) {
+      if (win[1].openFile === filePath || win[1].openFolder === filePath) {
+        BrowserWindow.fromId(win[0])?.focus()
+      } else if (win[1].openFolder && filePath.startsWith(win[1].openFolder)) {
+        const w = BrowserWindow.fromId(win[0])
+        w?.focus()
+        if (lstatSync(filePath).isFile()) w?.webContents.send('open-path', filePath)
+      }
+    } else {
+      const stat = lstatSync(filePath)
+      createWindow({
+        openFolder: stat.isDirectory() ? filePath : undefined,
+        openFile: stat.isFile() ? filePath : undefined
+      })
+    }
+  } catch (e) {
+  }
+}
 app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
@@ -126,29 +162,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-  app.on('open-file', (e, filePath) => {
-    try {
-      const win = Array.from(windows).find(w => {
-        return (w[1].openFile === filePath || w[1].openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
-      })
-      if (win) {
-        if (win[1].openFile === filePath || win[1].openFolder === filePath) {
-          BrowserWindow.fromId(win[0])?.focus()
-        } else if (win[1].openFolder && filePath.startsWith(win[1].openFolder)) {
-          const w = BrowserWindow.fromId(win[0])
-          w?.focus()
-          if (lstatSync(filePath).isFile()) w?.webContents.send('open-path', filePath)
-        }
-      } else {
-        const stat = lstatSync(filePath)
-        createWindow({
-          openFolder: stat.isDirectory() ? filePath : undefined,
-          openFile: stat.isFile() ? filePath : undefined
-        })
-      }
-    } catch (e) {
-    }
-  })
+
   try {
     const data = store.get('windows') as WinOptions[] || []
     // console.log('data', data)
@@ -156,13 +170,27 @@ app.whenReady().then(() => {
       for (let d of data) {
         createWindow(typeof d === 'object' ? d : undefined)
       }
-    } else {
+    } else if (!waitOpenFile) {
       createWindow()
     }
   } catch (e) {
     log.error('create error', e)
   }
-
+  if (waitOpenFile) {
+    const win = Array.from(windows).find(w => {
+      return !w[1].openFolder && !w[1].openFile
+    })
+    if (win) {
+      setTimeout(() => {
+        BrowserWindow.fromId(win[0])?.webContents.send('open-path', waitOpenFile)
+      }, 300)
+    } else{
+      createWindow({
+        openFile: waitOpenFile
+      })
+    }
+    waitOpenFile = ''
+  }
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
