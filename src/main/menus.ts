@@ -93,7 +93,7 @@ export const registerMenus = () => {
         if (params.filePath?.endsWith('.md')) {
           temp.add({
             label: '复制Markdown源码',
-            click: (e, win) => win?.webContents.send('copy-source-code')
+            click: (e, win) => win?.webContents.send('copy-source-code', params.filePath)
           })
         }
       }

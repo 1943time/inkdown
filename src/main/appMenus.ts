@@ -92,7 +92,13 @@ export const createAppMenus = () => {
         },
         {
           label: '打开最近的文件',
-          role: 'recentDocuments'
+          role: 'recentDocuments',
+          submenu:[
+            {
+              label: '清除',
+              role: 'clearRecentDocuments'
+            }
+          ]
         },
         {type: 'separator'},
         {

@@ -82,12 +82,16 @@ export class TreeStore {
     }))
     this.appendTab()
     new MenuKey(this)
-    window.electron.ipcRenderer.on('copy-source-code', e => {
-      if (this.openNote?.filePath.endsWith('.md')) {
-        const content = readFileSync(this.currentTab!.current!.filePath, {encoding: 'utf-8'})
+    window.electron.ipcRenderer.on('copy-source-code', (e, filePath?: string) => {
+      if (this.openNote?.filePath.endsWith('.md') || filePath) {
+        const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
         window.api.copyToClipboard(content)
         message$.next({type: 'success', content: '已复制到剪贴板~'})
       }
+    })
+
+    window.electron.ipcRenderer.on('open-path', (e, path: string) => {
+      this.open(path)
     })
     window.electron.ipcRenderer.on('tree-command', (e, params: {
       type: 'rootFolder' | 'file' | 'folder'
@@ -172,6 +176,7 @@ export class TreeStore {
         console.error('parser err', e)
       }
     }
+    document.title = this.root ? `${basename(this.root.filePath)}-${basename(node.filePath)}` : basename(node.filePath)
     this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
     this.currentTab.history.push(node)
     this.currentTab.index = this.currentTab.history.length - 1
@@ -200,6 +205,7 @@ export class TreeStore {
     } else {
       this.openNewNote(filePath)
     }
+    document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
   }
   createNewNote(filePath: string) {
     let node:IFileItem
@@ -256,9 +262,12 @@ export class TreeStore {
   }
   open(path: string, openFile?: string) {
     const stat = statSync(path)
+    document.title = basename(path)
     if (stat.isDirectory()) {
+      document.title = basename(path)
       this.openFolder(path, openFile)
     } else {
+      document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
       this.openNewNote(path)
     }
   }

@@ -27,6 +27,7 @@ export const Home = observer(() => {
       MainApi.open(treeStore.root?.filePath).then(res => {
         if (res.filePaths.length) {
           treeStore.open(res.filePaths[0])
+          window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
         }
       })
     }

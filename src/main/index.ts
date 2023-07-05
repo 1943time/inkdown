@@ -1,5 +1,6 @@
 import {app, BrowserWindow, shell, BrowserView, systemPreferences, ipcMain} from 'electron'
 import {join} from 'path'
+import {lstatSync} from 'fs'
 import {is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
 import icon from '../../resources/icon.png?asset'
@@ -9,6 +10,7 @@ import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
+
 type WinOptions = {
   width?: number
   height?: number
@@ -17,10 +19,10 @@ type WinOptions = {
   openFolder?: string
   openFile?: string
 }
-const options:BrowserWindowConstructorOptions =  {
+const options: BrowserWindowConstructorOptions = {
   show: false,
   autoHideMenuBar: true,
-  ...(process.platform === 'linux' ? { icon } : {}),
+  ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
   webPreferences: {
@@ -32,6 +34,7 @@ const options:BrowserWindowConstructorOptions =  {
   }
 }
 const windows = new Map<number, WinOptions>()
+
 function createWindow(initial?: WinOptions): void {
   const window = new BrowserWindow({
     width: initial?.width || 1000,
@@ -41,9 +44,9 @@ function createWindow(initial?: WinOptions): void {
   })
   window.webContents.session.webRequest.onBeforeSendHeaders(
     (details, callback) => {
-      callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } });
+      callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
     },
-  );
+  )
 
   window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
@@ -51,15 +54,15 @@ function createWindow(initial?: WinOptions): void {
         'Access-Control-Allow-Origin': ['*'],
         ...details.responseHeaders,
       },
-    });
-  });
+    })
+  })
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
     window.show()
   })
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    return { action: 'deny' }
+    return {action: 'deny'}
   })
   window.on('focus', () => {
     window.webContents.send('window-focus')
@@ -67,6 +70,9 @@ function createWindow(initial?: WinOptions): void {
   is.dev ? window.loadURL(baseUrl) : window.loadFile(baseUrl)
   window.on('blur', e => {
     window.webContents.send('window-blur')
+  })
+  window.on('close', () => {
+    windows.delete(window.id)
   })
   windows.set(window.id, initial || {})
 }
@@ -84,6 +90,9 @@ app.whenReady().then(() => {
     if (!windows.get(window.id)) return
     if (data.openFolder) windows.get(window.id)!.openFolder = data.openFolder
     if (data.openFile) windows.get(window.id)!.openFile = data.openFile
+  })
+  ipcMain.on('add-recent-path', (e, path) => {
+    app.addRecentDocument(path)
   })
   ipcMain.handle('get-win-set', (e) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
@@ -117,9 +126,32 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+  app.on('open-file', (e, filePath) => {
+    try {
+      const win = Array.from(windows).find(w => {
+        return (w[1].openFile === filePath || w[1].openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
+      })
+      if (win) {
+        if (win[1].openFile === filePath || win[1].openFolder === filePath) {
+          BrowserWindow.fromId(win[0])?.focus()
+        } else if (win[1].openFolder && filePath.startsWith(win[1].openFolder)) {
+          const w = BrowserWindow.fromId(win[0])
+          w?.focus()
+          if (lstatSync(filePath).isFile()) w?.webContents.send('open-path', filePath)
+        }
+      } else {
+        const stat = lstatSync(filePath)
+        createWindow({
+          openFolder: stat.isDirectory() ? filePath : undefined,
+          openFile: stat.isFile() ? filePath : undefined
+        })
+      }
+    } catch (e) {
+    }
+  })
   try {
     const data = store.get('windows') as WinOptions[] || []
-    console.log('data', data)
+    // console.log('data', data)
     if (data?.length) {
       for (let d of data) {
         createWindow(typeof d === 'object' ? d : undefined)
