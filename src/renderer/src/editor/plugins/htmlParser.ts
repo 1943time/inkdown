@@ -206,9 +206,7 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
-  console.log('task', parsed.querySelector('.m-list-item.task'))
   if (inner && !parsed.querySelector('.m-list-item.task')) return false
-  console.log('frag', fragment)
   Transforms.insertFragment(editor, fragment)
   return true
 }

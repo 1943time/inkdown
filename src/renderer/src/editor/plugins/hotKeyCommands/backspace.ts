@@ -190,6 +190,12 @@ export class BackspaceKey {
               return true
             }
           }
+
+          // 可删除顶级元素中的第一个段落
+          const next = Editor.hasPath(this.editor, Path.next(path))
+          if (Editor.isEditor(parent[0]) && next && Editor.node(this.editor, Path.next(path))[0].type !== 'hr') {
+            Transforms.delete(this.editor, {at: path})
+          }
         }
         return false
       }
