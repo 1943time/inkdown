@@ -3,7 +3,7 @@ import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, parserNode, sortFiles} from '../components/tree/parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse} from 'path'
-import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync} from 'fs'
+import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
@@ -82,6 +82,13 @@ export class TreeStore {
     }))
     this.appendTab()
     new MenuKey(this)
+    window.electron.ipcRenderer.on('copy-source-code', e => {
+      if (this.openNote?.filePath.endsWith('.md')) {
+        const content = readFileSync(this.currentTab!.current!.filePath, {encoding: 'utf-8'})
+        window.api.copyToClipboard(content)
+        message$.next({type: 'success', content: '已复制到剪贴板~'})
+      }
+    })
     window.electron.ipcRenderer.on('tree-command', (e, params: {
       type: 'rootFolder' | 'file' | 'folder'
       filePath: string

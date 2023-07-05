@@ -1,16 +1,22 @@
 import {BrowserWindow, ipcMain, Menu, shell} from 'electron'
+
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
 
 export const registerMenus = () => {
-  ipcMain.on('tool-menu', (e, filePath: string) => {
-    const temp:Menus = [
+  ipcMain.on('tool-menu', (e, filePath?: string) => {
+    const temp: Menus = [
       {
         type: 'separator'
       },
       {
+        label: '复制Markdown源码',
+        enabled: filePath?.endsWith('.md'),
+        click: (e, win) => win?.webContents.send('copy-source-code')
+      },
+      {
         label: '导出pdf',
-        enabled: !!filePath,
+        enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('print-to-pdf')
       },
       // {
@@ -24,11 +30,11 @@ export const registerMenus = () => {
       {
         label: '在Finder中显示',
         enabled: !!filePath,
-        click: () => shell.showItemInFolder(filePath)
+        click: () => shell.showItemInFolder(filePath!)
       },
       {
         label: '默认应用打开',
-        click: () => shell.openPath(filePath),
+        click: () => shell.openPath(filePath!),
         enabled: !!filePath
       }
     ]
@@ -84,6 +90,12 @@ export const registerMenus = () => {
           label: '默认应用打开',
           click: () => shell.openPath(params.filePath!)
         })
+        if (params.filePath?.endsWith('.md')) {
+          temp.add({
+            label: '复制Markdown源码',
+            click: (e, win) => win?.webContents.send('copy-source-code')
+          })
+        }
       }
       temp.add({type: 'separator'})
       temp.add({
@@ -101,7 +113,7 @@ export const registerMenus = () => {
     const click = (task: string) => {
       return () => e.sender.send('table-task', task)
     }
-    const temp:Menus = [
+    const temp: Menus = [
       {
         label: '上方插入行',
         id: 'insertRowBefore',
