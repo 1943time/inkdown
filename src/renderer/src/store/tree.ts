@@ -179,6 +179,7 @@ export class TreeStore {
     document.title = this.root ? `${basename(this.root.filePath)}-${basename(node.filePath)}` : basename(node.filePath)
     this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
     this.currentTab.history.push(node)
+    this.openParentDir(node.filePath)
     this.currentTab.index = this.currentTab.history.length - 1
     MainApi.setWin({openFile: node.filePath})
     if (scroll) {
@@ -269,6 +270,7 @@ export class TreeStore {
     } else {
       document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
       this.openNewNote(path)
+      this.openParentDir(path)
     }
   }
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
@@ -299,6 +301,20 @@ export class TreeStore {
     return this.schemaMap.get(file)
   }
 
+  openParentDir(filePath: string) {
+    const stack = this.root?.children?.slice() || []
+    while (stack.length) {
+      const item = stack.shift()!
+      if (filePath.startsWith(item.filePath)) {
+        if (item.folder) {
+          item.expand = true
+          if (filePath !== item.filePath) {
+            stack.push(...item.children!)
+          }
+        }
+      }
+    }
+  }
   openFolder(path: string, openFile?: string) {
     this.watcher.destroy()
     MainApi.setWin({openFolder: path})
@@ -308,6 +324,7 @@ export class TreeStore {
     requestIdleCallback(() => this.parserQueue(files))
     if (openFile && existsSync(openFile)) {
       this.open(openFile)
+      this.openParentDir(openFile)
     } else {
       let firstNote: IFileItem | null = null
       let stack = this.root.children?.slice() || []
@@ -435,7 +452,15 @@ export class TreeStore {
   }
 
   private removeSelf(node: IFileItem) {
+    const open = this.openNote === node
     node.parent!.children = node.parent!.children!.filter(c => c !== node)
+    const inHistory = this.currentTab.history.findIndex(c => c === node)
+    if (inHistory !== -1) this.currentTab.history.splice(inHistory, 1)
+    this.currentTab.index >= inHistory && this.currentTab.index > 0 ? this.currentTab.index-- : null
+    if (open && !this.currentTab.history.length) {
+      const doc = node.parent!.children!.find(c => c.ext === 'md')
+      if (doc) this.open(doc.filePath)
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import {app, BrowserWindow, shell, BrowserView, systemPreferences, ipcMain} from 'electron'
+import {app, BrowserWindow, shell, BrowserView, systemPreferences, ipcMain, screen} from 'electron'
 import {join} from 'path'
 import {lstatSync} from 'fs'
 import {is, optimizer} from '@electron-toolkit/utils'
@@ -34,11 +34,11 @@ const options: BrowserWindowConstructorOptions = {
   }
 }
 const windows = new Map<number, WinOptions>()
-
 function createWindow(initial?: WinOptions): void {
+  const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
-    width: initial?.width || 1000,
-    height: initial?.height || 800,
+    width: initial?.width || width,
+    height: initial?.height || height,
     titleBarStyle: 'hiddenInset',
     ...options
   })

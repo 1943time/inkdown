@@ -1,5 +1,4 @@
 import {observer} from 'mobx-react-lite'
-import {DownloadOutlined} from '@ant-design/icons'
 import {Button, Modal, notification, Progress, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
