@@ -108,13 +108,20 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
           })
         }
       }
-
-      if (el.type === 'paragraph' && path[0] === 0 && !Node.string(el)) {
-        const next = Node.get(editor, Path.next(path))
-        if (next && ['table', 'code'].includes(next.type)) {
-          e.preventDefault()
-          Transforms.select(editor, Editor.start(editor, Path.next(path)))
-          Transforms.delete(editor, {at: path})
+      if (el.type === 'paragraph') {
+        if (path[0] === 0 && !Node.string(el) && Editor.isEditor(Node.get(editor, Path.parent(path)))) {
+          const next = Editor.node(editor, Path.next(path))
+          if (['table', 'code', 'blockquote'].includes(next[0].type)) {
+            e.preventDefault()
+            Transforms.select(editor, Editor.start(editor, Path.next(path)))
+            Transforms.delete(editor, {at: path})
+          }
+        }
+        if (EditorUtils.checkSelEnd(editor, path)) {
+          Transforms.insertNodes(editor, EditorUtils.p, {
+            at: [editor.children.length],
+            select: true
+          })
         }
       }
     }

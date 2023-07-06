@@ -21,7 +21,6 @@ export interface IFileItem {
 export interface Tab {
   get current(): IFileItem | undefined
   history: IFileItem[]
-  refresh?: boolean
   index: number
   hasNext: boolean
   hasPrev: boolean

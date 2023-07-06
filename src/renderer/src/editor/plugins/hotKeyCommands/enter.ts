@@ -1,5 +1,5 @@
 import React from 'react'
-import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
+import {BaseSelection, Editor, Element, next, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../../../el'
 import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
@@ -99,57 +99,93 @@ export class EnterKey {
     if (parent.type === 'list-item') {
       e.preventDefault()
       const nextPath = Path.next(parentPath)
-      if (Editor.hasPath(this.editor, nextPath)) {
-        const index = parentPath[parentPath.length - 1]
-        if (index === 0) {
-          Transforms.delete(this.editor, {at: parentPath})
-          Transforms.insertNodes(this.editor, EditorUtils.p, {
-            at: Path.parent(parentPath),
-            select: true
-          })
-        } else {
-          const ulPath = Path.parent(parentPath)
-          Transforms.liftNodes(this.editor, {
-            at: parentPath
-          })
-          Transforms.delete(this.editor, {
-            at: Path.next(ulPath)
-          })
-          Transforms.insertNodes(this.editor, EditorUtils.p, {
-            at: Path.next(ulPath),
-            select: true
-          })
-        }
-      } else {
-        const ul = Editor.parent(this.editor, parentPath)
-        const top = Editor.parent(this.editor, ul[1])
-        if (Node.string(parent)) {
-          Transforms.insertNodes(this.editor, {
-            type: 'list-item',
-            checked: typeof top[0].checked === 'boolean' ? false : undefined,
-            children: [EditorUtils.p]
-          }, {select: true, at: Path.next(parentPath)})
-        } else if (top[0].type === 'list-item') {
-          Transforms.insertNodes(this.editor, {
-            type: 'list-item',
-            checked: typeof top[0].checked === 'boolean' ? false : undefined,
-            children: [EditorUtils.p]
-          }, {select: true, at: Path.next(top[1])})
-        } else {
-          Transforms.insertNodes(this.editor, EditorUtils.p, {
-            at: Path.next(ul[1]), select: true
-          })
-        }
-        if (Path.hasPrevious(parentPath)) {
-          if (Node.string(parent)) {
-            Transforms.delete(this.editor, {at: path})
-          } else {
-            Transforms.delete(this.editor, {at: parentPath})
+      const index = parentPath[parentPath.length - 1]
+      const ul = Editor.parent(this.editor, parentPath)
+      const realEmpty = parent.children.length === 1
+
+      if (!realEmpty) {
+        Transforms.delete(this.editor, {at: path})
+        Transforms.insertNodes(this.editor, {
+          type: 'list-item',
+          checked: typeof parent.checked === 'boolean' ? false : undefined,
+          children: [EditorUtils.p]
+        }, {at: nextPath, select: true})
+        return
+      }
+
+      if (index === 0) {
+        if (!Editor.hasPath(this.editor, nextPath)) {
+          Transforms.delete(this.editor, {at: Path.parent(parentPath)})
+          if (!this.editor.children.length) {
+            Transforms.insertNodes(this.editor, EditorUtils.p)
           }
         } else {
-          Transforms.delete(this.editor, {at: ul[1]})
+          Transforms.delete(this.editor, {at: parentPath})
+          Transforms.insertNodes(this.editor, EditorUtils.p, {
+            at: ul[1],
+            select: true
+          })
         }
+      } else if (Editor.hasPath(this.editor, nextPath)) {
+        Transforms.liftNodes(this.editor, {
+          at: parentPath
+        })
+        Transforms.delete(this.editor, {at: Path.next(ul[1])})
+        Transforms.insertNodes(this.editor, EditorUtils.p, {
+          at: Path.next(ul[1]),
+          select: true
+        })
+      } else {
+        const top = Editor.parent(this.editor, ul[1])
+        if (top[0].type === 'list-item') {
+          Transforms.insertNodes(this.editor, {
+            type: 'list-item',
+            checked: typeof top[0].checked === 'boolean' ? false : undefined,
+            children: [EditorUtils.p]
+          }, {at: Path.next(top[1]), select: true})
+        } else {
+          Transforms.insertNodes(this.editor, EditorUtils.p, {
+            at: Editor.isEditor(top[0]) ? Path.next(ul[1]) : Path.next(top[1]), select: true
+          })
+        }
+        Transforms.delete(this.editor, {at: parentPath})
       }
+      // if (Editor.hasPath(this.editor, nextPath)) {
+      //   const index = parentPath[parentPath.length - 1]
+      //   if (index === 0) {
+      //
+      //   }
+      // }
+      // } else {
+      //   const ul = Editor.parent(this.editor, parentPath)
+      //   const top = Editor.parent(this.editor, ul[1])
+      //   if (Node.string(parent)) {
+      //     Transforms.insertNodes(this.editor, {
+      //       type: 'list-item',
+      //       checked: typeof top[0].checked === 'boolean' ? false : undefined,
+      //       children: [EditorUtils.p]
+      //     }, {select: true, at: Path.next(parentPath)})
+      //   } else if (top[0].type === 'list-item') {
+      //     Transforms.insertNodes(this.editor, {
+      //       type: 'list-item',
+      //       checked: typeof top[0].checked === 'boolean' ? false : undefined,
+      //       children: [EditorUtils.p]
+      //     }, {select: true, at: Path.next(top[1])})
+      //   } else {
+      //     Transforms.insertNodes(this.editor, EditorUtils.p, {
+      //       at: Path.next(ul[1]), select: true
+      //     })
+      //   }
+      //   if (Path.hasPrevious(parentPath)) {
+      //     if (Node.string(parent)) {
+      //       Transforms.delete(this.editor, {at: path})
+      //     } else {
+      //       Transforms.delete(this.editor, {at: parentPath})
+      //     }
+      //   } else {
+      //     Transforms.delete(this.editor, {at: ul[1]})
+      //   }
+      // }
     }
   }
 
