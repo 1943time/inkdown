@@ -1,5 +1,5 @@
 import {action, makeAutoObservable, observe, runInAction} from 'mobx'
-import {Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms} from 'slate'
+import {BaseRange, BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {GetFields, IFileItem} from '../index'
 import {createContext, useContext} from 'react'
@@ -16,7 +16,6 @@ export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
   return useContext(EditorStoreContext)!
 }
-
 export class EditorStore {
   editor!: Editor
   search = {
@@ -24,6 +23,7 @@ export class EditorStore {
     currentIndex: 0,
     refresh: false,
   }
+  sel: BaseSelection | undefined
   focus = false
   openSearch = false
   focusSearch = false

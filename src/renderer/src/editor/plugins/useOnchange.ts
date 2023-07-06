@@ -3,6 +3,7 @@ import {useMemo, useRef} from 'react'
 import {EditorStore, useEditorStore} from '../store'
 import {MainApi} from '../../api/main'
 import {EditorUtils} from '../utils/editorUtils'
+import {runInAction} from 'mobx'
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   const currentType = useRef('')
@@ -13,6 +14,7 @@ export function useOnchange(editor: Editor, store: EditorStore) {
         match: n => Element.isElement(n),
         mode: 'lowest'
       })
+      runInAction(() => store.sel = sel)
       if (!node) return
       if (currentType.current !== node[0].type) {
         currentType.current = node[0].type

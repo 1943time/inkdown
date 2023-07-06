@@ -31,8 +31,13 @@ export type CustomLeaf = {
   text?: string
   highlight?: boolean | null
   current?: boolean | null
+  // footnote
+  fnc?: boolean
+  fnd?: boolean
 }
 export type NodeTypes<T = Elements> = T['type']
+
+export type MapValue<T> = T extends Map<any, infer I> ? I : T extends WeakMap<any, infer I> ? I : unknown
 
 declare module 'slate' {
   interface BaseElement {

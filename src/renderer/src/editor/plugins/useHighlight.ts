@@ -1,14 +1,18 @@
 import {useCallback, useEffect, useMemo, useRef} from 'react'
-import {Editor, Element, Node, NodeEntry, Range, Text} from 'slate'
+import {Editor, Element, Node, NodeEntry, Range} from 'slate'
 import {useSlate} from 'slate-react'
-import {CodeNode} from '../../el'
+import {CodeNode, MapValue} from '../../el'
 import {observer} from 'mobx-react-lite'
 import {EditorStore, useEditorStore} from '../store'
+import {EditorUtils} from '../utils/editorUtils'
 
 export const codeCache = new WeakMap<object, {
   code: string,
   language?: string
 }>()
+
+export const cacheFootNote = new WeakMap<object, Range[]>
+
 export const cacheLine = new WeakMap<object, Range[]>()
 export function useHighlight(store?: EditorStore) {
   return useCallback(([node, path]: NodeEntry):Range[] => {
@@ -16,6 +20,32 @@ export function useHighlight(store?: EditorStore) {
       const ranges = store?.highlightCache.get(node) || []
       if (node.type === 'code-line') {
         ranges.push(...cacheLine.get(node) || [])
+      }
+      // footnote
+      if (['paragraph', 'table-cell'].includes(node.type)) {
+        for (let i = 0; i < node.children.length; i++) {
+          const c = node.children[i]
+          if (c.text && !EditorUtils.isDirtLeaf(node)) {
+            const cache = cacheFootNote.get(c)
+            if (cache) {
+              ranges.push(...cache)
+            } else {
+              const match = c.text.matchAll(/\[\^.+?]:?/g)
+              let fNRanges: any[] = []
+              for (let m of match) {
+                if (typeof m.index !== 'number') continue
+                fNRanges.push({
+                  anchor: {path: [...path, i], offset: m.index},
+                  focus: {path: [...path, i], offset: m.index + m[0].length},
+                  fnc: !m[0].endsWith(':'),
+                  fnd: m[0].endsWith(':'),
+                })
+              }
+              cacheFootNote.set(c, fNRanges)
+              ranges.push(...fNRanges)
+            }
+          }
+        }
       }
       return ranges
     }

@@ -3,7 +3,7 @@ import {MEditor} from './Editor'
 import {Heading} from './tools/Leading'
 import {Empty} from '../components/Empty'
 import {Tab} from '../index'
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {withMarkdown} from './plugins'
 import {withReact} from 'slate-react'
 import {withHistory} from 'slate-history'
@@ -28,6 +28,22 @@ export const EditorFrame = observer(({tab}: {
     tab.store = store
     return store
   }, [])
+
+  const click = useCallback((e: React.MouseEvent) => {
+    if (e.metaKey && e.target) {
+      const el = (e.target as HTMLDivElement).parentElement
+      if (!el) return
+      if (el.dataset.fnc) {
+        const target = document.querySelector(`[data-fnd-name="${el.dataset.fncName}"]`)
+        target?.scrollIntoView({behavior: 'smooth'})
+      }
+      if (el.dataset.fnd) {
+        const target = document.querySelector(`[data-fnc-name="${el.dataset.fndName}"]`)
+        target?.scrollIntoView({behavior: 'smooth'})
+      }
+    }
+  }, [])
+
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.metaKey && e.key === 'f' && treeStore.currentTab.current) {
@@ -59,7 +75,9 @@ export const EditorFrame = observer(({tab}: {
         }}
       >
         <div
-          className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}>
+          className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
+          onClick={click}
+        >
           {tab.current ?
             <>
               <div className={`flex-1 flex justify-center items-start h-full ${mt === 'markdown' ? '' : 'hidden'}`}>

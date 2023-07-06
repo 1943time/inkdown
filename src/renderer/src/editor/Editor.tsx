@@ -31,6 +31,7 @@ export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
   const store = useEditorStore()
+  const inCode = useRef(false)
   const editor = store.editor
   const value = useRef<any[]>(initialValue)
   const high = useHighlight(store)
@@ -130,12 +131,12 @@ export const MEditor = observer(({note}: {
       timer = window.setTimeout(() => {
         // @ts-ignore
         const text = e.nativeEvent?.data || ''
-        if (/[\u4e00-\u9fa5]/.test(text)) {
+        if (/[\u4e00-\u9fa5]/.test(text) && inCode.current) {
           runInAction(() => {
             store.refreshHighlight = !store.refreshHighlight
           })
         }
-      }, 60)
+      }, 100)
     }
   }, [])
   const checkEnd = useCallback((e: React.MouseEvent) => {
@@ -157,6 +158,13 @@ export const MEditor = observer(({note}: {
       window.electron.ipcRenderer.removeListener('save-doc', save)
     }
   }, [])
+  useEffect(() => {
+    const [node] = Editor.nodes(store.editor, {
+      match: n => n.type === 'code',
+      mode: 'highest'
+    })
+    inCode.current = !!node
+  }, [store.sel])
   return (
     <Slate
       editor={editor}

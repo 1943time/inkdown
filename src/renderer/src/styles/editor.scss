@@ -33,6 +33,13 @@ a {
   .mermaid-container{
     @apply mb-3 cursor-default select-none bg-gray-500/5 py-3 rounded flex justify-center;
   }
+  [data-fnc="fnc"] {
+    font-size: .85em;
+    @apply dark:text-teal-500 align-super px-0.5 dark:hover:text-teal-600 duration-200 text-teal-600 hover:text-teal-500;
+  }
+  [data-fnd="fnd"] {
+    @apply dark:text-lime-500 px-0.5 dark:hover:text-lime-600 duration-200 text-lime-600 hover:text-lime-500;
+  }
   pre {
     margin: 0;
   }
@@ -86,13 +93,12 @@ a {
     font-weight: 600;
     font-size: 1.6em;
     line-height: 1.3333333;
-    margin-bottom: 16px;
+    margin: 16px 0;
   }
-
   h3 {
     font-weight: 500;
     font-size: 1.3em;
-    margin-bottom: 14px;
+    margin: 14px 0;
     line-height: 1.2;
   }
 

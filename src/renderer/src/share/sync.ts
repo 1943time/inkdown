@@ -271,15 +271,14 @@ export class Sync {
     const file = await db.file.where('filePath').equals(realPath).first()
     const m = mediaType(filePath)
     if (!['image'].includes(m)) return filePath
-    const buffer = await window.api.fs.readFile(filePath)
+    const buffer = await window.api.fs.readFile(realPath)
     const hash = window.api.md5(buffer)
-    const ext = parse(filePath).ext
+    const ext = parse(realPath).ext
     const name = `files/${hash}${ext}`
     if (file && file.hash === hash) {
       return '/' + name
     }
-    let contentType = `image/${ext}`
-    await this.sdk.uploadFile(name, filePath, contentType)
+    await this.sdk.uploadFile(name, realPath)
     if (file) {
       await db.file.update(file.id!, {hash})
     } else {

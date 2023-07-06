@@ -53,7 +53,7 @@ export class EnterKey {
             }
           }
           const str = Node.string(el)
-          if (!str) {
+          if (!str && !el.children.some((c: any) => c.type === 'media')) {
             this.empty(e, path)
           } else {
             this.paragraph(e, node, sel)
@@ -123,7 +123,13 @@ export class EnterKey {
       } else {
         const ul = Editor.parent(this.editor, parentPath)
         const top = Editor.parent(this.editor, ul[1])
-        if (top[0].type === 'list-item') {
+        if (Node.string(parent)) {
+          Transforms.insertNodes(this.editor, {
+            type: 'list-item',
+            checked: typeof top[0].checked === 'boolean' ? false : undefined,
+            children: [EditorUtils.p]
+          }, {select: true, at: Path.next(parentPath)})
+        } else if (top[0].type === 'list-item') {
           Transforms.insertNodes(this.editor, {
             type: 'list-item',
             checked: typeof top[0].checked === 'boolean' ? false : undefined,
@@ -135,7 +141,11 @@ export class EnterKey {
           })
         }
         if (Path.hasPrevious(parentPath)) {
-          Transforms.delete(this.editor, {at: parentPath})
+          if (Node.string(parent)) {
+            Transforms.delete(this.editor, {at: path})
+          } else {
+            Transforms.delete(this.editor, {at: parentPath})
+          }
         } else {
           Transforms.delete(this.editor, {at: ul[1]})
         }

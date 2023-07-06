@@ -9,7 +9,7 @@ import {Paragraph} from './paragraph'
 import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
 import {Media} from './media'
 import {useEditorStore} from '../store'
-import {Point, Range} from 'slate'
+import {Point} from 'slate'
 import {join} from 'path'
 import {treeStore} from '../../store/tree'
 
@@ -104,6 +104,10 @@ export const MLeaf = (props: RenderLeafProps) => {
       <span
         {...props.attributes}
         data-be={'text'}
+        data-fnc={leaf.fnc ? 'fnc' : undefined}
+        data-fnd={leaf.fnd ? 'fnd' : undefined}
+        data-fnc-name={leaf.fnc ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}
+        data-fnd-name={leaf.fnd ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}
         className={`${!!dirty ? 'mx-[1px]' : ''} ${className}`}
         style={style}>
         {!!dirty && !!leaf.text &&
