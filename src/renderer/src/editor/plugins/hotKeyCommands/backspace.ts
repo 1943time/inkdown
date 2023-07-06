@@ -54,6 +54,7 @@ export class BackspaceKey {
           } else {
             const nStart = Editor.start(this.editor, c[1])
             const nEnd = Editor.end(this.editor, c[1])
+            if (!Point.isBefore(start, nEnd)) continue
             Transforms.delete(this.editor, {
               at: {
                 anchor: Point.isBefore(start, nStart) ? nStart : start,
@@ -65,6 +66,7 @@ export class BackspaceKey {
       } else {
         const nStart = Editor.start(this.editor, n[1])
         const nEnd = Editor.end(this.editor, n[1])
+        if (!Point.isBefore(start, nEnd)) continue
         Transforms.delete(this.editor, {
           at: {
             anchor: Point.isBefore(start, nStart) ? nStart : start,
@@ -74,10 +76,7 @@ export class BackspaceKey {
       }
     }
     if (Editor.hasPath(this.editor, start.path)) {
-      Transforms.select(this.editor, {
-        path: start.path,
-        offset: start.offset
-      })
+      Transforms.select(this.editor, Editor.start(this.editor, start.path))
     } else if (Path.hasPrevious(start.path)) {
       Transforms.select(this.editor, Editor.end(this.editor, Path.previous(start.path)))
     } else {

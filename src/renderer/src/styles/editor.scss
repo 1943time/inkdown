@@ -194,6 +194,7 @@ ol.m-list {
   .check-item {
     display: inline-block;
     position: absolute;
+    user-select: none;
     height: 2em;
     left: 0;
     top: 1px;
