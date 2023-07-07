@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useMemo, useRef} from 'react'
 import {Editor, Element, Node, NodeEntry, Range} from 'slate'
 import {useSlate} from 'slate-react'
-import {CodeNode, MapValue} from '../../el'
+import {CodeNode} from '../../el'
 import {observer} from 'mobx-react-lite'
 import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'
@@ -82,12 +82,10 @@ export const SetNodeToDecorations = observer(() => {
         }
         codeCache.set(el, handle)
         const tokens = window.api.highlightCode(c.code, lang)
-        // console.log('code', c.code, tokens)
         for (let i = 0; i < tokens.length; i++) {
           const element = c.node[0]
           const line = element.children[i]
           if (cacheLine.get(line)) continue
-          // console.log('reset', line)
           const ranges: Range[] = []
           const lineToken = tokens[i]
           let start = 0

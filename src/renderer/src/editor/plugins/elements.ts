@@ -1,4 +1,4 @@
-import {BasePoint, BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms} from 'slate'
+import {BasePoint, BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms} from 'slate'
 import {BlockQuoteNode, Elements, ListNode, TableRowNode} from '../../el'
 import {ReactEditor} from 'slate-react'
 import {EditorUtils} from '../utils/editorUtils'
@@ -172,14 +172,10 @@ export const MdElements: Record<string, MdNode> = {
     },
     run: ({editor, match, sel, path}) => {
       const removeLength = match[0].match(/\s*(\d+\.|-|\*|\+)\s+(\[[\sx]])?/)?.[0].length || 0
-      const p = Node.fragment(editor, {
-        anchor: {
-          path: [...path, 0],
-          offset: removeLength
-        },
-        focus: Editor.end(editor, path)
-      })
-
+      let texts:any[] = [{text: ''}]
+      if (!Point.equals(sel.anchor, Editor.end(editor, path))) {
+        texts = EditorUtils.cutText(editor, sel.anchor)
+      }
       Transforms.delete(editor, {
         at: path
       })
@@ -189,7 +185,7 @@ export const MdElements: Record<string, MdNode> = {
         children: [
           {
             type: 'list-item',
-            children: p || [{type: 'paragraph', children:[{text: match[3] || ''}]}],
+            children: [{type: 'paragraph', children: texts}],
             checked: match[2] ? match[2].includes('x') : undefined
           }
         ]

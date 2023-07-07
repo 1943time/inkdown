@@ -74,6 +74,9 @@ export class EditorUtils {
       Point.compare(end, Editor.end(editor, nodePath)) !== -1
   }
 
+  static copy(data: object) {
+    return JSON.parse(JSON.stringify(data))
+  }
   static cutText(editor: Editor, start: Point, end?: Point) {
     let leaf = Node.leaf(editor, start.path)
     let texts: CustomLeaf[] = [{...leaf, text: leaf.text?.slice(start.offset) || ''}]

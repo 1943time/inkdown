@@ -117,7 +117,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
             Transforms.delete(editor, {at: path})
           }
         }
-        if (EditorUtils.checkSelEnd(editor, path)) {
+        if (Node.string(el) && EditorUtils.checkSelEnd(editor, path)) {
           Transforms.insertNodes(editor, EditorUtils.p, {
             at: [editor.children.length],
             select: true
