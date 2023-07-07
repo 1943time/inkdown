@@ -14,19 +14,19 @@ export interface Book{
   path: string
   strategy: 'auto' | 'custom'
   ignorePaths: string
+  map?: string
   filePath: string
+  config?: Record<string, any>
   updated: string
 }
 
 export interface Chapter {
   id?: number
   filePath: string
+  // hash filepath
   path: string
   bookId: number
   hash?: string
-  folder?: boolean
-  parentId?: number
-  sort?: number
   name: string
   updated: string
 }
@@ -46,8 +46,8 @@ class Db extends Dexie {
     super('db')
     this.version(1).stores({
       doc: '&id,name,filePath,hash,updated',
-      book: '++id,[filePath+path],name,strategy,filePath,ignorePaths,updated',
-      chapter: '++id,filePath,bookId,folder,path,hash,parentId,sort,name,updated',
+      book: '++id,[filePath+path],name,strategy,map,filePath,ignorePaths,config,updated',
+      chapter: '++id,filePath,bookId,path,hash,name,updated',
       file: '++id,filePath,hash'
     })
   }

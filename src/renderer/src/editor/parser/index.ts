@@ -11,6 +11,7 @@ const parser = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkMath, {singleDollarTextMath: false})
+
 const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
   let leafs: CustomLeaf[] = []
   for (let n of els) {

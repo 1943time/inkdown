@@ -7,7 +7,7 @@ import {MainApi} from '../api/main'
 import {extname} from 'path'
 import {message$} from '../utils'
 
-const removeBook = async (id: number) => {
+export const removeBook = async (id: number) => {
   const chapters = await db.chapter.where('bookId').equals(id).toArray()
   const book = await db.book.get(id)
   const sdk = new window.api.sdk()
@@ -21,7 +21,11 @@ const removeBook = async (id: number) => {
         await sdk.removeFile(`books/${book.path}/${c.path}.json`)
       }
     }
-    await sdk.removeFile(`books/${book.path}`)
+    try {
+      await sdk.removeFile(`books/${book.path}`)
+    } catch (e) {
+      console.log(`remove dir fail ${book.path}`)
+    }
   }
 }
 

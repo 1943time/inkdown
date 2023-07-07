@@ -320,7 +320,10 @@ export const ShareSet = observer(() => {
         onClose={() => setState({openSet: false})}
       />
       <Record open={state.openRecord} onClose={() => setState({openRecord: false})}/>
-      <Ebook open={state.ebookOpen} id={state.selectedBookId} onClose={() => setState({ebookOpen: false})}/>
+      <Ebook open={state.ebookOpen} id={state.selectedBookId} onClose={() => {
+        setState({ebookOpen: false})
+        getBooks()
+      }}/>
     </>
   )
 })

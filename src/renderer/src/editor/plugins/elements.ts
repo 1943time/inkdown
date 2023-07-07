@@ -1,6 +1,5 @@
-import {BasePoint, BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms} from 'slate'
+import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {BlockQuoteNode, Elements, ListNode, TableRowNode} from '../../el'
-import {ReactEditor} from 'slate-react'
 import {EditorUtils} from '../utils/editorUtils'
 
 export const insertAfter = (editor: Editor, path: Path, node: Elements = {

@@ -8,6 +8,7 @@ import {treeStore} from '../store/tree'
 import {IFileItem} from '../index'
 import {readFileSync} from 'fs'
 import {findText, getSectionTexts, slugify} from './utils'
+import {nanoid} from 'nanoid'
 
 type Els = Elements & CustomLeaf
 
@@ -23,6 +24,7 @@ interface EbookConfig {
   path: string
   strategy: 'auto' | 'custom'
   ignorePaths: string
+  map?: any
 }
 
 export const getSlugifyName = (path: string) => slugify(basename(path).replace(/\.\w+(#.*)?/, ''))
@@ -31,6 +33,7 @@ export class Sync {
   sdk = new window.api.sdk()
   currentBookConfig: any
   currentSections:any[] = []
+  noteSchemaMap = new Map<string, any[]>()
   currentBook?: Book
   private readonly prefix = 'books'
   get time() {
@@ -107,17 +110,10 @@ export class Sync {
   }
   async syncEbook(config: EbookConfig) {
     this.currentSections = []
-    if (config.strategy === 'auto') {
-      return this.syncAutoEbook(config)
-    }
-  }
-
-  private async syncAutoEbook(config: EbookConfig) {
     this.currentBookConfig = config
-    const root = treeStore.root.filePath!
-    const ignores = config.ignorePaths ? config.ignorePaths.split(',').map(p => join(root, p)) : []
     let chapterRecords:Chapter[] = []
     let book: Book | undefined
+    const root = treeStore.root.filePath!
     const sdk = new window.api.sdk()
     if (config.id) {
       chapterRecords = await db.chapter.where('bookId').equals(config.id).toArray()
@@ -127,13 +123,15 @@ export class Sync {
           strategy: config.strategy,
           name: config.name,
           ignorePaths: config.ignorePaths,
-          updated: this.time
+          updated: this.time,
+          map: config.map
         })
         if (book.path !== config.path) {
           sdk.removeFile(join(this.prefix, book.path, 'map.json'))
           sdk.removeFile(join(this.prefix, book.path, 'text.json'))
         }
       }
+      book = await db.book.get(config.id)
     }
     this.currentBook = book
     if (!book) {
@@ -143,18 +141,133 @@ export class Sync {
         name: config.name,
         ignorePaths: config.ignorePaths,
         path: config.path,
-        updated: this.time
+        updated: this.time,
+        map: config.map
       })
       book = await db.book.get(id)
     }
     const recordsMap = new Map(chapterRecords.map(c => [c.path, c]))
-    const map = await this.getMapByDirectory({
-      item: treeStore.root!,
-      book: book!,
-      records: recordsMap,
-      sdk,
-      ignorePath: ignores
+
+    if (config.strategy === 'auto') {
+      const ignores = config.ignorePaths ? config.ignorePaths.split(',').map(p => join(root, p)) : []
+      const map = await this.getMapByDirectory({
+        item: treeStore.root!,
+        book: book!,
+        records: recordsMap,
+        sdk,
+        ignorePath: ignores
+      })
+      return this.saveEbook({
+        config,
+        recordsMap,
+        sdk,
+        book: book!,
+        map
+      })
+    } else {
+      const map = await this.getCustomEbookMap({
+        config,
+        recordsMap,
+        sdk,
+        book: book!,
+      })
+      return this.saveEbook({
+        config,
+        recordsMap,
+        sdk,
+        book: book!,
+        map
+      })
+    }
+  }
+  private async getCustomEbookMap(ctx: {
+    config: EbookConfig, book: Book, recordsMap: Map<string, Chapter>, sdk: InstanceType<typeof window.api.sdk>
+  }) {
+    this.noteSchemaMap.clear()
+    const stack = treeStore.root.children!.slice()
+    while (stack.length) {
+      const item = stack.shift()!
+      if (item.ext === 'md') {
+        this.noteSchemaMap.set(item.filePath, treeStore.schemaMap.get(item)?.state || [])
+      }
+      if (item.folder) {
+        stack.push(...item.children!)
+      }
+    }
+    return this.getChapterByConfig({
+      ...ctx, records: ctx.recordsMap, items: JSON.parse(ctx.config.map!)
     })
+  }
+
+  private async getChapterByConfig(ctx: {
+    items: ChapterItem[],
+    records: Map<string, Chapter>,
+    book: Book,
+    sdk: InstanceType<typeof window.api.sdk>
+  }) {
+    const chapters: ChapterItem[] = []
+    for (let c of ctx.items) {
+      if (!c.name) throw new Error('name字段为空')
+      if (c.folder) {
+        if (!c.children?.length) continue
+        chapters.push({
+          ...c,
+          path: nanoid(),
+          children: await this.getChapterByConfig({
+            ...ctx,
+            items: c.children!
+          })
+        })
+      } else {
+        if (!c.path) throw new Error('path字段为空')
+        const realPath = join(ctx.book.filePath, c.path!) + '.md'
+        if (!(await this.exist(realPath))) throw new Error(`${c.path} 文件不存在`)
+        const path = window.api.md5(realPath)
+        const hash = window.api.md5(readFileSync(realPath, {encoding: 'utf-8'}))
+        const chapter: ChapterItem = {
+          folder: false,
+          name: c.name,
+          path: path
+        }
+        const shareSchema = await this.withShareSchema(this.noteSchemaMap.get(realPath) || [], realPath)
+        this.currentSections.push({
+          section: getSectionTexts(shareSchema).sections,
+          path: path,
+          name: c.name
+        })
+        if (!ctx.records.get(path) || ctx.records.get(path)!.hash !== hash) {
+          await ctx.sdk.uploadFileByText(`${this.prefix}/${ctx.book.path}/${path}.json`, JSON.stringify({
+            title: c.name,
+            schema: shareSchema
+          }))
+          if (!ctx.records.get(path)) {
+            await db.chapter.add({
+              hash,
+              path,
+              filePath: realPath,
+              name: c.name,
+              updated: this.time,
+              bookId: ctx.book.id!
+            })
+          } else {
+            await db.chapter.update(ctx.records.get(path)!.id!, {
+              hash: hash,
+              updated: this.time
+            })
+          }
+        }
+        chapters.push(chapter)
+      }
+    }
+    return chapters
+  }
+
+  private async saveEbook(ctx: {
+    config: EbookConfig, book: Book, recordsMap: Map<string, Chapter>, sdk: InstanceType<typeof window.api.sdk>, map: ChapterItem[]
+  }) {
+    const {config, book, recordsMap, sdk} = ctx
+    const root = treeStore.root.filePath!
+    const map = ctx.map
 
     await sdk.uploadFileByText(`${this.prefix}/${config.path}/map.json`, JSON.stringify({
       title: book!.name,
@@ -238,7 +351,6 @@ export class Sync {
               hash,
               path,
               filePath: c.filePath,
-              folder: false,
               name: ps.name,
               updated: this.time,
               bookId: ctx.book.id!

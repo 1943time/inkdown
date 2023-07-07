@@ -303,8 +303,24 @@ export const createAppMenus = () => {
       label: '帮助',
       role: 'help',
       submenu: [
-        {label: '文档'},
-        {label: '反馈'}
+        {
+          label: '文档',
+          click: () => {
+            shell.openExternal('https://bluestone.md-writer.com/book/docs')
+          }
+        },
+        {
+          label: 'Github',
+          click: () => {
+            shell.openExternal('https://github.com/1943time/bluestone')
+          }
+        },
+        {
+          label: 'Email',
+          click: () => {
+            shell.openExternal("mailto:mdwriter@163.com?subject=&body=");
+          }
+        }
       ]
     }
   ]
