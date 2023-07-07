@@ -47,7 +47,6 @@ function createWindow(initial?: WinOptions): void {
       callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
     },
   )
-
   window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
@@ -56,6 +55,14 @@ function createWindow(initial?: WinOptions): void {
       },
     })
   })
+  window.on('enter-full-screen', () => {
+    window.webContents?.send('enter-full-screen')
+  })
+
+  window.on('leave-full-screen', () => {
+    window.webContents?.send('leave-full-screen')
+  })
+
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
     window.show()

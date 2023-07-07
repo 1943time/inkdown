@@ -11,7 +11,6 @@ import {createHash} from 'crypto'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null
-
 const api = {
   preloadUrl: '',
   baseUrl: '',

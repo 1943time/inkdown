@@ -4,11 +4,21 @@ import Folder from '../../../assets/ReactIcon/Folder'
 import ISearch from '../../../assets/ReactIcon/ISearch'
 import Collapse from '../../../assets/ReactIcon/Collapse'
 import {Tooltip} from 'antd'
+import {useEffect, useState} from 'react'
 
 export const TreeTop = observer(() => {
+  const [full, setFull] = useState(false)
+  useEffect(() => {
+    window.electron.ipcRenderer.on('enter-full-screen', () => {
+      setFull(true)
+    })
+    window.electron.ipcRenderer.on('leave-full-screen', () => {
+      setFull(false)
+    })
+  }, [])
   return (
     <div
-      className={'fixed left-0 top-0 z-20 h-[40px] pl-20 duration-200'}
+      className={`fixed left-0 top-0 z-20 h-[40px] ${full ? 'pl-5' : 'pl-20'} duration-200`}
       style={{width: treeStore.fold ? 114 : treeStore.width}}
     >
       <div className={'flex h-full items-center'}>

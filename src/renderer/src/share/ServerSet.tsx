@@ -5,7 +5,6 @@ import {useLocalState} from '../hooks/useLocalState'
 import {useEffect} from 'react'
 import {MainApi} from '../api/main'
 import {db} from './db'
-
 export const ServerSet = observer((props: {
   open: boolean
   onClose: () => void
@@ -37,6 +36,8 @@ export const ServerSet = observer((props: {
         return form.validateFields().then(async v => {
           setState({submitting: true})
           try {
+            v.domain = v.domain?.replace(/\/+$/, '')
+            v.target = v.target?.replace(/\/+$/, '')
             await window.electron.ipcRenderer.invoke('saveServerConfig', v)
             const sdk = new window.api.sdk()
             await sdk.connect()

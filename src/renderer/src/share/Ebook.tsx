@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Form, FormInstance, Input, Modal, Radio} from 'antd'
+import {Button, Form, Input, Modal, Radio} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {Sync} from './sync'
-import {useCallback, useEffect, useRef} from 'react'
+import {useEffect} from 'react'
 import {db} from './db'
 import {message$} from '../utils'
 import AceEditor from 'react-ace'
@@ -19,6 +19,7 @@ function Code(props: {
       <AceEditor
         ref={editor => {
           editor?.editor.renderer.setOption('showGutter', false)
+          editor?.editor.setHighlightActiveLine(false)
         }}
         mode={'json'}
         theme="cloud9_night"
@@ -88,10 +89,19 @@ export const Ebook = observer((props: {
             type={'primary'}
             loading={state.submitting}
             onClick={() => {
-              form.validateFields().then(v => {
+              form.validateFields().then(async v => {
+                if (!props.id) {
+                  const exist = await db.book.filter(obj => obj.path === v.path || obj.name === v.name).first()
+                  if (exist) {
+                    return message$.next({
+                      type: 'info',
+                      content: exist.path === v.path ? '访问路径已存在' : '电子书名称已存在'
+                    })
+                  }
+                }
                 const sync = new Sync()
                 setState({submitting: true})
-                sync.syncEbook({
+                await sync.syncEbook({
                   ...v,
                   id: props.id
                 }).then(() => {
@@ -102,7 +112,8 @@ export const Ebook = observer((props: {
                     type: 'error',
                     content: '同步失败'
                   })
-                }).finally(() => setState({submitting: false}))
+                })
+                setState({submitting: false})
               })
             }}
           >

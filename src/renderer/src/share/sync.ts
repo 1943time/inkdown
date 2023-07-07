@@ -220,7 +220,8 @@ export class Sync {
         })
       } else {
         if (!c.path) throw new Error('path字段为空')
-        const realPath = join(ctx.book.filePath, c.path!) + '.md'
+        let realPath = join(ctx.book.filePath, c.path!)
+        if (!realPath.endsWith('.md')) realPath += '.md'
         if (!(await this.exist(realPath))) throw new Error(`${c.path} 文件不存在`)
         const path = window.api.md5(realPath)
         const hash = window.api.md5(readFileSync(realPath, {encoding: 'utf-8'}))
