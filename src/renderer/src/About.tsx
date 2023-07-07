@@ -5,7 +5,7 @@ import {useEffect} from 'react'
 export function About() {
   const [state, setState] = useSetState({
     version: '',
-    open: true
+    open: false
   })
   useEffect(() => {
     window.electron.ipcRenderer.on('open-about', () => {

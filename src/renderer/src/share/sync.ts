@@ -9,6 +9,7 @@ import {IFileItem} from '../index'
 import {readFileSync} from 'fs'
 import {findText, getSectionTexts, slugify} from './utils'
 import {nanoid} from 'nanoid'
+import {configStore} from '../store/config'
 
 type Els = Elements & CustomLeaf
 
@@ -207,7 +208,7 @@ export class Sync {
   }) {
     const chapters: ChapterItem[] = []
     for (let c of ctx.items) {
-      if (!c.name) throw new Error('name字段为空')
+      if (!c.name) throw new Error(configStore.isZh ? 'name字段为空' : 'name field is empty')
       if (c.folder) {
         if (!c.children?.length) continue
         chapters.push({
@@ -219,10 +220,10 @@ export class Sync {
           })
         })
       } else {
-        if (!c.path) throw new Error('path字段为空')
+        if (!c.path) throw new Error(configStore.isZh ? 'path字段为空' : 'path fields empty')
         let realPath = join(ctx.book.filePath, c.path!)
         if (!realPath.endsWith('.md')) realPath += '.md'
-        if (!(await this.exist(realPath))) throw new Error(`${c.path} 文件不存在`)
+        if (!(await this.exist(realPath))) throw new Error(`${c.path} ${configStore.isZh ? '文件不存在' : 'file dose not exist'}`)
         const path = window.api.md5(realPath)
         const hash = window.api.md5(readFileSync(realPath, {encoding: 'utf-8'}))
         const chapter: ChapterItem = {

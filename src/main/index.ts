@@ -1,15 +1,15 @@
-import {app, BrowserWindow, shell, BrowserView, systemPreferences, ipcMain, screen} from 'electron'
+import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
 import {join} from 'path'
 import {lstatSync} from 'fs'
 import {is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
 import icon from '../../resources/icon.png?asset'
 import {baseUrl, registerApi} from './api'
-import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
-import {store} from './store'
+import {getLocale, store} from './store'
 import {AppUpdate} from './update'
+import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 
 type WinOptions = {
   width?: number
@@ -127,7 +127,7 @@ app.whenReady().then(() => {
   new AppUpdate()
   ipcMain.on('create-window', () => createWindow())
   // console.log(app.getPath('userData'))
-  app.commandLine.appendSwitch('lang', 'zh-CN')
+  if (getLocale() === 'zh') app.commandLine.appendSwitch('lang', 'zh-CN')
   ipcMain.on('set-win', (e, data: WinOptions) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     if (!windows.get(window.id)) return

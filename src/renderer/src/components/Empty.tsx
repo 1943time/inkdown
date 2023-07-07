@@ -7,13 +7,14 @@ import {
   FolderOpenOutlined
 } from '@ant-design/icons'
 import {MainApi} from '../api/main'
+import {configStore} from '../store/config'
 
 export const Empty = observer(() => {
   return (
     <div className={'flex justify-center items-center h-[calc(100vh_-_40px)]'}>
       <div className={'flex-col space-y-6 text-sky-600'}>
         <div className={'text-lg text-gray-500'}>
-          没有打开的文件
+          {configStore.isZh ? '没有打开的文件' : 'No open files'}
         </div>
         <div
           className={'cursor-default hover:text-sky-400 duration-200'}
@@ -23,7 +24,7 @@ export const Empty = observer(() => {
         >
           <FileAddOutlined/>
           <span className={'ml-2'}>
-            创建Markdown文件
+            {configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file'}
           </span>
         </div>
         {/*{!treeStore.root ?*/}
@@ -36,7 +37,7 @@ export const Empty = observer(() => {
             >
               <FolderOpenOutlined/>
               <span className={'ml-2'}>
-                打开
+                {configStore.isZh ? 'Open' : '打开'}
               </span>
             </div>
           </>

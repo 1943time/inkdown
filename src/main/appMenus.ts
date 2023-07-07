@@ -1,13 +1,11 @@
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
 import MenuItem = Electron.MenuItem
-import {store} from './store'
-import {is} from '@electron-toolkit/utils'
-import {baseUrl} from './api'
-import {join} from 'path'
+import {getLocale, store} from './store'
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 
 const cmd = 'CmdOrCtrl'
-const levelMap = new Map([
+const local = getLocale()
+const levelZhMap = new Map([
   [1, '一'],
   [2, '二'],
   [3, '三'],
@@ -24,7 +22,7 @@ const task = (task: string, parameter?: any) => {
 const titles = Array.from(new Array(4)).map((_, i) => {
   const n = i + 1
   return {
-    label: `${levelMap.get(n)}级标题`,
+    label: local === 'zh' ? `${levelZhMap.get(n)}级标题` : `Heading ${n}`,
     id: `title-${n}`,
     accelerator: `${cmd}+${n}`,
     click: task('head', n),
@@ -32,7 +30,81 @@ const titles = Array.from(new Array(4)).map((_, i) => {
   }
 })
 
-let timer:any
+const menusLabel = local === 'zh' ? {
+  about: '关于 BlueStone',
+  update: '检查更新',
+  set: '偏好设置',
+  file: '文件',
+  create: '新建',
+  createWindow: '新建窗口',
+  open: '打开',
+  openRecent: '打开最近的文件',
+  clearRecent: '清除',
+  pdf: '导出 PDF',
+  edit: '编辑',
+  paragraph: '段落',
+  titleIncrease: '提升标题',
+  titleDecrease: '降低标题',
+  insertTable: '插入表格',
+  code: '代码块',
+  katex: '公式块',
+  orderedList: '有序列表',
+  unorderedList: '无序列表',
+  orderedTaskList: '有序任务列表',
+  unorderedTaskList: '无序任务列表',
+  horizontalLine: '水平分割线',
+  format: '格式',
+  bold: '加粗',
+  italic: '斜体',
+  strikethrough: '删除线',
+  inlineCode: '行内代码',
+  insertPicture: '插入图片',
+  clear: '清除',
+  view: '显示',
+  zoomIn: '放大',
+  zoomOut: '缩小',
+  leading: '大纲',
+  search: '搜索',
+  help: '帮助',
+  doc: '文档'
+} : {
+  about: 'About BlueStone',
+  update: 'Check for Updates',
+  set: 'Settings',
+  file: 'File',
+  create: 'Create',
+  createWindow: 'New Window',
+  open: 'Open',
+  openRecent: 'Open Recent',
+  clearRecent: 'Clear Items',
+  pdf: 'Export To PDF',
+  edit: 'Edit',
+  paragraph: 'Paragraph',
+  titleIncrease: 'Increase Heading Level',
+  titleDecrease: 'Decrease Heading Level',
+  insertTable: 'Insert Table',
+  code: 'Code Fences',
+  katex: 'Math Block',
+  orderedList: 'Ordered List',
+  unorderedList: 'Unordered List',
+  orderedTaskList: 'Ordered Task List',
+  unorderedTaskList: 'Unordered Task List',
+  horizontalLine: 'Horizontal Line',
+  format: 'Format',
+  bold: 'Bold',
+  italic: 'Italic',
+  strikethrough: 'Strikethrough',
+  inlineCode: 'Inline Code',
+  insertPicture: 'Insert Picture',
+  clear: 'Clear',
+  view: 'View',
+  zoomIn: 'Zoom In',
+  zoomOut: 'Zoom Out',
+  leading: 'Outline',
+  search: 'Search',
+  help: 'Help',
+  doc: 'Document'
+}
 export const createAppMenus = () => {
   const menus: MenuOptions = [
     {
@@ -40,20 +112,20 @@ export const createAppMenus = () => {
       role: 'appMenu',
       submenu: [
         {
-          label: '关于 BlueStone',
+          label: menusLabel.about,
           click: (e,win) => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
         },
         {
-          label: '检测更新',
+          label: menusLabel.update,
           click: () => {
             ipcMain.emit('check-updated')
           }
         },
         {type: 'separator'},
         {
-          label: '偏好设置',
+          label: menusLabel.set,
           accelerator: `${cmd}+,`,
           click: e => {
             BrowserWindow.getFocusedWindow()?.webContents.send('openSet')
@@ -65,20 +137,20 @@ export const createAppMenus = () => {
       ]
     },
     {
-      label: '文件',
+      label: menusLabel.file,
       id: 'file',
       role: 'fileMenu',
       submenu: [
         {
           id: 'create',
-          label: '新建',
+          label: menusLabel.create,
           accelerator: `${cmd}+n`,
           click: (menu, win) => {
             win?.webContents.send('create')
           }
         },
         {
-          label: '新建窗口',
+          label: menusLabel.createWindow,
           accelerator: `${cmd}+shift+n`,
           click: () => {
             ipcMain.emit('create-window')
@@ -87,36 +159,33 @@ export const createAppMenus = () => {
         {type: 'separator'},
         {
           id: 'open',
-          label: '打开',
+          label: menusLabel.open,
           accelerator: `${cmd}+o`,
           click: (menu, win) => {
             win?.webContents.send('open')
           }
         },
         {
-          label: '打开最近的文件',
+          label: menusLabel.openRecent,
           role: 'recentDocuments',
           submenu:[
             {
-              label: '清除',
+              label: menusLabel.clearRecent,
               role: 'clearRecentDocuments'
             }
           ]
         },
         {type: 'separator'},
         {
-          label: '导出PDF',
+          label: menusLabel.pdf,
           click: (e, win) => {
             win?.webContents.send('print-to-pdf')
           }
-        },
-        // {
-        //   label: '导出HTML'
-        // }
+        }
       ]
     },
     {
-      label: '编辑',
+      label: menusLabel.edit,
       id: 'edit',
       role: 'editMenu',
       submenu: [
@@ -138,13 +207,13 @@ export const createAppMenus = () => {
       ]
     },
     {
-      label: '段落',
+      label: menusLabel.paragraph,
       id: 'paragraph',
       submenu: [
         ...titles,
         {type: 'separator'},
         {
-          label: '段落',
+          label: menusLabel.paragraph,
           id: 'paragraph',
           accelerator: `${cmd}+0`,
           enabled: false,
@@ -152,35 +221,35 @@ export const createAppMenus = () => {
         },
         {type: 'separator'},
         {
-          label: '提升标题',
+          label: menusLabel.titleIncrease,
           id: 'titleIncrease',
           accelerator: `${cmd}+]`,
           enabled: false,
           click: task('head+')
         },
         {
-          label: '降低标题',
+          label: menusLabel.titleDecrease,
           id: 'titleDecrement',
           enabled: false,
           accelerator: `${cmd}+[`,
           click: task('head-')
         },
         {
-          label: '插入表格',
+          label: menusLabel.insertTable,
           id: 'insertTable',
           accelerator: `${cmd}+Alt+t`,
           click: task('insertTable'),
           enabled: false
         },
         {
-          label: '代码块',
+          label: menusLabel.code,
           id: 'insertCode',
           accelerator: `${cmd}+Alt+c`,
           click: task('insertCode'),
           enabled: false
         },
         {
-          label: '公式块',
+          label: menusLabel.katex,
           id: 'insertKatex',
           accelerator: `${cmd}+Alt+t`,
           click: task('insertKatex'),
@@ -188,28 +257,28 @@ export const createAppMenus = () => {
         },
         {type: 'separator'},
         {
-          label: '有序列表',
+          label: menusLabel.orderedList,
           id: 'insertOrderedList',
           accelerator: `${cmd}+Alt+o`,
           click: task('insertOrderedList'),
           enabled: false
         },
         {
-          label: '无序列表',
+          label: menusLabel.unorderedList,
           id: 'insertUnorderedList',
           accelerator: `${cmd}+Alt+u`,
           click: task('insertUnorderedList'),
           enabled: false
         },
         {
-          label: '有序任务列表',
+          label: menusLabel.orderedTaskList,
           id: 'insertTaskOrderedList',
           accelerator: `${cmd}+Shift+o`,
           click: task('insertTaskOrderedList'),
           enabled: false
         },
         {
-          label: '无序任务列表',
+          label: menusLabel.unorderedTaskList,
           id: 'insertTaskUnorderedList',
           accelerator: `${cmd}+Shift+u`,
           click: task('insertTaskUnorderedList'),
@@ -217,7 +286,7 @@ export const createAppMenus = () => {
         },
         {type: 'separator'},
         {
-          label: '水平分割线',
+          label: menusLabel.horizontalLine,
           id: 'insertHorizontalRule',
           accelerator: `${cmd}+Alt+/`,
           click: task('insertHorizontalRule'),
@@ -226,31 +295,31 @@ export const createAppMenus = () => {
       ]
     },
     {
-      label: '格式',
+      label: menusLabel.format,
       id: 'format',
       submenu: [
         {
-          label: '加粗',
+          label: menusLabel.bold,
           accelerator: `${cmd}+b`,
           click: task('bold')
         },
         {
-          label: '斜体',
+          label: menusLabel.italic,
           accelerator: `${cmd}+i`,
           click: task('italic')
         },
         {
-          label: '删除线',
+          label: menusLabel.strikethrough,
           accelerator: `Ctrl+Shift+\``,
           click: task('strikethrough')
         },
         {
-          label: '行内代码',
+          label: menusLabel.inlineCode,
           accelerator: `Ctrl+\``,
           click: task('code')
         },
         {
-          label: '插入图片',
+          label: menusLabel.insertPicture,
           accelerator: `${cmd}+Shift+i`,
           click: (e, win) => {
             dialog.showOpenDialog({
@@ -266,22 +335,21 @@ export const createAppMenus = () => {
         },
         {type: 'separator'},
         {
-          label: '清除',
+          label: menusLabel.clear,
           accelerator: `${cmd}+\\`,
           click: task('clear')
         }
       ]
     },
     {
-      label: '显示',
+      label: menusLabel.view,
       role: 'viewMenu',
       submenu: [
-        {role: 'zoom', label: '缩放'},
-        {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: '放大'},
-        {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: '缩小'},
+        {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: menusLabel.zoomIn},
+        {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: menusLabel.zoomOut},
         {type: 'separator'},
         {
-          label: '大纲',
+          label: menusLabel.leading,
           type: 'checkbox',
           id: 'showLeading',
           checked: !!store.get('config.showLeading'),
@@ -293,7 +361,7 @@ export const createAppMenus = () => {
           }
         },
         {
-          label: '搜索',
+          label: menusLabel.search,
           id: 'search',
           accelerator: `${cmd}+f`
         },
@@ -303,11 +371,11 @@ export const createAppMenus = () => {
       ]
     },
     {
-      label: '帮助',
+      label: menusLabel.help,
       role: 'help',
       submenu: [
         {
-          label: '文档',
+          label: menusLabel.doc,
           click: () => {
             shell.openExternal('https://bluestone.md-writer.com/book/docs')
           }

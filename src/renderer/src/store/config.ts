@@ -13,12 +13,18 @@ class ConfigStore {
     codeTabSize: 2,
     editorTextSize: 16,
     codeTheme: 'material-theme-palenight',
-    leadingLevel: 4
+    leadingLevel: 4,
+    locale: 'en' as 'en' | 'zh'
   }
+  locale = 'en' as 'en' | 'zh'
   timer = 0
+  get isZh() {
+    return this.locale === 'zh'
+  }
   constructor() {
     makeAutoObservable(this, {
-      timer: false
+      timer: false,
+      locale: false
     })
     window.electron.ipcRenderer.on('openSet', () => {
       this.initial()
@@ -101,6 +107,7 @@ class ConfigStore {
           ...this.config,
           ...res
         }
+        this.locale = res.locale || 'en'
         if (this.config.dark) {
           mermaid.initialize({
             theme: 'dark'

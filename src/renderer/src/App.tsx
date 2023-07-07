@@ -40,7 +40,7 @@ const App = observer(() => {
   if (!ready) return null
   return (
     <ConfigProvider
-      locale={zhCN}
+      locale={configStore.isZh ? zhCN : undefined}
       theme={{
         algorithm: themeObject,
         token: {

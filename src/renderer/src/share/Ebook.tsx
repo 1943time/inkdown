@@ -9,6 +9,7 @@ import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/mode-json'
 import 'ace-builds/src-noconflict/theme-cloud9_night'
 import {removeBook} from './Record'
+import {configStore} from '../store/config'
 
 function Code(props: {
   value?: string
@@ -57,7 +58,7 @@ export const Ebook = observer((props: {
 
   return (
     <Modal
-      title={'电子书'}
+      title={configStore.isZh ? '电子书' : 'eBook'}
       width={800}
       onCancel={props.onClose}
       open={props.open}
@@ -65,24 +66,24 @@ export const Ebook = observer((props: {
       footer={(
         <div>
           <Button onClick={props.onClose}>
-            取消
+            {configStore.isZh ? 'cancel' : '取消'}
           </Button>
           {props.id &&
             <Button
               danger={true}
               onClick={() => {
                 modal.confirm({
-                  title: '提示',
-                  content: '点击确定删除该电子书，删除后不可浏览',
+                  title: configStore.isZh ? '提示' : 'Prompt',
+                  content: configStore.isZh ? '点击确定删除该电子书，删除后不可浏览' : 'Click OK to delete the e-book, which cannot be browsed after deletion',
                   onOk: async () => {
                     await removeBook(props.id!)
-                    message$.next({type: 'success', content: '删除成功'})
+                    message$.next({type: 'success', content: configStore.isZh ? '删除成功' : 'The deletion was successful'})
                     props.onClose()
                   }
                 })
               }}
             >
-              删除
+              {configStore.isZh ? '删除' : 'Delete'}
             </Button>
           }
           <Button
@@ -93,9 +94,15 @@ export const Ebook = observer((props: {
                 if (!props.id) {
                   const exist = await db.book.filter(obj => obj.path === v.path || obj.name === v.name).first()
                   if (exist) {
+                    let msg = ''
+                    if (configStore.isZh) {
+                      msg = exist.path === v.path ? '访问路径已存在' : '电子书名称已存在'
+                    } else {
+                      msg = exist.path === v.path ? 'The access path already exists' : 'The eBook name already exists'
+                    }
                     return message$.next({
                       type: 'info',
-                      content: exist.path === v.path ? '访问路径已存在' : '电子书名称已存在'
+                      content: msg
                     })
                   }
                 }
@@ -110,31 +117,32 @@ export const Ebook = observer((props: {
                   console.error(e)
                   message$.next({
                     type: 'error',
-                    content: '同步失败'
+                    content: configStore.isZh ? '同步失败' : 'Synchronization failed'
                   })
                 })
                 setState({submitting: false})
               })
             }}
           >
-            {props.id ? '同步' : '添加'}
+            {props.id ? (configStore.isZh ? '同步' : 'synchronous') : (configStore.isZh ? '添加' : 'Create')}
           </Button>
         </div>
       )}
     >
       {modalCtx}
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}}>
-        <Form.Item label={'电子书名称'} name={'name'} rules={[{required: true}]}>
+        <Form.Item label={configStore.isZh ? '电子书名称' : 'The name of the e-book'} name={'name'} rules={[{required: true}]}>
           <Input/>
         </Form.Item>
-        <Form.Item label={'访问路径'} name={'path'}
-                   rules={[{required: true, pattern: /^[a-zA-Z\d]+$/, message: '由大小写英文字母数字组成'}]}>
-          <Input/>
+        <Form.Item
+          label={configStore.isZh ? '访问路径' : 'Url Path'} name={'path'}
+           rules={[{required: true, pattern: /^[a-zA-Z\d]+$/, message: configStore.isZh ? '由大小写英文字母数字组成' : 'Consists of uppercase and lowercase English alphanumeric numbers'}]}>
+          <Input placeholder={configStore.isZh ? '由大小写英文字母数字组成' : 'Consists of uppercase and lowercase English alphanumeric numbers'}/>
         </Form.Item>
-        <Form.Item label={'同步策略'} name={'strategy'} initialValue={'auto'} rules={[{required: true}]}>
+        <Form.Item label={configStore.isZh ? '同步策略' : 'Synchronization policy'} name={'strategy'} initialValue={'auto'} rules={[{required: true}]}>
           <Radio.Group>
-            <Radio.Button value={'auto'}>文件目录自动同步</Radio.Button>
-            <Radio.Button value={'custom'}>自定义章节</Radio.Button>
+            <Radio.Button value={'auto'}>{configStore.isZh ? '根据文件目录自动同步' : 'Automatic synchronization based on file directories'}</Radio.Button>
+            <Radio.Button value={'custom'}>{configStore.isZh ? '自定义章节' : 'Custom chapters'}</Radio.Button>
           </Radio.Group>
         </Form.Item>
         <Form.Item noStyle={true}
@@ -143,22 +151,22 @@ export const Ebook = observer((props: {
             <>
               {form.getFieldValue('strategy') === 'auto' &&
                 <>
-                  <Form.Item label={'过滤文件夹'} name={'ignorePaths'}>
-                    <Input placeholder={'例如: others/files 多个用,号分割'}/>
+                  <Form.Item label={configStore.isZh ? '过滤文件夹' : 'Filter folders'} name={'ignorePaths'}>
+                    <Input placeholder={configStore.isZh ? '例如: others/files 多个用,号分割' : 'For example: others/files Multiple uses, number splitting'}/>
                   </Form.Item>
                 </>
               }
               {form.getFieldValue('strategy') === 'custom' &&
                 <Form.Item
-                  label={'目录定义'} name={'map'}
+                  label={configStore.isZh ? '目录定义' : 'Directory definition'} name={'map'}
                   rules={[
                     {required: true, validator: (rule, value, callback) => {
                       try {
                         if (!(JSON.parse(value) instanceof Array)) {
-                          return Promise.reject('JSON格式不正确')
+                          return Promise.reject(configStore.isZh ? 'JSON格式不正确' : 'The JSON format is incorrect')
                         }
                       } catch (e) {
-                        return Promise.reject('JSON格式不正确')
+                        return Promise.reject(configStore.isZh ? 'JSON格式不正确' : 'The JSON format is incorrect')
                       }
                       return Promise.resolve()
                     }}

@@ -2,7 +2,7 @@ import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme} from 'ele
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
-import {store} from './store'
+import {getLocale, store} from './store'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 export const registerApi = () => {
   ipcMain.on('to-worker', (e, ...args:any[]) => {
@@ -38,6 +38,7 @@ export const registerApi = () => {
     }
     return {
       showLeading: !!config.showLeading,
+      locale: getLocale(),
       theme: theme,
       dark: dark,
       codeLineNumber: !!config.codeLineNumber,

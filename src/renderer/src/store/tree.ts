@@ -11,6 +11,7 @@ import {message$, stat} from '../utils'
 import {Watcher} from '../components/watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
+import {configStore} from './config'
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
@@ -86,7 +87,7 @@ export class TreeStore {
       if (this.openNote?.filePath.endsWith('.md') || filePath) {
         const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
         window.api.copyToClipboard(content)
-        message$.next({type: 'success', content: '已复制到剪贴板~'})
+        message$.next({type: 'success', content: configStore.isZh ? '已复制到剪贴板~' : 'Copied to clipboard'})
       }
     })
 
@@ -379,7 +380,7 @@ export class TreeStore {
         if (existsSync(path)) {
           return message$.next({
             type: 'warning',
-            content: '该文件已存在'
+            content: configStore.isZh ? '该文件已存在' : 'The file already exists'
           })
         }
         if (file.folder) {

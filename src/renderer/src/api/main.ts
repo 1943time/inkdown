@@ -2,6 +2,7 @@ import * as Electron from 'electron'
 import {nanoid} from 'nanoid'
 import {dialog} from 'electron'
 import {is} from '@electron-toolkit/utils'
+import {configStore} from '../store/config'
 const ipcRenderer = window.electron.ipcRenderer
 
 let taskMap = new Map<string, Function>()
@@ -43,7 +44,7 @@ export const MainApi = {
     defaultPath: string
   }) {
     return saveDialog({
-      title: '创建Markdown文件',
+      title: configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file',
       properties: ['createDirectory'],
       securityScopedBookmarks: true,
       filters: [
@@ -54,14 +55,14 @@ export const MainApi = {
   },
   openFile(ext = ['md', 'markdown']) {
     return openDialog({
-      title: '打开文件',
+      title: configStore.isZh ? '打开文件' : 'Open File',
       properties: ['openFile'],
       filters: [{name: 'f', extensions: ext}]
     })
   },
   open(rootPath?: string) {
     return openDialog({
-      title: '打开文件',
+      title: configStore.isZh ? '打开文件或文件夹' : 'Open File Or Folder',
       properties: ['openFile', 'openDirectory'],
       defaultPath: rootPath,
       filters: [{name: 'f', extensions: ['md', 'markdown']}]

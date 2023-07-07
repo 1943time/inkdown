@@ -24,7 +24,7 @@ export const Set = observer(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 items-center'}>
-            <span>偏好设置</span>
+            <span>{configStore.isZh ? '偏好设置' : 'Preferences'}</span>
             <div
               className={'p-1 hover:text-gray-700 dark:hover:text-gray-300 duration-200 hover:bg-gray-100/60 rounded dark:hover:bg-gray-500/30'}
               onClick={close}
@@ -35,7 +35,31 @@ export const Set = observer(() => {
           <div className={'divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300'}>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                颜色模式
+                {configStore.isZh ? '语言环境' : 'Locale'}
+              </div>
+              <div>
+                <Radio.Group
+                  value={configStore.config.locale}
+                  onChange={e => {
+                    configStore.setConfig('locale', e.target.value)
+                    modal.confirm({
+                      type: 'info',
+                      title: configStore.isZh ? '提示' : 'Prompt',
+                      content: configStore.isZh ? '语言模式设置在重启编辑器后生效，是否立即起重启？' : 'The Locale setting takes effect after restarting the editor, whether to restart immediately?',
+                      onOk: () => {
+                        MainApi.relaunch()
+                      }
+                    })
+                  }}
+                >
+                  <Radio.Button value={'en'}>{configStore.isZh ? '英文' : 'English'}</Radio.Button>
+                  <Radio.Button value={'zh'}>{configStore.isZh ? '中文' : 'Chinese'}</Radio.Button>
+                </Radio.Group>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                {configStore.isZh ? '颜色模式' : 'Themes'}
               </div>
               <div>
                 <Radio.Group
@@ -44,15 +68,15 @@ export const Set = observer(() => {
                     configStore.setTheme(e.target.value)
                   }}
                 >
-                  <Radio.Button value={'system'}>系统</Radio.Button>
-                  <Radio.Button value={'light'}>明亮</Radio.Button>
-                  <Radio.Button value={'dark'}>暗黑</Radio.Button>
+                  <Radio.Button value={'system'}>{configStore.isZh ? '系统' : 'System'}</Radio.Button>
+                  <Radio.Button value={'light'}>{configStore.isZh ? '明亮' : 'Light'}</Radio.Button>
+                  <Radio.Button value={'dark'}>{configStore.isZh ? '暗黑' : 'Dark'}</Radio.Button>
                 </Radio.Group>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                代码段显示行号
+                {configStore.isZh ? '代码段显示行号' : 'Show Code Line Number'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.codeLineNumber} onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
@@ -60,7 +84,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                代码段TabSize
+                {configStore.isZh ? '代码段TabSize' : 'Code TabSize'}
               </div>
               <div>
                 <Radio.Group
@@ -76,7 +100,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                代码段风格
+                {configStore.isZh ? '代码段风格' : 'Code Style'}
               </div>
               <div>
                 <Select
@@ -86,10 +110,8 @@ export const Set = observer(() => {
                     configStore.setConfig('codeTheme', e)
                     modal.confirm({
                       type: 'info',
-                      cancelText: '取消',
-                      okText: '确定',
-                      title: '提示',
-                      content: '代码风格设置在重启编辑器后生效，是否立即起重启？',
+                      title: configStore.isZh ? '提示' : 'Prompt',
+                      content: configStore.isZh ? '代码风格设置在重启编辑器后生效，是否立即起重启？' : 'The code style setting takes effect after restarting the editor, do you want to restart immediately?',
                       onOk: () => {
                         MainApi.relaunch()
                       }
@@ -115,7 +137,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                编辑区文字大小
+                {configStore.isZh ? '编辑区文字大小' : 'Edit area text size'}
               </div>
               <div className={'w-32'}>
                 <Slider
@@ -128,7 +150,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                显示大纲
+                {configStore.isZh ? '显示大纲' : 'Display the Outline'}
               </div>
               <div>
                 <Checkbox
@@ -141,7 +163,8 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                大纲提取级别
+                {configStore.isZh ? '大纲提取级别' : 'Outline extraction level'}
+
               </div>
               <div>
                 <Radio.Group
@@ -150,9 +173,9 @@ export const Set = observer(() => {
                     configStore.setConfig('leadingLevel', e.target.value)
                   }}
                 >
-                  <Radio value={2}>二级</Radio>
-                  <Radio value={3}>三级</Radio>
-                  <Radio value={4}>四级</Radio>
+                  <Radio value={2}>{configStore.isZh ? '二级' : 'Level 2'}</Radio>
+                  <Radio value={3}>{configStore.isZh ? '三级' : 'Level 3'}</Radio>
+                  <Radio value={4}>{configStore.isZh ? '四级' : 'Level 4'}</Radio>
                 </Radio.Group>
               </div>
             </div>

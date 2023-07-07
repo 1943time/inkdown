@@ -3,6 +3,7 @@ import {createElement, useMemo} from 'react'
 import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'
 import {useEditorStore} from '../store'
+import {observer} from 'mobx-react-lite'
 
 export function List({element, attributes, children}: ElementProps<ListNode>) {
   const tag = element.order ? 'ol' : 'ul'
@@ -11,7 +12,7 @@ export function List({element, attributes, children}: ElementProps<ListNode>) {
   }, [element, element.children])
 }
 
-export function ListItem({element, children, attributes}: ElementProps<ListItemNode>) {
+export const ListItem = observer(({element, children, attributes}: ElementProps<ListItemNode>) => {
   const [, update] = useMEditor(element)
   const store = useEditorStore()
   const isTask = typeof element.checked === 'boolean'
@@ -31,4 +32,4 @@ export function ListItem({element, children, attributes}: ElementProps<ListItemN
       {children}
     </li>
   ), [element, element.children, store.refreshHighlight])
-}
+})

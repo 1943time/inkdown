@@ -1,7 +1,42 @@
 import {BrowserWindow, ipcMain, Menu, shell} from 'electron'
+import {getLocale} from './store'
 
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
+
+const locale = getLocale()
+
+const menusLabel = locale === 'zh' ? {
+  copyMarkdown: '复制Markdown源码',
+  pdf: '导出PDF',
+  openInFinder: '在Finder中显示',
+  openInDefault: '默认应用打开',
+  delete: '删除',
+  createNote: '新建文档',
+  createFolder: '新建文件夹',
+  rename: '重命名',
+  insertRowAbove: '上方插入行',
+  insertRowBelow: '下方插入行',
+  insertColBefore: '左侧插入列',
+  insertColAfter: '右侧插入列',
+  delCol: '删除列',
+  delRow: '删除行'
+} : {
+  copyMarkdown: 'Copy Markdown Source Code',
+  pdf: 'Export To PDF',
+  openInFinder: 'Reveal in Finder',
+  openInDefault: 'Open in default app',
+  delete: 'Delete',
+  createNote: 'New note',
+  createFolder: 'New folder',
+  rename: 'Rename',
+  insertRowAbove: 'Add Row Above',
+  insertRowBelow: 'Add Row Below',
+  insertColBefore: 'Add Column before',
+  insertColAfter: 'Add Column after',
+  delCol: 'Delete col',
+  delRow: 'Delete row'
+}
 
 export const registerMenus = () => {
   ipcMain.on('tool-menu', (e, filePath?: string) => {
@@ -10,12 +45,12 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: '复制Markdown源码',
+        label: menusLabel.copyMarkdown,
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('copy-source-code')
       },
       {
-        label: '导出pdf',
+        label: menusLabel.pdf,
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('print-to-pdf')
       },
@@ -28,12 +63,12 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: '在Finder中显示',
+        label: menusLabel.openInFinder,
         enabled: !!filePath,
         click: () => shell.showItemInFolder(filePath!)
       },
       {
-        label: '默认应用打开',
+        label: menusLabel.openInDefault,
         click: () => shell.openPath(filePath!),
         enabled: !!filePath
       }
@@ -65,41 +100,41 @@ export const registerMenus = () => {
     // }
     if (params.type !== 'file') {
       temp.add({
-        label: '新建文件',
+        label: menusLabel.createNote,
         click: () => sendCommand('createNote')
       })
       temp.add({
-        label: '新建文件夹',
+        label: menusLabel.createFolder,
         click: () => sendCommand('createFolder')
       })
     }
     if (params.type !== 'rootFolder') {
       temp.add({
-        label: '重命名',
+        label: menusLabel.rename,
         click: () => sendCommand('rename')
       })
       temp.add({
         type: 'separator'
       })
       temp.add({
-        label: '在Finder中显示',
+        label: menusLabel.openInFinder,
         click: () => shell.showItemInFolder(params.filePath!)
       })
       if (params.type === 'file') {
         temp.add({
-          label: '默认应用打开',
+          label: menusLabel.openInDefault,
           click: () => shell.openPath(params.filePath!)
         })
         if (params.filePath?.endsWith('.md')) {
           temp.add({
-            label: '复制Markdown源码',
+            label: menusLabel.copyMarkdown,
             click: (e, win) => win?.webContents.send('copy-source-code', params.filePath)
           })
         }
       }
       temp.add({type: 'separator'})
       temp.add({
-        label: '删除',
+        label: menusLabel.delete,
         click: () => sendCommand('delete')
       })
     }
@@ -115,36 +150,30 @@ export const registerMenus = () => {
     }
     const temp: Menus = [
       {
-        label: '上方插入行',
-        id: 'insertRowBefore',
+        label: menusLabel.insertRowAbove,
         click: click('insertRowBefore'),
       },
       {
-        label: '下方插入行',
-        id: 'insertRowAfter',
+        label: menusLabel.insertRowBelow,
         accelerator: `${cmd}+Enter`,
         click: click('insertRowAfter'),
       },
       {type: 'separator'},
       {
-        label: '左侧插入列',
-        id: 'insertColBefore',
+        label: menusLabel.insertColBefore,
         click: click('insertColBefore'),
       },
       {
-        label: '又侧插入列',
-        id: 'insertColAfter',
+        label: menusLabel.insertColAfter,
         click: click('insertColAfter'),
       },
       {type: 'separator'},
       {
-        label: '删除列',
-        id: 'removeCol',
+        label: menusLabel.delCol,
         click: click('removeCol')
       },
       {
-        label: '删除行',
-        id: 'removeRow',
+        label: menusLabel.delRow,
         accelerator: `${cmd}+Shift+Backspace`,
         click: click('removeRow')
       }

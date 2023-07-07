@@ -5,10 +5,12 @@ import {Editor, Node, Transforms} from 'slate'
 import {useGetSetState} from 'react-use'
 import katex from 'katex'
 import {ReactEditor, useSlateStatic} from 'slate-react'
+import {observer} from 'mobx-react-lite'
+import {configStore} from '../../../../store/config'
 
-export function Katex(props: {
+export const Katex = observer((props: {
   el: CodeNode
-}) {
+}) => {
   const editor = useSlateStatic()
   const [state, setState] = useGetSetState({
     code: '',
@@ -54,8 +56,8 @@ export function Katex(props: {
       contentEditable={false}>
       <div ref={divRef} className={`${!state().code.trim() ? 'hidden' : ''} katex-container`}/>
       {!state().code.trim() &&
-        <div className={'text-center text-gray-500'}>公式</div>
+        <div className={'text-center text-gray-500'}>{configStore.isZh ? '公式' : 'Formula'}</div>
       }
     </div>
   )
-}
+})

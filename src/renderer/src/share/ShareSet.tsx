@@ -21,6 +21,7 @@ import {Sync} from './sync'
 import {Record} from './Record'
 import {Ebook} from './Ebook'
 import {Book, db} from './db'
+import {configStore} from '../store/config'
 
 export const ShareSet = observer(() => {
   const [state, setState] = useLocalState({
@@ -43,7 +44,7 @@ export const ShareSet = observer(() => {
     window.api.copyToClipboard(getDocUrl())
     message$.next({
       type: 'success',
-      content: '复制到剪贴板'
+      content: configStore.isZh ? '已复制到剪贴板' : 'Copied to clipboard'
     })
   }, [])
   useEffect(() => {
@@ -67,7 +68,7 @@ export const ShareSet = observer(() => {
     <>
       {contextHolder}
       <Popover content={(
-        <div className={'w-[400px] pb-2'}>
+        <div className={'w-[500px] pb-2'}>
           <Tabs
             activeKey={state.tab}
             onChange={key => {
@@ -81,22 +82,22 @@ export const ShareSet = observer(() => {
                 type={'text'} icon={<HistoryOutlined />}
                 onClick={() => setState({openRecord: true, popOpen: false})}
               >
-                分享记录
+                {configStore.isZh ? '分享记录' : 'Share Records'}
               </Button>
             )}
             items={[
               {
                 key: 'doc',
-                label: '当前文档',
+                label: configStore.isZh ? '当前文档' : 'Current Document',
                 children: (
                   <div>
                     <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                       <Net className={'w-5 h-5 fill-gray-500'}/>
-                      <span className={'ml-2'}>分享当前文档</span>
+                      <span className={'ml-2'}>{configStore.isZh ? '分享当前文档' : 'Share the current document'}</span>
                     </div>
                     {!state.config &&
                       <div className={'mt-4'}>
-                        <Alert message="您暂未设置分享服务，请设置后进行分享" type="warning"/>
+                        <Alert message={configStore.isZh ? '您暂未设置分享服务，请设置后进行分享' : 'You have not yet set up a sharing service, please set it up and share'} type="warning"/>
                       </div>
                     }
                     <div className={'mt-4'}>
@@ -107,7 +108,7 @@ export const ShareSet = observer(() => {
                           icon={<CopyOutlined />}
                           onClick={copyDocUrl}
                         >
-                          复制
+                          {configStore.isZh ? '复制' : 'Copy'}
                         </Button>
                       </Space.Compact>
                       <Button
@@ -128,7 +129,7 @@ export const ShareSet = observer(() => {
                               setState({popOpen: false})
                               api.success({
                                 key,
-                                message: '同步成功',
+                                message: configStore.isZh ? '同步成功' : 'Synchronization succeeded',
                                 duration: 2,
                                 btn: (
                                   <Space>
@@ -138,7 +139,7 @@ export const ShareSet = observer(() => {
                                         copyDocUrl()
                                       }}
                                     >
-                                      复制链接
+                                      {configStore.isZh ? '复制链接' : 'Copy Link'}
                                     </Button>
                                     <Button
                                       type={'primary'}
@@ -147,7 +148,7 @@ export const ShareSet = observer(() => {
                                         api.destroy(key)
                                       }}
                                     >
-                                      打开
+                                      {configStore.isZh ? '打开' : 'Open'}
                                     </Button>
                                   </Space>
                                 )
@@ -156,7 +157,7 @@ export const ShareSet = observer(() => {
                               console.error(e)
                               message$.next({
                                 type: 'info',
-                                content: '同步失败'
+                                content: configStore.isZh ? '同步失败' : 'Synchronization failed'
                               })
                             } finally {
                               setState({syncing: false})
@@ -164,7 +165,7 @@ export const ShareSet = observer(() => {
                           }
                         }}
                       >
-                        同步文件
+                        {configStore.isZh ? '同步文件' : 'Sync files'}
                       </Button>
                     </div>
                   </div>
@@ -172,16 +173,16 @@ export const ShareSet = observer(() => {
               },
               {
                 key: 'book',
-                label: '电子书',
+                label: configStore.isZh ? '电子书' : 'eBook',
                 children: (
                   <div className={'max-h-[400px] overflow-y-auto'}>
                     <div className={'flex text-sm items-center text-gray-500 justify-center mb-2'}>
                       <Net className={'w-5 h-5 fill-gray-500'}/>
-                      <span className={'ml-2'}>制作电子书</span>
+                      <span className={'ml-2'}>{configStore.isZh ? '制作电子书' : 'Make an eBook'}</span>
                     </div>
                     {!state.config &&
                       <div className={'mt-4'}>
-                        <Alert message="您暂未设置分享服务，请设置后进行分享" type="warning"/>
+                        <Alert message={configStore.isZh ? '您暂未设置分享服务，请设置后进行分享' : 'You have not yet set up a sharing service, please set it up and share'} type="warning"/>
                       </div>
                     }
                     {state.books.map(b =>
@@ -206,7 +207,7 @@ export const ShareSet = observer(() => {
                               const key = 'Date' + Date.now()
                               api.success({
                                 key,
-                                message: '同步成功',
+                                message: configStore.isZh ? '同步成功' : 'Synchronization succeeded',
                                 duration: 2,
                                 btn: (
                                   <Space>
@@ -216,7 +217,7 @@ export const ShareSet = observer(() => {
                                         window.api.copyToClipboard(`${state.config.domain}/book/${b.path}`)
                                       }}
                                     >
-                                      复制链接
+                                      {configStore.isZh ? '复制链接' : 'Copy Link'}
                                     </Button>
                                     <Button
                                       type={'primary'}
@@ -225,7 +226,7 @@ export const ShareSet = observer(() => {
                                         api.destroy(key)
                                       }}
                                     >
-                                      打开
+                                      {configStore.isZh ? '打开' : 'Open'}
                                     </Button>
                                   </Space>
                                 )
@@ -234,7 +235,7 @@ export const ShareSet = observer(() => {
                               console.error(e)
                               message$.next({
                                 type: 'warning',
-                                content: '同步失败'
+                                content: configStore.isZh ? '同步失败' : 'Synchronization failed'
                               })
                             } finally {
                               setState({syncing: false})
@@ -242,7 +243,7 @@ export const ShareSet = observer(() => {
                           }} className={`${state.syncing ? 'text-gray-600 cursor-not-allowed' : ''}`}>
                             <SyncOutlined className={`${state.syncing ? 'animate-spin' : ''}`}/>
                             <span className={'ml-1'}>
-                              同步{state.syncing ? '中' : ''}
+                              {state.syncing ? (configStore.isZh ? '同步中' : 'Synchronizing') : (configStore.isZh ? '同步' : 'synchronous')}
                             </span>
                           </a>
                           <a onClick={() => {
@@ -253,7 +254,7 @@ export const ShareSet = observer(() => {
                             }, 200)
                           }} className={`${state.syncing ? 'text-gray-600 cursor-not-allowed' : ''}`}>
                             <EditOutlined />
-                            <span className={'ml-1'}>编辑</span>
+                            <span className={'ml-1'}>{configStore.isZh ? '编辑' : 'Edit'}</span>
                           </a>
                         </div>
                       </div>
@@ -267,7 +268,7 @@ export const ShareSet = observer(() => {
                           }, 200)
                         }}
                         type={'primary'} block={true} disabled={!state.config || !treeStore.root}>
-                        添加电子书
+                        {configStore.isZh ? '添加电子书': 'Add eBook'}
                       </Button>
                     </div>
                   </div>
@@ -275,19 +276,19 @@ export const ShareSet = observer(() => {
               },
               {
                 key: 'set',
-                label: '服务设置',
+                label: configStore.isZh ? '服务设置' : 'Service settings',
                 children: (
                   <div>
                     {!!state.config ?
                       (
                         <div className={'flex text-sm items-center text-green-500 justify-center'}>
                           <CheckOutlined className={'w-5 h-5'} />
-                          <span className={'ml-2'}>已设置服务</span>
+                          <span className={'ml-2'}>{configStore.isZh ? '已设置服务' : 'The service is set up'}</span>
                         </div>
                       ) : (
                         <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                           <Net className={'w-5 h-5 fill-gray-500'}/>
-                          <span className={'ml-2'}>将自动同步文档及相关资源至您的服务</span>
+                          <span className={'ml-2'}>{configStore.isZh ? '将自动同步文档及相关资源至您的服务' : 'Automatically synchronize documents and related resources to your service'}</span>
                         </div>
                       )
                     }
@@ -301,7 +302,7 @@ export const ShareSet = observer(() => {
                           }, 200)
                         }}
                       >
-                        {state.config ? '修改分享服务' : '设置分享服务'}
+                        {configStore.isZh ? '设置分享服务' : 'Set up sharing services'}
                       </Button>
                     </div>
                   </div>

@@ -5,6 +5,7 @@ import {useLocalState} from '../hooks/useLocalState'
 import {useEffect} from 'react'
 import {MainApi} from '../api/main'
 import {db} from './db'
+import {configStore} from '../store/config'
 export const ServerSet = observer((props: {
   open: boolean
   onClose: () => void
@@ -26,12 +27,12 @@ export const ServerSet = observer((props: {
   }, [props.open])
   return (
     <Modal
-      title={'设置分享服务'}
+      title={configStore.isZh ? '设置分享服务' : 'Set up sharing service'}
       width={600}
       open={props.open}
       onCancel={props.onClose}
       confirmLoading={state.submitting}
-      okText={state.submitting ? '正在初始化' : '确定'}
+      okText={state.submitting ? (configStore.isZh ? '正在初始化' : 'Initializing') : configStore.isZh ? '确定' : 'Confirm'}
       onOk={() => {
         return form.validateFields().then(async v => {
           setState({submitting: true})
@@ -45,7 +46,7 @@ export const ServerSet = observer((props: {
             sdk.dispose()
             message$.next({
               type: 'success',
-              content: '服务初始化成功'
+              content: configStore.isZh ? '服务初始化成功' : 'Service initialization succeeded'
             })
             await db.doc.clear()
             await db.file.clear()
@@ -58,7 +59,7 @@ export const ServerSet = observer((props: {
             await window.electron.ipcRenderer.invoke('removeServerConfig')
             message$.next({
               type: 'warning',
-              content: '服务链接失败，请确认参数填写正确'
+              content: configStore.isZh ? '服务链接失败，请确认参数填写正确' : 'The service link fails, please confirm that the parameters are correct'
             })
           } finally {
             setState({submitting: false})
@@ -67,11 +68,11 @@ export const ServerSet = observer((props: {
       }}
     >
       <Form layout={'horizontal'} labelCol={{span: 6}} form={form}>
-        <Form.Item label={'服务类型'} rules={[{required: true}]} name={'server'} initialValue={'ali'}>
+        <Form.Item label={'服务类型'} rules={[{required: true}]} name={'server'} initialValue={'ssh'}>
           <Select
             options={[
-              {label: '阿里云', value: 'ali'},
-              {label: 'Linux服务', value: 'ssh'}
+              {label: configStore.isZh ? 'Linux服务器' : 'Linux server', value: 'ssh'},
+              {label: configStore.isZh ? '阿里云' : 'Ali cloud', value: 'ali'}
             ]}
           />
         </Form.Item>
@@ -105,24 +106,24 @@ export const ServerSet = observer((props: {
                     name={'host'}>
                     <Input/>
                   </Form.Item>
-                  <Form.Item label={'username'} name={'username'} rules={[{required: true}]}>
+                  <Form.Item label={'ssh username'} name={'username'} rules={[{required: true}]}>
                     <Input/>
                   </Form.Item>
-                  <Form.Item label={'password'} name={'password'} rules={[{required: true}]}>
+                  <Form.Item label={'ssh password'} name={'password'} rules={[{required: true}]}>
                     <Input/>
                   </Form.Item>
-                  <Form.Item label={'存储路径'} name={'target'} rules={[{required: true}]}>
+                  <Form.Item label={configStore.isZh ? '存储路径' : 'Storage path'} name={'target'} rules={[{required: true}]}>
                     <Input/>
                   </Form.Item>
                   <Form.Item label={'port'} name={'port'}>
-                    <Input placeholder={'选填'}/>
+                    <Input placeholder={configStore.isZh ? '选填' : 'Optional'}/>
                   </Form.Item>
                 </>
               }
             </>
           }
         </Form.Item>
-        <Form.Item label={'绑定域名'} name={'domain'} rules={[{required: true}]}>
+        <Form.Item label={configStore.isZh ? '绑定域名' : 'Bind a domain name'} name={'domain'} rules={[{required: true}]}>
           <Input/>
         </Form.Item>
       </Form>

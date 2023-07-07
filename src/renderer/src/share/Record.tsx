@@ -6,6 +6,7 @@ import {Book, db} from './db'
 import {MainApi} from '../api/main'
 import {extname} from 'path'
 import {message$} from '../utils'
+import {configStore} from '../store/config'
 
 export const removeBook = async (id: number) => {
   const chapters = await db.chapter.where('bookId').equals(id).toArray()
@@ -70,7 +71,7 @@ export const Record = observer((props: {
   }, [props.open])
   return (
     <Modal
-      title={'分享记录'}
+      title={configStore.isZh ? '分享记录' : 'Share Records'}
       width={800}
       open={props.open}
       onCancel={props.onClose}
@@ -89,7 +90,7 @@ export const Record = observer((props: {
         items={[
           {
             key: 'doc',
-            label: '分享文档',
+            label: configStore.isZh ? '分享文档' : 'Share documents',
             children: (
               <div>
                 <Table
@@ -106,7 +107,7 @@ export const Record = observer((props: {
                   }}
                   columns={[
                     {
-                      title: '名称',
+                      title: configStore.isZh ? '名称' : 'Name',
                       dataIndex: 'name',
                       render: (v, record) => (
                         <a
@@ -116,35 +117,35 @@ export const Record = observer((props: {
                       )
                     },
                     {
-                      title: '文件路径',
+                      title: configStore.isZh ? '文件路径' : 'File path',
                       dataIndex: 'filePath'
                     },
                     {
-                      title: '更新时间',
+                      title: configStore.isZh ? '更新时间' : 'Updated',
                       dataIndex: 'updated'
                     },
                     {
-                      title: '删除',
+                      title: configStore.isZh ? '删除' : 'Delete',
                       key: 'handle',
                       render: (v, record) => (
                         <Button
                           size={'small'} danger type={'link'}
                           onClick={() => {
                             modal.confirm({
-                              title: '提示',
-                              content: '将同时删除远程文件，点击确认删除',
+                              title: configStore.isZh ?'提示' : 'Prompt',
+                              content: configStore.isZh ? '将同时删除远程文件，点击确认删除' : 'The remote file will be deleted at the same time, click Confirm Delete',
                               onOk: async () => {
                                 const sdk = new window.api.sdk()
                                 await sdk.removeFile('docs/' + record.id + '.html')
                                 sdk.dispose()
                                 await db.doc.delete(record.id)
-                                message$.next({type: 'success', content: '删除成功'})
+                                message$.next({type: 'success', content: configStore.isZh ? '删除成功' : 'Deletion was successful'})
                                 getDocs()
                               }
                             })
                           }}
                         >
-                          删除
+                          {configStore.isZh ? '删除' : 'Delete'}
                         </Button>
                       )
                     }
@@ -155,7 +156,7 @@ export const Record = observer((props: {
           },
           {
             key: 'book',
-            label: '电子书',
+            label: configStore ? '电子书' : 'eBook',
             children: (
               <div>
                 <Table
@@ -172,7 +173,7 @@ export const Record = observer((props: {
                   }}
                   columns={[
                     {
-                      title: '名称',
+                      title: configStore.isZh ? '名称' : 'Name',
                       dataIndex: 'name',
                       render: (v, record) => (
                         <a
@@ -182,38 +183,38 @@ export const Record = observer((props: {
                       )
                     },
                     {
-                      title: '文件路径',
+                      title: configStore.isZh ? '文件路径' : 'FilePath',
                       dataIndex: 'filePath'
                     },
                     {
-                      title: '同步策略',
+                      title: configStore.isZh ? '同步策略' : 'Policy',
                       dataIndex: 'strategy',
-                      render: v => v === 'auto' ? '自动生成' : '自定义'
+                      render: v => v === 'auto' ? (configStore.isZh ? '自动生成' : 'Auto') : (configStore.isZh ? '自定义' : 'Custom')
                     },
                     {
-                      title: '更新时间',
+                      title: configStore.isZh ? '更新时间' : 'Updated',
                       dataIndex: 'updated'
                     },
                     {
-                      title: '删除',
+                      title: configStore.isZh ? '删除' : 'Delete',
                       key: 'handle',
                       render: (v, record) => (
                         <Button
                           size={'small'} danger type={'link'}
                           onClick={() => {
                             modal.confirm({
-                              title: '提示',
-                              content: '将同时删除远程文件与所有章节，点击确认删除',
+                              title: configStore.isZh ? '提示' : 'Prompt',
+                              content: configStore.isZh ? '将同时删除远程文件与所有章节，点击确认删除' : 'The remote file and all chapters will be deleted at the same time, click Confirm Delete',
                               onOk: async () => {
                                 return removeBook(record.id!).then(() => {
-                                  message$.next({type: 'success', content: '删除成功'})
+                                  message$.next({type: 'success', content: configStore.isZh ? '删除成功' : 'Deletion was successful'})
                                   getBooks()
                                 })
                               }
                             })
                           }}
                         >
-                          删除
+                          {configStore.isZh ? '删除' : 'Delete'}
                         </Button>
                       )
                     }
@@ -224,7 +225,7 @@ export const Record = observer((props: {
           },
           {
             key: 'file',
-            label: '同步文件',
+            label: configStore.isZh ? '同步文件' : 'Synced files',
             children: (
               <div>
                 <Table
@@ -241,7 +242,7 @@ export const Record = observer((props: {
                   }}
                   columns={[
                     {
-                      title: '打开',
+                      title: configStore.isZh ? '打开' : 'Open',
                       dataIndex: 'hash',
                       render: (v, record) => (
                         <a
@@ -251,19 +252,19 @@ export const Record = observer((props: {
                       )
                     },
                     {
-                      title: '文件路径',
+                      title: configStore.isZh ? '文件路径' : 'File Path',
                       dataIndex: 'filePath'
                     },
                     {
-                      title: '删除',
+                      title: configStore.isZh ? '删除' : 'Delete',
                       key: 'handle',
                       render: (v, record) => (
                         <Button
                           size={'small'} danger type={'link'}
                           onClick={() => {
                             modal.confirm({
-                              title: '提示',
-                              content: '将同时删除远程文件，点击确认删除',
+                              title: configStore.isZh ? '提示' : 'Prompt',
+                              content: configStore.isZh ? '将同时删除远程文件，点击确认删除' : 'The remote file will be deleted at the same time, click Confirm Delete',
                               onOk: async () => {
                                 const sdk = new window.api.sdk()
                                 await sdk.removeFile('files/' + record.hash + extname(record.filePath))
@@ -274,7 +275,7 @@ export const Record = observer((props: {
                             })
                           }}
                         >
-                          删除
+                          {configStore.isZh ? '删除' : 'Delete'}
                         </Button>
                       )
                     }

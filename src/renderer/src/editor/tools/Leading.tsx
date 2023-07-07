@@ -94,7 +94,7 @@ export const Heading = observer(({note}: {
       }}
     >
       <div className={`w-56 h-full pt-10 pb-10 pr-4 overflow-y-auto`}>
-        <div className={'dark:text-gray-500 text-gray-400 text-sm mb-4'}>Leading</div>
+        <div className={'dark:text-gray-500 text-gray-400 text-sm mb-4'}>{configStore.isZh ? '大纲' : 'Outline'}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-500 text-sm'}>
           {state().headings.map(h =>
             <div
