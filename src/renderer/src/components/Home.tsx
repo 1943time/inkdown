@@ -10,6 +10,7 @@ import WebviewTag = Electron.WebviewTag
 import {mediaType} from '../editor/utils/dom'
 import {download} from '../utils'
 import {Set} from './Set'
+import {About} from '../About'
 export const Home = observer(() => {
   const view = useRef<WebviewTag>(null)
   const initial = useCallback(async () => {
@@ -93,6 +94,7 @@ export const Home = observer(() => {
         className={'w-[500px] h-[500px] relative top-10 hidden'}
         webpreferences={'sandbox=no, nodeIntegration=true, contextIsolation=no'}
       />
+      <About/>
       <Set/>
     </div>
   )

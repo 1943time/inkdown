@@ -1,6 +1,9 @@
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'
+import {is} from '@electron-toolkit/utils'
+import {baseUrl} from './api'
+import {join} from 'path'
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 
 const cmd = 'CmdOrCtrl'
@@ -37,9 +40,9 @@ export const createAppMenus = () => {
       role: 'appMenu',
       submenu: [
         {
-          label: '关于',
+          label: '关于 BlueStone',
           click: (e,win) => {
-            // win.webContents.send('showAbout')
+            BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
         },
         {

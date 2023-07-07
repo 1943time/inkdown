@@ -9,6 +9,11 @@ export const registerApi = () => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.getBrowserView()?.webContents.send('task', ...args)
   })
+
+  ipcMain.handle('get-version', () => {
+    return app.getVersion()
+  })
+
   ipcMain.handle('saveServerConfig', (e, config: any) => {
     store.set('server-config', config)
   })
