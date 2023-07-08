@@ -393,9 +393,7 @@ export class Sync {
     const hash = window.api.md5(buffer)
     const ext = parse(realPath).ext
     const name = `files/${hash}${ext}`
-    console.log('file', file, realPath, hash)
     if (file && file.hash === hash) {
-      console.log('return ',realPath)
       return '/' + name
     }
     await this.sdk.uploadFile(name, realPath)

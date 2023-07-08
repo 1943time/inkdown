@@ -112,7 +112,7 @@ export const Record = observer((props: {
                       render: (v, record) => (
                         <a
                           className={'text-blue-500'}
-                          onClick={() => window.open(`${state.config?.domain}/docs/${record.id}.html`)}
+                          onClick={() => window.open(`${state.config?.domain}/doc/${record.id}`)}
                         >{v}</a>
                       )
                     },
@@ -136,7 +136,7 @@ export const Record = observer((props: {
                               content: configStore.isZh ? '将同时删除远程文件，点击确认删除' : 'The remote file will be deleted at the same time, click Confirm Delete',
                               onOk: async () => {
                                 const sdk = new window.api.sdk()
-                                await sdk.removeFile('docs/' + record.id + '.html')
+                                await sdk.removeFile('docs/' + record.id + '.json')
                                 sdk.dispose()
                                 await db.doc.delete(record.id)
                                 message$.next({type: 'success', content: configStore.isZh ? '删除成功' : 'Deletion was successful'})
@@ -156,7 +156,7 @@ export const Record = observer((props: {
           },
           {
             key: 'book',
-            label: configStore ? '电子书' : 'eBook',
+            label: configStore.isZh ? '电子书' : 'eBook',
             children: (
               <div>
                 <Table

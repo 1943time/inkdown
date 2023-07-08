@@ -28,7 +28,7 @@ Screenshots can be copied directly into the editing area, and if the folder is n
 
 ## Blockquote
 
-Use '>' plus spaces to convert block references as follows:
+Use `>`plus spaces to convert block references as follows:
 
 > Text contents
 

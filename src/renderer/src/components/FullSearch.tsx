@@ -22,7 +22,8 @@ export const FullSearch = observer(() => {
     searchResults: [] as {
       file: IFileItem, results: { el: any, text: '' }[], fold?: boolean
     }[],
-    foldIndex: [] as number[]
+    foldIndex: [] as number[],
+    searching: false
   })
 
   const toPoint = useCallback((target: HTMLElement) => {
@@ -64,6 +65,7 @@ export const FullSearch = observer(() => {
   const timer = useRef(0)
   const search = useCallback((immediate?: true) => {
     clearTimeout(timer.current)
+    setState({searching: true})
     timer.current = window.setTimeout(() => {
       if (!treeStore.searchKeyWord.trim() || !treeStore.files.length) {
         return setState({searchResults: []})
@@ -91,7 +93,7 @@ export const FullSearch = observer(() => {
         }
         if (res) results.push(res)
       }
-      setState({searchResults: results, foldIndex: []})
+      setState({searchResults: results, foldIndex: [], searching: false})
     }, immediate ? 0 : 300)
   }, [])
   useEffect(() => {
@@ -114,6 +116,20 @@ export const FullSearch = observer(() => {
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>
+        {!state().searching && !state().searchResults.length && treeStore.searchKeyWord &&
+          <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
+            {configStore.isZh ?
+              <span>
+              未找到 <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span> 相关内容
+              </span> : (
+                <span>
+                  No content found for <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
+                </span>
+              )
+            }
+
+          </div>
+        }
         <div className={'space-y-3'}>
           {state().searchResults.map((s, i) =>
             <div key={i}>

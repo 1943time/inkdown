@@ -2,7 +2,7 @@
 
 ## html rendering
 
-Qingshi uses a pure rich text editing mode, and does not support directly writing and rendering html code for the time being, and will add code snippets to render html in the future
+Bluestone uses a pure rich text editing mode, and does not support directly writing and rendering html code for the time being, and will add code snippets to render html in the future
 
 
 
