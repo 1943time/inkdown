@@ -3,6 +3,7 @@ import {useEditorStore} from '../store'
 import {useEffect, useMemo, useRef} from 'react'
 import IClose from '../../assets/ReactIcon/IClose'
 import {Tooltip} from 'antd'
+import {configStore} from '../../store/config'
 export const Search = observer(() => {
   const store = useEditorStore()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -22,7 +23,7 @@ export const Search = observer(() => {
           <div className={'flex-1'}>
             <input
               value={store.search.text}
-              placeholder={'查找'}
+              placeholder={configStore.isZh ? '查找' : 'Search'}
               autoFocus={true}
               ref={inputRef}
               onFocus={() => {
@@ -37,19 +38,19 @@ export const Search = observer(() => {
               onChange={e => store.setSearchText(e.target.value)}
             />
           </div>
-          <div className={'ml-4 flex justify-end text-gray-400 items-center select-none'}>
+          <div className={'ml-4 flex justify-end dark:text-gray-400 text-gray-500 items-center select-none'}>
             <div className={'space-x-3 text-[13px] leading-5 flex items-center mr-2'}>
               <div
-                className={'bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-300 duration-100'}
+                className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                 onClick={() => store.prevSearch()}
               >
-                上一个
+                {configStore.isZh ? '上一个' : 'Prev'}
               </div>
               <div
-                className={'bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border border-zinc-700 hover:text-gray-300 duration-100'}
+                className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                 onClick={() => store.nextSearch()}
               >
-                下一个
+                {configStore.isZh ? '下一个' : 'Next'}
               </div>
             </div>
             <div className={'w-12 text-right'}>
@@ -62,7 +63,7 @@ export const Search = observer(() => {
               }
               {!store.matchCount && !!store.search.text &&
                 <div className={'text-gray-500 text-sm'}>
-                  无结果
+                  {configStore.isZh ? '无结果' : 'No result'}
                 </div>
               }
             </div>
@@ -70,12 +71,12 @@ export const Search = observer(() => {
           <div className={'ml-5'}>
             <Tooltip placement="bottom" title={'Esc'} mouseEnterDelay={.5}>
               <div
-                className={'p-1'}
+                className={'p-0.5 rounded duration-200 dark:text-gray-400 dark:hover:text-gray-300 text-gray-500 hover:text-gray-600 hover:bg-black/5 dark:hover:bg-white/5'}
                 onClick={() => {
                   store.setOpenSearch(false)
                 }}
               >
-                <IClose className={'w-5 h-5 text-gray-400 hover:text-gray-300'}/>
+                <IClose className={'w-5 h-5'}/>
               </div>
             </Tooltip>
           </div>

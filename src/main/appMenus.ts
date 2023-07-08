@@ -4,7 +4,6 @@ import {getLocale, store} from './store'
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 
 const cmd = 'CmdOrCtrl'
-const local = getLocale()
 const levelZhMap = new Map([
   [1, '一'],
   [2, '二'],
@@ -19,93 +18,93 @@ const task = (task: string, parameter?: any) => {
   }
 }
 
-const titles = Array.from(new Array(4)).map((_, i) => {
-  const n = i + 1
-  return {
-    label: local === 'zh' ? `${levelZhMap.get(n)}级标题` : `Heading ${n}`,
-    id: `title-${n}`,
-    accelerator: `${cmd}+${n}`,
-    click: task('head', n),
-    enabled: false
-  }
-})
-
-const menusLabel = local === 'zh' ? {
-  about: '关于 BlueStone',
-  update: '检查更新',
-  set: '偏好设置',
-  file: '文件',
-  create: '新建',
-  createWindow: '新建窗口',
-  open: '打开',
-  openRecent: '打开最近的文件',
-  clearRecent: '清除',
-  pdf: '导出 PDF',
-  edit: '编辑',
-  paragraph: '段落',
-  titleIncrease: '提升标题',
-  titleDecrease: '降低标题',
-  insertTable: '插入表格',
-  code: '代码块',
-  katex: '公式块',
-  orderedList: '有序列表',
-  unorderedList: '无序列表',
-  orderedTaskList: '有序任务列表',
-  unorderedTaskList: '无序任务列表',
-  horizontalLine: '水平分割线',
-  format: '格式',
-  bold: '加粗',
-  italic: '斜体',
-  strikethrough: '删除线',
-  inlineCode: '行内代码',
-  insertPicture: '插入图片',
-  clear: '清除',
-  view: '显示',
-  zoomIn: '放大',
-  zoomOut: '缩小',
-  leading: '大纲',
-  search: '搜索',
-  help: '帮助',
-  doc: '文档'
-} : {
-  about: 'About BlueStone',
-  update: 'Check for Updates',
-  set: 'Settings',
-  file: 'File',
-  create: 'Create',
-  createWindow: 'New Window',
-  open: 'Open',
-  openRecent: 'Open Recent',
-  clearRecent: 'Clear Items',
-  pdf: 'Export To PDF',
-  edit: 'Edit',
-  paragraph: 'Paragraph',
-  titleIncrease: 'Increase Heading Level',
-  titleDecrease: 'Decrease Heading Level',
-  insertTable: 'Insert Table',
-  code: 'Code Fences',
-  katex: 'Math Block',
-  orderedList: 'Ordered List',
-  unorderedList: 'Unordered List',
-  orderedTaskList: 'Ordered Task List',
-  unorderedTaskList: 'Unordered Task List',
-  horizontalLine: 'Horizontal Line',
-  format: 'Format',
-  bold: 'Bold',
-  italic: 'Italic',
-  strikethrough: 'Strikethrough',
-  inlineCode: 'Inline Code',
-  insertPicture: 'Insert Picture',
-  clear: 'Clear',
-  view: 'View',
-  zoomIn: 'Zoom In',
-  zoomOut: 'Zoom Out',
-  leading: 'Outline',
-  search: 'Search',
-  help: 'Help',
-  doc: 'Document'
-}
 export const createAppMenus = () => {
+  const titles = Array.from(new Array(4)).map((_, i) => {
+    const n = i + 1
+    return {
+      label: getLocale() === 'zh' ? `${levelZhMap.get(n)}级标题` : `Heading ${n}`,
+      id: `title-${n}`,
+      accelerator: `${cmd}+${n}`,
+      click: task('head', n),
+      enabled: false
+    }
+  })
+  const menusLabel = getLocale() === 'zh' ? {
+    about: '关于 BlueStone',
+    update: '检查更新',
+    set: '偏好设置',
+    file: '文件',
+    create: '新建',
+    createWindow: '新建窗口',
+    open: '打开',
+    openRecent: '打开最近的文件',
+    clearRecent: '清除',
+    pdf: '导出 PDF',
+    edit: '编辑',
+    paragraph: '段落',
+    titleIncrease: '提升标题',
+    titleDecrease: '降低标题',
+    insertTable: '插入表格',
+    code: '代码块',
+    katex: '公式块',
+    orderedList: '有序列表',
+    unorderedList: '无序列表',
+    orderedTaskList: '有序任务列表',
+    unorderedTaskList: '无序任务列表',
+    horizontalLine: '水平分割线',
+    format: '格式',
+    bold: '加粗',
+    italic: '斜体',
+    strikethrough: '删除线',
+    inlineCode: '行内代码',
+    insertPicture: '插入图片',
+    clear: '清除',
+    view: '显示',
+    zoomIn: '放大',
+    zoomOut: '缩小',
+    leading: '大纲',
+    search: '搜索',
+    help: '帮助',
+    doc: '文档'
+  } : {
+    about: 'About BlueStone',
+    update: 'Check for Updates',
+    set: 'Settings',
+    file: 'File',
+    create: 'Create',
+    createWindow: 'New Window',
+    open: 'Open',
+    openRecent: 'Open Recent',
+    clearRecent: 'Clear Items',
+    pdf: 'Export To PDF',
+    edit: 'Edit',
+    paragraph: 'Paragraph',
+    titleIncrease: 'Increase Heading Level',
+    titleDecrease: 'Decrease Heading Level',
+    insertTable: 'Insert Table',
+    code: 'Code Fences',
+    katex: 'Math Block',
+    orderedList: 'Ordered List',
+    unorderedList: 'Unordered List',
+    orderedTaskList: 'Ordered Task List',
+    unorderedTaskList: 'Unordered Task List',
+    horizontalLine: 'Horizontal Line',
+    format: 'Format',
+    bold: 'Bold',
+    italic: 'Italic',
+    strikethrough: 'Strikethrough',
+    inlineCode: 'Inline Code',
+    insertPicture: 'Insert Picture',
+    clear: 'Clear',
+    view: 'View',
+    zoomIn: 'Zoom In',
+    zoomOut: 'Zoom Out',
+    leading: 'Outline',
+    search: 'Search',
+    help: 'Help',
+    doc: 'Document'
+  }
+
   const menus: MenuOptions = [
     {
       label: app.getName(),
@@ -193,7 +192,7 @@ export const createAppMenus = () => {
         {role: 'redo'},
         {type: 'separator'},
         {
-          label: 'save',
+          label: 'Save',
           accelerator: `${cmd}+s`,
           click: () => {
             BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')

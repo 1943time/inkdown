@@ -4,41 +4,40 @@ import {getLocale} from './store'
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
 
-const locale = getLocale()
-
-const menusLabel = locale === 'zh' ? {
-  copyMarkdown: '复制Markdown源码',
-  pdf: '导出PDF',
-  openInFinder: '在Finder中显示',
-  openInDefault: '默认应用打开',
-  delete: '删除',
-  createNote: '新建文档',
-  createFolder: '新建文件夹',
-  rename: '重命名',
-  insertRowAbove: '上方插入行',
-  insertRowBelow: '下方插入行',
-  insertColBefore: '左侧插入列',
-  insertColAfter: '右侧插入列',
-  delCol: '删除列',
-  delRow: '删除行'
-} : {
-  copyMarkdown: 'Copy Markdown Source Code',
-  pdf: 'Export To PDF',
-  openInFinder: 'Reveal in Finder',
-  openInDefault: 'Open in default app',
-  delete: 'Delete',
-  createNote: 'New note',
-  createFolder: 'New folder',
-  rename: 'Rename',
-  insertRowAbove: 'Add Row Above',
-  insertRowBelow: 'Add Row Below',
-  insertColBefore: 'Add Column before',
-  insertColAfter: 'Add Column after',
-  delCol: 'Delete col',
-  delRow: 'Delete row'
-}
-
 export const registerMenus = () => {
+  const locale = getLocale()
+
+  const menusLabel = locale === 'zh' ? {
+    copyMarkdown: '复制Markdown源码',
+    pdf: '导出PDF',
+    openInFinder: '在Finder中显示',
+    openInDefault: '默认应用打开',
+    delete: '删除',
+    createNote: '新建文档',
+    createFolder: '新建文件夹',
+    rename: '重命名',
+    insertRowAbove: '上方插入行',
+    insertRowBelow: '下方插入行',
+    insertColBefore: '左侧插入列',
+    insertColAfter: '右侧插入列',
+    delCol: '删除列',
+    delRow: '删除行'
+  } : {
+    copyMarkdown: 'Copy Markdown Source Code',
+    pdf: 'Export To PDF',
+    openInFinder: 'Reveal in Finder',
+    openInDefault: 'Open in default app',
+    delete: 'Delete',
+    createNote: 'New note',
+    createFolder: 'New folder',
+    rename: 'Rename',
+    insertRowAbove: 'Add Row Above',
+    insertRowBelow: 'Add Row Below',
+    insertColBefore: 'Add Column before',
+    insertColAfter: 'Add Column after',
+    delCol: 'Delete col',
+    delRow: 'Delete row'
+  }
   ipcMain.on('tool-menu', (e, filePath?: string) => {
     const temp: Menus = [
       {

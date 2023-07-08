@@ -72,7 +72,7 @@ export const Record = observer((props: {
   return (
     <Modal
       title={configStore.isZh ? '分享记录' : 'Share Records'}
-      width={800}
+      width={900}
       open={props.open}
       onCancel={props.onClose}
       footer={null}

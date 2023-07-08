@@ -6,6 +6,7 @@ import {IFileItem} from '../index'
 import {treeStore} from '../store/tree'
 import {Node} from 'slate'
 import {ReactEditor} from 'slate-react'
+import {configStore} from '../store/config'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -109,7 +110,7 @@ export const FullSearch = observer(() => {
             treeStore.setState({searchKeyWord: e.target.value})
             search()
           }}
-          placeholder={'查找'}
+          placeholder={configStore.isZh ? '查找' : 'Search'}
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>

@@ -18,11 +18,12 @@ function Code(props: {
   return (
     <div className={'pt-2'}>
       <AceEditor
-        ref={editor => {
-          editor?.editor.renderer.setOption('showGutter', false)
-          editor?.editor.setHighlightActiveLine(false)
-        }}
         mode={'json'}
+        setOptions={{
+          showGutter: false,
+          highlightActiveLine: false,
+          useWorker: false
+        }}
         theme="cloud9_night"
         height={'400px'}
         width={'100%'}
@@ -172,7 +173,7 @@ export const Ebook = observer((props: {
                     }}
                   ]}
                   initialValue={JSON.stringify([
-                    {name: "folderName", folder: true, children: [{name: "docName", path: "docPath"}]}
+                    {name: "folderName", folder: true, children: [{name: "docName", path: "folderName/fileName"}]}
                   ], null, 2)}
                 >
                   <Code/>
