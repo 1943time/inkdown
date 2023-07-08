@@ -4,7 +4,7 @@
 
 ## Title
 
-Typing 1-5 '#' signs plus spaces at the beginning of a paragraph can be converted to a level 1-5 heading
+Typing 1-5 `#`signs plus spaces at the beginning of a paragraph can be converted to a level 1-5 heading
 
 ## Text
 

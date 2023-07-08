@@ -148,6 +148,7 @@ export const Ebook = observer((props: {
                       </Space>
                     )
                   })
+                  props.onClose()
                 }).catch(async e => {
                   console.error(e)
                   message$.next({

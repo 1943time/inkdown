@@ -32,7 +32,7 @@ To manually generate a scenario that requires the naming and sorting of chapters
 		}
 	],
 	"name": "start",
-	"folder": true, // 文件夹
+	"folder": true,
 	"children": [
 		{
 			"name": "Fundation",

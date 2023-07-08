@@ -178,7 +178,10 @@ export const ShareSet = observer(() => {
                   <div className={'max-h-[400px] overflow-y-auto'}>
                     <div className={'flex text-sm items-center text-gray-500 justify-center mb-2'}>
                       <Net className={'w-5 h-5 fill-gray-500'}/>
-                      <span className={'ml-2'}>{configStore.isZh ? '制作电子书' : 'Make an eBook'}</span>
+                      {state.books.length ?
+                        <span className={'ml-2'}>{configStore.isZh ? '当前文件夹中的电子书' : 'eBooks in the current folder'}</span> :
+                        <span className={'ml-2'}>{configStore.isZh ? '制作电子书' : 'Make an eBook'}</span>
+                      }
                     </div>
                     {!state.config &&
                       <div className={'mt-4'}>
