@@ -186,12 +186,12 @@ export const ShareSet = observer(() => {
                       </div>
                     }
                     {state.books.map(b =>
-                      <div className={'w-full flex items-center px-3 py-1 border-b border-gray-200/10 text-blue-500 mb-4'} key={b.id!}>
+                      <div className={'w-full justify-between flex items-center px-3 py-1 border-b border-gray-200/10 text-blue-500 mb-4'} key={b.id!}>
                         <a className={'flex-1 max-w-[240px] break-all'} href={`${state.config.domain}/book/${b.path}`} target={'_blank'}>
                           <ReadOutlined />
                           <span className={'ml-1'}>{b.name}</span>
                         </a>
-                        <div className={'flex w-28 justify-between flex-shrink-0 ml-4'}>
+                        <div className={'flex w-44 justify-between flex-shrink-0 ml-4 space-x-3'}>
                           <a onClick={async () => {
                             if (state.syncing) return
                             const sync = new Sync()
@@ -202,7 +202,8 @@ export const ShareSet = observer(() => {
                                 name: b.name,
                                 path: b.path,
                                 strategy: b.strategy,
-                                ignorePaths: b.ignorePaths
+                                ignorePaths: b.ignorePaths,
+                                map: b.map
                               })
                               const key = 'Date' + Date.now()
                               api.success({

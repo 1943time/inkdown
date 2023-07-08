@@ -10,6 +10,7 @@ import {readFileSync} from 'fs'
 import {findText, getSectionTexts, slugify} from './utils'
 import {nanoid} from 'nanoid'
 import {configStore} from '../store/config'
+import {removeBook} from './Record'
 
 type Els = Elements & CustomLeaf
 
@@ -117,24 +118,25 @@ export class Sync {
     const root = treeStore.root.filePath!
     const sdk = new window.api.sdk()
     if (config.id) {
-      chapterRecords = await db.chapter.where('bookId').equals(config.id).toArray()
       book = await db.book.get(config.id!)
       if (book) {
-        db.book.update(config.id!, {
-          strategy: config.strategy,
-          name: config.name,
-          ignorePaths: config.ignorePaths,
-          updated: this.time,
-          map: config.map
-        })
         if (book.path !== config.path) {
-          sdk.removeFile(join(this.prefix, book.path, 'map.json'))
-          sdk.removeFile(join(this.prefix, book.path, 'text.json'))
+          await removeBook(config.id)
+          book = undefined
+        } else {
+          chapterRecords = await db.chapter.where('bookId').equals(config.id).toArray()
+          db.book.update(config.id!, {
+            strategy: config.strategy,
+            name: config.name,
+            ignorePaths: config.ignorePaths,
+            updated: this.time,
+            map: config.map,
+            path: config.path
+          })
+          book = await db.book.get(config.id)
         }
       }
-      book = await db.book.get(config.id)
     }
-    this.currentBook = book
     if (!book) {
       const id = await db.book.add({
         filePath: root,
@@ -147,6 +149,8 @@ export class Sync {
       })
       book = await db.book.get(id)
     }
+
+    this.currentBook = book
     const recordsMap = new Map(chapterRecords.map(c => [c.path, c]))
 
     if (config.strategy === 'auto') {
@@ -196,7 +200,7 @@ export class Sync {
       }
     }
     return this.getChapterByConfig({
-      ...ctx, records: ctx.recordsMap, items: JSON.parse(ctx.config.map!)
+      ...ctx, records: ctx.recordsMap, items: JSON.parse(ctx.config.map)
     })
   }
 

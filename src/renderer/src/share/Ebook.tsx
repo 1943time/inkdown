@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Form, Input, Modal, Radio} from 'antd'
+import {Button, Form, Input, Modal, notification, Radio, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {Sync} from './sync'
 import {useEffect} from 'react'
@@ -10,6 +10,7 @@ import 'ace-builds/src-noconflict/mode-json'
 import 'ace-builds/src-noconflict/theme-cloud9_night'
 import {removeBook} from './Record'
 import {configStore} from '../store/config'
+import {MainApi} from '../api/main'
 
 function Code(props: {
   value?: string
@@ -41,19 +42,26 @@ export const Ebook = observer((props: {
   id?: number
 }) => {
   const [state, setState] = useLocalState({
-    submitting: false
+    submitting: false,
+    config: {} as any
   })
+  const [api, contextHolder] = notification.useNotification()
   const [modal, modalCtx] = Modal.useModal()
   const [form] = Form.useForm()
   useEffect(() => {
     if (props.open) {
       if (props.id) {
         db.book.get(props.id).then(res => {
-          if (res) form.setFieldsValue(res)
+          if (res) form.setFieldsValue({
+            ...res
+          })
         })
       } else {
         form.resetFields()
       }
+      MainApi.getServerConfig().then((res) => {
+        if (res) setState({config: res})
+      })
     }
   }, [props.open])
 
@@ -67,7 +75,7 @@ export const Ebook = observer((props: {
       footer={(
         <div>
           <Button onClick={props.onClose}>
-            {configStore.isZh ? 'cancel' : '取消'}
+            {configStore.isZh ? '取消' : 'cancel'}
           </Button>
           {props.id &&
             <Button
@@ -111,15 +119,46 @@ export const Ebook = observer((props: {
                 setState({submitting: true})
                 await sync.syncEbook({
                   ...v,
-                  id: props.id
-                }).then(() => {
-                  console.log('success')
-                }).catch(e => {
+                  id: props.id,
+                }).then(async () => {
+                  const key = 'Date' + Date.now()
+                  api.success({
+                    key,
+                    message: configStore.isZh ? '同步成功' : 'Synchronization succeeded',
+                    duration: 2,
+                    btn: (
+                      <Space>
+                        <Button
+                          onClick={() => {
+                            api.destroy(key)
+                            window.api.copyToClipboard(`${state.config.domain}/book/${v.path}`)
+                          }}
+                        >
+                          {configStore.isZh ? '复制链接' : 'Copy Link'}
+                        </Button>
+                        <Button
+                          type={'primary'}
+                          onClick={() => {
+                            window.open(`${state.config.domain}/book/${v.path}`)
+                            api.destroy(key)
+                          }}
+                        >
+                          {configStore.isZh ? '打开' : 'Open'}
+                        </Button>
+                      </Space>
+                    )
+                  })
+                }).catch(async e => {
                   console.error(e)
                   message$.next({
                     type: 'error',
                     content: configStore.isZh ? '同步失败' : 'Synchronization failed'
                   })
+                  const book = await db.book.where('path').equals(v.path).first()
+                  if (book) {
+                    await db.book.delete(book.id!)
+                    await db.chapter.where('bookId').equals(book.id!).delete()
+                  }
                 })
                 setState({submitting: false})
               })
@@ -131,6 +170,7 @@ export const Ebook = observer((props: {
       )}
     >
       {modalCtx}
+      {contextHolder}
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}}>
         <Form.Item label={configStore.isZh ? '电子书名称' : 'The name of the e-book'} name={'name'} rules={[{required: true}]}>
           <Input/>

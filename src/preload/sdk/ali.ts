@@ -75,7 +75,7 @@ export class AliApi implements ServerSdk {
       method: 'PUT',
       bucket: this.config.bucket,
       headers: {
-        'Content-Type': mime.lookup(filePath) || ''
+        'Content-Type': contentType || mime.lookup(filePath) || ''
       },
       object: name
     })

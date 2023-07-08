@@ -17,11 +17,11 @@ export class Sdk implements  ServerSdk {
   private async getConfig() {
     return ipcRenderer.invoke('getServerConfig')
   }
-  private async uploadMultiple(files: {name: string, filePath: string}[]) {
+  private async uploadMultiple(files: {name: string, filePath: string, contentType?: string}[]) {
     let offset = 0
     let stack = files.slice(offset, offset + 5)
     while (stack.length) {
-      await Promise.all(stack.map(f => this.uploadFile(f.name, f.filePath)))
+      await Promise.all(stack.map(f => this.uploadFile(f.name, f.filePath, f.contentType)))
       offset += 5
       stack = files.slice(offset, offset + 5)
     }

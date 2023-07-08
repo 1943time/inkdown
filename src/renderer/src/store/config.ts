@@ -37,7 +37,7 @@ class ConfigStore {
       if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
     }))
   }
-  private syncConfig() {
+  syncConfig() {
     clearTimeout(this.timer)
     this.timer = window.setTimeout(() => {
       MainApi.getServerConfig().then(async res => {

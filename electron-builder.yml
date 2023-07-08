@@ -1,5 +1,5 @@
 appId: bluestone
-productName: BlueStone
+productName: Bluestone
 directories:
   buildResources: build
 #afterSign: scripts/notarize.js

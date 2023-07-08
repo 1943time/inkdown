@@ -46,7 +46,7 @@ class Db extends Dexie {
     super('db')
     this.version(1).stores({
       doc: '&id,name,filePath,hash,updated',
-      book: '++id,[filePath+path],name,strategy,map,filePath,ignorePaths,config,updated',
+      book: '++id,path,name,strategy,map,filePath,ignorePaths,config,updated',
       chapter: '++id,filePath,bookId,path,hash,name,updated',
       file: '++id,filePath,hash'
     })

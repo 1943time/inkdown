@@ -1,5 +1,4 @@
 node_modules
-/dist
 out
 *.log*
 unpackage
@@ -7,3 +6,4 @@ resources/lib/current.html
 resources/lib/current.json
 .env
 electron.vite.config.*.mjs
+dist

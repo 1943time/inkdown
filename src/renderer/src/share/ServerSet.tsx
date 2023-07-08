@@ -42,7 +42,7 @@ export const ServerSet = observer((props: {
             await window.electron.ipcRenderer.invoke('saveServerConfig', v)
             const sdk = new window.api.sdk()
             await sdk.connect()
-            await sdk.reset()
+            await sdk.initial()
             sdk.dispose()
             message$.next({
               type: 'success',
@@ -50,6 +50,8 @@ export const ServerSet = observer((props: {
             })
             await db.doc.clear()
             await db.file.clear()
+            await db.chapter.clear()
+            configStore.syncConfig()
             await db.chapter.filter(o => true).modify({
               hash: ''
             })
@@ -68,7 +70,7 @@ export const ServerSet = observer((props: {
       }}
     >
       <Form layout={'horizontal'} labelCol={{span: 6}} form={form}>
-        <Form.Item label={'服务类型'} rules={[{required: true}]} name={'server'} initialValue={'ssh'}>
+        <Form.Item label={configStore.isZh ? '服务类型' : 'Service type'} rules={[{required: true}]} name={'server'} initialValue={'ssh'}>
           <Select
             options={[
               {label: configStore.isZh ? 'Linux服务器' : 'Linux server', value: 'ssh'},

@@ -33,7 +33,7 @@ const composeText = (t: Text, parent: any[]) => {
   if (!t.text) return ''
   let str = textStyle(t)
   if (t.url) {
-    str = `[${str}](${encodeURIComponent(t.url)})`
+    str = `[${str}](${encodeURI(t.url)})`
   } else if (isMix(t) && index !== -1) {
     const next = siblings[index +  1]
     if (!str.endsWith(' ') && next && EditorUtils.isDirtLeaf(next) && !Node.string(next).startsWith(' ')) {
@@ -133,7 +133,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += toMarkdown(node.children, preString, newParent)
       break
     case 'media':
-      str += `![${node.alt}](${encodeURIComponent(node.url)})`
+      str += `![${node.alt}](${encodeURI(node.url)})`
       break
     case 'list':
       str += toMarkdown(node.children, preString, newParent)

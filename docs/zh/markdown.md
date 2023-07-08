@@ -10,15 +10,15 @@
 
 > 文字格式由最后一个字符触发转换 如：`**bold**` 当键入最后一个`*`时会转换为粗体，如果希望将文字加入复合格式，建议使用浮动栏控制，如：加粗、斜体同时存在。需要光标脱离格式 ，可以使用方向左右键。
 
-| 语法                             | 效果                                 |
-| -------------------------------- | ------------------------------------ |
-| `*斜体*`                         | *斜体*                               |
-| `**粗体**`                       | **粗体**                             |
-| `这是一个 ~~删除线~~`            | 这是一个 ~~删除线~~                  |
-| `***斜粗体***`                   | ***斜粗***                           |
-| `行内code`                       | `行内code`                           |
-| `***~~斜粗体删除线~~***`         | ~~***斜粗体删除线***~~               |
-| `[链接](https://www.google.com)` | [链接](https%3A%2F%2Fwww.google.com) |
+| 语法                             | 效果                           |
+| -------------------------------- | ------------------------------ |
+| `*斜体*`                         | *斜体*                         |
+| `**粗体**`                       | **粗体**                       |
+| `这是一个 ~~删除线~~`            | 这是一个 ~~删除线~~            |
+| `***斜粗体***`                   | ***斜粗***                     |
+| `行内code`                       | `行内code`                     |
+| `***~~斜粗体删除线~~***`         | ~~***斜粗体删除线***~~         |
+| `[链接](https://www.google.com)` | [链接](https://www.google.com) |
 
 ## 图片与链接
 
@@ -77,7 +77,7 @@ func main() {
 }
 ```
 
-> 青石根据shiki进行代码高亮，高亮语言十分丰富，具体可查看 [languages](https%3A%2F%2Fgithub.com%2Fshikijs%2Fshiki%2Fblob%2Fmain%2Fdocs%2Flanguages.md)
+> 青石根据shiki进行代码高亮，高亮语言十分丰富，具体可查看 [languages](https://github.com/shikijs/shiki/blob/main/docs/languages.md)
 
 ## 脚注
 
@@ -95,11 +95,11 @@ func main() {
 
 当代码段使用mermaid语言时，将自动在其下方渲染mermaid图形，光标离开代码段区域，代码段会自动折叠。
 
-![suUxrWDayV8HcXWvSAF2O](..%2F.images%2FsuUxrWDayV8HcXWvSAF2O.png)
+![suUxrWDayV8HcXWvSAF2O](../.images/suUxrWDayV8HcXWvSAF2O.png)
 
 在段落开始键入`$$`加入回车，将创建katex公式编辑区，将自动在其下方渲染katex公式，光标离开代码段区域，代码段会自动折叠。示例图如下：
 
-![BqVYzfX2ZHnI39MnRE3Pp](..%2F.images%2FBqVYzfX2ZHnI39MnRE3Pp.png)
+![BqVYzfX2ZHnI39MnRE3Pp](../.images/BqVYzfX2ZHnI39MnRE3Pp.png)
 
 ## 自动保存
 
