@@ -1,9 +1,9 @@
 appId: bluestone
 productName: Bluestone
-copyright: "Copyright © 2022 mdwriter@163.com",
+copyright: 'Copyright © 2023 mdwriter@163.com'
 directories:
   buildResources: build
-#afterSign: scripts/notarize.js
+afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -30,15 +30,13 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
-  identity: null
+#  identity: null
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-dmg:
-  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
 linux:
   target:
     - AppImage
