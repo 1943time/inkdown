@@ -62,5 +62,5 @@ jobs:
         with:
           prerelease: true
           files: |
-            dist/BlueStone*.*
+            dist/Bluestone*.*
             dist/latest*.yml
