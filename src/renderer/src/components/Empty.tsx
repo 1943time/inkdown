@@ -37,7 +37,7 @@ export const Empty = observer(() => {
             >
               <FolderOpenOutlined/>
               <span className={'ml-2'}>
-                {configStore.isZh ? 'Open' : '打开'}
+                {configStore.isZh ? '打开' : 'Open'}
               </span>
             </div>
           </>
