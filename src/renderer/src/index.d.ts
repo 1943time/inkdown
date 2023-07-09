@@ -1,4 +1,4 @@
-import {Editor} from 'slate'
+/// <reference types="electron-vite/node" />
 import {EditorStore} from './editor/store'
 
 export interface IFileItem {

@@ -67,7 +67,7 @@ export const createAppMenus = () => {
     help: '帮助',
     doc: '文档'
   } : {
-    about: 'About BlueStone',
+    about: 'About Bluestone',
     update: 'Check for Updates',
     set: 'Settings',
     file: 'File',

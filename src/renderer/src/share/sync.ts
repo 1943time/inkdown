@@ -91,7 +91,9 @@ export class Sync {
         schema: await this.withShareSchema(schema, filePath),
         title:name
       }
-      window.api.copyToClipboard(JSON.stringify(schemaData))
+      // window.api.copyToClipboard(JSON.stringify({
+      //   doc: schemaData
+      // }))
       const code = await window.api.fs.readFile(filePath, {encoding: 'utf-8'})
       const hash = window.api.md5(code)
       const doc = await db.doc.where('filePath').equals(filePath).first()

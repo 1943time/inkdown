@@ -14,8 +14,11 @@ export const registerApi = () => {
     return app.getVersion()
   })
 
-  ipcMain.handle('get-web-path', () => {
-    return app.isPackaged ? join(app.getAppPath(), '..', 'web') : join(__dirname, '../../web')
+  ipcMain.handle('get-env', () => {
+    return {
+      isPackaged: app.isPackaged,
+      webPath: app.isPackaged ? join(app.getAppPath(), '..', 'web') : join(__dirname, '../../web')
+    }
   })
   ipcMain.handle('saveServerConfig', (e, config: any) => {
     store.set('server-config', config)

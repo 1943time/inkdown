@@ -69,7 +69,7 @@ export const ServerSet = observer((props: {
         })
       }}
     >
-      <Form layout={'horizontal'} labelCol={{span: 6}} form={form}>
+      <Form layout={'horizontal'} labelCol={{span: 7}} form={form}>
         <Form.Item label={configStore.isZh ? '服务类型' : 'Service type'} rules={[{required: true}]} name={'server'} initialValue={'ssh'}>
           <Select
             options={[

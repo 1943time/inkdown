@@ -1,7 +1,7 @@
 import {GithubOutlined} from '@ant-design/icons'
 import {useSetState} from 'react-use'
 import {useEffect} from 'react'
-
+import icon from '../../../resources/icon.png?asset'
 export function About() {
   const [state, setState] = useSetState({
     version: '',
@@ -25,8 +25,8 @@ export function About() {
         w-[300px] h-[200px] border dark:border-gray-200/10 dark:bg-zinc-800 flex flex-col justify-center py-5 items-center relative`}
         onClick={e => e.stopPropagation()}
       >
-        <img src="" alt="" className={'w-14 h-14'}/>
-        <div className={'mt-4 text-sm'}>BlueStone</div>
+        <img src={icon} alt="" className={'w-14 h-14'}/>
+        <div className={'mt-4 text-sm'}>bluestone</div>
         <div className={'flex items-center mt-3'}>
           <div className={'flex items-center text-xs mr-3'}>
             <GithubOutlined className={'text-base'} />
