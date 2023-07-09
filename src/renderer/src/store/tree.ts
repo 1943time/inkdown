@@ -263,16 +263,20 @@ export class TreeStore {
     }
   }
   open(path: string, openFile?: string) {
-    const stat = statSync(path)
-    document.title = basename(path)
-    if (stat.isDirectory()) {
+    try {
+      const stat = statSync(path)
       document.title = basename(path)
-      this.openFolder(path, openFile)
-    } else {
-      document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
-      this.openNewNote(path)
-      this.openParentDir(path)
-    }
+      if (stat.isDirectory()) {
+        this.currentTab.index = 0
+        this.currentTab.history = []
+        document.title = basename(path)
+        this.openFolder(path, openFile)
+      } else {
+        document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
+        this.openNewNote(path)
+        this.openParentDir(path)
+      }
+    } catch (e) {}
   }
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
     for (let key of Object.keys(value)) {

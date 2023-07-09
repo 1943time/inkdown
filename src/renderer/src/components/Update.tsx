@@ -3,6 +3,7 @@ import {Button, Modal, notification, Progress, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
 import {message$} from '../utils'
+import {configStore} from '../store/config'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
   const [state, setState] = useLocalState({
@@ -41,23 +42,25 @@ export const Update = observer(() => {
       if (!manual) return
       message$.next({
         type: 'info',
-        content: '暂无可用更新'
+        content: configStore.isZh ? '暂无可用更新' : 'No updates are available'
       })
     })
 
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)
+      if (state.startUpdate) {
+        api.error({
+          message: configStore.isZh ? '更新失败' : 'The update failed',
+          description: typeof err === 'string' ? err : configStore.isZh ? '网络异常，请稍后再试或手动下载' : 'The network is abnormal, please try again later or download manually'
+        })
+      }
       setState({startUpdate: false, percent: 0})
-      api.error({
-        message: '更新失败',
-        description: typeof err === 'string' ? err : '网络异常，请稍后再试或手动下载'
-      })
     })
     ipcRenderer.on('update-downloaded', e => {
       setState({startUpdate: false, percent: 0})
       modal.confirm({
         type: 'warning',
-        content: '下载更新已完成，是否立即重启？',
+        content: configStore.isZh ? '下载更新已完成，是否立即重启？' : 'Download the update is complete, do you want to restart it now?',
         onOk: () => {
           ipcRenderer.send('install-update')
         },
@@ -81,27 +84,27 @@ export const Update = observer(() => {
         <Progress percent={state.percent} className={'m-0'}/>
       </div>
       <Modal
-        title={`更新BlueStone-${state.updateData.tag}`}
+        title={`Update Bluestone-${state.updateData.tag}`}
         width={600}
         onCancel={() => setState({open: false})}
         open={state.open}
         footer={(
-          <Space>
+          <Space className={'mt-4'}>
             {state.startUpdate ? (
               <>
-                <Button onClick={downLoad}>手动下载</Button>
+                <Button onClick={downLoad}>{configStore.isZh ? '手动下载' : 'Download manually'}</Button>
                 <Button
                   onClick={() => {
                     ipcRenderer.send('cancel-update')
                     setState({startUpdate: false, percent: 0})
                   }}
                 >
-                  取消更新
+                  {configStore.isZh ? 'Cancel update' : '取消更新'}
                 </Button>
               </>
             ) : (
               <>
-                <Button onClick={downLoad}>手动下载</Button>
+                <Button onClick={downLoad}>{configStore.isZh ? '手动下载' : 'Download manually'}</Button>
                 <Button
                   type={'primary'}
                   onClick={() => {
@@ -109,7 +112,7 @@ export const Update = observer(() => {
                     setState({startUpdate: true, open: false})
                   }}
                 >
-                  立即更新
+                  {configStore.isZh ? '立即更新' : 'Update now'}
                 </Button>
               </>
             )}
@@ -121,7 +124,10 @@ export const Update = observer(() => {
           className={'py-2'}
         />
         {state.startUpdate &&
-          <Progress percent={state.percent} className={'mt-4'}/>
+          <div className={'flex items-center mt-4'}>
+            <span className={'mr-4'}>{configStore.isZh ? '正在更新' : 'Updating'}</span>
+            <Progress percent={state.percent} className={'flex-1 mb-0'}/>
+          </div>
         }
       </Modal>
     </>
