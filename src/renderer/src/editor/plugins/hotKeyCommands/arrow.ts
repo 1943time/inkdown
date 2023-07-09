@@ -85,13 +85,10 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         const row = Path.parent(path)
         const table = Path.parent(row)
         if (!Editor.hasPath(editor, Path.next(row))) {
-          e.preventDefault()
           if (!Editor.hasPath(editor, Path.next(table))) {
             Transforms.insertNodes(editor, EditorUtils.p, {
               at: Path.next(table), select: true
             })
-          } else {
-            Transforms.select(editor, Editor.start(editor, Path.next(table)))
           }
         } else {
           e.preventDefault()

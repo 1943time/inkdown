@@ -79,7 +79,7 @@ const parserBlock = (nodes: Content[], top = false) => {
         break
       case 'code':
         el = {
-          type: 'code', language: n.lang,
+          type: 'code', language: n.lang, render: n.meta === 'render',
           children: n.value.split('\n').map(s => {
             return {
               type: 'code-line',

@@ -2,9 +2,22 @@
 
 ## html rendering
 
-Bluestone uses a pure rich text editing mode, and does not support directly writing and rendering html code for the time being, and will add code snippets to render html in the future
+Bluestone uses a pure rich text editing mode, which does not support writing rendering HTML code directly, and can use code snippets to render, such as:
 
+![C1qo4ES-W-B6GO2zB8gpm](../.images/C1qo4ES-W-B6GO2zB8gpm.png)
 
+Click the eye icon to render the HTML directly, and the result is as follows:
+
+```html render
+<p style="text-align:center;color:cyan;">hello bluestone</p>
+```
+
+Export as:
+
+```html
+```html render
+<p style="text-align:center;color:cyan;">hello bluestone</p>
+```
 
 ## code snippet performance
 

@@ -1,7 +1,7 @@
 import {ReactEditor, useSelected} from 'slate-react'
 import {useGetSetState} from 'react-use'
 import React, {createContext, useCallback, useContext, useEffect, useMemo, useRef} from 'react'
-import {AutoComplete} from 'antd'
+import {AutoComplete, Tooltip} from 'antd'
 import {useMEditor} from '../../hooks/editor'
 import {CodeLineNode, CodeNode, ElementProps} from '../../el'
 import {cacheLine} from '../plugins/useHighlight'
@@ -10,6 +10,8 @@ import {Katex} from './CodeUI/Katex/Katex'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {configStore} from '../../store/config'
+import {Editor, Node, Transforms} from 'slate'
+import {EyeOutlined} from '@ant-design/icons'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
@@ -38,8 +40,12 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     )
   }, [props.element, props.element.children, store.refreshHighlight])
 
-  const visible = useMemo(() => {
-    return (props.element.language !== 'mermaid' && !props.element.katex) || selected
+  const hide = useMemo(() => {
+    if (selected) return false
+    if (props.element.language === 'mermaid') return true
+    if (props.element.katex) return true
+    if (props.element.language === 'html' && props.element.render) return true
+    return false
   }, [selected, props.element])
 
   return (
@@ -47,7 +53,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       <div
         {...props.attributes}
         data-be={'code'}
-        className={`${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${visible ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none ${props.element.language !== 'mermaid' || selected ? '' : 'hidden'}`}
           contentEditable={false}>
@@ -77,8 +83,20 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }
           {!state().editable &&
             <>
+              {props.element.language === 'html' &&
+                <Tooltip mouseEnterDelay={1} title={'render'}>
+                  <EyeOutlined
+                    className={`mr-2 ${props.element.render ? 'text-sky-500 hover:text-sky-600' : 'text-gray-400 hover:text-gray-300'} duration-200`}
+                    onClick={() => {
+                      update({
+                        render: !props.element.render
+                      })
+                    }}
+                  />
+                </Tooltip>
+              }
               <div
-                className={'duration-200 hover:text-sky-500 cursor-pointer text-gray-400 text-xs'}
+                className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
                 onClick={() => {
                   if (!props.element.katex) setState({editable: true})
                 }}
@@ -111,6 +129,16 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       }
       {!!props.element.katex &&
         <Katex el={props.element}/>
+      }
+      {props.element.language === 'html' && !!props.element.render &&
+        <div
+          className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded'}
+          onClick={() => {
+            Transforms.select(editor, Editor.start(editor, ReactEditor.findPath(editor, props.element)))
+          }}
+          dangerouslySetInnerHTML={{__html: props.element.children?.map(c => Node.string(c)).join('\n')}}
+          contentEditable={false}
+        />
       }
     </CodeCtx.Provider>
   )

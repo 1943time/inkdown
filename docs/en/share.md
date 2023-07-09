@@ -40,7 +40,7 @@ Before you can share documents, you need to set your service type and parameters
 
 3. Configure service-related parameters in Bluestone, remember the root directory of nginx, and store the directory in the configuration as follows:
 
-   ![c2WP66VfzZR4854wlvpzJ](../.images/c2WP66VfzZR4854wlvpzJ.png)
+   ![NaViPz4C4b-sShtm5cs22](../.images/NaViPz4C4b-sShtm5cs22.png)
 
 4. Click OK, it will try to upload the initialization file, and after success, you can select any markdown file to share
 

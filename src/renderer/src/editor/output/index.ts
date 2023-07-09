@@ -126,7 +126,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       if (node.katex && node.language === 'latex') {
         str += `${preString}$$\n${code}\n${preString}$$`
       } else {
-        str += `${preString}\`\`\`${node.language || ''}\n${code}\n${preString}\`\`\``
+        str += `${preString}\`\`\`${node.language || ''}${!!node.render ? ' render' : ''}\n${code}\n${preString}\`\`\``
       }
       break
     case 'blockquote':

@@ -65,7 +65,7 @@ export const Mermaid = observer((props: {
         <div className={'text-center text-red-500/80'}>{state().error}</div>
       }
       {!state().code && !state().error &&
-        <div className={'text-center text-gray-500'}>empty mermaid</div>
+        <div className={'text-center text-gray-500'}>Empty</div>
       }
     </div>
   )

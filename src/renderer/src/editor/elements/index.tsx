@@ -22,7 +22,7 @@ export const MElement = (props: RenderElementProps) => {
     case 'head':
       return <Head {...props}/>
     case 'hr':
-      return <div {...props.attributes} contentEditable={false} className={'m-hr'}>{props.children}</div>
+      return <div {...props.attributes} contentEditable={false} className={'m-hr select-none'}>{props.children}</div>
     case 'list-item':
       return (
         <ListItem {...props}/>
