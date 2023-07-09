@@ -1,4 +1,4 @@
-import {ipcRenderer} from 'electron'
+import {ipcRenderer, app} from 'electron'
 import {AliApi} from './ali'
 import {readdirSync, readFileSync} from 'fs'
 import {join} from 'path'
@@ -47,9 +47,12 @@ export class Sdk implements  ServerSdk {
     await this.getSdk()
     return this.targetSdk.uploadFileByText(name, content)
   }
+  async getWebPath() {
+    return ipcRenderer.invoke('get-web-path')
+  }
   async reset() {
     await this.getSdk()
-    const sourcePath = join(__dirname, '../../resources/dist')
+    const sourcePath = await this.getWebPath()
     const filesName = readdirSync(join(sourcePath, 'lib'))
     const files:{name: string, filePath: string, contentType?: string}[] = [
       {name: 'index.html', filePath: join(sourcePath, 'index.html')}
@@ -63,8 +66,8 @@ export class Sdk implements  ServerSdk {
   }
   async initial() {
     await this.getSdk()
-    const shikiPath = join(__dirname, '../../node_modules/shiki')
-    const sourcePath = join(__dirname, '../../resources/dist')
+    const sourcePath = await this.getWebPath()
+    const shikiPath = join(sourcePath, 'shiki')
     const languages = readdirSync(join(shikiPath, 'languages'))
     const themes = readdirSync(join(shikiPath, 'themes'))
     const filesName = readdirSync(join(sourcePath, 'lib'))

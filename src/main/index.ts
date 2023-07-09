@@ -10,7 +10,6 @@ import {registerMenus} from './menus'
 import {getLocale, store} from './store'
 import {AppUpdate} from './update'
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
-
 type WinOptions = {
   width?: number
   height?: number

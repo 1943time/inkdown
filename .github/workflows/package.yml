@@ -54,8 +54,12 @@ jobs:
       - name: Electron-Mac
         if: matrix.platform == 'mac'
         run: |
-          npm run build:mac
-
+          electron-builder --mac --arm64 --config
+          mv dist/latest-mac.yml dist/latest-mac-arm64.yml
+          mv dist/Bluestone-0.5.0-mac.zip dist/Bluestone-0.5.0-arm64-mac.zip
+          electron-builder --mac --x64 --config
+          mv dist/latest-mac.yml dist/latest-mac-x64.yml
+          mv dist/Bluestone-0.5.0-mac.zip dist/Bluestone-0.5.0-x64-mac.zip
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.15
         env:

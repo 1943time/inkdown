@@ -9,6 +9,7 @@
       <excludeFolder url="file://$MODULE_DIR$/unpackage" />
       <excludeFolder url="file://$MODULE_DIR$/resources" />
       <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/web" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

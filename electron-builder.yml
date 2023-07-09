@@ -1,5 +1,6 @@
 appId: bluestone
 productName: Bluestone
+copyright: "Copyright © 2022 mdwriter@163.com",
 directories:
   buildResources: build
 #afterSign: scripts/notarize.js
@@ -11,8 +12,13 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!scripts/*'
+  - '!web/*'
 asarUnpack:
   - resources/*
+extraResources:
+  - from: node_modules/shiki
+    to: web/shiki
+  - web
 fileAssociations:
   ext: md
   role: Editor
