@@ -381,12 +381,10 @@ export class TreeStore {
       } else {
         let path = join(parent.filePath, file.editName)
         if (!file.folder && !path.endsWith('.md')) path += '.md'
-        if (existsSync(path)) {
-          return message$.next({
-            type: 'warning',
-            content: configStore.isZh ? '该文件已存在' : 'The file already exists'
-          })
-        }
+        if (parent.children?.find(c => c.filePath === path) || existsSync(path)) return message$.next({
+          type: 'warning',
+          content: configStore.isZh ? '该文件已存在' : 'The file already exists'
+        })
         if (file.folder) {
           mkdirSync(path)
         } else {
