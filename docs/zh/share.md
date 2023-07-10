@@ -15,11 +15,11 @@
 5. 上传后会在本机进行记录，可以删除分享记录，同时会删除远程文件。
 6. 打开网站链接，拉取对应的JSON文件进行渲染
 
-## Service settings
+## 服务设置
 
-Before you can share documents, you need to set your service type and parameters
+再分享之前，需要定义你自己的服务参数
 
-### 服务设置
+### Linux 服务器
 
 > 有很多的云服务商支持ip访问服务器，如果您不想购买域名，可用ip来访问服务器，分享文档。青石使用了`ssh`上传所需的相关文件。
 

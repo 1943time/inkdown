@@ -53,8 +53,8 @@ export const Update = observer(() => {
           message: configStore.isZh ? '更新失败' : 'The update failed',
           description: typeof err === 'string' ? err : configStore.isZh ? '网络异常，请稍后再试或手动下载' : 'The network is abnormal, please try again later or download manually'
         })
+        setState({startUpdate: false, percent: 0})
       }
-      setState({startUpdate: false, percent: 0})
     })
     ipcRenderer.on('update-downloaded', e => {
       setState({startUpdate: false, percent: 0})

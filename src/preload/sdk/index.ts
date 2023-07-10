@@ -73,6 +73,7 @@ export class Sdk implements  ServerSdk {
     const filesName = readdirSync(join(env.webPath, 'lib'))
     const files:{name: string, filePath: string, contentType?: string}[] = [
       {name: 'index.html', filePath: join(env.webPath, 'index.html')},
+      {name: 'icon.png', filePath: join(env.webPath, 'icon.png')},
       {name: 'lib/shiki/onig.wasm', filePath: join(shikiPath, 'dist/onig.wasm'), contentType: 'application/wasm'},
     ]
 

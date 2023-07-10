@@ -30,7 +30,6 @@ export const withMarkdown = (editor: Editor) => {
     deleteFragment(direction)
   }
   editor.deleteForward = (unit) => {
-    console.log('delete forward', unit)
     deleteForward(unit)
   }
   return editor

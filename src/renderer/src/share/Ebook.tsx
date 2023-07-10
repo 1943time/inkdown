@@ -178,8 +178,12 @@ export const Ebook = observer((props: {
         </Form.Item>
         <Form.Item
           label={configStore.isZh ? '访问路径' : 'Url Path'} name={'path'}
-           rules={[{required: true, pattern: /^[a-zA-Z\d]+$/, message: configStore.isZh ? '由大小写英文字母数字组成' : 'Consists of uppercase and lowercase English alphanumeric numbers'}]}>
-          <Input placeholder={configStore.isZh ? '由大小写英文字母数字组成' : 'Consists of uppercase and lowercase English alphanumeric numbers'}/>
+           rules={[{required: true, validator: (rule, value: string) => {
+             if (value.startsWith('-') || value.endsWith('-')) return Promise.reject(configStore.isZh ? '不能以-划线开头或结尾' : 'Cannot begin or end with a - dash')
+               if (!(/^[\da-zA-Z\-]+$/.test(value))) return Promise.reject(configStore.isZh ? '由大小写字母数字与-线组成' : 'It consists of uppercase and lowercase alphanumeric numbers and - lines')
+               return Promise.resolve()
+             }, message: configStore.isZh ? '由大小写英文字母数字组成' : 'Consists of uppercase and lowercase English alphanumeric numbers'}]}>
+          <Input placeholder={configStore.isZh ? '由大小写英文字母 或 - 数字组成' : 'Consists of uppercase and lowercase English letters or - numbers'}/>
         </Form.Item>
         <Form.Item label={configStore.isZh ? '同步策略' : 'Synchronization policy'} name={'strategy'} initialValue={'auto'} rules={[{required: true}]}>
           <Radio.Group>
