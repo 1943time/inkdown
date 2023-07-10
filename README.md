@@ -23,4 +23,18 @@ such as synchronizing markdown to your own Linux server or cloud storage.
 
 Currently, markdown is supported to Linux servers and Alibaba Cloud OSS, which only requires very simple configuration.
 
-![loading](./docs/assets/QQ20230709-003704-HD.gif)
+When the service parameters are configured.
+
+Open a markdown file and write the following content
+![](./docs/assets/input.png)
+
+Click Share Button
+
+![](./docs/assets/start-share.png)
+
+to view the content in the browser
+
+![](./docs/assets/share-result.png)
+
+
+

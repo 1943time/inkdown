@@ -3,11 +3,10 @@ import {treeStore} from '../../../store/tree'
 import {PlusCircleOutlined} from '@ant-design/icons'
 import {IFileItem} from '../../../index'
 import ArrowRight from '../../../assets/ReactIcon/ArrowRight'
-import {Fragment, useCallback} from 'react'
+import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
 import {MainApi} from '../../../api/main'
 import {Input} from 'antd'
-import {ReactEditor} from 'slate-react'
 
 export const TreeRender = observer(() => {
   const context = useCallback(() => {
@@ -51,6 +50,13 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
     if (treeStore.dropNode === c) return 'bg-sky-500/10'
     if (treeStore.openNote === c) return 'dark:bg-gray-200/5 bg-gray-300/50'
     return 'dark:hover:bg-gray-400/5 hover:bg-gray-400/10'
+  }, [])
+  const timer = useRef(0)
+  const saveNote = useCallback((item: IFileItem) => {
+    clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => {
+      treeStore.saveNote(item)
+    }, 60)
   }, [])
   return (
     <>
@@ -106,9 +112,9 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                   autoFocus={true}
                   value={c.editName}
                   onChange={action(e => c.editName = e.target.value)}
-                  onBlur={() => treeStore.saveNote(c)}
+                  onBlur={() => saveNote(c)}
                   onKeyDown={e => {
-                    if (e.key === 'Enter') treeStore.saveNote(c)
+                    if (e.key === 'Enter') saveNote(c)
                   }}
                   placeholder={`${c.folder ? '请输入文件夹名' : '请输入笔记名称'}`}
                 /> :
