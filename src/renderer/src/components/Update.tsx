@@ -104,7 +104,7 @@ export const Update = observer(() => {
                     setState({startUpdate: false, percent: 0})
                   }}
                 >
-                  {configStore.isZh ? 'Cancel update' : '取消更新'}
+                  {configStore.isZh ? '取消更新' : 'Cancel update'}
                 </Button>
               </>
             ) : (
