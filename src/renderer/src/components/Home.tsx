@@ -8,7 +8,6 @@ import {MainApi} from '../api/main'
 import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
-import {ipcRenderer} from 'electron'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
@@ -42,7 +41,7 @@ export const Home = observer(() => {
     const printPdf = () => {
       MainApi.sendToSelf('window-blur')
       if (treeStore.openNote && treeStore.openNote.ext === 'md') {
-        ipcRenderer.send('print-pdf', treeStore.openNote!.filePath, treeStore.root?.filePath)
+        window.electron.ipcRenderer.send('print-pdf', treeStore.openNote!.filePath, treeStore.root?.filePath)
       }
     }
     initial()
