@@ -120,6 +120,7 @@ export const createAppMenus = () => {
           label: menusLabel.update,
           click: () => {
             ipcMain.emit('check-updated')
+            BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
           }
         },
         {type: 'separator'},

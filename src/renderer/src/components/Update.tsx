@@ -10,6 +10,7 @@ export const Update = observer(() => {
     open: false,
     startUpdate: false,
     percent: 0,
+    manual: false,
     updateData: {
       tag: '',
       releaseNotes: '',
@@ -21,7 +22,7 @@ export const Update = observer(() => {
   const downLoad = useCallback(() => {
     const file = state.updateData.files.find(f => f.url.endsWith('.dmg'))
     if (file) {
-      window.open(`https://github.com/1943time/bluestone/releases/download/${state.updateData.tag}/${file.url}`)
+      window.open(`https://github.com/1943time/bluestone/releases/latest`)
     }
   }, [])
 
@@ -30,9 +31,12 @@ export const Update = observer(() => {
   useEffect(() => {
     ipcRenderer.on('update-available', (e, data) => {
       console.log('update-available', data)
+      if (state.startUpdate) return
       setState({open: !!data, updateData: data})
     })
-
+    ipcRenderer.on('check-updated', e => {
+      setState({manual: true})
+    })
     ipcRenderer.on('update-progress', (e, data) => {
       const percent = (data.percent as number || 0).toFixed(1)
       setState({percent: +percent})
@@ -48,13 +52,14 @@ export const Update = observer(() => {
 
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)
-      if (state.startUpdate) {
+      if (state.startUpdate || state.manual) {
+        let msg = typeof err === 'string' ? err : err instanceof Error ? err.message : 'The network is abnormal, please try again later or download manually'
         api.error({
           message: configStore.isZh ? '更新失败' : 'The update failed',
-          description: typeof err === 'string' ? err : configStore.isZh ? '网络异常，请稍后再试或手动下载' : 'The network is abnormal, please try again later or download manually'
+          description: msg
         })
-        setState({startUpdate: false, percent: 0})
       }
+      setState({startUpdate: false, percent: 0, manual: false})
     })
     ipcRenderer.on('update-downloaded', e => {
       setState({startUpdate: false, percent: 0})
