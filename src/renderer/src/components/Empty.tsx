@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons'
 import {MainApi} from '../api/main'
 import {configStore} from '../store/config'
-import logo from '../../public/logo.svg'
+import logo from '../../../../resources/icon.png?asset'
 export const Empty = observer(() => {
   return (
     <div className={'flex justify-center items-center h-[calc(100vh_-_40px)]'}>

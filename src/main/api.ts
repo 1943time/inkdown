@@ -1,9 +1,11 @@
-import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme} from 'electron'
+import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserView} from 'electron'
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {getLocale, store} from './store'
+import {writeFileSync} from 'fs'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
+const workerPath = join(__dirname, '../renderer/worker.html')
 export const registerApi = () => {
   ipcMain.on('to-worker', (e, ...args:any[]) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
@@ -113,5 +115,51 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-preload-url', e => {
     return join(__dirname, '../preload/index.js')
+  })
+
+  ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (win) {
+      const view = new BrowserView({
+        webPreferences: {
+          preload: join(__dirname, '../preload/index.js'),
+          sandbox: false,
+          nodeIntegration: true,
+          contextIsolation: false,
+          webviewTag: true
+        }
+      })
+      win.setBrowserView(view)
+      view.setBounds({ x: 0, y: 0, width: 0, height: 0})
+      await view.webContents.loadFile(workerPath)
+      const ready = async (e: any, filePath: string) => {
+        try {
+          const save = await dialog.showSaveDialog({
+            filters: [{name: 'pdf', extensions: ['pdf']}]
+          })
+          if (save.filePath) {
+            const buffer = await view.webContents.printToPDF({
+              printBackground: true,
+              displayHeaderFooter: true,
+              margins: {
+                marginType: 'custom',
+                bottom: 0,
+                left: 0,
+                top: 0,
+                right: 0
+              },
+            })
+            writeFileSync(save.filePath, buffer)
+          }
+        } finally {
+          win.setBrowserView(null)
+          ipcMain.off('print-pdf-ready', ready)
+        }
+      }
+      ipcMain.on('print-pdf-ready', ready)
+      setTimeout(() => {
+        view.webContents.send('print-pdf-load', filePath, rootPath)
+      }, 300)
+    }
   })
 }

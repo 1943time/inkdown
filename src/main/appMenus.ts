@@ -179,7 +179,7 @@ export const createAppMenus = () => {
         {
           label: menusLabel.pdf,
           click: (e, win) => {
-            win?.webContents.send('print-to-pdf')
+            win?.webContents.send('call-print-pdf')
           }
         }
       ]

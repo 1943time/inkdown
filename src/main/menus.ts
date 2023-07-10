@@ -51,7 +51,9 @@ export const registerMenus = () => {
       {
         label: menusLabel.pdf,
         enabled: filePath?.endsWith('.md'),
-        click: (e, win) => win?.webContents.send('print-to-pdf')
+        click: (e, win) => {
+          win?.webContents.send('call-print-pdf')
+        }
       },
       // {
       //   label: '导出html',

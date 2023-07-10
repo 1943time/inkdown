@@ -35,9 +35,11 @@ const options: BrowserWindowConstructorOptions = {
 const windows = new Map<number, WinOptions>()
 function createWindow(initial?: WinOptions): void {
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
+  let openWidth = initial?.width ? initial.width < 800 ? 800 : initial.width : width
+  let openHeight = initial?.height ? initial.height < 400 ? 400 : initial.width : height
   const window = new BrowserWindow({
-    width: initial?.width || width,
-    height: initial?.height || height,
+    width: openWidth,
+    height: openHeight,
     titleBarStyle: 'hiddenInset',
     ...options
   })
