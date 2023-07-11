@@ -393,7 +393,7 @@ export class TreeStore {
         file.ext = 'md'
         file.mode = undefined
         file.children = file.folder ? [] : undefined
-        file.filename = file.editName
+        file.filename = file.editName.replace(/\.md$/, '')
         file.editName = undefined
       }
       parent.children = sortFiles(parent.children!)
