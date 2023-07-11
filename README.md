@@ -19,6 +19,8 @@ such as synchronizing markdown to your own Linux server or cloud storage.
 
 ![](./docs/.images/JB6DVdZ4sDQoNukOhzHdc.png)
 
+![](./docs/assets/share-demo.gif)
+
 ## share demo
 
 Currently, markdown is supported to Linux servers and Alibaba Cloud OSS, which only requires very simple configuration.
@@ -35,6 +37,4 @@ Click Share Button
 to view the content in the browser
 
 ![](./docs/assets/share-result.png)
-
-
 
