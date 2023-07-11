@@ -53,13 +53,15 @@ export class Watcher {
           const parent = nodesMap.get(join(path, '..'))!
           switch (e) {
             case 'add':
-              runInAction(() => {
-                parent.children!.push(createFileNode({
-                  folder: false,
-                  parent: parent,
-                  fileName: basename(path)
-                }))
-              })
+              if (!parent.children!.find(c => c.filePath === path)) {
+                runInAction(() => {
+                  parent.children!.push(createFileNode({
+                    folder: false,
+                    parent: parent,
+                    fileName: basename(path)
+                  }))
+                })
+              }
               break
             case 'unlink':
               runInAction(() => {
@@ -71,13 +73,15 @@ export class Watcher {
               })
               break
             case 'addDir':
-              runInAction(() => {
-                parent.children!.push(createFileNode({
-                  folder: true,
-                  parent: parent,
-                  fileName: basename(path)
-                }))
-              })
+              if (!parent.children!.find(c => c.filePath === path)) {
+                runInAction(() => {
+                  parent.children!.push(createFileNode({
+                    folder: true,
+                    parent: parent,
+                    fileName: basename(path)
+                  }))
+                })
+              }
               break
             case 'unlinkDir':
               runInAction(() => {
@@ -124,7 +128,6 @@ export class Watcher {
             }
           })
         }
-        console.log('off', h)
       }
     }
   }
@@ -133,7 +136,7 @@ export class Watcher {
     this.fileCheck = false
     setTimeout(() => {
       this.fileCheck = true
-    }, 500)
+    }, 1000)
   }
 
   destroy() {
