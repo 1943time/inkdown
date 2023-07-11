@@ -56,7 +56,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
     clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
       treeStore.saveNote(item)
-    }, 60)
+    }, 30)
   }, [])
   return (
     <>

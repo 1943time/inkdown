@@ -141,7 +141,11 @@ const parserBlock = (nodes: Content[], top = false) => {
   return els
 }
 export const markdownParser = (filePath: string) => {
-  const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
-  const root = parser.parse(mdStr)
-  return {schema: parserBlock(root.children, true), nodes: root.children}
+  try {
+    const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
+    const root = parser.parse(mdStr)
+    return {schema: parserBlock(root.children, true), nodes: root.children}
+  } catch (e) {
+    return {schema: [], nodes: []}
+  }
 }

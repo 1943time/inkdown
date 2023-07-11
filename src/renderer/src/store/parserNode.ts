@@ -1,6 +1,6 @@
-import {IFileItem} from '../../index'
+import {IFileItem} from '../index'
 import {readdirSync, statSync} from 'fs'
-import {basename, join, parse} from 'path'
+import {basename, extname, join, parse} from 'path'
 import {observable} from 'mobx'
 import {nanoid} from 'nanoid'
 
@@ -11,14 +11,14 @@ export const createFileNode = (params: {
   filePath?: string
   mode?: IFileItem['mode']
 }) => {
-  const p = parse(params.fileName)
+  const p = params.folder ? params.fileName : parse(params.fileName).name
   const node = {
     id: nanoid(),
-    filename: p.name,
+    filename: p,
     folder: params.folder,
     children: params.folder ? [] : undefined,
     mode: params.mode,
-    ext: params.folder ? undefined : p.ext.replace(/^\./, ''),
+    ext: params.folder ? undefined : extname(params.fileName).replace(/^\./, ''),
   } as IFileItem
 
   Object.defineProperty(node, 'parent', {

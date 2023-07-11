@@ -1,7 +1,7 @@
-import {TreeStore} from '../store/tree'
+import {TreeStore} from './tree'
 import {basename, join} from 'path'
 import {runInAction} from 'mobx'
-import {createFileNode, sortFiles} from './tree/parserNode'
+import {createFileNode, sortFiles} from './parserNode'
 import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
 
@@ -53,7 +53,7 @@ export class Watcher {
           const parent = nodesMap.get(join(path, '..'))!
           switch (e) {
             case 'add':
-              if (!parent.children!.find(c => c.filePath === path)) {
+              if (parent.children && !parent.children.find(c => c.filePath === path)) {
                 runInAction(() => {
                   parent.children!.push(createFileNode({
                     folder: false,
@@ -73,7 +73,7 @@ export class Watcher {
               })
               break
             case 'addDir':
-              if (!parent.children!.find(c => c.filePath === path)) {
+              if (parent.children && !parent.children.find(c => c.filePath === path)) {
                 runInAction(() => {
                   parent.children!.push(createFileNode({
                     folder: true,

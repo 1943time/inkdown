@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
-import {createFileNode, parserNode, sortFiles} from '../components/tree/parserNode'
+import {createFileNode, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse} from 'path'
 import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
@@ -8,7 +8,7 @@ import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
 import {message$, stat} from '../utils'
-import {Watcher} from '../components/watch'
+import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
@@ -405,8 +405,10 @@ export class TreeStore {
       } else {
         const p = parse(file.editName)
         const path = file.filePath
-        file.filename = p.name
-        renameSync(path, join(path, '..', p.name) + `.${file.ext}`)
+        file.filename = file.folder ? file.editName : p.name
+        let newPath = join(path, '..', file.filename)
+        if (!file.folder && file.ext) newPath += `.${file.ext}`
+        renameSync(path, newPath)
         file.mode = undefined
       }
     }
