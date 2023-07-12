@@ -32,7 +32,7 @@ const api = {
     watchers.set(path, watcher)
   },
   highlightCodeToString(code: string, lang: string) {
-    return highlighter?.codeToHtml(code, {lang})
+    return langSet.has(lang) ? highlighter?.codeToHtml(code, {lang}) : code
   },
   md5(str: string | Buffer) {
     return createHash('md5').update(str).digest('hex')

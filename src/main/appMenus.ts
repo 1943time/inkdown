@@ -40,6 +40,7 @@ export const createAppMenus = () => {
     openRecent: '打开最近的文件',
     clearRecent: '清除',
     pdf: '导出 PDF',
+    html: '导出 HTML',
     edit: '编辑',
     paragraph: '段落',
     titleIncrease: '提升标题',
@@ -77,6 +78,7 @@ export const createAppMenus = () => {
     openRecent: 'Open Recent',
     clearRecent: 'Clear Items',
     pdf: 'Export To PDF',
+    html: 'Export To HTML',
     edit: 'Edit',
     paragraph: 'Paragraph',
     titleIncrease: 'Increase Heading Level',
@@ -180,6 +182,12 @@ export const createAppMenus = () => {
           label: menusLabel.pdf,
           click: (e, win) => {
             win?.webContents.send('call-print-pdf')
+          }
+        },
+        {
+          label: menusLabel.html,
+          click: (e, win) => {
+            win?.webContents.send('print-to-html')
           }
         }
       ]

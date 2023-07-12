@@ -10,6 +10,7 @@ export const registerMenus = () => {
   const menusLabel = locale === 'zh' ? {
     copyMarkdown: '复制Markdown源码',
     pdf: '导出PDF',
+    html: '导出HTML',
     openInFinder: '在Finder中显示',
     openInDefault: '默认应用打开',
     delete: '删除',
@@ -25,6 +26,7 @@ export const registerMenus = () => {
   } : {
     copyMarkdown: 'Copy Markdown Source Code',
     pdf: 'Export To PDF',
+    html: 'Export To HTML',
     openInFinder: 'Reveal in Finder',
     openInDefault: 'Open in default app',
     delete: 'Delete',
@@ -55,11 +57,11 @@ export const registerMenus = () => {
           win?.webContents.send('call-print-pdf')
         }
       },
-      // {
-      //   label: '导出html',
-      //   enabled: !!filePath,
-      //   click: (e, win) => win?.webContents.send('print-to-html')
-      // },
+      {
+        label: menusLabel.html,
+        enabled: filePath?.endsWith('.md'),
+        click: (e, win) => win?.webContents.send('print-to-html')
+      },
       {
         type: 'separator'
       },

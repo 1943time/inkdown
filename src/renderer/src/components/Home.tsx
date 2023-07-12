@@ -4,10 +4,11 @@ import {Nav} from './Nav'
 import {treeStore} from '../store/tree'
 import {EditorFrame} from '../editor/EditorFrame'
 import {useCallback, useEffect, useRef} from 'react'
-import {MainApi} from '../api/main'
+import {MainApi, saveDialog} from '../api/main'
 import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
+import {exportHtml} from '../editor/output/html'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
@@ -44,14 +45,20 @@ export const Home = observer(() => {
         window.electron.ipcRenderer.send('print-pdf', treeStore.openNote!.filePath, treeStore.root?.filePath)
       }
     }
+    const printHtml = () => {
+      MainApi.sendToSelf('window-blur')
+      if (treeStore.openNote && treeStore.openNote.ext === 'md') exportHtml(treeStore.openNote)
+    }
     initial()
     window.electron.ipcRenderer.on('open', open)
     window.electron.ipcRenderer.on('create', create)
     window.electron.ipcRenderer.on('call-print-pdf', printPdf)
+    window.electron.ipcRenderer.on('print-to-html', printHtml)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
       window.electron.ipcRenderer.removeListener('create', create)
       window.electron.ipcRenderer.removeListener('call-print-pdf', printPdf)
+      window.electron.ipcRenderer.removeListener('print-to-html', printHtml)
     }
   }, [])
   return (
