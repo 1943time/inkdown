@@ -14,6 +14,7 @@ files:
   - '!scripts/*'
   - '!web/*'
   - '!docs/*'
+  - '!dist.zip'
 asarUnpack:
   - resources/*
 extraResources:
