@@ -1,4 +1,4 @@
-name: WorkTest
+name: Package
 
 on:
   push:
@@ -23,12 +23,3 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: download web program
-        uses: suisei-cn/actions-download-file@v1.4.0
-        with:
-          url: "https://github.com/1943time/bs-web/releases/tag/v0.5.1/dist.zip"
-      - name: ls
-        run: |
-          ls
-          unzip -qq dist.zip -d web1
-          ls
