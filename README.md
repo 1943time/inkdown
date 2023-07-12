@@ -19,7 +19,7 @@ such as synchronizing markdown to your own Linux server or cloud storage.
 
 ![](./docs/.images/JB6DVdZ4sDQoNukOhzHdc.png)
 
-![](./docs/assets/share-demo.gif)
+![](./docs/assets/share-demo2.gif)
 
 ## share demo
 
