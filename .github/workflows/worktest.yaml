@@ -27,9 +27,8 @@ jobs:
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: "https://github.com/1943time/bs-web/releases/tag/v0.5.1/dist.zip"
-      - uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq dist.zip -d web1
       - name: ls
         run: |
+          ls
+          unzip -qq dist.zip -d web1
           ls
