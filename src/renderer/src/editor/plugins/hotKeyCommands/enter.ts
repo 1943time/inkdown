@@ -269,13 +269,15 @@ export class EnterKey {
           }
         }
         if (Editor.hasPath(this.editor, Path.next(node[1]))) {
-          Transforms.moveNodes(this.editor, {
-            at: {
-              anchor: Editor.start(this.editor, Path.next(node[1])),
-              focus: Editor.end(this.editor, parent[1])
-            },
-            to: [...Path.next(parent[1]), 1]
-          })
+          let cur = Path.next(node[1])
+          let index = 1
+          while (Editor.hasPath(this.editor, cur)) {
+            Transforms.moveNodes(this.editor, {
+              at: cur,
+              to: [...Path.next(parent[1]), index]
+            })
+            index++
+          }
         }
       }
     }

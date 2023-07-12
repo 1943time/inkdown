@@ -186,8 +186,20 @@ export class BackspaceKey {
                 at: listPath,
                 select: true
               })
-              return true
+            } else {
+              let cur = Path.next(path)
+              let index = preListItem[0].children.length
+              Transforms.select(this.editor, Editor.end(this.editor, preListItem[1]))
+              while (Editor.hasPath(this.editor, cur)) {
+                Transforms.moveNodes(this.editor, {
+                  at: cur,
+                  to: [...preListItem[1], index]
+                })
+                index++
+              }
+              Transforms.delete(this.editor, {at: parent[1]})
             }
+            return true
           }
 
           // 可删除顶级元素中的第一个段落
