@@ -29,7 +29,6 @@ jobs:
           url: "https://github.com/1943time/bs-web/releases/tag/v0.5.1/dist.zip"
       - name: unzip
         run: |
+          ls
           unzip dist.zip
           mv -f dist web
-          ls
-
