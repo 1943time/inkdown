@@ -2,6 +2,7 @@ import {Editor, Element, Node, Path, Point, Range, Text, Transforms} from 'slate
 import {CustomLeaf} from '../../el'
 import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
+import {clearCodeCache} from '../plugins/useHighlight'
 
 export class EditorUtils {
   static get p() {
@@ -17,6 +18,18 @@ export class EditorUtils {
     return Editor.isEditor(p[0])
   }
 
+  static moveNodes(editor: Editor, from: Path, to: Path, index = 1) {
+    while (Editor.hasPath(editor, from)) {
+      const node = Editor.node(editor, from)
+      // 刷新code元素缓存
+      if (node[0].type === 'code') clearCodeCache(node[0])
+      Transforms.moveNodes(editor, {
+        at: from,
+        to: [...to, index]
+      })
+      index++
+    }
+  }
   static moveAfterSpace(editor: Editor, path: Path) {
     const next = Editor.next(editor, {at: path})
     if (!next || !Text.isText(next[0])) {

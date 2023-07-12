@@ -1,6 +1,7 @@
 import {Editor, Element, Node, Path, Point, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import {Elements} from '../../../el'
+import {clearCodeCache} from '../useHighlight'
 
 export class BackspaceKey {
   constructor(
@@ -190,13 +191,7 @@ export class BackspaceKey {
               let cur = Path.next(path)
               let index = preListItem[0].children.length
               Transforms.select(this.editor, Editor.end(this.editor, preListItem[1]))
-              while (Editor.hasPath(this.editor, cur)) {
-                Transforms.moveNodes(this.editor, {
-                  at: cur,
-                  to: [...preListItem[1], index]
-                })
-                index++
-              }
+              EditorUtils.moveNodes(this.editor, cur, preListItem[1], index)
               Transforms.delete(this.editor, {at: parent[1]})
             }
             return true

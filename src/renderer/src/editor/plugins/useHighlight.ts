@@ -5,6 +5,8 @@ import {CodeNode} from '../../el'
 import {observer} from 'mobx-react-lite'
 import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'
+import {runInAction} from 'mobx'
+import {treeStore} from '../../store/tree'
 
 export const codeCache = new WeakMap<object, {
   code: string,
@@ -14,6 +16,19 @@ export const codeCache = new WeakMap<object, {
 export const cacheFootNote = new WeakMap<object, Range[]>
 
 export const cacheLine = new WeakMap<object, Range[]>()
+
+let clearTimer = 0
+
+export const clearCodeCache = (node: any) => {
+  codeCache.delete(node)
+  node.children.map(n => cacheLine.delete(n))
+  clearTimeout(clearTimer)
+  clearTimer = window.setTimeout(() => {
+    runInAction(() => {
+      treeStore.currentTab!.store!.refreshHighlight = !treeStore.currentTab!.store!.refreshHighlight
+    })
+  }, 60)
+}
 export function useHighlight(store?: EditorStore) {
   return useCallback(([node, path]: NodeEntry):Range[] => {
     if (Element.isElement(node) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
@@ -60,7 +75,6 @@ export const SetNodeToDecorations = observer(() => {
     const codes = Array.from(
       Editor.nodes<CodeNode>(editor, {
         at: [],
-        mode: 'highest',
         match: n => Element.isElement(n) && n.type === 'code' && !codeCache.get(n)
       })
     ).map(node => {
@@ -69,6 +83,7 @@ export const SetNodeToDecorations = observer(() => {
         code: node[0].children.map(n => Node.string(n)).join('\n')
       }
     })
+
     for (let c of codes) {
       if (c.code.length > 20000) continue
       const lang = c.node[0].language || ''

@@ -1,15 +1,17 @@
 import React from 'react'
-import {BaseSelection, Editor, Element, next, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
+import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../../../el'
 import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
+import {clearCodeCache} from '../useHighlight'
 
 export class EnterKey {
   constructor(
     private readonly editor: Editor,
     private readonly backspace: BackspaceKey
-  ) {}
+  ) {
+  }
 
   run(e: React.KeyboardEvent) {
     let sel = this.editor.selection
@@ -97,50 +99,52 @@ export class EnterKey {
     }
 
     if (parent.type === 'list-item') {
-      e.preventDefault()
-      const nextPath = Path.next(parentPath)
-      const index = parentPath[parentPath.length - 1]
-      const ul = Editor.parent(this.editor, parentPath)
+      const [ul, ulPath] = Editor.parent(this.editor, parentPath)
       const realEmpty = parent.children.length === 1
-
-      if (!realEmpty) {
-        Transforms.delete(this.editor, {at: path})
-        Transforms.insertNodes(this.editor, {
-          type: 'list-item',
-          checked: typeof parent.checked === 'boolean' ? false : undefined,
-          children: [EditorUtils.p]
-        }, {at: nextPath, select: true})
+      if (ul.children.length === 1 && realEmpty) {
+        e.preventDefault()
+        Transforms.delete(this.editor, {at: ulPath})
+        Transforms.insertNodes(this.editor, EditorUtils.p, {at: ulPath, select: true})
         return
       }
-
-      if (index === 0) {
-        if (!Editor.hasPath(this.editor, nextPath)) {
-          Transforms.delete(this.editor, {at: Path.parent(parentPath)})
-          if (!this.editor.children.length) {
-            Transforms.insertNodes(this.editor, EditorUtils.p)
-          }
-        } else {
+      if (realEmpty) {
+        e.preventDefault()
+        if (!Path.hasPrevious(parentPath)) {
           Transforms.delete(this.editor, {at: parentPath})
+          Transforms.insertNodes(this.editor, EditorUtils.p, {at: ulPath, select: true})
+        } else if (!Editor.hasPath(this.editor, Path.next(parentPath))) {
+          Transforms.delete(this.editor, {at: parentPath})
+          Transforms.insertNodes(this.editor, EditorUtils.p, {at: Path.next(ulPath), select: true})
+        } else {
+          Transforms.liftNodes(this.editor, {
+            at: parentPath
+          })
+          Transforms.delete(this.editor, {at: Path.next(ulPath)})
           Transforms.insertNodes(this.editor, EditorUtils.p, {
-            at: ul[1],
+            at: Path.next(ulPath),
             select: true
           })
         }
-      } else if (Editor.hasPath(this.editor, nextPath)) {
-        Transforms.liftNodes(this.editor, {
-          at: parentPath
-        })
-        Transforms.delete(this.editor, {at: Path.next(ul[1])})
-        Transforms.insertNodes(this.editor, EditorUtils.p, {
-          at: Path.next(ul[1]),
-          select: true
-        })
       } else {
-        Transforms.insertNodes(this.editor, EditorUtils.p, {
-          at: Path.next(ul[1]),
-          select: true
-        })
-        Transforms.delete(this.editor, {at: parentPath})
+        if (!Editor.hasPath(this.editor, Path.next(path))) {
+          e.preventDefault()
+          Transforms.delete(this.editor, {at: path})
+          Transforms.insertNodes(this.editor, {
+            type: 'list-item',
+            checked: typeof parent.checked === 'boolean' ? false : undefined,
+            children: [EditorUtils.p]
+          }, {at: Path.next(parentPath), select: true})
+        } else if (!Path.hasPrevious(path)) {
+          e.preventDefault()
+          Transforms.insertNodes(this.editor, {
+            type: 'list-item',
+            checked: typeof parent.checked === 'boolean' ? false : undefined,
+            children: [EditorUtils.p]
+          }, {at: Path.next(parentPath), select: true})
+          let cur = Path.next(path)
+          let index = 1
+          EditorUtils.moveNodes(this.editor, cur, Path.next(parentPath), index)
+        }
       }
     }
   }
@@ -148,9 +152,11 @@ export class EnterKey {
   private table(node: NodeEntry<TableNode>, sel: BaseSelection, e: React.KeyboardEvent) {
     if (e.metaKey) {
       const row = Editor.parent(this.editor, node[1])
-      const insertRow = {type: 'table-row', children: row[0].children.map(c => {
-        return {type: 'table-cell', children: [{text: ''}]}
-      })}
+      const insertRow = {
+        type: 'table-row', children: row[0].children.map(c => {
+          return {type: 'table-cell', children: [{text: ''}]}
+        })
+      }
       Transforms.insertNodes(this.editor, insertRow, {
         at: Path.next(row[1])
       })
@@ -247,37 +253,22 @@ export class EnterKey {
       } else {
         e.preventDefault()
         const checked = typeof parent[0].checked === 'boolean' ? false : undefined
-        if (Point.equals(end, sel.focus)) {
-          Transforms.insertNodes(this.editor, {
-            type: 'list-item', children: [EditorUtils.p], checked
-          }, {at: Path.next(parent[1]), select: true})
-          e.preventDefault()
-        } else {
-          if (!Editor.hasPath(this.editor, Path.next(node[1]))) {
-            const next = Path.next(parent[1])
-            Transforms.insertNodes(this.editor, {
-              type: 'list-item', children: [{type: 'paragraph', children: EditorUtils.cutText(this.editor, sel.focus)}], checked
-            }, {at: next})
-            Transforms.delete(this.editor, {
-              at: {
-                anchor: sel.anchor,
-                focus: end
-              }
-            })
-            Transforms.select(this.editor, Editor.start(this.editor, next))
-            e.preventDefault()
-          }
+        Transforms.insertNodes(this.editor, {
+          type: 'list-item',
+          children: [{type: 'paragraph', children: EditorUtils.cutText(this.editor, sel.focus)}],
+          checked
+        }, {at: Path.next(parent[1])})
+        if (!Point.equals(sel.anchor, Editor.end(this.editor, node[1]))) {
+          Transforms.delete(this.editor, {
+            at: {
+              anchor: sel.anchor,
+              focus: Editor.end(this.editor, node[1])
+            }
+          })
         }
+        Transforms.select(this.editor, Editor.start(this.editor, Path.next(parent[1])))
         if (Editor.hasPath(this.editor, Path.next(node[1]))) {
-          let cur = Path.next(node[1])
-          let index = 1
-          while (Editor.hasPath(this.editor, cur)) {
-            Transforms.moveNodes(this.editor, {
-              at: cur,
-              to: [...Path.next(parent[1]), index]
-            })
-            index++
-          }
+          EditorUtils.moveNodes(this.editor, Path.next(node[1]), Path.next(parent[1]), 1)
         }
       }
     }
