@@ -3,6 +3,8 @@ name: WorkTest
 on:
   push:
     branches: worktest
+  workflow_dispatch:
+
 jobs:
   build:
     strategy:
@@ -25,10 +27,10 @@ jobs:
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: "https://github.com/1943time/bs-web/releases/tag/v0.5.1/dist.zip"
-          target: ./
-      - name: unzip
-        run: |
-          unzip dist.zip
-          mv -f dist web
-          ls
+          target: /
+#      - name: unzip
+#        run: |
+#          unzip dist.zip
+#          mv -f dist web
+#          ls
 
