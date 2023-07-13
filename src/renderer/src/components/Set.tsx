@@ -84,6 +84,14 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                {configStore.isZh ? '显示字符统计' : 'Displays character statistics'}
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.showCharactersCount} onChange={e => configStore.setConfig('showCharactersCount', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 {configStore.isZh ? '代码段TabSize' : 'Code TabSize'}
               </div>
               <div>

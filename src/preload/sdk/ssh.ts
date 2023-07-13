@@ -1,8 +1,8 @@
 import {NodeSSH} from 'node-ssh'
 import {ServerSdk} from './index'
-import {join, parse, sep} from 'path'
-import {writeFileSync} from 'fs'
+import {join, sep} from 'path'
 import {SFTPWrapper} from 'ssh2'
+
 const ssh = new NodeSSH()
 
 interface Config {

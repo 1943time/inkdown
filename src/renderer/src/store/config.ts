@@ -14,7 +14,8 @@ class ConfigStore {
     editorTextSize: 16,
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4,
-    locale: 'en' as 'en' | 'zh'
+    locale: 'en' as 'en' | 'zh',
+    showCharactersCount: true
   }
   locale = 'en' as 'en' | 'zh'
   timer = 0

@@ -53,7 +53,8 @@ export const registerApi = () => {
       codeTabSize: config.codeTabSize || 2,
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
-      leadingLevel: config.leadingLevel || 4
+      leadingLevel: config.leadingLevel || 4,
+      showCharactersCount: config.showCharactersCount
     }
   })
 

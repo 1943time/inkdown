@@ -23,6 +23,10 @@ export class EditorStore {
     currentIndex: 0,
     refresh: false,
   }
+  count = {
+    words: 0,
+    characters: 0
+  }
   sel: BaseSelection | undefined
   focus = false
   openSearch = false

@@ -9,6 +9,7 @@ import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
 import {exportHtml} from '../editor/output/html'
+import {Characters} from './Characters'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
@@ -69,6 +70,7 @@ export const Home = observer(() => {
         {treeStore.tabs.map((t) =>
           <EditorFrame tab={t} key={t.id}/>
         )}
+        <Characters/>
       </div>
       <About/>
       <Set/>

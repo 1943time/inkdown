@@ -17,6 +17,7 @@ import {useEditorStore} from './store'
 import {runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
+import {countWords} from 'alfaaz'
 
 const initialValue: Descendant[] = [
   {
@@ -57,6 +58,15 @@ export const MEditor = observer(({note}: {
     }
   }, [note])
 
+  const count = useCallback((nodes: any[]) => {
+    if (!configStore.config.showCharactersCount) return
+    const root = Editor.node(editor, [])
+    const res = toMarkdown(nodes, '', [root[0]])
+    runInAction(() => {
+      store.count.words = countWords(res)
+      store.count.characters = res.length
+    })
+  }, [])
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -73,6 +83,7 @@ export const MEditor = observer(({note}: {
       })
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
+      count(v)
       runInAction(() => {
         note.refresh = !note.refresh
         store.docChanged = true
@@ -91,9 +102,13 @@ export const MEditor = observer(({note}: {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
       let data = treeStore.schemaMap.get(note)
+      count(data?.state || [])
       first.current = true
       if (!data) data = treeStore.getSchema(note)
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
+      treeStore.schemaMap.set(note, {
+        ...data!,
+      })
       setTimeout(() => {
         store.setState(state => state.pauseCodeHighlight = false)
         requestIdleCallback(() => {
@@ -176,7 +191,7 @@ export const MEditor = observer(({note}: {
       <Editable
         decorate={high}
         spellCheck={false}
-        className={'pt-14 edit-area'}
+        className={'pt-12 edit-area'}
         style={{fontSize: configStore.config.editorTextSize}}
         onMouseDown={checkEnd}
         onDrop={e => {

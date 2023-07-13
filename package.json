@@ -47,6 +47,7 @@
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "@typescript-eslint/parser": "^5.48.0",
     "@vitejs/plugin-react": "^3.1.0",
+    "alfaaz": "^1.1.0",
     "antd": "^5.6.3",
     "dayjs": "^1.11.7",
     "dexie": "^3.2.4",
