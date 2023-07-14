@@ -390,12 +390,12 @@ export const createAppMenus = () => {
       label: menusLabel.help,
       role: 'help',
       submenu: [
-        {
-          label: menusLabel.doc,
-          click: () => {
-            shell.openExternal('https://bluestone.md-writer.com/book/docs')
-          }
-        },
+        // {
+        //   label: menusLabel.doc,
+        //   click: () => {
+        //     shell.openExternal('https://bluestone.md-writer.com/book/docs')
+        //   }
+        // },
         {
           label: 'Github',
           click: () => {
