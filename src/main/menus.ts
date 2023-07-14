@@ -11,6 +11,7 @@ export const registerMenus = () => {
     copyMarkdown: '复制Markdown源码',
     pdf: '导出PDF',
     html: '导出HTML',
+    eBook: '导出电子书',
     openInFinder: '在Finder中显示',
     openInDefault: '默认应用打开',
     delete: '删除',
@@ -27,6 +28,7 @@ export const registerMenus = () => {
     copyMarkdown: 'Copy Markdown Source Code',
     pdf: 'Export To PDF',
     html: 'Export To HTML',
+    eBook: 'Export eBook',
     openInFinder: 'Reveal in Finder',
     openInDefault: 'Open in default app',
     delete: 'Delete',
@@ -61,6 +63,10 @@ export const registerMenus = () => {
         label: menusLabel.html,
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('print-to-html')
+      },
+      {
+        label: menusLabel.eBook,
+        click: (e, win) => win?.webContents.send('export-ebook')
       },
       {
         type: 'separator'

@@ -191,7 +191,7 @@ export const MEditor = observer(({note}: {
       <Editable
         decorate={high}
         spellCheck={false}
-        className={'pt-12 edit-area'}
+        className={'edit-area'}
         style={{fontSize: configStore.config.editorTextSize}}
         onMouseDown={checkEnd}
         onDrop={e => {

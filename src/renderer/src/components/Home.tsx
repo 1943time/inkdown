@@ -4,12 +4,13 @@ import {Nav} from './Nav'
 import {treeStore} from '../store/tree'
 import {EditorFrame} from '../editor/EditorFrame'
 import {useCallback, useEffect, useRef} from 'react'
-import {MainApi, saveDialog} from '../api/main'
+import {MainApi} from '../api/main'
 import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
 import {exportHtml} from '../editor/output/html'
 import {Characters} from './Characters'
+import {ExportEbook} from './ExportEbook'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
@@ -74,6 +75,7 @@ export const Home = observer(() => {
       </div>
       <About/>
       <Set/>
+      <ExportEbook/>
     </div>
   )
 })

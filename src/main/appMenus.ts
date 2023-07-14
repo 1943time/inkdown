@@ -41,6 +41,7 @@ export const createAppMenus = () => {
     clearRecent: '清除',
     pdf: '导出 PDF',
     html: '导出 HTML',
+    eBook: '导出电子书',
     edit: '编辑',
     paragraph: '段落',
     titleIncrease: '提升标题',
@@ -79,6 +80,7 @@ export const createAppMenus = () => {
     clearRecent: 'Clear Items',
     pdf: 'Export To PDF',
     html: 'Export To HTML',
+    eBook: 'Export eBook',
     edit: 'Edit',
     paragraph: 'Paragraph',
     titleIncrease: 'Increase Heading Level',
@@ -188,6 +190,12 @@ export const createAppMenus = () => {
           label: menusLabel.html,
           click: (e, win) => {
             win?.webContents.send('print-to-html')
+          }
+        },
+        {
+          label: menusLabel.eBook,
+          click: (e, win) => {
+            win?.webContents.send('export-ebook')
           }
         }
       ]

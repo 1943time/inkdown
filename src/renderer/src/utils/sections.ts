@@ -1,5 +1,8 @@
 import {remove as removeDiacritics} from 'diacritics'
 import {CustomLeaf, Elements} from '../el'
+import {Node} from 'slate'
+import {encodeHtml} from './index'
+import {basename} from 'path'
 
 const rControl = /[\u0000-\u001f]/g
 const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'<>,.?/]+/g
@@ -9,6 +12,9 @@ const spaceNode = ['table-cell']
 const blockNode = ['table', 'head', 'paragraph', 'list', 'blockquote', 'list-item', 'table-row', 'code', 'hr', 'code-line']
 
 type Els = Elements & CustomLeaf
+
+export const getSlugifyName = (path: string) => slugify(basename(path).replace(/\.\w+(#.*)?/, ''))
+export const getHeadId = (node: any) => slugify(findText(node))
 
 const findSectionNodeText = (node: any) => {
   const stack = [node]
@@ -24,8 +30,8 @@ const findSectionNodeText = (node: any) => {
       navText += ' '
     }
     if (['code'].includes(cn.type)) {
-      if (cn.language !== 'mermaid') {
-        navText += cn.code as string
+      if (cn.language !== 'mermaid' && !cn.katex) {
+        navText += cn.children.map(c => Node.string(c)).join('\n') as string
       }
     }
     if (cn.type === 'code-line') continue
@@ -49,7 +55,7 @@ export const getSectionTexts = (schema: any[]) => {
     if (node.type === 'head' && node.level < 4) {
       curSection = {
         tag: `h${node.level}` as any,
-        title: node.id,
+        title: getHeadId(node),
         text: ''
       }
       sections.push(curSection)
@@ -59,7 +65,7 @@ export const getSectionTexts = (schema: any[]) => {
         if (blockNode.includes(node.type) && !!curSection.text) {
           str = '\n' + str
         }
-        curSection.text += str
+        curSection.text += encodeHtml(str)
       }
     }
   }

@@ -457,15 +457,12 @@ export class TreeStore {
   }
 
   private removeSelf(node: IFileItem) {
-    const open = this.openNote === node
-    node.parent!.children = node.parent!.children!.filter(c => c !== node)
-    const inHistory = this.currentTab.history.findIndex(c => c === node)
-    if (inHistory !== -1) this.currentTab.history.splice(inHistory, 1)
-    this.currentTab.index >= inHistory && this.currentTab.index > 0 ? this.currentTab.index-- : null
-    if (open && !this.currentTab.history.length) {
-      const doc = node.parent!.children!.find(c => c.ext === 'md')
-      if (doc) this.open(doc.filePath)
+    const index = this.currentTab.history.findIndex(n => n === node)
+    if (index !== -1) {
+      this.currentTab.history.splice(index, 1)
+      if (index <= this.currentTab.index) this.currentTab.index--
     }
+    node.parent!.children = node.parent!.children!.filter(c => c !== node)
   }
 }
 

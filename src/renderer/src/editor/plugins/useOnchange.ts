@@ -20,7 +20,7 @@ export function useOnchange(editor: Editor, store: EditorStore) {
         currentType.current = node[0].type
         MainApi.setEditorContext(node[0].type, EditorUtils.isTop(editor, node[1]))
       }
-      if (sel && node[0].type !== 'code-line' &&
+      if (sel && node[0].type !== 'code-line' && node[0].type !== 'head' &&
         !Range.isCollapsed(sel) &&
         Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path))
       ) {

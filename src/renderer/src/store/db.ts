@@ -31,24 +31,30 @@ export interface Chapter {
   updated: string
 }
 
+export interface Ebook {
+  id?: number
+  map?: string
+  strategy: 'auto' | 'custom'
+  name: string
+  filePath: string
+  ignorePaths?: string
+}
 export interface DocFile {
   id?: number
   filePath: string
   hash: string
 }
 class Db extends Dexie {
-  public doc!: Table<Doc, number>
-  public book!: Table<Book, number>
-  public chapter!: Table<Chapter, number>
-  public file!: Table<DocFile, number>
+  public ebook!: Table<Ebook, number>
 
   public constructor() {
     super('db')
-    this.version(1).stores({
-      doc: '&id,name,filePath,hash,updated',
-      book: '++id,path,name,strategy,map,filePath,ignorePaths,config,updated',
-      chapter: '++id,filePath,bookId,path,hash,name,updated',
-      file: '++id,filePath,hash'
+    this.version(2).stores({
+      // doc: '&id,name,filePath,hash,updated',
+      // book: '++id,path,name,strategy,map,filePath,ignorePaths,config,updated',
+      // chapter: '++id,filePath,bookId,path,hash,name,updated',
+      // file: '++id,filePath,hash',
+      ebook: '++id,filePath,strategy,name,map,ignorePaths'
     })
   }
 }

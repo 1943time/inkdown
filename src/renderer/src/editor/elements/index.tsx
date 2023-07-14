@@ -10,7 +10,7 @@ import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
 import {Media} from './media'
 import {useEditorStore} from '../store'
 import {Point} from 'slate'
-import {join} from 'path'
+import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 
 export const MElement = (props: RenderElementProps) => {
@@ -83,7 +83,7 @@ export const MLeaf = (props: RenderLeafProps) => {
             if (/^https?/.test(leaf.url)) {
               window.open(leaf.url)
             } else {
-              const path = join(treeStore.currentTab.current!.filePath, '..', leaf.url)
+              const path = isAbsolute(leaf.url) ? leaf.url : join(treeStore.currentTab.current!.filePath, '..', leaf.url)
               treeStore.selectPath(path)
             }
           }}

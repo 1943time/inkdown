@@ -1,6 +1,6 @@
 {
   "name": "bluestone",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
@@ -16,10 +16,10 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run npmbuild && electron-builder --win --config",
-    "build:mac": "electron-builder --macos --arm64 --x64 --config",
+    "build:mac": "electron-builder --macos --arm64 --config",
     "build:linux": "electron-builder --linux --config",
     "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
-    "sync-css": "cp -f src/renderer/src/styles/color.scss ../bsp/src/styles && cp -f src/renderer/src/styles/editor.scss ../bsp/src/styles"
+    "sync-css": "cp -f src/renderer/src/styles/color.scss ../bs-preview/src/styles && cp -f src/renderer/src/styles/editor.scss ../bs-preview/src/styles"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
@@ -31,7 +31,6 @@
     "got": "^11.8.6",
     "mime-types": "^2.1.35",
     "mkdirp": "^3.0.0",
-    "node-ssh": "^13.1.0",
     "shiki": "^0.14.1",
     "xml2js": "^0.6.0"
   },

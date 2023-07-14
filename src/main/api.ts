@@ -151,6 +151,7 @@ export const registerApi = () => {
               },
             })
             writeFileSync(save.filePath, buffer)
+            shell.showItemInFolder(save.filePath)
           }
         } finally {
           win.setBrowserView(null)

@@ -184,14 +184,20 @@ export class BackspaceKey {
                 Transforms.delete(this.editor, {at: listPath})
               }
               Transforms.insertNodes(this.editor, el, {
-                at: listPath,
-                select: true
+                at: listPath
               })
+              Transforms.select(this.editor, Editor.start(this.editor, listPath))
             } else {
+
               let cur = Path.next(path)
-              let index = preListItem[0].children.length
-              Transforms.select(this.editor, Editor.end(this.editor, preListItem[1]))
-              EditorUtils.moveNodes(this.editor, cur, preListItem[1], index)
+              const moveIndex = preListItem[0].children.length
+              if (Editor.hasPath(this.editor, cur)) {
+                EditorUtils.moveNodes(this.editor, cur, preListItem[1], moveIndex)
+              }
+              Transforms.moveNodes(this.editor, {
+                at: path,
+                to: [...preListItem[1], moveIndex]
+              })
               Transforms.delete(this.editor, {at: parent[1]})
             }
             return true

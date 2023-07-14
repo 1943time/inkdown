@@ -19,15 +19,19 @@ export class EditorUtils {
   }
 
   static moveNodes(editor: Editor, from: Path, to: Path, index = 1) {
+    let count = 0
     while (Editor.hasPath(editor, from)) {
+      if (count > 100) break
       const node = Editor.node(editor, from)
       // 刷新code元素缓存
       if (node[0].type === 'code') clearCodeCache(node[0])
+      console.log('mode', from, to, index)
       Transforms.moveNodes(editor, {
         at: from,
         to: [...to, index]
       })
       index++
+      count++
     }
   }
   static moveAfterSpace(editor: Editor, path: Path) {

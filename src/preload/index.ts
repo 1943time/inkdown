@@ -6,7 +6,6 @@ import * as fs from 'fs/promises'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
 import * as chokidar from 'chokidar'
-import {Sdk} from './sdk'
 import {createHash} from 'crypto'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
@@ -15,7 +14,6 @@ const api = {
   preloadUrl: '',
   baseUrl: '',
   langSet,
-  sdk: Sdk,
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },

@@ -3,7 +3,6 @@ import {AppstoreOutlined, LeftOutlined, RightOutlined, SendOutlined} from '@ant-
 import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
-import {ShareSet} from '../share/ShareSet'
 import {Update} from './Update'
 
 export const Nav = observer(() => {
@@ -68,7 +67,6 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-4 text-gray-500'}>
           <Update/>
-          <ShareSet/>
           <AppstoreOutlined
             className={'text-lg duration-200 dark:hover:text-gray-300 hover:text-gray-600'}
             onClick={() => MainApi.openToolMenu(treeStore.openNote?.filePath)}
