@@ -43,6 +43,7 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(editor)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
+  const countTimerRef = useRef<number | null>(null)
   const save = useCallback(async () => {
     if (nodeRef.current && store.docChanged) {
       runInAction(() => {
@@ -60,12 +61,21 @@ export const MEditor = observer(({note}: {
 
   const count = useCallback((nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
-    const root = Editor.node(editor, [])
-    const res = toMarkdown(nodes, '', [root[0]])
-    runInAction(() => {
-      store.count.words = countWords(res)
-      store.count.characters = res.length
-    })
+    if (countTimerRef.current === null) {
+      countTimerRef.current = window.setTimeout(() => {
+        const root = Editor.node(editor, [])
+        const res = toMarkdown(nodes, '', [root[0]])
+        const texts = Editor.nodes(editor, {
+          at: [],
+          match: n => n.text
+        })
+        runInAction(() => {
+          store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
+          store.count.characters = res.length
+        })
+        countTimerRef.current = null
+      }, 300)
+    }
   }, [])
   const change = useCallback((v: any[]) => {
     if (first.current) {
