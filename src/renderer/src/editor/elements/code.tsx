@@ -28,6 +28,14 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     options: langOptions
   })
 
+  const html = useMemo(() => {
+    if (store.webview) {
+      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), props.element.language || '')
+      html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
+      return html
+    }
+    return ''
+  }, [store])
   const setLanguage = useCallback(() => {
     setState({editable: false})
     props.element.children.forEach(l => cacheLine.delete(l))
@@ -47,7 +55,6 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     if (props.element.language === 'html' && props.element.render) return true
     return false
   }, [selected, props.element])
-
   return (
     <CodeCtx.Provider value={{lang: props.element.language || '', code: true}}>
       <div
@@ -116,13 +123,27 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             )}
           </div>
         }
-        <pre
-          data-bl-type={'code'}
-          className={'text-gray-200'}
-          data-bl-lang={props.element.language}
-        >
-          {child}
-        </pre>
+        {store.webview ?
+          <pre
+            data-bl-type={'code'}
+            className={`text-gray-200`}
+            style={{
+              paddingLeft: configStore.config.codeLineNumber ? 48 : 24,
+              paddingRight: 24
+            }}
+            data-bl-lang={props.element.language}
+            dangerouslySetInnerHTML={{__html: html}}
+          >
+          </pre> : (
+            <pre
+              data-bl-type={'code'}
+              className={'text-gray-200'}
+              data-bl-lang={props.element.language}
+            >
+              {child}
+            </pre>
+          )
+        }
       </div>
       {props.element.language === 'mermaid' &&
         <Mermaid lines={props.element.children} el={props.element}/>

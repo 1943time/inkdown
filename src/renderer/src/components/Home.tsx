@@ -11,6 +11,7 @@ import {About} from '../About'
 import {exportHtml} from '../editor/output/html'
 import {Characters} from './Characters'
 import {ExportEbook} from './ExportEbook'
+import {Webview} from './Webview'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {

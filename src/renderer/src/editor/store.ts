@@ -27,6 +27,7 @@ export class EditorStore {
     words: 0,
     characters: 0
   }
+  webview = false
   sel: BaseSelection | undefined
   focus = false
   openSearch = false
@@ -49,8 +50,9 @@ export class EditorStore {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
 
-  constructor(editor: Editor) {
+  constructor(editor: Editor, webview = false) {
     this.editor = editor
+    this.webview = webview
     makeAutoObservable(this, {
       searchRanges: false,
       editor: false,

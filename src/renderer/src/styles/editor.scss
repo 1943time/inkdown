@@ -43,6 +43,9 @@ a {
   }
   pre {
     margin: 0;
+    .line{
+      display: inline;
+    }
   }
   .high-text{
     border-radius: 1px;

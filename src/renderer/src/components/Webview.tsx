@@ -10,20 +10,24 @@ import {createEditor} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, EditorStoreContext} from '../editor/store'
 import {treeStore} from '../store/tree'
+import {observer} from 'mobx-react-lite'
 
-export function Webview() {
+export const Webview = observer(() => {
   const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
-  const store = useMemo(() => new EditorStore(editor), [])
+  const store = useMemo(() => new EditorStore(editor, true), [])
   const high = useHighlight()
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
+  const print = (filePath: string) => {
+    treeStore.openNewNote(filePath)
+    EditorUtils.reset(editor, treeStore.schemaMap.get(treeStore.currentTab.current!)?.state || [])
+    setTimeout(() => {
+      window.electron.ipcRenderer.send('print-pdf-ready', filePath)
+    }, 200)
+  }
   useEffect(() => {
     window.electron.ipcRenderer.on('print-pdf-load', (e, filePath: string) => {
-      treeStore.openNewNote(filePath)
-      EditorUtils.reset(editor, treeStore.schemaMap.get(treeStore.currentTab.current!)?.state || [])
-      setTimeout(() => {
-        window.electron.ipcRenderer.send('print-pdf-ready', filePath)
-      }, 200)
+      print(filePath)
     })
   }, [])
   return (
@@ -36,7 +40,6 @@ export function Webview() {
           <SetNodeToDecorations/>
           <Placeholder/>
           <Editable
-            decorate={high}
             spellCheck={false}
             readOnly={true}
             className={'w-full h-full'}
@@ -47,4 +50,4 @@ export function Webview() {
       </EditorStoreContext.Provider>
     </div>
   )
-}
+})
