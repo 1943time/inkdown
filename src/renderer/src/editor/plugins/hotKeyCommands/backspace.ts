@@ -77,7 +77,7 @@ export class BackspaceKey {
       }
     }
     if (Editor.hasPath(this.editor, start.path)) {
-      Transforms.select(this.editor, Editor.start(this.editor, start.path))
+      Transforms.select(this.editor, Editor.end(this.editor, start.path))
     } else if (Path.hasPrevious(start.path)) {
       Transforms.select(this.editor, Editor.end(this.editor, Path.previous(start.path)))
     } else {
