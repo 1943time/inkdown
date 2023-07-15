@@ -175,7 +175,10 @@ export const createAppMenus = () => {
           submenu:[
             {
               label: menusLabel.clearRecent,
-              role: 'clearRecentDocuments'
+              click: () => {
+                app.clearRecentDocuments()
+                BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
+              }
             }
           ]
         },

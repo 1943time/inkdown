@@ -12,6 +12,7 @@ import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
+import {appendRecentDir, appendRecentNote} from './db'
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
@@ -240,6 +241,9 @@ export class TreeStore {
       const node = this.files.find(n => !n.folder && n.filePath === filePath)
       if (node) {
         this.selectNote(node)
+        if (node.ext === 'md') {
+          appendRecentNote(filePath, treeStore.root.filePath)
+        }
       }
     } else {
       const node = createFileNode({
@@ -271,6 +275,7 @@ export class TreeStore {
         this.currentTab.history = []
         document.title = basename(path)
         this.openFolder(path, openFile)
+        appendRecentDir(path)
       } else {
         document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
         this.openNewNote(path)

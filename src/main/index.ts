@@ -4,7 +4,7 @@ import {lstatSync} from 'fs'
 import {is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
 import icon from '../../resources/icon.png?asset'
-import {baseUrl, registerApi} from './api'
+import {baseUrl, isDark, registerApi} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {getLocale, store} from './store'
@@ -34,6 +34,7 @@ const options: BrowserWindowConstructorOptions = {
 }
 const windows = new Map<number, WinOptions>()
 function createWindow(initial?: WinOptions): void {
+  const dark = isDark()
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   let openWidth = initial?.width ? initial.width < 800 ? 800 : initial.width : width
   let openHeight = initial?.height ? initial.height < 400 ? 400 : initial.width : height
@@ -41,6 +42,7 @@ function createWindow(initial?: WinOptions): void {
     width: openWidth,
     height: openHeight,
     titleBarStyle: 'hiddenInset',
+    backgroundColor: dark ? '#222222' : '#ffffff',
     ...options
   })
   window.webContents.session.webRequest.onBeforeSendHeaders(
@@ -66,7 +68,6 @@ function createWindow(initial?: WinOptions): void {
 
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
-    window.show()
   })
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -83,6 +84,8 @@ function createWindow(initial?: WinOptions): void {
     windows.delete(window.id)
   })
   windows.set(window.id, initial || {})
+
+  window.show()
 }
 
 let waitOpenFile = ''
@@ -126,7 +129,13 @@ app.whenReady().then(() => {
   registerMenus()
   registerApi()
   new AppUpdate()
-  ipcMain.on('create-window', () => createWindow())
+  ipcMain.on('create-window', (e, filePath?: string) => {
+    if (filePath) {
+      openFiles(filePath)
+    } else {
+      createWindow()
+    }
+  })
   // console.log(app.getPath('userData'))
   if (getLocale() === 'zh') app.commandLine.appendSwitch('lang', 'zh-CN')
   ipcMain.on('set-win', (e, data: WinOptions) => {

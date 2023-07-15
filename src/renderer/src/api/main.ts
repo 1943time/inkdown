@@ -1,7 +1,6 @@
 import * as Electron from 'electron'
 import {nanoid} from 'nanoid'
 import {dialog} from 'electron'
-import {is} from '@electron-toolkit/utils'
 import {configStore} from '../store/config'
 const ipcRenderer = window.electron.ipcRenderer
 
@@ -36,6 +35,9 @@ export const MainApi = {
     return openDialog({
       properties: ['openDirectory']
     })
+  },
+  getPath(type: 'home') {
+    return ipcRenderer.invoke('get-path', type)
   },
   sendToSelf(task: string, ...args: any[]) {
     ipcRenderer.send('send-to-self', task, ...args)

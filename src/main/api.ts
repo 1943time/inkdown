@@ -6,6 +6,20 @@ import {getLocale, store} from './store'
 import {writeFileSync} from 'fs'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
+export const isDark = (config?: any) => {
+  if (!config) config = store.get('config') || {}
+  let dark = false
+  if (typeof config.theme === 'string') {
+    if (config.theme === 'dark') {
+      dark = true
+    } else if (config.theme === 'system' && nativeTheme.shouldUseDarkColors) {
+      dark = true
+    }
+  } else {
+    dark = nativeTheme.shouldUseDarkColors
+  }
+  return dark
+}
 export const registerApi = () => {
   ipcMain.on('to-worker', (e, ...args:any[]) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
@@ -16,6 +30,9 @@ export const registerApi = () => {
     return app.getVersion()
   })
 
+  ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
+    return app.getPath(type)
+  })
   ipcMain.handle('get-env', () => {
     return {
       isPackaged: app.isPackaged,
@@ -34,16 +51,7 @@ export const registerApi = () => {
   ipcMain.handle('getConfig', () => {
     const config:any = store.get('config') || {}
     const theme = typeof config.theme === 'string' ? config.theme : nativeTheme.themeSource
-    let dark = false
-    if (typeof config.theme === 'string') {
-      if (config.theme === 'dark') {
-        dark = true
-      } else if (config.theme === 'system' && nativeTheme.shouldUseDarkColors) {
-        dark = true
-      }
-    } else {
-      dark = nativeTheme.shouldUseDarkColors
-    }
+    const dark = isDark(config)
     return {
       showLeading: !!config.showLeading,
       locale: getLocale(),
