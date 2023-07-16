@@ -35,29 +35,7 @@ class ConfigStore {
     })
     window.electron.ipcRenderer.on('changeConfig',  action((e, key: any, value: any) => {
       this.config[key] = value
-      if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
     }))
-  }
-  syncConfig() {
-    clearTimeout(this.timer)
-    this.timer = window.setTimeout(() => {
-      MainApi.getServerConfig().then(async res => {
-        if (res) {
-          const sdk = new window.api.sdk()
-          try {
-            await sdk.uploadFileByText('config.json', JSON.stringify({
-              codeTheme: this.config.codeTheme,
-              codeTabSize: this.config.codeTabSize,
-              codeLineNumber: this.config.codeLineNumber
-            }))
-          } catch (e) {
-            console.error('set share config fail')
-          } finally {
-            sdk.dispose()
-          }
-        }
-      })
-    }, 3000)
   }
   async setTheme(theme: typeof this.config.theme) {
     const dark = await MainApi.getSystemDark()
@@ -89,6 +67,7 @@ class ConfigStore {
         document.documentElement.classList.remove('dark')
         this.config.dark = false
       }
+      localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
       window.electron.ipcRenderer.send('setStore', 'config.theme', theme)
     })
   }
@@ -98,7 +77,6 @@ class ConfigStore {
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
     ipcRenderer.send('setStore', `config.${key}`, value)
-    if (['codeLineNumber', 'codeTabSize', 'codeTheme'].includes(key)) this.syncConfig()
   }
   initial() {
     return new Promise(resolve => {
@@ -108,6 +86,7 @@ class ConfigStore {
           ...this.config,
           ...res
         }
+        localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         this.locale = res.locale || 'en'
         if (this.config.dark) {
           mermaid.initialize({
