@@ -62,7 +62,8 @@ export const registerApi = () => {
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
-      showCharactersCount: config.showCharactersCount
+      showCharactersCount: config.showCharactersCount,
+      titleColor: config.titleColor
     }
   })
 
@@ -75,7 +76,11 @@ export const registerApi = () => {
     return nativeTheme.shouldUseDarkColors
   })
   ipcMain.on('setStore', (e, key: string, value: any) => {
-    store.set(key, value)
+    if (typeof value === 'undefined') {
+      store.delete(key)
+    } else {
+      store.set(key, value)
+    }
   })
   ipcMain.on('toggleShowLeading', (e, show: boolean) => {
     const showLeading = Menu.getApplicationMenu()?.getMenuItemById('showLeading')

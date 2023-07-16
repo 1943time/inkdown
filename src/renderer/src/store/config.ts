@@ -15,7 +15,8 @@ class ConfigStore {
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4,
     locale: 'en' as 'en' | 'zh',
-    showCharactersCount: true
+    showCharactersCount: true,
+    titleColor: undefined as undefined | 'h-emerald' | 'h-indigo' | 'h-amber'
   }
   locale = 'en' as 'en' | 'zh'
   timer = 0

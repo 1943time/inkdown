@@ -23,6 +23,23 @@ a {
   @apply pt-10;
 }
 
+.dark .content {
+  &.h-emerald {
+    h1,h2,h3,h4,h5 {
+      color: rgba(16, 185, 129, 1);
+    }
+  }
+  &.h-indigo {
+    h1,h2,h3,h4,h5{
+      color: rgba(99, 102, 241, .9);
+    }
+  }
+  &.h-amber {
+    h1,h2,h3,h4,h5{
+      color: rgba(245,158,11, .8);
+    }
+  }
+}
 .content {
   @extend .md-text;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
@@ -86,6 +103,21 @@ a {
   }
   h1,h2,h3,h4,h5,h6{
     position: relative;
+  }
+  &.h-emerald {
+    h1,h2,h3,h4,h5 {
+      color: rgba(16, 185, 129, .9);
+    }
+  }
+  &.h-indigo {
+    h1,h2,h3,h4,h5{
+      color: rgba(99, 102, 241, .9);
+    }
+  }
+  &.h-amber {
+    h1,h2,h3,h4,h5{
+      color: rgba(245,158,11, .9);
+    }
   }
   h1 {
     font-size: 2em;

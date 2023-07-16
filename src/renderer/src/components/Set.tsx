@@ -88,6 +88,39 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                {configStore.isZh ? '标题颜色' : 'Title Color'}
+              </div>
+              <div>
+                <div className={'flex space-x-3 items-center'}>
+                  <div
+                    className={`rounded-full p-0.5 ${!configStore.config.titleColor ? 'border-sky-500' : 'border-transparent'}  border-[1.5px]`}
+                    onClick={() => configStore.setConfig('titleColor', undefined)}
+                  >
+                    <div className={'rounded-full w-5 h-5 dark:bg-[rgba(255,255,255,0.85)] bg-[rgba(32,34,36,.9)]'}></div>
+                  </div>
+                  <div
+                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-emerald' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
+                    onClick={() => configStore.setConfig('titleColor', 'h-emerald')}
+                  >
+                    <div className={'rounded-full w-5 h-5 bg-[rgba(16,185,129,1)]'}></div>
+                  </div>
+                  <div
+                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-indigo' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
+                    onClick={() => configStore.setConfig('titleColor', 'h-indigo')}
+                  >
+                    <div className={'rounded-full w-5 h-5 bg-[rgba(99,102,241,.9)]'}></div>
+                  </div>
+                  <div
+                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-amber' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
+                    onClick={() => configStore.setConfig('titleColor', 'h-amber')}
+                  >
+                    <div className={'rounded-full w-5 h-5 bg-[rgba(245,158,11,.8)]'}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 {configStore.isZh ? '代码段显示行号' : 'Show Code Line Number'}
               </div>
               <div>
