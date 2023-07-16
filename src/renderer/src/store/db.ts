@@ -1,7 +1,7 @@
 import Dexie, {Table} from 'dexie'
 import {nanoid} from 'nanoid'
 export interface Ebook {
-  id?: string
+  id?: number
   map?: string
   strategy: 'auto' | 'custom'
   name: string
