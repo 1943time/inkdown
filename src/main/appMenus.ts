@@ -349,7 +349,7 @@ export const createAppMenus = () => {
         },
         {
           label: menusLabel.insertPicture,
-          accelerator: `${cmd}+Shift+i`,
+          accelerator: `${cmd}+p`,
           click: (e, win) => {
             dialog.showOpenDialog({
               properties: ['openFile'],

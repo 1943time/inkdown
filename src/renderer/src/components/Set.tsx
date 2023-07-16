@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite'
 import {Checkbox, Modal, Radio, Select, Slider} from 'antd'
 import {CloseOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
-import {useCallback} from 'react'
+import {useCallback, useEffect} from 'react'
 import {action} from 'mobx'
 import {MainApi} from '../api/main'
 
@@ -10,29 +10,41 @@ export const Set = observer(() => {
   const close = useCallback(action(() => {
     configStore.visible = false
   }), [])
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        close()
+      }
+    }
+    if (configStore.visible) {
+      window.addEventListener('keydown', esc)
+    } else {
+      window.removeEventListener('keydown', esc)
+    }
+  }, [configStore.visible])
   const [modal, context] = Modal.useModal()
   if (!configStore.visible) return null
   return (
-    <div className={`fixed inset-0 z-[100] bg-black/50`}>
+    <div className={`fixed inset-0 z-[100] dark:bg-black/30 bg-black/10`}>
       {context}
       <div
         className={'w-full h-full flex items-center justify-center overflow-auto'}
         onClick={close}
       >
         <div
-          className={'w-[500px] bg-white dark:bg-zinc-900 rounded border-gray-200 dark:border-gray-700 border p-4'}
+          className={'w-[500px] modal-panel p-4'}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-2 items-center'}>
+          <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b modal-border pb-2 items-center'}>
             <span>{configStore.isZh ? '偏好设置' : 'Preferences'}</span>
             <div
-              className={'p-1 hover:text-gray-700 dark:hover:text-gray-300 duration-200 hover:bg-gray-100/60 rounded dark:hover:bg-gray-500/30'}
+              className={'p-1 hover:text-gray-700 dark:hover:text-gray-300 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30'}
               onClick={close}
             >
               <CloseOutlined />
             </div>
           </div>
-          <div className={'divide-y divide-gray-200 dark:divide-gray-700 text-gray-600 dark:text-gray-300'}>
+          <div className={'divide-y divide-gray-200 dark:divide-gray-200/20 text-gray-600 dark:text-gray-300'}>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
                 {configStore.isZh ? '语言环境' : 'Locale'}

@@ -88,7 +88,7 @@ export const QuickOpen = observer(() => {
   return (
     <div className={'z-[1000] fixed inset-0 dark:bg-black/30 bg-black/10'} onClick={close}>
       <div
-        className={'mt-20 w-[600px] dark:bg-zinc-800 bg-white rounded-lg border border-gray-200 mx-auto dark:border-gray-200/10'}
+        className={'mt-20 w-[600px] modal-panel rounded-lg mx-auto'}
         onClick={e => e.stopPropagation()}
       >
         <input
@@ -102,7 +102,7 @@ export const QuickOpen = observer(() => {
             setState({query, filterRecords: state.records.filter(q => q.name.includes(query)), activeIndex: 0})
           }}
         />
-        <div className={'h-[1px] dark:bg-gray-200/10 bg-gray-200'}/>
+        <div className={'h-[1px] bg-gray-200 dark:bg-gray-200/20'}/>
         <div
           className={`p-2 relative overflow-y-auto max-h-[300px] ${!!state.filterRecords.length ? '' : 'hidden'}`}
           ref={scrollRef}>

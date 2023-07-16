@@ -57,3 +57,12 @@ html{
     background: rgba(6,182,212, .5);
   }
 }
+
+.modal-panel{
+  @extend .modal-border;
+  @apply dark:bg-zinc-900 bg-white rounded-lg border;
+}
+
+.modal-border{
+  @apply dark:border-gray-200/20 border-gray-300/80;
+}
