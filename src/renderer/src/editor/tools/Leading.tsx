@@ -30,6 +30,7 @@ export const Heading = observer(({note}: {
     for (let h of state().headings) {
       cache.delete(h.schema)
     }
+    setState({active: ''})
   }, [note])
   useDebounce(() => {
     if (note) {

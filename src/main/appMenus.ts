@@ -416,9 +416,15 @@ export const createAppMenus = () => {
           }
         },
         {
+          label: 'Issues',
+          click: () => {
+            shell.openExternal('https://github.com/1943time/bluestone/issues')
+          }
+        },
+        {
           label: 'Email',
           click: () => {
-            shell.openExternal("mailto:mdwriter@163.com?subject=&body=");
+            shell.openExternal("mailto:1943dejavu@gmail.com?subject=&body=");
           }
         }
       ]
