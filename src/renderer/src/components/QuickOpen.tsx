@@ -4,6 +4,7 @@ import {useLocalState} from '../hooks/useLocalState'
 import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
+import {configStore} from '../store/config'
 
 export const QuickOpen = observer(() => {
   const [state, setState] = useLocalState({
@@ -85,13 +86,13 @@ export const QuickOpen = observer(() => {
   }, [])
   if (!state.open) return null
   return (
-    <div className={'z-[1000] fixed inset-0 bg-black/30'} onClick={close}>
+    <div className={'z-[1000] fixed inset-0 dark:bg-black/30 bg-black/10'} onClick={close}>
       <div
-        className={'mt-20 w-[600px] bg-zinc-800 rounded-lg border b1 mx-auto'}
+        className={'mt-20 w-[600px] dark:bg-zinc-800 bg-white rounded-lg border border-gray-200 mx-auto dark:border-gray-200/10'}
         onClick={e => e.stopPropagation()}
       >
         <input
-          className={'bg-transparent outline-none h-10 w-full px-4 text-gray-200 placeholder-gray-200/30'}
+          className={'bg-transparent outline-none h-10 w-full px-4 dark:text-gray-200 text-gray-600 dark:placeholder-gray-200/30 placeholder-gray-300'}
           placeholder={'Find recent open note'}
           autoFocus={true}
           value={state.query}
@@ -101,7 +102,7 @@ export const QuickOpen = observer(() => {
             setState({query, filterRecords: state.records.filter(q => q.name.includes(query)), activeIndex: 0})
           }}
         />
-        <div className={'h-[1px] bg-gray-500'}/>
+        <div className={'h-[1px] dark:bg-gray-200/10 bg-gray-200'}/>
         <div
           className={`p-2 relative overflow-y-auto max-h-[300px] ${!!state.filterRecords.length ? '' : 'hidden'}`}
           ref={scrollRef}>
@@ -114,14 +115,14 @@ export const QuickOpen = observer(() => {
                 close()
                 treeStore.openNewNote(r.filePath)
               }}
-              className={`cursor-default px-3 py-1 rounded text-gray-300 text-sm ${state.activeIndex === i ? 'bg-gray-200/10' : ''}`}
+              className={`cursor-default px-3 py-1 rounded dark:text-gray-300 text-gray-600 text-sm ${state.activeIndex === i ? 'dark:bg-gray-200/10 bg-gray-200/60' : ''}`}
               key={r.id}>
               {r.name}
             </div>
           )}
         </div>
         <div className={`px-4 py-2 ${!state.filterRecords.length ? '' : 'hidden'}`}>
-          <div className={'text-gray-500 text-center text-sm'}>No recently opened history</div>
+          <div className={'text-gray-500 text-center text-sm'}>{configStore.isZh ? '没有最近打开的记录' : 'No recently opened history'}</div>
         </div>
       </div>
     </div>
