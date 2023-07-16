@@ -1,19 +1,14 @@
 import {observer} from 'mobx-react-lite'
-import {
-  CloseCircleOutlined,
-  FileAddOutlined,
-  FileSearchOutlined,
-  FileTextOutlined,
-  FolderOpenOutlined, FolderOutlined
-} from '@ant-design/icons'
+import {FileAddOutlined, FolderOpenOutlined, FolderOutlined} from '@ant-design/icons'
 import {MainApi} from '../api/main'
 import {configStore} from '../store/config'
 import logo from '../../../../resources/icon.png?asset'
 import {useEffect} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
-import {db, IRecent} from '../store/db'
+import {db} from '../store/db'
 import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
+import {existsSync} from 'fs'
 
 export const Empty = observer(() => {
   const [state, setState] = useLocalState({
@@ -21,8 +16,16 @@ export const Empty = observer(() => {
   })
   useEffect(() => {
     MainApi.getPath('home').then(home => {
-      db.recent.reverse().limit(5).toArray().then(res => {
-        setState({records: res.map(r => {
+      db.recent.limit(5).toArray().then(res => {
+        setState({records: res.sort((a, b) => a.time > b.time ? -1 : 1).
+          filter(r => {
+          try {
+            return existsSync(r.filePath)
+          } catch (e) {
+            db.recent.where('id').equals(r.id!).delete()
+            return false
+          }
+          }).sort((a, b) => a.time > b.time ? -1 : 1).map(r => {
             return {
               name: basename(r.filePath),
               filePath: r.filePath,

@@ -6,7 +6,7 @@ A WYSIWYG markdown editor.
 
 # Brief introduction
 
-BlueStone is an open source WYSIWYG Markdown editor，Currently only `Mac` system is supported，
+Bluestone is an open source WYSIWYG Markdown editor，Currently only `Mac` system is supported，
 use [gfm](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
 Supports light and dark color schemes, with the goal of improving the Markdown reading and editing experience.
 

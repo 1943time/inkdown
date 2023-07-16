@@ -36,6 +36,7 @@ export const createAppMenus = () => {
     file: '文件',
     create: '新建',
     createWindow: '新建窗口',
+    openQuickly: '快速打开',
     open: '打开',
     openRecent: '打开最近的文件',
     clearRecent: '清除',
@@ -75,6 +76,7 @@ export const createAppMenus = () => {
     file: 'File',
     create: 'Create',
     createWindow: 'New Window',
+    openQuickly: 'Open Quickly',
     open: 'Open',
     openRecent: 'Open Recent',
     clearRecent: 'Clear Items',
@@ -162,9 +164,17 @@ export const createAppMenus = () => {
         },
         {type: 'separator'},
         {
+          label: menusLabel.openQuickly,
+          accelerator: `${cmd}+o`,
+          click: () => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
+          }
+        },
+        {type: 'separator'},
+        {
           id: 'open',
           label: menusLabel.open,
-          accelerator: `${cmd}+o`,
+          accelerator: `${cmd}+option+o`,
           click: (menu, win) => {
             win?.webContents.send('open')
           }

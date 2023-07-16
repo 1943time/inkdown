@@ -12,6 +12,7 @@ import {exportHtml} from '../editor/output/html'
 import {Characters} from './Characters'
 import {ExportEbook} from './ExportEbook'
 import {appendRecentDir, db} from '../store/db'
+import {QuickOpen} from './QuickOpen'
 
 export const Home = observer(() => {
   const initial = useCallback(async () => {
@@ -87,6 +88,7 @@ export const Home = observer(() => {
       <About/>
       <Set/>
       <ExportEbook/>
+      <QuickOpen/>
     </div>
   )
 })

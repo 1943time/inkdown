@@ -178,6 +178,7 @@ export class TreeStore {
         console.error('parser err', e)
       }
     }
+    if (node.ext === 'md' && this.root) appendRecentNote(node.filePath, this.root.filePath)
     document.title = this.root ? `${basename(this.root.filePath)}-${basename(node.filePath)}` : basename(node.filePath)
     this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
     this.currentTab.history.push(node)
