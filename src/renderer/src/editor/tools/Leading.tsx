@@ -95,8 +95,8 @@ export const Heading = observer(({note}: {
       }}
     >
       <div className={`w-56 h-full pt-10 pb-10 pr-4 overflow-y-auto`}>
-        <div className={'dark:text-gray-500 text-gray-400 text-sm mb-4'}>{configStore.isZh ? '大纲' : 'Outline'}</div>
-        <div className={'space-y-1 dark:text-gray-400 text-gray-500 text-sm'}>
+        <div className={'text-gray-500 text-sm mb-4'}>{configStore.isZh ? '大纲' : 'Outline'}</div>
+        <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm'}>
           {state().headings.map(h =>
             <div
               key={h.key}
@@ -108,7 +108,7 @@ export const Heading = observer(({note}: {
                   })
                 }
               }}
-              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-sky-500' : 'dark:hover:text-gray-200 hover:text-gray-700'}`}>
+              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-sky-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
               {h.title}
             </div>
           )}

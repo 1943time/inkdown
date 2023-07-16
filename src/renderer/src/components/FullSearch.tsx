@@ -7,6 +7,7 @@ import {treeStore} from '../store/tree'
 import {Node} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {configStore} from '../store/config'
+import {SearchOutlined} from '@ant-design/icons'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -103,11 +104,12 @@ export const FullSearch = observer(() => {
   }, [treeStore.treeTab])
   return (
     <div className={'py-3 h-full'}>
-      <div className={'px-5'}>
+      <div className={'px-4 relative'}>
+        <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'} />
         <input
           value={treeStore.searchKeyWord}
           autoFocus={true}
-          className={'input h-8 w-full'}
+          className={'input h-8 w-full pl-7'}
           onChange={e => {
             treeStore.setState({searchKeyWord: e.target.value})
             search()
@@ -131,7 +133,7 @@ export const FullSearch = observer(() => {
           </div>
         }
         <div className={'space-y-3'}>
-          {state().searchResults.map((s, i) =>
+          {state().searchResults.slice(0, 100).map((s, i) =>
             <div key={i}>
               <div className={'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-default select-none'}>
                 <div className={'flex items-center'}>
@@ -157,7 +159,7 @@ export const FullSearch = observer(() => {
               </div>
               {!state().foldIndex.includes(i) &&
                 <div className={'space-y-2 text-xs dark:text-gray-400 text-gray-600 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'}>
-                  {s.results.map((r, j) =>
+                  {s.results.slice(0, 100).map((r, j) =>
                     <div
                       key={j}
                       onClick={() => toNode({el: r.el, file: s.file})}

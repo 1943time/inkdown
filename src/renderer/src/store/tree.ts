@@ -185,6 +185,7 @@ export class TreeStore {
     this.openParentDir(node.filePath)
     this.currentTab.index = this.currentTab.history.length - 1
     MainApi.setWin({openFile: node.filePath})
+    if (this.currentTab.store?.openSearch) this.currentTab.store?.setSearchText(this.currentTab.store.search.text)
     if (scroll) {
       this.currentTab.store!.container?.scroll({
         top: 0

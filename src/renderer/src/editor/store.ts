@@ -93,12 +93,12 @@ export class EditorStore {
     }
     return left
   }
-
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
     this.searchRanges = []
     if (!this.search.text) {
       this.search.currentIndex = 0
+      this.matchCount = 0
       this.refreshHighlight = !this.refreshHighlight
       return
     }
@@ -176,10 +176,10 @@ export class EditorStore {
       }
     }
   }
-  setSearchText(text: string) {
+  setSearchText(text?: string) {
     this.searchRanges = []
     this.search.currentIndex = 0
-    this.search.text = text
+    this.search.text = text || ''
     clearTimeout(this.searchTimer)
     this.searchTimer = window.setTimeout(() => {
       this.matchSearch()

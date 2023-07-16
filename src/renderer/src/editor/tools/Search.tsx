@@ -53,7 +53,7 @@ export const Search = observer(() => {
                 {configStore.isZh ? '下一个' : 'Next'}
               </div>
             </div>
-            <div className={'w-12 text-right'}>
+            <div className={'w-16 text-right'}>
               {!!store.matchCount &&
                 <div className={'space-x-0.5 text-sm'}>
                   <span>{store.search.currentIndex + 1}</span>
