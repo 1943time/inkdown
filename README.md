@@ -40,6 +40,9 @@ The result is as follows
 
 ![](./docs/assets/d4.png)
 
+## Preferences
 
+currently, the editor supports the following preferences
 
+![](./docs/assets/d5.png)
 

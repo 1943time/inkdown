@@ -40,5 +40,11 @@
 ![](./docs/assets/d4.png)
 
 
+## 偏好设置
+
+目前编辑器支持如下偏好设置
+
+![](./docs/assets/d5.png)
+
 
 
