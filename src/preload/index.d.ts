@@ -12,6 +12,7 @@ declare global {
     api: {
       sdk: typeof Sdk,
       md5: (str: string | Buffer) => string
+      // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string
       highlightCode(code: string, lang: string): IThemedToken[][]
       highlightCodeToString(code: string, lang: string): string
