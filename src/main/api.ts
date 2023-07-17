@@ -45,7 +45,6 @@ export const registerApi = () => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.getBrowserView()?.webContents.send('task', ...args)
   })
-
   ipcMain.handle('get-version', () => {
     return app.getVersion()
   })
@@ -111,7 +110,8 @@ export const registerApi = () => {
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: config.showCharactersCount,
-      titleColor: config.titleColor
+      titleColor: config.titleColor,
+      mas: process.mas || false
     }
   })
 

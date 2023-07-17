@@ -16,8 +16,10 @@ class ConfigStore {
     leadingLevel: 4,
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
-    titleColor: undefined as undefined | 'h-emerald' | 'h-indigo' | 'h-amber'
+    titleColor: undefined as undefined | 'h-emerald' | 'h-indigo' | 'h-amber',
+    mas: false
   }
+  masUpdate = false
   locale = 'en' as 'en' | 'zh'
   timer = 0
   get isZh() {
@@ -79,6 +81,11 @@ class ConfigStore {
     this.config[key] = value
     ipcRenderer.send('setStore', `config.${key}`, value)
   }
+  checkMasUpdate() {
+    // window.api.checkedLatest().then(res => {
+    //   console.log('res', res)
+    // })
+  }
   initial() {
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
@@ -87,6 +94,8 @@ class ConfigStore {
           ...this.config,
           ...res
         }
+        // if (this.config.mas) this.checkMasUpdate()
+        this.checkMasUpdate()
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         this.locale = res.locale || 'en'
         if (this.config.dark) {

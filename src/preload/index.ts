@@ -3,10 +3,11 @@ import { electronAPI } from '@electron-toolkit/preload'
 import {getHighlighter, Highlighter } from 'shiki'
 import {BUNDLED_LANGUAGES} from 'shiki'
 import * as fs from 'fs/promises'
-const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
-let highlighter:Highlighter | null = null
 import * as chokidar from 'chokidar'
 import {createHash} from 'crypto'
+const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
+let highlighter:Highlighter | null = null
+import got from 'got'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null
@@ -17,6 +18,9 @@ const api = {
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
+  // checkedLatest() {
+  //   return got.get('https://api.github.com/repos/1943time/bluestone/releases/latest').json<any>()
+  // },
   highlightCode(code: string, lang: string) {
     return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
   },
