@@ -7,3 +7,4 @@ resources/lib/current.json
 .env
 electron.vite.config.*.mjs
 dist
+web

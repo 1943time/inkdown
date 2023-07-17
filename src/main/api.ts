@@ -8,7 +8,7 @@ import icon from '../../resources/icon.png?asset'
 
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
-const docsPath = join(__dirname, '../renderer/docs.html')
+const docsPath = app.isPackaged ? join(app.getAppPath(), '..', 'web', 'docs.html') : join(__dirname, '../../web', 'docs.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 
 export const windowOptions: BrowserWindowConstructorOptions = {
