@@ -68,7 +68,7 @@ export const createAppMenus = () => {
     leading: '大纲',
     search: '搜索',
     help: '帮助',
-    doc: '文档'
+    doc: '使用文档'
   } : {
     about: 'About Bluestone',
     update: 'Check for Updates',
@@ -108,7 +108,7 @@ export const createAppMenus = () => {
     leading: 'Outline',
     search: 'Search',
     help: 'Help',
-    doc: 'Document'
+    doc: 'Documentation'
   }
 
   const menus: MenuOptions = [
@@ -403,12 +403,12 @@ export const createAppMenus = () => {
       label: menusLabel.help,
       role: 'help',
       submenu: [
-        // {
-        //   label: menusLabel.doc,
-        //   click: () => {
-        //     shell.openExternal('https://bluestone.md-writer.com/book/docs')
-        //   }
-        // },
+        {
+          label: menusLabel.doc,
+          click: () => {
+            ipcMain.emit('open-help-docs')
+          }
+        },
         {
           label: 'Github',
           click: () => {

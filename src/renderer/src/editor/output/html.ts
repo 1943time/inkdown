@@ -281,11 +281,6 @@ export const exportHtml = async (node: IFileItem) => {
   <header class="header">
     <div class="header-content"><a class="block header-name">${title}</a>
       <div class="flex items-center">
-        <div class="lg:hidden" id="menu"><span role="img" aria-label="menu"
-                                               class="anticon anticon-menu duration-200 hover:text-gray-600 text-gray-500 text-xl"><svg
-          data-icon="menu" width="1em" height="1em" fill="currentColor" aria-hidden="true" viewBox="64 64 896 896"><path
-          d="M904 160H120c-4.4 0-8 3.6-8 8v64c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-64c0-4.4-3.6-8-8-8zm0 624H120c-4.4 0-8 3.6-8 8v64c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-64c0-4.4-3.6-8-8-8zm0-312H120c-4.4 0-8 3.6-8 8v64c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-64c0-4.4-3.6-8-8-8z"/></svg></span>
-        </div>
         <div id="theme"
              class="group-hover:hidden border-gray-200 border-t bottom-0 dark:border-gray-200/20 fixed h-10 hidden items-center justify-center left-0 lg:block lg:border-none lg:h-auto lg:ml-4 lg:static lg:w-auto w-full">
           <svg width="20" aria-hidden="true"
@@ -308,7 +303,7 @@ export const exportHtml = async (node: IFileItem) => {
     <div class="content">
       <div class="real-content">${content}</div>
     </div>
-    <div class="leading xl:block">
+    <div class="leading lg:block">
       <div class="leading-title">On this page</div>
       <div class="leading-list">${outline}</div>
     </div>

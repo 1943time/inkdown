@@ -1,15 +1,13 @@
 import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
-import {join} from 'path'
 import {lstatSync} from 'fs'
 import {is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
-import icon from '../../resources/icon.png?asset'
-import {baseUrl, isDark, registerApi} from './api'
+import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {getLocale, store} from './store'
 import {AppUpdate} from './update'
-import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+
 type WinOptions = {
   width?: number
   height?: number
@@ -18,20 +16,7 @@ type WinOptions = {
   openFolder?: string
   openFile?: string
 }
-const options: BrowserWindowConstructorOptions = {
-  show: false,
-  autoHideMenuBar: true,
-  ...(process.platform === 'linux' ? {icon} : {}),
-  minWidth: 700,
-  minHeight: 400,
-  webPreferences: {
-    preload: join(__dirname, '../preload/index.js'),
-    sandbox: false,
-    nodeIntegration: true,
-    contextIsolation: false,
-    webviewTag: true
-  }
-}
+
 const windows = new Map<number, WinOptions>()
 function createWindow(initial?: WinOptions): void {
   const dark = isDark()
@@ -43,7 +28,7 @@ function createWindow(initial?: WinOptions): void {
     height: openHeight,
     titleBarStyle: 'hiddenInset',
     backgroundColor: dark ? '#222222' : '#ffffff',
-    ...options
+    ...windowOptions
   })
   window.webContents.session.webRequest.onBeforeSendHeaders(
     (details, callback) => {

@@ -23,6 +23,11 @@
 
 ![](./docs/assets/test1.gif)
 
+## 链接
+链接与图片支持文件路径，通常引入文件可以从文件树中拖入，或直接使用ctrl + v
+![](./docs/assets/link.gif)
+
+
 ## 导出
 
 支持导出 pdf,html,和电子书

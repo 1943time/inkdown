@@ -24,6 +24,10 @@ Text format can be converted with floating bar or syntax
 
 ![](./docs/assets/test1.gif)
 
+## Link
+Links and images support file paths, usually imported files can be dragged in from the file tree, or directly use ctrl + v
+![](./docs/assets/link.gif)
+
 ## Export
 
 Support exporting pdf, html, and ebook.

@@ -207,7 +207,7 @@ export const MdElements: Record<string, MdNode> = {
   },
   blockquote: {
     matchKey: ' ',
-    reg: /\s*>\s+([^\n]+)?/,
+    reg: /^\s*>\s+([^\n]+)?/,
     checkAllow: (ctx) => {
       const parent = Editor.parent(ctx.editor, ctx.node[1])
       return (Editor.isEditor(parent[0]) || parent[0].type === 'blockquote') && ctx.node[0].type === 'paragraph'

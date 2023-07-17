@@ -4,8 +4,28 @@ import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {getLocale, store} from './store'
 import {writeFileSync} from 'fs'
+import icon from '../../resources/icon.png?asset'
+
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
+const docsPath = join(__dirname, '../renderer/docs.html')
+import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+
+export const windowOptions: BrowserWindowConstructorOptions = {
+  show: false,
+  autoHideMenuBar: true,
+  ...(process.platform === 'linux' ? {icon} : {}),
+  minWidth: 700,
+  minHeight: 400,
+  webPreferences: {
+    preload: join(__dirname, '../preload/index.js'),
+    sandbox: false,
+    nodeIntegration: true,
+    contextIsolation: false,
+    webviewTag: true
+  }
+}
+
 export const isDark = (config?: any) => {
   if (!config) config = store.get('config') || {}
   let dark = false
@@ -29,7 +49,35 @@ export const registerApi = () => {
   ipcMain.handle('get-version', () => {
     return app.getVersion()
   })
-
+  ipcMain.on('open-help-docs', () => {
+    const dark = isDark()
+    const window = new BrowserWindow({
+      width: 1050,
+      height: 800,
+      backgroundColor: dark ? '#222222' : '#ffffff',
+      ...windowOptions,
+      autoHideMenuBar: false
+    })
+    window.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
+      },
+    )
+    window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          'Access-Control-Allow-Origin': ['*'],
+          ...details.responseHeaders,
+        },
+      })
+    })
+    window.webContents.setWindowOpenHandler((details) => {
+      shell.openExternal(details.url)
+      return {action: 'deny'}
+    })
+    window.loadFile(docsPath)
+    window.show()
+  })
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
   })
