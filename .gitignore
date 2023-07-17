@@ -8,3 +8,7 @@ resources/lib/current.json
 electron.vite.config.*.mjs
 dist
 web
+build/bluestone.provisionprofile
+build/entitlements.mas.inherit.plist
+build/entitlements.mas.plist
+build/entitlements.mas.loginhelper.plist

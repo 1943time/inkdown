@@ -3,7 +3,7 @@ productName: Bluestone
 copyright: 'Copyright © 2023 mdwriter@163.com'
 directories:
   buildResources: build
-afterSign: scripts/notarize.js
+#afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -33,12 +33,24 @@ nsis:
   createDesktopShortcut: always
 mac:
 #  identity: null
+  target:
+    - mas
+    - dmg
   entitlementsInherit: build/entitlements.mac.plist
+  provisioningProfile: build/bluestone.provisionprofile
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+mas:
+  hardenedRuntime: false
+  type: distribution
+  category: public.app-category.productivity
+  entitlements: build/entitlements.mas.plist
+  entitlementsInherit: build/entitlements.mas.inherit.plist
+  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
+
 linux:
   target:
     - AppImage
