@@ -122,13 +122,13 @@ export const createAppMenus = () => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
         },
-        {
-          label: menusLabel.update,
-          click: () => {
-            ipcMain.emit('check-updated')
-            BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
-          }
-        },
+        // {
+        //   label: menusLabel.update,
+        //   click: () => {
+        //     ipcMain.emit('check-updated')
+        //     BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
+        //   }
+        // },
         {type: 'separator'},
         {
           label: menusLabel.set,

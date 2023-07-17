@@ -6,7 +6,7 @@ import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {getLocale, store} from './store'
-import {AppUpdate} from './update'
+// import {AppUpdate} from './update'
 
 type WinOptions = {
   width?: number
@@ -113,7 +113,7 @@ app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
   registerApi()
-  new AppUpdate()
+  // new AppUpdate()
   ipcMain.on('create-window', (e, filePath?: string) => {
     if (filePath) {
       openFiles(filePath)
