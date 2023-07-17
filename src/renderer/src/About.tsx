@@ -1,4 +1,4 @@
-import {GithubOutlined} from '@ant-design/icons'
+import {CloseOutlined, GithubOutlined} from '@ant-design/icons'
 import {useSetState} from 'react-use'
 import {useEffect} from 'react'
 import icon from '../../../resources/icon.png?asset'
@@ -17,14 +17,20 @@ export function About() {
   if (!state.open) return null
   return (
     <div
-      className={'w-screen h-screen flex justify-center items-center z-[2000] fixed left-0 top-0'}
+      className={'w-screen h-screen flex justify-center items-center z-[2000] fixed left-0 top-0 dark:bg-black/30 bg-black/10'}
       onClick={() => {setState({open: false})}}
     >
       <div
-        className={`bg-white rounded-lg dark:text-gray-400 text-gray-600 border-gray-200
-        w-[300px] h-[200px] border dark:border-gray-200/10 dark:bg-zinc-800 flex flex-col justify-center py-5 items-center relative`}
+        className={`modal-panel text-gray-600 dark:text-gray-400
+        w-[300px] h-[200px] flex flex-col justify-center py-5 items-center relative`}
         onClick={e => e.stopPropagation()}
       >
+        <div
+          className={'text-sm absolute right-2 top-2 px-1 py-0.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 duration-200'}
+          onClick={() => {setState({open: false})}}
+        >
+          <CloseOutlined />
+        </div>
         <img src={icon} alt="" className={'w-14 h-14'}/>
         <div className={'mt-4 text-sm'}>bluestone</div>
         <div className={'flex items-center mt-3'}>

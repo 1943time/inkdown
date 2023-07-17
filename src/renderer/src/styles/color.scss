@@ -60,7 +60,7 @@ html{
 
 .modal-panel{
   @extend .modal-border;
-  @apply dark:bg-zinc-900 bg-white rounded-lg border;
+  @apply dark:bg-zinc-900 bg-white rounded-lg border shadow-lg shadow-gray-300/30 dark:shadow-gray-600/5;
 }
 
 .modal-border{

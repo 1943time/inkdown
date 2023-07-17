@@ -252,7 +252,17 @@ export class EnterKey {
         e.preventDefault()
       } else {
         e.preventDefault()
-        const checked = typeof parent[0].checked === 'boolean' ? false : undefined
+        let checked:boolean | undefined =  undefined
+        if (typeof parent[0].checked === 'boolean') {
+          if (sel.anchor.offset === 0) {
+            checked = parent[0].checked
+            Transforms.setNodes(this.editor, {
+              checked: false
+            }, {at: parent[1]})
+          } else {
+            checked = false
+          }
+        }
         Transforms.insertNodes(this.editor, {
           type: 'list-item',
           children: [{type: 'paragraph', children: EditorUtils.cutText(this.editor, sel.focus)}],

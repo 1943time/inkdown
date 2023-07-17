@@ -32,7 +32,7 @@ export const Set = observer(() => {
         onClick={close}
       >
         <div
-          className={'w-[500px] modal-panel p-4'}
+          className={'min-w-[500px] modal-panel p-4 w-4/5 max-w-[800px]'}
           onClick={(e) => e.stopPropagation()}
         >
           <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b modal-border pb-2 items-center'}>
@@ -203,7 +203,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '显示大纲' : 'Display the Outline'}
+                {configStore.isZh ? '显示大纲' : 'Show Outline'}
               </div>
               <div>
                 <Checkbox
