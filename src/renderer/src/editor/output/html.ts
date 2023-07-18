@@ -303,10 +303,12 @@ export const exportHtml = async (node: IFileItem) => {
     <div class="content">
       <div class="real-content">${content}</div>
     </div>
-    <div class="leading lg:block">
-      <div class="leading-title">On this page</div>
-      <div class="leading-list">${outline}</div>
-    </div>
+    ${!!outline ? `
+      <div class="leading lg:block">
+        <div class="leading-title">On this page</div>
+        <div class="leading-list">${outline}</div>
+      </div>
+    ` : ''}
   </div>
 </div>
 <script>${script}</script>
