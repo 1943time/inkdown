@@ -33,7 +33,7 @@ mac:
 #  identity: null
   target:
     - mas
-#    - dmg
+    - dmg
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
   provisioningProfile: build/bluestone.provisionprofile
