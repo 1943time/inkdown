@@ -31,7 +31,7 @@ nsis:
   createDesktopShortcut: always
 mac:
   target:
-#    - mas
+    - mas
     - dmg
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
@@ -42,14 +42,14 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-#mas:
-#  hardenedRuntime: false
-#  icon: build/icon.icns
-#  type: distribution
-#  category: public.app-category.productivity
-#  entitlements: build/entitlements.mas.plist
-#  entitlementsInherit: build/entitlements.mas.inherit.plist
-#  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
+mas:
+  hardenedRuntime: false
+  icon: build/icon.icns
+  type: distribution
+  category: public.app-category.productivity
+  entitlements: build/entitlements.mas.plist
+  entitlementsInherit: build/entitlements.mas.inherit.plist
+  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
 
 linux:
   target:
