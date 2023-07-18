@@ -100,7 +100,7 @@ export const registerApi = () => {
     const theme = typeof config.theme === 'string' ? config.theme : nativeTheme.themeSource
     const dark = isDark(config)
     return {
-      showLeading: !!config.showLeading,
+      showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
       locale: getLocale(),
       theme: theme,
       dark: dark,
