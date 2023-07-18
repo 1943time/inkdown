@@ -31,7 +31,7 @@ nsis:
   createDesktopShortcut: always
 mac:
   target:
-    - mas
+#    - mas
     - dmg
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
