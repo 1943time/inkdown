@@ -18,8 +18,6 @@ files:
 asarUnpack:
   - resources/*
 extraResources:
-  - from: node_modules/shiki
-    to: web/shiki
   - web
 fileAssociations:
   ext: md
@@ -35,9 +33,11 @@ mac:
 #  identity: null
   target:
     - mas
-    - dmg
+#    - dmg
+  icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
   provisioningProfile: build/bluestone.provisionprofile
+  minimumSystemVersion: 12.0.0
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -45,6 +45,7 @@ mac:
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
 mas:
   hardenedRuntime: false
+  icon: build/icon.icns
   type: distribution
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
