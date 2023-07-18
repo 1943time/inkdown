@@ -32,6 +32,7 @@ nsis:
 mac:
   target:
     - mas
+    - dmg
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
   provisioningProfile: build/bluestone.provisionprofile
