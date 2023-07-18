@@ -42,7 +42,6 @@ jobs:
       - name: Set env
         if: matrix.platform == 'mac'
         run: |
-          echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
           echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
           echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
           echo "CSC_LINK=${{ secrets.CSC_INSTALLER_LINK }}" >> $GITHUB_ENV
