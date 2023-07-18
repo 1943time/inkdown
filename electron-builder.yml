@@ -29,14 +29,9 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-#  export CSC_LINK=/Users/huangjie/Documents/apple/bluestone.p12
-#  export CSC_KEY_PASSWORD=Best1151
-#  export CSC_INSTALLER_LINK=/Users/huangjie/Documents/apple/mac-store.p12
-#  export CSC_INSTALLER_KEY_PASSWORD=Best100508
 mac:
   target:
     - mas
-    - dmg
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
   provisioningProfile: build/bluestone.provisionprofile

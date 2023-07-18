@@ -45,11 +45,9 @@ jobs:
           echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> $GITHUB_ENV
           echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
           echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
-          echo "CSC_LINK=${{ secrets.CERTIFICATE_OSX_APPLICATION }}" >> $GITHUB_ENV
-          echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
+          echo "CSC_LINK=${{ secrets.CSC_INSTALLER_LINK }}" >> $GITHUB_ENV
+          echo "CSC_KEY_PASSWORD=${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
-          echo "CSC_INSTALLER_LINK=${{ secrets.CSC_INSTALLER_LINK }}" >> $GITHUB_ENV
-          echo "CSC_INSTALLER_KEY_PASSWORD=${{ secrets.CSC_INSTALLER_KEY_PASSWORD }}" >> $GITHUB_ENV
           echo -n "${{ secrets.PROVISION }}" | base64 --decode > build/bluestone.provisionprofile
 
       #      - name: ls
