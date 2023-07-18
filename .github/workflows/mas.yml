@@ -52,6 +52,7 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }}
           CERTIFICATE_OSX_INSTALL: ${{secrets.CSC_INSTALLER_LINK}}
           INSTALL_PASSWORD: ${{secrets.CSC_INSTALLER_KEY_PASSWORD}}
+          CERTIFICATE_DISTRIBUTION: ${{secrets.CERTIFICATE_DISTRIBUTION}}
 #      - name: Set env
 #        if: matrix.platform == 'mac'
 #        run: |

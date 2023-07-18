@@ -3,11 +3,13 @@
 KEY_CHAIN=build.keychain
 CERTIFICATE_P12=certificate.p12
 CERTIFICATE_INSTALL_P12=certificate_install.p12
+CERTIFICATE_DISTRIBUTION_P12=certificate_distribution.P12
 
 # Recreate the certificate from the secure environment variable
 echo $CERTIFICATE_OSX_APPLICATION | base64 --decode > $CERTIFICATE_P12
 #security import $CERTIFICATE_P12 -k /Library/Keychains/System.keychain -P $CERTIFICATE_PASSWORD
 echo $CERTIFICATE_OSX_INSTALL | base64 --decode > $CERTIFICATE_INSTALL_P12
+echo $CERTIFICATE_DISTRIBUTION | base64 --decode > $CERTIFICATE_DISTRIBUTION_P12
 
 #create a keychain
 security create-keychain -p actions $KEY_CHAIN
@@ -20,6 +22,7 @@ security unlock-keychain -p actions $KEY_CHAIN
 
 security import $CERTIFICATE_P12 -k $KEY_CHAIN -P $CERTIFICATE_PASSWORD -T /usr/bin/codesign;
 security import $CERTIFICATE_INSTALL_P12 -k $KEY_CHAIN -P $INSTALL_PASSWORD -T /usr/bin/codesign;
+security import $CERTIFICATE_DISTRIBUTION_P12 -k $KEY_CHAIN -P $INSTALL_PASSWORD -T /usr/bin/codesign;
 
 security set-key-partition-list -S apple-tool:,apple: -s -k actions $KEY_CHAIN
 
