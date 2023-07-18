@@ -40,7 +40,7 @@ jobs:
           pnpm install --no-frozen-lockfile
 
       - name: Add MacOS certs
-        if: matrix.os == 'macos-latest' && startsWith(github.ref, 'refs/tags/')
+        if: matrix.platform == 'mac'
         run: |
           chmod +x osx-cert.sh && ./osx-cert.sh
           echo -n "${{ secrets.PROVISION }}" | base64 --decode > build/bluestone.provisionprofile
