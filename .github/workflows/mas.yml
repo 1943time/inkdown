@@ -44,8 +44,8 @@ jobs:
         run: |
           echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
           echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
-          echo "CSC_NAME=Developer ID Application: jie huang (GPJ86B8H94)" >> $GITHUB_ENV
-          echo "CSC_INSTALLER_NAME=3rd Party Mac Developer Application: jie huang (GPJ86B8H94)" >> $GITHUB_ENV
+          echo "CSC_NAME='Developer ID Application: jie huang (GPJ86B8H94)'" >> $GITHUB_ENV
+          echo "CSC_INSTALLER_NAME='3rd Party Mac Developer Application: jie huang (GPJ86B8H94)'" >> $GITHUB_ENV
           echo "CSC_LINK=${{ secrets.CERTIFICATE_OSX_APPLICATION }}" >> $GITHUB_ENV
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "CSC_INSTALLER_LINK=${{ secrets.CSC_INSTALLER_LINK }}" >> $GITHUB_ENV
