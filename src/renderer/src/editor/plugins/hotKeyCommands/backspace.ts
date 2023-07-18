@@ -1,8 +1,6 @@
 import {Editor, Element, Node, Path, Point, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import {Elements} from '../../../el'
-import {clearCodeCache} from '../useHighlight'
-
 export class BackspaceKey {
   constructor(
     private readonly editor: Editor
@@ -183,7 +181,7 @@ export class BackspaceKey {
               } else {
                 Transforms.delete(this.editor, {at: listPath})
               }
-              Transforms.insertNodes(this.editor, el, {
+              Transforms.insertNodes(this.editor, EditorUtils.copy(parent[0].children), {
                 at: listPath
               })
               Transforms.select(this.editor, Editor.start(this.editor, listPath))
