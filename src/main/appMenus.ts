@@ -381,7 +381,7 @@ export const createAppMenus = () => {
           label: menusLabel.leading,
           type: 'checkbox',
           id: 'showLeading',
-          checked: !!store.get('config.showLeading'),
+          checked: typeof store.get('config.showLeading') !== 'boolean' ? true : !!store.get('config.showLeading'),
           click: e => {
             store.set('config.showLeading', e.checked)
             BrowserWindow.getAllWindows().forEach(w => {

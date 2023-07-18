@@ -1,6 +1,6 @@
 appId: bluestone
 productName: Bluestone
-copyright: 'Copyright © 2023 mdwriter@163.com'
+copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
 #afterSign: scripts/notarize.js
@@ -29,8 +29,11 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+#  export CSC_LINK=/Users/huangjie/Documents/apple/bluestone.p12
+#  export CSC_KEY_PASSWORD=Best1151
+#  export CSC_INSTALLER_LINK=/Users/huangjie/Documents/apple/mac-store.p12
+#  export CSC_INSTALLER_KEY_PASSWORD=Best100508
 mac:
-#  identity: null
   target:
     - mas
     - dmg
