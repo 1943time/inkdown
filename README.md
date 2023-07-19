@@ -1,6 +1,6 @@
 # Bluestone
 A WYSIWYG markdown editor.
-[Download](https://github.com/1943time/bluestone/releases/latest)
+[Download (signed and notarized)](https://github.com/1943time/bluestone/releases/latest)
  | [中文文档](./ZH_README.md)
 
 
