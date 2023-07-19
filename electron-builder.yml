@@ -18,8 +18,6 @@ files:
 asarUnpack:
   - resources/*
 extraResources:
-  - from: node_modules/shiki
-    to: web/shiki
   - web
 fileAssociations:
   ext: md
