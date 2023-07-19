@@ -29,28 +29,33 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+asar: true
 mac:
   target:
-    - mas
-    - dmg
+    -
+      target: dmg
+      arch: universal
+    -
+      target: mas
+      arch: universal
   icon: build/icon.icns
   entitlementsInherit: build/entitlements.mac.plist
-  provisioningProfile: build/bluestone.provisionprofile
-  minimumSystemVersion: 12.0.0
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  minimumSystemVersion: 12.0
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+#  extendInfo:
+#    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+#    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+#    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
 mas:
   hardenedRuntime: false
   icon: build/icon.icns
   type: distribution
-  category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
   entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
-
+  provisioningProfile: build/bluestone.provisionprofile
 linux:
   target:
     - AppImage
