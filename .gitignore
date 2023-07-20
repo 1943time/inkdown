@@ -9,3 +9,5 @@ electron.vite.config.*.mjs
 dist
 web
 build/bluestone.provisionprofile
+build/testflight.provisionprofile
+build/beta.provisionprofile

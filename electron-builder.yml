@@ -9,7 +9,7 @@ files:
   - '!src/*'
   - '!unpackage/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
+  - '!{.npmrc,*.mjs.env,.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!scripts/*'
   - '!web/*'
@@ -23,7 +23,7 @@ fileAssociations:
   ext: md
   role: Editor
 win:
-  executableName: BlueStone
+  executableName: Bluestone
 nsis:
   artifactName: BlueStone-${os}-${arch}-${version}.${ext}
   shortcutName: ${productName}
@@ -32,10 +32,9 @@ nsis:
 asar: true
 mac:
   target:
-    -
-      target: dmg
-      arch: universal
-    -
+#    -
+#      target: dmg
+#    -
       target: mas
       arch: universal
   icon: build/icon.icns
@@ -55,6 +54,7 @@ mas:
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
   entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
+  gatekeeperAssess: false
   provisioningProfile: build/bluestone.provisionprofile
 linux:
   target:
