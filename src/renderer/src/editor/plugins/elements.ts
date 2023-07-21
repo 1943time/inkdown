@@ -87,28 +87,19 @@ export const MdElements: Record<string, MdNode> = {
     },
     reg: /^\s*(#{1,5})(\s+)([^\n]*)$/,
     run: ({editor, path, match, sel, startText}) => {
-      const removeLength = match[1].length
-      const p = Node.fragment(editor, {
-        anchor: {
-          path: [...path, 0],
-          offset: removeLength
-        },
-        focus: Editor.end(editor, path)
-      })
-
+      let text:any = [{text: ''}]
+      if (!Point.equals(sel.anchor, Editor.end(editor, path))) {
+        text = EditorUtils.cutText(editor, sel.anchor)
+      }
       Transforms.delete(editor, {
         at: path
       })
       Transforms.insertNodes(editor, {
-        type: 'head', level: match[1].length, children: p[0]?.children || [{text: ''}]
+        type: 'head', level: match[1].length, children: text
       }, {
         at: path
       })
-
-      Transforms.select(editor, {
-        path: [...path, 0, 0],
-        offset: sel!.anchor.offset - removeLength
-      })
+      Transforms.select(editor, Editor.start(editor, path))
       return true
     }
   },
