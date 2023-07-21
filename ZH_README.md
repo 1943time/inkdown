@@ -2,6 +2,7 @@
 一个所见即所得Markdown编辑器
 [Download](https://github.com/1943time/bluestone/releases/latest)
 
+如果你想立即体验, 可以打开 [web 版](https://ed.md-writer.com/), 推荐使用chrome浏览
 
 # 简介
 
