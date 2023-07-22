@@ -193,7 +193,7 @@ blockquote {
   padding: 4px 14px 4px 20px;
   position: relative;
   font-size: .9em;
-  @apply bg-gray-200/50 dark:bg-gray-700/20;
+  @apply bg-gray-200/50 dark:bg-gray-700/20 dark:text-gray-400 text-gray-600;
   blockquote{
     font-size: 1em;
   }

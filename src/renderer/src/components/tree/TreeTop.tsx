@@ -46,7 +46,7 @@ export const TreeTop = observer(() => {
         </div>
         <Tooltip placement={'bottom'} title={'切换显示侧栏'} mouseEnterDelay={1} arrow={false}>
           <div
-            className={'absolute right-2 top-1/2 -translate-y-1/2 dark:hover:bg-black/20 hover:bg-black/5 p-1 rounded'}
+            className={'absolute right-2 top-1/2 -translate-y-1/2 dark:hover:bg-gray-400/10 hover:bg-black/5 p-1 rounded'}
             onClick={() => {
               treeStore.setState({
                 fold: !treeStore.fold
