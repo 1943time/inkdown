@@ -1,4 +1,4 @@
-import {Subject} from 'rxjs'
+import {Observable, Subject} from 'rxjs'
 import {IObjectDidChange, IValueDidChange, observe} from 'mobx'
 import {useEffect} from 'react'
 
@@ -17,7 +17,7 @@ export const useObserve = <T extends object>(data: T, fn: (value: IObjectDidChan
   }, [])
 }
 
-export const useSubject = <T>(subject: Subject<T>, fn: (value: T) => void, deps: any[] = []) => {
+export const useSubject = <T>(subject: Subject<T> | Observable<T>, fn: (value: T) => void, deps: any[] = []) => {
   useEffect(() => {
     const cancel = subject.subscribe(fn)
     return () => cancel.unsubscribe()

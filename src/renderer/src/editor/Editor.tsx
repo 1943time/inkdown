@@ -18,7 +18,9 @@ import {runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
+import {debounceTime, Subject} from 'rxjs'
 
+const countThrottle$ = new Subject<any>()
 const initialValue: Descendant[] = [
   {
     type: 'paragraph',
@@ -43,7 +45,6 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(editor)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
-  const countTimerRef = useRef<number | null>(null)
   const save = useCallback(async () => {
     if (nodeRef.current && store.docChanged) {
       runInAction(() => {
@@ -61,22 +62,20 @@ export const MEditor = observer(({note}: {
 
   const count = useCallback((nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
-    if (countTimerRef.current === null) {
-      countTimerRef.current = window.setTimeout(() => {
-        const root = Editor.node(editor, [])
-        const res = toMarkdown(nodes, '', [root[0]])
-        const texts = Editor.nodes(editor, {
-          at: [],
-          match: n => n.text
-        })
-        runInAction(() => {
-          store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
-          store.count.characters = res.length
-        })
-        countTimerRef.current = null
-      }, 300)
-    }
+    const root = Editor.node(editor, [])
+    const res = toMarkdown(nodes, '', [root[0]])
+    const texts = Editor.nodes(editor, {
+      at: [],
+      match: n => n.text
+    })
+    runInAction(() => {
+      store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
+      store.count.characters = res.length
+    })
   }, [])
+
+  useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
+
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -93,7 +92,7 @@ export const MEditor = observer(({note}: {
       })
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
-      count(v)
+      countThrottle$.next(1)
       runInAction(() => {
         note.refresh = !note.refresh
         store.docChanged = true
@@ -113,6 +112,7 @@ export const MEditor = observer(({note}: {
       store.setState(state => state.pauseCodeHighlight = true)
       let data = treeStore.schemaMap.get(note)
       count(data?.state || [])
+      countThrottle$.next(1)
       first.current = true
       if (!data) data = treeStore.getSchema(note)
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)

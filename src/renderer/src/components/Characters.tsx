@@ -11,14 +11,14 @@ export const Characters = observer(() => {
       <span
         className={`w-20`}
         style={{
-          width: String(treeStore.currentTab.store?.count.words).length * 9 + 36
+          width: String(treeStore.currentTab.store?.count.words).length * 10 + 36
         }}
       >
         {treeStore.currentTab.store?.count.words} words
       </span>
       <span
         style={{
-          width: String(treeStore.currentTab.store!.count.characters || 0).length * 9 + 72
+          width: String(treeStore.currentTab.store!.count.characters || 0).length * 10 + 72
         }}
       >{treeStore.currentTab.store?.count.characters || 0} characters</span>
     </div>
