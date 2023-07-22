@@ -117,7 +117,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                   onKeyDown={e => {
                     if (e.key === 'Enter') saveNote(c)
                   }}
-                  placeholder={`${c.folder ? configStore.isZh ? '请输入文件夹名' : 'Please enter a folder name' : configStore.isZh ? '请输入笔记名称' : 'Please enter a name for the note'}`}
+                  placeholder={`${c.folder ? configStore.isZh ? '输入文件夹名' : 'enter a folder name' : configStore.isZh ? '输入文档名称' : 'enter a doc name'}`}
                 /> :
                 <>
                   {c.folder &&

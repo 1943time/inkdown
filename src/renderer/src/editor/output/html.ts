@@ -95,7 +95,6 @@ const eBookTemplate = async (data: {
   name: string
 }) => {
   const {script, css} = await getAssets()
-  window.api.copyToClipboard(JSON.stringify(data.map))
   return `
 <html lang="en">
 <head>

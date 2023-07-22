@@ -25,7 +25,7 @@ export const TreeTop = observer(() => {
         <div className={`h-full space-x-3 items-center flex duration-200 ${treeStore.fold ? 'opacity-0 -translate-x-10' : ''}`}>
           <Tooltip placement={'bottom'} title={'文件树'} mouseEnterDelay={1} arrow={false}>
             <div
-              className={`p-1 rounded  ${treeStore.treeTab === 'folder' ? 'dark:bg-black/30 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-black/20 hover:bg-black/5'}`}
+              className={`p-1 rounded  ${treeStore.treeTab === 'folder' ? 'dark:bg-gray-300/10 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-gray-400/10 hover:bg-black/5'}`}
               onClick={() => {
                 treeStore.setState({treeTab: 'folder'})
               }}
@@ -35,7 +35,7 @@ export const TreeTop = observer(() => {
           </Tooltip>
           <Tooltip placement={'bottom'} title={'搜索'} mouseEnterDelay={1} arrow={false}>
             <div
-              className={`p-1 rounded  ${treeStore.treeTab === 'search' ? 'dark:bg-black/30 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-black/20 hover:bg-black/5'}`}
+              className={`p-1 rounded  ${treeStore.treeTab === 'search' ? 'dark:bg-gray-300/10 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-gray-400/10 hover:bg-black/5'}`}
               onClick={() => {
                 treeStore.setState({treeTab: 'search'})
               }}

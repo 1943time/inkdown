@@ -72,7 +72,7 @@ export const MEditor = observer(({note}: {
       store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
       store.count.characters = res.length
     })
-  }, [])
+  }, [editor])
 
   useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
 
@@ -92,7 +92,7 @@ export const MEditor = observer(({note}: {
       })
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
-      countThrottle$.next(1)
+      countThrottle$.next(v)
       runInAction(() => {
         note.refresh = !note.refresh
         store.docChanged = true
@@ -111,8 +111,9 @@ export const MEditor = observer(({note}: {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
       let data = treeStore.schemaMap.get(note)
-      count(data?.state || [])
-      countThrottle$.next(1)
+      setTimeout(() => {
+        count(data?.state || [])
+      })
       first.current = true
       if (!data) data = treeStore.getSchema(note)
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
