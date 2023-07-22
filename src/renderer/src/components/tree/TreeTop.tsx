@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../../store/tree'
-import Folder from '../../../assets/ReactIcon/Folder'
-import ISearch from '../../../assets/ReactIcon/ISearch'
-import Collapse from '../../../assets/ReactIcon/Collapse'
+import {treeStore} from '../../store/tree'
+import Folder from '../../assets/ReactIcon/Folder'
+import ISearch from '../../assets/ReactIcon/ISearch'
+import Collapse from '../../assets/ReactIcon/Collapse'
 import {Tooltip} from 'antd'
 import {useEffect, useState} from 'react'
 

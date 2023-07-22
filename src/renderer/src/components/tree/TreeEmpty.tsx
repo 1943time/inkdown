@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
-import {MainApi} from '../../../api/main'
-import {treeStore} from '../../../store/tree'
+import {MainApi} from '../../api/main'
+import {treeStore} from '../../store/tree'
 import {FolderOpenOutlined} from '@ant-design/icons'
-import {configStore} from '../../../store/config'
+import {configStore} from '../../store/config'
 export const TreeEmpty = observer(() => {
   return (
     <div className={'h-full flex justify-center items-center text-gray-400'}>

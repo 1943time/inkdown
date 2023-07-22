@@ -1,12 +1,13 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../../store/tree'
+import {treeStore} from '../../store/tree'
 import {PlusCircleOutlined} from '@ant-design/icons'
-import {IFileItem} from '../../../index'
-import ArrowRight from '../../../assets/ReactIcon/ArrowRight'
+import {IFileItem} from '../../index'
+import ArrowRight from '../../assets/ReactIcon/ArrowRight'
 import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
-import {MainApi} from '../../../api/main'
+import {MainApi} from '../../api/main'
 import {Input} from 'antd'
+import {configStore} from '../../store/config'
 
 export const TreeRender = observer(() => {
   const context = useCallback(() => {
@@ -116,7 +117,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                   onKeyDown={e => {
                     if (e.key === 'Enter') saveNote(c)
                   }}
-                  placeholder={`${c.folder ? '请输入文件夹名' : '请输入笔记名称'}`}
+                  placeholder={`${c.folder ? configStore.isZh ? '请输入文件夹名' : 'Please enter a folder name' : configStore.isZh ? '请输入笔记名称' : 'Please enter a name for the note'}`}
                 /> :
                 <>
                   {c.folder &&
