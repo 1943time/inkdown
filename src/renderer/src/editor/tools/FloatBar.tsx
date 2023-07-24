@@ -159,7 +159,7 @@ export const FloatBar = observer(() => {
               )
               closeLink()
             }}
-            className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500'}
+            className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500 ml-2'}
           />
         </div> :
         <div className={'w-[200px] justify-center items-center h-full flex space-x-0.5'}>
