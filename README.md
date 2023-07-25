@@ -3,7 +3,7 @@ A WYSIWYG markdown editor.
 [Download (signed and notarized)](https://github.com/1943time/bluestone/releases/latest)
  | [中文文档](./ZH_README.md)
 
-If you want to experience it immediately, can open the [web version](https://ed.md-writer.com/), it is recommended to use chrome
+If you want to experience it immediately, can open the [web version](https://ed.bluestone.blog), it is recommended to use chrome
 
 # Brief introduction
 
