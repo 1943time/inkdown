@@ -28,7 +28,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     lang: props.element.language,
     editable: false,
     options: langOptions,
-    hide: true
+    hide: props.element.katex || props.element.render || props.element.language === 'mermaid'
   })
 
   const html = useMemo(() => {
