@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import {Element} from 'slate'
 import fs from 'fs'
-import {Content, Table, List} from 'mdast'
+import {Content, Table} from 'mdast'
 import {CustomLeaf, Elements, MediaNode, TableNode} from '../../el'
 
 const parser = unified()
@@ -47,29 +47,41 @@ const parseTable = (table: Table) => {
   }
   return node
 }
-const parserBlock = (nodes: Content[], top = false) => {
+const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   let els:(Elements | Text) [] = []
   let el:Element | null | Element[] = null
   let preNode:null | Content = null
   for (let n of nodes) {
     switch (n.type) {
       case 'heading':
-        el = {type: 'head', level: n.depth, children: parserBlock(n.children)}
+        el = {type: 'head', level: n.depth, children: parserBlock(n.children, false, n)}
         break
       case 'html':
-        el = {text: n.value}
+        if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
+          el = {
+            type: 'code', language: 'html', render: true,
+            children: n.value.split('\n').map(s => {
+              return {
+                type: 'code-line',
+                children: [{text: s}]
+              }
+            })
+          }
+        } else {
+          el = {text: n.value}
+        }
         break
       case 'image':
         el = {type: 'media', children: [{text: ''}], url: decodeURIComponent(n.url), alt: n.alt} as MediaNode
         break
       case 'list':
-        el = {type: 'list', order: n.ordered, children: parserBlock(n.children)}
+        el = {type: 'list', order: n.ordered, children: parserBlock(n.children, false, n)}
         break
       case 'listItem':
-        el = {type: 'list-item', checked: n.checked, children: n.children?.length ? parserBlock(n.children) : [{type: 'paragraph', children: [{text: ''}]}]}
+        el = {type: 'list-item', checked: n.checked, children: n.children?.length ? parserBlock(n.children, false, n) : [{type: 'paragraph', children: [{text: ''}]}]}
         break
       case 'paragraph':
-        el = {type: 'paragraph', children: parserBlock(n.children)}
+        el = {type: 'paragraph', children: parserBlock(n.children, false, n)}
         break
       case 'inlineCode':
         el = {text:n.value, code: true}
@@ -100,7 +112,7 @@ const parserBlock = (nodes: Content[], top = false) => {
         }
         break
       case 'blockquote':
-        el = {type: 'blockquote', children: parserBlock(n.children)}
+        el = {type: 'blockquote', children: parserBlock(n.children, false, n)}
         break
       case 'table':
         el = parseTable(n)
@@ -144,7 +156,9 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
-    return {schema: parserBlock(root.children, true), nodes: root.children}
+    const schema = parserBlock(root.children, true)
+    console.log('root', root.children, schema)
+    return {schema: schema, nodes: root.children}
   } catch (e) {
     return {schema: [], nodes: []}
   }

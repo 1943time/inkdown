@@ -10,8 +10,10 @@ import {Katex} from './CodeUI/Katex/Katex'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {configStore} from '../../store/config'
-import {Editor, Node, Transforms} from 'slate'
+import {Editor, Node, Path, Transforms} from 'slate'
 import {EyeOutlined} from '@ant-design/icons'
+import {useSubject} from '../../hooks/subscribe'
+import {selChange$} from '../plugins/useOnchange'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
@@ -25,7 +27,8 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   const [state, setState] = useGetSetState({
     lang: props.element.language,
     editable: false,
-    options: langOptions
+    options: langOptions,
+    hide: true
   })
 
   const html = useMemo(() => {
@@ -48,21 +51,24 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     )
   }, [props.element, props.element.children, store.refreshHighlight])
 
-  const hide = useMemo(() => {
-    if (selected) return false
-    if (props.element.language === 'mermaid') return true
-    if (props.element.katex) return true
-    if (props.element.language === 'html' && props.element.render) return true
-    return false
-  }, [selected, props.element])
+  useSubject(selChange$, (ctx) => {
+    if (props.element.katex || props.element.render || props.element.language === 'mermaid') {
+      if (ctx.node && ctx.node[0].type === 'code-line' && ctx.sel) {
+        const show = Path.equals(ReactEditor.findPath(store.editor, props.element), Path.parent(ctx.node[1]))
+        setState({hide: !show})
+        return
+      }
+      setState({hide: true})
+    }
+  }, [props.element])
   return (
     <CodeCtx.Provider value={{lang: props.element.language || '', code: true}}>
       <div
         {...props.attributes}
         data-be={'code'}
-        className={`${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <div
-          className={`absolute z-10 right-2 top-1 flex items-center select-none ${props.element.language !== 'mermaid' || selected ? '' : 'hidden'}`}
+          className={`absolute z-10 right-2 top-1 flex items-center select-none`}
           contentEditable={false}>
           {state().editable &&
             <AutoComplete
@@ -90,22 +96,15 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }
           {!state().editable &&
             <>
-              {props.element.language === 'html' &&
-                <Tooltip mouseEnterDelay={1} title={'render'}>
-                  <EyeOutlined
-                    className={`mr-2 ${props.element.render ? 'text-sky-500 hover:text-sky-600' : 'text-gray-400 hover:text-gray-300'} duration-200`}
-                    onClick={() => {
-                      update({
-                        render: !props.element.render
-                      })
-                    }}
-                  />
+              {props.element.language === 'html' && props.element.render &&
+                <Tooltip mouseEnterDelay={1} title={'render html'}>
+                  <EyeOutlined className={`mr-2 text-sky-500 hover:text-sky-600 duration-200`}/>
                 </Tooltip>
               }
               <div
                 className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
                 onClick={() => {
-                  if (!props.element.katex) setState({editable: true})
+                  if (!props.element.katex && !props.element.render) setState({editable: true})
                 }}
               >
                 {props.element.language ?
@@ -153,8 +152,9 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       }
       {props.element.language === 'html' && !!props.element.render &&
         <div
-          className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded'}
-          onClick={() => {
+          className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded leading-5'}
+          onClick={(e) => {
+            e.stopPropagation()
             Transforms.select(editor, Editor.start(editor, ReactEditor.findPath(editor, props.element)))
           }}
           dangerouslySetInnerHTML={{__html: props.element.children?.map(c => Node.string(c)).join('\n')}}

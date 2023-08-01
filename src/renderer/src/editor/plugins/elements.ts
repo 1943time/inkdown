@@ -192,7 +192,7 @@ export const MdElements: Record<string, MdNode> = {
   },
   hr: {
     reg: /^\s*\*\*\*|---|___\s*/,
-    checkAllow: ctx => EditorUtils.isTop(ctx.editor, ctx.node[1]) && ctx.node[0].type === 'paragraph',
+    checkAllow: ctx => ctx.node[0].type === 'paragraph',
     run: ({editor, path}) => {
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {type: 'hr', children: [{text: ''}]}, {at: path})

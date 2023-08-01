@@ -66,6 +66,7 @@ export const MLeaf = (props: RenderLeafProps) => {
     if (leaf.strikethrough) children = <s>{children}</s>
     if (leaf.italic) children = <i>{children}</i>
     if (leaf.highlight) className = 'high-text'
+    if (leaf.html) className += ' dark:text-gray-500 text-gray-400'
     if (leaf.current) {
       style.background = '#f59e0b'
     }

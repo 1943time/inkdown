@@ -64,6 +64,24 @@ export const useKeyboard = (editor: Editor) => {
             tab.run(e)
             break
           case 'Enter':
+            const [node] = Editor.nodes<any>(editor, {
+              match: n => Element.isElement(n),
+              mode: 'lowest'
+            })
+            if (node[0].type === 'paragraph') {
+              const str = Node.string(node[0])
+              if (/^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
+                Transforms.delete(editor, {at: node[1]})
+                Transforms.insertNodes(editor, {
+                  type: 'code', language: 'html', render: true,
+                  children: str.split('\n').map(s => {
+                    return {type: 'code-line', children: [{text: s}]}
+                  })
+                }, {select: true})
+                e.preventDefault()
+                return
+              }
+            }
             enter.run(e)
             break
         }
