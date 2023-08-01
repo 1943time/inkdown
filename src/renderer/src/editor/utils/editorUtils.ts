@@ -10,7 +10,7 @@ export class EditorUtils {
   }
 
   static isDirtLeaf(leaf: CustomLeaf) {
-    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url
+    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html
   }
 
   static isTop(editor: Editor, path: Path) {
