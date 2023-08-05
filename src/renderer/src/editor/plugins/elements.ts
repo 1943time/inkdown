@@ -122,7 +122,6 @@ export const MdElements: Record<string, MdNode> = {
     reg: /!\[([^]*)]\(([^)]+)\)\s*/,
     matchKey: ')',
     run: ({editor, match, sel, startText}) => {
-      console.log('match', match, startText)
       Transforms.select(editor, {
         anchor: {path: sel.anchor.path, offset: match.index!},
         focus: {path: sel.anchor.path, offset: match.index! + startText.length}

@@ -25,7 +25,6 @@ export class EditorUtils {
       const node = Editor.node(editor, from)
       // 刷新code元素缓存
       if (node[0].type === 'code') clearCodeCache(node[0])
-      console.log('mode', from, to, index)
       Transforms.moveNodes(editor, {
         at: from,
         to: [...to, index]
