@@ -61,7 +61,7 @@ export class EditorUtils {
 
   static clearMarks(editor: Editor, split = false) {
     if (!editor.selection) return
-    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold'], {
+    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold', 'textColor'], {
       split,
       match: Text.isText
     })

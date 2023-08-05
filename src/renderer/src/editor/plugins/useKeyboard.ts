@@ -6,6 +6,7 @@ import {BackspaceKey} from './hotKeyCommands/backspace'
 import {MatchKey} from './hotKeyCommands/match'
 import {keyArrow} from './hotKeyCommands/arrow'
 import {isMix} from '../output'
+import {EditorUtils} from '../utils/editorUtils'
 
 export const useKeyboard = (editor: Editor) => {
   return useMemo(() => {
@@ -56,6 +57,9 @@ export const useKeyboard = (editor: Editor) => {
         }
       }
       match.run(e)
+      if (e.metaKey && e.key.toLowerCase() === 'backspace') {
+        EditorUtils.clearMarks(editor)
+      }
       if (e.key.startsWith('Arrow')) {
         keyArrow(editor, e)
       } else {
@@ -77,7 +81,7 @@ export const useKeyboard = (editor: Editor) => {
                   children: str.split('\n').map(s => {
                     return {type: 'code-line', children: [{text: s}]}
                   })
-                }, {select: true})
+                }, {select: true, at: node[1]})
                 e.preventDefault()
                 return
               }

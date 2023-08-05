@@ -12,7 +12,7 @@ export const Nav = observer(() => {
   }, [treeStore.openNote])
   return (
     <div
-      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none'}
+      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
       style={{paddingLeft: treeStore.fold ? 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {

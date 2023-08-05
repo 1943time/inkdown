@@ -34,3 +34,10 @@
     color: white !important;
   }
 }
+
+.move {
+  cursor: col-resize;
+  .width-duration {
+    transition: none;
+  }
+}

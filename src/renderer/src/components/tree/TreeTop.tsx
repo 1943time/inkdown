@@ -17,7 +17,7 @@ export const TreeTop = observer(() => {
   }, [])
   return (
     <div
-      className={`fixed left-0 top-0 z-20 h-[40px] ${full ? 'pl-5' : 'pl-20'} duration-200`}
+      className={`fixed left-0 top-0 z-20 h-[40px] ${full ? 'pl-5' : 'pl-20'} duration-200 width-duration`}
       style={{width: treeStore.fold ? 114 : treeStore.width}}
     >
       <div className={'flex h-full items-center'}>

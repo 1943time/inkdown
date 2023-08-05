@@ -13,6 +13,7 @@ import {Characters} from './Characters'
 import {ExportEbook} from './ExportEbook'
 import {appendRecentDir, db} from '../store/db'
 import {QuickOpen} from './QuickOpen'
+import {action} from 'mobx'
 
 export const Home = observer(() => {
   const initial = useCallback(async () => {
@@ -75,9 +76,32 @@ export const Home = observer(() => {
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
     }
   }, [])
+
+  const moveStart = useCallback((e: React.MouseEvent) => {
+    const left = e.clientX
+    const startWidth = treeStore.width
+    document.documentElement.classList.add('move')
+    const move = action((e: MouseEvent) => {
+      let width = startWidth + (e.clientX - left)
+      if (width < 220) width = 220
+      if (width > 500) width = 500
+      treeStore.width = width
+    })
+    window.addEventListener('mousemove', move)
+    window.addEventListener('mouseup', () => {
+      window.removeEventListener('mousemove', move)
+      document.documentElement.classList.remove('move')
+      localStorage.setItem('tree-width', String(treeStore.width))
+    }, {once: true})
+  }, [])
   return (
     <div className={'flex h-screen overflow-hidden'}>
       <Tree/>
+      <div
+        className={'fixed w-1 bg-transparent z-[200] left-0 top-0 h-screen -ml-0.5 cursor-col-resize select-none'}
+        style={{left: treeStore.width}}
+        onMouseDown={moveStart}
+      />
       <div className={'flex-1 overflow-hidden flex flex-col pt-10 relative'}>
         <Nav/>
         {treeStore.tabs.map((t) =>

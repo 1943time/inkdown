@@ -16,7 +16,7 @@ export const Tree = observer(() => {
     <div className={'relative z-[60]'}>
       <TreeTop/>
       <div
-        className={'flex-shrink-0 b1 tree-bg h-full border-r pt-[39px] duration-200 overflow-hidden'}
+        className={'flex-shrink-0 b1 tree-bg h-full border-r pt-[39px] duration-200 overflow-hidden width-duration'}
         style={{width: treeStore.fold ? 0 : treeStore.width}}
       >
         <div style={{width: treeStore.width}} className={'h-full border-t b1'}>
