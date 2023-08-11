@@ -76,7 +76,7 @@ export const EditorFrame = observer(({tab}: {
         }}
       >
         <div
-          className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
+          className={`items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
           onClick={click}
         >
           {tab.current ?
