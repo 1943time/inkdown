@@ -18,8 +18,7 @@
     "build:win": "npm run npmbuild && electron-builder --win --config",
     "build:mac": "electron-builder --macos --arm64 --x64 --config",
     "build:linux": "electron-builder --linux --config",
-    "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
-    "sync-css": "cp -f src/renderer/src/styles/color.scss ../bs-preview/src/styles && cp -f src/renderer/src/styles/editor.scss ../bs-preview/src/styles"
+    "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
