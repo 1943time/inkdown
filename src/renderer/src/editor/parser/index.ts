@@ -2,7 +2,7 @@ import {unified} from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
-import {Element} from 'slate'
+import {Element, Node} from 'slate'
 import fs from 'fs'
 import {Content, Table} from 'mdast'
 import {CustomLeaf, Elements, MediaNode, TableNode} from '../../el'
@@ -78,7 +78,17 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {type: 'list', order: n.ordered, children: parserBlock(n.children, false, n)}
         break
       case 'listItem':
-        el = {type: 'list-item', checked: n.checked, children: n.children?.length ? parserBlock(n.children, false, n) : [{type: 'paragraph', children: [{text: ''}]}]}
+        const children = n.children?.length ? parserBlock(n.children, false, n) : [{type: 'paragraph', children: [{text: ''}]}] as any
+        if (children[0].type === 'paragraph' && children[0].children[0]?.text) {
+          const text = children[0].children[0]?.text
+          const m = text.match(/^\[([x\s])]/)
+          if (m) {
+            el = {type: 'list-item', checked: m ? m[1] === 'x' : undefined, children: children}
+            children[0].children[0].text = text.replace(/^\[([x\s])]/, '')
+            break
+          }
+        }
+        el = {type: 'list-item', checked: n.checked, children: children}
         break
       case 'paragraph':
         el = {type: 'paragraph', children: parserBlock(n.children, false, n)}
