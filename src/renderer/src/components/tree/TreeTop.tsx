@@ -1,9 +1,9 @@
 import {observer} from 'mobx-react-lite'
 import {treeStore} from '../../store/tree'
-import Folder from '../../assets/ReactIcon/Folder'
-import ISearch from '../../assets/ReactIcon/ISearch'
-import Collapse from '../../assets/ReactIcon/Collapse'
 import {useEffect, useState} from 'react'
+import Folder from '../../icons/Folder'
+import ISearch from '../../icons/ISearch'
+import Collapse from '../../icons/Collapse'
 
 export const TreeTop = observer(() => {
   const [full, setFull] = useState(false)

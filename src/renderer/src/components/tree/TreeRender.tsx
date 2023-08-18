@@ -2,12 +2,12 @@ import {observer} from 'mobx-react-lite'
 import {treeStore} from '../../store/tree'
 import {PlusCircleOutlined} from '@ant-design/icons'
 import {IFileItem} from '../../index'
-import ArrowRight from '../../assets/ReactIcon/ArrowRight'
 import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
 import {MainApi} from '../../api/main'
 import {Input} from 'antd'
 import {configStore} from '../../store/config'
+import ArrowRight from '../../icons/ArrowRight'
 
 export const TreeRender = observer(() => {
   const context = useCallback(() => {

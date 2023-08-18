@@ -89,7 +89,7 @@ export const MLeaf = (props: RenderLeafProps) => {
             }
           }}
           data-slate-inline={true}
-          className={`mx-[1px] text-sky-500 duration-300 hover:text-sky-600 cursor-default ${className}`}
+          className={`mx-[1px] link cursor-default ${className}`}
           {...props.attributes}>
           {!!props.text?.text &&
             <InlineChromiumBugfix/>

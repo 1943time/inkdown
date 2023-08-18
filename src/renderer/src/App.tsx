@@ -4,13 +4,12 @@ import {Home} from './components/Home'
 import {observer} from 'mobx-react-lite'
 import {useEffect, useMemo, useState} from 'react'
 import {configStore} from './store/config'
-import zhCN from 'antd/locale/zh_CN';
 import {message$} from './utils'
 
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   useSubject(message$, args => {
-    messageApi.open(args)
+    args === 'destroy' ? messageApi.destroy() : messageApi.open(args)
   })
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -27,7 +26,6 @@ const App = observer(() => {
   if (!ready) return null
   return (
     <ConfigProvider
-      locale={configStore.isZh ? zhCN : undefined}
       theme={{
         algorithm: themeObject,
         token: {

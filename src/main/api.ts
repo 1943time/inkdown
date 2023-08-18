@@ -2,9 +2,9 @@ import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserVi
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
-import {getLocale, store} from './store'
+import {store} from './store'
 import {writeFileSync} from 'fs'
-import icon from '../../resources/icon.png?asset'
+// import icon from '../../resources/icon.png?asset'
 
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
@@ -14,15 +14,14 @@ import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOption
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
   autoHideMenuBar: true,
-  ...(process.platform === 'linux' ? {icon} : {}),
+  // ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
   webPreferences: {
     preload: join(__dirname, '../preload/index.js'),
     sandbox: false,
     nodeIntegration: true,
-    contextIsolation: false,
-    webviewTag: true
+    contextIsolation: false
   }
 }
 
@@ -70,6 +69,7 @@ export const registerApi = () => {
         },
       })
     })
+
     window.webContents.setWindowOpenHandler((details) => {
       shell.openExternal(details.url)
       return {action: 'deny'}
@@ -101,7 +101,6 @@ export const registerApi = () => {
     const dark = isDark(config)
     return {
       showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
-      locale: getLocale(),
       theme: theme,
       dark: dark,
       codeLineNumber: !!config.codeLineNumber,
@@ -111,7 +110,8 @@ export const registerApi = () => {
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: config.showCharactersCount,
       titleColor: config.titleColor,
-      mas: process.mas || false
+      mas: process.mas || false,
+      token: config.token
     }
   })
 

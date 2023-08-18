@@ -1,9 +1,9 @@
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useEffect, useMemo, useRef} from 'react'
-import IClose from '../../assets/ReactIcon/IClose'
 import {Tooltip} from 'antd'
 import {configStore} from '../../store/config'
+import IClose from '../../icons/IClose'
 export const Search = observer(() => {
   const store = useEditorStore()
   const inputRef = useRef<HTMLInputElement>(null)

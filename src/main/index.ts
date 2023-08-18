@@ -5,7 +5,7 @@ import log from 'electron-log'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
-import {getLocale, store} from './store'
+import {store} from './store'
 import {AppUpdate} from './update'
 
 type WinOptions = {
@@ -122,7 +122,6 @@ app.whenReady().then(() => {
     }
   })
   // console.log(app.getPath('userData'))
-  if (getLocale() === 'zh') app.commandLine.appendSwitch('lang', 'zh-CN')
   ipcMain.on('set-win', (e, data: WinOptions) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     if (!windows.get(window.id)) return

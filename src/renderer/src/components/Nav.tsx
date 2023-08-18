@@ -4,6 +4,12 @@ import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
+import IUser from '../icons/IUser'
+import {configStore} from '../store/config'
+import {Login} from '../share/Login'
+import {useLocalState} from '../hooks/useLocalState'
+import {User} from '../share/User'
+import {Share} from '../share/Share'
 
 export const Nav = observer(() => {
   const paths = useMemo(() => {
@@ -65,12 +71,18 @@ export const Nav = observer(() => {
             }
           </div>
         </div>
-        <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-4 text-gray-500'}>
+        <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
           <Update/>
-          <AppstoreOutlined
-            className={'text-lg duration-200 dark:hover:text-gray-300 hover:text-gray-600'}
+          <Share/>
+          <div
+            className={'flex items-center justify-center p-1 group'}
             onClick={() => MainApi.openToolMenu(treeStore.openNote?.filePath)}
-          />
+          >
+            <AppstoreOutlined
+              className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
+            />
+          </div>
+          <User/>
         </div>
       </div>
       {/*{treeStore.tabs.length > 1 &&*/}

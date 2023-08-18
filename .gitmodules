@@ -1,0 +1,3 @@
+[submodule "src/renderer/src/share"]
+	path = src/renderer/src/share
+	url = git@codeup.aliyun.com:6388b571126bcb821717ed1b/bluestone/share-module.git

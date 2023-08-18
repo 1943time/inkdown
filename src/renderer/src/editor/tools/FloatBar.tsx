@@ -11,10 +11,10 @@ import {
   LinkOutlined,
   StrikethroughOutlined
 } from '@ant-design/icons'
-import ICode from '../../assets/ReactIcon/ICode'
 import {BaseRange, Editor, NodeEntry, Path, Range, Text, Transforms} from 'slate'
 import {Input} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
+import ICode from '../../icons/ICode'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},

@@ -12,3 +12,5 @@ build/bluestone.provisionprofile
 build/entitlements.mas.inherit.plist
 build/entitlements.mas.plist
 build/entitlements.mas.loginhelper.plist
+src/renderer/src/share
+

@@ -7,7 +7,6 @@ import * as chokidar from 'chokidar'
 import {createHash} from 'crypto'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
-import got from 'got'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null

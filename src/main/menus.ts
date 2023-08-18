@@ -1,30 +1,10 @@
 import {BrowserWindow, ipcMain, Menu, shell} from 'electron'
-import {getLocale} from './store'
 
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
 
 export const registerMenus = () => {
-  const locale = getLocale()
-
-  const menusLabel = locale === 'zh' ? {
-    copyMarkdown: '复制Markdown源码',
-    pdf: '导出PDF',
-    html: '导出HTML',
-    eBook: '导出电子书',
-    openInFinder: '在Finder中显示',
-    openInDefault: '默认应用打开',
-    delete: '删除',
-    createNote: '新建文档',
-    createFolder: '新建文件夹',
-    rename: '重命名',
-    insertRowAbove: '上方插入行',
-    insertRowBelow: '下方插入行',
-    insertColBefore: '左侧插入列',
-    insertColAfter: '右侧插入列',
-    delCol: '删除列',
-    delRow: '删除行'
-  } : {
+  const menusLabel = {
     copyMarkdown: 'Copy Markdown Source Code',
     pdf: 'Export To PDF',
     html: 'Export To HTML',
@@ -64,10 +44,10 @@ export const registerMenus = () => {
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('print-to-html')
       },
-      {
-        label: menusLabel.eBook,
-        click: (e, win) => win?.webContents.send('export-ebook')
-      },
+      // {
+      //   label: menusLabel.eBook,
+      //   click: (e, win) => win?.webContents.send('export-ebook')
+      // },
       {
         type: 'separator'
       },
@@ -103,7 +83,7 @@ export const registerMenus = () => {
     }
     // if (params.type === 'file') {
     //   temp.add({
-    //     label: '新Tab中打开',
+    //     label: 'Open in new Tab',
     //     click: () => sendCommand('openInNewTab')
     //   })
     // }
