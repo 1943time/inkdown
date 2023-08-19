@@ -366,7 +366,7 @@ export const createAppMenus = () => {
         {
           label: menusLabel.doc,
           click: () => {
-            ipcMain.emit('open-help-docs')
+            shell.openExternal(`https://pb.bluestone.blog/official/book/docs`)
           }
         },
         {

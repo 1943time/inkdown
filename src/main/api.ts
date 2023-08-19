@@ -8,7 +8,6 @@ import {writeFileSync} from 'fs'
 
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
-const docsPath = app.isPackaged ? join(app.getAppPath(), '..', 'web', 'docs.html') : join(__dirname, '../../web', 'docs.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 
 export const windowOptions: BrowserWindowConstructorOptions = {
@@ -46,36 +45,6 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-version', () => {
     return app.getVersion()
-  })
-  ipcMain.on('open-help-docs', () => {
-    const dark = isDark()
-    const window = new BrowserWindow({
-      width: 1050,
-      height: 800,
-      backgroundColor: dark ? '#222222' : '#ffffff',
-      ...windowOptions,
-      autoHideMenuBar: false
-    })
-    window.webContents.session.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
-      },
-    )
-    window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-      callback({
-        responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
-          ...details.responseHeaders,
-        },
-      })
-    })
-
-    window.webContents.setWindowOpenHandler((details) => {
-      shell.openExternal(details.url)
-      return {action: 'deny'}
-    })
-    window.loadFile(docsPath)
-    window.show()
   })
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
