@@ -28,7 +28,6 @@
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
     "got": "^11.8.6",
-    "ky": "^0.33.3",
     "mime-types": "^2.1.35",
     "mkdirp": "^3.0.0",
     "shiki": "^0.14.1",

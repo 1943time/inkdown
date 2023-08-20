@@ -5,6 +5,8 @@ import {BUNDLED_LANGUAGES} from 'shiki'
 import * as fs from 'fs/promises'
 import * as chokidar from 'chokidar'
 import {createHash} from 'crypto'
+import got, {Got} from 'got'
+import {ExtendOptions} from 'got/dist/source/types'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
 
@@ -16,6 +18,9 @@ const api = {
   langSet,
   copyToClipboard(str: string) {
     clipboard.writeText(str)
+  },
+  createHttp(options: ExtendOptions) {
+    return got.extend(options)
   },
   // checkedLatest() {
   //   return got.get('https://api.github.com/repos/1943time/bluestone/releases/latest').json<any>()
