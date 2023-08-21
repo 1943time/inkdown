@@ -128,9 +128,8 @@ export class EditorUtils {
   }
 
   static toggleFormat(editor: Editor, format: any) {
-    const selection = window.getSelection()
-    const node = selection?.getRangeAt(0).startContainer.parentNode as HTMLElement
-    if (node?.dataset?.slateString) {
+    const str = editor.selection ? Editor.string(editor, editor.selection) : ''
+    if (str) {
       const isActive = EditorUtils.isFormatActive(editor, format)
       Transforms.setNodes(
         editor,

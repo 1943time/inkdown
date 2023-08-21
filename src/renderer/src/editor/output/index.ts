@@ -8,10 +8,6 @@ const cache = new WeakMap<object, string>()
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
-const getTexts = (nodes: any[]): string => {
-  return nodes.reduce((a, b) => a + (b.text || ''), '')
-}
-
 const textStyle = (t: Text) => {
   if (!t.text) return ''
   let str = t.text.replace(/(?<!\\)\\/g, '\\')
@@ -35,8 +31,8 @@ const composeText = (t: Text, parent: any[]) => {
   if (t.url) {
     str = `[${str}](${encodeURI(t.url)})`
   } else if (isMix(t) && index !== -1) {
-    const next = siblings[index +  1]
-    if (!str.endsWith(' ') && next && EditorUtils.isDirtLeaf(next) && !Node.string(next).startsWith(' ')) {
+    const next = siblings[index + 1]
+    if (!str.endsWith(' ') && next && !Node.string(next).startsWith(' ')) {
       str += ' '
     }
   }

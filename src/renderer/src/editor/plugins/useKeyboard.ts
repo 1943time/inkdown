@@ -40,33 +40,6 @@ export const useKeyboard = (editor: Editor) => {
         }
         window.api.copyToClipboard(str.join('\n'))
       }
-      // 防止在混合样式文字左右加入空格
-      if (e.code === 'Space') {
-        const [text] = Editor.nodes(editor, {
-          match: Text.isText
-        })
-        const sel = editor.selection
-        if (sel && text && isMix(text[0])) {
-          const [start, end] = Editor.edges(editor, sel)
-          if (start.offset === 0) {
-            e.preventDefault()
-            Transforms.insertNodes(editor, {text: ' '}, {
-              at: start.path
-            })
-            Transforms.select(editor, start)
-          } else if (end.offset === Node.string(text[0]).length) {
-            e.preventDefault()
-            const next = Path.next(end.path)
-            Transforms.insertNodes(editor, {text: ' '}, {
-              at: next
-            })
-            Transforms.select(editor, {
-              path: next,
-              offset: 1
-            })
-          }
-        }
-      }
       if (isHotkey('mod+a', e) && editor.selection) {
         const [code] = Editor.nodes(editor, {
           match: n => Element.isElement(n) && n.type === 'code'
@@ -80,10 +53,10 @@ export const useKeyboard = (editor: Editor) => {
         }
       }
       match.run(e)
-      if (e.metaKey && e.key.toLowerCase() === 'backspace') {
+      if (isHotkey('mod+backspace', e)) {
         EditorUtils.clearMarks(editor)
       }
-      if (e.key.startsWith('Arrow')) {
+      if (e.key.toLowerCase().startsWith('arrow')) {
         keyArrow(editor, e)
       } else {
         switch (e.key) {
