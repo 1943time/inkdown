@@ -124,7 +124,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       } else if (node.language === 'html' && node.render) {
         str += `${preString}\n${code}\n${preString}`
       } else {
-        str += `${preString}\`\`\`${node.language || ''}\n${code}\n${preString}\`\`\``
+        str += `${preString}\`\`\`${node.language || '`'}\n${code}\n${preString}\`\`\`${!node.language ? '`' : ''}`
       }
       break
     case 'blockquote':

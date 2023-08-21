@@ -3,13 +3,14 @@ import {extname, join} from 'path'
 import {ReactEditor} from 'slate-react'
 import {useGetSetState, useSetState} from 'react-use'
 import Img from '../../svg/Img'
-import {useEffect} from 'react'
+import {useEffect, useMemo} from 'react'
 import {treeStore} from '../../store/tree'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {Path} from 'slate'
 import {isAbsolute} from 'path'
 import {getImageData} from '../../utils'
+import {mediaType} from '../utils/dom'
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const store = useEditorStore()
   const [state, setState] = useGetSetState({
@@ -18,7 +19,14 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     selected: false,
     path: ReactEditor.findPath(store.editor, element)
   })
+  const type = useMemo(() => {
+    return mediaType(element.url)
+  }, [element.url])
   useEffect(() => {
+    if (type !== 'image') {
+      setState({loadSuccess: true})
+      return
+    }
     let realUrl = element.url
     if (!element.url.startsWith('http') && !element.url.startsWith('file:') && treeStore.openNote) {
       const file = isAbsolute(element.url) ? element.url : join(treeStore.currentTab.current!.filePath, '..', element.url)
@@ -34,7 +42,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     img.src = realUrl
     img.onload = () => setState({loadSuccess: true})
     img.onerror = () => setState({loadSuccess: false})
-  }, [element.url])
+  }, [element.url, type])
   useSubject(store.mediaNode$, node => {
     setState({selected: !!node && Path.equals(state().path, node[1])})
   })
@@ -61,14 +69,22 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }}
     >
       {children}
-      {state().loadSuccess ?
+      {state().loadSuccess && type !== 'other' ?
         <span className={'inline-block relative top-1'}>
           <span className={`border-2 ${state().selected ? ' border-blue-500/60' : 'border-transparent'} block`}>
-            <img
-              src={state().url} alt={element.alt}
-              referrerPolicy={'no-referrer'}
-              className={'align-text-bottom border-2 border-red-500'}
-            />
+            {type === 'video' &&
+              <video src={element.url} controls={true}/>
+            }
+            {type === 'document' &&
+              <object data={element.url} className={'w-full h-auto'}/>
+            }
+            {type === 'image' &&
+              <img
+                src={state().url} alt={element.alt}
+                referrerPolicy={'no-referrer'}
+                className={'align-text-bottom border-2 border-red-500'}
+              />
+            }
           </span>
         </span>
         :

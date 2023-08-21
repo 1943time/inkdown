@@ -77,6 +77,15 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
       case 'list':
         el = {type: 'list', order: n.ordered, children: parserBlock(n.children, false, n)}
         break
+      case 'footnoteReference':
+        el = {text: `[^${n.identifier}]`}
+        break
+      case 'footnoteDefinition':
+        el = {
+          type: 'paragraph',
+          children: [{text: `[^${n.identifier}]:`}, ...(parserBlock(n.children, false, n)[0] as any)?.children]
+        }
+        break
       case 'listItem':
         const children = n.children?.length ? parserBlock(n.children, false, n) : [{type: 'paragraph', children: [{text: ''}]}] as any
         if (children[0].type === 'paragraph' && children[0].children[0]?.text) {

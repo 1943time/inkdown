@@ -108,7 +108,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                 }}
               >
                 {props.element.language ?
-                  <span>{props.element.katex ? '公式' : props.element.language}</span> :
+                  <span>{props.element.katex ? 'Formula' : props.element.language}</span> :
                   <span>{'plain text'}</span>
                 }
               </div>

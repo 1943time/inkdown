@@ -48,7 +48,7 @@ export const MediaAttr = observer(() => {
       if (!treeStore.fold) left -= treeStore.width
       if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 20
       setState({
-        top: top - 32 - 2, left, width, visible: true
+        top: top - 32, left, width, visible: true
       })
     }
   }, [])
@@ -124,7 +124,7 @@ export const MediaAttr = observer(() => {
   }, [treeStore.size, store.openSearch])
   return (
     <div
-      className={`z-10 absolute dark:text-gray-300 text-gray-500 h-8 rounded text-sm dark:bg-zinc-900/80 text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
+      className={`z-10 absolute dark:text-gray-300 text-gray-500 h-8 rounded text-sm dark:bg-zinc-900/80 bg-white/80 text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
       ref={domRef}
       style={{
         left: state().left,

@@ -6,7 +6,6 @@ import {treeStore} from '../../store/tree'
 import {
   BoldOutlined, CheckOutlined,
   ClearOutlined,
-  FileSearchOutlined,
   ItalicOutlined,
   LinkOutlined,
   StrikethroughOutlined
@@ -181,7 +180,7 @@ export const FloatBar = observer(() => {
               {t.icon}
             </div>
           )}
-          <div className={'w-[1px] h-5 bg-gray-200/10 flex-shrink-0'}></div>
+          <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
           <div
             className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
             onClick={() => {
