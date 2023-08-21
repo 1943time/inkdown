@@ -17,16 +17,16 @@ export const TreeRender = observer(() => {
   return (
     <div
       className={'pt-5'}
+      onDrop={e => e.stopPropagation()}
+      onDragOver={e => {
+        e.stopPropagation()
+        if (treeStore.dropNode === treeStore.root) {
+          treeStore.setState({dropNode: null})
+        }
+      }}
     >
       <div
-        className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
-        onDragOver={e => {
-          e.preventDefault()
-          treeStore.setState({dropNode: treeStore.root})
-        }}
-        onDrop={e => {
-          treeStore.moveNode(treeStore.root)
-        }}
+        className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
       >
         <span className={'font-bold text-[15px]'}>{treeStore.root.filename}</span>
         <div

@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
-import {createFileNode, parserNode, sortFiles} from './parserNode'
+import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse} from 'path'
 import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
@@ -362,16 +362,11 @@ export class TreeStore {
       this.watcher.pause()
       const fromPath = this.dragNode.filePath
       const toPath = to.filePath!
+      this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
       this.dropNode = null
       renameSync(fromPath, join(toPath, basename(fromPath)))
-      this.removeSelf(this.dragNode)
       to.children!.push(this.dragNode)
-      Object.defineProperty(this.dragNode, 'parent', {
-        configurable: true,
-        get() {
-          return to
-        }
-      })
+      defineParent(this.dragNode, to)
       to.children = sortFiles(to.children!)
       if (this.dragNode === this.currentTab.current) {
         MainApi.setWin({openFile: this.dragNode.filePath})

@@ -21,8 +21,15 @@ export const Tree = observer(() => {
       >
         <div style={{width: treeStore.width}} className={'h-full border-t b1'}>
           <div
-            className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'} pb-10`}
+            className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'} pb-10 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
             onContextMenu={context}
+            onDragOver={e => {
+              e.preventDefault()
+              treeStore.setState({dropNode: treeStore.root})
+            }}
+            onDrop={e => {
+              treeStore.moveNode(treeStore.root)
+            }}
           >
             {!!treeStore.root ?
               <TreeRender/> :
