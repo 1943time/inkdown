@@ -28,6 +28,7 @@
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
     "got": "^11.8.6",
+    "is-hotkey": "^0.2.0",
     "mime-types": "^2.1.35",
     "mkdirp": "^3.0.0",
     "shiki": "^0.14.1",
