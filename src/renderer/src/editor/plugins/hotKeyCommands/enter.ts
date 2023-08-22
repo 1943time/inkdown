@@ -4,7 +4,7 @@ import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../..
 import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
-import {clearCodeCache} from '../useHighlight'
+import {isMod} from '../../../utils/keyboard'
 
 export class EnterKey {
   constructor(
@@ -150,7 +150,7 @@ export class EnterKey {
   }
 
   private table(node: NodeEntry<TableNode>, sel: BaseSelection, e: React.KeyboardEvent) {
-    if (e.metaKey) {
+    if (isMod(e)) {
       const row = Editor.parent(this.editor, node[1])
       const insertRow = {
         type: 'table-row', children: row[0].children.map(c => {
@@ -235,7 +235,7 @@ export class EnterKey {
       }
     }
     if (parent[0].type === 'list-item') {
-      if (e.metaKey || Path.hasPrevious(node[1])) {
+      if (isMod(e) || Path.hasPrevious(node[1])) {
         const text = Point.equals(end, sel.focus) ? [{text: ''}] : EditorUtils.cutText(this.editor, sel.focus)
         Transforms.insertNodes(this.editor, {
           type: 'paragraph', children: text
@@ -285,7 +285,7 @@ export class EnterKey {
   }
 
   private codeLine(node: CodeLineNode, path: Path, sel: BaseSelection, e: React.KeyboardEvent) {
-    if (e.metaKey) {
+    if (isMod(e)) {
       const parent = Path.parent(path)
       Transforms.insertNodes(this.editor, {type: 'paragraph', children: [{text: ''}]}, {
         at: Path.next(parent),

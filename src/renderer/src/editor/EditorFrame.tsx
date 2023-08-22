@@ -19,6 +19,8 @@ import {MainApi} from '../api/main'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {getImageData} from '../utils'
 import {configStore} from '../store/config'
+import isHotkey from 'is-hotkey'
+import {isMod} from '../utils/keyboard'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
@@ -31,7 +33,7 @@ export const EditorFrame = observer(({tab}: {
   }, [])
 
   const click = useCallback((e: React.MouseEvent) => {
-    if (e.metaKey && e.target) {
+    if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement
       if (!el) return
       if (el.dataset.fnc) {
@@ -47,10 +49,10 @@ export const EditorFrame = observer(({tab}: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === 'f' && treeStore.currentTab.current) {
+      if (isHotkey('mod+f', e) && treeStore.currentTab.current) {
         store.setOpenSearch(true)
       }
-      if (e.key.toLowerCase() === 'escape' && store.openSearch) {
+      if (isHotkey('esc', e) && store.openSearch) {
         store.setOpenSearch(false)
       }
     }
