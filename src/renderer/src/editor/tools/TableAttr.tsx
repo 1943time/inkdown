@@ -17,6 +17,7 @@ import {observer} from 'mobx-react-lite'
 import {treeStore} from '../../store/tree'
 import {MainApi} from '../../api/main'
 import {IpcRendererEvent} from '@electron-toolkit/preload'
+import isHotkey from 'is-hotkey'
 
 
 export const TableAttr = observer(() => {
@@ -215,7 +216,7 @@ export const TableAttr = observer(() => {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (e.key === 'Backspace' && e.metaKey && e.shiftKey) {
+      if (isHotkey('mod+shift+backspace', e)) {
         if (!tableCellRef.current || !tableRef.current) return
         e.preventDefault()
         const rows = tableRef.current[0].children.length
