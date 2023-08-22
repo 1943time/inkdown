@@ -5,6 +5,7 @@ import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
 import {configStore} from '../store/config'
+import isHotkey from 'is-hotkey'
 
 export const QuickOpen = observer(() => {
   const [state, setState] = useLocalState({

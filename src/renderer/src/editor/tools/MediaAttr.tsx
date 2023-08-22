@@ -11,6 +11,7 @@ import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {treeStore} from '../../store/tree'
 import {keyArrow} from '../plugins/hotKeyCommands/arrow'
+import isHotkey from 'is-hotkey'
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
   const [state, setState] = useGetSetState({

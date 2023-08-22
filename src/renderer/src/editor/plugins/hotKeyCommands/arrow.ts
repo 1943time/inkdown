@@ -1,6 +1,8 @@
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
+import {isMod} from '../../../utils/keyboard'
+import isHotkey from 'is-hotkey'
 
 export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
   const sel = editor.selection
@@ -8,7 +10,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
     if (e.key === 'ArrowLeft') {
       e.preventDefault()
       e.stopPropagation()
-      if (!e.metaKey) {
+      if (!isMod(e)) {
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const pre = Editor.previous<any>(editor, {at: sel.focus.path})
@@ -27,7 +29,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
     if (e.key === 'ArrowRight') {
       e.preventDefault()
       e.stopPropagation()
-      if (!e.metaKey) {
+      if (!isMod(e)) {
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
