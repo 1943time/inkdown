@@ -50,7 +50,6 @@ export const MEditor = observer(({note}: {
       runInAction(() => {
         store.docChanged = false
       })
-      treeStore.watcher.pause()
       const root = Editor.node(editor, [])
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {

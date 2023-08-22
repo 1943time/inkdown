@@ -102,7 +102,6 @@ export class TreeStore {
     }) => {
       runInAction(() => {
         const {filePath, type} = params
-        this.watcher.pause()
         switch (params.command) {
           case 'createNote':
             const addNote = createFileNode({
@@ -332,7 +331,6 @@ export class TreeStore {
     MainApi.setWin({openFolder: path})
     const {root, files} = parserNode(path)
     this.root = root
-    this.watcher.watch()
     requestIdleCallback(() => this.parserQueue(files))
     if (openFile && existsSync(openFile)) {
       this.open(openFile)
@@ -359,7 +357,6 @@ export class TreeStore {
   }
   moveNode(to: IFileItem) {
     if (this.dragNode && this.dragNode !== to && to.children!.every(c => c !== this.dropNode)) {
-      this.watcher.pause()
       const fromPath = this.dragNode.filePath
       const toPath = to.filePath!
       this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
@@ -376,7 +373,6 @@ export class TreeStore {
 
   saveNote(file: IFileItem) {
     const parent = file.parent!
-    this.watcher.pause()
     if (file.mode === 'create') {
       if (!file.editName) {
         parent.children = parent.children!.filter(c => c !== file)
