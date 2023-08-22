@@ -459,10 +459,11 @@ export class TreeStore {
   }
 
   private removeSelf(node: IFileItem) {
-    const index = this.currentTab.history.findIndex(n => n === node)
-    if (index !== -1) {
-      this.currentTab.history.splice(index, 1)
-      if (index <= this.currentTab.index) this.currentTab.index--
+    this.currentTab.history = this.currentTab.history.filter(h => h !== node)
+    if (this.currentTab.history.length > 1 && this.currentTab.index > this.currentTab.history.length - 1) {
+      this.currentTab.index = this.currentTab.history.length - 1
+    } else if (!this.currentTab.history.length) {
+      this.currentTab.index = 0
     }
     node.parent!.children = node.parent!.children!.filter(c => c !== node)
   }
