@@ -19,6 +19,11 @@ Bluestone provides the ability to share Markdown documents with one click, or co
 
 ![](./docs/assets/syntax.gif)
 
+## Share
+bluestone provides a function to automatically extract markdown files and share them, [more](https://pb.bluestone.blog/official/book/docs/share)
+
+![](./docs/assets/share.gif)
+
 ## Format
 
 Text format can be converted with floating bar or syntax

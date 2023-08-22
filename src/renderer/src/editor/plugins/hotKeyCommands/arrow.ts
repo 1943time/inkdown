@@ -2,7 +2,6 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
 import {isMod} from '../../../utils/keyboard'
-import isHotkey from 'is-hotkey'
 
 export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
   const sel = editor.selection
