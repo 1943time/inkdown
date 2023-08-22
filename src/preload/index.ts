@@ -9,6 +9,7 @@ import got, {Got} from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
+import {toUnix} from 'upath'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null
@@ -27,6 +28,9 @@ const api = {
   // },
   highlightCode(code: string, lang: string) {
     return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
+  },
+  toUnix(path: string) {
+    return toUnix(path)
   },
   fs,
   watch: async (path: string, cb: (event: 'add'| 'addDir' | 'change'| 'unlink'| 'unlinkDir', path: string) => void) => {

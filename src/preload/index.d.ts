@@ -13,6 +13,7 @@ declare global {
     electron: ElectronAPI
     api: {
       sdk: typeof Sdk,
+      toUnix: (path: string) => string
       md5: (str: string | Buffer) => string
       createHttp: (options: ExtendOptions) => Got
       // checkedLatest: () => Promise<any>
