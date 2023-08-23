@@ -77,7 +77,7 @@ export const MainApi = {
     ipcRenderer.send('tree-context-menu', params)
   },
   moveToTrash(path: string) {
-    ipcRenderer.send('move-to-trash', path)
+    ipcRenderer.invoke('move-to-trash', path)
   },
   openToolMenu(filePath?: string) {
     ipcRenderer.send('tool-menu', filePath)

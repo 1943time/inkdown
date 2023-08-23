@@ -138,7 +138,7 @@ export const registerApi = () => {
     BrowserWindow.fromWebContents(e.sender)?.maximize()
   })
 
-  ipcMain.on('move-to-trash', (e, path) => {
+  ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
   })
   ipcMain.handle('get-base-url', e => {
