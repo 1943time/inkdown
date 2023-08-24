@@ -2,13 +2,13 @@
 一个所见即所得Markdown编辑器
 [Download](https://github.com/1943time/bluestone/releases/latest)
 
-如果你想立即体验, 可以打开 [web 版](https://ed.bluestone.blog), 推荐使用chrome浏览
+如果你想立即体验, 可以打开 [web 演示](https://ed.bluestone.blog), 推荐使用chrome浏览
 
 # 简介
 
-青石是一个开源Markdown编辑器，目前只支持 `Mac` 系统，
+青石是一个开源Markdown编辑器，
 使用 [gfm](https://github.github.com/gfm/) 语法，扩展了 [Mermaid](https://mermaid.js.org/) 图形 [Katex](https://katex.org/) 公式，
-支持明暗两种风格，目标为提高Markdown阅读与编辑体验
+支持明暗两种风格，目标为提高Markdown阅读与编辑体验。
 
 ![](./docs/assets/d1.png)
 

@@ -1,13 +1,13 @@
 # Bluestone
 A WYSIWYG markdown editor.
-[Download (signed and notarized)](https://github.com/1943time/bluestone/releases/latest)
+[Download](https://github.com/1943time/bluestone/releases/latest)
  | [中文文档](./ZH_README.md)
 
 If you want to experience it immediately, can open the [web demo](https://ed.bluestone.blog), it is recommended to use chrome
 
 # Brief introduction
 
-Bluestone is an WYSIWYG Markdown editor，Currently only `Mac` system is supported，
+Bluestone is an WYSIWYG Markdown editor，
 use [gfm](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
 Supports light and dark color schemes, with the goal of improving the Markdown reading
 and editing experience. and generate your Markdown files into online documents in the easiest and fastest way.
