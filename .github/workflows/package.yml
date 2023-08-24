@@ -57,11 +57,11 @@ jobs:
       - name: Build
         run: |
           npm run build
-
-      - name: Electron-Mac
+      - name: Build App
         if: matrix.platform == 'mac'
         run: |
           npm run build:mac
+          npm run build:win
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.15
         env:
@@ -70,5 +70,6 @@ jobs:
           draft: false
           prerelease: true
           files: |
-            dist/Bluestone*.*
+            dist/Bluestone*-arm64-*.*
+            dist/Bluestone*-x64-*.*
             dist/latest*.yml

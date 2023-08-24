@@ -1,6 +1,6 @@
 {
   "name": "bluestone",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
@@ -15,10 +15,11 @@
     "dev": "electron-vite dev -w",
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:win": "npm run npmbuild && electron-builder --win --config",
+    "build:win": "electron-builder --win --arm64 --x64 --config",
     "build:mac": "electron-builder --macos --arm64 --x64 --config",
     "build:linux": "electron-builder --linux --config",
-    "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage"
+    "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
+    "buildapp": "npm run build && npm run build:mac && npm run build:win"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^1.0.3",
@@ -27,13 +28,13 @@
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",
     "electron-updater": "^5.3.0",
+    "form-data": "^4.0.0",
     "got": "^11.8.6",
-    "is-hotkey": "^0.2.0",
     "mime-types": "^2.1.35",
     "mkdirp": "^3.0.0",
+    "node-fetch": "^2.6.13",
     "shiki": "^0.14.1",
-    "upath": "^2.0.1",
-    "xml2js": "^0.6.0"
+    "upath": "^2.0.1"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.0.1",
@@ -41,6 +42,7 @@
     "@electron/notarize": "^2.1.0",
     "@types/mime-types": "^2.1.1",
     "@types/node": "16.18.11",
+    "@types/node-fetch": "^2.6.4",
     "@types/react": "18.0.26",
     "@types/react-dom": "18.0.10",
     "@types/xml2js": "^0.4.11",
@@ -57,6 +59,7 @@
     "electron-builder": "^24.6.3",
     "electron-vite": "^1.0.26",
     "framer-motion": "^10.10.0",
+    "is-hotkey": "^0.2.0",
     "katex": "^0.16.4",
     "mermaid": "^10.0.2",
     "mobx": "^6.8.0",

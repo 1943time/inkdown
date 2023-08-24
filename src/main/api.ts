@@ -3,16 +3,17 @@ import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {store} from './store'
-import {writeFileSync} from 'fs'
+import {createReadStream, writeFileSync} from 'fs'
 // import icon from '../../resources/icon.png?asset'
-
+import FormData from "form-data"
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+import fetch from 'node-fetch'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
-  autoHideMenuBar: true,
+  // autoHideMenuBar: true,
   // ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
@@ -138,7 +139,7 @@ export const registerApi = () => {
     BrowserWindow.fromWebContents(e.sender)?.maximize()
   })
 
-  ipcMain.on('move-to-trash', (e, path) => {
+  ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
   })
   ipcMain.handle('get-base-url', e => {
@@ -146,6 +147,27 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-preload-url', e => {
     return join(__dirname, '../preload/index.js')
+  })
+
+  ipcMain.handle('upload', (e, data: {
+    url: string
+    data: Record<string, string>
+  }) => {
+    const config:any = store.get('config') || {}
+    const form = new FormData()
+    for (let [key, v] of Object.entries(data.data)) {
+      if (key === 'file') {
+        form.append('file', createReadStream(v))
+      } else {
+        form.append(key, v)
+      }
+    }
+    return fetch(data.url, {
+      method: 'post', body: form,
+      headers: {
+        Authorization: `Bearer ${config.token}`
+      }
+    }).then(res => res.json())
   })
 
   ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {
@@ -156,12 +178,14 @@ export const registerApi = () => {
           preload: join(__dirname, '../preload/index.js'),
           sandbox: false,
           nodeIntegration: true,
-          contextIsolation: false,
-          webviewTag: true
+          contextIsolation: false
         }
       })
       win.setBrowserView(view)
       view.setBounds({ x: 0, y: 0, width: 0, height: 0})
+      ipcMain.handleOnce('print-dom-ready', () => {
+        return filePath
+      })
       await view.webContents.loadFile(workerPath)
       const ready = async (e: any, filePath: string) => {
         try {
@@ -185,13 +209,9 @@ export const registerApi = () => {
           }
         } finally {
           win.setBrowserView(null)
-          ipcMain.off('print-pdf-ready', ready)
         }
       }
-      ipcMain.on('print-pdf-ready', ready)
-      setTimeout(() => {
-        view.webContents.send('print-pdf-load', filePath, rootPath)
-      }, 300)
+      ipcMain.once('print-pdf-ready', ready)
     }
   })
 }

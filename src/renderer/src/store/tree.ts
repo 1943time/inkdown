@@ -2,7 +2,7 @@ import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
-import {basename, join, parse} from 'path'
+import {basename, join, parse, sep} from 'path'
 import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
@@ -231,6 +231,7 @@ export class TreeStore {
       this.watcher.watchNote(filePath)
     }
     appendFileSync(filePath, '', {encoding: 'utf-8'})
+    if (this.root && filePath.startsWith(this.root.filePath)) this.watcher.onChange('add', filePath, node)
     this.currentTab.history.push(node)
     this.currentTab.index = this.currentTab.history.length - 1
     MainApi.setWin({openFile: node.filePath})
@@ -414,7 +415,7 @@ export class TreeStore {
 
   getAbsolutePath(file: IFileItem) {
     if (this.root) {
-      return file.filePath.replace(this.root.filePath, '').split('/').slice(1)
+      return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
     } else {
       return [file.filename]
     }

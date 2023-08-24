@@ -9,9 +9,9 @@ If you want to experience it immediately, can open the [web demo](https://ed.blu
 
 Bluestone is an WYSIWYG Markdown editor，Currently only `Mac` system is supported，
 use [gfm](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
-Supports light and dark color schemes, with the goal of improving the Markdown reading and editing experience. and generate your Markdown files into online documents in the easiest and fastest way.
-
-Bluestone provides the ability to share Markdown documents with one click, or combine multiple Markdown documents into a book at the same time, check out the online [documentation](https://pb.bluestone.blog/official/book/docs/introduction) to view more
+Supports light and dark color schemes, with the goal of improving the Markdown reading
+and editing experience. and generate your Markdown files into online documents in the easiest and fastest way.
+[documentation](https://pb.bluestone.blog/official/book/docs/introduction)
 
 ![](./docs/assets/d1.png)
 
@@ -20,7 +20,7 @@ Bluestone provides the ability to share Markdown documents with one click, or co
 ![](./docs/assets/syntax.gif)
 
 ## Share
-bluestone provides a function to automatically extract markdown files and share them, [more](https://pb.bluestone.blog/official/book/docs/share)
+bluestone provides a function to automatically extract markdown files and share them, or combine multiple Markdown documents into a book at the same time [more](https://pb.bluestone.blog/official/book/docs/share)
 
 ![](./docs/assets/share.gif)
 

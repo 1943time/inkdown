@@ -5,7 +5,7 @@ import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
 import {configStore} from '../store/config'
-import isHotkey from 'is-hotkey'
+import {sep} from 'path'
 
 export const QuickOpen = observer(() => {
   const [state, setState] = useLocalState({
@@ -63,7 +63,7 @@ export const QuickOpen = observer(() => {
     })
       .sort((a, b) => a.time > b.time ? -1 : 1)
       .map(d => {
-        return {id: d.id!, filePath: d.filePath, name: d.filePath.replace(d.dirPath + '/', '').replace(/\.\w+$/, '')}
+        return {id: d.id!, filePath: d.filePath, name: d.filePath.replace(d.dirPath + sep, '').replace(/\.\w+$/, '')}
       })
     setState({
       records: data,
