@@ -1,9 +1,9 @@
 appId: bluestone
 productName: Bluestone
-copyright: 'Copyright © 2023 mdwriter@163.com'
+copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
-afterSign: scripts/notarize.js
+#afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -17,35 +17,34 @@ files:
   - '!dist.zip'
 asarUnpack:
   - resources/*
+artifactName: "Bluestone-${os}-${arch}-${version}.${ext}"
 extraResources:
   - web
 fileAssociations:
   ext: md
   role: Editor
 win:
-  executableName: BlueStone
-nsis:
-  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
+  target:
+    - zip
+    - nsis
 mac:
-#  identity: null
+  identity: null
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  target:
+    - zip
+    - dmg
 linux:
   target:
     - AppImage
-    - snap
     - deb
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: github

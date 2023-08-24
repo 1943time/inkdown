@@ -231,6 +231,7 @@ export class TreeStore {
       this.watcher.watchNote(filePath)
     }
     appendFileSync(filePath, '', {encoding: 'utf-8'})
+    if (this.root && filePath.startsWith(this.root.filePath)) this.watcher.onChange('add', filePath, node)
     this.currentTab.history.push(node)
     this.currentTab.index = this.currentTab.history.length - 1
     MainApi.setWin({openFile: node.filePath})

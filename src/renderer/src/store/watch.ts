@@ -4,6 +4,7 @@ import {runInAction} from 'mobx'
 import {createFileNode, sortFiles} from './parserNode'
 import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
+import {IFileItem} from '../index'
 
 export class Watcher {
   private changeHistory = new Set<string>()
@@ -60,7 +61,7 @@ export class Watcher {
     })
   }
 
-  private onChange(e: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir', path: string) {
+  public onChange(e: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir', path: string, node?: IFileItem) {
     if (e === 'change') {
       this.changeHistory.add(path)
     } else {
@@ -72,11 +73,12 @@ export class Watcher {
           case 'add':
             if (parent.children && !parent.children.find(c => c.filePath === path)) {
               runInAction(() => {
-                parent.children!.push(createFileNode({
+                if (!node) node = createFileNode({
                   folder: false,
                   parent: parent,
                   fileName: basename(path)
-                }))
+                })
+                parent.children!.push(node)
               })
             }
             break
@@ -91,12 +93,13 @@ export class Watcher {
             break
           case 'addDir':
             if (parent.children && !parent.children.find(c => c.filePath === path)) {
+              if (!node) node =  createFileNode({
+                folder: true,
+                parent: parent,
+                fileName: basename(path)
+              })
               runInAction(() => {
-                parent.children!.push(createFileNode({
-                  folder: true,
-                  parent: parent,
-                  fileName: basename(path)
-                }))
+                parent.children!.push(node!)
               })
             }
             break

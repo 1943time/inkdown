@@ -3,16 +3,17 @@ import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {store} from './store'
-import {writeFileSync} from 'fs'
+import {createReadStream, writeFileSync} from 'fs'
 // import icon from '../../resources/icon.png?asset'
-
+import FormData from "form-data"
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+import fetch from 'node-fetch'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
-  autoHideMenuBar: true,
+  // autoHideMenuBar: true,
   // ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
@@ -148,6 +149,27 @@ export const registerApi = () => {
     return join(__dirname, '../preload/index.js')
   })
 
+  ipcMain.handle('upload', (e, data: {
+    url: string
+    data: Record<string, string>
+  }) => {
+    const config:any = store.get('config') || {}
+    const form = new FormData()
+    for (let [key, v] of Object.entries(data.data)) {
+      if (key === 'file') {
+        form.append('file', createReadStream(v))
+      } else {
+        form.append(key, v)
+      }
+    }
+    return fetch(data.url, {
+      method: 'post', body: form,
+      headers: {
+        Authorization: `Bearer ${config.token}`
+      }
+    }).then(res => res.json())
+  })
+
   ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     if (win) {
@@ -156,8 +178,7 @@ export const registerApi = () => {
           preload: join(__dirname, '../preload/index.js'),
           sandbox: false,
           nodeIntegration: true,
-          contextIsolation: false,
-          webviewTag: true
+          contextIsolation: false
         }
       })
       win.setBrowserView(view)

@@ -250,6 +250,7 @@ export class EditorStore {
             if (!existsSync(imageDir)) {
               mkdirSync(imageDir)
               await MainApi.mkdirp(imageDir)
+              treeStore.watcher.onChange('addDir', imageDir)
             }
             targetPath = join(imageDir, name)
             mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, name))
@@ -262,6 +263,7 @@ export class EditorStore {
           }
           writeFileSync(targetPath, base64Image, {encoding: 'base64'})
           this.insertInlineNode(mediaUrl)
+          if (treeStore.root) treeStore.watcher.onChange('add', targetPath)
         }
       }
     }

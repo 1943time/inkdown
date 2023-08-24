@@ -4,21 +4,26 @@ import {useEffect, useState} from 'react'
 import Folder from '../../icons/Folder'
 import ISearch from '../../icons/ISearch'
 import Collapse from '../../icons/Collapse'
+import {useSetState} from 'react-use'
+import {isWindows} from '../../utils'
 
 export const TreeTop = observer(() => {
-  const [full, setFull] = useState(false)
+  const [state, setState] = useSetState({
+    full: false,
+    win: isWindows
+  })
   useEffect(() => {
     window.electron.ipcRenderer.on('enter-full-screen', () => {
-      setFull(true)
+      setState({full: true})
     })
     window.electron.ipcRenderer.on('leave-full-screen', () => {
-      setFull(false)
+      setState({full: false})
     })
   }, [])
   return (
     <div
-      className={`fixed left-0 top-0 z-20 h-[40px] ${full ? 'pl-5' : 'pl-20'} duration-200 width-duration`}
-      style={{width: treeStore.fold ? 114 : treeStore.width}}
+      className={`fixed left-0 top-0 z-20 h-[40px] ${state.win ? 'pl-2' : state.full ? 'pl-5' : 'pl-20'} duration-200 width-duration`}
+      style={{width: treeStore.fold ? isWindows ? 42 : 114 : treeStore.width}}
     >
       <div className={'flex h-full items-center'}>
         <div

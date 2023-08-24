@@ -1,6 +1,6 @@
 import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
 import {lstatSync} from 'fs'
-import {is, optimizer} from '@electron-toolkit/utils'
+import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
@@ -155,7 +155,7 @@ app.whenReady().then(() => {
     }))
   })
   // Set app user model id for windows
-  // electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('blog.bluestone')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
