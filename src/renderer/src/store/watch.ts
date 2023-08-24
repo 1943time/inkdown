@@ -84,10 +84,13 @@ export class Watcher {
             break
           case 'unlink':
             runInAction(() => {
-              parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
-              this.store.currentTab.history = this.store.currentTab.history.filter(h => h.filePath !== path)
-              if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
-                this.store.currentTab.index = this.store.currentTab.history.length - 1
+              const index = parent.children!.findIndex(n => n.filePath === path)
+              if (index !== -1) {
+                parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
+                this.store.currentTab.history = this.store.currentTab.history.filter(h => h.filePath !== path)
+                if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
+                  this.store.currentTab.index = this.store.currentTab.history.length - 1
+                }
               }
             })
             break
