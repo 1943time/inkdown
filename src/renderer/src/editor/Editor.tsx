@@ -201,8 +201,8 @@ export const MEditor = observer(({note}: {
       <Editable
         decorate={high}
         spellCheck={false}
-        className={'edit-area'}
-        style={{fontSize: configStore.config.editorTextSize}}
+        className={`edit-area ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}
+        style={{fontSize: configStore.config.editorTextSize || 16}}
         onMouseDown={checkEnd}
         onDrop={e => {
           const dragNode = treeStore.dragNode

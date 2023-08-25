@@ -23,6 +23,11 @@ a {
   @apply pt-10;
 }
 
+.heading-line{
+  h1,h2,h3,h4,h5{
+    @apply border-b dark:border-gray-200/10 border-gray-200;
+  }
+}
 .dark .content {
   h1,h2,h3,h4,h5{
     color: rgba(255,255,255,.9);
@@ -107,25 +112,11 @@ a {
   h1,h2,h3,h4,h5,h6{
     position: relative;
     color: rgba(0,0,0,.8);
-  }
-  &.h-emerald {
-    h1,h2,h3,h4,h5 {
-      color: rgba(16, 185, 129, .9);
-    }
-  }
-  &.h-indigo {
-    h1,h2,h3,h4,h5{
-      color: rgba(99, 102, 241, .9);
-    }
-  }
-  &.h-amber {
-    h1,h2,h3,h4,h5{
-      color: rgba(245,158,11, .9);
-    }
+    padding: 6px 0;
   }
   h1 {
     font-size: 2em;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
     font-weight: 700;
   }
 

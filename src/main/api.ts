@@ -79,8 +79,8 @@ export const registerApi = () => {
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: config.showCharactersCount,
-      titleColor: config.titleColor,
       mas: process.mas || false,
+      headingMarkLine: config.headingMarkLine || false,
       token: config.token
     }
   })

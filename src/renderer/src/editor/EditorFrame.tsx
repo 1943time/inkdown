@@ -85,7 +85,7 @@ export const EditorFrame = observer(({tab}: {
             <>
               <div className={`flex-1 flex justify-center items-start h-full ${mt === 'markdown' ? '' : 'hidden'}`}>
                 <div
-                  className={`max-w-[900px] flex-1 content px-14 ${configStore.config.titleColor}`}
+                  className={`max-w-[900px] flex-1 content px-14`}
                 >
                   <MEditor note={tab.current}/>
                 </div>

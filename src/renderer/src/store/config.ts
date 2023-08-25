@@ -11,6 +11,7 @@ class ConfigStore {
     showLeading: true,
     theme: 'system' as 'system' | 'dark' | 'light',
     dark: false,
+    headingMarkLine: false,
     codeLineNumber: false,
     codeTabSize: 2,
     editorTextSize: 16,
@@ -18,7 +19,6 @@ class ConfigStore {
     leadingLevel: 4,
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
-    titleColor: undefined as undefined | 'h-emerald' | 'h-indigo' | 'h-amber',
     mas: false,
     token: ''
   }
