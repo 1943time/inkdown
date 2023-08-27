@@ -201,6 +201,7 @@ export const MEditor = observer(({note}: {
       <Editable
         decorate={high}
         spellCheck={false}
+        readOnly={store.readonly}
         className={`edit-area ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}
         style={{fontSize: configStore.config.editorTextSize || 16}}
         onMouseDown={checkEnd}

@@ -77,15 +77,14 @@ let waitOpenFile = ''
 app.on('will-finish-launching', () => {
   // Event fired When someone drags files onto the icon while your app is running
   app.on("open-file", (event, file) => {
+    event.preventDefault()
     if (app.isReady() === false) {
       waitOpenFile = file
     } else {
       openFiles(file)
     }
-    event.preventDefault()
-  });
-});
-
+  })
+})
 const openFiles = (filePath: string) => {
   try {
     const win = Array.from(windows).find(w => {

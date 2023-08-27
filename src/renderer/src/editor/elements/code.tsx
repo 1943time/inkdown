@@ -14,6 +14,7 @@ import {Editor, Node, Path, Transforms} from 'slate'
 import {EyeOutlined} from '@ant-design/icons'
 import {useSubject} from '../../hooks/subscribe'
 import {selChange$} from '../plugins/useOnchange'
+import {DragHandle} from '../tools/DragHandle'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
@@ -21,7 +22,6 @@ const langOptions = Array.from(window.api.langSet).map(l => {
 })
 
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
-  const selected = useSelected()
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
   const [state, setState] = useGetSetState({
@@ -66,7 +66,9 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       <div
         {...props.attributes}
         data-be={'code'}
-        className={`${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        onDragStart={store.dragStart}
+        className={`drag-el ${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        <DragHandle style={{top: '0.9em'}}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
           contentEditable={false}>

@@ -81,7 +81,8 @@ export const registerApi = () => {
       showCharactersCount: config.showCharactersCount,
       mas: process.mas || false,
       headingMarkLine: config.headingMarkLine || false,
-      token: config.token
+      token: config.token,
+      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
     }
   })
 

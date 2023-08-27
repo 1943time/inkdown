@@ -72,7 +72,7 @@ export const EditorFrame = observer(({tab}: {
     <EditorStoreContext.Provider value={store}>
       <Search/>
       <div
-        className={'flex-1 h-full overflow-y-auto items-start'}
+        className={'flex-1 h-full overflow-y-auto items-start relative'}
         ref={dom => {
           store.setState(state => state.container = dom)
         }}

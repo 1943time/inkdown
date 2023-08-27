@@ -4,7 +4,7 @@ import stringWidth from 'string-width'
 import {EditorUtils} from '../utils/editorUtils'
 const space = '  '
 
-const cache = new WeakMap<object, string>()
+export const outputCache = new WeakMap<object, string>()
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
@@ -105,7 +105,7 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
 }
 
 const parserNode = (node: any, preString = '', parent: any[]) => {
-  if (cache.get(node)) return cache.get(node)!
+  if (outputCache.get(node)) return outputCache.get(node)!
   let str = ''
   const newParent = [...parent, node]
   switch (node.type) {
@@ -149,7 +149,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       if (node.text) str += composeText(node, parent)
       break
   }
-  cache.set(node, str)
+  outputCache.set(node, str)
   return str
 }
 

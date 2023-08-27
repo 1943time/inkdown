@@ -20,6 +20,7 @@ class ConfigStore {
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
     mas: false,
+    dragToSort: true,
     token: ''
   }
   masUpdate = false
