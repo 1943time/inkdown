@@ -7,6 +7,7 @@ import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
+const isWindows = process.platform === 'win32'
 
 type WinOptions = {
   width?: number
@@ -153,8 +154,7 @@ app.whenReady().then(() => {
       }
     }))
   })
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('blog.bluestone')
+  if (isWindows) electronApp.setAppUserModelId('blog.bluestone')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -162,7 +162,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
+  if (isWindows) waitOpenFile = process.argv[1] || ''
   try {
     const data = store.get('windows') as WinOptions[] || []
     // console.log('data', data)
