@@ -367,7 +367,7 @@ export class EditorStore {
       if (!ableToEnter.has(el.dataset.be!)) continue
       const top = getOffsetTop(el, this.container!)
       const left = getOffsetLeft(el, this.container!)
-      if (!el.previousSibling) {
+      if (!el.previousSibling && el.parentElement?.dataset.be !== 'list-item') {
         points.push({
           el: el,
           direction: 'top',
