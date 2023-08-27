@@ -3,6 +3,7 @@ import {useCallback, useMemo} from 'react'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {MainApi} from '../../api/main'
+import {DragHandle} from '../tools/DragHandle'
 
 export function TableCell(props: RenderElementProps) {
   const store = useEditorStore()
@@ -29,9 +30,11 @@ export function TableCell(props: RenderElementProps) {
 }
 
 export const Table = observer((props: RenderElementProps) => {
+  const store = useEditorStore()
   return useMemo(() => {
     return (
-      <div className={'m-table'} {...props.attributes} data-be={'table'}>
+      <div className={'m-table drag-el'} {...props.attributes} data-be={'table'} onDragStart={store.dragStart}>
+        <DragHandle style={{top: '0.65em'}}/>
         <table>
           <tbody>{props.children}</tbody>
         </table>

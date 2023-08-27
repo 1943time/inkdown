@@ -205,13 +205,19 @@ export const MdElements: Record<string, MdNode> = {
       const parent = Editor.parent(ctx.editor, ctx.node[1])
       return (Editor.isEditor(parent[0]) || parent[0].type === 'blockquote') && ctx.node[0].type === 'paragraph'
     },
-    run: ({sel, editor, path, match}) => {
+    run: ({sel, editor, path, match, el}) => {
       if (sel && Range.isCollapsed(sel)) {
+        const text = EditorUtils.cutText(editor, {path: sel.anchor.path, offset: 1})
+        Transforms.delete(editor, {
+          at: path
+        })
         Transforms.insertNodes(editor, {
           type: 'blockquote',
-          children: [{type: 'paragraph', children: [{text: match[1] || ''}]}]
-        } as BlockQuoteNode, {select: true})
-        Transforms.delete(editor, {at: path})
+          children: [
+            {type: 'paragraph', children: text}
+          ]
+        }, {at: path})
+        Transforms.select(editor, Editor.start(editor, path))
       }
       return true
     }

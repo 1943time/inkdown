@@ -79,9 +79,10 @@ export const registerApi = () => {
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: config.showCharactersCount,
-      titleColor: config.titleColor,
       mas: process.mas || false,
-      token: config.token
+      headingMarkLine: config.headingMarkLine || false,
+      token: config.token,
+      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
     }
   })
 

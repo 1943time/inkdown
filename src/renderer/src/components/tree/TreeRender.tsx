@@ -75,7 +75,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
               `}
               draggable={!c.mode}
               onDragOver={e => {
-                if (c.folder && !c.mode) {
+                if (c.folder && !c.mode && treeStore.dragNode) {
                   e.preventDefault()
                   treeStore.setState({dropNode: c})
                 }
