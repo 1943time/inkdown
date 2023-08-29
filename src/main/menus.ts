@@ -8,7 +8,6 @@ export const registerMenus = () => {
     copyMarkdown: 'Copy Markdown Source Code',
     pdf: 'Export To PDF',
     html: 'Export To HTML',
-    eBook: 'Export eBook',
     openInFinder: 'Reveal in Finder',
     openInDefault: 'Open in default app',
     delete: 'Delete',
@@ -44,10 +43,6 @@ export const registerMenus = () => {
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('print-to-html')
       },
-      // {
-      //   label: menusLabel.eBook,
-      //   click: (e, win) => win?.webContents.send('export-ebook')
-      // },
       {
         type: 'separator'
       },
@@ -81,12 +76,6 @@ export const registerMenus = () => {
         command: command
       })
     }
-    // if (params.type === 'file') {
-    //   temp.add({
-    //     label: 'Open in new Tab',
-    //     click: () => sendCommand('openInNewTab')
-    //   })
-    // }
     if (params.type !== 'file') {
       temp.add({
         label: menusLabel.createNote,
@@ -133,7 +122,7 @@ export const registerMenus = () => {
     })
   })
 
-  ipcMain.on('table-menu', (e) => {
+  ipcMain.on('table-menu', (e, head?: boolean) => {
     const click = (task: string) => {
       return () => e.sender.send('table-task', task)
     }
@@ -155,6 +144,32 @@ export const registerMenus = () => {
       {
         label: menusLabel.insertColAfter,
         click: click('insertColAfter'),
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Move',
+        submenu: [
+          {
+            label: 'Move Up One Row',
+            click: click('moveUpOneRow'),
+            enabled: !head
+          },
+          {
+            label: 'Move Down One Row',
+            click: click('moveDownOneRow'),
+            enabled: !head
+          },
+          {
+            label: 'Move Left One Col',
+            click: click('moveLeftOneCol')
+          },
+          {
+            label: 'Move Right One Col',
+            click: click('moveRightOneCol')
+          }
+        ]
       },
       {type: 'separator'},
       {

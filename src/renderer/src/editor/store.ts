@@ -423,7 +423,6 @@ export class EditorStore {
         if (!Path.equals(targetPath, dragPath)) {
           const parent = Node.parent(this.editor, dragPath)
           outputCache.delete(dragNode)
-
           if (dragNode.type === 'code') {
             clearCodeCache(dragNode)
           }
