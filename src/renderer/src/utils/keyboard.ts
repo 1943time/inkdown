@@ -3,21 +3,28 @@ import {Range, Editor, Element, Transforms, Path, Node, NodeEntry} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import React from 'react'
 import isHotkey from 'is-hotkey'
+import {outputCache} from '../editor/output'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
   const task = ['insertTaskUnorderedList', 'insertTaskOrderedList'].includes(type)
+
   if (node && ['paragraph'].includes(node[0].type)) {
     const parent = Editor.parent(editor, node[1])
     if (parent[0].type === 'list-item') {
       Transforms.setNodes(editor, {order: isOrder ? true : undefined}, {at: Path.parent(parent[1])})
-      const list = Array.from<any>(Editor.nodes(editor, {
+      const [list] = Editor.nodes<any>(editor, {
+        match: n => n.type === 'list'
+      })
+
+      if (list) outputCache.delete(list[0])
+      const listItems = Array.from<any>(Editor.nodes(editor, {
         match: n => n.type === 'list-item',
         at: Path.parent(parent[1]),
         reverse: true,
         mode: 'lowest'
       }))
-      for (let l of list) {
+      for (let l of listItems) {
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }
     } else {

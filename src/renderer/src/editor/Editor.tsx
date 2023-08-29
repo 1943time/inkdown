@@ -167,9 +167,8 @@ export const MEditor = observer(({note}: {
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
-      const box = target.parentElement?.parentElement?.parentElement as HTMLDivElement
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
-      if (box?.scrollTop + e.clientY > top) {
+      if (store.container!.scrollTop + e.clientY - 60 > top) {
         if (EditorUtils.checkEnd(editor)) {
           e.preventDefault()
         }
