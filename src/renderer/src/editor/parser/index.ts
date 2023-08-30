@@ -51,6 +51,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   let els:(Elements | Text) [] = []
   let el:Element | null | Element[] = null
   let preNode:null | Content = null
+  let colorTag = ''
+  let colorText = ''
   for (let n of nodes) {
     switch (n.type) {
       case 'heading':
@@ -68,7 +70,15 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             })
           }
         } else {
-          el = {text: n.value}
+          const colorMatch = n.value.match(/<span\s+style="color:\s*(#\w+)"\s+data-be>/)
+          if (colorMatch) {
+            colorTag = colorMatch[1]
+          } else if (/^\s*<\/span>\s*$/.test(n.value)) {
+            el = {text: colorText, highColor: colorTag}
+            colorTag = ''
+          } else {
+            el = {text: n.value}
+          }
         }
         break
       case 'image':
@@ -137,6 +147,10 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = parseTable(n)
         break
       default:
+        if (n.type === 'text' && colorTag) {
+          colorText = n.value
+          break
+        }
         if (['strong', 'link', 'text', 'emphasis', 'delete', 'inlineCode'].includes(n.type)) {
           if (n.type === 'text') {
             el = {text: n.value}

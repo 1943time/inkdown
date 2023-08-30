@@ -364,7 +364,6 @@ ol.m-list {
 }
 [data-slate-node="text"] {
   user-select: none;
-  pointer-events: none;
 }
 .drag-handle {
   @apply absolute opacity-0 flex items-center;

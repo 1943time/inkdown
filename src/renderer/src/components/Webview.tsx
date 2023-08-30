@@ -11,6 +11,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, EditorStoreContext} from '../editor/store'
 import {treeStore} from '../store/tree'
 import {observer} from 'mobx-react-lite'
+import {configStore} from '../store/config'
 
 export const Webview = observer(() => {
   const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
@@ -28,7 +29,7 @@ export const Webview = observer(() => {
     window.electron.ipcRenderer.invoke('print-dom-ready').then(print)
   }, [])
   return (
-    <div className={'w-full h-full content p-5'}>
+    <div className={`w-full h-full content p-5 ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}>
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={editor}

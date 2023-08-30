@@ -21,14 +21,6 @@ import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 
 const countThrottle$ = new Subject<any>()
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [
-      {text: ''}
-    ]
-  }
-]
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -36,7 +28,7 @@ export const MEditor = observer(({note}: {
   const store = useEditorStore()
   const inCode = useRef(false)
   const editor = store.editor
-  const value = useRef<any[]>(initialValue)
+  const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(store)
   const saveTimer = useRef(0)
   const nodeRef = useRef<IFileItem>()
@@ -167,9 +159,8 @@ export const MEditor = observer(({note}: {
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
-      const box = target.parentElement?.parentElement?.parentElement as HTMLDivElement
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
-      if (box?.scrollTop + e.clientY > top) {
+      if (store.container!.scrollTop + e.clientY - 60 > top) {
         if (EditorUtils.checkEnd(editor)) {
           e.preventDefault()
         }
@@ -193,7 +184,7 @@ export const MEditor = observer(({note}: {
   return (
     <Slate
       editor={editor}
-      initialValue={initialValue}
+      initialValue={[EditorUtils.p]}
       onChange={change}
     >
       <SetNodeToDecorations/>

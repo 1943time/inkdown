@@ -388,7 +388,7 @@ export const createAppMenus = () => {
         {
           label: menusLabel.doc,
           click: () => {
-            shell.openExternal(`https://pb.bluestone.blog/official/book/docs`)
+            shell.openExternal(`https://pb.bluemd.me/official/book/docs`)
           }
         },
         {

@@ -38,6 +38,7 @@ export const TableAttr = observer(() => {
   })
   const tableRef = useRef<NodeEntry<TableNode>>()
   const tableCellRef = useRef<NodeEntry<TableCellNode>>()
+  const isHead = () => tableCellRef.current?.[1][tableCellRef.current?.[1].length - 2] === 0
   const resize = useCallback(() => {
     const table = tableRef.current
     if (!table) return
@@ -198,7 +199,7 @@ export const TableAttr = observer(() => {
 
   const removeRow = useCallback((path: Path, index: number, columns: number) => {
     if (Path.hasPrevious(path)) {
-      Transforms.select(editor, Editor.end(editor,[...tableRef.current![1], path[path.length - 1] - 1, index]))
+      Transforms.select(editor, Editor.end(editor, [...tableRef.current![1], path[path.length - 1] - 1, index]))
     } else {
       Transforms.select(editor, Editor.end(editor, [...tableRef.current![1], path[path.length - 1], index]))
     }
@@ -239,6 +240,7 @@ export const TableAttr = observer(() => {
       const path = tableCellRef.current[1]
       const index = path[path.length - 1]
       const row = path[path.length - 2]
+      const rowPath = Path.parent(path)
       switch (task) {
         case 'insertRowBefore':
           insertRow(row === 0 ? Path.next(Path.parent(path)) : Path.parent(path), columns)
@@ -251,6 +253,48 @@ export const TableAttr = observer(() => {
           break
         case 'insertColAfter':
           insertCol(tableRef.current[1], rows, index + 1)
+          break
+        case 'moveUpOneRow':
+          if (row > 1) {
+            Transforms.moveNodes(editor, {
+              at: rowPath,
+              to: Path.previous(rowPath)
+            })
+          } else {
+            Transforms.moveNodes(editor, {
+              at: rowPath,
+              to: [...tableRef.current[1], rows - 1]
+            })
+          }
+          break
+        case 'moveDownOneRow':
+          if (row < rows - 1) {
+            Transforms.moveNodes(editor, {
+              at: rowPath,
+              to: Path.next(rowPath)
+            })
+          } else {
+            Transforms.moveNodes(editor, {
+              at: rowPath,
+              to: [...tableRef.current[1], 1]
+            })
+          }
+          break
+        case 'moveLeftOneCol':
+          Array.from(new Array(rows)).map((_, i) => {
+            Transforms.moveNodes(editor, {
+              at: [...tableRef.current![1], i, index],
+              to: [...tableRef.current![1], i, index > 0 ? index - 1 : columns - 1]
+            })
+          })
+          break
+        case 'moveRightOneCol':
+          Array.from(new Array(rows)).map((_, i) => {
+            Transforms.moveNodes(editor, {
+              at: [...tableRef.current![1], i, index],
+              to: [...tableRef.current![1], i, index === columns - 1 ? 0 : index + 1]
+            })
+          })
           break
         case 'removeCol':
           if (columns < 2) {
@@ -372,10 +416,10 @@ export const TableAttr = observer(() => {
           </div>
         </Tooltip>
         <div
-          onClick={() => MainApi.tableMenu()}
+          onClick={() => MainApi.tableMenu(isHead())}
           className={`t-handle`}
         >
-          <EllipsisOutlined />
+          <EllipsisOutlined/>
         </div>
       </div>
       <div className={'flex items-center'}>

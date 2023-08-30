@@ -4,13 +4,13 @@ import {useEditorStore} from '../store'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {treeStore} from '../../store/tree'
 import {
-  BoldOutlined, CheckOutlined,
-  ClearOutlined,
+  BoldOutlined, CaretDownOutlined, CheckOutlined,
+  ClearOutlined, HighlightOutlined,
   ItalicOutlined,
   LinkOutlined,
   StrikethroughOutlined
 } from '@ant-design/icons'
-import {BaseRange, Editor, NodeEntry, Path, Range, Text, Transforms} from 'slate'
+import {BaseRange, Editor, NodeEntry, Range, Text, Transforms} from 'slate'
 import {Input} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
@@ -22,6 +22,14 @@ const tools = [
   {type: 'code', icon: <ICode className={'w-5 h-5'}/>},
   {type: 'url', icon: <LinkOutlined/>}
 ]
+
+const colors = [
+  {color: '#10b981'},
+  {color: '#f59e0b'},
+  {color: '#3b82f6'},
+  {color: '#6366f1'},
+  {color: '#f43f5e'}
+]
 export const FloatBar = observer(() => {
   const store = useEditorStore()
   const [state, setState] = useLocalState({
@@ -29,7 +37,9 @@ export const FloatBar = observer(() => {
     left: 0,
     top: 0,
     link: false,
-    url: ''
+    url: '',
+    hoverSelectColor: false,
+    openSelectColor: false
   })
   const sel = useRef<BaseRange>()
   const el = useRef<NodeEntry<any>>()
@@ -59,10 +69,10 @@ export const FloatBar = observer(() => {
     if (store.domRect) {
       let left = store.domRect.x
       if (!treeStore.fold) left -= treeStore.width
-      left = left - (200 - store.domRect.width) / 2
+      left = left - ((state.openSelectColor ? 180 : 250) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
-      const barWidth = state.link ? 304 : 204
+      const barWidth = state.link ? 304 : state.openSelectColor ? 184 : 254
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       const top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
       setState({
@@ -92,6 +102,8 @@ export const FloatBar = observer(() => {
       }
       window.addEventListener('keydown', close)
       return () => window.removeEventListener('keydown', close)
+    } else {
+      setState({openSelectColor: false, hoverSelectColor: false})
     }
     return () => {}
   }, [state.open])
@@ -161,34 +173,96 @@ export const FloatBar = observer(() => {
             className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500 ml-2'}
           />
         </div> :
-        <div className={'w-[200px] justify-center items-center h-full flex space-x-0.5'}>
-          {tools.map(t =>
-            <div
-              key={t.type}
-              onMouseDown={e => e.preventDefault()}
-              onClick={(e) => {
-                if (t.type !== 'url') {
-                  EditorUtils.toggleFormat(store.editor, t.type)
-                } else {
-                  openLink()
-                }
-              }}
-              className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-sky-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
+        <div className={`${state.openSelectColor ? 'w-[180px]' : 'w-[250px]'} h-full space-x-0.5`}>
+          {!state.openSelectColor &&
+            <div className={'flex items-center space-x-0.5 justify-center h-full'}>
+              {tools.map(t =>
+                <div
+                  key={t.type}
+                  onMouseDown={e => e.preventDefault()}
+                  onClick={(e) => {
+                    if (t.type !== 'url') {
+                      EditorUtils.toggleFormat(store.editor, t.type)
+                    } else {
+                      openLink()
+                    }
+                  }}
+                  className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-sky-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
               cursor-default py-0.5 px-2 rounded
               `}
-            >
-              {t.icon}
+                >
+                  {t.icon}
+                </div>
+              )}
+              <div
+                className={`flex items-center`}
+              >
+                <div
+                  className={`${EditorUtils.isFormatActive(store.editor, 'highColor') ? 'bg-sky-500/80 dark:text-gray-200 text-white' : state.hoverSelectColor ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600' : 'float-bar-icon'} py-0.5 px-2 rounded-tl rounded-bl`}
+                  onMouseEnter={e => e.stopPropagation()}
+                  onClick={() => {
+                    if (EditorUtils.isFormatActive(store.editor, 'highColor')) {
+                      EditorUtils.highColor(store.editor)
+                    } else {
+                      EditorUtils.highColor(store.editor, localStorage.getItem('high-color') || '#10b981')
+                      EditorUtils.clearMarks(store.editor)
+                    }
+                  }}
+                >
+                  <HighlightOutlined />
+                </div>
+                <div
+                  className={'h-6 text-xs rounded-tr rounded-br float-bar-icon flex items-center px-0.5'}
+                  onMouseEnter={() => setState({hoverSelectColor: true})}
+                  onMouseLeave={() => setState({hoverSelectColor: false})}
+                  onClick={() => {
+                    setState({openSelectColor: true, hoverSelectColor: false})
+                    resize()
+                  }}
+                >
+                  <CaretDownOutlined className={'scale-95'}/>
+                </div>
+              </div>
+              <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
+              <div
+                className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
+                onClick={() => {
+                  EditorUtils.clearMarks(store.editor, true)
+                  EditorUtils.highColor(store.editor)
+                }}
+              >
+                <ClearOutlined/>
+              </div>
             </div>
-          )}
-          <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
-          <div
-            className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
-            onClick={() => {
-              EditorUtils.clearMarks(store.editor, true)
-            }}
-          >
-            <ClearOutlined/>
-          </div>
+          }
+          {state.openSelectColor &&
+            <div className={'flex items-center space-x-2 justify-center h-full'}>
+              <div
+                className={'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'}
+                onClick={() => {
+                  setState({openSelectColor: false})
+                  resize()
+                  EditorUtils.highColor(store.editor)
+                }}
+              >
+                /
+              </div>
+              {colors.map(c =>
+                <div
+                  key={c.color}
+                  style={{backgroundColor: c.color}}
+                  className={`float-color-icon ${EditorUtils.isFormatActive(store.editor, 'highColor', c.color) ? 'border-white/50' : ''}`}
+                  onClick={() => {
+                    localStorage.setItem('high-color', c.color)
+                    EditorUtils.highColor(store.editor, c.color)
+                    EditorUtils.clearMarks(store.editor, true)
+                    setState({openSelectColor: false})
+                    resize()
+                  }}
+                />
+              )}
+            </div>
+          }
         </div>
       }
     </div>

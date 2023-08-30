@@ -21,7 +21,7 @@ import {getImageData} from '../utils'
 import {configStore} from '../store/config'
 import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
-
+import {useSubject} from '../hooks/subscribe'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {

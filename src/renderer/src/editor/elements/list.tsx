@@ -4,7 +4,6 @@ import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'
 import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
-import {DragHandle} from '../tools/DragHandle'
 import Drag from '../../icons/Drag'
 import {configStore} from '../../store/config'
 
@@ -21,7 +20,7 @@ export const List = observer(({element, attributes, children}: ElementProps<List
       >
         {configStore.config.dragToSort &&
           <span
-            className={'block absolute -left-6 top-[5px] w-6 group hover:border-r border-gray-200/10 h-[calc(100%_-_10px)]'}
+            className={'block absolute -left-6 top-[5px] w-5 group hover:border-r dark:border-gray-200/10 border-gray-200 h-[calc(100%_-_10px)]'}
             style={{
               paddingTop: '.3em'
             }}

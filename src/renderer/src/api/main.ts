@@ -102,8 +102,8 @@ export const MainApi = {
   openInFolder(path: string) {
     ipcRenderer.send('openInFolder', path)
   },
-  tableMenu() {
-    ipcRenderer.send('table-menu')
+  tableMenu(head = false) {
+    ipcRenderer.send('table-menu', head)
   },
   mkdirp(path: string) {
     return ipcRenderer.invoke('mkdirp', path)
