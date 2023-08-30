@@ -61,6 +61,7 @@ export const MLeaf = (props: RenderLeafProps) => {
     let className = ''
     let children = <>{props.children}</>
     if (leaf.code) children = <code className={'inline-code'}>{children}</code>
+    if (leaf.highColor) style.color = leaf.highColor
     if (leaf.color) style.color = leaf.color
     if (leaf.bold) children = <strong>{children}</strong>
     if (leaf.strikethrough) children = <s>{children}</s>

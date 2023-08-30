@@ -66,3 +66,11 @@ html{
 .modal-border{
   @apply dark:border-gray-200/20 border-gray-300/80;
 }
+
+.float-bar-icon{
+  @apply dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600 cursor-default;
+}
+
+.float-color-icon{
+  @apply w-5 h-5 rounded border border-white/10 hover:border-white/50;
+}

@@ -10,6 +10,7 @@ export const isMix = (t: Text) => {
 }
 const textStyle = (t: Text) => {
   if (!t.text) return ''
+  if (t.highColor) return `<span style="color:${t.highColor}" data-be>${t.text}</span>`
   let str = t.text.replace(/(?<!\\)\\/g, '\\')
   let preStr = '', afterStr = ''
   if (t.code || t.bold || t.strikethrough || t.italic) {

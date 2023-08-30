@@ -111,12 +111,12 @@ export class EditorUtils {
     return texts
   }
 
-  static isFormatActive(editor: Editor, format) {
+  static isFormatActive(editor: Editor, format: string, value?: any) {
     const [match] = Editor.nodes(editor, {
       match: n => !!n[format],
       mode: 'lowest'
     })
-    return !!match
+    return value ? match?.[0]?.[format] === value : !!match
   }
 
   static getUrl(editor: Editor) {
@@ -130,6 +130,7 @@ export class EditorUtils {
   static toggleFormat(editor: Editor, format: any) {
     const str = editor.selection ? Editor.string(editor, editor.selection) : ''
     if (str) {
+      EditorUtils.highColor(editor)
       const isActive = EditorUtils.isFormatActive(editor, format)
       Transforms.setNodes(
         editor,
@@ -137,6 +138,14 @@ export class EditorUtils {
         {match: Text.isText, split: true}
       )
     }
+  }
+
+  static highColor(editor: Editor, color?: string) {
+    Transforms.setNodes(
+      editor,
+      {'highColor': color},
+      {match: Text.isText, split: true}
+    )
   }
 
   static checkEnd(editor: Editor) {
