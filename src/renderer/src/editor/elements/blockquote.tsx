@@ -5,7 +5,7 @@ export function Blockquote(props: ElementProps<BlockQuoteNode>) {
   const store = useEditorStore()
   return useMemo(() => (
     <blockquote
-      data-be={'code-line'}
+      data-be={'blockquote'}
       {...props.attributes}
     >
       {props.children}

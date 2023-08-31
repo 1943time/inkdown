@@ -1,12 +1,13 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../../store/tree'
+import {treeStore} from '../../store/tree'
 import {PlusCircleOutlined} from '@ant-design/icons'
-import {IFileItem} from '../../../index'
-import ArrowRight from '../../../assets/ReactIcon/ArrowRight'
+import {IFileItem} from '../../index'
 import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
-import {MainApi} from '../../../api/main'
+import {MainApi} from '../../api/main'
 import {Input} from 'antd'
+import {configStore} from '../../store/config'
+import ArrowRight from '../../icons/ArrowRight'
 
 export const TreeRender = observer(() => {
   const context = useCallback(() => {
@@ -16,16 +17,16 @@ export const TreeRender = observer(() => {
   return (
     <div
       className={'pt-5'}
+      onDrop={e => e.stopPropagation()}
+      onDragOver={e => {
+        e.stopPropagation()
+        if (treeStore.dropNode === treeStore.root) {
+          treeStore.setState({dropNode: null})
+        }
+      }}
     >
       <div
-        className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
-        onDragOver={e => {
-          e.preventDefault()
-          treeStore.setState({dropNode: treeStore.root})
-        }}
-        onDrop={e => {
-          treeStore.moveNode(treeStore.root)
-        }}
+        className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
       >
         <span className={'font-bold text-[15px]'}>{treeStore.root.filename}</span>
         <div
@@ -74,7 +75,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
               `}
               draggable={!c.mode}
               onDragOver={e => {
-                if (c.folder && !c.mode) {
+                if (c.folder && !c.mode && treeStore.dragNode) {
                   e.preventDefault()
                   treeStore.setState({dropNode: c})
                 }
@@ -116,7 +117,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                   onKeyDown={e => {
                     if (e.key === 'Enter') saveNote(c)
                   }}
-                  placeholder={`${c.folder ? '请输入文件夹名' : '请输入笔记名称'}`}
+                  placeholder={`${c.folder ? configStore.isZh ? '输入文件夹名' : 'enter a folder name' : configStore.isZh ? '输入文档名称' : 'enter a doc name'}`}
                 /> :
                 <>
                   {c.folder &&

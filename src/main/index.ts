@@ -1,12 +1,13 @@
 import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
 import {lstatSync} from 'fs'
-import {is, optimizer} from '@electron-toolkit/utils'
+import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import log from 'electron-log'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
-import {getLocale, store} from './store'
-// import {AppUpdate} from './update'
+import {store} from './store'
+import {AppUpdate} from './update'
+const isWindows = process.platform === 'win32'
 
 type WinOptions = {
   width?: number
@@ -77,15 +78,14 @@ let waitOpenFile = ''
 app.on('will-finish-launching', () => {
   // Event fired When someone drags files onto the icon while your app is running
   app.on("open-file", (event, file) => {
+    event.preventDefault()
     if (app.isReady() === false) {
       waitOpenFile = file
     } else {
       openFiles(file)
     }
-    event.preventDefault()
-  });
-});
-
+  })
+})
 const openFiles = (filePath: string) => {
   try {
     const win = Array.from(windows).find(w => {
@@ -113,7 +113,7 @@ app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
   registerApi()
-  // new AppUpdate()
+  new AppUpdate()
   ipcMain.on('create-window', (e, filePath?: string) => {
     if (filePath) {
       openFiles(filePath)
@@ -122,7 +122,6 @@ app.whenReady().then(() => {
     }
   })
   // console.log(app.getPath('userData'))
-  if (getLocale() === 'zh') app.commandLine.appendSwitch('lang', 'zh-CN')
   ipcMain.on('set-win', (e, data: WinOptions) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     if (!windows.get(window.id)) return
@@ -155,8 +154,7 @@ app.whenReady().then(() => {
       }
     }))
   })
-  // Set app user model id for windows
-  // electronApp.setAppUserModelId('com.electron')
+  if (isWindows) electronApp.setAppUserModelId('blog.bluestone')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -164,7 +162,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
+  if (isWindows) waitOpenFile = process.argv[1] || ''
   try {
     const data = store.get('windows') as WinOptions[] || []
     // console.log('data', data)

@@ -10,7 +10,7 @@ export class EditorUtils {
   }
 
   static isDirtLeaf(leaf: CustomLeaf) {
-    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url
+    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html
   }
 
   static isTop(editor: Editor, path: Path) {
@@ -25,7 +25,6 @@ export class EditorUtils {
       const node = Editor.node(editor, from)
       // 刷新code元素缓存
       if (node[0].type === 'code') clearCodeCache(node[0])
-      console.log('mode', from, to, index)
       Transforms.moveNodes(editor, {
         at: from,
         to: [...to, index]
@@ -61,7 +60,7 @@ export class EditorUtils {
 
   static clearMarks(editor: Editor, split = false) {
     if (!editor.selection) return
-    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold'], {
+    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold', 'textColor'], {
       split,
       match: Text.isText
     })
@@ -112,12 +111,12 @@ export class EditorUtils {
     return texts
   }
 
-  static isFormatActive(editor: Editor, format) {
+  static isFormatActive(editor: Editor, format: string, value?: any) {
     const [match] = Editor.nodes(editor, {
       match: n => !!n[format],
       mode: 'lowest'
     })
-    return !!match
+    return value ? match?.[0]?.[format] === value : !!match
   }
 
   static getUrl(editor: Editor) {
@@ -129,9 +128,9 @@ export class EditorUtils {
   }
 
   static toggleFormat(editor: Editor, format: any) {
-    const selection = window.getSelection()
-    const node = selection?.getRangeAt(0).startContainer.parentNode as HTMLElement
-    if (node?.dataset?.slateString) {
+    const str = editor.selection ? Editor.string(editor, editor.selection) : ''
+    if (str) {
+      EditorUtils.highColor(editor)
       const isActive = EditorUtils.isFormatActive(editor, format)
       Transforms.setNodes(
         editor,
@@ -139,6 +138,14 @@ export class EditorUtils {
         {match: Text.isText, split: true}
       )
     }
+  }
+
+  static highColor(editor: Editor, color?: string) {
+    Transforms.setNodes(
+      editor,
+      {'highColor': color},
+      {match: Text.isText, split: true}
+    )
   }
 
   static checkEnd(editor: Editor) {

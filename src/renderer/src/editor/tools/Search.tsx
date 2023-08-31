@@ -1,9 +1,10 @@
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useEffect, useMemo, useRef} from 'react'
-import IClose from '../../assets/ReactIcon/IClose'
 import {Tooltip} from 'antd'
 import {configStore} from '../../store/config'
+import IClose from '../../icons/IClose'
+import isHotkey from 'is-hotkey'
 export const Search = observer(() => {
   const store = useEditorStore()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -30,7 +31,7 @@ export const Search = observer(() => {
                 store.matchSearch(false)
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter') {
+                if (isHotkey('enter', e)) {
                   store.nextSearch()
                 }
               }}

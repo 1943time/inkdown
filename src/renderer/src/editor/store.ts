@@ -2,20 +2,23 @@ import {action, makeAutoObservable, observe, runInAction} from 'mobx'
 import {BaseRange, BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {GetFields, IFileItem} from '../index'
-import {createContext, useContext} from 'react'
+import React, {createContext, useCallback, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {of, Subject} from 'rxjs'
 import {existsSync, mkdirSync, writeFileSync} from 'fs'
 import {join, parse, relative} from 'path'
-import {mediaType} from './utils/dom'
+import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {nanoid} from 'nanoid'
 import {MainApi} from '../api/main'
+import {outputCache} from './output'
+import {clearCodeCache} from './plugins/useHighlight'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
   return useContext(EditorStoreContext)!
 }
+
 export class EditorStore {
   editor!: Editor
   search = {
@@ -30,6 +33,9 @@ export class EditorStore {
   webview = false
   sel: BaseSelection | undefined
   focus = false
+  readonly = false
+  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list'])
+  dragEl:null | HTMLElement = null
   openSearch = false
   focusSearch = false
   docChanged = false
@@ -53,17 +59,20 @@ export class EditorStore {
   constructor(editor: Editor, webview = false) {
     this.editor = editor
     this.webview = webview
+    this.dragStart = this.dragStart.bind(this)
     makeAutoObservable(this, {
       searchRanges: false,
       editor: false,
       tableCellNode: false,
       container: false,
-      highlightCache: false
+      highlightCache: false,
+      dragEl: false
     })
     observe(this.search, 'text', () => {
       this.matchCount = 0
     })
   }
+
   hideRanges() {
     if (this.highlightCache.size) {
       setTimeout(() => {
@@ -74,6 +83,7 @@ export class EditorStore {
       }, 60)
     }
   }
+
   offsetTop(node: HTMLElement) {
     let top = this.openSearch ? 46 : 0
     const doc = this.doc
@@ -93,6 +103,7 @@ export class EditorStore {
     }
     return left
   }
+
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
     this.searchRanges = []
@@ -126,7 +137,6 @@ export class EditorStore {
       })
       let ranges: Range[] = []
       let itemRanges: Range[] = []
-      let openMatch = false
       for (let i = 0; i < parts.length; i++) {
         if (i !== 0) {
           const start = offset - keyWord.length
@@ -134,14 +144,13 @@ export class EditorStore {
             if (c.start < offset && c.end > start) {
               const anchorOffset = start < c.start ? 0 : start - c.start
               const focusOffset = offset > c.end ? c.length : offset - c.start
-              const range:Range = {
+              const range: Range = {
                 anchor: {path: [...path, c.index], offset: anchorOffset},
                 focus: {path: [...path, c.index], offset: focusOffset},
                 current: matchCount === this.search.currentIndex,
                 highlight: true
               }
               itemRanges.push(range)
-              openMatch = true
               ranges.push(range)
               if (c.end >= offset) {
                 matchCount++
@@ -162,6 +171,7 @@ export class EditorStore {
     this.refreshHighlight = !this.refreshHighlight
     if (scroll) requestIdleCallback(() => this.toPoint())
   }
+
   setOpenSearch(open: boolean) {
     this.openSearch = open
     if (!open) {
@@ -176,6 +186,7 @@ export class EditorStore {
       }
     }
   }
+
   setSearchText(text?: string) {
     this.searchRanges = []
     this.search.currentIndex = 0
@@ -201,6 +212,7 @@ export class EditorStore {
     })
     this.refreshHighlight = !this.refreshHighlight
   }
+
   nextSearch() {
     if (this.search.currentIndex === this.searchRanges.length - 1) {
       this.search.currentIndex = 0
@@ -250,6 +262,7 @@ export class EditorStore {
             if (!existsSync(imageDir)) {
               mkdirSync(imageDir)
               await MainApi.mkdirp(imageDir)
+              treeStore.watcher.onChange('addDir', imageDir)
             }
             targetPath = join(imageDir, name)
             mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, name))
@@ -262,6 +275,7 @@ export class EditorStore {
           }
           writeFileSync(targetPath, base64Image, {encoding: 'base64'})
           this.insertInlineNode(mediaUrl)
+          if (treeStore.root) treeStore.watcher.onChange('add', targetPath)
         }
       }
     }
@@ -273,9 +287,15 @@ export class EditorStore {
     const path = relative(join(note.filePath, '..'), dragNode.filePath)
     this.insertInlineNode(path)
   }
+
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
-    let node = mediaType(filePath) === 'image' ? {type: 'media', url: filePath, alt: p.name, children: [{text: ''}]} : {text: p.name, url: filePath}
+    let node = mediaType(filePath) === 'image' ? {
+      type: 'media',
+      url: filePath,
+      alt: p.name,
+      children: [{text: ''}]
+    } : {text: p.name, url: filePath}
     const sel = this.editor.selection
     const type = mediaType(filePath)
     if (!sel || !Range.isCollapsed(sel)) return
@@ -288,7 +308,7 @@ export class EditorStore {
       anchor: {path: text[1], offset: 0},
       focus: {path: text[1], offset: text[0].text.length}
     })
-    if (type!== 'image') node = {...text[0], ...node}
+    if (type !== 'image') node = {...text[0], ...node}
     Transforms.insertNodes(this.editor, [
       {...text[0], text: beforeText},
       node,
@@ -301,13 +321,14 @@ export class EditorStore {
     if (type === 'image') {
       Transforms.select(this.editor, Path.next(sel.focus.path))
     } else {
-      const targetPath = sel.anchor.offset === 0 ? sel.focus.path: Path.next(sel.focus.path)
+      const targetPath = sel.anchor.offset === 0 ? sel.focus.path : Path.next(sel.focus.path)
       Transforms.select(this.editor, {
         anchor: Editor.end(this.editor, targetPath),
         focus: Editor.end(this.editor, targetPath),
       })
     }
   }
+
   private toPoint() {
     const cur = this.searchRanges[this.search.currentIndex]
     if (!cur?.length) return
@@ -320,6 +341,111 @@ export class EditorStore {
         top: top - 100
       })
     }
+  }
+  private toPath(el: HTMLElement) {
+    const node = ReactEditor.toSlateNode(this.editor, el)
+    const path = ReactEditor.findPath(this.editor, node)
+    return [path, node] as [Path, Node]
+  }
+  private isListItem(el: HTMLElement) {
+    return el.dataset.be === 'list-item'
+  }
+  dragStart(e: React.DragEvent, type?: string) {
+    e.stopPropagation()
+    this.readonly = true
+    type MovePoint = {
+      el: HTMLDivElement,
+        direction: 'top' | 'bottom',
+      top: number
+      left: number
+    }
+    const ableToEnter = type === 'list-item' ? new Set(['list-item']) : this.ableToEnter
+    let mark: null | HTMLDivElement = null
+    const els = document.querySelectorAll<HTMLDivElement>('[data-be]')
+    const points: MovePoint[] = []
+    for (let el of els) {
+      if (!ableToEnter.has(el.dataset.be!)) continue
+      const top = getOffsetTop(el, this.container!)
+      const left = getOffsetLeft(el, this.container!)
+      if (!el.previousSibling && el.parentElement?.dataset.be !== 'list-item') {
+        points.push({
+          el: el,
+          direction: 'top',
+          left: left,
+          top: top - 2
+        })
+      }
+      points.push({
+        el: el,
+        left: this.isListItem(el) ? left - 20: left,
+        direction: 'bottom',
+        top: top + el.clientHeight + 2
+      })
+    }
+    let last:MovePoint | null = null
+    const dragover = (e: DragEvent) => {
+      e.preventDefault()
+      const target = e.target as HTMLElement
+      const top = e.clientY - 40 + this.container!.scrollTop
+      let distance = 1000000
+      let cur: MovePoint | null = null
+      for (let p of points) {
+        let curDistance = Math.abs(p.top - top)
+        if (curDistance < distance) {
+          cur = p
+          distance = curDistance
+        }
+      }
+      if (cur) {
+        last = cur
+        const width = this.isListItem(last.el) ? last.el.clientWidth + 20 + 'px': last.el.clientWidth + 'px'
+        if (!mark) {
+          mark = document.createElement('div')
+          mark.classList.add('move-mark')
+          mark.style.width = width
+          mark.style.transform = `translate(${last.left}px, ${last.top}px)`
+          this.container!.append(mark)
+        } else {
+          mark.style.width = width
+          mark.style.transform = `translate(${last.left}px, ${last.top}px)`
+        }
+      }
+    }
+    window.addEventListener('dragover', dragover)
+    window.addEventListener('dragend', action(() => {
+      window.removeEventListener('dragover', dragover)
+      this.readonly = false
+      if (mark) this.container!.removeChild(mark)
+      if (last && this.dragEl) {
+        const [dragPath, dragNode] = this.toPath(this.dragEl)
+        const [targetPath] = this.toPath(last.el)
+        let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
+        if (!Path.equals(targetPath, dragPath)) {
+          const parent = Node.parent(this.editor, dragPath)
+          outputCache.delete(dragNode)
+          if (dragNode.type === 'code') {
+            clearCodeCache(dragNode)
+          }
+          if (dragNode.type === 'table') {
+            setTimeout(action(() => {
+              treeStore.size = JSON.parse(JSON.stringify(treeStore.size))
+            }))
+          }
+          if (Path.equals(Path.parent(targetPath), Path.parent(dragPath)) && Path.compare(dragPath, targetPath) === -1) {
+            toPath = Path.previous(toPath)
+          }
+          Transforms.moveNodes(this.editor, {
+            at: dragPath,
+            to: toPath
+          })
+          if (parent.children?.length === 1) {
+            Transforms.delete(this.editor, {at: Path.parent(dragPath)})
+          }
+        }
+      }
+      this.dragEl!.draggable = false
+      this.dragEl = null
+    }), {once: true})
   }
 }
 

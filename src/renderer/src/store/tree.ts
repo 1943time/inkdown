@@ -1,8 +1,8 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
-import {createFileNode, parserNode, sortFiles} from './parserNode'
+import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
-import {basename, join, parse} from 'path'
+import {basename, join, parse, sep} from 'path'
 import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
@@ -102,7 +102,6 @@ export class TreeStore {
     }) => {
       runInAction(() => {
         const {filePath, type} = params
-        this.watcher.pause()
         switch (params.command) {
           case 'createNote':
             const addNote = createFileNode({
@@ -232,6 +231,7 @@ export class TreeStore {
       this.watcher.watchNote(filePath)
     }
     appendFileSync(filePath, '', {encoding: 'utf-8'})
+    if (this.root && filePath.startsWith(this.root.filePath)) this.watcher.onChange('add', filePath, node)
     this.currentTab.history.push(node)
     this.currentTab.index = this.currentTab.history.length - 1
     MainApi.setWin({openFile: node.filePath})
@@ -332,7 +332,6 @@ export class TreeStore {
     MainApi.setWin({openFolder: path})
     const {root, files} = parserNode(path)
     this.root = root
-    this.watcher.watch()
     requestIdleCallback(() => this.parserQueue(files))
     if (openFile && existsSync(openFile)) {
       this.open(openFile)
@@ -359,19 +358,13 @@ export class TreeStore {
   }
   moveNode(to: IFileItem) {
     if (this.dragNode && this.dragNode !== to && to.children!.every(c => c !== this.dropNode)) {
-      this.watcher.pause()
       const fromPath = this.dragNode.filePath
       const toPath = to.filePath!
+      this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
       this.dropNode = null
       renameSync(fromPath, join(toPath, basename(fromPath)))
-      this.removeSelf(this.dragNode)
       to.children!.push(this.dragNode)
-      Object.defineProperty(this.dragNode, 'parent', {
-        configurable: true,
-        get() {
-          return to
-        }
-      })
+      defineParent(this.dragNode, to)
       to.children = sortFiles(to.children!)
       if (this.dragNode === this.currentTab.current) {
         MainApi.setWin({openFile: this.dragNode.filePath})
@@ -381,7 +374,6 @@ export class TreeStore {
 
   saveNote(file: IFileItem) {
     const parent = file.parent!
-    this.watcher.pause()
     if (file.mode === 'create') {
       if (!file.editName) {
         parent.children = parent.children!.filter(c => c !== file)
@@ -423,7 +415,7 @@ export class TreeStore {
 
   getAbsolutePath(file: IFileItem) {
     if (this.root) {
-      return file.filePath.replace(this.root.filePath, '').split('/').slice(1)
+      return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
     } else {
       return [file.filename]
     }
@@ -464,10 +456,11 @@ export class TreeStore {
   }
 
   private removeSelf(node: IFileItem) {
-    const index = this.currentTab.history.findIndex(n => n === node)
-    if (index !== -1) {
-      this.currentTab.history.splice(index, 1)
-      if (index <= this.currentTab.index) this.currentTab.index--
+    this.currentTab.history = this.currentTab.history.filter(h => h !== node)
+    if (this.currentTab.history.length > 1 && this.currentTab.index > this.currentTab.history.length - 1) {
+      this.currentTab.index = this.currentTab.history.length - 1
+    } else if (!this.currentTab.history.length) {
+      this.currentTab.index = 0
     }
     node.parent!.children = node.parent!.children!.filter(c => c !== node)
   }

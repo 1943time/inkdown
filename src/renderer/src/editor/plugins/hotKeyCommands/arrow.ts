@@ -1,6 +1,7 @@
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
+import {isMod} from '../../../utils/keyboard'
 
 export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
   const sel = editor.selection
@@ -8,7 +9,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
     if (e.key === 'ArrowLeft') {
       e.preventDefault()
       e.stopPropagation()
-      if (!e.metaKey) {
+      if (!isMod(e)) {
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const pre = Editor.previous<any>(editor, {at: sel.focus.path})
@@ -27,7 +28,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
     if (e.key === 'ArrowRight') {
       e.preventDefault()
       e.stopPropagation()
-      if (!e.metaKey) {
+      if (!isMod(e)) {
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
@@ -36,7 +37,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         } else if (sel.focus.offset === leaf.text?.length && dirt && !Editor.next(editor, {at: sel.focus.path})) {
           EditorUtils.moveAfterSpace(editor, sel.focus.path)
         } else {
-          Transforms.move(editor, { unit: 'offset' })
+          Transforms.move(editor, { unit: 'offset'})
         }
       } else {
         Transforms.select(editor, Editor.end(editor, Path.parent(sel.focus.path)))
@@ -114,7 +115,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
             Transforms.delete(editor, {at: path})
           }
         }
-        if (Node.string(el) && EditorUtils.checkSelEnd(editor, path)) {
+        if ((Node.string(el) || el.children.length > 1 || el.children[0].type === 'media') && EditorUtils.checkSelEnd(editor, path)) {
           Transforms.insertNodes(editor, EditorUtils.p, {
             at: [editor.children.length],
             select: true

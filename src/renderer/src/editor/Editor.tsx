@@ -18,15 +18,9 @@ import {runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
+import {debounceTime, Subject} from 'rxjs'
 
-const initialValue: Descendant[] = [
-  {
-    type: 'paragraph',
-    children: [
-      {text: ''}
-    ]
-  }
-]
+const countThrottle$ = new Subject<any>()
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -34,7 +28,7 @@ export const MEditor = observer(({note}: {
   const store = useEditorStore()
   const inCode = useRef(false)
   const editor = store.editor
-  const value = useRef<any[]>(initialValue)
+  const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(store)
   const saveTimer = useRef(0)
   const nodeRef = useRef<IFileItem>()
@@ -43,13 +37,11 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(editor)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
-  const countTimerRef = useRef<number | null>(null)
   const save = useCallback(async () => {
     if (nodeRef.current && store.docChanged) {
       runInAction(() => {
         store.docChanged = false
       })
-      treeStore.watcher.pause()
       const root = Editor.node(editor, [])
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
@@ -61,22 +53,20 @@ export const MEditor = observer(({note}: {
 
   const count = useCallback((nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
-    if (countTimerRef.current === null) {
-      countTimerRef.current = window.setTimeout(() => {
-        const root = Editor.node(editor, [])
-        const res = toMarkdown(nodes, '', [root[0]])
-        const texts = Editor.nodes(editor, {
-          at: [],
-          match: n => n.text
-        })
-        runInAction(() => {
-          store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
-          store.count.characters = res.length
-        })
-        countTimerRef.current = null
-      }, 300)
-    }
-  }, [])
+    const root = Editor.node(editor, [])
+    const res = toMarkdown(nodes, '', [root[0]])
+    const texts = Editor.nodes(editor, {
+      at: [],
+      match: n => n.text
+    })
+    runInAction(() => {
+      store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
+      store.count.characters = res.length
+    })
+  }, [editor])
+
+  useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
+
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -93,7 +83,7 @@ export const MEditor = observer(({note}: {
       })
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
-      count(v)
+      countThrottle$.next(v)
       runInAction(() => {
         note.refresh = !note.refresh
         store.docChanged = true
@@ -112,7 +102,9 @@ export const MEditor = observer(({note}: {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
       let data = treeStore.schemaMap.get(note)
-      count(data?.state || [])
+      setTimeout(() => {
+        count(data?.state || [])
+      })
       first.current = true
       if (!data) data = treeStore.getSchema(note)
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
@@ -167,9 +159,8 @@ export const MEditor = observer(({note}: {
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
-      const box = target.parentElement?.parentElement?.parentElement as HTMLDivElement
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
-      if (box?.scrollTop + e.clientY > top) {
+      if (store.container!.scrollTop + e.clientY - 60 > top) {
         if (EditorUtils.checkEnd(editor)) {
           e.preventDefault()
         }
@@ -193,7 +184,7 @@ export const MEditor = observer(({note}: {
   return (
     <Slate
       editor={editor}
-      initialValue={initialValue}
+      initialValue={[EditorUtils.p]}
       onChange={change}
     >
       <SetNodeToDecorations/>
@@ -201,8 +192,9 @@ export const MEditor = observer(({note}: {
       <Editable
         decorate={high}
         spellCheck={false}
-        className={'edit-area'}
-        style={{fontSize: configStore.config.editorTextSize}}
+        readOnly={store.readonly}
+        className={`edit-area ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}
+        style={{fontSize: configStore.config.editorTextSize || 16}}
         onMouseDown={checkEnd}
         onDrop={e => {
           const dragNode = treeStore.dragNode

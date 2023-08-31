@@ -1,21 +1,31 @@
 import {treeStore, TreeStore} from '../store/tree'
 import {Range, Editor, Element, Transforms, Path, Node, NodeEntry} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
+import React from 'react'
+import isHotkey from 'is-hotkey'
+import {outputCache} from '../editor/output'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
   const task = ['insertTaskUnorderedList', 'insertTaskOrderedList'].includes(type)
+
   if (node && ['paragraph'].includes(node[0].type)) {
     const parent = Editor.parent(editor, node[1])
     if (parent[0].type === 'list-item') {
       Transforms.setNodes(editor, {order: isOrder ? true : undefined}, {at: Path.parent(parent[1])})
-      const list = Array.from<any>(Editor.nodes(editor, {
+      const [list] = Editor.nodes<any>(editor, {
+        match: n => n.type === 'list'
+      })
+
+      if (list) outputCache.delete(list[0])
+      const listItems = Array.from<any>(Editor.nodes(editor, {
         match: n => n.type === 'list-item',
         at: Path.parent(parent[1]),
         reverse: true,
         mode: 'lowest'
       }))
-      for (let l of list) {
+
+      for (let l of listItems) {
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }
     } else {
@@ -28,6 +38,10 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       )
     }
   }
+}
+
+export const isMod = (e: MouseEvent | KeyboardEvent | React.KeyboardEvent | React.MouseEvent) => {
+  return e.metaKey || e.ctrlKey
 }
 const insertCode = (editor: Editor, node: NodeEntry<any>, katex?: boolean) => {
   if (node && ['paragraph', 'head'].includes(node[0].type)) {
@@ -53,9 +67,9 @@ export class MenuKey {
     private readonly store: TreeStore,
   ) {
     window.addEventListener('keydown', e => {
-      if (e.metaKey && e.key === 'b') this.run('bold')
-      if (e.metaKey && e.key === 'i') this.run('italic')
-      if (e.metaKey && e.key === '0') this.run('paragraph')
+      if (isHotkey('mod+b', e)) this.run('bold')
+      if (isHotkey('mod+i', e)) this.run('italic')
+      if (isHotkey('mod+0', e)) this.run('paragraph')
     }, false)
     window.electron.ipcRenderer.on('key-task', (e, task: string, other: any) => {
       this.run(task, other)

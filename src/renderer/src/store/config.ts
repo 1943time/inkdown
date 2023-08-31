@@ -2,13 +2,16 @@ import {action, makeAutoObservable, runInAction} from 'mobx'
 import {MainApi} from '../api/main'
 import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
+import {Subject} from 'rxjs'
 
+export const login$ = new Subject<boolean>()
 class ConfigStore {
   visible = false
   config = {
     showLeading: true,
     theme: 'system' as 'system' | 'dark' | 'light',
     dark: false,
+    headingMarkLine: false,
     codeLineNumber: false,
     codeTabSize: 2,
     editorTextSize: 16,
@@ -16,14 +19,18 @@ class ConfigStore {
     leadingLevel: 4,
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
-    titleColor: undefined as undefined | 'h-emerald' | 'h-indigo' | 'h-amber',
-    mas: false
+    mas: false,
+    dragToSort: true,
+    token: ''
   }
   masUpdate = false
-  locale = 'en' as 'en' | 'zh'
+  locale = 'en'
   timer = 0
   get isZh() {
     return this.locale === 'zh'
+  }
+  get isLogin() {
+    return !!this.config.token
   }
   constructor() {
     makeAutoObservable(this, {
@@ -79,6 +86,7 @@ class ConfigStore {
   }
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
+    if (key === 'token' && value) login$.next(true)
     ipcRenderer.send('setStore', `config.${key}`, value)
   }
   checkMasUpdate() {
@@ -89,15 +97,15 @@ class ConfigStore {
   initial() {
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
+        // console.log('res', res)
         if (res.dark) document.documentElement.classList.add('dark')
         this.config = {
           ...this.config,
           ...res
         }
-        // if (this.config.mas) this.checkMasUpdate()
+        if (this.config.token) login$.next(true)
         this.checkMasUpdate()
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
-        this.locale = res.locale || 'en'
         if (this.config.dark) {
           mermaid.initialize({
             theme: 'dark'

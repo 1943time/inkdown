@@ -9,7 +9,7 @@ const kb = 1024
 const mb = kb * 1024
 const gb = mb * 1024
 export const sizeUnit = (size: number) => {
-  size = Number(size)
+  size = Number(size) * 1024
   if (size > gb) return (size / gb).toFixed(2) + ' GB'
   if (size > mb) return (size / mb).toFixed(2) + ' MB'
   if (size > kb) return (size / kb).toFixed(2) + ' KB'
@@ -54,7 +54,7 @@ export const download = (data: Blob | Uint8Array, fileName: string) => {
   }
 }
 
-export const message$ = new Subject<ArgsProps>()
+export const message$ = new Subject<ArgsProps | 'destroy'>()
 
 
 export const encodeHtml = (str: string) => {
@@ -62,3 +62,7 @@ export const encodeHtml = (str: string) => {
     matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
   return str.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m; })
 }
+
+export const isMac = /macintosh|mac os x/i.test(navigator.userAgent)
+
+export const isWindows = /windows|win32/i.test(navigator.userAgent)

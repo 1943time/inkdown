@@ -11,11 +11,11 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, EditorStoreContext} from '../editor/store'
 import {treeStore} from '../store/tree'
 import {observer} from 'mobx-react-lite'
+import {configStore} from '../store/config'
 
 export const Webview = observer(() => {
   const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
   const store = useMemo(() => new EditorStore(editor, true), [])
-  const high = useHighlight()
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
   const print = (filePath: string) => {
@@ -23,15 +23,13 @@ export const Webview = observer(() => {
     EditorUtils.reset(editor, treeStore.schemaMap.get(treeStore.currentTab.current!)?.state || [])
     setTimeout(() => {
       window.electron.ipcRenderer.send('print-pdf-ready', filePath)
-    }, 200)
+    }, 100)
   }
   useEffect(() => {
-    window.electron.ipcRenderer.on('print-pdf-load', (e, filePath: string) => {
-      print(filePath)
-    })
+    window.electron.ipcRenderer.invoke('print-dom-ready').then(print)
   }, [])
   return (
-    <div className={'w-full h-full content p-5'}>
+    <div className={`w-full h-full content p-5 ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}>
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={editor}

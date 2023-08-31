@@ -3,24 +3,28 @@ import {useCallback, useMemo} from 'react'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {MainApi} from '../../api/main'
+import {DragHandle} from '../tools/DragHandle'
 
 export function TableCell(props: RenderElementProps) {
   const store = useEditorStore()
-  const context = useCallback(() => {
-    MainApi.tableMenu()
+  const context = useCallback((head?: boolean) => {
+    return () => {
+      MainApi.tableMenu(head)
+    }
   }, [])
   return useMemo(() => {
     return props.element.title ? (
       <th
         {...props.attributes} style={{textAlign: props.element.align}} data-be={'th'}
-        onContextMenu={context}
+        onContextMenu={context(true)}
       >
         {props.children}
       </th>
     ) : (
       <td
         {...props.attributes} style={{textAlign: props.element.align}} data-be={'td'}
-        onContextMenu={context}
+        className={'group'}
+        onContextMenu={context()}
       >
         {props.children}
       </td>
@@ -29,9 +33,11 @@ export function TableCell(props: RenderElementProps) {
 }
 
 export const Table = observer((props: RenderElementProps) => {
+  const store = useEditorStore()
   return useMemo(() => {
     return (
-      <div className={'m-table'} {...props.attributes} data-be={'table'}>
+      <div className={'m-table drag-el'} {...props.attributes} data-be={'table'} onDragStart={store.dragStart}>
+        <DragHandle style={{top: '0.65em'}}/>
         <table>
           <tbody>{props.children}</tbody>
         </table>

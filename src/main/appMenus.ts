@@ -1,17 +1,10 @@
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
 import MenuItem = Electron.MenuItem
-import {getLocale, store} from './store'
-type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
+import {store} from './store'
 
+type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
+const isMac = process.platform === 'darwin'
 const cmd = 'CmdOrCtrl'
-const levelZhMap = new Map([
-  [1, '一'],
-  [2, '二'],
-  [3, '三'],
-  [4, '四'],
-  [5, '五'],
-  [6, '六'],
-])
 const task = (task: string, parameter?: any) => {
   return (e: MenuItem, win?: BrowserWindow) => {
     win?.webContents.send('key-task', task, parameter)
@@ -22,54 +15,14 @@ export const createAppMenus = () => {
   const titles = Array.from(new Array(4)).map((_, i) => {
     const n = i + 1
     return {
-      label: getLocale() === 'zh' ? `${levelZhMap.get(n)}级标题` : `Heading ${n}`,
+      label: `Heading ${n}`,
       id: `title-${n}`,
       accelerator: `${cmd}+${n}`,
       click: task('head', n),
       enabled: false
     }
   })
-  const menusLabel = getLocale() === 'zh' ? {
-    about: '关于 BlueStone',
-    update: '检查更新',
-    set: '偏好设置',
-    file: '文件',
-    create: '新建',
-    createWindow: '新建窗口',
-    openQuickly: '快速打开',
-    open: '打开',
-    openRecent: '打开最近的文件',
-    clearRecent: '清除',
-    pdf: '导出 PDF',
-    html: '导出 HTML',
-    eBook: '导出电子书',
-    edit: '编辑',
-    paragraph: '段落',
-    titleIncrease: '提升标题',
-    titleDecrease: '降低标题',
-    insertTable: '插入表格',
-    code: '代码块',
-    katex: '公式块',
-    orderedList: '有序列表',
-    unorderedList: '无序列表',
-    orderedTaskList: '有序任务列表',
-    unorderedTaskList: '无序任务列表',
-    horizontalLine: '水平分割线',
-    format: '格式',
-    bold: '加粗',
-    italic: '斜体',
-    strikethrough: '删除线',
-    inlineCode: '行内代码',
-    insertPicture: '插入图片',
-    clear: '清除',
-    view: '显示',
-    zoomIn: '放大',
-    zoomOut: '缩小',
-    leading: '大纲',
-    search: '搜索',
-    help: '帮助',
-    doc: '使用文档'
-  } : {
+  const menusLabel = {
     about: 'About Bluestone',
     update: 'Check for Updates',
     set: 'Settings',
@@ -110,25 +63,24 @@ export const createAppMenus = () => {
     help: 'Help',
     doc: 'Documentation'
   }
-
   const menus: MenuOptions = [
     {
-      label: app.getName(),
+      label: 'Bluestone',
       role: 'appMenu',
       submenu: [
         {
           label: menusLabel.about,
-          click: (e,win) => {
+          click: (e, win) => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
         },
-        // {
-        //   label: menusLabel.update,
-        //   click: () => {
-        //     ipcMain.emit('check-updated')
-        //     BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
-        //   }
-        // },
+        {
+          label: menusLabel.update,
+          click: () => {
+            ipcMain.emit('check-updated')
+            BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
+          }
+        },
         {type: 'separator'},
         {
           label: menusLabel.set,
@@ -141,100 +93,109 @@ export const createAppMenus = () => {
         {type: 'separator'},
         {role: 'quit'}
       ]
+    }
+  ]
+  const systemFileMenus: MenuOptions[number]['submenu'] = isMac ? [
+    {type: 'separator'},
+    {
+      id: 'open',
+      label: menusLabel.open,
+      accelerator: `${cmd}+option+o`,
+      click: (menu, win) => {
+        win?.webContents.send('open')
+      }
     },
     {
-      label: menusLabel.file,
-      id: 'file',
-      role: 'fileMenu',
+      label: menusLabel.openRecent,
+      role: 'recentDocuments',
       submenu: [
         {
-          id: 'create',
-          label: menusLabel.create,
-          accelerator: `${cmd}+n`,
-          click: (menu, win) => {
-            win?.webContents.send('create')
-          }
-        },
-        {
-          label: menusLabel.createWindow,
-          accelerator: `${cmd}+shift+n`,
+          label: menusLabel.clearRecent,
           click: () => {
-            ipcMain.emit('create-window')
-          }
-        },
-        {type: 'separator'},
-        {
-          label: menusLabel.openQuickly,
-          accelerator: `${cmd}+o`,
-          click: () => {
-            BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
-          }
-        },
-        {type: 'separator'},
-        {
-          id: 'open',
-          label: menusLabel.open,
-          accelerator: `${cmd}+option+o`,
-          click: (menu, win) => {
-            win?.webContents.send('open')
-          }
-        },
-        {
-          label: menusLabel.openRecent,
-          role: 'recentDocuments',
-          submenu:[
-            {
-              label: menusLabel.clearRecent,
-              click: () => {
-                app.clearRecentDocuments()
-                BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
-              }
-            }
-          ]
-        },
-        {type: 'separator'},
-        {
-          label: menusLabel.pdf,
-          click: (e, win) => {
-            win?.webContents.send('call-print-pdf')
-          }
-        },
-        {
-          label: menusLabel.html,
-          click: (e, win) => {
-            win?.webContents.send('print-to-html')
-          }
-        },
-        {
-          label: menusLabel.eBook,
-          click: (e, win) => {
-            win?.webContents.send('export-ebook')
+            app.clearRecentDocuments()
+            BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
           }
         }
       ]
     },
+  ] : [
     {
-      label: menusLabel.edit,
-      id: 'edit',
-      role: 'editMenu',
-      submenu: [
-        {role: 'undo'},
-        {role: 'redo'},
-        {type: 'separator'},
-        {
-          label: 'Save',
-          accelerator: `${cmd}+s`,
-          click: () => {
-            BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')
-          }
-        },
-        {role: 'copy'},
-        {role: 'paste'},
-        {role: 'cut'},
-        {role: 'delete'},
-        {role: 'selectAll'}
-      ]
-    },
+      id: 'open',
+      label: menusLabel.open,
+      accelerator: `${cmd}+option+o`,
+      click: (menu, win) => {
+        win?.webContents.send('open')
+      }
+    }
+  ]
+  menus.push({
+    label: menusLabel.file,
+    id: 'file',
+    role: 'fileMenu',
+    submenu: [
+      {
+        id: 'create',
+        label: menusLabel.create,
+        accelerator: `${cmd}+n`,
+        click: (menu, win) => {
+          win?.webContents.send('create')
+        }
+      },
+      {
+        label: menusLabel.createWindow,
+        accelerator: `${cmd}+shift+n`,
+        click: () => {
+          ipcMain.emit('create-window')
+        }
+      },
+      ...systemFileMenus,
+      {type: 'separator'},
+      {
+        label: menusLabel.openQuickly,
+        accelerator: `${cmd}+o`,
+        click: () => {
+          BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
+        }
+      },
+      {type: 'separator'},
+      {
+        label: menusLabel.pdf,
+        click: (e, win) => {
+          win?.webContents.send('call-print-pdf')
+        }
+      },
+      {
+        label: menusLabel.html,
+        click: (e, win) => {
+          win?.webContents.send('print-to-html')
+        }
+      }
+    ]
+  })
+
+  menus.push({
+    label: menusLabel.edit,
+    id: 'edit',
+    role: 'editMenu',
+    submenu: [
+      {role: 'undo'},
+      {role: 'redo'},
+      {type: 'separator'},
+      {
+        label: 'Save',
+        accelerator: `${cmd}+s`,
+        click: () => {
+          BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')
+        }
+      },
+      {role: 'copy'},
+      {role: 'paste'},
+      {role: 'cut'},
+      {role: 'delete'},
+      {role: 'selectAll'}
+    ]
+  })
+  menus.push(
     {
       label: menusLabel.paragraph,
       id: 'paragraph',
@@ -322,7 +283,9 @@ export const createAppMenus = () => {
           enabled: false
         }
       ]
-    },
+    }
+  )
+  menus.push(
     {
       label: menusLabel.format,
       id: 'format',
@@ -353,7 +316,7 @@ export const createAppMenus = () => {
           click: (e, win) => {
             dialog.showOpenDialog({
               properties: ['openFile'],
-              filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: '图片'}],
+              filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
               securityScopedBookmarks: true
             }).then(res => {
               if (res.filePaths.length) {
@@ -369,7 +332,23 @@ export const createAppMenus = () => {
           click: task('clear')
         }
       ]
-    },
+    }
+  )
+  const winMenus:MenuOptions[number]['submenu']  = isMac ? [] : [
+    {
+      label: 'Show Menu Bar',
+      type: 'checkbox',
+      checked: !!store.get('showMenuBar'),
+      accelerator: 'Alt+1',
+      click: e => {
+        store.set('showMenuBar', e.checked)
+        BrowserWindow.getAllWindows().forEach(w => {
+          w.menuBarVisible = e.checked
+        })
+      }
+    }
+  ]
+  menus.push(
     {
       label: menusLabel.view,
       role: 'viewMenu',
@@ -377,11 +356,12 @@ export const createAppMenus = () => {
         {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: menusLabel.zoomIn},
         {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: menusLabel.zoomOut},
         {type: 'separator'},
+        ...winMenus,
         {
           label: menusLabel.leading,
           type: 'checkbox',
           id: 'showLeading',
-          checked: typeof store.get('config.showLeading') !== 'boolean' ? true : !!store.get('config.showLeading'),
+          checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
           click: e => {
             store.set('config.showLeading', e.checked)
             BrowserWindow.getAllWindows().forEach(w => {
@@ -398,7 +378,9 @@ export const createAppMenus = () => {
         {role: 'reload'},
         {role: 'toggleDevTools'}
       ]
-    },
+    }
+  )
+  menus.push(
     {
       label: menusLabel.help,
       role: 'help',
@@ -406,7 +388,7 @@ export const createAppMenus = () => {
         {
           label: menusLabel.doc,
           click: () => {
-            ipcMain.emit('open-help-docs')
+            shell.openExternal(`https://pb.bluemd.me/official/book/docs`)
           }
         },
         {
@@ -429,7 +411,8 @@ export const createAppMenus = () => {
         }
       ]
     }
-  ]
+  )
+
   const instance = Menu.buildFromTemplate(menus)
   const setParagraph = (enable: boolean, exclude?: ['title']) => {
     const menu = instance.getMenuItemById('paragraph')

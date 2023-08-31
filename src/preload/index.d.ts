@@ -4,6 +4,8 @@ import {dialog} from 'electron'
 import * as fs from 'fs/promises'
 import {AliApi} from './sdk/ali'
 import {Sdk} from './sdk'
+import {Got} from 'got'
+import {ExtendOptions} from 'got/dist/source/types'
 
 
 declare global {
@@ -11,7 +13,9 @@ declare global {
     electron: ElectronAPI
     api: {
       sdk: typeof Sdk,
+      toUnix: (path: string) => string
       md5: (str: string | Buffer) => string
+      createHttp: (options: ExtendOptions) => Got
       // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string
       highlightCode(code: string, lang: string): IThemedToken[][]

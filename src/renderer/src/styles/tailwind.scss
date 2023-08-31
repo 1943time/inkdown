@@ -34,3 +34,21 @@
     color: white !important;
   }
 }
+
+.move {
+  cursor: col-resize;
+  .width-duration {
+    transition: none;
+  }
+}
+
+.link{
+  @apply text-sky-500 duration-300 hover:text-sky-600;
+}
+
+.ant-popover-inner, .ant-dropdown-menu{
+  @apply border border-gray-200/20;
+}
+.ant-btn-primary {
+  background-color: #0ea5e9;
+}

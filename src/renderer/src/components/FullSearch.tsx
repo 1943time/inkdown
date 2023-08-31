@@ -1,6 +1,5 @@
 import {observer} from 'mobx-react-lite'
 import {useGetSetState} from 'react-use'
-import ArrowRight from '../assets/ReactIcon/ArrowRight'
 import {useCallback, useEffect, useRef} from 'react'
 import {IFileItem} from '../index'
 import {treeStore} from '../store/tree'
@@ -8,6 +7,7 @@ import {Node} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {configStore} from '../store/config'
 import {SearchOutlined} from '@ant-design/icons'
+import ArrowRight from '../icons/ArrowRight'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {

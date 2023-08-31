@@ -4,16 +4,13 @@ import stringWidth from 'string-width'
 import {EditorUtils} from '../utils/editorUtils'
 const space = '  '
 
-const cache = new WeakMap<object, string>()
+export const outputCache = new WeakMap<object, string>()
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
-const getTexts = (nodes: any[]): string => {
-  return nodes.reduce((a, b) => a + (b.text || ''), '')
-}
-
 const textStyle = (t: Text) => {
   if (!t.text) return ''
+  if (t.highColor) return `<span style="color:${t.highColor}" data-be>${t.text}</span>`
   let str = t.text.replace(/(?<!\\)\\/g, '\\')
   let preStr = '', afterStr = ''
   if (t.code || t.bold || t.strikethrough || t.italic) {
@@ -35,8 +32,8 @@ const composeText = (t: Text, parent: any[]) => {
   if (t.url) {
     str = `[${str}](${encodeURI(t.url)})`
   } else if (isMix(t) && index !== -1) {
-    const next = siblings[index +  1]
-    if (!str.endsWith(' ') && next && EditorUtils.isDirtLeaf(next) && !Node.string(next).startsWith(' ')) {
+    const next = siblings[index + 1]
+    if (!str.endsWith(' ') && next && !Node.string(next).startsWith(' ')) {
       str += ' '
     }
   }
@@ -109,7 +106,7 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
 }
 
 const parserNode = (node: any, preString = '', parent: any[]) => {
-  if (cache.get(node)) return cache.get(node)!
+  if (outputCache.get(node)) return outputCache.get(node)!
   let str = ''
   const newParent = [...parent, node]
   switch (node.type) {
@@ -125,8 +122,10 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       }).join('\n')
       if (node.katex && node.language === 'latex') {
         str += `${preString}$$\n${code}\n${preString}$$`
+      } else if (node.language === 'html' && node.render) {
+        str += `${preString}\n${code}\n${preString}`
       } else {
-        str += `${preString}\`\`\`${node.language || ''}${!!node.render ? ' render' : ''}\n${code}\n${preString}\`\`\``
+        str += `${preString}\`\`\`${node.language || '`'}\n${code}\n${preString}\`\`\`${!node.language ? '`' : ''}`
       }
       break
     case 'blockquote':
@@ -151,7 +150,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       if (node.text) str += composeText(node, parent)
       break
   }
-  cache.set(node, str)
+  outputCache.set(node, str)
   return str
 }
 

@@ -4,7 +4,9 @@ import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
-
+import {isWindows} from '../utils'
+import {Share} from '../share/Share'
+import {User} from '../share/User'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
@@ -12,8 +14,8 @@ export const Nav = observer(() => {
   }, [treeStore.openNote])
   return (
     <div
-      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none'}
-      style={{paddingLeft: treeStore.fold ? 114 : treeStore.width}}
+      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
+      style={{paddingLeft: treeStore.fold ? isWindows ? 42 : 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {
           MainApi.maxSize()
@@ -65,49 +67,20 @@ export const Nav = observer(() => {
             }
           </div>
         </div>
-        <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-4 text-gray-500'}>
+        <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
+          <Share/>
           <Update/>
-          <AppstoreOutlined
-            className={'text-lg duration-200 dark:hover:text-gray-300 hover:text-gray-600'}
+          <div
+            className={'flex items-center justify-center p-1 group'}
             onClick={() => MainApi.openToolMenu(treeStore.openNote?.filePath)}
-          />
+          >
+            <AppstoreOutlined
+              className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
+            />
+          </div>
+          <User/>
         </div>
       </div>
-      {/*{treeStore.tabs.length > 1 &&*/}
-      {/*  <div*/}
-      {/*    className={`h-8 border-gray-200/10 border-b text-[13px] overflow-x-auto hide-scrollbar relative w-full`}*/}
-      {/*  >*/}
-      {/*    <div className={'flex h-full'}>*/}
-      {/*      {treeStore.tabs.map((t, i) =>*/}
-      {/*        <div*/}
-      {/*          onClick={() => {*/}
-      {/*            treeStore.setState({currentIndex: i})*/}
-      {/*          }}*/}
-      {/*          className={`${i === treeStore.currentIndex ? 'bg-[#24262A]' : 'bg-[#1F2024]'}*/}
-      {/*        ${i !== 0 ? 'border-l border-gray-200/10' : ''}*/}
-      {/*        relative flex-1 min-w-[200px] text-gray-300 h-full flex items-center group px-8 cursor-default`}*/}
-      {/*          key={i}*/}
-      {/*        >*/}
-      {/*          <div*/}
-      {/*            className={`${i === treeStore.currentIndex ? '' : 'hidden group-hover:block'}*/}
-      {/*          absolute p-1 left-1 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300`}*/}
-      {/*            onClick={(e) => {*/}
-      {/*              e.stopPropagation()*/}
-      {/*              treeStore.removeTab(i)*/}
-      {/*            }}*/}
-      {/*          >*/}
-      {/*            <IClose*/}
-      {/*              className={'w-4 h-4'}*/}
-      {/*            />*/}
-      {/*          </div>*/}
-      {/*          <div className={'w-full truncate text-center'}>*/}
-      {/*            {t.current? t.current.filename : 'New Tab'}*/}
-      {/*          </div>*/}
-      {/*        </div>*/}
-      {/*      )}*/}
-      {/*    </div>*/}
-      {/*  </div>*/}
-      {/*}*/}
     </div>
   )
 })

@@ -25,10 +25,10 @@ export const Set = observer(() => {
   const [modal, context] = Modal.useModal()
   if (!configStore.visible) return null
   return (
-    <div className={`fixed inset-0 z-[100] dark:bg-black/30 bg-black/10`}>
+    <div className={`fixed inset-0 z-[300] dark:bg-black/30 bg-black/10`}>
       {context}
       <div
-        className={'w-full h-full flex items-center justify-center overflow-auto'}
+        className={'w-full h-full flex items-center justify-center overflow-auto py-10 flex-wrap'}
         onClick={close}
       >
         <div
@@ -36,7 +36,7 @@ export const Set = observer(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b modal-border pb-2 items-center'}>
-            <span>{configStore.isZh ? '偏好设置' : 'Preferences'}</span>
+            <span>{'Preferences'}</span>
             <div
               className={'p-1 hover:text-gray-700 dark:hover:text-gray-300 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30'}
               onClick={close}
@@ -47,31 +47,7 @@ export const Set = observer(() => {
           <div className={'divide-y divide-gray-200 dark:divide-gray-200/20 text-gray-600 dark:text-gray-300'}>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '语言环境' : 'Locale'}
-              </div>
-              <div>
-                <Radio.Group
-                  value={configStore.config.locale}
-                  onChange={e => {
-                    configStore.setConfig('locale', e.target.value)
-                    modal.confirm({
-                      type: 'info',
-                      title: configStore.isZh ? '提示' : 'Prompt',
-                      content: configStore.isZh ? '语言模式设置在重启编辑器后生效，是否立即起重启？' : 'The Locale setting takes effect after restarting the editor, whether to restart immediately?',
-                      onOk: () => {
-                        MainApi.relaunch()
-                      }
-                    })
-                  }}
-                >
-                  <Radio.Button value={'en'}>{configStore.isZh ? '英文' : 'English'}</Radio.Button>
-                  <Radio.Button value={'zh'}>{configStore.isZh ? '中文' : 'Chinese'}</Radio.Button>
-                </Radio.Group>
-              </div>
-            </div>
-            <div className={'flex justify-between items-center py-3'}>
-              <div className={'text-sm'}>
-                {configStore.isZh ? '颜色模式' : 'Themes'}
+                {'Themes'}
               </div>
               <div>
                 <Radio.Group
@@ -80,48 +56,31 @@ export const Set = observer(() => {
                     configStore.setTheme(e.target.value)
                   }}
                 >
-                  <Radio.Button value={'system'}>{configStore.isZh ? '系统' : 'System'}</Radio.Button>
-                  <Radio.Button value={'light'}>{configStore.isZh ? '明亮' : 'Light'}</Radio.Button>
-                  <Radio.Button value={'dark'}>{configStore.isZh ? '暗黑' : 'Dark'}</Radio.Button>
+                  <Radio.Button value={'system'}>{'System'}</Radio.Button>
+                  <Radio.Button value={'light'}>{'Light'}</Radio.Button>
+                  <Radio.Button value={'dark'}>{'Dark'}</Radio.Button>
                 </Radio.Group>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '标题颜色' : 'Title Color'}
+                Heading Mark Line
               </div>
               <div>
-                <div className={'flex space-x-3 items-center'}>
-                  <div
-                    className={`rounded-full p-0.5 ${!configStore.config.titleColor ? 'border-sky-500' : 'border-transparent'}  border-[1.5px]`}
-                    onClick={() => configStore.setConfig('titleColor', undefined)}
-                  >
-                    <div className={'rounded-full w-5 h-5 dark:bg-[rgba(255,255,255,0.85)] bg-[rgba(32,34,36,.9)]'}></div>
-                  </div>
-                  <div
-                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-emerald' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
-                    onClick={() => configStore.setConfig('titleColor', 'h-emerald')}
-                  >
-                    <div className={'rounded-full w-5 h-5 bg-[rgba(16,185,129,1)]'}></div>
-                  </div>
-                  <div
-                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-indigo' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
-                    onClick={() => configStore.setConfig('titleColor', 'h-indigo')}
-                  >
-                    <div className={'rounded-full w-5 h-5 bg-[rgba(99,102,241,.9)]'}></div>
-                  </div>
-                  <div
-                    className={`rounded-full p-0.5 ${configStore.config.titleColor === 'h-amber' ? 'border-sky-500' : 'border-transparent'} border-[1.5px]`}
-                    onClick={() => configStore.setConfig('titleColor', 'h-amber')}
-                  >
-                    <div className={'rounded-full w-5 h-5 bg-[rgba(245,158,11,.8)]'}></div>
-                  </div>
-                </div>
+                <Checkbox checked={configStore.config.headingMarkLine} onChange={e => configStore.setConfig('headingMarkLine', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '代码段显示行号' : 'Show Code Line Number'}
+                Drag To Sort
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.dragToSort} onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                {'Show Code Line Number'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.codeLineNumber} onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
@@ -129,7 +88,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '显示字符统计' : 'Displays character statistics'}
+                {'Displays character statistics'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.showCharactersCount} onChange={e => configStore.setConfig('showCharactersCount', e.target.checked)}/>
@@ -137,7 +96,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '代码段TabSize' : 'Code TabSize'}
+                {'Code TabSize'}
               </div>
               <div>
                 <Radio.Group
@@ -153,7 +112,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '代码段风格' : 'Code Style'}
+                {'Code Style'}
               </div>
               <div>
                 <Select
@@ -163,8 +122,8 @@ export const Set = observer(() => {
                     configStore.setConfig('codeTheme', e)
                     modal.confirm({
                       type: 'info',
-                      title: configStore.isZh ? '提示' : 'Prompt',
-                      content: configStore.isZh ? '代码风格设置在重启编辑器后生效，是否立即起重启？' : 'The code style setting takes effect after restarting the editor, do you want to restart immediately?',
+                      title: 'Note',
+                      content: 'The code style setting takes effect after restarting the editor, do you want to restart immediately?',
                       onOk: () => {
                         MainApi.relaunch()
                       }
@@ -190,7 +149,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '编辑区文字大小' : 'Edit area text size'}
+                {'Edit area text size'}
               </div>
               <div className={'w-32'}>
                 <Slider
@@ -203,7 +162,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '显示大纲' : 'Show Outline'}
+                {'Show Outline'}
               </div>
               <div>
                 <Checkbox
@@ -216,7 +175,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {configStore.isZh ? '大纲提取级别' : 'Outline extraction level'}
+                {'Outline extraction level'}
 
               </div>
               <div>
@@ -226,9 +185,9 @@ export const Set = observer(() => {
                     configStore.setConfig('leadingLevel', e.target.value)
                   }}
                 >
-                  <Radio value={2}>{configStore.isZh ? '二级' : 'Level 2'}</Radio>
-                  <Radio value={3}>{configStore.isZh ? '三级' : 'Level 3'}</Radio>
-                  <Radio value={4}>{configStore.isZh ? '四级' : 'Level 4'}</Radio>
+                  <Radio value={2}>{'Level 2'}</Radio>
+                  <Radio value={3}>{'Level 3'}</Radio>
+                  <Radio value={4}>{'Level 4'}</Radio>
                 </Radio.Group>
               </div>
             </div>

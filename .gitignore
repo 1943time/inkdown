@@ -1,6 +1,6 @@
 node_modules
 out
-*.log
+*.log*
 unpackage
 resources/lib/current.html
 resources/lib/current.json
@@ -9,5 +9,8 @@ electron.vite.config.*.mjs
 dist
 web
 build/bluestone.provisionprofile
-build/testflight.provisionprofile
-build/beta.provisionprofile
+build/entitlements.mas.inherit.plist
+build/entitlements.mas.plist
+build/entitlements.mas.loginhelper.plist
+src/renderer/src/share
+

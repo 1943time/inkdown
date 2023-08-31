@@ -3,13 +3,13 @@ productName: Bluestone
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
-#afterSign: scripts/notarize.js
+afterSign: scripts/notarize.js
 files:
   - '!**/.vscode/*'
   - '!src/*'
   - '!unpackage/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.npmrc,*.mjs.env,.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!scripts/*'
   - '!web/*'
@@ -17,54 +17,33 @@ files:
   - '!dist.zip'
 asarUnpack:
   - resources/*
+artifactName: "Bluestone-${os}-${arch}-${version}.${ext}"
 extraResources:
   - web
 fileAssociations:
   ext: md
   role: Editor
 win:
-  executableName: Bluestone
-nsis:
-  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
-asar: true
-mac:
+  verifyUpdateCodeSignature: false
   target:
-#    -
-#      target: dmg
-#    -
-      target: mas
-      arch: universal
-  icon: build/icon.icns
+    - nsis
+mac:
+#  identity: null
   entitlementsInherit: build/entitlements.mac.plist
-  minimumSystemVersion: 12.0
-  category: public.app-category.productivity
-  hardenedRuntime: true
-  gatekeeperAssess: false
-#  extendInfo:
-#    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-#    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-#    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-mas:
-  hardenedRuntime: false
-  icon: build/icon.icns
-  type: distribution
-  entitlements: build/entitlements.mas.plist
-  entitlementsInherit: build/entitlements.mas.inherit.plist
-  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
-  gatekeeperAssess: false
-  provisioningProfile: build/bluestone.provisionprofile
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  target:
+    - dmg
 linux:
   target:
     - AppImage
-    - snap
     - deb
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: BlueStone-${os}-${arch}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: github

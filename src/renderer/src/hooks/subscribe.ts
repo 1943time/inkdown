@@ -1,6 +1,6 @@
-import {Subject} from 'rxjs'
+import {Observable, Subject} from 'rxjs'
 import {IObjectDidChange, IValueDidChange, observe} from 'mobx'
-import {useEffect} from 'react'
+import {useEffect, useLayoutEffect} from 'react'
 
 export const useObserveKey = <T extends object, K extends keyof T>(data: T, key: K, fn: (value: IValueDidChange<T[K]>) => void) => {
   useEffect(() => {
@@ -17,8 +17,8 @@ export const useObserve = <T extends object>(data: T, fn: (value: IObjectDidChan
   }, [])
 }
 
-export const useSubject = <T>(subject: Subject<T>, fn: (value: T) => void, deps: any[] = []) => {
-  useEffect(() => {
+export const useSubject = <T>(subject: Subject<T> | Observable<T>, fn: (value: T) => void, deps: any[] = []) => {
+  useLayoutEffect(() => {
     const cancel = subject.subscribe(fn)
     return () => cancel.unsubscribe()
   }, deps)

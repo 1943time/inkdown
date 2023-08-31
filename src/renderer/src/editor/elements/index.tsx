@@ -61,11 +61,13 @@ export const MLeaf = (props: RenderLeafProps) => {
     let className = ''
     let children = <>{props.children}</>
     if (leaf.code) children = <code className={'inline-code'}>{children}</code>
+    if (leaf.highColor) style.color = leaf.highColor
     if (leaf.color) style.color = leaf.color
     if (leaf.bold) children = <strong>{children}</strong>
     if (leaf.strikethrough) children = <s>{children}</s>
     if (leaf.italic) children = <i>{children}</i>
     if (leaf.highlight) className = 'high-text'
+    if (leaf.html) className += ' dark:text-gray-500 text-gray-400'
     if (leaf.current) {
       style.background = '#f59e0b'
     }
@@ -88,7 +90,7 @@ export const MLeaf = (props: RenderLeafProps) => {
             }
           }}
           data-slate-inline={true}
-          className={`mx-[1px] text-sky-500 duration-300 hover:text-sky-600 cursor-default ${className}`}
+          className={`mx-[1px] link cursor-default ${className}`}
           {...props.attributes}>
           {!!props.text?.text &&
             <InlineChromiumBugfix/>

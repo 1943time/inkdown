@@ -5,9 +5,11 @@ import {BUNDLED_LANGUAGES} from 'shiki'
 import * as fs from 'fs/promises'
 import * as chokidar from 'chokidar'
 import {createHash} from 'crypto'
+import got from 'got'
+import {ExtendOptions} from 'got/dist/source/types'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
-import got from 'got'
+import {toUnix} from 'upath'
 
 let watchers = new Map<string, chokidar.FSWatcher>()
 let ready:any = null
@@ -18,11 +20,14 @@ const api = {
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
-  // checkedLatest() {
-  //   return got.get('https://api.github.com/repos/1943time/bluestone/releases/latest').json<any>()
-  // },
+  createHttp(options: ExtendOptions) {
+    return got.extend(options)
+  },
   highlightCode(code: string, lang: string) {
     return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
+  },
+  toUnix(path: string) {
+    return toUnix(path)
   },
   fs,
   watch: async (path: string, cb: (event: 'add'| 'addDir' | 'change'| 'unlink'| 'unlinkDir', path: string) => void) => {

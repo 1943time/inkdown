@@ -19,7 +19,9 @@ import {MainApi} from '../api/main'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {getImageData} from '../utils'
 import {configStore} from '../store/config'
-
+import isHotkey from 'is-hotkey'
+import {isMod} from '../utils/keyboard'
+import {useSubject} from '../hooks/subscribe'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
@@ -31,7 +33,7 @@ export const EditorFrame = observer(({tab}: {
   }, [])
 
   const click = useCallback((e: React.MouseEvent) => {
-    if (e.metaKey && e.target) {
+    if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement
       if (!el) return
       if (el.dataset.fnc) {
@@ -47,10 +49,10 @@ export const EditorFrame = observer(({tab}: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key === 'f' && treeStore.currentTab.current) {
+      if (isHotkey('mod+f', e) && treeStore.currentTab.current) {
         store.setOpenSearch(true)
       }
-      if (e.key.toLowerCase() === 'escape' && store.openSearch) {
+      if (isHotkey('esc', e) && store.openSearch) {
         store.setOpenSearch(false)
       }
     }
@@ -70,20 +72,20 @@ export const EditorFrame = observer(({tab}: {
     <EditorStoreContext.Provider value={store}>
       <Search/>
       <div
-        className={'flex-1 h-full overflow-y-auto items-start'}
+        className={'flex-1 h-full overflow-y-auto items-start relative'}
         ref={dom => {
           store.setState(state => state.container = dom)
         }}
       >
         <div
-          className={`flex justify-center items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
+          className={`items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
           onClick={click}
         >
           {tab.current ?
             <>
               <div className={`flex-1 flex justify-center items-start h-full ${mt === 'markdown' ? '' : 'hidden'}`}>
                 <div
-                  className={`max-w-[900px] flex-1 content px-14 ${configStore.config.titleColor}`}
+                  className={`max-w-[900px] flex-1 content px-14`}
                 >
                   <MEditor note={tab.current}/>
                 </div>

@@ -4,6 +4,27 @@ import {basename, extname, join, parse} from 'path'
 import {observable} from 'mobx'
 import {nanoid} from 'nanoid'
 
+export const defineParent = (node: IFileItem, parent: IFileItem) => {
+  Object.defineProperty(node, 'parent', {
+    configurable: true,
+    get() {
+      return parent
+    }
+  })
+  Object.defineProperty(node, 'filePath', {
+    configurable: true,
+    get() {
+      let cur:IFileItem | undefined = this.parent
+      const paths = [this.filename]
+      if (cur) paths.unshift(cur.filePath)
+      let path = join(...paths)
+      if (!this.folder) {
+        path += `.${this.ext}`
+      }
+      return path
+    }
+  })
+}
 export const createFileNode = (params: {
   fileName: string
   folder: boolean
@@ -20,32 +41,13 @@ export const createFileNode = (params: {
     mode: params.mode,
     ext: params.folder ? undefined : extname(params.fileName).replace(/^\./, ''),
   } as IFileItem
-
-  Object.defineProperty(node, 'parent', {
-    configurable: true,
-    get() {
-      return params.parent
-    }
-  })
-
-  if (!params.filePath) {
-    Object.defineProperty(node, 'filePath', {
-      configurable: true,
-      get() {
-        let cur:IFileItem | undefined = this.parent
-        const paths = [this.filename]
-        if (cur) paths.unshift(cur.filePath)
-        let path = join(...paths)
-        if (!this.folder) {
-          path += `.${this.ext}`
-        }
-        return path
-      }
-    })
-  } else {
+  if (params.parent) {
+    defineParent(node, params.parent)
+  } else if (params.filePath) {
     node.filePath = params.filePath
     node.independent = true
   }
+
   return observable(node)
 }
 const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {

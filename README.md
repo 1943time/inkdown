@@ -1,20 +1,29 @@
-# Bluestone
-A WYSIWYG markdown editor.
-[Download (signed and notarized)](https://github.com/1943time/bluestone/releases/latest)
- | [中文文档](./ZH_README.md)
-
+<p align="center">
+  <img src="./build/icon.png" style="width:60px"/>
+</p>
+<p align="center">A WYSIWYG markdown editor. <a href="https://github.com/1943time/bluestone/releases/latest" target="_blank">Download</a><br/>improving the Markdown reading and editing experience</p>
 
 # Brief introduction
 
-Bluestone is an WYSIWYG Markdown editor，Currently only `Mac` system is supported，
-use [gfm](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
-Supports light and dark color schemes, with the goal of improving the Markdown reading and editing experience.
+Bluestone is an WYSIWYG Markdown editor，
+use [GFM](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
+Supports light and dark color theme. and generate your Markdown files into online documents in the easiest and fastest way.
+[documentation](https://pb.bluemd.me/official/book/docs/introduction)
 
 ![](./docs/assets/d1.png)
 
 ![](./docs/assets/d2.png)
 
 ![](./docs/assets/syntax.gif)
+
+## Drag
+Freely drag to sort document elements
+![](./docs/assets/drag.gif)
+
+## Share
+bluestone provides an optional sharing function that can automatically extract Markdown files and share them to the network, or merge multiple Markdown documents into a book at the same time [more](https://pb.bluemd.me/official/book/docs/share)
+
+![](./docs/assets/share.gif)
 
 ## Format
 
@@ -27,22 +36,6 @@ Text format can be converted with floating bar or syntax
 ## Link
 Links and images support file paths, usually imported files can be dragged in from the file tree, or directly use ctrl + v
 ![](./docs/assets/link.gif)
-
-## Export
-
-Support exporting pdf, html, and ebook.
-
-An eBook is a document that combines multiple documents into one document by chapter and is equipped with a search function.
-
-Select Export eBook, and Choose a custom chapter.
-
-![](./docs/assets/d3.png)
-
-Will merge multiple documents in to a html, convert pictures to base64, and internal links will jump to each other.
-
-The result is as follows
-
-![](./docs/assets/d4.png)
 
 ## Preferences
 

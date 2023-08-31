@@ -8,12 +8,13 @@ import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
 
+const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]]*>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, {
   code: string,
   language?: string
 }>()
 
-export const cacheFootNote = new WeakMap<object, Range[]>
+export const cacheTextNode = new WeakMap<object, Range[]>
 
 export const cacheLine = new WeakMap<object, Range[]>()
 
@@ -41,23 +42,31 @@ export function useHighlight(store?: EditorStore) {
         for (let i = 0; i < node.children.length; i++) {
           const c = node.children[i]
           if (c.text && !EditorUtils.isDirtLeaf(node)) {
-            const cache = cacheFootNote.get(c)
+            const cache = cacheTextNode.get(c)
             if (cache) {
               ranges.push(...cache)
             } else {
+              let textRanges: any[] = []
+              const matchHtml = c.text.matchAll(htmlReg)
+              for (let m of matchHtml) {
+                textRanges.push({
+                  anchor: {path: [...path, i], offset: m.index},
+                  focus: {path: [...path, i], offset: m.index + m[0].length},
+                  html: true
+                })
+              }
               const match = c.text.matchAll(/\[\^.+?]:?/g)
-              let fNRanges: any[] = []
               for (let m of match) {
                 if (typeof m.index !== 'number') continue
-                fNRanges.push({
+                textRanges.push({
                   anchor: {path: [...path, i], offset: m.index},
                   focus: {path: [...path, i], offset: m.index + m[0].length},
                   fnc: !m[0].endsWith(':'),
                   fnd: m[0].endsWith(':'),
                 })
               }
-              cacheFootNote.set(c, fNRanges)
-              ranges.push(...fNRanges)
+              cacheTextNode.set(c, textRanges)
+              ranges.push(...textRanges)
             }
           }
         }

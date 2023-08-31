@@ -2,27 +2,26 @@ import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserVi
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
-import {getLocale, store} from './store'
-import {writeFileSync} from 'fs'
-import icon from '../../resources/icon.png?asset'
-
+import {store} from './store'
+import {createReadStream, writeFileSync} from 'fs'
+// import icon from '../../resources/icon.png?asset'
+import FormData from "form-data"
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
-const docsPath = app.isPackaged ? join(app.getAppPath(), '..', 'web', 'docs.html') : join(__dirname, '../../web', 'docs.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+import fetch from 'node-fetch'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
-  autoHideMenuBar: true,
-  ...(process.platform === 'linux' ? {icon} : {}),
+  // autoHideMenuBar: true,
+  // ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
   webPreferences: {
     preload: join(__dirname, '../preload/index.js'),
     sandbox: false,
     nodeIntegration: true,
-    contextIsolation: false,
-    webviewTag: true
+    contextIsolation: false
   }
 }
 
@@ -48,35 +47,6 @@ export const registerApi = () => {
   ipcMain.handle('get-version', () => {
     return app.getVersion()
   })
-  ipcMain.on('open-help-docs', () => {
-    const dark = isDark()
-    const window = new BrowserWindow({
-      width: 1050,
-      height: 800,
-      backgroundColor: dark ? '#222222' : '#ffffff',
-      ...windowOptions,
-      autoHideMenuBar: false
-    })
-    window.webContents.session.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
-      },
-    )
-    window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-      callback({
-        responseHeaders: {
-          'Access-Control-Allow-Origin': ['*'],
-          ...details.responseHeaders,
-        },
-      })
-    })
-    window.webContents.setWindowOpenHandler((details) => {
-      shell.openExternal(details.url)
-      return {action: 'deny'}
-    })
-    window.loadFile(docsPath)
-    window.show()
-  })
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
   })
@@ -101,7 +71,6 @@ export const registerApi = () => {
     const dark = isDark(config)
     return {
       showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
-      locale: getLocale(),
       theme: theme,
       dark: dark,
       codeLineNumber: !!config.codeLineNumber,
@@ -110,8 +79,10 @@ export const registerApi = () => {
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: config.showCharactersCount,
-      titleColor: config.titleColor,
-      mas: process.mas || false
+      mas: process.mas || false,
+      headingMarkLine: config.headingMarkLine || false,
+      token: config.token,
+      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
     }
   })
 
@@ -169,7 +140,7 @@ export const registerApi = () => {
     BrowserWindow.fromWebContents(e.sender)?.maximize()
   })
 
-  ipcMain.on('move-to-trash', (e, path) => {
+  ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
   })
   ipcMain.handle('get-base-url', e => {
@@ -177,6 +148,27 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-preload-url', e => {
     return join(__dirname, '../preload/index.js')
+  })
+
+  ipcMain.handle('upload', (e, data: {
+    url: string
+    data: Record<string, string>
+  }) => {
+    const config:any = store.get('config') || {}
+    const form = new FormData()
+    for (let [key, v] of Object.entries(data.data)) {
+      if (key === 'file') {
+        form.append('file', createReadStream(v))
+      } else {
+        form.append(key, v)
+      }
+    }
+    return fetch(data.url, {
+      method: 'post', body: form,
+      headers: {
+        Authorization: `Bearer ${config.token}`
+      }
+    }).then(res => res.json())
   })
 
   ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {
@@ -187,12 +179,14 @@ export const registerApi = () => {
           preload: join(__dirname, '../preload/index.js'),
           sandbox: false,
           nodeIntegration: true,
-          contextIsolation: false,
-          webviewTag: true
+          contextIsolation: false
         }
       })
       win.setBrowserView(view)
       view.setBounds({ x: 0, y: 0, width: 0, height: 0})
+      ipcMain.handleOnce('print-dom-ready', () => {
+        return filePath
+      })
       await view.webContents.loadFile(workerPath)
       const ready = async (e: any, filePath: string) => {
         try {
@@ -216,13 +210,9 @@ export const registerApi = () => {
           }
         } finally {
           win.setBrowserView(null)
-          ipcMain.off('print-pdf-ready', ready)
         }
       }
-      ipcMain.on('print-pdf-ready', ready)
-      setTimeout(() => {
-        view.webContents.send('print-pdf-load', filePath, rootPath)
-      }, 300)
+      ipcMain.once('print-pdf-ready', ready)
     }
   })
 }

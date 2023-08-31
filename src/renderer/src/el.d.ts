@@ -31,6 +31,7 @@ export type CustomLeaf = {
   text?: string
   highlight?: boolean | null
   current?: boolean | null
+  html?: string
   // footnote
   fnc?: boolean
   fnd?: boolean
