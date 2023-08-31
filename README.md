@@ -1,7 +1,7 @@
-<div style="display: flex; justify-content: center; flex-direction: column;align-items: center;padding-top: 20px">
+<p align="center">
   <img src="./build/icon.png" style="width:60px"/>
-  <p style="text-align: center">A WYSIWYG markdown editor. <a href="https://github.com/1943time/bluestone/releases/latest" target="_blank">Download</a><br/>improving the Markdown reading and editing experience</p>
-</div>
+</p>
+<p align="center">A WYSIWYG markdown editor. <a href="https://github.com/1943time/bluestone/releases/latest" target="_blank">Download</a><br/>improving the Markdown reading and editing experience</p>
 
 # Brief introduction
 
