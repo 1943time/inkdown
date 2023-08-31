@@ -1,16 +1,13 @@
-# Bluestone
-A WYSIWYG markdown editor.
-[Download](https://github.com/1943time/bluestone/releases/latest)
- | [中文文档](./ZH_README.md)
-
-If you want to experience it immediately, can open the [web demo](https://ed.bluemd.me), it is recommended to use chrome
+<p align="center">
+  <img src="./build/icon.png" style="width:60px"/>
+</p>
+<p align="center">A WYSIWYG markdown editor. <a href="https://github.com/1943time/bluestone/releases/latest" target="_blank">Download</a><br/>improving the Markdown reading and editing experience</p>
 
 # Brief introduction
 
 Bluestone is an WYSIWYG Markdown editor，
-use [gfm](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
-Supports light and dark color schemes, with the goal of improving the Markdown reading
-and editing experience. and generate your Markdown files into online documents in the easiest and fastest way.
+use [GFM](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
+Supports light and dark color theme. and generate your Markdown files into online documents in the easiest and fastest way.
 [documentation](https://pb.bluemd.me/official/book/docs/introduction)
 
 ![](./docs/assets/d1.png)
@@ -19,8 +16,12 @@ and editing experience. and generate your Markdown files into online documents i
 
 ![](./docs/assets/syntax.gif)
 
+## Drag
+Freely drag to sort document elements
+![](./docs/assets/drag.gif)
+
 ## Share
-bluestone provides a function to automatically extract markdown files and share them, or combine multiple Markdown documents into a book at the same time [more](https://pb.bluemd.me/official/book/docs/share)
+bluestone provides an optional sharing function that can automatically extract Markdown files and share them to the network, or merge multiple Markdown documents into a book at the same time [more](https://pb.bluemd.me/official/book/docs/share)
 
 ![](./docs/assets/share.gif)
 
