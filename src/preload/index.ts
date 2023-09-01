@@ -3,7 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import {getHighlighter, Highlighter } from 'shiki'
 import {BUNDLED_LANGUAGES} from 'shiki'
 import * as fs from 'fs/promises'
-import * as chokidar from 'chokidar'
+import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
 import got from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
@@ -11,11 +11,9 @@ const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])])
 let highlighter:Highlighter | null = null
 import {toUnix} from 'upath'
 
-let watchers = new Map<string, chokidar.FSWatcher>()
+let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
-  preloadUrl: '',
-  baseUrl: '',
   langSet,
   copyToClipboard(str: string) {
     clipboard.writeText(str)
@@ -32,10 +30,10 @@ const api = {
   fs,
   watch: async (path: string, cb: (event: 'add'| 'addDir' | 'change'| 'unlink'| 'unlinkDir', path: string) => void) => {
     if (watchers.get(path)) await watchers.get(path)!.close()
-    const watcher = chokidar.watch(path, {
-      ignoreInitial: true
+    const watcher = watch(path, {
+      recursive: true
     })
-    watcher!.on('all', cb)
+    watcher!.on('change', cb)
     watchers.set(path, watcher)
   },
   highlightCodeToString(code: string, lang: string) {
@@ -45,8 +43,6 @@ const api = {
     return createHash('md5').update(str).digest('hex')
   },
   async ready() {
-    this.baseUrl = await ipcRenderer.invoke('get-base-url')
-    this.preloadUrl = await ipcRenderer.invoke('get-preload-url')
     const config = await ipcRenderer.invoke('getConfig')
     return new Promise(resolve => {
       if (ready) {

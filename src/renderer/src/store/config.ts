@@ -11,7 +11,7 @@ class ConfigStore {
     showLeading: true,
     theme: 'system' as 'system' | 'dark' | 'light',
     dark: false,
-    headingMarkLine: false,
+    headingMarkLine: true,
     codeLineNumber: false,
     codeTabSize: 2,
     editorTextSize: 16,
@@ -23,11 +23,13 @@ class ConfigStore {
     dragToSort: true,
     token: ''
   }
-  masUpdate = false
   locale = 'en'
   timer = 0
   get isZh() {
     return this.locale === 'zh'
+  }
+  get mas() {
+    return process.mas || false
   }
   get isLogin() {
     return !!this.config.token
@@ -89,11 +91,6 @@ class ConfigStore {
     if (key === 'token' && value) login$.next(true)
     ipcRenderer.send('setStore', `config.${key}`, value)
   }
-  checkMasUpdate() {
-    // window.api.checkedLatest().then(res => {
-    //   console.log('res', res)
-    // })
-  }
   initial() {
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
@@ -104,7 +101,6 @@ class ConfigStore {
           ...res
         }
         if (this.config.token) login$.next(true)
-        this.checkMasUpdate()
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         if (this.config.dark) {
           mermaid.initialize({

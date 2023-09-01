@@ -24,6 +24,10 @@ export const registerMenus = () => {
   ipcMain.on('tool-menu', (e, filePath?: string) => {
     const temp: Menus = [
       {
+        label: 'Documentation',
+        click: () => shell.openExternal('https://pb.bluemd.me/official/book/docs/introduction')
+      },
+      {
         type: 'separator'
       },
       {
@@ -37,11 +41,6 @@ export const registerMenus = () => {
         click: (e, win) => {
           win?.webContents.send('call-print-pdf')
         }
-      },
-      {
-        label: menusLabel.html,
-        enabled: filePath?.endsWith('.md'),
-        click: (e, win) => win?.webContents.send('print-to-html')
       },
       {
         type: 'separator'

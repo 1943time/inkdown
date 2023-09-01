@@ -254,7 +254,7 @@ export class EditorStore {
         if (base64) {
           let base64Image = base64.split(';base64,').pop()!
           const p = parse(file.name)
-          const name = nanoid() + p.ext
+          const name = Date.now().toString(16) + p.ext
           let targetPath = ''
           let mediaUrl = ''
           if (treeStore.root) {
@@ -262,7 +262,7 @@ export class EditorStore {
             if (!existsSync(imageDir)) {
               mkdirSync(imageDir)
               await MainApi.mkdirp(imageDir)
-              treeStore.watcher.onChange('addDir', imageDir)
+              treeStore.watcher.onChange('update', imageDir)
             }
             targetPath = join(imageDir, name)
             mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, name))
@@ -275,7 +275,7 @@ export class EditorStore {
           }
           writeFileSync(targetPath, base64Image, {encoding: 'base64'})
           this.insertInlineNode(mediaUrl)
-          if (treeStore.root) treeStore.watcher.onChange('add', targetPath)
+          if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
         }
       }
     }

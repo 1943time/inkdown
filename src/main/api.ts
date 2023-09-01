@@ -78,9 +78,9 @@ export const registerApi = () => {
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
-      showCharactersCount: config.showCharactersCount,
+      showCharactersCount: typeof config.showCharactersCount === 'boolean' ? config.showCharactersCount : true,
       mas: process.mas || false,
-      headingMarkLine: config.headingMarkLine || false,
+      headingMarkLine: typeof config.headingMarkLine === 'boolean' ? config.headingMarkLine : true,
       token: config.token,
       dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
     }
@@ -142,12 +142,6 @@ export const registerApi = () => {
 
   ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
-  })
-  ipcMain.handle('get-base-url', e => {
-    return baseUrl
-  })
-  ipcMain.handle('get-preload-url', e => {
-    return join(__dirname, '../preload/index.js')
   })
 
   ipcMain.handle('upload', (e, data: {

@@ -1,11 +1,10 @@
 import {ConfigProvider, message, theme} from 'antd'
-import {useSubject} from './hooks/subscribe'
-import {Home} from './components/Home'
 import {observer} from 'mobx-react-lite'
 import {useEffect, useMemo, useState} from 'react'
-import {configStore} from './store/config'
-import {message$} from './utils'
-
+import { useSubject } from './hooks/subscribe'
+import { configStore } from './store/config'
+import { message$ } from './utils'
+import { Home } from './components/Home'
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   useSubject(message$, args => {

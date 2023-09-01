@@ -4,7 +4,6 @@ import {CloseOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
 import {useCallback, useEffect} from 'react'
 import {action} from 'mobx'
-import {MainApi} from '../api/main'
 
 export const Set = observer(() => {
   const close = useCallback(action(() => {
@@ -120,13 +119,9 @@ export const Set = observer(() => {
                   className={'w-[220px]'}
                   onChange={e => {
                     configStore.setConfig('codeTheme', e)
-                    modal.confirm({
-                      type: 'info',
+                    modal.info({
                       title: 'Note',
-                      content: 'The code style setting takes effect after restarting the editor, do you want to restart immediately?',
-                      onOk: () => {
-                        MainApi.relaunch()
-                      }
+                      content: 'Code style settings will take effect after restarting applications'
                     })
                   }}
                   options={[
