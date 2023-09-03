@@ -1,8 +1,10 @@
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'
+import {is} from '@electron-toolkit/utils'
 
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
+const isMas = process.mas || false
 const isMac = process.platform === 'darwin'
 const cmd = 'CmdOrCtrl'
 const task = (task: string, parameter?: any) => {
@@ -63,6 +65,15 @@ export const createAppMenus = () => {
     help: 'Help',
     doc: 'Documentation'
   }
+  const update: MenuOptions[number]['submenu'] = !isMas ? [
+    {
+      label: menusLabel.update,
+      click: () => {
+        ipcMain.emit('check-updated')
+        BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
+      }
+    }
+  ] : []
   const menus: MenuOptions = [
     {
       label: 'Bluestone',
@@ -74,13 +85,7 @@ export const createAppMenus = () => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
         },
-        {
-          label: menusLabel.update,
-          click: () => {
-            ipcMain.emit('check-updated')
-            BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
-          }
-        },
+        ...update,
         {type: 'separator'},
         {
           label: menusLabel.set,
@@ -149,7 +154,6 @@ export const createAppMenus = () => {
         }
       },
       ...systemFileMenus,
-      {type: 'separator'},
       {
         label: menusLabel.openQuickly,
         accelerator: `${cmd}+o`,
@@ -162,12 +166,6 @@ export const createAppMenus = () => {
         label: menusLabel.pdf,
         click: (e, win) => {
           win?.webContents.send('call-print-pdf')
-        }
-      },
-      {
-        label: menusLabel.html,
-        click: (e, win) => {
-          win?.webContents.send('print-to-html')
         }
       }
     ]
@@ -348,6 +346,11 @@ export const createAppMenus = () => {
       }
     }
   ]
+  const devTools:MenuOptions[number]['submenu'] = is.dev ? [
+    {type: 'separator'},
+    {role: 'reload'},
+    {role: 'toggleDevTools'}
+  ] : []
   menus.push(
     {
       label: menusLabel.view,
@@ -363,7 +366,6 @@ export const createAppMenus = () => {
           id: 'showLeading',
           checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
           click: e => {
-            store.set('config.showLeading', e.checked)
             BrowserWindow.getAllWindows().forEach(w => {
               w.webContents.send('changeConfig', 'showLeading', e.checked)
             })
@@ -372,12 +374,13 @@ export const createAppMenus = () => {
         {
           label: menusLabel.search,
           id: 'search',
-          accelerator: `${cmd}+f`
+          accelerator: `${cmd}+f`,
+          click: e => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('open-search')
+          }
         },
-        {type: 'separator'},
-        {role: 'reload'},
-        {role: 'toggleDevTools'}
-      ]
+        ...devTools
+      ],
     }
   )
   menus.push(

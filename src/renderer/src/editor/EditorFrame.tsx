@@ -21,7 +21,6 @@ import {getImageData} from '../utils'
 import {configStore} from '../store/config'
 import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
-import {useSubject} from '../hooks/subscribe'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
@@ -49,16 +48,18 @@ export const EditorFrame = observer(({tab}: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (isHotkey('mod+f', e) && treeStore.currentTab.current) {
-        store.setOpenSearch(true)
-      }
       if (isHotkey('esc', e) && store.openSearch) {
         store.setOpenSearch(false)
       }
     }
+    const open = () => {
+      store.setOpenSearch(true)
+    }
     window.addEventListener('keydown', keydown)
+    window.electron.ipcRenderer.on('open-search', open)
     return () => {
       window.removeEventListener('keydown', keydown)
+      window.electron.ipcRenderer.removeListener('open-search', open)
     }
   }, [])
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
@@ -77,13 +78,13 @@ export const EditorFrame = observer(({tab}: {
           store.setState(state => state.container = dom)
         }}
       >
-        <div
-          className={`items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''}`}
-          onClick={click}
-        >
-          {tab.current ?
-            <>
-              <div className={`flex-1 flex justify-center items-start h-full ${mt === 'markdown' ? '' : 'hidden'}`}>
+        {tab.current &&
+          <>
+            <div
+              className={`items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''} ${mt === 'markdown' ? '' : 'hidden'}`}
+              onClick={click}
+            >
+              <div className={`flex-1 flex justify-center items-start h-full`}>
                 <div
                   className={`max-w-[900px] flex-1 content px-14`}
                 >
@@ -91,42 +92,44 @@ export const EditorFrame = observer(({tab}: {
                 </div>
                 <Heading note={tab.current}/>
               </div>
-              {mt !== 'other' && mt !== 'markdown' &&
-                <>
-                  {mt === 'image' ?
-                    <div style={{height: size.height}} className={'flex items-center justify-center px-14 py-5'}>
-                      <img src={getImageData(tab.current?.filePath)} alt=""/>
-                    </div> :
-                    (
-                      <div style={{
-                        ...size
-                      }}>
-                        <iframe className={'w-full h-full px-14 py-5'} src={tab.current.filePath}/>
-                      </div>
-                    )
-                  }
-                </>
-              }
-              {mt === 'other' &&
-                <div style={{height: size.height}} className={'flex items-center flex-col justify-center'}>
-                  <div className={'text-gray-600'}>{configStore.isZh ? '暂不支持打开该文件类型' : 'Opening this file type is not currently supported'}</div>
-                  <div
-                    className={'text-sky-500 text-sm mt-3 cursor-default duration-200 hover:text-sky-600'}
-                    onClick={() => {
-                      MainApi.openInFolder(tab.current?.filePath || '')
-                    }}
-                  >
-                    <FolderOpenOutlined/> {configStore.isZh ? '在Finder中显示' : 'Displayed in Finder'}
-                  </div>
+            </div>
+            {mt !== 'other' && mt !== 'markdown' &&
+              <>
+                {mt === 'image' ?
+                  <div className={'text-center px-14 py-5'}>
+                    <img src={getImageData(tab.current?.filePath)} alt=""/>
+                  </div> :
+                  (
+                    <div style={{
+                      ...size
+                    }}>
+                      <iframe className={'w-full h-full px-14 py-5'} src={tab.current.filePath}/>
+                    </div>
+                  )
+                }
+              </>
+            }
+            {mt === 'other' &&
+              <div style={{height: size.height}} className={'flex items-center flex-col justify-center'}>
+                <div className={'text-gray-600'}>{configStore.isZh ? '暂不支持打开该文件类型' : 'Opening this file type is not currently supported'}</div>
+                <div
+                  className={'text-sky-500 text-sm mt-3 cursor-default duration-200 hover:text-sky-600'}
+                  onClick={() => {
+                    MainApi.openInFolder(tab.current?.filePath || '')
+                  }}
+                >
+                  <FolderOpenOutlined/> {configStore.isZh ? '在Finder中显示' : 'Displayed in Finder'}
                 </div>
-              }
-            </> :
-            <Empty/>
-          }
-          <FloatBar/>
-          <TableAttr/>
-          <MediaAttr/>
-        </div>
+              </div>
+            }
+          </>
+        }
+        {!tab.current &&
+          <Empty/>
+        }
+        <FloatBar/>
+        <TableAttr/>
+        <MediaAttr/>
       </div>
     </EditorStoreContext.Provider>
   )

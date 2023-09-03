@@ -18,8 +18,8 @@ files:
 asarUnpack:
   - resources/*
 artifactName: "Bluestone-${os}-${arch}-${version}.${ext}"
-extraResources:
-  - web
+#extraResources:
+#  - web
 fileAssociations:
   ext: md
   role: Editor
@@ -30,13 +30,20 @@ win:
 mac:
 #  identity: null
   entitlementsInherit: build/entitlements.mac.plist
+#  minimumSystemVersion: 12.0
+#  category: public.app-category.productivity
+  hardenedRuntime: true
   extendInfo:
+    - ElectronTeamID: GPJ86B8H94
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   target:
-    - dmg
+    - target: dmg
+      arch:
+        - x64
+        - arm64
 linux:
   target:
     - AppImage

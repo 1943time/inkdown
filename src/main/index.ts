@@ -1,7 +1,6 @@
 import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
 import {lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
-import log from 'electron-log'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
@@ -154,7 +153,7 @@ app.whenReady().then(() => {
       }
     }))
   })
-  if (isWindows) electronApp.setAppUserModelId('blog.bluestone')
+  if (isWindows) electronApp.setAppUserModelId('me.bluemd')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -174,7 +173,7 @@ app.whenReady().then(() => {
       createWindow()
     }
   } catch (e) {
-    log.error('create error', e)
+    // log.error('create error', e)
   }
   if (waitOpenFile) {
     const win = Array.from(windows).find(w => {

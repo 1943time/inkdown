@@ -16,8 +16,8 @@ import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
 import {treeStore} from '../../store/tree'
 import {MainApi} from '../../api/main'
-import {IpcRendererEvent} from '@electron-toolkit/preload'
 import isHotkey from 'is-hotkey'
+import IpcRendererEvent = Electron.IpcRendererEvent
 
 
 export const TableAttr = observer(() => {
@@ -322,7 +322,7 @@ export const TableAttr = observer(() => {
       }
       ReactEditor.focus(editor)
     }
-
+    // @ts-ignore
     window.electron.ipcRenderer.on('table-task', task)
     return () => {
       window.electron.ipcRenderer.removeListener('table-task', task)

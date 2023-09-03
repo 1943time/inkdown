@@ -8,10 +8,8 @@ import {MainApi} from '../api/main'
 import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
-import {exportHtml} from '../editor/output/html'
 import {Characters} from './Characters'
-import {ExportEbook} from './ExportEbook'
-import {appendRecentDir, db} from '../store/db'
+import {db} from '../store/db'
 import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
 
@@ -55,10 +53,6 @@ export const Home = observer(() => {
         window.electron.ipcRenderer.send('print-pdf', treeStore.openNote!.filePath, treeStore.root?.filePath)
       }
     }
-    const printHtml = () => {
-      MainApi.sendToSelf('window-blur')
-      if (treeStore.openNote && treeStore.openNote.ext === 'md') exportHtml(treeStore.openNote)
-    }
     const clearRecent = () => {
       db.recent.clear()
     }
@@ -66,13 +60,11 @@ export const Home = observer(() => {
     window.electron.ipcRenderer.on('open', open)
     window.electron.ipcRenderer.on('create', create)
     window.electron.ipcRenderer.on('call-print-pdf', printPdf)
-    window.electron.ipcRenderer.on('print-to-html', printHtml)
     window.electron.ipcRenderer.on('clear-recent', clearRecent)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
       window.electron.ipcRenderer.removeListener('create', create)
       window.electron.ipcRenderer.removeListener('call-print-pdf', printPdf)
-      window.electron.ipcRenderer.removeListener('print-to-html', printHtml)
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
     }
   }, [])
@@ -111,7 +103,6 @@ export const Home = observer(() => {
       </div>
       <About/>
       <Set/>
-      <ExportEbook/>
       <QuickOpen/>
     </div>
   )

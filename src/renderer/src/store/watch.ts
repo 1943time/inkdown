@@ -1,10 +1,11 @@
 import {TreeStore} from './tree'
-import {basename, join} from 'path'
+import {basename, join, sep} from 'path'
 import {runInAction} from 'mobx'
 import {createFileNode, sortFiles} from './parserNode'
 import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
 import {IFileItem} from '../index'
+import {lstatSync} from 'fs'
 
 export class Watcher {
   private changeHistory = new Set<string>()
@@ -15,14 +16,16 @@ export class Watcher {
   ) {
     this.onChange = this.onChange.bind(this)
     window.electron.ipcRenderer.on('window-blur', () => {
-      if (this.store.root?.filePath) {
-        window.api.watch(this.store.root.filePath, this.onChange)
-      }
-      if (this.watchNoteSet.size) {
-        for (let f of this.watchNoteSet) {
-          window.api.watch(f, this.onChange)
+      setTimeout(() => {
+        if (this.store.root?.filePath) {
+          window.api.watch(this.store.root.filePath, this.onChange)
         }
-      }
+        if (this.watchNoteSet.size) {
+          for (let f of this.watchNoteSet) {
+            window.api.watch(f, this.onChange)
+          }
+        }
+      }, 100)
     })
     window.electron.ipcRenderer.on('window-focus', () => {
       if (this.store.root?.filePath) {
@@ -61,65 +64,64 @@ export class Watcher {
     })
   }
 
-  public onChange(e: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir', path: string, node?: IFileItem) {
-    if (e === 'change') {
-      this.changeHistory.add(path)
-    } else {
-      try {
-        if (!this.store.root || !path.startsWith(this.store.root.filePath)) return
-        const nodesMap = new Map(this.store.nodes.map(n => [n.filePath, n]))
-        const parent = nodesMap.get(join(path, '..'))!
-        switch (e) {
-          case 'add':
-            if (parent.children && !parent.children.find(c => c.filePath === path)) {
-              runInAction(() => {
-                if (!node) node = createFileNode({
-                  folder: false,
-                  parent: parent,
-                  fileName: basename(path)
-                })
-                parent.children!.push(node)
-              })
+  public onChange(e: 'remove' | 'update', path: string, node?: IFileItem) {
+    const base = basename(path)
+    if (path.split(sep).some(p => p.startsWith('.')) && base !== '.images') return
+    const nodesMap = new Map(this.store.nodes.map(n => [n.filePath, n]))
+    const target = nodesMap.get(path)
+    const parent = nodesMap.get(join(path, '..'))!
+    if (target && e === 'remove') {
+      if (target.folder) {
+        runInAction(() => {
+          parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
+        })
+      } else {
+        runInAction(() => {
+          const index = parent.children!.findIndex(n => n.filePath === path)
+          if (index !== -1) {
+            parent?.children!.splice(index, 1)
+            this.store.currentTab.history = this.store.currentTab.history.filter(h => h.filePath !== path)
+            if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
+              this.store.currentTab.index = this.store.currentTab.history.length - 1
             }
-            break
-          case 'unlink':
-            runInAction(() => {
-              const index = parent.children!.findIndex(n => n.filePath === path)
-              if (index !== -1) {
-                parent?.children!.splice(index, 1)
-                this.store.currentTab.history = this.store.currentTab.history.filter(h => h.filePath !== path)
-                if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
-                  this.store.currentTab.index = this.store.currentTab.history.length - 1
-                }
-              }
+          }
+        })
+      }
+    }
+    if (e === 'update') {
+      if (target) {
+        this.changeHistory.add(path)
+      } else {
+        const stat = lstatSync(path)
+        if (stat.isDirectory()) {
+          if (parent.children && !parent.children.find(c => c.filePath === path)) {
+            if (!node) node =  createFileNode({
+              folder: true,
+              parent: parent,
+              fileName: basename(path)
             })
-            break
-          case 'addDir':
-            if (parent.children && !parent.children.find(c => c.filePath === path)) {
-              if (!node) node =  createFileNode({
-                folder: true,
+            runInAction(() => {
+              parent.children!.push(node!)
+            })
+          }
+        } else {
+          if (parent.children && !parent.children.find(c => c.filePath === path)) {
+            runInAction(() => {
+              if (!node) node = createFileNode({
+                folder: false,
                 parent: parent,
                 fileName: basename(path)
               })
-              runInAction(() => {
-                parent.children!.push(node!)
-              })
-            }
-            break
-          case 'unlinkDir':
-            runInAction(() => {
-              parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
+              parent.children!.push(node)
             })
-            break
+          }
         }
-        if (parent) {
-          runInAction(() => {
-            parent.children = sortFiles(parent.children!)
-          })
-        }
-      } catch (e) {
-        console.error('watch result err', e)
       }
+    }
+    if (parent) {
+      runInAction(() => {
+        parent.children = sortFiles(parent.children!)
+      })
     }
   }
 
