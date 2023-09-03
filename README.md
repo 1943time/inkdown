@@ -1,7 +1,7 @@
 # Bluestone Markdown
 A WYSIWYG markdown editor. improving the Markdown reading and editing experience [Download](https://github.com/1943time/bluestone/releases/latest) or
 
-<a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.png" style="width:100px; height:30px;object-fit:cover;"/><a>
+<a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.png" style="width:100px"/><a>
 
 ***
 
