@@ -30,6 +30,7 @@ export class EditorStore {
     words: 0,
     characters: 0
   }
+  openInsertNetworkImage = false
   webview = false
   sel: BaseSelection | undefined
   focus = false
@@ -72,7 +73,6 @@ export class EditorStore {
       this.matchCount = 0
     })
   }
-
   hideRanges() {
     if (this.highlightCache.size) {
       setTimeout(() => {

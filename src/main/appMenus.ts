@@ -55,7 +55,6 @@ export const createAppMenus = () => {
     italic: 'Italic',
     strikethrough: 'Strikethrough',
     inlineCode: 'Inline Code',
-    insertPicture: 'Insert Picture',
     clear: 'Clear',
     view: 'View',
     zoomIn: 'Zoom In',
@@ -309,19 +308,32 @@ export const createAppMenus = () => {
           click: task('code')
         },
         {
-          label: menusLabel.insertPicture,
+          label: 'Image',
           accelerator: `${cmd}+p`,
-          click: (e, win) => {
-            dialog.showOpenDialog({
-              properties: ['openFile'],
-              filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
-              securityScopedBookmarks: true
-            }).then(res => {
-              if (res.filePaths.length) {
-                win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
+          submenu: [
+            {
+              label: 'Insert local image',
+              accelerator: `${cmd}+p`,
+              click: (e, win) => {
+                dialog.showOpenDialog({
+                  properties: ['openFile'],
+                  filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
+                  securityScopedBookmarks: true
+                }).then(res => {
+                  if (res.filePaths.length) {
+                    win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
+                  }
+                })
               }
-            })
-          }
+            },
+            {
+              accelerator: `${cmd}+shift+p`,
+              label: 'Insert image via url',
+              click: (e, win) => {
+                win?.webContents.send('key-task', 'insertNetworkImage')
+              }
+            }
+          ]
         },
         {type: 'separator'},
         {
