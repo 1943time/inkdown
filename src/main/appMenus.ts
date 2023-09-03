@@ -366,7 +366,6 @@ export const createAppMenus = () => {
           id: 'showLeading',
           checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
           click: e => {
-            store.set('config.showLeading', e.checked)
             BrowserWindow.getAllWindows().forEach(w => {
               w.webContents.send('changeConfig', 'showLeading', e.checked)
             })
@@ -375,7 +374,10 @@ export const createAppMenus = () => {
         {
           label: menusLabel.search,
           id: 'search',
-          accelerator: `${cmd}+f`
+          accelerator: `${cmd}+f`,
+          click: e => {
+            BrowserWindow.getFocusedWindow()?.webContents.send('open-search')
+          }
         },
         ...devTools
       ],

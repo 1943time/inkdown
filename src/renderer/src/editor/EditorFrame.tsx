@@ -48,16 +48,18 @@ export const EditorFrame = observer(({tab}: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (isHotkey('mod+f', e) && treeStore.currentTab.current) {
-        store.setOpenSearch(true)
-      }
       if (isHotkey('esc', e) && store.openSearch) {
         store.setOpenSearch(false)
       }
     }
+    const open = () => {
+      store.setOpenSearch(true)
+    }
     window.addEventListener('keydown', keydown)
+    window.electron.ipcRenderer.on('open-search', open)
     return () => {
       window.removeEventListener('keydown', keydown)
+      window.electron.ipcRenderer.removeListener('open-search', open)
     }
   }, [])
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])

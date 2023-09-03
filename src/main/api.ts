@@ -1,4 +1,4 @@
-import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserView} from 'electron'
+import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserView, systemPreferences} from 'electron'
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
