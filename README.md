@@ -1,7 +1,9 @@
-<p align="center">
-  <img src="./build/icon.png" style="width:60px"/>
-</p>
-<p align="center">A WYSIWYG markdown editor. <a href="https://github.com/1943time/bluestone/releases/latest" target="_blank">Download</a><br/>improving the Markdown reading and editing experience</p>
+# Bluestone Markdown
+A WYSIWYG markdown editor. improving the Markdown reading and editing experience [Download](https://github.com/1943time/bluestone/releases/latest) or
+
+<a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px"/><a>
+
+***
 
 # Brief introduction
 
@@ -20,10 +22,12 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 Freely drag to sort document elements
 ![](./docs/assets/drag.gif)
 
-## Share
-bluestone provides an optional sharing function that can automatically extract Markdown files and share them to the network, or merge multiple Markdown documents into a book at the same time [more](https://pb.bluemd.me/official/book/docs/share)
+[//]: # (## Share)
 
-![](./docs/assets/share.gif)
+[//]: # (bluestone provides an optional sharing function that can automatically extract Markdown files and share them to the network, or merge multiple Markdown documents into a book at the same time [more]&#40;https://pb.bluemd.me/official/book/docs/share&#41;)
+
+[//]: # ()
+[//]: # (![]&#40;./docs/assets/share.gif&#41;)
 
 ## Format
 
