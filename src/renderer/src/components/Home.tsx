@@ -12,6 +12,7 @@ import {Characters} from './Characters'
 import {db} from '../store/db'
 import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
+import {exportHtml} from '../editor/output/html'
 
 export const Home = observer(() => {
   const initial = useCallback(async () => {
@@ -53,6 +54,10 @@ export const Home = observer(() => {
         window.electron.ipcRenderer.send('print-pdf', treeStore.openNote!.filePath, treeStore.root?.filePath)
       }
     }
+    const printHtml = () => {
+      MainApi.sendToSelf('window-blur')
+      if (treeStore.openNote && treeStore.openNote.ext === 'md') exportHtml(treeStore.openNote)
+    }
     const clearRecent = () => {
       db.recent.clear()
     }
@@ -60,15 +65,16 @@ export const Home = observer(() => {
     window.electron.ipcRenderer.on('open', open)
     window.electron.ipcRenderer.on('create', create)
     window.electron.ipcRenderer.on('call-print-pdf', printPdf)
+    window.electron.ipcRenderer.on('call-print-html', printHtml)
     window.electron.ipcRenderer.on('clear-recent', clearRecent)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
       window.electron.ipcRenderer.removeListener('create', create)
       window.electron.ipcRenderer.removeListener('call-print-pdf', printPdf)
+      window.electron.ipcRenderer.removeListener('call-print-html', printHtml)
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
     }
   }, [])
-
   const moveStart = useCallback((e: React.MouseEvent) => {
     const left = e.clientX
     const startWidth = treeStore.width
@@ -86,6 +92,11 @@ export const Home = observer(() => {
       localStorage.setItem('tree-width', String(treeStore.width))
     }, {once: true})
   }, [])
+
+  useEffect(() => {
+    window.electron.ipcRenderer.send('open-file', treeStore.openNote && treeStore.openNote.ext === 'md')
+  }, [treeStore.openNote])
+
   return (
     <div className={'flex h-screen overflow-hidden'}>
       <Tree/>

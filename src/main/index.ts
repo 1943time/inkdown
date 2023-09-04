@@ -5,6 +5,7 @@ import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
+import log from 'electron-log'
 import {AppUpdate} from './update'
 const isWindows = process.platform === 'win32'
 
@@ -18,6 +19,7 @@ type WinOptions = {
 }
 
 const windows = new Map<number, WinOptions>()
+app.setAsDefaultProtocolClient('bluestone-markdown')
 function createWindow(initial?: WinOptions): void {
   const dark = isDark()
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
@@ -83,6 +85,10 @@ app.on('will-finish-launching', () => {
     } else {
       openFiles(file)
     }
+  })
+  app.on('open-url', (event, url) => {
+    log.info('open-url', url)
+    BrowserWindow.getFocusedWindow()?.webContents.send('open-schema', url)
   })
 })
 const openFiles = (filePath: string) => {

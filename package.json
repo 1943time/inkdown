@@ -1,6 +1,6 @@
 {
   "name": "bluestone",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
@@ -16,7 +16,7 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "electron-builder --win --arm64 --x64 --config",
-    "build:mac": "electron-builder --macos --arm64 --x64 --config",
+    "build:mac": "electron-builder --macos --config",
     "build:mas": "npm run build && electron-builder --macos --config mas-builder.yml",
     "build:linux": "electron-builder --linux --config",
     "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",

@@ -10,6 +10,7 @@ export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 import fetch from 'node-fetch'
+import {openAuth} from './auth'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
@@ -49,6 +50,9 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
+  })
+  ipcMain.on('open-auth', (e, type: 'github') => {
+    openAuth(type)
   })
   ipcMain.handle('get-env', () => {
     return {

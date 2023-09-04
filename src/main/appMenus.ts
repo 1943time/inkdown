@@ -163,8 +163,18 @@ export const createAppMenus = () => {
       {type: 'separator'},
       {
         label: menusLabel.pdf,
+        id: 'print-pdf',
+        enabled: false,
         click: (e, win) => {
           win?.webContents.send('call-print-pdf')
+        }
+      },
+      {
+        label: menusLabel.html,
+        id: 'print-html',
+        enabled: false,
+        click: (e, win) => {
+          win?.webContents.send('call-print-html')
         }
       }
     ]
@@ -359,8 +369,6 @@ export const createAppMenus = () => {
     }
   ]
   const devTools:MenuOptions[number]['submenu'] = is.dev ? [
-    {type: 'separator'},
-    {role: 'reload'},
     {role: 'toggleDevTools'}
   ] : []
   menus.push(
@@ -391,6 +399,8 @@ export const createAppMenus = () => {
             BrowserWindow.getFocusedWindow()?.webContents.send('open-search')
           }
         },
+        {type: 'separator'},
+        {role: 'reload'},
         ...devTools
       ],
     }
@@ -470,5 +480,9 @@ export const createAppMenus = () => {
         setFormat(false)
         break
     }
+  })
+  ipcMain.on('open-file', (e, isMarkdown: boolean) => {
+    instance.getMenuItemById('print-pdf')!.enabled = isMarkdown
+    instance.getMenuItemById('print-html')!.enabled = isMarkdown
   })
 }

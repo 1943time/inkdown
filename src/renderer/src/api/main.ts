@@ -22,6 +22,9 @@ export const MainApi = {
   closeWindow() {
     ipcRenderer.send('close-window')
   },
+  openAuth(type: 'github') {
+    ipcRenderer.send('open-auth', type)
+  },
   getSystemDark() {
     return ipcRenderer.invoke('get-system-dark')
   },

@@ -52,3 +52,11 @@
 .ant-btn-primary {
   background-color: #0ea5e9;
 }
+
+.ellipsis-10{
+  overflow : hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+}

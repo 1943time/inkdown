@@ -27,6 +27,7 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       }))
 
       for (let l of listItems) {
+        outputCache.delete(l[0])
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }
     } else {
