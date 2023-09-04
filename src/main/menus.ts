@@ -43,6 +43,13 @@ export const registerMenus = () => {
         }
       },
       {
+        label: menusLabel.html,
+        enabled: filePath?.endsWith('.md'),
+        click: (e, win) => {
+          win?.webContents.send('call-print-html')
+        }
+      },
+      {
         type: 'separator'
       },
       {

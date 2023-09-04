@@ -21,6 +21,7 @@ import {getImageData} from '../utils'
 import {configStore} from '../store/config'
 import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
+import {InsertNetworkImage} from './tools/InsertNetworkImage'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
@@ -130,6 +131,7 @@ export const EditorFrame = observer(({tab}: {
         <FloatBar/>
         <TableAttr/>
         <MediaAttr/>
+        <InsertNetworkImage/>
       </div>
     </EditorStoreContext.Provider>
   )

@@ -163,7 +163,7 @@ export const FullSearch = observer(() => {
                     <div
                       key={j}
                       onClick={() => toNode({el: r.el, file: s.file})}
-                      className={'cursor-default dark:hover:text-gray-200 hover:text-gray-800 group break-all'}
+                      className={'cursor-default dark:hover:text-gray-200 hover:text-gray-800 group break-all ellipsis-10'}
                       dangerouslySetInnerHTML={{__html: r.text}}
                     />
                   )}

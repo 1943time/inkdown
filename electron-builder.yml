@@ -18,8 +18,8 @@ files:
 asarUnpack:
   - resources/*
 artifactName: "Bluestone-${os}-${arch}-${version}.${ext}"
-#extraResources:
-#  - web
+extraResources:
+  - web
 fileAssociations:
   ext: md
   role: Editor
@@ -42,7 +42,7 @@ mac:
   target:
     - target: dmg
       arch:
-        - x64
+#        - x64
         - arm64
 linux:
   target:
@@ -56,3 +56,8 @@ publish:
   provider: github
   owner: '1943time'
   repo: 'bluestone'
+
+protocols:
+  name: Bluestone Markdown
+  schemes:
+    - bluestone-markdown

@@ -51,7 +51,7 @@ jobs:
 
       - name: ls
         run: |
-          wget https://github.com/1943time/bs-web/releases/download/v0.5.1/web.zip
+          wget https://pic.bluestone.blog/web/web.zip
           chmod 755 web.zip
           unzip web.zip
       - name: Build

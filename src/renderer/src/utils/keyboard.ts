@@ -4,6 +4,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import React from 'react'
 import isHotkey from 'is-hotkey'
 import {outputCache} from '../editor/output'
+import {runInAction} from 'mobx'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -26,6 +27,7 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       }))
 
       for (let l of listItems) {
+        outputCache.delete(l[0])
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }
     } else {
@@ -80,13 +82,21 @@ export class MenuKey {
     this.timer = window.setTimeout(() => {
       const sel = this.state?.editor.selection
       if (!this.state || !sel) return
-      if (task === 'insertImage' && sel && other) {
+      if (['insertNetworkImage', 'insertImage'].includes(task) && sel) {
         const [node] = Editor.nodes<any>(this.state?.editor, {
           match: n => Element.isElement(n),
           mode: 'highest'
         })
         if (node && node[0].type === 'code') return
-        this.state.insertInlineNode(other)
+        if (task === 'insertImage') {
+          this.state.insertInlineNode(other)
+        } else {
+          if (this.store.currentTab.current?.ext === 'md') {
+            runInAction(() => {
+              this.store.currentTab.store!.openInsertNetworkImage = true
+            })
+          }
+        }
         return
       }
 
