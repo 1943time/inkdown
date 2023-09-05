@@ -42,7 +42,7 @@ mac:
   target:
     - target: dmg
       arch:
-#        - x64
+        - x64
         - arm64
 linux:
   target:
