@@ -189,25 +189,24 @@ blockquote {
   padding-left: 24px;
   padding-top: 5px;
   padding-bottom: 5px;
+  &::marker{
+    @apply text-gray-500;
+  }
   li:not(.task){
-    &::marker{
-      @apply text-gray-500;
-    }
     >:first-child{
       .drag-handle{
         padding-left: 2px;
         padding-right: 18px;
-        left: -36px !important;
+        left: -44px !important;
         top: .35em !important;
       }
     }
-
   }
   li.task >:nth-child(2) {
     .drag-handle{
       padding-left: 2px;
       padding-right: 42px;
-      left: -60px !important;
+      left: -68px !important;
       top: .35em !important;
     }
   }

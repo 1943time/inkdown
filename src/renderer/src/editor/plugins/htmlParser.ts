@@ -207,7 +207,6 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
-  if (!parsed.querySelector('.m-list-item.task')) return false
   Transforms.insertFragment(editor, fragment)
   return true
 }

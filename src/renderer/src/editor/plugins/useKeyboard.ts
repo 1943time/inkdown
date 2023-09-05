@@ -5,11 +5,8 @@ import {EnterKey} from './hotKeyCommands/enter'
 import {BackspaceKey} from './hotKeyCommands/backspace'
 import {MatchKey} from './hotKeyCommands/match'
 import {keyArrow} from './hotKeyCommands/arrow'
-import {isMix} from '../output'
 import {EditorUtils} from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
-
-const textNodes = new Set(['table-row', 'code-line', 'paragraph', 'head'])
 export const useKeyboard = (editor: Editor) => {
   return useMemo(() => {
     const tab = new TabKey(editor)

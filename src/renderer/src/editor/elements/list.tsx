@@ -20,9 +20,10 @@ export const List = observer(({element, attributes, children}: ElementProps<List
       >
         {configStore.config.dragToSort &&
           <span
-            className={'block absolute -left-7 top-[5px] w-5 group hover:border-r dark:border-gray-200/10 border-gray-200 h-[calc(100%_-_10px)]'}
+            className={'block absolute top-[5px] w-5 group hover:border-r dark:border-gray-200/10 border-gray-200 h-[calc(100%_-_10px)]'}
             style={{
-              paddingTop: '.3em'
+              paddingTop: '.3em',
+              left: -36
             }}
           >
             <Drag

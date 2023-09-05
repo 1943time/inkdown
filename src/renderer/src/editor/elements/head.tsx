@@ -2,7 +2,6 @@ import {ElementProps, HeadNode} from '../../el'
 import {createElement, useMemo} from 'react'
 import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'
-import {configStore} from '../../store/config'
 
 const levelDragHandleTop = new Map([
   [1, '.52em'],
@@ -21,7 +20,7 @@ export function Head({element, attributes, children}: ElementProps<HeadNode>) {
       onDragStart: store.dragStart
     }, (
       <>
-        <DragHandle style={{top: levelDragHandleTop.get(element.level)}}/>
+        <DragHandle style={{top: levelDragHandleTop.get(element.level), left: -28, paddingRight: 10}}/>
         {children}
       </>
     ))

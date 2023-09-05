@@ -257,11 +257,15 @@ export class EnterKey {
         e.preventDefault()
         let checked:boolean | undefined =  undefined
         if (typeof parent[0].checked === 'boolean') {
-          if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
+          if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path) && !Path.hasPrevious(node[1])) {
             checked = parent[0].checked
-            Transforms.setNodes(this.editor, {
-              checked: false
+            Transforms.insertNodes(this.editor, {
+              type: 'list-item',
+              children: [EditorUtils.p],
+              checked: typeof checked === 'boolean' ? false : undefined
             }, {at: parent[1]})
+            Transforms.select(this.editor, Editor.start(this.editor, Path.next(parent[1])))
+            return
           } else {
             checked = false
           }
