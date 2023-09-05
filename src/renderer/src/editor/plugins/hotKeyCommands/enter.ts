@@ -46,12 +46,15 @@ export class EnterKey {
             if (Editor.hasPath(this.editor, Path.next(end.path))) {
               Transforms.move(this.editor, {unit: 'offset'})
             } else {
-              Transforms.transform(this.editor, {
-                type: 'insert_node',
-                path: Path.next(end.path),
-                node: {text: ''}
-              })
-              Transforms.move(this.editor, {unit: 'offset'})
+              const parent = Editor.parent(this.editor, node[1])
+              if (parent[0].type !== 'list-item' || Path.hasPrevious(path)) {
+                Transforms.transform(this.editor, {
+                  type: 'insert_node',
+                  path: Path.next(end.path),
+                  node: {text: ''}
+                })
+                Transforms.move(this.editor, {unit: 'offset'})
+              }
             }
           }
           const str = Node.string(el)
@@ -254,7 +257,7 @@ export class EnterKey {
         e.preventDefault()
         let checked:boolean | undefined =  undefined
         if (typeof parent[0].checked === 'boolean') {
-          if (sel.anchor.offset === 0) {
+          if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
             checked = parent[0].checked
             Transforms.setNodes(this.editor, {
               checked: false
@@ -263,9 +266,10 @@ export class EnterKey {
             checked = false
           }
         }
+        const text = Point.equals(Editor.end(this.editor, node[1]), sel.focus) ? [{text: ''}] : EditorUtils.cutText(this.editor, sel.focus)
         Transforms.insertNodes(this.editor, {
           type: 'list-item',
-          children: [{type: 'paragraph', children: EditorUtils.cutText(this.editor, sel.focus)}],
+          children: [{type: 'paragraph', children: text}],
           checked
         }, {at: Path.next(parent[1])})
         if (!Point.equals(sel.anchor, Editor.end(this.editor, node[1]))) {

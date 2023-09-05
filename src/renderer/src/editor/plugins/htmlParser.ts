@@ -160,6 +160,7 @@ const processFragment = (fragment: any[]) => {
 export const htmlParser = (editor: Editor, html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html').body
   const inner = !!parsed.querySelector('[data-be]')
+  if (inner) return false
   parsed.querySelectorAll('span.select-none').forEach(el => {
     el.remove()
   })
@@ -206,7 +207,7 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
-  if (inner && !parsed.querySelector('.m-list-item.task')) return false
+  if (!parsed.querySelector('.m-list-item.task')) return false
   Transforms.insertFragment(editor, fragment)
   return true
 }
