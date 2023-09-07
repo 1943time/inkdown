@@ -2,9 +2,7 @@ import {action, makeAutoObservable, runInAction} from 'mobx'
 import {MainApi} from '../api/main'
 import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
-import {Subject} from 'rxjs'
 
-export const login$ = new Subject<boolean>()
 class ConfigStore {
   visible = false
   config = {
@@ -20,8 +18,7 @@ class ConfigStore {
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
     mas: false,
-    dragToSort: true,
-    token: ''
+    dragToSort: true
   }
   locale = 'en'
   timer = 0
@@ -30,9 +27,6 @@ class ConfigStore {
   }
   get mas() {
     return process.mas || false
-  }
-  get isLogin() {
-    return !!this.config.token
   }
   constructor() {
     makeAutoObservable(this, {
@@ -88,7 +82,6 @@ class ConfigStore {
   }
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
-    if (key === 'token' && value) login$.next(true)
     ipcRenderer.send('setStore', `config.${key}`, value)
   }
   initial() {
@@ -100,7 +93,6 @@ class ConfigStore {
           ...this.config,
           ...res
         }
-        if (this.config.token) login$.next(true)
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         if (this.config.dark) {
           mermaid.initialize({

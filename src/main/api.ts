@@ -3,14 +3,12 @@ import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {store} from './store'
-import {createReadStream, writeFileSync} from 'fs'
+import {writeFileSync} from 'fs'
 // import icon from '../../resources/icon.png?asset'
-import FormData from "form-data"
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
-import fetch from 'node-fetch'
-import {openAuth} from './auth'
+import {openAuth, listener} from './auth'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
@@ -41,6 +39,7 @@ export const isDark = (config?: any) => {
   return dark
 }
 export const registerApi = () => {
+  listener(store)
   ipcMain.on('to-worker', (e, ...args:any[]) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.getBrowserView()?.webContents.send('task', ...args)
@@ -85,7 +84,6 @@ export const registerApi = () => {
       showCharactersCount: typeof config.showCharactersCount === 'boolean' ? config.showCharactersCount : true,
       mas: process.mas || false,
       headingMarkLine: typeof config.headingMarkLine === 'boolean' ? config.headingMarkLine : true,
-      token: config.token,
       dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
     }
   })
@@ -146,27 +144,6 @@ export const registerApi = () => {
 
   ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
-  })
-
-  ipcMain.handle('upload', (e, data: {
-    url: string
-    data: Record<string, string>
-  }) => {
-    const config:any = store.get('config') || {}
-    const form = new FormData()
-    for (let [key, v] of Object.entries(data.data)) {
-      if (key === 'file') {
-        form.append('file', createReadStream(v))
-      } else {
-        form.append(key, v)
-      }
-    }
-    return fetch(data.url, {
-      method: 'post', body: form,
-      headers: {
-        Authorization: `Bearer ${config.token}`
-      }
-    }).then(res => res.json())
   })
 
   ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {

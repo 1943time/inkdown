@@ -34,6 +34,10 @@ export class TreeStore {
   fold = true
   watcher: Watcher
   externalChange$ = new Subject<string>()
+  moveFile$ = new Subject<{
+    from: string
+    to: string
+  }>()
   get files() {
     if (!this.root) return []
     let files: IFileItem[] = []
@@ -369,6 +373,10 @@ export class TreeStore {
       if (this.dragNode === this.currentTab.current) {
         MainApi.setWin({openFile: this.dragNode.filePath})
       }
+      this.moveFile$.next({
+        from: fromPath,
+        to: join(toPath, basename(fromPath))
+      })
     }
   }
 
@@ -408,6 +416,10 @@ export class TreeStore {
         let newPath = join(path, '..', file.filename)
         if (!file.folder && file.ext) newPath += `.${file.ext}`
         renameSync(path, newPath)
+        this.moveFile$.next({
+          from: path,
+          to: newPath
+        })
         file.mode = undefined
       }
     }

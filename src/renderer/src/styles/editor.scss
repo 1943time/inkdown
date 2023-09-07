@@ -160,7 +160,7 @@ a {
   font-size: 0.9em;
 }
 .t-handle {
-  @apply w-5 h-5 cursor-default duration-300 hover:bg-gray-600/30 rounded-sm flex items-center justify-center;
+  @apply w-5 h-5 cursor-default duration-200 dark:hover:bg-gray-300/20 hover:bg-gray-300/40 rounded-sm flex items-center justify-center;
 }
 
 blockquote {

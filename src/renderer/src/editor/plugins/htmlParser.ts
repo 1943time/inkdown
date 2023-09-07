@@ -160,18 +160,21 @@ const processFragment = (fragment: any[]) => {
 export const htmlParser = (editor: Editor, html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html').body
   const inner = !!parsed.querySelector('[data-be]')
-  if (inner) return false
   parsed.querySelectorAll('span.select-none').forEach(el => {
     el.remove()
   })
   const sel = editor.selection
   let fragment = processFragment(deserialize(parsed))
   if (!fragment?.length) return
+  let [node] = Editor.nodes<Element>(editor, {
+    match: n => Element.isElement(n)
+  })
   if (sel) {
-    const [node] = Editor.nodes<Element>(editor, {
+    const [n] = Editor.nodes<Element>(editor, {
       match: n => Element.isElement(n) && ['code', 'table-cell', 'head', 'list-item'].includes(n.type),
       at: Range.isCollapsed(sel) ? sel.anchor.path : Range.start(sel).path
     })
+    if (n) node = n
     if (node) {
       if (node[0].type === 'code') {
         let text = parserCodeText(parsed)
@@ -207,6 +210,7 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
+  if (inner && !['code', 'code-line', 'table-cell'].includes(node?.[0].type)) return false
   Transforms.insertFragment(editor, fragment)
   return true
 }

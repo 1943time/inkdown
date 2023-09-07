@@ -10,7 +10,7 @@ import {ExtendOptions} from 'got/dist/source/types'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
 import {toUnix} from 'upath'
-
+import mime from 'mime-types'
 let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
@@ -26,6 +26,9 @@ const api = {
   },
   toUnix(path: string) {
     return toUnix(path)
+  },
+  mimeType(file: string) {
+    return mime.lookup(file) || ''
   },
   fs,
   watch: async (path: string, cb: (event: 'add'| 'addDir' | 'change'| 'unlink'| 'unlinkDir', path: string) => void) => {

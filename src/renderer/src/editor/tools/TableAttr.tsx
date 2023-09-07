@@ -339,7 +339,7 @@ export const TableAttr = observer(() => {
       onMouseDown={e => {
         e.preventDefault()
       }}
-      className={`${state().visible ? '' : 'hidden'} dark:bg-zinc-900/80 bg-gray-200/70
+      className={`${state().visible ? '' : 'hidden'} dark:bg-zinc-900/70 bg-white/70 border-t border-l border-r border-gray-100 dark:border-gray-100/10
         text-sm absolute z-10 items-center flex justify-between dark:text-gray-300 text-gray-500 h-[24px] w-full px-2 rounded-tr rounded-tl select-none
       `}
     >
@@ -385,32 +385,32 @@ export const TableAttr = observer(() => {
             </div>
           )}
           trigger="click">
-          <Tooltip placement={'top'} title={'调整表格'} mouseEnterDelay={.5}>
+          <Tooltip placement={'top'} title={'Scale ranks'} mouseEnterDelay={.5}>
             <div className={'t-handle'}>
               <AppstoreAddOutlined/>
             </div>
           </Tooltip>
         </Popover>
-        <Tooltip placement={'top'} title={'左对齐'} mouseEnterDelay={.5}>
+        <Tooltip placement={'top'} title={'align left'} mouseEnterDelay={.5}>
           <div
             onClick={(e) => setAligns('left')}
-            className={`${state().align === 'left' ? 'bg-gray-600/50' : ''} t-handle`}
+            className={`${state().align === 'left' ? 'bg-gray-300/30 dark:bg-gray-300/10' : ''} t-handle`}
           >
             <AlignLeftOutlined/>
           </div>
         </Tooltip>
-        <Tooltip placement={'top'} title={'居中对齐'} mouseEnterDelay={.5}>
+        <Tooltip placement={'top'} title={'align center'} mouseEnterDelay={.5}>
           <div
             onClick={() => setAligns('center')}
-            className={`${state().align === 'center' ? 'bg-gray-600/50' : ''} t-handle`}
+            className={`${state().align === 'center' ? 'bg-gray-300/30 dark:bg-gray-300/10' : ''} t-handle`}
           >
             <AlignCenterOutlined/>
           </div>
         </Tooltip>
-        <Tooltip placement={'top'} title={'右对齐'} mouseEnterDelay={.5}>
+        <Tooltip placement={'top'} title={'align right'} mouseEnterDelay={.5}>
           <div
             onClick={() => setAligns('right')}
-            className={`${state().align === 'right' ? 'bg-gray-600/50' : ''} t-handle`}
+            className={`${state().align === 'right' ? 'bg-gray-300/30 dark:bg-gray-300/10' : ''} t-handle`}
           >
             <AlignRightOutlined/>
           </div>
