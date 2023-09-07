@@ -73,7 +73,7 @@ export class EditorUtils {
       mode: 'highest',
       reverse: true
     })
-    if (!insertNodes) insertNodes = [{type: 'paragraph', children: [{text: ''}]}]
+    if (!insertNodes) insertNodes = [EditorUtils.p]
     for (let n of Array.from(nodes)) {
       Transforms.delete(editor, {at: n[1]})
     }

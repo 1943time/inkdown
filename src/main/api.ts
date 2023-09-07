@@ -119,6 +119,12 @@ export const registerApi = () => {
     window?.webContents.send(task, ...args)
   })
 
+  ipcMain.on('send-to-all', (e, task: string, ...args) => {
+    const windows = BrowserWindow.getAllWindows()
+    for (let w of windows) {
+      w.webContents?.send(task, ...args)
+    }
+  })
   ipcMain.on('close-window', (e) => {
     BrowserWindow.fromWebContents(e.sender)?.close()
   })

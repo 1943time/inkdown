@@ -45,6 +45,9 @@ export const MainApi = {
   sendToSelf(task: string, ...args: any[]) {
     ipcRenderer.send('send-to-self', task, ...args)
   },
+  sendToAll(task: string, ...args: any[]) {
+    ipcRenderer.send('send-to-all', task, ...args)
+  },
   createNewFile(options?: {
     defaultPath: string
   }) {

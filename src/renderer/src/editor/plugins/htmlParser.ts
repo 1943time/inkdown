@@ -1,5 +1,7 @@
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
+import {EditorUtils} from '../utils/editorUtils'
+import {BackspaceKey} from './hotKeyCommands/backspace'
 
 const ELEMENT_TAGS = {
   BLOCKQUOTE: () => ({type: 'blockquote'}),
@@ -170,6 +172,18 @@ export const htmlParser = (editor: Editor, html: string) => {
     match: n => Element.isElement(n)
   })
   if (sel) {
+    if (!Range.isCollapsed(sel)) {
+      const back = new BackspaceKey(editor)
+      back.range()
+      const start = Range.start(sel)
+      Transforms.select(editor, Editor.start(editor, start.path))
+      setTimeout(() => {
+        const node = Editor.node(editor, [0])
+        if (editor.children.length > 1 && node[0].type === 'paragraph' && !Node.string(node[0])) {
+          Transforms.delete(editor, {at: [0]})
+        }
+      })
+    }
     const [n] = Editor.nodes<Element>(editor, {
       match: n => Element.isElement(n) && ['code', 'table-cell', 'head', 'list-item'].includes(n.type),
       at: Range.isCollapsed(sel) ? sel.anchor.path : Range.start(sel).path
