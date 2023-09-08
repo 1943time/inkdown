@@ -1,5 +1,7 @@
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
+import {EditorUtils} from '../utils/editorUtils'
+import {BackspaceKey} from './hotKeyCommands/backspace'
 
 const ELEMENT_TAGS = {
   BLOCKQUOTE: () => ({type: 'blockquote'}),
@@ -166,11 +168,27 @@ export const htmlParser = (editor: Editor, html: string) => {
   const sel = editor.selection
   let fragment = processFragment(deserialize(parsed))
   if (!fragment?.length) return
+  let [node] = Editor.nodes<Element>(editor, {
+    match: n => Element.isElement(n)
+  })
   if (sel) {
-    const [node] = Editor.nodes<Element>(editor, {
+    if (!Range.isCollapsed(sel)) {
+      const back = new BackspaceKey(editor)
+      back.range()
+      const start = Range.start(sel)
+      Transforms.select(editor, Editor.start(editor, start.path))
+      setTimeout(() => {
+        const node = Editor.node(editor, [0])
+        if (editor.children.length > 1 && node[0].type === 'paragraph' && !Node.string(node[0])) {
+          Transforms.delete(editor, {at: [0]})
+        }
+      })
+    }
+    const [n] = Editor.nodes<Element>(editor, {
       match: n => Element.isElement(n) && ['code', 'table-cell', 'head', 'list-item'].includes(n.type),
       at: Range.isCollapsed(sel) ? sel.anchor.path : Range.start(sel).path
     })
+    if (n) node = n
     if (node) {
       if (node[0].type === 'code') {
         let text = parserCodeText(parsed)
@@ -206,7 +224,7 @@ export const htmlParser = (editor: Editor, html: string) => {
       }
     }
   }
-  if (inner && !parsed.querySelector('.m-list-item.task')) return false
+  if (inner && !['code', 'code-line', 'table-cell'].includes(node?.[0].type)) return false
   Transforms.insertFragment(editor, fragment)
   return true
 }

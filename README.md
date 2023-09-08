@@ -22,12 +22,18 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 Freely drag to sort document elements
 ![](./docs/assets/drag.gif)
 
-[//]: # (## Share)
+## Share
 
-[//]: # (bluestone provides an optional sharing function that can automatically extract Markdown files and share them to the network, or merge multiple Markdown documents into a book at the same time [more]&#40;https://pb.bluemd.me/official/book/docs/share&#41;)
+Bluestone provides non-intrusive optional sharing functions that can automatically extract Markdown files and share them to the network,
+or merge multiple Markdown documents into a book at the same time.
 
-[//]: # ()
-[//]: # (![]&#40;./docs/assets/share.gif&#41;)
+Due to the data interaction involved,
+the network function part is not yet open source,
+and the sharing function is currently only supported in the [mac store](https://apps.apple.com/us/app/bluestone-markdown/id6451391474) environment.
+[more](https://pb.bluemd.me/official/book/docs/share)
+
+
+![](./docs/assets/share.gif)
 
 ## Format
 
@@ -46,4 +52,5 @@ Links and images support file paths, usually imported files can be dragged in fr
 currently, the editor supports the following preferences
 
 ![](./docs/assets/d5.png)
+
 
