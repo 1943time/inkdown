@@ -4,7 +4,7 @@ import {CodeCtx, CodeElement, CodeLine} from './code'
 import {Blockquote} from './blockquote'
 import {List, ListItem} from './list'
 import {Head} from './head'
-import {CSSProperties, useContext, useMemo} from 'react'
+import React, {CSSProperties, useContext, useMemo} from 'react'
 import {Paragraph} from './paragraph'
 import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
 import {Media} from './media'
@@ -12,7 +12,10 @@ import {useEditorStore} from '../store'
 import {Point} from 'slate'
 import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
-
+const dragStart = (e: React.DragEvent) => {
+  e.preventDefault()
+  e.stopPropagation()
+}
 export const MElement = (props: RenderElementProps) => {
   switch (props.element.type) {
     case 'blockquote':
@@ -77,6 +80,8 @@ export const MLeaf = (props: RenderLeafProps) => {
         <span
           style={style}
           data-be={'link'}
+          draggable={false}
+          onDragStart={dragStart}
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
@@ -106,6 +111,8 @@ export const MLeaf = (props: RenderLeafProps) => {
       <span
         {...props.attributes}
         data-be={'text'}
+        draggable={false}
+        onDragStart={dragStart}
         data-fnc={leaf.fnc ? 'fnc' : undefined}
         data-fnd={leaf.fnd ? 'fnd' : undefined}
         data-fnc-name={leaf.fnc ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}

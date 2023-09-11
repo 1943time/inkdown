@@ -39,7 +39,7 @@ const parseTable = (table: Table) => {
             type: 'table-cell',
             align: aligns?.[i] || undefined,
             title: l === 0,
-            children: c.children?.length ? parserBlock(c.children) : [{text: ''}]
+            children: c.children?.length ? parserBlock(c.children, false, c) : [{text: ''}]
           }
         })
       }
@@ -51,8 +51,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   let els:(Elements | Text) [] = []
   let el:Element | null | Element[] = null
   let preNode:null | Content = null
-  let colorTag = ''
-  let colorText = ''
+  let htmlTag:{tag: string, color?: string, url?: string}[] = []
   for (let n of nodes) {
     switch (n.type) {
       case 'heading':
@@ -70,12 +69,34 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             })
           }
         } else {
-          const colorMatch = n.value.match(/<span\s+style="color:\s*(#\w+)"\s+data-be>/)
-          if (colorMatch) {
-            colorTag = colorMatch[1]
-          } else if (/^\s*<\/span>\s*$/.test(n.value)) {
-            el = {text: colorText, highColor: colorTag}
-            colorTag = ''
+          // date-be will be removed in a few versions
+          const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a).*?>/)
+          if (htmlMatch) {
+            const [str, tag] = htmlMatch
+            if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {
+              htmlTag.pop()
+            }
+            if (!str.startsWith('</')) {
+              if (tag === 'span') {
+                const color = str.match(/style="color:\s*(#\w+)"/)
+                if (color) {
+                  htmlTag.push({
+                    tag: tag,
+                    color: color[1]
+                  })
+                }
+              } else if (tag === 'a') {
+                const url = str.match(/href="([\w:.\/_\-#\\]+)"/)
+                if (url) {
+                  htmlTag.push({
+                    tag: tag,
+                    url: url[1]
+                  })
+                }
+              } else {
+                htmlTag.push({tag: tag})
+              }
+            }
           } else {
             el = {text: n.value}
           }
@@ -147,11 +168,18 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = parseTable(n)
         break
       default:
-        if (n.type === 'text' && colorTag) {
-          colorText = n.value
+        if (n.type === 'text' && htmlTag.length) {
+          el = {text: n.value}
+          for (let t of htmlTag) {
+            if (t.tag === 'code')  el.code = true
+            if (t.tag === 'i') el.italic = true
+            if (t.tag === 'b' || t.tag === 'strong') el.bold = true
+            if (t.tag === 'del') el.strikethrough = true
+            if (t.tag === 'span' && t.color) el.highColor = t.color
+            if (t.tag === 'a' && t.url) el.url = t.url
+          }
           break
-        }
-        if (['strong', 'link', 'text', 'emphasis', 'delete', 'inlineCode'].includes(n.type)) {
+        } else if (['strong', 'link', 'text', 'emphasis', 'delete', 'inlineCode'].includes(n.type)) {
           if (n.type === 'text') {
             el = {text: n.value}
           } else {

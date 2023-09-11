@@ -65,8 +65,7 @@ export class Watcher {
   }
 
   public onChange(e: 'remove' | 'update', path: string, node?: IFileItem) {
-    const base = basename(path)
-    if (path.split(sep).some(p => p.startsWith('.')) && base !== '.images') return
+    if (path.split(sep).some(p => p.startsWith('.') && p !== '.images')) return
     const nodesMap = new Map(this.store.nodes.map(n => [n.filePath, n]))
     const target = nodesMap.get(path)
     const parent = nodesMap.get(join(path, '..'))!

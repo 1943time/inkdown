@@ -40,13 +40,20 @@ class ConfigStore {
       })
     })
     window.electron.ipcRenderer.on('changeConfig',  action((e, key: any, value: any) => {
+      if (key === 'theme') {
+        this.setTheme(value, false)
+      }
       this.config[key] = value
     }))
   }
-  async setTheme(theme: typeof this.config.theme) {
+  async setTheme(theme: typeof this.config.theme, broadcast = true) {
+    if (theme === this.config.theme) return
     const dark = await MainApi.getSystemDark()
     runInAction(() => {
       this.config.theme = theme
+      if (broadcast) {
+        MainApi.sendToAll('changeConfig', 'theme', theme)
+      }
       if (theme === 'dark') {
         document.documentElement.classList.add('dark')
         this.config.dark = true

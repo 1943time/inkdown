@@ -205,7 +205,6 @@ export const FloatBar = observer(() => {
                       EditorUtils.highColor(store.editor)
                     } else {
                       EditorUtils.highColor(store.editor, localStorage.getItem('high-color') || '#10b981')
-                      EditorUtils.clearMarks(store.editor)
                     }
                   }}
                 >
@@ -255,7 +254,6 @@ export const FloatBar = observer(() => {
                   onClick={() => {
                     localStorage.setItem('high-color', c.color)
                     EditorUtils.highColor(store.editor, c.color)
-                    EditorUtils.clearMarks(store.editor, true)
                     setState({openSelectColor: false})
                     resize()
                   }}

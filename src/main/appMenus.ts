@@ -417,6 +417,12 @@ export const createAppMenus = () => {
           }
         },
         {
+          label: 'Bluestone Website',
+          click: () => {
+            shell.openExternal('https://www.bluemd.me')
+          }
+        },
+        {
           label: 'Github',
           click: () => {
             shell.openExternal('https://github.com/1943time/bluestone')

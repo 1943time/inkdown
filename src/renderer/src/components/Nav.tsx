@@ -9,7 +9,7 @@ export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
     return treeStore.getAbsolutePath(treeStore.openNote)
-  }, [treeStore.openNote])
+  }, [treeStore.openNote?.filename])
   return (
     <div
       className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
@@ -66,6 +66,7 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
+          {/*<Share/>*/}
           <Update/>
           <div
             className={'flex items-center justify-center p-1 group'}
@@ -75,6 +76,7 @@ export const Nav = observer(() => {
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
             />
           </div>
+          {/*<User/>*/}
         </div>
       </div>
     </div>

@@ -8,9 +8,19 @@ export const outputCache = new WeakMap<object, string>()
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
+
+const textHtml = (t: Text) => {
+  let str = t.text || ''
+  if (t.highColor) str = `<span style="color:${t.highColor}">${str}</span>`
+  if (t.code) str = `<code>${str}</code>`
+  if (t.italic) str = `<i>${str}</i>`
+  if (t.bold) str = `<b>${str}</b>`
+  if (t.strikethrough) str = `<del>${str}</del>`
+  if (t.url) str = `<a href="${t.url}">${str}</a>`
+  return str
+}
 const textStyle = (t: Text) => {
   if (!t.text) return ''
-  if (t.highColor) return `<span style="color:${t.highColor}" data-be>${t.text}</span>`
   let str = t.text.replace(/(?<!\\)\\/g, '\\')
   let preStr = '', afterStr = ''
   if (t.code || t.bold || t.strikethrough || t.italic) {
@@ -25,10 +35,12 @@ const textStyle = (t: Text) => {
   return `${preStr}${str}${afterStr}`
 }
 const composeText = (t: Text, parent: any[]) => {
+  if (!t.text) return ''
+  if (t.highColor) return textHtml(t)
+
   const siblings = parent[parent.length -1]?.children
   const index = siblings?.findIndex(n => n === t)
-  if (!t.text) return ''
-  let str = textStyle(t)
+  let str = textStyle(t)!
   if (t.url) {
     str = `[${str}](${encodeURI(t.url)})`
   } else if (isMix(t) && index !== -1) {
