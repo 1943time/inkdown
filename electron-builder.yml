@@ -42,13 +42,13 @@ mac:
   target:
     - target: dmg
       arch:
-#        - x64
+        - x64
         - arm64
 linux:
   target:
     - AppImage
     - deb
-  maintainer: electronjs.org
+  maintainer: bluemd.me
   category: Utility
 appImage:
 npmRebuild: false
@@ -56,8 +56,3 @@ publish:
   provider: github
   owner: '1943time'
   repo: 'bluestone'
-
-protocols:
-  name: Bluestone Markdown
-  schemes:
-    - bluestone-markdown
