@@ -8,7 +8,7 @@ import {writeFileSync} from 'fs'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
-// import {openAuth, listener} from './auth'
+import {openAuth, listener} from './auth'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
@@ -39,7 +39,7 @@ export const isDark = (config?: any) => {
   return dark
 }
 export const registerApi = () => {
-  // listener(store)
+  listener(store)
   ipcMain.on('to-worker', (e, ...args:any[]) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.getBrowserView()?.webContents.send('task', ...args)
@@ -50,9 +50,9 @@ export const registerApi = () => {
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
   })
-  // ipcMain.on('open-auth', (e, type: 'github') => {
-  //   openAuth(type)
-  // })
+  ipcMain.on('open-auth', (e, type: 'github') => {
+    openAuth(type)
+  })
   ipcMain.handle('get-env', () => {
     return {
       isPackaged: app.isPackaged,

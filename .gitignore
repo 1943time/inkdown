@@ -15,4 +15,3 @@ build/entitlements.mas.plist
 build/entitlements.mas.loginhelper.plist
 src/renderer/src/share
 mas-builder.yml
-src/main/auth.ts

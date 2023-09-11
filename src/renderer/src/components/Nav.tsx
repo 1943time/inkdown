@@ -5,6 +5,8 @@ import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
 import {isWindows} from '../utils'
+import {Share} from '../share/Share'
+import {User} from '../share/User'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
@@ -66,7 +68,7 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
-          {/*<Share/>*/}
+          <Share/>
           <Update/>
           <div
             className={'flex items-center justify-center p-1 group'}
@@ -76,7 +78,7 @@ export const Nav = observer(() => {
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
             />
           </div>
-          {/*<User/>*/}
+          <User/>
         </div>
       </div>
     </div>
