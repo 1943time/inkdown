@@ -28,8 +28,7 @@ Bluestone provides non-intrusive optional sharing functions that can automatical
 or merge multiple Markdown documents into a book at the same time.
 
 Due to the data interaction involved,
-the network function part is not yet open source,
-and the sharing function is currently only supported in the [mac store](https://apps.apple.com/us/app/bluestone-markdown/id6451391474) environment.
+the network function part is not yet open source
 [more](https://pb.bluemd.me/official/book/docs/share)
 
 
