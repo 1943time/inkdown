@@ -18,6 +18,7 @@ export const cacheTextNode = new WeakMap<object, Range[]>
 
 export const cacheLine = new WeakMap<object, Range[]>()
 
+const highlightNodes = new Set(['paragraph', 'table-cell', 'code-line', 'head', 'inline-katex'])
 let clearTimer = 0
 
 export const clearCodeCache = (node: any) => {
@@ -32,10 +33,38 @@ export const clearCodeCache = (node: any) => {
 }
 export function useHighlight(store?: EditorStore) {
   return useCallback(([node, path]: NodeEntry):Range[] => {
-    if (Element.isElement(node) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
+    if (Element.isElement(node) && highlightNodes.has(node.type)) {
       const ranges = store?.highlightCache.get(node) || []
       if (node.type === 'code-line') {
         ranges.push(...cacheLine.get(node) || [])
+      }
+      if (node.type === 'inline-katex') {
+        if (cacheTextNode.get(node)) {
+          ranges.push(...cacheTextNode.get(node)!)
+        } else {
+          const code = Node.string(node)
+          if (code) {
+            let textRanges: any[] = []
+            const tokens = window.api.highlightCode(code, 'latex')
+            let start = 0
+            const lineToken = tokens[0]
+            for (let t of lineToken) {
+              const length = t.content.length
+              if (!length) {
+                continue
+              }
+              const end = start + length
+              textRanges.push({
+                anchor: { path, offset: start },
+                focus: { path, offset: end },
+                color: t.color
+              })
+              start = end
+            }
+            cacheTextNode.set(node, textRanges)
+            ranges.push(...textRanges)
+          }
+        }
       }
       // footnote
       if (['paragraph', 'table-cell'].includes(node.type)) {
@@ -95,7 +124,7 @@ export const SetNodeToDecorations = observer(() => {
 
     for (let c of codes) {
       if (c.code.length > 20000) continue
-      const lang = c.node[0].language || ''
+      const lang = c.node[0].language?.toLowerCase() || ''
       if (!window.api.langSet.has(lang)) continue
       const el = c.node[0]
       let handle = codeCache.get(el)
@@ -119,7 +148,6 @@ export const SetNodeToDecorations = observer(() => {
               continue
             }
             const end = start + length
-
             const path = [...c.node[1], i, 0]
             ranges.push({
               anchor: { path, offset: start },

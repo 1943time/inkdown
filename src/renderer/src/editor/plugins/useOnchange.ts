@@ -6,6 +6,7 @@ import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
 export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>}>()
+const floatBarIgnoreNode = new Set(['code-line', 'head', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   const currentType = useRef('')
@@ -27,7 +28,7 @@ export function useOnchange(editor: Editor, store: EditorStore) {
         currentType.current = node[0].type
         MainApi.setEditorContext(node[0].type, EditorUtils.isTop(editor, node[1]))
       }
-      if (sel && node[0].type !== 'code-line' && node[0].type !== 'head' &&
+      if (sel && !floatBarIgnoreNode.has(node[0].type) &&
         !Range.isCollapsed(sel) &&
         Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path))
       ) {

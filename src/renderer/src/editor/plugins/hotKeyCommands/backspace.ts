@@ -36,7 +36,7 @@ export class BackspaceKey {
             language: n[0].language,
             children: [{type: 'code-line', children: [{text: ''}]}],
             katex: n[0].katex
-          }, {at: n[1]})
+          }, {at: n[1], select: true})
         }
         // 如果是首个元素 替换paragraph
       } else if (n[0].type === 'table') {
@@ -76,7 +76,7 @@ export class BackspaceKey {
       }
     }
     if (Editor.hasPath(this.editor, start.path)) {
-      Transforms.select(this.editor, Editor.end(this.editor, start.path))
+      return false
     } else if (Path.hasPrevious(start.path)) {
       Transforms.select(this.editor, Editor.end(this.editor, Path.previous(start.path)))
     } else {
@@ -107,6 +107,10 @@ export class BackspaceKey {
       match: n => Element.isElement(n)
     }))
     const [node] = nodes
+    if (node[0].type === 'inline-katex' && !Node.string(node[0])) {
+      Transforms.delete(this.editor, {at: Path.parent(sel.anchor.path)})
+      return true
+    }
     this.clearStyle(sel)
     const [el, path] = node
     if (el.type === 'head') {

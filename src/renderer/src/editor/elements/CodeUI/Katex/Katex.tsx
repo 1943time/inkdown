@@ -6,7 +6,6 @@ import {useGetSetState} from 'react-use'
 import katex from 'katex'
 import {ReactEditor, useSlateStatic} from 'slate-react'
 import {observer} from 'mobx-react-lite'
-import {configStore} from '../../../../store/config'
 
 export const Katex = observer((props: {
   el: CodeNode
@@ -49,14 +48,14 @@ export const Katex = observer((props: {
   }, [props.el.children])
   return (
     <div
-      className={'mb-3 cursor-default select-none text-center bg-gray-500/5 py-3 rounded'}
+      className={'mb-3 cursor-default select-none text-center bg-gray-500/5 py-4 rounded'}
       onClick={() => {
         Transforms.select(editor, Editor.start(editor, ReactEditor.findPath(editor, props.el)))
       }}
       contentEditable={false}>
       <div ref={divRef} className={`${!state().code.trim() ? 'hidden' : ''} katex-container`}/>
       {!state().code.trim() &&
-        <div className={'text-center text-gray-500'}>{configStore.isZh ? '公式' : 'Formula'}</div>
+        <div className={'text-center text-gray-500'}>Formula</div>
       }
     </div>
   )

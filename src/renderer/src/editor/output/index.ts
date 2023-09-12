@@ -5,6 +5,7 @@ import {EditorUtils} from '../utils/editorUtils'
 const space = '  '
 
 export const outputCache = new WeakMap<object, string>()
+const inlineNode = new Set(['media', 'inline-katex'])
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
@@ -146,6 +147,10 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
     case 'media':
       str += `![${node.alt}](${encodeURI(node.url)})`
       break
+    case 'inline-katex':
+      const inlineCode = Node.string(node)
+      if (inlineCode) str += `$${inlineCode}$`
+      break
     case 'list':
       str += toMarkdown(node.children, preString, newParent)
       break
@@ -214,7 +219,7 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[]) => {
       }
     } else {
       str += parserNode(node, preString, parent)
-      if (node.type && node.type !== 'media' && i !== tree.length - 1) {
+      if (node.type && !inlineNode.has(node.type) && i !== tree.length - 1) {
         str += '\n'
         if (p.type !== 'list') {
           str += '\n'

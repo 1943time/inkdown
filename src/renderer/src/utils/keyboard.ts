@@ -160,6 +160,12 @@ export class MenuKey {
         case 'insertKatex':
           insertCode(editor, node, true)
           break
+        case 'insertInlineKatex':
+          Transforms.insertNodes(editor, {
+            type: 'inline-katex',
+            children: [{text: ''}]
+          }, {select: true})
+          break
         case 'insertOrderedList':
           formatList(editor, node, task)
           break

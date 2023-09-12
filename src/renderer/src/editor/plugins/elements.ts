@@ -61,6 +61,25 @@ export const MdElements: Record<string, MdNode> = {
       Transforms.select(editor, [...path, 1, 0, 0])
     }
   },
+  inlineKatex: {
+    reg: /\$\s+\$$/,
+    matchKey: '$',
+    checkAllow: ctx => {
+      return ['paragraph', 'table-cell'].includes(ctx.node[0].type)
+    },
+    run: ({editor, path, match, sel}) => {
+      Transforms.select(editor, {
+        anchor: {path: sel.anchor.path, offset: sel.anchor.offset - match[0].length + 1},
+        focus: {path: sel.anchor.path, offset: sel.anchor.offset}
+      })
+      Transforms.insertNodes(editor, {
+        type: 'inline-katex',
+        children: [{text: ''}],
+        select: true
+      })
+      return true
+    }
+  },
   code: {
     reg: /^\s*```(\w{1,15})?\s*$/,
     run: ({editor, path, match}) => {

@@ -28,7 +28,21 @@ export const useKeyboard = (editor: Editor) => {
       }
       match.run(e)
       if (isHotkey('mod+backspace', e)) {
-        EditorUtils.clearMarks(editor)
+        const [inlineKatex] = Editor.nodes<any>(editor, {
+          match: n => Element.isElement(n) && n.type === 'inline-katex'
+        })
+        if (inlineKatex && Node.string(inlineKatex[0])) {
+          e.preventDefault()
+          Transforms.delete(editor, {
+            at: {
+              anchor: Editor.start(editor, inlineKatex[1]),
+              focus: Editor.end(editor, inlineKatex[1])
+            },
+            unit: 'character'
+          })
+        } else {
+          EditorUtils.clearMarks(editor)
+        }
       }
       if (e.key.toLowerCase().startsWith('arrow')) {
         keyArrow(editor, e)

@@ -1,6 +1,6 @@
-import {ReactEditor, useSelected} from 'slate-react'
+import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
-import React, {createContext, useCallback, useContext, useEffect, useMemo, useRef} from 'react'
+import React, {createContext, useCallback, useContext, useMemo} from 'react'
 import {AutoComplete, Tooltip} from 'antd'
 import {useMEditor} from '../../hooks/editor'
 import {CodeLineNode, CodeNode, ElementProps} from '../../el'
@@ -25,25 +25,26 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
   const [state, setState] = useGetSetState({
-    lang: props.element.language,
+    lang: props.element.language?.toLowerCase() || '',
     editable: false,
     options: langOptions,
-    hide: props.element.katex || props.element.render || props.element.language === 'mermaid'
+    hide: props.element.katex || props.element.render || props.element.language?.toLowerCase() === 'mermaid'
   })
 
   const html = useMemo(() => {
     if (store.webview) {
-      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), props.element.language || '')
+      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), state().lang || '')
       html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
       return html
     }
     return ''
-  }, [store])
+  }, [store, state().lang])
+
   const setLanguage = useCallback(() => {
     setState({editable: false})
     props.element.children.forEach(l => cacheLine.delete(l))
     update({language: state().lang})
-  }, [props.element, props.element.children])
+  }, [props.element, props.element.children, state().lang])
 
   const child = useMemo(() => {
     return (
@@ -62,7 +63,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     }
   }, [props.element])
   return (
-    <CodeCtx.Provider value={{lang: props.element.language || '', code: true}}>
+    <CodeCtx.Provider value={{lang: state().lang || '', code: true}}>
       <div
         {...props.attributes}
         data-be={'code'}
@@ -132,14 +133,14 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
               paddingLeft: configStore.config.codeLineNumber ? 48 : 24,
               paddingRight: 24
             }}
-            data-bl-lang={props.element.language}
+            data-bl-lang={state().lang}
             dangerouslySetInnerHTML={{__html: html}}
           >
           </pre> : (
             <pre
               data-bl-type={'code'}
               className={'text-gray-200'}
-              data-bl-lang={props.element.language}
+              data-bl-lang={state().lang}
             >
               {child}
             </pre>

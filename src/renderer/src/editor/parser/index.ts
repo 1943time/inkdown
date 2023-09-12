@@ -5,12 +5,12 @@ import remarkMath from 'remark-math'
 import {Element, Node} from 'slate'
 import fs from 'fs'
 import {Content, Table} from 'mdast'
-import {CustomLeaf, Elements, MediaNode, TableNode} from '../../el'
+import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../el'
 
 const parser = unified()
   .use(remarkParse)
   .use(remarkGfm)
-  .use(remarkMath, {singleDollarTextMath: false})
+  .use(remarkMath, {singleDollarTextMath: true})
 
 const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
   let leafs: CustomLeaf[] = []
@@ -104,6 +104,9 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       case 'image':
         el = {type: 'media', children: [{text: ''}], url: decodeURIComponent(n.url), alt: n.alt} as MediaNode
+        break
+      case 'inlineMath':
+        el = {type: 'inline-katex', children: [{text: n.value}]} as InlineKatexNode
         break
       case 'list':
         el = {type: 'list', order: n.ordered, children: parserBlock(n.children, false, n)}
@@ -217,6 +220,7 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
+    console.log('parse', root)
     const schema = parserBlock(root.children, true)
     return {schema: schema, nodes: root.children}
   } catch (e) {

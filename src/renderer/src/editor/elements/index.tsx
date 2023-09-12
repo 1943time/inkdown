@@ -12,6 +12,7 @@ import {useEditorStore} from '../store'
 import {Point} from 'slate'
 import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
+import {InlineKatex} from './CodeUI/Katex/InlineKatex'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -50,6 +51,8 @@ export const MElement = (props: RenderElementProps) => {
       return <TableCell {...props}>{props.children}</TableCell>
     case 'media':
       return <Media {...props}/>
+    case 'inline-katex':
+      return <InlineKatex {...props}/>
     default:
       return <Paragraph {...props}/>
   }

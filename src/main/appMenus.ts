@@ -44,7 +44,6 @@ export const createAppMenus = () => {
     titleDecrease: 'Decrease Heading Level',
     insertTable: 'Insert Table',
     code: 'Code Fences',
-    katex: 'Math Block',
     orderedList: 'Ordered List',
     unorderedList: 'Unordered List',
     orderedTaskList: 'Ordered Task List',
@@ -246,11 +245,24 @@ export const createAppMenus = () => {
           enabled: false
         },
         {
-          label: menusLabel.katex,
-          id: 'insertKatex',
-          accelerator: `${cmd}+Alt+t`,
-          click: task('insertKatex'),
-          enabled: false
+          label: 'Formula',
+          id: 'formula',
+          submenu: [
+            {
+              label: 'Formula Block',
+              id: 'insertKatex',
+              accelerator: `${cmd}+k`,
+              click: task('insertKatex'),
+              enabled: false
+            },
+            {
+              label: 'Inline Formula',
+              id: 'insertInlineKatex',
+              accelerator: `${cmd}+Alt+k`,
+              click: task('insertInlineKatex'),
+              enabled: false
+            }
+          ]
         },
         {type: 'separator'},
         {
@@ -464,6 +476,10 @@ export const createAppMenus = () => {
 
   Menu.setApplicationMenu(instance)
   ipcMain.on('changeContext', (e, ctx: string, isTop: boolean) => {
+    const katex = instance.getMenuItemById('insertKatex')!
+    const inlineKatex = instance.getMenuItemById('insertInlineKatex')!
+    katex.enabled = ctx === 'paragraph'
+    inlineKatex.enabled = ['table-cell', 'paragraph'].includes(ctx)
     switch (ctx) {
       case 'table-cell':
         setParagraph(false)
