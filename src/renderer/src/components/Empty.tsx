@@ -61,8 +61,8 @@ export const Empty = observer(() => {
           >
             <FileAddOutlined/>
             <span className={'ml-2'}>
-            {configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file'}
-          </span>
+              {configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file'}
+            </span>
           </div>
           <div
             className={'cursor-default hover:text-sky-400 duration-200'}

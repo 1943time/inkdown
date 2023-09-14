@@ -42,6 +42,9 @@ a {
   overflow: hidden;
   position: relative;
   line-height: 1.625em;
+  .link{
+    text-decoration: underline;
+  }
   .mermaid-container{
     @apply mb-3 cursor-default select-none bg-gray-500/5 py-3 rounded flex justify-center;
   }

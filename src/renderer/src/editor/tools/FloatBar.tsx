@@ -8,7 +8,7 @@ import {
   ClearOutlined, HighlightOutlined,
   ItalicOutlined,
   LinkOutlined,
-  StrikethroughOutlined
+  StrikethroughOutlined, UnderlineOutlined
 } from '@ant-design/icons'
 import {BaseRange, Editor, NodeEntry, Range, Text, Transforms} from 'slate'
 import {Input} from 'antd'
@@ -26,10 +26,10 @@ const tools = [
 const colors = [
   {color: 'rgba(16,185,129,1)'},
   {color: 'rgba(245,158,11,1)'},
-  {color: 'rgba(59,130,246, 1)'},
+  {color: 'rgba(59,130,246,1)'},
   {color: 'rgba(156,163,175,.8)'},
-  {color: 'rgba(99, 102, 241, 1)'},
-  {color: 'rgba(244, 63, 94, 1)'}
+  {color: 'rgba(99,102, 241,1)'},
+  {color: 'rgba(244,63,94,1)'}
 ]
 export const FloatBar = observer(() => {
   const store = useEditorStore()

@@ -38,6 +38,14 @@ export const Home = observer(() => {
         }
       })
     }
+    const openFile = (e: any) => {
+      MainApi.openFile().then(res => {
+        if (res.filePaths.length) {
+          treeStore.open(res.filePaths[0])
+          window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
+        }
+      })
+    }
 
     const create = (e: any) => {
       MainApi.createNewFile({
@@ -63,12 +71,14 @@ export const Home = observer(() => {
     }
     initial()
     window.electron.ipcRenderer.on('open', open)
+    window.electron.ipcRenderer.on('open-file', openFile)
     window.electron.ipcRenderer.on('create', create)
     window.electron.ipcRenderer.on('call-print-pdf', printPdf)
     window.electron.ipcRenderer.on('call-print-html', printHtml)
     window.electron.ipcRenderer.on('clear-recent', clearRecent)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
+      window.electron.ipcRenderer.removeListener('open-file', openFile)
       window.electron.ipcRenderer.removeListener('create', create)
       window.electron.ipcRenderer.removeListener('call-print-pdf', printPdf)
       window.electron.ipcRenderer.removeListener('call-print-html', printHtml)

@@ -7,6 +7,7 @@ import {MatchKey} from './hotKeyCommands/match'
 import {keyArrow} from './hotKeyCommands/arrow'
 import {EditorUtils} from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
+import {MainApi} from '../../api/main'
 export const useKeyboard = (editor: Editor) => {
   return useMemo(() => {
     const tab = new TabKey(editor)
@@ -14,6 +15,15 @@ export const useKeyboard = (editor: Editor) => {
     const enter = new EnterKey(editor, backspace)
     const match = new MatchKey(editor)
     return (e: React.KeyboardEvent) => {
+      if (isHotkey('mod+shift+v', e)) {
+        e.preventDefault()
+        return MainApi.sendToSelf('key-task', 'paste-plain-text')
+      }
+      if (isHotkey('mod+alt+v', e) || isHotkey('mod+opt+v', e)) {
+        e.preventDefault()
+        return MainApi.sendToSelf('key-task', 'paste-markdown-code')
+      }
+
       if (isHotkey('mod+a', e) && editor.selection) {
         const [code] = Editor.nodes(editor, {
           match: n => Element.isElement(n) && n.type === 'code'

@@ -1,4 +1,4 @@
-import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
+import {Menu, app, ipcMain, BrowserWindow, shell, dialog, clipboard} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'
 import {is} from '@electron-toolkit/utils'
@@ -103,7 +103,6 @@ export const createAppMenus = () => {
     {
       id: 'open',
       label: menusLabel.open,
-      accelerator: `${cmd}+option+o`,
       click: (menu, win) => {
         win?.webContents.send('open')
       }
@@ -124,8 +123,14 @@ export const createAppMenus = () => {
   ] : [
     {
       id: 'open',
-      label: menusLabel.open,
-      accelerator: `${cmd}+option+o`,
+      label: 'Open File',
+      click: (menu, win) => {
+        win?.webContents.send('open-file')
+      }
+    },
+    {
+      id: 'open',
+      label: 'Open Folder',
       click: (menu, win) => {
         win?.webContents.send('open')
       }
@@ -178,7 +183,21 @@ export const createAppMenus = () => {
       }
     ]
   })
-
+  const delRange = isMac ? [
+    {
+      label: 'Delete Range',
+      submenu: [
+        {
+          label: 'Delete Line',
+          accelerator: `${cmd}+Backspace`
+        },
+        {
+          label: 'Delete Word',
+          accelerator: `Alt+Backspace`
+        }
+      ]
+    }
+  ] : []
   menus.push({
     label: menusLabel.edit,
     id: 'edit',
@@ -198,7 +217,26 @@ export const createAppMenus = () => {
       {role: 'paste'},
       {role: 'cut'},
       {role: 'delete'},
-      {role: 'selectAll'}
+      ...delRange,
+      {role: 'selectAll'},
+      {type: 'separator'},
+      {
+        id: 'break-line',
+        accelerator: `${cmd}+Enter`,
+        label: 'Line Break Within Paragraph',
+        click: task('key-break')
+      },
+      {type: 'separator'},
+      {
+        accelerator: `${cmd}+shift+v`,
+        label: 'Paste as Plain Text',
+        click: task('paste-plain-text')
+      },
+      {
+        accelerator: `${cmd}+alt+v`,
+        label: 'Paste Markdown Code',
+        click: task('paste-markdown-code')
+      }
     ]
   })
   menus.push(
@@ -479,6 +517,7 @@ export const createAppMenus = () => {
     const katex = instance.getMenuItemById('insertKatex')!
     const inlineKatex = instance.getMenuItemById('insertInlineKatex')!
     katex.enabled = ctx === 'paragraph'
+    instance.getMenuItemById('break-line')!.enabled = ctx === 'paragraph'
     inlineKatex.enabled = ['table-cell', 'paragraph'].includes(ctx)
     switch (ctx) {
       case 'table-cell':

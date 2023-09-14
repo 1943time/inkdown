@@ -63,7 +63,7 @@ export const MainApi = {
   },
   openFile(ext = ['md', 'markdown']) {
     return openDialog({
-      title: configStore.isZh ? '打开文件' : 'Open File',
+      title: 'Open File',
       properties: ['openFile'],
       filters: [{name: 'f', extensions: ext}]
     })

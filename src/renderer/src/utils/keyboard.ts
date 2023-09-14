@@ -5,6 +5,7 @@ import React from 'react'
 import isHotkey from 'is-hotkey'
 import {outputCache} from '../editor/output'
 import {runInAction} from 'mobx'
+import {markdownParser} from '../share/sync/parse'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -185,6 +186,57 @@ export class MenuKey {
                 children: [{text: ''}]
               }, {at: Path.next(path), select: true})
             }
+          }
+          break
+        case 'paste-plain-text':
+          const text = window.api.getClipboardText()
+          if (text) {
+            if (node[0].type === 'code-line') {
+              Transforms.insertFragment(editor, text.split('\n').map(c => {
+                return {type: 'code-line', children: [{text: c}]}
+              }))
+              setTimeout(() => {
+                runInAction(() => {
+                  this.store.currentTab.store!.refreshHighlight = !this.store.currentTab.store!.refreshHighlight
+                })
+              }, 60)
+            } else if (node[0].type === 'table-cell') {
+              Editor.insertText(editor, text.replace(/\n/g, ' '))
+            } else {
+              Editor.insertText(editor, text)
+            }
+          }
+          break
+        case 'paste-markdown-code':
+          const markdownCode = window.api.getClipboardText()
+          if (markdownCode) {
+            const {schema} = markdownParser(markdownCode)
+            if ((schema[0].type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+              const first = schema.shift()
+              Editor.insertNode(editor, first.children)
+            }
+            if (schema.length) {
+              if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
+                const [block] = Editor.nodes<any>(editor, {
+                  match: n => ['table', 'code', 'paragraph'].includes(n.type),
+                  mode: 'lowest'
+                })
+                Transforms.insertNodes(editor, schema, {
+                  at: Path.next(block[1]),
+                  select: true
+                })
+              } else {
+                Transforms.insertNodes(editor, schema, {
+                  at: Path.next(node[1]),
+                  select: true
+                })
+              }
+            }
+          }
+          break
+        case 'key-break':
+          if (node[0].type === 'paragraph') {
+            Editor.insertText(editor, '\n')
           }
           break
       }

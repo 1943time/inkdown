@@ -69,7 +69,6 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             })
           }
         } else {
-          // date-be will be removed in a few versions
           const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a).*?>/)
           if (htmlMatch) {
             const [str, tag] = htmlMatch
@@ -78,7 +77,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             }
             if (!str.startsWith('</')) {
               if (tag === 'span') {
-                const color = str.match(/style="color:\s*([\w#(),.]+);?\s*"/)
+                const color = str.match(/style="color:\s*([\w#(),.\s]+);?\s*"/)
                 if (color) {
                   htmlTag.push({
                     tag: tag,
@@ -220,7 +219,6 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
-    console.log('parse', root)
     const schema = parserBlock(root.children, true)
     return {schema: schema, nodes: root.children}
   } catch (e) {
