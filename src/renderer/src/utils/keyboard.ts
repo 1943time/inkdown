@@ -88,15 +88,7 @@ export class MenuKey {
           mode: 'highest'
         })
         if (node && node[0].type === 'code') return
-        if (task === 'insertImage') {
-          this.state.insertInlineNode(other)
-        } else {
-          if (this.store.currentTab.current?.ext === 'md') {
-            runInAction(() => {
-              this.store.currentTab.store!.openInsertNetworkImage = true
-            })
-          }
-        }
+        this.state.insertInlineNode(other || 'https://xxx/image.png')
         return
       }
 

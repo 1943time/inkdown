@@ -1,17 +1,17 @@
-import {ReactEditor, useSlate} from 'slate-react'
-import {Editor, NodeEntry, Path, Text, Transforms} from 'slate'
+import {ReactEditor} from 'slate-react'
+import {Editor, NodeEntry, Path, Transforms} from 'slate'
 import {MediaNode} from '../../el'
 import {useGetSetState} from 'react-use'
 import {Input} from 'antd'
-import {CheckOutlined, DeleteOutlined, FolderOpenOutlined} from '@ant-design/icons'
+import {CheckOutlined, DeleteOutlined} from '@ant-design/icons'
 import React, {useCallback, useEffect, useRef} from 'react'
-import {getOffsetLeft, getOffsetTop} from '../utils/dom'
+import {getOffsetLeft} from '../utils/dom'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {treeStore} from '../../store/tree'
 import {keyArrow} from '../plugins/hotKeyCommands/arrow'
-import isHotkey from 'is-hotkey'
+
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
   const [state, setState] = useGetSetState({
@@ -144,7 +144,7 @@ export const MediaAttr = observer(() => {
         className={'w-16'}
       />
       <Input
-        className={'flex-1 ml-2'}
+        className={'flex-1 ml-2 mpath'}
         size={'small'}
         value={state().url}
         onChange={e => {

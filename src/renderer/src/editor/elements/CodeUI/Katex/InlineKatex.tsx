@@ -10,16 +10,18 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
   const renderEl = useRef<HTMLElement>(null)
   const [selected, path, store] = useSelStatus(element)
   useEffect(() => {
-    const value = Node.string(element)
-    katex.render(value, renderEl.current!, {
-      strict: false,
-      output: 'html',
-      throwOnError: false,
-      macros: {
-        "\\f": "#1f(#2)"
-      }
-    })
-  }, [element])
+    if (!selected) {
+      const value = Node.string(element)
+      katex.render(value, renderEl.current!, {
+        strict: false,
+        output: 'html',
+        throwOnError: false,
+        macros: {
+          "\\f": "#1f(#2)"
+        }
+      })
+    }
+  }, [selected])
   return useMemo(() => (
       <span
         {...attributes}
@@ -36,7 +38,7 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
           onClick={() => {
             Transforms.select(store.editor, Editor.end(store.editor, path))
           }}
-          className={`mx-1 ${selected ? 'hidden' : ''}`}
+          className={`mx-1 select-none ${selected ? 'hidden' : ''}`}
         />
       </span>
     ),

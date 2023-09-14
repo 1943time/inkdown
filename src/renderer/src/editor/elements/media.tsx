@@ -89,7 +89,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
         </span>
         :
         (
-          <span className={'inline-block align-text-top'}>
+          <span className={`inline-block align-text-top border rounded ${state().selected ? ' border-blue-500/60' : 'border-transparent'}`}>
             <Img className={'fill-gray-300 align-middle text-xl'}/>
           </span>
         )

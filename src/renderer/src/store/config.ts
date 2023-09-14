@@ -18,7 +18,8 @@ class ConfigStore {
     locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
     mas: false,
-    dragToSort: true
+    dragToSort: true,
+    spellCheck: false
   }
   locale = 'en'
   timer = 0

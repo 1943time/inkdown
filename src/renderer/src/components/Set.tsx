@@ -95,6 +95,14 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                Spell Check
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.spellCheck} onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 {'Code TabSize'}
               </div>
               <div>

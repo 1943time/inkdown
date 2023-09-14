@@ -24,11 +24,12 @@ const tools = [
 ]
 
 const colors = [
-  {color: '#10b981'},
-  {color: '#f59e0b'},
-  {color: '#3b82f6'},
-  {color: '#6366f1'},
-  {color: '#f43f5e'}
+  {color: 'rgba(16,185,129,1)'},
+  {color: 'rgba(245,158,11,1)'},
+  {color: 'rgba(59,130,246, 1)'},
+  {color: 'rgba(156,163,175,.8)'},
+  {color: 'rgba(99, 102, 241, 1)'},
+  {color: 'rgba(244, 63, 94, 1)'}
 ]
 export const FloatBar = observer(() => {
   const store = useEditorStore()
@@ -69,10 +70,10 @@ export const FloatBar = observer(() => {
     if (store.domRect) {
       let left = store.domRect.x
       if (!treeStore.fold) left -= treeStore.width
-      left = left - ((state.openSelectColor ? 180 : 250) - store.domRect.width) / 2
+      left = left - ((state.openSelectColor ? 206 : 250) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
-      const barWidth = state.link ? 304 : state.openSelectColor ? 184 : 254
+      const barWidth = state.link ? 304 : state.openSelectColor ? 210 : 254
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       const top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
       setState({
@@ -173,7 +174,7 @@ export const FloatBar = observer(() => {
             className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500 ml-2'}
           />
         </div> :
-        <div className={`${state.openSelectColor ? 'w-[180px]' : 'w-[250px]'} h-full space-x-0.5`}>
+        <div className={`${state.openSelectColor ? 'w-[206px]' : 'w-[250px]'} h-full space-x-0.5`}>
           {!state.openSelectColor &&
             <div className={'flex items-center space-x-0.5 justify-center h-full'}>
               {tools.map(t =>

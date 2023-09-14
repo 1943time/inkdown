@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
-import {Descendant, Editor} from 'slate'
+import {Editor} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -191,7 +191,7 @@ export const MEditor = observer(({note}: {
       <Placeholder/>
       <Editable
         decorate={high}
-        spellCheck={false}
+        spellCheck={configStore.config.spellCheck}
         readOnly={store.readonly}
         className={`edit-area ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}
         style={{fontSize: configStore.config.editorTextSize || 16}}

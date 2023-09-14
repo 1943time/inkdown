@@ -290,42 +290,29 @@ export class EditorStore {
 
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
-    let node = mediaType(filePath) === 'image' ? {
+    const type = mediaType(filePath)
+    let node = type === 'image' ? {
       type: 'media',
       url: filePath,
       alt: p.name,
       children: [{text: ''}]
     } : {text: p.name, url: filePath}
     const sel = this.editor.selection
-    const type = mediaType(filePath)
     if (!sel || !Range.isCollapsed(sel)) return
-    const [text] = Editor.nodes<any>(this.editor, {
-      match: n => Text.isText(n)
+    const [cur] = Editor.nodes<any>(this.editor, {
+      match: n => Element.isElement(n),
+      mode: 'lowest'
     })
-    const beforeText = text[0].text.slice(0, sel.focus.offset)
-    const afterText = text[0].text.slice(sel.focus.offset)
-    Transforms.select(this.editor, {
-      anchor: {path: text[1], offset: 0},
-      focus: {path: text[1], offset: text[0].text.length}
-    })
-    if (type !== 'image') node = {...text[0], ...node}
-    Transforms.insertNodes(this.editor, [
-      {...text[0], text: beforeText},
-      node,
-      {...text[0], text: afterText}
-    ])
-    Transforms.select(this.editor, {
-      anchor: {path: sel.focus.path, offset: beforeText.length + type === 'image' ? 1 : p.name.length},
-      focus: {path: sel.focus.path, offset: beforeText.length + type === 'image' ? 1 : p.name.length}
-    })
-    if (type === 'image') {
-      Transforms.select(this.editor, Path.next(sel.focus.path))
+    if ((node.type === 'media' && cur[0].type === 'paragraph') || (node.text && ['table-cell', 'paragraph'].includes(cur[0].type))) {
+      Transforms.insertNodes(this.editor, node, {select: true})
     } else {
-      const targetPath = sel.anchor.offset === 0 ? sel.focus.path : Path.next(sel.focus.path)
-      Transforms.select(this.editor, {
-        anchor: Editor.end(this.editor, targetPath),
-        focus: Editor.end(this.editor, targetPath),
+      const [par] = Editor.nodes<any>(this.editor, {
+        match: n => Element.isElement(n) && ['table', 'code', 'head'].includes(n.type)
       })
+      Transforms.insertNodes(this.editor, {
+        type: 'paragraph',
+        children: [node]
+      }, {select: true, at: Path.next(par[1])})
     }
   }
 

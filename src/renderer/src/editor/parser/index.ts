@@ -78,7 +78,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             }
             if (!str.startsWith('</')) {
               if (tag === 'span') {
-                const color = str.match(/style="color:\s*(#\w+)"/)
+                const color = str.match(/style="color:\s*([\w#(),.]+);?\s*"/)
                 if (color) {
                   htmlTag.push({
                     tag: tag,

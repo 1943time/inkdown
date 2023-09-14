@@ -38,6 +38,7 @@ export const isDark = (config?: any) => {
   }
   return dark
 }
+
 export const registerApi = () => {
   listener(store)
   ipcMain.on('to-worker', (e, ...args:any[]) => {
@@ -76,6 +77,7 @@ export const registerApi = () => {
       showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
       theme: theme,
       dark: dark,
+      spellCheck: !!config.spellCheck,
       codeLineNumber: !!config.codeLineNumber,
       codeTabSize: config.codeTabSize || 2,
       codeTheme: config.codeTheme || 'material-theme-palenight',
