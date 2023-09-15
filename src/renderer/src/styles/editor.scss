@@ -193,7 +193,7 @@ blockquote {
   padding-top: 5px;
   padding-bottom: 5px;
   li::marker{
-    @apply dark:text-gray-500 text-gray-400;
+    @apply text-gray-500;
   }
   li:not(.task){
     >:first-child{
@@ -385,7 +385,7 @@ ol.m-list {
   background: var(--md-code-bg);
   font-size: 0.9em;
   line-height: 1.3em;
-  @apply mx-[1px] px-2 py-1.5 rounded-sm caret-sky-500 break-all text-gray-400;
+  @apply mx-[1px] rounded-sm caret-sky-500 break-all text-gray-400;
 }
 
 .katex-display{

@@ -185,11 +185,18 @@ export const htmlParser = (editor: Editor, html: string) => {
       })
     }
     const [n] = Editor.nodes<Element>(editor, {
-      match: n => Element.isElement(n) && ['code', 'table-cell', 'head', 'list-item'].includes(n.type),
+      match: n => Element.isElement(n) && ['code', 'table-cell', 'head', 'list-item', 'inline-katex'].includes(n.type),
       at: Range.isCollapsed(sel) ? sel.anchor.path : Range.start(sel).path
     })
     if (n) node = n
     if (node) {
+      if (node[0].type === 'inline-katex') {
+        let text = parsed.innerText
+        if (text) {
+          Editor.insertText(editor, text.replace(/\n/g, ' '))
+        }
+        return true
+      }
       if (node[0].type === 'code') {
         let text = parserCodeText(parsed)
         if (text) {
