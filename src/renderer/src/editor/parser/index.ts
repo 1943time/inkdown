@@ -77,12 +77,20 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             }
             if (!str.startsWith('</')) {
               if (tag === 'span') {
-                const color = str.match(/style="color:\s*([\w#(),.\s]+);?\s*"/)
-                if (color) {
-                  htmlTag.push({
-                    tag: tag,
-                    color: color[1]
-                  })
+                try {
+                  const styles = str.match(/style="([^"\n]+)"/)
+                  if (styles) {
+                    // @ts-ignore
+                    const stylesMap = new Map(styles[1].split(';').map(item => item.split(':').map(item => item.trim())))
+                    if (stylesMap.get('color')) {
+                      htmlTag.push({
+                        tag: tag,
+                        color: stylesMap.get('color') as string
+                      })
+                    }
+                  }
+                } catch (e) {
+                  el = {text: n.value}
                 }
               } else if (tag === 'a') {
                 const url = str.match(/href="([\w:.\/_\-#\\]+)"/)
