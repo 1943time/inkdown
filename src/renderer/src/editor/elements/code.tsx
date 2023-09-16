@@ -15,6 +15,7 @@ import {EyeOutlined} from '@ant-design/icons'
 import {useSubject} from '../../hooks/subscribe'
 import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
+import {runInAction} from 'mobx'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
@@ -44,6 +45,9 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     setState({editable: false})
     props.element.children.forEach(l => cacheLine.delete(l))
     update({language: state().lang})
+    setTimeout(() => {
+      runInAction(() => store.refreshHighlight = !store.refreshHighlight)
+    })
   }, [props.element, props.element.children, state().lang])
 
   const child = useMemo(() => {

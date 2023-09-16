@@ -75,8 +75,10 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     >
       {children}
       {state().loadSuccess && type !== 'other' ?
-        <span className={'inline-block relative top-1'}>
-          <span className={`border-2 ${state().selected ? ' border-blue-500/60' : 'border-transparent'} block`}>
+        <span className={'inline-block top-1'}>
+          <span
+            className={`relative border-2 ${state().selected ? ' border-blue-500/60' : 'border-transparent'} block`}
+          >
             {type === 'video' &&
               <video src={element.url} controls={true}/>
             }
