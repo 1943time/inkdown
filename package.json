@@ -33,7 +33,7 @@
     "mime-types": "^2.1.35",
     "mkdirp": "^3.0.0",
     "node-watch": "^0.7.4",
-    "shiki": "^0.14.1",
+    "shiki": "^0.14.4",
     "upath": "^2.0.1"
   },
   "devDependencies": {

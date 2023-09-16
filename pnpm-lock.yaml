@@ -36,8 +36,8 @@ dependencies:
     specifier: ^0.7.4
     version: 0.7.4
   shiki:
-    specifier: ^0.14.1
-    version: 0.14.1
+    specifier: ^0.14.4
+    version: 0.14.4
   upath:
     specifier: ^2.0.1
     version: 2.0.1
@@ -5405,8 +5405,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /shiki@0.14.1:
-    resolution: {integrity: sha512-+Jz4nBkCBe0mEDqo1eKRcCdjRtrCjozmcbTUjbPTX7OOJfEbTZzlUWlZtGe3Gb5oV1/jnojhG//YZc3rs9zSEw==}
+  /shiki@0.14.4:
+    resolution: {integrity: sha512-IXCRip2IQzKwxArNNq1S+On4KPML3Yyn8Zzs/xRgcgOWIr8ntIK3IKzjFPfjy/7kt9ZMjc+FItfqHRBg8b6tNQ==}
     dependencies:
       ansi-sequence-parser: 1.1.1
       jsonc-parser: 3.2.0

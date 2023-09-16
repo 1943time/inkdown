@@ -18,6 +18,7 @@ declare global {
       md5: (str: string | Buffer) => string
       createHttp: (options: ExtendOptions) => Got
       getClipboardText: () => string
+      writeClipboardText: (str: string) => void
       mimeType: (file: string) => string
       // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string

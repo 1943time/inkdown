@@ -199,10 +199,12 @@ export const MEditor = observer(({note}: {
         onDrop={e => {
           const dragNode = treeStore.dragNode
           const file = e.dataTransfer.files[0]
-          if ((dragNode && !dragNode.folder) || file) {
+          if ((dragNode && !dragNode.folder) || file || store.dragDocNode) {
             setTimeout(() => {
               if (dragNode) {
                 store.insertDragFile(dragNode)
+              } else if (store.dragDocNode) {
+                store.insertDragDocNode()
               } else {
                 store.insertFile(file)
               }
@@ -222,6 +224,13 @@ export const MEditor = observer(({note}: {
           })
         }}
         onPaste={e => {
+          const text = window.api.getClipboardText()
+          if (text && text.startsWith('bsc:')) {
+            const [, path] = text.split(':')
+            e.preventDefault()
+            e.stopPropagation()
+            store.insertInlineNode(path)
+          }
           const file = e.clipboardData?.files[0]
           if (file) {
             store.insertFile(file)

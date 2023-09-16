@@ -6,6 +6,7 @@ import isHotkey from 'is-hotkey'
 import {outputCache} from '../editor/output'
 import {runInAction} from 'mobx'
 import {markdownParser} from '../share/sync/parse'
+import {ReactEditor} from 'slate-react'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -73,6 +74,17 @@ export class MenuKey {
       if (isHotkey('mod+b', e)) this.run('bold')
       if (isHotkey('mod+i', e)) this.run('italic')
       if (isHotkey('mod+0', e)) this.run('paragraph')
+      if (isHotkey('mod+x', e) && this.state) {
+        const [node] = Editor.nodes<any>(this.state.editor, {
+          match: n => n.type === 'media'
+        })
+        if (node) {
+          e.preventDefault()
+          window.api.writeClipboardText(`bsc:${node[0].url}`)
+          Transforms.delete(this.state.editor, {at: node[1]})
+          ReactEditor.focus(this.state.editor)
+        }
+      }
     }, false)
     window.electron.ipcRenderer.on('key-task', (e, task: string, other: any) => {
       this.run(task, other)

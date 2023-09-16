@@ -1,15 +1,14 @@
 import {action, makeAutoObservable, observe, runInAction} from 'mobx'
-import {BaseRange, BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms} from 'slate'
+import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {GetFields, IFileItem} from '../index'
-import React, {createContext, useCallback, useContext} from 'react'
+import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
-import {of, Subject} from 'rxjs'
+import {Subject} from 'rxjs'
 import {existsSync, mkdirSync, writeFileSync} from 'fs'
 import {join, parse, relative} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
-import {nanoid} from 'nanoid'
 import {MainApi} from '../api/main'
 import {outputCache} from './output'
 import {clearCodeCache} from './plugins/useHighlight'
@@ -30,6 +29,7 @@ export class EditorStore {
     words: 0,
     characters: 0
   }
+  dragDocNode:null | Element = null
   openInsertNetworkImage = false
   webview = false
   sel: BaseSelection | undefined
@@ -67,7 +67,8 @@ export class EditorStore {
       tableCellNode: false,
       container: false,
       highlightCache: false,
-      dragEl: false
+      dragEl: false,
+      dragDocNode: false
     })
     observe(this.search, 'text', () => {
       this.matchCount = 0
@@ -286,6 +287,24 @@ export class EditorStore {
     if (!note || !dragNode) return
     const path = relative(join(note.filePath, '..'), dragNode.filePath)
     this.insertInlineNode(path)
+  }
+
+  insertDragDocNode() {
+    if (this.dragDocNode && this.editor.selection) {
+      const [node] = Editor.nodes<any>(this.editor, {
+        match: n => ['code', 'head'].includes(n.type)
+      })
+      const path = ReactEditor.findPath(this.editor, this.dragDocNode)
+      Transforms.delete(this.editor, {at: path})
+      if (node) {
+        Transforms.insertNodes(this.editor, {
+          type: 'paragraph',
+          children: [JSON.parse(JSON.stringify(this.dragDocNode))]
+        }, {select: true, at: Path.next(node[1])})
+      } else {
+        Transforms.insertNodes(this.editor, JSON.parse(JSON.stringify(this.dragDocNode)), {select: true})
+      }
+    }
   }
 
   insertInlineNode(filePath: string) {
