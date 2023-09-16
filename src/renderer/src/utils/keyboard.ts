@@ -145,6 +145,7 @@ export class MenuKey {
           }
           break
         case 'quote':
+          if (!['paragraph', 'head'].includes(node[0].type)) return
           if (Node.parent(editor, node[1]).type === 'blockquote') {
             Transforms.unwrapNodes(editor, {at: Path.parent(node[1])})
             return
