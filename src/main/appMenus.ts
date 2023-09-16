@@ -269,6 +269,13 @@ export const createAppMenus = () => {
           click: task('head-')
         },
         {
+          label: 'Quote',
+          id: 'quote',
+          accelerator: `${cmd}+Alt+q`,
+          click: task('quote'),
+          enabled: false
+        },
+        {
           label: menusLabel.insertTable,
           id: 'insertTable',
           accelerator: `${cmd}+Alt+t`,

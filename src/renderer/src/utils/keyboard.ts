@@ -144,6 +144,21 @@ export class MenuKey {
             Transforms.setNodes(editor, {type: 'paragraph'}, {at: node[1]})
           }
           break
+        case 'quote':
+          if (Node.parent(editor, node[1]).type === 'blockquote') {
+            Transforms.unwrapNodes(editor, {at: Path.parent(node[1])})
+            return
+          }
+          if (node[0].type === 'head') {
+            Transforms.setNodes(editor, {
+              type: 'paragraph'
+            }, {at: node[1]})
+          }
+          Transforms.wrapNodes(editor, {
+            type: 'blockquote',
+            children: []
+          })
+          break
         case 'insertTable':
           if (node && ['paragraph', 'head'].includes(node[0].type)) {
             const path = node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
@@ -245,6 +260,9 @@ export class MenuKey {
               }
             }
           }
+          setTimeout(() => {
+            runInAction(() => this.state!.refreshHighlight = !this.state!.refreshHighlight)
+          }, 100)
           break
         case 'key-break':
           if (node[0].type === 'paragraph') {
