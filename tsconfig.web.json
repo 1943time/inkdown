@@ -13,6 +13,7 @@
     "noUnusedParameters": false,
     "noUnusedLocals": false,
     "isolatedModules": false,
+    "allowJs": true,
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"
