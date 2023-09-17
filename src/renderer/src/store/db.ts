@@ -21,23 +21,78 @@ export interface IQuickOpen {
   dirPath: string
   time: number
 }
+
+export interface IHistory {
+  id?: string
+  filePath: string
+  schema: any[]
+  updated: number
+}
 class Db extends Dexie {
   public ebook!: Table<Ebook, number>
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
+  public history!: Table<IHistory, string>
 
   public constructor() {
     super('db')
-    this.version(3).stores({
+    this.version(4).stores({
       ebook: '++id,filePath,strategy,name,map,ignorePaths',
       recent: '&id,&filePath',
-      quickOpen: '&id,filePath,dirPath'
+      quickOpen: '&id,filePath,dirPath',
+      history: '&id,filePath,schema,updated'
     })
   }
 }
 
 export const db = new Db()
 
+export const clearExpiredRecord = async () => {
+  const time = localStorage.getItem('clear-records-time')
+  const expiration = Date.now() - (90 * 3600 * 24 * 1000)
+  if (!time || +time < expiration) {
+    localStorage.setItem('clear-records-time', String(Date.now()))
+    await db.history.filter(obj => {
+      return obj.updated < expiration
+    }).delete()
+  }
+}
+export const moveFileRecord = async (filePath: string, targetFilePath?: string) => {
+  try {
+    if (!targetFilePath) {
+      await db.history.where('filePath').equals(filePath).delete()
+    } else {
+      await db.history.where('filePath').equals(filePath).modify({
+        filePath: targetFilePath
+      })
+    }
+  } catch (e) {console.error(e)}
+}
+export const saveRecord = async (filePath: string, schema: any[]) => {
+  try {
+    let records = await db.history.where('filePath').equals(filePath).toArray()
+    records = records.sort((a, b) => a.updated > b.updated ? 1 : -1)
+    const last = records[records.length - 1]
+    const now = Date.now()
+    if (last && now < last.updated + 1800 * 1000) {
+      await db.history.where('id').equals(last.id!).modify({
+        schema: schema,
+        updated: now
+      })
+    } else {
+      await db.history.add({
+        id: nanoid(),
+        schema,
+        filePath,
+        updated: now
+      })
+      if (records.length >= 15) {
+        const first = records[0]
+        await db.history.where('id').equals(first!.id!).delete()
+      }
+    }
+  } catch (e) {console.error(e)}
+}
 export const appendRecentDir = async (filePath: string) => {
   const item = await db.recent.where('filePath').equals(filePath).first()
   if (item) {

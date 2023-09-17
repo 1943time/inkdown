@@ -23,12 +23,15 @@ class ConfigStore {
   }
   locale = 'en'
   timer = 0
+
   get isZh() {
     return this.locale === 'zh'
   }
+
   get mas() {
     return process.mas || false
   }
+
   constructor() {
     makeAutoObservable(this, {
       timer: false,
@@ -40,7 +43,7 @@ class ConfigStore {
         this.visible = true
       })
     })
-    window.electron.ipcRenderer.on('changeConfig',  action((e, key: any, value: any) => {
+    window.electron.ipcRenderer.on('changeConfig', action((e, key: any, value: any) => {
       if (key === 'theme') {
         this.setTheme(value, false)
       }
@@ -85,13 +88,16 @@ class ConfigStore {
       window.electron.ipcRenderer.send('setStore', 'config.theme', theme)
     })
   }
+
   toggleShowLeading() {
     window.electron.ipcRenderer.send('toggleShowLeading')
   }
+
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
     ipcRenderer.send('setStore', `config.${key}`, value)
   }
+
   initial() {
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {

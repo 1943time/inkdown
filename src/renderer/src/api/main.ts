@@ -2,6 +2,7 @@ import * as Electron from 'electron'
 import {nanoid} from 'nanoid'
 import {dialog} from 'electron'
 import {configStore} from '../store/config'
+import {moveFileRecord} from '../store/db'
 const ipcRenderer = window.electron.ipcRenderer
 
 let taskMap = new Map<string, Function>()
@@ -84,6 +85,7 @@ export const MainApi = {
   },
   moveToTrash(path: string) {
     ipcRenderer.invoke('move-to-trash', path)
+    moveFileRecord(path)
   },
   openToolMenu(filePath?: string) {
     ipcRenderer.send('tool-menu', filePath)

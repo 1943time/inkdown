@@ -19,8 +19,10 @@ import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
+import {saveRecord} from '../store/db'
 
 const countThrottle$ = new Subject<any>()
+export const saveDoc$ = new Subject<any[] | null>()
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -46,11 +48,20 @@ export const MEditor = observer(({note}: {
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
         const res = toMarkdown(schema.state, '', [root[0]])
+        saveRecord(nodeRef.current.filePath, schema.state)
         await window.api.fs.writeFile(nodeRef.current.filePath, res, {encoding: 'utf-8'})
       }
     }
   }, [note])
 
+  useSubject(saveDoc$, data => {
+    if (data && nodeRef.current) {
+      const schema = treeStore.schemaMap.get(nodeRef.current)
+      EditorUtils.reset(editor, data, schema?.history)
+    } else {
+      save()
+    }
+  })
   const count = useCallback((nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
     const root = Editor.node(editor, [])

@@ -40,7 +40,7 @@ export const useSelStatus = (element: BaseElement) => {
     const path = ReactEditor.findPath(store.editor, element)
     setState({
       path,
-      selected: Path.equals(ReactEditor.findPath(store.editor, element), ctx.node[1])
+      selected: Path.equals(ReactEditor.findPath(store.editor, element), ctx.node?.[1] || [])
     })
   }, [path, element])
   return [state.selected, state.path, store] as [boolean, Path, EditorStore]

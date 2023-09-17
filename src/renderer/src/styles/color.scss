@@ -36,6 +36,9 @@
 .b1{
   border-color: var(--b1);
 }
+.b2{
+  @apply border-gray-200 dark:border-gray-200/10;
+}
 .md-text{
   color: var(--md-text);
 }

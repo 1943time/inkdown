@@ -53,6 +53,14 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
+        label: 'File History',
+        enabled: filePath?.endsWith('.md'),
+        click: (e, win) => win?.webContents.send('open-file-history')
+      },
+      {
+        type: 'separator'
+      },
+      {
         label: menusLabel.openInFinder,
         enabled: !!filePath,
         click: () => shell.showItemInFolder(filePath!)

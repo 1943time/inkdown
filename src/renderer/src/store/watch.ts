@@ -6,6 +6,7 @@ import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
 import {IFileItem} from '../index'
 import {lstatSync} from 'fs'
+import {moveFileRecord} from './db'
 
 export class Watcher {
   private changeHistory = new Set<string>()
@@ -83,6 +84,9 @@ export class Watcher {
             if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
               this.store.currentTab.index = this.store.currentTab.history.length - 1
             }
+          }
+          if (target.ext === 'md') {
+            moveFileRecord(target.filePath)
           }
         })
       }

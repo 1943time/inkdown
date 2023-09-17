@@ -13,7 +13,10 @@ import {treeStore} from '../store/tree'
 import {observer} from 'mobx-react-lite'
 import {configStore} from '../store/config'
 
-export const Webview = observer(() => {
+export const Webview = observer((props: {
+  value?: any[]
+  history?: boolean
+}) => {
   const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
   const store = useMemo(() => new EditorStore(editor, true), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
@@ -26,10 +29,15 @@ export const Webview = observer(() => {
     }, 100)
   }
   useEffect(() => {
-    window.electron.ipcRenderer.invoke('print-dom-ready').then(print)
+    if (!props.history) window.electron.ipcRenderer.invoke('print-dom-ready').then(print)
   }, [])
+
+  useEffect(() => {
+    EditorUtils.reset(editor, props.value)
+  }, [props.value])
+
   return (
-    <div className={`w-full h-full content p-5 ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}>
+    <div className={`view w-full ${props.history ? '' : 'h-full'} content p-5 ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}>
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={editor}

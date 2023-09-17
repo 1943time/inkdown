@@ -22,6 +22,14 @@ a {
   min-height: calc(100vh - 40px);
   @apply pt-10;
 }
+.pure-modal{
+  .ant-modal-content{
+    padding: 0;
+  }
+  .ant-modal-close{
+    top: 15px;
+  }
+}
 
 .heading-line{
   h1,h2,h3,h4,h5{
@@ -364,9 +372,7 @@ ol.m-list {
 .move-mark{
   @apply h-0.5 dark:bg-white/50 bg-black/50 left-0 z-10 block absolute rounded top-0 duration-200;
 }
-[data-slate-node="text"] {
-  user-select: none;
-}
+
 .drag-handle {
   @apply absolute opacity-0 flex items-center;
   padding-left: 2px;
@@ -390,4 +396,8 @@ ol.m-list {
 
 .katex-display{
   margin: 0 !important;
+}
+
+.view .drag-handle {
+  display: none;
 }

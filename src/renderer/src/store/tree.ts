@@ -12,7 +12,7 @@ import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {appendRecentDir, appendRecentNote} from './db'
+import {appendRecentDir, appendRecentNote, moveFileRecord} from './db'
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
@@ -366,7 +366,8 @@ export class TreeStore {
       const toPath = to.filePath!
       this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
       this.dropNode = null
-      renameSync(fromPath, join(toPath, basename(fromPath)))
+      const targetPath = join(toPath, basename(fromPath))
+      renameSync(fromPath, targetPath)
       to.children!.push(this.dragNode)
       defineParent(this.dragNode, to)
       to.children = sortFiles(to.children!)
@@ -375,8 +376,11 @@ export class TreeStore {
       }
       this.moveFile$.next({
         from: fromPath,
-        to: join(toPath, basename(fromPath))
+        to: targetPath
       })
+      if (this.dragNode.ext === 'md') {
+        moveFileRecord(fromPath, targetPath)
+      }
     }
   }
 
@@ -416,6 +420,7 @@ export class TreeStore {
         let newPath = join(path, '..', file.filename)
         if (!file.folder && file.ext) newPath += `.${file.ext}`
         renameSync(path, newPath)
+        moveFileRecord(path, newPath)
         this.moveFile$.next({
           from: path,
           to: newPath

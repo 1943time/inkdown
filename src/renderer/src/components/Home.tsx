@@ -9,10 +9,11 @@ import {existsSync} from 'fs'
 import {Set} from './Set'
 import {About} from '../About'
 import {Characters} from './Characters'
-import {db} from '../store/db'
+import {clearExpiredRecord, db} from '../store/db'
 import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
 import {exportHtml} from '../editor/output/html'
+import {History} from './History'
 
 export const Home = observer(() => {
   const initial = useCallback(async () => {
@@ -70,6 +71,9 @@ export const Home = observer(() => {
       db.recent.clear()
     }
     initial()
+    setTimeout(() => {
+      clearExpiredRecord()
+    }, 10000)
     window.electron.ipcRenderer.on('open', open)
     window.electron.ipcRenderer.on('open-file', openFile)
     window.electron.ipcRenderer.on('create', create)
@@ -125,6 +129,7 @@ export const Home = observer(() => {
       <About/>
       <Set/>
       <QuickOpen/>
+      <History/>
     </div>
   )
 })
