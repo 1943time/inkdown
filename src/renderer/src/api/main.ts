@@ -43,6 +43,9 @@ export const MainApi = {
   getPath(type: 'home') {
     return ipcRenderer.invoke('get-path', type)
   },
+  showMessageBox(options: Parameters<typeof dialog['showMessageBoxSync']>[0]) {
+    return ipcRenderer.invoke('message-dialog', options) as Promise<number>
+  },
   sendToSelf(task: string, ...args: any[]) {
     ipcRenderer.send('send-to-self', task, ...args)
   },

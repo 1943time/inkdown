@@ -11,43 +11,29 @@ export const defineParent = (node: IFileItem, parent: IFileItem) => {
       return parent
     }
   })
-  Object.defineProperty(node, 'filePath', {
-    configurable: true,
-    get() {
-      let cur:IFileItem | undefined = this.parent
-      const paths = [this.filename]
-      if (cur) paths.unshift(cur.filePath)
-      let path = join(...paths)
-      if (!this.folder) {
-        path += `.${this.ext}`
-      }
-      return path
-    }
-  })
 }
+
 export const createFileNode = (params: {
-  fileName: string
   folder: boolean
   parent?: IFileItem
-  filePath?: string
+  filePath: string
   mode?: IFileItem['mode']
 }) => {
-  const p = params.folder ? params.fileName : parse(params.fileName).name
+  const p = parse(params.filePath).name
   const node = {
     id: nanoid(),
     filename: p,
     folder: params.folder,
     children: params.folder ? [] : undefined,
     mode: params.mode,
-    ext: params.folder ? undefined : extname(params.fileName).replace(/^\./, ''),
+    filePath: params.filePath,
+    ext: params.folder ? undefined : extname(params.filePath).replace(/^\./, ''),
   } as IFileItem
   if (params.parent) {
     defineParent(node, params.parent)
-  } else if (params.filePath) {
-    node.filePath = params.filePath
+  } else {
     node.independent = true
   }
-
   return observable(node)
 }
 const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {
@@ -59,17 +45,17 @@ const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {
     const s = statSync(filePath)
     if (s.isDirectory()) {
       const node = createFileNode({
-        fileName: f,
         folder: true,
-        parent: parent
+        parent: parent,
+        filePath: join(path, f)
       })
       node.children = readDir(filePath, node, cacheFiles)
       tree.push(node)
     } else {
       const node = createFileNode({
-        fileName: f,
         folder: false,
-        parent: parent
+        parent: parent,
+        filePath: join(path, f)
       })
       if (['md', 'markdown'].includes(node.ext!)) {
         cacheFiles.push(node)

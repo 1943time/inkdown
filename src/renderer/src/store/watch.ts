@@ -1,7 +1,7 @@
 import {TreeStore} from './tree'
-import {basename, join, sep} from 'path'
+import {join, sep} from 'path'
 import {runInAction} from 'mobx'
-import {createFileNode, sortFiles} from './parserNode'
+import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
 import {IFileItem} from '../index'
@@ -67,13 +67,17 @@ export class Watcher {
 
   public onChange(e: 'remove' | 'update', path: string, node?: IFileItem) {
     if (path.split(sep).some(p => p.startsWith('.') && p !== '.images')) return
-    const nodesMap = new Map(this.store.nodes.map(n => [n.filePath, n]))
+    const nodesMap = this.store.getFileMap(true)
     const target = nodesMap.get(path)
     const parent = nodesMap.get(join(path, '..'))!
     if (target && e === 'remove') {
       if (target.folder) {
         runInAction(() => {
           parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
+          this.store.currentTab.history  = this.store.currentTab.history.filter(f => !f.filePath.startsWith(path))
+          if (this.store.currentTab.index > 0 && this.store.currentTab.index > this.store.currentTab.history.length - 1) {
+            this.store.currentTab.index = this.store.currentTab.history.length - 1
+          }
         })
       } else {
         runInAction(() => {
@@ -92,20 +96,24 @@ export class Watcher {
       }
     }
     if (e === 'update') {
-      if (target) {
+      if (target || !path.startsWith(this.store.root?.filePath)) {
         this.changeHistory.add(path)
       } else {
         const stat = lstatSync(path)
         if (stat.isDirectory()) {
           if (parent.children && !parent.children.find(c => c.filePath === path)) {
-            if (!node) node =  createFileNode({
-              folder: true,
-              parent: parent,
-              fileName: basename(path)
-            })
-            runInAction(() => {
-              parent.children!.push(node!)
-            })
+            if (!node) {
+              const {root} = parserNode(path)
+              root.root = false
+              defineParent(root, parent)
+              runInAction(() => {
+                parent.children!.push(root)
+              })
+            } else {
+              runInAction(() => {
+                parent.children!.push(node!)
+              })
+            }
           }
         } else {
           if (parent.children && !parent.children.find(c => c.filePath === path)) {
@@ -113,7 +121,7 @@ export class Watcher {
               if (!node) node = createFileNode({
                 folder: false,
                 parent: parent,
-                fileName: basename(path)
+                filePath: path
               })
               parent.children!.push(node)
             })
@@ -138,7 +146,7 @@ export class Watcher {
 
   async openDirCheck() {
     const history = this.store.currentTab.history
-    const nodesMap = new Map(this.store.nodes.map(n => [n.filePath, n]))
+    const nodesMap = this.store.getFileMap(true)
     for (let h of history) {
       if (h.independent) {
         await this.off(h.filePath)

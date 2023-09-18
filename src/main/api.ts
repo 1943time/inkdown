@@ -86,7 +86,8 @@ export const registerApi = () => {
       showCharactersCount: typeof config.showCharactersCount === 'boolean' ? config.showCharactersCount : true,
       mas: process.mas || false,
       headingMarkLine: typeof config.headingMarkLine === 'boolean' ? config.headingMarkLine : true,
-      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true
+      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true,
+      autoRebuild: typeof config.autoRebuild === 'boolean' ? config.autoRebuild : true
     }
   })
 
@@ -115,6 +116,9 @@ export const registerApi = () => {
   })
   ipcMain.handle('save-dialog', async (e, options: Parameters<typeof dialog['showSaveDialog']>[0]) => {
     return dialog.showSaveDialog(options)
+  })
+  ipcMain.handle('message-dialog', async (e, options: Parameters<typeof dialog['showMessageBoxSync']>[0]) => {
+    return dialog.showMessageBoxSync(options)
   })
   ipcMain.on('send-to-self', (e, task: string, ...args) => {
     const window = BrowserWindow.fromWebContents(e.sender)!

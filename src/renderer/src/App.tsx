@@ -1,15 +1,21 @@
-import {ConfigProvider, message, theme} from 'antd'
+import {ConfigProvider, message, Modal, theme} from 'antd'
 import {observer} from 'mobx-react-lite'
 import {useEffect, useMemo, useState} from 'react'
 import { useSubject } from './hooks/subscribe'
 import { configStore } from './store/config'
-import { message$ } from './utils'
+import {message$, modal$} from './utils'
 import { Home } from './components/Home'
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
+  const [modal, modalContext] = Modal.useModal()
   useSubject(message$, args => {
     args === 'destroy' ? messageApi.destroy() : messageApi.open(args)
   })
+
+  useSubject(modal$, args => {
+    modal[args.type](args.params)
+  })
+
   const [ready, setReady] = useState(false)
   useEffect(() => {
     Promise.allSettled([
@@ -33,6 +39,7 @@ const App = observer(() => {
       }}
     >
       {contextHolder}
+      {modalContext}
       <Home/>
     </ConfigProvider>
   )

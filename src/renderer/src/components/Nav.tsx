@@ -11,7 +11,7 @@ export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
     return treeStore.getAbsolutePath(treeStore.openNote)
-  }, [treeStore.openNote?.filename])
+  }, [treeStore.openNote?.filePath])
   return (
     <div
       className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}

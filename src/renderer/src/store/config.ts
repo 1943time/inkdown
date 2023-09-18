@@ -19,7 +19,8 @@ class ConfigStore {
     showCharactersCount: true,
     mas: false,
     dragToSort: true,
-    spellCheck: false
+    spellCheck: false,
+    autoRebuild: true
   }
   locale = 'en'
   timer = 0

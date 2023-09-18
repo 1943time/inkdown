@@ -4,6 +4,7 @@ import {treeStore} from '../store/tree'
 import {mediaType} from '../editor/utils/dom'
 import {Subject} from 'rxjs'
 import {ArgsProps} from 'antd/es/message'
+import {HookAPI} from 'antd/es/modal/useModal'
 
 const kb = 1024
 const mb = kb * 1024
@@ -56,6 +57,11 @@ export const download = (data: Blob | Uint8Array, fileName: string) => {
 
 export const message$ = new Subject<ArgsProps | 'destroy'>()
 
+type ModalEvent<K extends keyof HookAPI> = {
+  type: K
+  params: Parameters<HookAPI[K]>[0]
+}
+export const modal$ = new Subject<ModalEvent<keyof HookAPI>>()
 
 export const encodeHtml = (str: string) => {
   const encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;'},

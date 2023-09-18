@@ -3,18 +3,19 @@ import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse, sep} from 'path'
-import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync} from 'fs'
+import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
-import {message$, stat} from '../utils'
+import {message$, modal$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
 import {appendRecentDir, appendRecentNote, moveFileRecord} from './db'
-import {refactor, visitElements} from './refactor'
+import {refactor, renameAllFiles} from './refactor'
 import {saveDoc$} from '../editor/Editor'
+
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
@@ -40,34 +41,21 @@ export class TreeStore {
     from: string
     to: string
   }>()
+
   get files() {
     if (!this.root) return []
     let files: IFileItem[] = []
-    const stack:IFileItem[] = this.root.children!.slice()
+    const stack: IFileItem[] = this.root.children!.slice()
     while (stack.length) {
       const node = stack.shift()!
+      files.push(node)
       if (node.folder) {
         stack.push(...node.children!)
-      } else {
-        files.push(node)
       }
     }
     return files
   }
 
-  get nodes() {
-    if (!this.root) return []
-    let nodes: IFileItem[] = [this.root]
-    const stack:IFileItem[] = this.root.children!.slice()
-    while (stack.length) {
-      const node = stack.shift()!
-      nodes.push(node)
-      if (node.folder) {
-        stack.push(...node.children!)
-      }
-    }
-    return nodes
-  }
   get currentTab() {
     return this.tabs[this.currentIndex]
   }
@@ -111,10 +99,10 @@ export class TreeStore {
         switch (params.command) {
           case 'createNote':
             const addNote = createFileNode({
-              fileName: nanoid(),
               folder: false,
               parent: this.ctxNode || this.root,
-              mode: 'create'
+              mode: 'create',
+              filePath: ''
             })
             if (!this.ctxNode) {
               this.root.children!.unshift(addNote)
@@ -124,10 +112,10 @@ export class TreeStore {
             break
           case 'createFolder':
             const addFolder = createFileNode({
-              fileName: nanoid(),
               folder: true,
               parent: this.ctxNode || this.root,
-              mode: 'create'
+              mode: 'create',
+              filePath: ''
             })
             if (!this.ctxNode) {
               this.root.children!.unshift(addFolder)
@@ -158,6 +146,12 @@ export class TreeStore {
         }
       })
     })
+  }
+
+  getFileMap(root = false) {
+    const nodes = this.files
+    if (root) nodes.push(this.root)
+    return new Map(nodes.map(n => [n.filePath, n]))
   }
 
   navigatePrev() {
@@ -217,18 +211,18 @@ export class TreeStore {
     }
     document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
   }
+
   createNewNote(filePath: string) {
-    let node:IFileItem
+    let node: IFileItem
     if (this.root && filePath.startsWith(this.root.filePath)) {
-      const map = new Map(this.nodes.map(n => [n.filePath, n]))
+      const map = this.getFileMap(true)
       node = createFileNode({
-        fileName: filePath,
         parent: map.get(join(filePath, '..')),
-        folder: false
+        folder: false,
+        filePath: filePath
       })
     } else {
       node = createFileNode({
-        fileName: filePath,
         filePath: filePath,
         folder: false
       })
@@ -255,7 +249,6 @@ export class TreeStore {
       }
     } else {
       const node = createFileNode({
-        fileName: filePath,
         filePath: filePath,
         folder: false
       })
@@ -274,6 +267,7 @@ export class TreeStore {
       this.currentTab.index = this.currentTab.history.length - 1
     }
   }
+
   open(path: string, openFile?: string) {
     try {
       const stat = statSync(path)
@@ -289,8 +283,10 @@ export class TreeStore {
         this.openNewNote(path)
         this.openParentDir(path)
       }
-    } catch (e) {}
+    } catch (e) {
+    }
   }
+
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
     for (let key of Object.keys(value)) {
       this[key] = value[key]
@@ -336,6 +332,7 @@ export class TreeStore {
       }
     }
   }
+
   openFolder(path: string, openFile?: string) {
     this.watcher.destroy()
     MainApi.setWin({openFolder: path})
@@ -365,6 +362,7 @@ export class TreeStore {
     setTimeout(action(() => this.fold = false), 100)
     this.watcher.openDirCheck()
   }
+
   moveNode(to: IFileItem) {
     if (this.dragNode && this.dragNode !== to && to.children!.every(c => c !== this.dropNode)) {
       const fromPath = this.dragNode.filePath
@@ -374,7 +372,6 @@ export class TreeStore {
       const targetPath = join(toPath, basename(fromPath))
       renameSync(fromPath, targetPath)
       to.children!.push(this.dragNode)
-      defineParent(this.dragNode, to)
       to.children = sortFiles(to.children!)
       if (this.dragNode === this.currentTab.current) {
         MainApi.setWin({openFile: this.dragNode.filePath})
@@ -383,10 +380,15 @@ export class TreeStore {
         from: fromPath,
         to: targetPath
       })
+      this.dragNode.filePath = targetPath
+      defineParent(this.dragNode, to)
       if (this.dragNode.ext === 'md') {
         moveFileRecord(fromPath, targetPath)
-        this.checkDepends(fromPath, targetPath)
       }
+      if (this.dragNode.folder) {
+        renameAllFiles(this.dragNode.filePath, this.dragNode.children || [])
+      }
+      this.checkDepends(fromPath, targetPath)
     }
   }
 
@@ -400,7 +402,7 @@ export class TreeStore {
         if (!file.folder && !path.endsWith('.md')) path += '.md'
         if (parent.children?.find(c => c.filePath === path) || existsSync(path)) return message$.next({
           type: 'warning',
-          content: configStore.isZh ? '该文件已存在' : 'The file already exists'
+          content: 'The name already exists'
         })
         if (file.folder) {
           mkdirSync(path)
@@ -410,7 +412,8 @@ export class TreeStore {
         file.ext = 'md'
         file.mode = undefined
         file.children = file.folder ? [] : undefined
-        file.filename = file.editName.replace(/\.md$/, '')
+        file.filePath = path
+        file.filename = parse(path).name
         file.editName = undefined
       }
       parent.children = sortFiles(parent.children!)
@@ -425,21 +428,51 @@ export class TreeStore {
         file.filename = file.folder ? file.editName : p.name
         let newPath = join(path, '..', file.filename)
         if (!file.folder && file.ext) newPath += `.${file.ext}`
+        file.filePath = newPath
         renameSync(path, newPath)
+        if (file.folder) {
+          renameAllFiles(file.filePath, file.children || [])
+        }
         this.checkDepends(path, newPath)
         this.moveFile$.next({
           from: path,
           to: newPath
         })
         file.mode = undefined
-        moveFileRecord(path, newPath)
+        if (file.ext === 'md') moveFileRecord(path, newPath)
       }
     }
   }
-  async checkDepends(oldPath: string, targetPath: string) {
-    const files = await refactor(oldPath, targetPath, this.root?.children || [])
-    this.parserQueue(files.slice(), true)
+
+  refactorFolder(oldPath: string, targetPath: string) {
+    const files = readdirSync(targetPath)
+    let changeFiles: [string, string][] = []
+    for (let f of files) {
+      if (f.startsWith('.')) continue
+      const path = join(targetPath, f)
+      const stat = statSync(path)
+      if (stat.isDirectory()) {
+        changeFiles.push(...this.refactorFolder(join(oldPath, f), path))
+      } else {
+        changeFiles.push([join(oldPath, f), path])
+      }
+    }
+    return changeFiles
   }
+
+  async checkDepends(oldPath: string, targetPath: string) {
+    if (!configStore.config.autoRebuild) return
+    const stat = statSync(targetPath)
+    if (stat.isDirectory()) {
+      const changeFiles = this.refactorFolder(oldPath, targetPath)
+      const files = await refactor(changeFiles, this.root?.children || [])
+      this.parserQueue(files.slice(), true)
+    } else {
+      const files = await refactor([[oldPath, targetPath]], this.root?.children || [])
+      this.parserQueue(files.slice(), true)
+    }
+  }
+
   getAbsolutePath(file: IFileItem) {
     if (this.root) {
       return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
