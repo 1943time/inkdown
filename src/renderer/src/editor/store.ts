@@ -104,7 +104,11 @@ export class EditorStore {
     }
     return left
   }
-
+  doRefreshHighlight() {
+    setTimeout(action(() => {
+      this.refreshHighlight = !this.refreshHighlight
+    }), 60)
+  }
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
     this.searchRanges = []

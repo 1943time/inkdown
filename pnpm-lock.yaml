@@ -179,8 +179,8 @@ devDependencies:
     specifier: ^0.77.0
     version: 0.77.0(slate@0.94.1)
   slate-react:
-    specifier: ^0.97.1
-    version: 0.97.1(react-dom@18.2.0)(react@18.2.0)(slate@0.94.1)
+    specifier: ^0.98.3
+    version: 0.98.3(react-dom@18.2.0)(react@18.2.0)(slate@0.94.1)
   string-width:
     specifier: ^5.1.2
     version: 5.1.2
@@ -5539,8 +5539,8 @@ packages:
       slate: 0.94.1
     dev: true
 
-  /slate-react@0.97.1(react-dom@18.2.0)(react@18.2.0)(slate@0.94.1):
-    resolution: {integrity: sha512-+1LMIVusBwduzBOsoX0u6ah7qgpOIlVOdbVpUrowSc5uZTXViBvAQnvSD6edOjtRUI62IFtPSvDAoHRm+E55+g==}
+  /slate-react@0.98.3(react-dom@18.2.0)(react@18.2.0)(slate@0.94.1):
+    resolution: {integrity: sha512-p1BnF9eRyRM0i5hkgOb11KgmpWLQm9Zyp6jVkOAj5fPdIGheKhg48Z7aWKrayeJ4nmRyi/NjRZz/io5hQcphmw==}
     peerDependencies:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'

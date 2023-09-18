@@ -10,7 +10,7 @@ export class EditorUtils {
   }
 
   static isDirtLeaf(leaf: CustomLeaf) {
-    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html
+    return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html || leaf.highColor
   }
 
   static isTop(editor: Editor, path: Path) {
@@ -60,7 +60,7 @@ export class EditorUtils {
 
   static clearMarks(editor: Editor, split = false) {
     if (!editor.selection) return
-    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold', 'textColor'], {
+    Transforms.unsetNodes(editor, ['url', 'strikethrough', 'italic', 'code', 'bold', 'textColor', 'highColor'], {
       split,
       match: Text.isText
     })

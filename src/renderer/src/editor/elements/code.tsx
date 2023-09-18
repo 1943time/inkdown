@@ -4,7 +4,7 @@ import React, {createContext, useCallback, useContext, useMemo} from 'react'
 import {AutoComplete, Tooltip} from 'antd'
 import {useMEditor} from '../../hooks/editor'
 import {CodeLineNode, CodeNode, ElementProps} from '../../el'
-import {cacheLine} from '../plugins/useHighlight'
+import {codeCache} from '../plugins/useHighlight'
 import {Mermaid} from './CodeUI/Mermaid'
 import {Katex} from './CodeUI/Katex/Katex'
 import {observer} from 'mobx-react-lite'
@@ -43,7 +43,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   const setLanguage = useCallback(() => {
     setState({editable: false})
-    props.element.children.forEach(l => cacheLine.delete(l))
+    codeCache.delete(props.element)
     update({language: state().lang})
     setTimeout(() => {
       runInAction(() => store.refreshHighlight = !store.refreshHighlight)

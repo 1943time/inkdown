@@ -9,21 +9,14 @@ import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]]*>(.*<\/[a-z]+>:?)?/g
-export const codeCache = new WeakMap<object, {
-  code: string,
-  language?: string
-}>()
-
+export const codeCache = new WeakMap<object, Range[]>()
 export const cacheTextNode = new WeakMap<object, Range[]>
 
-export const cacheLine = new WeakMap<object, Range[]>()
-
-const highlightNodes = new Set(['paragraph', 'table-cell', 'code-line', 'head', 'inline-katex'])
+const highlightNodes = new Set(['paragraph', 'table-cell', 'code', 'head', 'inline-katex'])
 let clearTimer = 0
 
 export const clearCodeCache = (node: any) => {
   codeCache.delete(node)
-  node.children.map(n => cacheLine.delete(n))
   clearTimeout(clearTimer)
   clearTimer = window.setTimeout(() => {
     runInAction(() => {
@@ -35,8 +28,8 @@ export function useHighlight(store?: EditorStore) {
   return useCallback(([node, path]: NodeEntry):Range[] => {
     if (Element.isElement(node) && highlightNodes.has(node.type)) {
       const ranges = store?.highlightCache.get(node) || []
-      if (node.type === 'code-line') {
-        ranges.push(...cacheLine.get(node) || [])
+      if (node.type === 'code') {
+        ranges.push(...codeCache.get(node) || [])
       }
       if (node.type === 'inline-katex') {
         if (cacheTextNode.get(node)) {
@@ -121,7 +114,6 @@ export const SetNodeToDecorations = observer(() => {
         code: node[0].children.map(n => Node.string(n)).join('\n')
       }
     })
-
     for (let c of codes) {
       if (c.code.length > 20000) continue
       const lang = c.node[0].language?.toLowerCase() || ''
@@ -129,17 +121,9 @@ export const SetNodeToDecorations = observer(() => {
       const el = c.node[0]
       let handle = codeCache.get(el)
       if (!handle) {
-        handle = {
-          code: c.code,
-          language: c.node[0].language
-        }
-        codeCache.set(el, handle)
+        const ranges: Range[] = []
         const tokens = window.api.highlightCode(c.code, lang)
         for (let i = 0; i < tokens.length; i++) {
-          const element = c.node[0]
-          const line = element.children[i]
-          if (cacheLine.get(line)) continue
-          const ranges: Range[] = []
           const lineToken = tokens[i]
           let start = 0
           for (let t of lineToken) {
@@ -156,8 +140,8 @@ export const SetNodeToDecorations = observer(() => {
             })
             start = end
           }
-          cacheLine.set(line, ranges)
         }
+        codeCache.set(el, ranges)
       }
     }
   }, [])

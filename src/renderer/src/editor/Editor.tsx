@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
 import {Editor} from 'slate'
 import {MElement, MLeaf} from './elements'
-import {SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
+import {codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
 import {useOnchange} from './plugins/useOnchange'
 import './parser'
@@ -14,7 +14,7 @@ import {EditorUtils} from './utils/editorUtils'
 import {Placeholder} from './tools/Placeholder'
 import {toMarkdown} from './output'
 import {useEditorStore} from './store'
-import {runInAction} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
@@ -23,6 +23,7 @@ import {saveRecord} from '../store/db'
 
 const countThrottle$ = new Subject<any>()
 export const saveDoc$ = new Subject<any[] | null>()
+const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -58,6 +59,7 @@ export const MEditor = observer(({note}: {
     if (data && nodeRef.current) {
       const schema = treeStore.schemaMap.get(nodeRef.current)
       EditorUtils.reset(editor, data, schema?.history)
+      store.doRefreshHighlight()
     } else {
       save()
     }
@@ -152,21 +154,6 @@ export const MEditor = observer(({note}: {
     }
   }, [note])
 
-  const inputAndRefresh = useMemo(() => {
-    let timer = 0
-    return (e: React.FormEvent<HTMLDivElement>) => {
-      clearTimeout(timer)
-      timer = window.setTimeout(() => {
-        // @ts-ignore
-        const text = e.nativeEvent?.data || ''
-        if (/[\u4e00-\u9fa5]/.test(text) && inCode.current) {
-          runInAction(() => {
-            store.refreshHighlight = !store.refreshHighlight
-          })
-        }
-      }, 100)
-    }
-  }, [])
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
@@ -253,7 +240,16 @@ export const MEditor = observer(({note}: {
             e.preventDefault()
           }
         }}
-        onBeforeInputCapture={inputAndRefresh}
+        onCompositionStart={preventDefault}
+        onCompositionEnd={e => {
+          const [code] = Editor.nodes<any>(store.editor, {
+            match: el => el.type === 'code'
+          })
+          if (code) {
+            codeCache.delete(code[0])
+            requestIdleCallback(action(() => store.refreshHighlight = !store.refreshHighlight))
+          }
+        }}
         renderElement={renderElement}
         onKeyDown={keydown}
         renderLeaf={renderLeaf}

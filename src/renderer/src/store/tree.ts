@@ -13,6 +13,8 @@ import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
 import {appendRecentDir, appendRecentNote, moveFileRecord} from './db'
+import {refactor, visitElements} from './refactor'
+import {saveDoc$} from '../editor/Editor'
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
@@ -295,16 +297,19 @@ export class TreeStore {
     }
   }
 
-  parserQueue(files: IFileItem[]) {
+  parserQueue(files: IFileItem[], force = false) {
     if (!files.length) return
     const file = files.shift()!
-    if (!this.schemaMap.get(file)) {
+    if (!this.schemaMap.get(file) || force) {
       this.schemaMap.set(file, {
         state: markdownParser(file.filePath).schema
       })
+      if (file.filePath === this.openNote?.filePath) {
+        saveDoc$.next(this.schemaMap.get(file)?.state || null)
+      }
     }
     if (files.length) {
-      requestIdleCallback(() => this.parserQueue(files))
+      requestIdleCallback(() => this.parserQueue(files, force))
     }
   }
 
@@ -380,6 +385,7 @@ export class TreeStore {
       })
       if (this.dragNode.ext === 'md') {
         moveFileRecord(fromPath, targetPath)
+        this.checkDepends(fromPath, targetPath)
       }
     }
   }
@@ -420,16 +426,20 @@ export class TreeStore {
         let newPath = join(path, '..', file.filename)
         if (!file.folder && file.ext) newPath += `.${file.ext}`
         renameSync(path, newPath)
-        moveFileRecord(path, newPath)
+        this.checkDepends(path, newPath)
         this.moveFile$.next({
           from: path,
           to: newPath
         })
         file.mode = undefined
+        moveFileRecord(path, newPath)
       }
     }
   }
-
+  async checkDepends(oldPath: string, targetPath: string) {
+    const files = await refactor(oldPath, targetPath, this.root?.children || [])
+    this.parserQueue(files.slice(), true)
+  }
   getAbsolutePath(file: IFileItem) {
     if (this.root) {
       return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)

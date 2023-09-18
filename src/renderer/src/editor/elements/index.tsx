@@ -77,7 +77,7 @@ export const MLeaf = (props: RenderLeafProps) => {
     if (leaf.current) {
       style.background = '#f59e0b'
     }
-    const dirty = leaf.bold || leaf.code || leaf.italic || leaf.strikethrough
+    const dirty = leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || leaf.highColor
     if (leaf.url) {
       return (
         <span
