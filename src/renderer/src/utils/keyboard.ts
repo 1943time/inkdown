@@ -1,12 +1,12 @@
-import {treeStore, TreeStore} from '../store/tree'
-import {Range, Editor, Element, Transforms, Path, Node, NodeEntry} from 'slate'
+import {TreeStore} from '../store/tree'
+import {Range, Editor, Element, Transforms, Path, Node, NodeEntry, Point} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import React from 'react'
 import isHotkey from 'is-hotkey'
 import {outputCache} from '../editor/output'
 import {runInAction} from 'mobx'
-import {markdownParser} from '../share/sync/parse'
 import {ReactEditor} from 'slate-react'
+import {markdownParser} from '../editor/parser'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -74,14 +74,17 @@ export class MenuKey {
       if (isHotkey('mod+b', e)) this.run('bold')
       if (isHotkey('mod+i', e)) this.run('italic')
       if (isHotkey('mod+0', e)) this.run('paragraph')
-      if (isHotkey('mod+x', e) && this.state) {
+      if ((isHotkey('mod+x', e) || isHotkey('mod+c', e)) && this.state && this.state.editor.selection) {
         const [node] = Editor.nodes<any>(this.state.editor, {
           match: n => n.type === 'media'
         })
-        if (node) {
+        const [start, end] = Range.edges(this.state.editor.selection)
+        if (node && Path.compare(start.path, node[1]) === 0 && Path.compare(end.path, node[1]) === 0) {
           e.preventDefault()
-          window.api.writeClipboardText(`bsc:${node[0].url}`)
-          Transforms.delete(this.state.editor, {at: node[1]})
+          window.api.writeClipboardText(`bsc::${node[0].url}`)
+          if (isHotkey('mod+x', e)) {
+            Transforms.delete(this.state.editor, {at: node[1]})
+          }
           ReactEditor.focus(this.state.editor)
         }
       }

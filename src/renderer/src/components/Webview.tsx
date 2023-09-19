@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {markdownParser} from '../editor/parser'
 import {SetNodeToDecorations, useHighlight} from '../editor/plugins/useHighlight'
 import {Placeholder} from '../editor/tools/Placeholder'
 import {Editable, Slate, withReact} from 'slate-react'
@@ -18,9 +17,10 @@ export const Webview = observer((props: {
   history?: boolean
 }) => {
   const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
-  const store = useMemo(() => new EditorStore(editor, true), [])
+  const store = useMemo(() => new EditorStore(editor, true, props.history), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
+  const high = useHighlight(store)
   const print = (filePath: string) => {
     treeStore.openNewNote(filePath)
     EditorUtils.reset(editor, treeStore.schemaMap.get(treeStore.currentTab.current!)?.state || [])
@@ -46,6 +46,7 @@ export const Webview = observer((props: {
           <SetNodeToDecorations/>
           <Placeholder/>
           <Editable
+            decorate={props.history ? high : undefined}
             spellCheck={false}
             readOnly={true}
             className={'w-full h-full'}

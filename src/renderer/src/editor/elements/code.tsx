@@ -33,7 +33,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   })
 
   const html = useMemo(() => {
-    if (store.webview) {
+    if (store.webview && !store.history) {
       let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), state().lang || '')
       html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
       return html
@@ -129,13 +129,13 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             )}
           </div>
         }
-        {store.webview ?
+        {store.webview && !store.history ?
           <pre
             data-bl-type={'code'}
             className={`text-gray-200`}
             style={{
-              paddingLeft: configStore.config.codeLineNumber ? 48 : 24,
-              paddingRight: 24
+              paddingLeft: configStore.config.codeLineNumber ? 44 : 20,
+              paddingRight: 20
             }}
             data-bl-lang={state().lang}
             dangerouslySetInnerHTML={{__html: html}}

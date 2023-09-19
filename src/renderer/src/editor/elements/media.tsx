@@ -11,7 +11,6 @@ import {Path} from 'slate'
 import {isAbsolute} from 'path'
 import {getImageData} from '../../utils'
 import {mediaType} from '../utils/dom'
-import {action} from 'mobx'
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const store = useEditorStore()
   const [state, setState] = useGetSetState({
@@ -56,10 +55,6 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       {...attributes}
       className={`cursor-pointer mx-1 inline-block select-none`}
       data-be={'media'}
-      onDragStart={action((e) => {
-        e.stopPropagation()
-        store.dragDocNode = element
-      })}
       contentEditable={false}
       onClick={(e) => {
         const path = ReactEditor.findPath(store.editor, element)
@@ -89,6 +84,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
               <img
                 src={state().url} alt={element.alt}
                 referrerPolicy={'no-referrer'}
+                draggable={false}
                 className={'align-text-bottom border-2 border-red-500'}
               />
             }

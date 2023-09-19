@@ -6,12 +6,13 @@ import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {Subject} from 'rxjs'
 import {existsSync, mkdirSync, writeFileSync} from 'fs'
-import {join, parse, relative} from 'path'
+import {isAbsolute, join, parse, relative} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {outputCache} from './output'
 import {clearCodeCache} from './plugins/useHighlight'
+import {toUnix} from 'upath'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -29,7 +30,6 @@ export class EditorStore {
     words: 0,
     characters: 0
   }
-  dragDocNode:null | Element = null
   openInsertNetworkImage = false
   webview = false
   sel: BaseSelection | undefined
@@ -52,14 +52,15 @@ export class EditorStore {
   pauseCodeHighlight = false
   domRect: DOMRect | null = null
   container: null | HTMLDivElement = null
-
+  history = false
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
 
-  constructor(editor: Editor, webview = false) {
+  constructor(editor: Editor, webview = false, history = false) {
     this.editor = editor
     this.webview = webview
+    this.history = history
     this.dragStart = this.dragStart.bind(this)
     makeAutoObservable(this, {
       searchRanges: false,
@@ -67,8 +68,7 @@ export class EditorStore {
       tableCellNode: false,
       container: false,
       highlightCache: false,
-      dragEl: false,
-      dragDocNode: false
+      dragEl: false
     })
     observe(this.search, 'text', () => {
       this.matchCount = 0
@@ -248,6 +248,7 @@ export class EditorStore {
     }
   }
 
+
   insertFile(file: File) {
     if (file.path) {
       this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
@@ -293,33 +294,16 @@ export class EditorStore {
     this.insertInlineNode(path)
   }
 
-  insertDragDocNode() {
-    if (this.dragDocNode && this.editor.selection) {
-      const [node] = Editor.nodes<any>(this.editor, {
-        match: n => ['code', 'head'].includes(n.type)
-      })
-      const path = ReactEditor.findPath(this.editor, this.dragDocNode)
-      Transforms.delete(this.editor, {at: path})
-      if (node) {
-        Transforms.insertNodes(this.editor, {
-          type: 'paragraph',
-          children: [JSON.parse(JSON.stringify(this.dragDocNode))]
-        }, {select: true, at: Path.next(node[1])})
-      } else {
-        Transforms.insertNodes(this.editor, JSON.parse(JSON.stringify(this.dragDocNode)), {select: true})
-      }
-    }
-  }
-
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
     const type = mediaType(filePath)
-    let node = type === 'image' ? {
+    const url = isAbsolute(filePath) ? filePath: toUnix(filePath)
+    let node = ['image', 'audio', 'video', 'document'].includes(type) ? {
       type: 'media',
-      url: filePath,
+      url,
       alt: p.name,
       children: [{text: ''}]
-    } : {text: p.name, url: filePath}
+    } : {text: p.name, url}
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     const [cur] = Editor.nodes<any>(this.editor, {

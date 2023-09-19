@@ -30,8 +30,8 @@ const api = {
   highlightCode(code: string, lang: string) {
     return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
   },
-  toUnix(path: string) {
-    return toUnix(path)
+  toUnix(path: string, force = false) {
+    return electronAPI.process.platform === 'win32' || force ? toUnix(path) : path
   },
   mimeType(file: string) {
     return mime.lookup(file) || ''

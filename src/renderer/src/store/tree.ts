@@ -7,12 +7,12 @@ import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, read
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
-import {message$, modal$, stat} from '../utils'
+import {message$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {appendRecentDir, appendRecentNote, moveFileRecord} from './db'
+import {appendRecentDir, appendRecentNote, db, moveFileRecord} from './db'
 import {refactor, renameAllFiles} from './refactor'
 import {saveDoc$} from '../editor/Editor'
 
@@ -141,6 +141,7 @@ export class TreeStore {
             if (filePath && this.ctxNode) {
               this.removeSelf(this.ctxNode)
               MainApi.moveToTrash(filePath)
+              db.history.where('filePath').equals(filePath).delete()
             }
             break
         }

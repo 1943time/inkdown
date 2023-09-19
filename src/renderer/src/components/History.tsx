@@ -112,6 +112,7 @@ export const History = observer(() => {
         <Button
           icon={<HistoryOutlined/>}
           type={'primary'} className={'ml-3'}
+          disabled={!schema.length}
           onClick={() => {
             if (schema.length) saveDoc$.next(schema)
             setState({open: false})

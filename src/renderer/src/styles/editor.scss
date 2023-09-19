@@ -398,6 +398,11 @@ ol.m-list {
   margin: 0 !important;
 }
 
-.view .drag-handle {
-  display: none;
+.view {
+  .drag-handle {
+    display: none;
+  }
+  [data-be="link"]{
+    pointer-events: none;
+  }
 }
