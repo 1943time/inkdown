@@ -10,7 +10,6 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
   const depFiles =  new Set<IFileItem>()
   const changeFiles = new Set<IFileItem>()
   const changeFilesPath = new Map(paths.map(p => [p[1], p[0]]))
-  console.log('change', paths)
   while (stack.length) {
     const item = stack.pop()!
     if (item.folder) {
@@ -21,13 +20,11 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
         changeFiles.add(item)
       }
       let file = await window.api.fs.readFile(filePath, {encoding: 'utf-8'})
-      console.log('change', filePath)
       let fileChange = false
       file = file.replace(urlRegexp, (m, text: string, url: string) => {
         if (/^https?:/.test(url)) return m
         const absolute = isAbsolute(url)
         const linkPath = absolute ? url : join(filePath, '..', url)
-        console.log('linkPath', linkPath)
         for (let p of paths) {
           if (linkPath === p[0]) {
             fileChange = true
@@ -47,18 +44,15 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
       }
     }
   }
-  console.log('change2', changeFiles)
   for (let fileItem of changeFiles) {
     let file = await window.api.fs.readFile(fileItem.filePath, {encoding: 'utf-8'})
     let fileChange = false
     file = file.replace(urlRegexp, (m, text: string, url: string) => {
       if (url.startsWith('http:')) return m
       if (!isAbsolute(url)) {
-        console.log('url', url)
         const linkPath = join(changeFilesPath.get(fileItem.filePath)!, '..', url)
         if (isExist(linkPath)) {
           const changePath = relative(join(fileItem.filePath, '..'), linkPath)
-          console.log('url', linkPath, changePath)
           if (changePath !== url) {
             fileChange = true
             return `[${text}](${window.api.toUnix(changePath)})`
