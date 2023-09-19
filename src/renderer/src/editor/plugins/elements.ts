@@ -179,7 +179,7 @@ export const MdElements: Record<string, MdNode> = {
       if (Editor.parent(ctx.editor, ctx.node[1])[0].type === 'list-item') {
         return Path.hasPrevious(ctx.node[1])
       }
-      return ['paragraph'].includes(ctx.node[0].type) && !Path.hasPrevious(ctx.node[1])
+      return ['paragraph'].includes(ctx.node[0].type) && !Path.hasPrevious(ctx.sel.anchor.path)
     },
     run: ({editor, match, sel, path}) => {
       const removeLength = match[0].match(/\s*(\d+\.|-|\*|\+)\s+(\[[\sx]])?/)?.[0].length || 0

@@ -72,15 +72,15 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
 
 export const renameAllFiles = (filePath: string, nodes: IFileItem[]) => {
   for (let n of nodes) {
-    const newPath = join(filePath, basename(n.filePath))
+    const oldPath = n.filePath
+    n.filePath = join(filePath, basename(n.filePath))
     if (n.folder) {
       renameAllFiles(n.filePath, n.children || [])
     }
     if (n.ext === 'md') {
-      db.history.where('filePath').equals(n.filePath).modify({
-        filePath: newPath
+      db.history.where('filePath').equals(oldPath).modify({
+        filePath: n.filePath
       })
     }
-    n.filePath = newPath
   }
 }
