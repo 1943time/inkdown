@@ -12,7 +12,6 @@ import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {outputCache} from './output'
 import {clearCodeCache} from './plugins/useHighlight'
-import {toUnix} from 'upath'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -297,7 +296,7 @@ export class EditorStore {
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
     const type = mediaType(filePath)
-    const url = isAbsolute(filePath) ? filePath: toUnix(filePath)
+    const url = isAbsolute(filePath) ? filePath: window.api.toUnix(filePath)
     let node = ['image', 'audio', 'video', 'document'].includes(type) ? {
       type: 'media',
       url,
