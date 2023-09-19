@@ -17,15 +17,15 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 ![](./docs/assets/syntax.gif)
 
 ## Features
-- Use pure WYSIWYG editing mode, compatible with markdown syntax conversion, so symbols will not be searched when using the search function
-- Automatically record and clear file history, view and roll back at any time
-- Using shiki as code syntax highlighting, the syntax analysis is more fine-grained and more beautiful
-- Supports block-level and inline editing rendering of katex
-- Support rendering mermaid graphics
+- Use pure WYSIWYG editing mode, compatible with markdown syntax conversion, so symbols will not be searched when using the search function.
+- Automatically record and clear file history, view and roll back at any time.
+- Using shiki as code syntax highlighting, the syntax analysis is more fine-grained and more beautiful.
+- Supports block-level and inline editing rendering of katex.
+- Support rendering mermaid graphics.
 - The file path is automatically rebuilt. When the file or folder path changes, the related dependent links and image paths will automatically change.
-- Support exporting html and pdf
+- Support exporting html and pdf.
 - Can drag document elements to change their order.
-- Non-intrusive sharing function, one-click to share a single markdown document or combine multiple markdown files into a combined document containing chapters, bluestone will automatically manage all dependencies
+- Non-intrusive sharing function, one-click to share a single markdown document or combine multiple markdown files into a combined document containing chapters, bluestone will automatically manage all dependencies.
 
 ## Drag
 ![](./docs/assets/drag.gif)
