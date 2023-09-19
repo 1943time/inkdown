@@ -233,3 +233,13 @@ export const markdownParser = (filePath: string) => {
     return {schema: [], nodes: []}
   }
 }
+
+export const markdownParserByText = (content: string) => {
+  try {
+    const root = parser.parse(content)
+    const schema = parserBlock(root.children, true)
+    return {schema: schema as any[], nodes: root.children}
+  } catch (e) {
+    return {schema: [], nodes: []}
+  }
+}

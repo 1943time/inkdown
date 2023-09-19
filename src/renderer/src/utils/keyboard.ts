@@ -6,7 +6,7 @@ import isHotkey from 'is-hotkey'
 import {outputCache} from '../editor/output'
 import {runInAction} from 'mobx'
 import {ReactEditor} from 'slate-react'
-import {markdownParser} from '../editor/parser'
+import {markdownParserByText} from '../editor/parser'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -241,8 +241,8 @@ export class MenuKey {
         case 'paste-markdown-code':
           const markdownCode = window.api.getClipboardText()
           if (markdownCode) {
-            const {schema} = markdownParser(markdownCode)
-            if ((schema[0].type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+            const {schema} = markdownParserByText(markdownCode)
+            if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
               const first = schema.shift()
               Editor.insertNode(editor, first.children)
             }
