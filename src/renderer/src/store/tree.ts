@@ -366,6 +366,15 @@ export class TreeStore {
 
   moveNode(to: IFileItem) {
     if (this.dragNode && this.dragNode !== to && to.children!.every(c => c !== this.dropNode)) {
+      if (to.children?.some(c => {
+        return c.filename === this.dragNode!.filename && String(c.ext) === String(this.dragNode!.ext)
+      })) {
+        message$.next({
+          type: 'warning',
+          content: 'filename already exists'
+        })
+        return
+      }
       const fromPath = this.dragNode.filePath
       const toPath = to.filePath!
       this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
