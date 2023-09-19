@@ -14,8 +14,6 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 
 ![](./docs/assets/d1.png)
 
-![](./docs/assets/d2.png)
-
 ![](./docs/assets/syntax.gif)
 
 ## Features
@@ -26,23 +24,11 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 - Support rendering mermaid graphics
 - The file path is automatically rebuilt. When the file or folder path changes, the related dependent links and image paths will automatically change.
 - Support exporting html and pdf
+- Can drag document elements to change their order.
 - Non-intrusive sharing function, one-click to share a single markdown document or combine multiple markdown files into a combined document containing chapters, bluestone will automatically manage all dependencies
 
 ## Drag
-Freely drag to sort document elements
 ![](./docs/assets/drag.gif)
-
-## Share
-
-Bluestone provides non-intrusive optional sharing functions that can automatically extract Markdown files and share them to the network,
-or merge multiple Markdown documents into a book at the same time.
-
-Due to the data interaction involved,
-the network function part is not yet open source
-[more](https://pb.bluemd.me/official/book/docs/share)
-
-
-![](./docs/assets/share.gif)
 
 ## Format
 
