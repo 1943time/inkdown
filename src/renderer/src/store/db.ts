@@ -74,7 +74,7 @@ export const saveRecord = async (filePath: string, schema: any[]) => {
     records = records.sort((a, b) => a.updated > b.updated ? 1 : -1)
     const last = records[records.length - 1]
     const now = Date.now()
-    if (last && now < last.updated + 1800 * 1000) {
+    if (last && now < last.updated + 600 * 1000) {
       await db.history.where('id').equals(last.id!).modify({
         schema: schema,
         updated: now

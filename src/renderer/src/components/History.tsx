@@ -63,7 +63,7 @@ export const History = observer(() => {
       <div className={'h-12 border-b b2 px-5 text-base font-semibold'}>
         <div className={'flex items-center h-full'}>
           <Help
-            text={'The last 15 records will be recorded. If the file change interval is more than 30 minutes, new records will be added. bluestone will clean cache periodically.'}/>
+            text={'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added. bluestone will clean cache periodically.'}/>
           <span className={'ml-1'}>
             File history for <span className={'text-sky-500 ml-1'}>{state.fileName}</span>
           </span>
