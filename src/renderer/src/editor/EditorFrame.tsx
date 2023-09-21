@@ -119,7 +119,7 @@ export const EditorFrame = observer(({tab}: {
                     MainApi.openInFolder(tab.current?.filePath || '')
                   }}
                 >
-                  <FolderOpenOutlined/> {'Displayed in Finder'}
+                  <FolderOpenOutlined/> {'Show in Finder'}
                 </div>
               </div>
             }
