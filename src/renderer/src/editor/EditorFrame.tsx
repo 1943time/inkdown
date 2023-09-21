@@ -112,14 +112,14 @@ export const EditorFrame = observer(({tab}: {
             }
             {mt === 'other' &&
               <div style={{height: size.height}} className={'flex items-center flex-col justify-center'}>
-                <div className={'text-gray-600'}>{configStore.isZh ? '暂不支持打开该文件类型' : 'Opening this file type is not currently supported'}</div>
+                <div className={'text-gray-600'}>{'Opening this file type is not currently supported'}</div>
                 <div
                   className={'text-sky-500 text-sm mt-3 cursor-default duration-200 hover:text-sky-600'}
                   onClick={() => {
                     MainApi.openInFolder(tab.current?.filePath || '')
                   }}
                 >
-                  <FolderOpenOutlined/> {configStore.isZh ? '在Finder中显示' : 'Displayed in Finder'}
+                  <FolderOpenOutlined/> {'Displayed in Finder'}
                 </div>
               </div>
             }

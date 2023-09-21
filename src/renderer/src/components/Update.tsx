@@ -46,7 +46,7 @@ export const Update = observer(() => {
       if (!manual) return
       message$.next({
         type: 'info',
-        content: configStore.isZh ? '暂无可用更新' : 'No updates are available'
+        content: 'No updates are available'
       })
     })
 
@@ -55,7 +55,7 @@ export const Update = observer(() => {
       if (state.startUpdate || state.manual) {
         let msg = typeof err === 'string' ? err : err instanceof Error ? err.message : 'The network is abnormal, please try again later or download manually'
         api.error({
-          message: configStore.isZh ? '更新失败' : 'The update failed',
+          message: 'The update failed',
           description: msg
         })
       }
@@ -65,7 +65,7 @@ export const Update = observer(() => {
       setState({startUpdate: false, percent: 0})
       modal.confirm({
         type: 'warning',
-        content: configStore.isZh ? '下载更新已完成，是否立即重启？' : 'Download the update is complete, do you want to restart it now?',
+        content: 'Download the update is complete, do you want to restart it now?',
         onOk: () => {
           ipcRenderer.send('install-update')
         },
@@ -97,19 +97,19 @@ export const Update = observer(() => {
           <Space className={'mt-4'}>
             {state.startUpdate ? (
               <>
-                <Button onClick={downLoad}>{configStore.isZh ? '手动下载' : 'Download manually'}</Button>
+                <Button onClick={downLoad}>{'Download manually'}</Button>
                 <Button
                   onClick={() => {
                     ipcRenderer.send('cancel-update')
                     setState({startUpdate: false, percent: 0})
                   }}
                 >
-                  {configStore.isZh ? '取消更新' : 'Cancel update'}
+                  {'Cancel update'}
                 </Button>
               </>
             ) : (
               <>
-                <Button onClick={downLoad}>{configStore.isZh ? '手动下载' : 'Download manually'}</Button>
+                <Button onClick={downLoad}>{'Download manually'}</Button>
                 <Button
                   type={'primary'}
                   onClick={() => {
@@ -117,7 +117,7 @@ export const Update = observer(() => {
                     setState({startUpdate: true, open: false})
                   }}
                 >
-                  {configStore.isZh ? '立即更新' : 'Update now'}
+                  {'Update now'}
                 </Button>
               </>
             )}
@@ -130,7 +130,7 @@ export const Update = observer(() => {
         />
         {state.startUpdate &&
           <div className={'flex items-center mt-4'}>
-            <span className={'mr-4'}>{configStore.isZh ? '正在更新' : 'Updating'}</span>
+            <span className={'mr-4'}>{'Updating'}</span>
             <Progress percent={state.percent} className={'flex-1 mb-0'}/>
           </div>
         }

@@ -24,7 +24,7 @@ export const Search = observer(() => {
           <div className={'flex-1'}>
             <input
               value={store.search.text}
-              placeholder={configStore.isZh ? '查找' : 'Search'}
+              placeholder={'Search'}
               autoFocus={true}
               ref={inputRef}
               onFocus={() => {
@@ -45,13 +45,13 @@ export const Search = observer(() => {
                 className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                 onClick={() => store.prevSearch()}
               >
-                {configStore.isZh ? '上一个' : 'Prev'}
+                {'Prev'}
               </div>
               <div
                 className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                 onClick={() => store.nextSearch()}
               >
-                {configStore.isZh ? '下一个' : 'Next'}
+                {'Next'}
               </div>
             </div>
             <div className={'w-16 text-right'}>
@@ -64,7 +64,7 @@ export const Search = observer(() => {
               }
               {!store.matchCount && !!store.search.text &&
                 <div className={'text-gray-500 text-sm'}>
-                  {configStore.isZh ? '无结果' : 'No result'}
+                  {'No result'}
                 </div>
               }
             </div>

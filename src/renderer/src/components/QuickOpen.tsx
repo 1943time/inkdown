@@ -123,7 +123,7 @@ export const QuickOpen = observer(() => {
           )}
         </div>
         <div className={`px-4 py-2 ${!state.filterRecords.length ? '' : 'hidden'}`}>
-          <div className={'text-gray-500 text-center text-sm'}>{configStore.isZh ? '没有最近打开的记录' : 'No recently opened history'}</div>
+          <div className={'text-gray-500 text-center text-sm'}>{'No recently opened history'}</div>
         </div>
       </div>
     </div>

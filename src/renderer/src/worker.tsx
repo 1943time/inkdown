@@ -21,7 +21,6 @@ const App = observer(() => {
   if (!ready) return null
   return (
     <ConfigProvider
-      locale={configStore.isZh ? zhCN : undefined}
       theme={{
         algorithm: configStore.config.dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {

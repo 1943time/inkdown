@@ -105,7 +105,7 @@ export const FullSearch = observer(() => {
   return (
     <div className={'py-3 h-full'}>
       <div className={'px-4 relative'}>
-        <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'} />
+        <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'}/>
         <input
           value={treeStore.searchKeyWord}
           autoFocus={true}
@@ -114,28 +114,22 @@ export const FullSearch = observer(() => {
             treeStore.setState({searchKeyWord: e.target.value})
             search()
           }}
-          placeholder={configStore.isZh ? '查找' : 'Search'}
+          placeholder={'Search'}
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>
         {!state().searching && !state().searchResults.length && treeStore.searchKeyWord &&
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
-            {configStore.isZh ?
-              <span>
-              未找到 <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span> 相关内容
-              </span> : (
-                <span>
-                  No content found for <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
-                </span>
-              )
-            }
-
+            <span>
+              No content found for <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
+            </span>
           </div>
         }
         <div className={'space-y-3'}>
           {state().searchResults.slice(0, 100).map((s, i) =>
             <div key={i}>
-              <div className={'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-default select-none'}>
+              <div
+                className={'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-default select-none'}>
                 <div className={'flex items-center'}>
                   <div
                     className={'p-1'}
@@ -158,7 +152,8 @@ export const FullSearch = observer(() => {
                 <span className={'ml-2 dark:text-gray-500 pr-1 text-gray-600'}>{s.results.length}</span>
               </div>
               {!state().foldIndex.includes(i) &&
-                <div className={'space-y-2 text-xs dark:text-gray-400 text-gray-600 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'}>
+                <div
+                  className={'space-y-2 text-xs dark:text-gray-400 text-gray-600 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'}>
                   {s.results.slice(0, 100).map((r, j) =>
                     <div
                       key={j}

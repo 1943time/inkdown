@@ -118,7 +118,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                     e.stopPropagation()
                     if (e.key === 'Enter') saveNote(c)
                   }}
-                  placeholder={`${c.folder ? configStore.isZh ? '输入文件夹名' : 'enter a folder name' : configStore.isZh ? '输入文档名称' : 'enter a doc name'}`}
+                  placeholder={`${c.folder ? 'enter a folder name' : 'enter a doc name'}`}
                 /> :
                 <>
                   {c.folder &&

@@ -15,19 +15,13 @@ class ConfigStore {
     editorTextSize: 16,
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4,
-    locale: 'en' as 'en' | 'zh',
     showCharactersCount: true,
     mas: false,
     dragToSort: true,
     spellCheck: false,
     autoRebuild: true
   }
-  locale = 'en'
   timer = 0
-
-  get isZh() {
-    return this.locale === 'zh'
-  }
 
   get mas() {
     return process.mas || false
@@ -35,8 +29,7 @@ class ConfigStore {
 
   constructor() {
     makeAutoObservable(this, {
-      timer: false,
-      locale: false
+      timer: false
     })
     window.electron.ipcRenderer.on('openSet', () => {
       this.initial()

@@ -82,7 +82,7 @@ export class TreeStore {
       if (this.openNote?.filePath.endsWith('.md') || filePath) {
         const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
         window.api.copyToClipboard(content)
-        message$.next({type: 'success', content: configStore.isZh ? '已复制到剪贴板~' : 'Copied to clipboard'})
+        message$.next({type: 'success', content: 'Copied to clipboard'})
       }
     })
 

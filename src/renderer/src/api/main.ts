@@ -56,7 +56,7 @@ export const MainApi = {
     defaultPath: string
   }) {
     return saveDialog({
-      title: configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file',
+      title: 'Create a Markdown file',
       properties: ['createDirectory'],
       securityScopedBookmarks: true,
       filters: [
@@ -74,7 +74,7 @@ export const MainApi = {
   },
   open(rootPath?: string) {
     return openDialog({
-      title: configStore.isZh ? '打开文件或文件夹' : 'Open File Or Folder',
+      title: 'Open File Or Folder',
       properties: ['openFile', 'openDirectory'],
       defaultPath: rootPath,
       filters: [{name: 'f', extensions: ['md', 'markdown']}]

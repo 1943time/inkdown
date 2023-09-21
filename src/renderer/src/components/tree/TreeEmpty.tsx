@@ -8,7 +8,7 @@ export const TreeEmpty = observer(() => {
     <div className={'h-full flex justify-center items-center text-gray-400'}>
       <div className={'text-center text-sm space-y-2'}>
         <div>
-          {configStore.isZh ? '目录为空' : 'The directory is empty'}
+          {'The directory is empty'}
         </div>
         <div
           className={'cursor-pointer text-sky-500 hover:text-sky-600 duration-200'}
@@ -22,7 +22,7 @@ export const TreeEmpty = observer(() => {
         >
           <FolderOpenOutlined/>
           <span className={'ml-1'}>
-            {configStore.isZh ? '打开文件夹' : 'Open folder'}
+            {'Open folder'}
         </span>
         </div>
       </div>

@@ -51,7 +51,7 @@ export const Empty = observer(() => {
             Bluestone
           </div>
           <div className={'text-lg text-gray-500'}>
-            {configStore.isZh ? '没有打开的文件' : 'No open files'}
+            {'No open files'}
           </div>
           <div
             className={'cursor-default hover:text-sky-400 duration-200'}
@@ -61,7 +61,7 @@ export const Empty = observer(() => {
           >
             <FileAddOutlined/>
             <span className={'ml-2'}>
-              {configStore.isZh ? '创建Markdown文件' : 'Create a Markdown file'}
+              {'Create a Markdown file'}
             </span>
           </div>
           <div
@@ -73,14 +73,14 @@ export const Empty = observer(() => {
             <FolderOpenOutlined/>
             <span
               className={'ml-2'}>
-            {configStore.isZh ? '打开文件或文件夹' : 'Open file or folder'}
+            {'Open file or folder'}
           </span>
           </div>
         </div>
         {!!state.records.length &&
           <div className={'mt-6'}>
             <div className={'text-lg text-gray-500'}>
-              {configStore.isZh ? '最近的' : 'Recent'}
+              {'Recent'}
             </div>
             <div className={'mt-2'}>
               {state.records.map(r =>
