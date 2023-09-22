@@ -39,6 +39,14 @@ export const getImageData = (filePath: string = '') => {
   }
 }
 
+export function toArrayBuffer(buffer: any) {
+  const arrayBuffer = new ArrayBuffer(buffer.length)
+  const view = new Uint8Array(arrayBuffer)
+  for (let i = 0; i < buffer.length; ++i) {
+    view[i] = buffer[i]
+  }
+  return arrayBuffer
+}
 
 export const download = (data: Blob | Uint8Array, fileName: string) => {
   data = data instanceof Uint8Array ? new Blob([data]) : data

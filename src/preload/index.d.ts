@@ -14,6 +14,7 @@ declare global {
     api: {
       sdk: typeof Sdk,
       dev: boolean
+      got: Got
       toUnix: (path: string) => string
       md5: (str: string | Buffer) => string
       createHttp: (options: ExtendOptions) => Got

@@ -1,5 +1,5 @@
 import {ElementProps, MediaNode} from '../../el'
-import {extname, join} from 'path'
+import {basename, extname, join} from 'path'
 import {ReactEditor} from 'slate-react'
 import {useGetSetState, useSetState} from 'react-use'
 import Img from '../../svg/Img'
@@ -7,9 +7,9 @@ import {useEffect, useMemo} from 'react'
 import {treeStore} from '../../store/tree'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
-import {Path} from 'slate'
+import {Path, Transforms} from 'slate'
 import {isAbsolute} from 'path'
-import {getImageData} from '../../utils'
+import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const store = useEditorStore()
@@ -23,6 +23,9 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     return mediaType(element.url)
   }, [element.url])
   useEffect(() => {
+    if (element.downloadUrl) {
+      return
+    }
     if (type !== 'image') {
       setState({loadSuccess: true})
       return
@@ -42,13 +45,31 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     img.src = realUrl
     img.onload = () => setState({loadSuccess: true})
     img.onerror = () => setState({loadSuccess: false})
-  }, [element.url])
+  }, [element.url, element.downloadUrl])
   useSubject(store.mediaNode$, node => {
     setState({selected: !!node && Path.equals(state().path, node[1])})
   })
   useEffect(() => {
     if (!store.editor.selection) return
     setState({selected: Path.equals(state().path, Path.parent(store.editor.selection.focus.path))})
+    if (element.downloadUrl) {
+      const url = decodeURIComponent(element.downloadUrl)
+      const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
+      if (image) {
+        window.api.got.get(element.downloadUrl, {
+          responseType: 'buffer'
+        }).then(res => {
+          store.saveFile({
+            name: Date.now().toString(16) + '.' + image[1],
+            buffer: toArrayBuffer(res.rawBody)
+          }).then(res => {
+            Transforms.setNodes(store.editor, {
+              url: res, downloadUrl: undefined
+            }, {at: state().path})
+          })
+        })
+      }
+    }
   }, [])
   return (
     <span

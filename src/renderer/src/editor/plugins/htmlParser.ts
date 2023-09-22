@@ -3,6 +3,11 @@ import {jsx} from 'slate-hyperscript'
 import {EditorUtils} from '../utils/editorUtils'
 import {BackspaceKey} from './hotKeyCommands/backspace'
 
+const findElementByNode = (node: ChildNode) => {
+  const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
+  return node.parentElement!.children[index] as HTMLElement
+}
+const fragment = new Set(['body', 'figure', 'div'])
 const ELEMENT_TAGS = {
   BLOCKQUOTE: () => ({type: 'blockquote'}),
   H1: () => ({type: 'head', level: 1}),
@@ -11,10 +16,12 @@ const ELEMENT_TAGS = {
   H4: () => ({type: 'head', level: 4}),
   H5: () => ({type: 'head', level: 5}),
   TABLE: () => ({type: 'table'}),
+  IMG: (el: HTMLImageElement) => {
+    return {type: 'media', url: el.src, downloadUrl: el.src && /^https?:/.test(el.src) ? el.src : undefined}
+  },
   TR: () => ({type: 'table-row'}),
   TH: () => ({type: 'table-cell', title: true}),
   TD: () => ({type: 'table-cell'}),
-  // IMG: el => ({ type: 'image', url: el.getAttribute('src') }),
   LI: () => ({type: 'list-item'}),
   OL: () => ({type: 'list', order: true}),
   P: () => ({type: 'paragraph'}),
@@ -33,7 +40,8 @@ const TEXT_TAGS = {
   STRONG: () => ({bold: true})
 }
 
-export const deserialize = (el: HTMLElement, parentTag: string = '') => {
+export const deserialize = (el: ChildNode, parentTag: string = '') => {
+  if (el.nodeName.toLowerCase() === 'noscript') return []
   if (el.nodeType === 3) {
     return el.textContent
   } else if (el.nodeType !== 1) {
@@ -44,17 +52,16 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
 
   const {nodeName} = el
   let target = el
-
   if (
     nodeName === 'PRE' &&
     el.childNodes[0] &&
     el.childNodes[0].nodeName === 'CODE'
   ) {
-    target = el.children[0] as HTMLElement
+    target = el.childNodes[0]
   }
-  let children = Array.from(target.children)
+  let children = Array.from(target.childNodes)
     .map(n => {
-      return deserialize(n as HTMLElement, target.tagName.toLowerCase())
+      return deserialize(n, target.nodeName.toLowerCase().toLowerCase())
     })
     .flat()
 
@@ -62,13 +69,17 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
     children = [{text: el.textContent || ''}]
   }
 
-  if (el.nodeName === 'BODY') {
+  if (fragment.has((el.nodeName.toLowerCase()))) {
+    return jsx('fragment', {}, children)
+  }
+  if (TEXT_TAGS[nodeName] && Array.from(el.childNodes).some(e => el.nodeType !== 3 && !TEXT_TAGS[e.nodeName])) {
     return jsx('fragment', {}, children)
   }
   if (ELEMENT_TAGS[nodeName]) {
     if (!parentTag || !['h1', 'h2', 'code', 'h3', 'h4', 'h5', 'th', 'td'].includes(parentTag)) {
       if (nodeName === 'PRE') {
-        const dataset = el.dataset
+        const dom = findElementByNode(el)
+        const dataset = dom.dataset
         const inner = dataset?.blType === 'code'
         if (inner) {
           return {
@@ -77,7 +88,7 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
             })
           }
         } else {
-          const text = parserCodeText(target)
+          const text = parserCodeText(findElementByNode(target))
           if (text) {
             return {
               type: 'code', children: text.split('\n').map(c => {
@@ -94,7 +105,9 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
   }
   if (TEXT_TAGS[nodeName]) {
     const attrs = TEXT_TAGS[nodeName](el)
-    return children.map(child => jsx('text', attrs, child)).filter(c => !!c.text)
+    return children.map(child => {
+      return jsx('text', attrs, child)
+    }).filter(c => !!c.text)
   }
   return children
 }
@@ -102,35 +115,16 @@ export const deserialize = (el: HTMLElement, parentTag: string = '') => {
 const parserCodeText = (el: HTMLElement) => {
   el.innerHTML = el.innerHTML.replace(/<br\/?>|<\/div>(?=\S)/g, '\n')
   return el.innerText
-  // let str = ''
-  // for (let c of el.children) {
-  //   console.log('el', c, c.nodeName)
-  //   if (c.nodeType === 3) {
-  //     str += c.textContent
-  //   } else if (['a', 'span', 'strong', 'code', 'i', 's', 'font', 'em', 'del'].includes(c.nodeName.toLowerCase())) {
-  //     str += c.textContent
-  //   } else if ('br' === c.nodeName.toLowerCase()) {
-  //     str += '\n'
-  //   } else {
-  //     if (str && !str.endsWith('\n')) str += '\n'
-  //     if (c.children?.length) {
-  //       str += parserCodeText(c as HTMLElement)
-  //     } else if (c.textContent) {
-  //       str += c.textContent
-  //     }
-  //   }
-  // }
-  // return str
 }
 
-const getTextNode = (nodes: any[]) => {
+const getTextsNode = (nodes: any[]) => {
   let text: any[] = []
   for (let n of nodes) {
     if (n.text) {
       text.push(n)
     }
     if (n?.children) {
-      text.push(...getTextNode(n.children))
+      text.push(...getTextsNode(n.children))
     }
   }
   return text
@@ -140,6 +134,13 @@ const processFragment = (fragment: any[]) => {
   let trans:any[] = []
   let list:any = null
   for (let f of fragment) {
+    if (f.text) {
+      f.text = f.text.replace(/^\n+|\n+$/g, '')
+      if (!f.text) continue
+    }
+    if (['media', 'link'].includes(f.type)) {
+      f = {type: 'paragraph', children: [f]}
+    }
     if (f.type === 'list-item') {
       if (!list) {
         list = {type: 'list', children: [f]}
@@ -162,9 +163,6 @@ const processFragment = (fragment: any[]) => {
 export const htmlParser = (editor: Editor, html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html').body
   const inner = !!parsed.querySelector('[data-be]')
-  parsed.querySelectorAll('span.select-none').forEach(el => {
-    el.remove()
-  })
   const sel = editor.selection
   let fragment = processFragment(deserialize(parsed))
   if (!fragment?.length) return
@@ -207,7 +205,7 @@ export const htmlParser = (editor: Editor, html: string) => {
         return true
       }
       if (node[0].type === 'table-cell') {
-        Transforms.insertFragment(editor, getTextNode(fragment))
+        Transforms.insertFragment(editor, getTextsNode(fragment))
         return true
       }
       if (node[0].type === 'head') {

@@ -15,7 +15,7 @@ export type ListNode = {type: 'list', children: ListItemNode[], order?: boolean}
 export type ListItemNode = {type: 'list-item', children: BaseElement['children'], checked?: boolean}
 export type HeadNode = {type: 'head', children: BaseElement['children'], level: number}
 export type HrNode = {type: 'hr'}
-export type MediaNode = {type: 'media', url: string, alt: string}
+export type MediaNode = {type: 'media', url: string, alt: string, downloadUrl?: string}
 export type InlineKatexNode = {type: 'inline-katex', value: string, children: BaseElement['children']}
 export type Elements =
   CodeNode | CodeLineNode | ParagraphNode | TableNode | TableRowNode | TableCellNode |

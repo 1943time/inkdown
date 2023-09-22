@@ -158,7 +158,7 @@ export const MEditor = observer(({note}: {
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
-      if (store.container!.scrollTop + e.clientY - 60 > top) {
+      if (store.container && store.container.scrollTop + e.clientY - 60 > top) {
         if (EditorUtils.checkEnd(editor)) {
           e.preventDefault()
         }

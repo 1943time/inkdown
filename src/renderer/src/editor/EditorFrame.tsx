@@ -98,7 +98,7 @@ export const EditorFrame = observer(({tab}: {
               <>
                 {mt === 'image' ?
                   <div className={'text-center px-14 py-5'}>
-                    <img src={getImageData(tab.current?.filePath)} alt=""/>
+                    <img src={getImageData(tab.current?.filePath)} alt="" className={'inline'}/>
                   </div> :
                   (
                     <div style={{

@@ -21,6 +21,7 @@ const api = {
   getClipboardText() {
     return clipboard.readText('clipboard')
   },
+  got,
   writeClipboardText(str: string) {
     return clipboard.writeText(str, 'clipboard')
   },

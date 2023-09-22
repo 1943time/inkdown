@@ -6,7 +6,7 @@ import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {Subject} from 'rxjs'
 import {existsSync, mkdirSync, writeFileSync} from 'fs'
-import {isAbsolute, join, parse, relative} from 'path'
+import {basename, isAbsolute, join, parse, relative} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
@@ -247,45 +247,38 @@ export class EditorStore {
     }
   }
 
-
-  insertFile(file: File) {
-    if (file.path) {
-      this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
-    } else {
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = async () => {
-        const base64 = reader.result as string
-        if (base64) {
-          let base64Image = base64.split(';base64,').pop()!
-          const p = parse(file.name)
-          const name = Date.now().toString(16) + p.ext
-          let targetPath = ''
-          let mediaUrl = ''
-          if (treeStore.root) {
-            const imageDir = join(treeStore.root!.filePath, '.images')
-            if (!existsSync(imageDir)) {
-              mkdirSync(imageDir)
-              await MainApi.mkdirp(imageDir)
-              treeStore.watcher.onChange('update', imageDir)
-            }
-            targetPath = join(imageDir, name)
-            mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, name))
-          } else {
-            const path = await MainApi.getCachePath()
-            const imageDir = join(path, 'images')
-            if (!existsSync(imageDir)) mkdirSync(imageDir)
-            targetPath = join(imageDir, name)
-            mediaUrl = targetPath
-          }
-          writeFileSync(targetPath, base64Image, {encoding: 'base64'})
-          this.insertInlineNode(mediaUrl)
-          if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
-        }
-      }
+  async insertFile(file: File) {
+    if (file.path && mediaType(file.path) !== 'image') {
+      return this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
     }
+    const mediaPath = await this.saveFile(file)
+    this.insertInlineNode(mediaPath)
   }
-
+  async saveFile(file: File | {name: string, buffer: ArrayBuffer}) {
+    let targetPath = ''
+    let mediaUrl = ''
+    const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
+    const base = basename(file.name)
+    if (treeStore.root) {
+      const imageDir = join(treeStore.root!.filePath, '.images')
+      if (!existsSync(imageDir)) {
+        mkdirSync(imageDir)
+        await MainApi.mkdirp(imageDir)
+        treeStore.watcher.onChange('update', imageDir)
+      }
+      targetPath = join(imageDir, base)
+      mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
+    } else {
+      const path = await MainApi.getCachePath()
+      const imageDir = join(path, 'images')
+      if (!existsSync(imageDir)) mkdirSync(imageDir)
+      targetPath = join(imageDir, base)
+      mediaUrl = targetPath
+    }
+    writeFileSync(targetPath, new DataView(buffer))
+    if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
+    return mediaUrl
+  }
   insertDragFile(dragNode: IFileItem) {
     const note = treeStore.currentTab.current
     if (!note || !dragNode) return
