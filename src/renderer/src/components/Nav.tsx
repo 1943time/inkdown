@@ -68,6 +68,7 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
+          {/*Network services are relatively private and currently not open source. Please comment on this line of code to run it*/}
           <Share/>
           <Update/>
           <div
@@ -78,6 +79,7 @@ export const Nav = observer(() => {
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
             />
           </div>
+          {/*Network services are relatively private and currently not open source. Please comment on this line of code to run it*/}
           <User/>
         </div>
       </div>

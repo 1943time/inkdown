@@ -10,6 +10,7 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
   const depFiles =  new Set<IFileItem>()
   const changeFiles = new Set<IFileItem>()
   const changeFilesPath = new Map(paths.map(p => [p[1], p[0]]))
+  const oldPathMap = new Map(paths)
   while (stack.length) {
     const item = stack.pop()!
     if (item.folder) {
@@ -25,15 +26,13 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
         if (/^https?:/.test(url)) return m
         const absolute = isAbsolute(url)
         const linkPath = absolute ? url : join(filePath, '..', url)
-        for (let p of paths) {
-          if (linkPath === p[0]) {
-            fileChange = true
-            if (absolute) {
-              return `[${text}](${p[1]})`
-            } else {
-              const changePath = relative(join(filePath, '..'), p[1])
-              return `[${text}](${window.api.toUnix(changePath)})`
-            }
+        if (oldPathMap.get(linkPath)) {
+          fileChange = true
+          if (absolute) {
+            return `[${text}](${oldPathMap.get(linkPath)})`
+          } else {
+            const changePath = relative(join(filePath, '..'), oldPathMap.get(linkPath)!)
+            return `[${text}](${window.api.toUnix(changePath)})`
           }
         }
         return m
