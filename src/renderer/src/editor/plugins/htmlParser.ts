@@ -7,7 +7,7 @@ const findElementByNode = (node: ChildNode) => {
   const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
   return node.parentElement!.children[index] as HTMLElement
 }
-const fragment = new Set(['body', 'figure', 'div'])
+const fragment = new Set(['body', 'figure', 'div', 'figcaption'])
 const ELEMENT_TAGS = {
   BLOCKQUOTE: () => ({type: 'blockquote'}),
   H1: () => ({type: 'head', level: 1}),
@@ -138,7 +138,7 @@ const processFragment = (fragment: any[]) => {
       f.text = f.text.replace(/^\n+|\n+$/g, '')
       if (!f.text) continue
     }
-    if (['media', 'link'].includes(f.type)) {
+    if ((!f.type && f.text) || ['media', 'link'].includes(f.type)) {
       f = {type: 'paragraph', children: [f]}
     }
     if (f.type === 'list-item') {

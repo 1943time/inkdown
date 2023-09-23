@@ -277,7 +277,7 @@ export class EditorStore {
     }
     writeFileSync(targetPath, new DataView(buffer))
     if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
-    return mediaUrl
+    return window.api.toUnix(mediaUrl)
   }
   insertDragFile(dragNode: IFileItem) {
     const note = treeStore.currentTab.current

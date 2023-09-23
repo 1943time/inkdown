@@ -64,7 +64,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
             buffer: toArrayBuffer(res.rawBody)
           }).then(res => {
             Transforms.setNodes(store.editor, {
-              url: res, downloadUrl: undefined
+              url: res, downloadUrl: undefined, alt: ''
             }, {at: state().path})
           })
         })
