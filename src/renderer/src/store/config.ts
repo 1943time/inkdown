@@ -19,7 +19,8 @@ class ConfigStore {
     mas: false,
     dragToSort: true,
     spellCheck: false,
-    autoRebuild: true
+    autoRebuild: true,
+    hideWebService: false
   }
   timer = 0
 

@@ -2,11 +2,11 @@ import {observer} from 'mobx-react-lite'
 import {Checkbox, Modal, Radio, Select, Slider, Tooltip} from 'antd'
 import {CloseOutlined, QuestionCircleOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
-import {useCallback, useEffect} from 'react'
+import {ReactNode, useCallback, useEffect} from 'react'
 import {action} from 'mobx'
 
 function Help(props: {
-  text: string
+  text: string | ReactNode
 }) {
   return (
     <Tooltip title={props.text}>
@@ -73,6 +73,27 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                <span className={'mr-1'}>Automatic Rebuild</span> <Help text={'When a file or folder is renamed or moved, its related dependent links or image paths will automatically change'}/>
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.autoRebuild} onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                <span className={'mr-1'}>Hide Web Services</span> <Help text={(
+                  <>
+                    If you need to share documents with others, web services can share markdown documents online in a minimalist way,
+                    <a className={'link ml-1'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>more</a>.
+                  </>
+                )}/>
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.hideWebService} onChange={e => configStore.setConfig('hideWebService', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 Heading Mark Line
               </div>
               <div>
@@ -85,14 +106,6 @@ export const Set = observer(() => {
               </div>
               <div>
                 <Checkbox checked={configStore.config.dragToSort} onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
-              </div>
-            </div>
-            <div className={'flex justify-between items-center py-3'}>
-              <div className={'text-sm'}>
-                <span className={'mr-1'}>Automatic Rebuild</span> <Help text={'When a file or folder is renamed or moved, its related dependent links or image paths will automatically change'}/>
-              </div>
-              <div>
-                <Checkbox checked={configStore.config.autoRebuild} onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>

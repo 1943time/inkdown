@@ -38,6 +38,7 @@ export const isDark = (config?: any) => {
   }
   return dark
 }
+const isBoolean = (v: any) => typeof v === 'boolean'
 
 export const registerApi = () => {
   listener(store)
@@ -83,11 +84,12 @@ export const registerApi = () => {
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
-      showCharactersCount: typeof config.showCharactersCount === 'boolean' ? config.showCharactersCount : true,
+      showCharactersCount: isBoolean(config.showCharactersCount) ? config.showCharactersCount : true,
       mas: process.mas || false,
-      headingMarkLine: typeof config.headingMarkLine === 'boolean' ? config.headingMarkLine : true,
-      dragToSort: typeof config.dragToSort === 'boolean' ? config.dragToSort : true,
-      autoRebuild: typeof config.autoRebuild === 'boolean' ? config.autoRebuild : true
+      headingMarkLine: isBoolean(config.headingMarkLine) ? config.headingMarkLine : true,
+      dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
+      autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true,
+      hideWebService: isBoolean(config.hideWebService) ? config.hideWebService : false
     }
   })
 

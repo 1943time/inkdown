@@ -7,6 +7,7 @@ import {Update} from './Update'
 import {isWindows} from '../utils'
 import {Share} from '../share/Share'
 import {User} from '../share/User'
+import {configStore} from '../store/config'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
@@ -69,7 +70,9 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
           {/*Network services are relatively private and currently not open source. Please comment on this line of code to run it*/}
-          <Share/>
+          {!configStore.config.hideWebService &&
+            <Share/>
+          }
           <Update/>
           <div
             className={'flex items-center justify-center p-1 group'}
@@ -80,7 +83,9 @@ export const Nav = observer(() => {
             />
           </div>
           {/*Network services are relatively private and currently not open source. Please comment on this line of code to run it*/}
-          <User/>
+          {!configStore.config.hideWebService &&
+            <User/>
+          }
         </div>
       </div>
     </div>
