@@ -1,4 +1,4 @@
-import {Menu, app, ipcMain, BrowserWindow, shell, dialog, clipboard} from 'electron'
+import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'
 import {is} from '@electron-toolkit/utils'
@@ -462,6 +462,10 @@ export const createAppMenus = () => {
       ],
     }
   )
+  menus.push({
+    role: 'windowMenu'
+  })
+
   menus.push(
     {
       label: menusLabel.help,

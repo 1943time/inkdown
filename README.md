@@ -19,7 +19,7 @@ Supports light and dark color theme. and generate your Markdown files into onlin
 ## Features
 - Use pure WYSIWYG editing mode, compatible with markdown syntax conversion, so markdown symbols will not be searched when using the search function.
 - Automatically record and clear file history, view and roll back at any time.
-- Using [shiki](https://github.com/shikijs/shiki) as code syntax highlighting, the syntax analysis is more fine-grained and more beautiful.
+- Using [shiki](https://github.com/shikijs/shiki) as code syntax highlighting, the syntax analysis is more fine-grained and beautiful.
 - Supports block-level and inline editing rendering of [katex](https://katex.org/).
 - Support rendering [mermaid](https://mermaid.js.org/) graphics.
 - The file path is automatically rebuilt. When the file or folder path changes, the related dependent links and image paths will automatically change.

@@ -1,16 +1,16 @@
 import {ElementProps, MediaNode} from '../../el'
-import {basename, extname, join} from 'path'
+import {isAbsolute, join} from 'path'
 import {ReactEditor} from 'slate-react'
-import {useGetSetState, useSetState} from 'react-use'
+import {useGetSetState} from 'react-use'
 import Img from '../../svg/Img'
 import {useEffect, useMemo} from 'react'
 import {treeStore} from '../../store/tree'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {Path, Transforms} from 'slate'
-import {isAbsolute} from 'path'
 import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
+
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const store = useEditorStore()
   const [state, setState] = useGetSetState({
@@ -60,7 +60,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
           responseType: 'buffer'
         }).then(res => {
           store.saveFile({
-            name: Date.now().toString(16) + '.' + image[1],
+            name: Date.now().toString(16) + '.' + image[1].toLowerCase(),
             buffer: toArrayBuffer(res.rawBody)
           }).then(res => {
             Transforms.setNodes(store.editor, {
