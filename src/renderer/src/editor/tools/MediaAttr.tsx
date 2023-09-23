@@ -125,7 +125,8 @@ export const MediaAttr = observer(() => {
   }, [treeStore.size, store.openSearch])
   return (
     <div
-      className={`z-10 absolute dark:text-gray-300 text-gray-500 h-8 rounded text-sm dark:bg-zinc-900/80 bg-white/80 text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
+      className={`dark:bg-zinc-900/70 bg-white/70 border-t border-l border-r border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
+      z-10 absolute dark:text-gray-300 text-gray-500 h-8 text-sm text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
       ref={domRef}
       style={{
         left: state().left,
@@ -153,22 +154,26 @@ export const MediaAttr = observer(() => {
         onKeyDown={keydown}
         placeholder={'url or file path'}
       />
-      <CheckOutlined
-        onClick={() => {
-          const path = nodeRef.current![1]
-          Transforms.setNodes(
-            store.editor,
-            {url: state().url || '', alt: state().alt || ''},
-            {at: path}
-          )
-        }}
-        className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500 ml-2'}
-      />
-      <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0 mx-2'}></div>
-      <DeleteOutlined
-        className={'dark:text-gray-300 text-gray-500 cursor-pointer duration-300 hover:text-sky-500'}
-        onClick={del}
-      />
+      <div className={'rounded-sm dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 ml-2 px-1 py-0.5'}>
+        <CheckOutlined
+          onClick={() => {
+            const path = nodeRef.current![1]
+            Transforms.setNodes(
+              store.editor,
+              {url: state().url || '', alt: state().alt || ''},
+              {at: path}
+            )
+          }}
+          className={'dark:text-gray-300 text-gray-500 cursor-default relative'}
+        />
+      </div>
+      <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0 mx-1'}></div>
+      <div className={'rounded-sm dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 px-1 py-0.5'}>
+        <DeleteOutlined
+          className={'dark:text-gray-300 text-gray-500 cursor-pointer'}
+          onClick={del}
+        />
+      </div>
     </div>
   )
 })
