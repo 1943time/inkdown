@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {AppstoreOutlined, LeftOutlined, RightOutlined, SendOutlined} from '@ant-design/icons'
+import {AppstoreOutlined, LeftOutlined, RightOutlined} from '@ant-design/icons'
 import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'

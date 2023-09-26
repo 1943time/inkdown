@@ -258,7 +258,8 @@ export class EditorStore {
     let targetPath = ''
     let mediaUrl = ''
     const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
-    const base = basename(file.name)
+    const p = parse(file.name)
+    const base = Date.now().toString(16) + p.ext
     if (treeStore.root) {
       const imageDir = join(treeStore.root!.filePath, '.images')
       if (!existsSync(imageDir)) {
