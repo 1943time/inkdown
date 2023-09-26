@@ -6,7 +6,7 @@ import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
 export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>}>()
-const floatBarIgnoreNode = new Set(['code-line', 'head', 'inline-katex'])
+const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   const currentType = useRef('')

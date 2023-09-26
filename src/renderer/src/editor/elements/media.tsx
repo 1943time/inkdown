@@ -19,15 +19,17 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     selected: false,
     path: ReactEditor.findPath(store.editor, element)
   })
+
   const type = useMemo(() => {
     return mediaType(element.url)
   }, [element.url])
+
   useEffect(() => {
     if (element.downloadUrl) {
       return
     }
-    if (type !== 'image') {
-      setState({loadSuccess: true})
+    if (!['image', 'video', 'document'].includes(type) || element.url?.startsWith('data:')) {
+      setState({loadSuccess: true, url: element.url})
       return
     }
     let realUrl = element.url
@@ -90,7 +92,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }}
     >
       {children}
-      {state().loadSuccess && type !== 'other' ?
+      {state().loadSuccess && (type !== 'other' || state().url.startsWith('data:')) ?
         <span className={'inline-block top-1'}>
           <span
             className={`relative border-2 ${state().selected ? ' border-blue-500/60' : 'border-transparent'} block`}
@@ -101,7 +103,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
             {type === 'document' &&
               <object data={element.url} className={'w-full h-auto'}/>
             }
-            {type === 'image' &&
+            {(type === 'image' || state().url.startsWith('data:')) &&
               <img
                 src={state().url} alt={element.alt}
                 referrerPolicy={'no-referrer'}

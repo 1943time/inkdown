@@ -92,6 +92,7 @@ export const FloatBar = observer(() => {
       setState({open: false})
     }
   }, [store.domRect])
+
   useEffect(() => {
     if (state.open) {
       const close = (e: KeyboardEvent) => {
