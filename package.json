@@ -18,7 +18,7 @@
     "build:win": "electron-builder --win --arm64 --x64 --config",
     "build:mac": "electron-builder --macos --config",
     "build:mas": "npm run build && electron-builder --macos --config mas-builder.yml",
-    "build:linux": "electron-builder --linux --config",
+    "build:linux": "electron-builder --linux --arm64 --x64 --config",
     "unpackage": "rm -rf unpackage && asar extract dist/mac-arm64/bluestone.app/Contents/Resources/app.asar ./unpackage",
     "buildapp": "npm run build && npm run build:mac && npm run build:win"
   },

@@ -62,6 +62,7 @@ jobs:
         run: |
           npm run build:mac
           npm run build:win
+          npm run build:linux
       - name: GH Release
         uses: softprops/action-gh-release@v0.1.15
         env:
@@ -72,4 +73,6 @@ jobs:
           files: |
             dist/Bluestone*-arm64-*.*
             dist/Bluestone*-x64-*.*
+            dist/Bluestone*-x86_64-*.*
+            dist/Bluestone*-amd64-*.*
             dist/latest*.yml

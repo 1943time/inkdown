@@ -48,9 +48,9 @@ linux:
   target:
     - AppImage
     - deb
-  maintainer: bluemd.me
-  category: Utility
-appImage:
+  maintainer: 1943dejavu
+  category: Markdown
+  executableName: Bluestone
 npmRebuild: false
 publish:
   provider: github

@@ -159,7 +159,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       }
       {props.element.language === 'html' && !!props.element.render &&
         <div
-          className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded leading-5'}
+          className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded leading-5 overflow-auto'}
           onClick={(e) => {
             e.stopPropagation()
             Transforms.select(editor, Editor.start(editor, ReactEditor.findPath(editor, props.element)))

@@ -4,7 +4,7 @@ import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {store} from './store'
 import {writeFileSync} from 'fs'
-// import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/icon.png?asset'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
@@ -13,7 +13,7 @@ import {openAuth, listener} from './auth'
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
   // autoHideMenuBar: true,
-  // ...(process.platform === 'linux' ? {icon} : {}),
+  ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,
   webPreferences: {

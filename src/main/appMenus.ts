@@ -6,6 +6,7 @@ import {is} from '@electron-toolkit/utils'
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 const isMas = process.mas || false
 const isMac = process.platform === 'darwin'
+const isLinux = process.platform === 'linux'
 const cmd = 'CmdOrCtrl'
 const task = (task: string, parameter?: any) => {
   return (e: MenuItem, win?: BrowserWindow) => {
@@ -98,7 +99,7 @@ export const createAppMenus = () => {
       ]
     }
   ]
-  const systemFileMenus: MenuOptions[number]['submenu'] = isMac ? [
+  const systemFileMenus: MenuOptions[number]['submenu'] = isMac || isLinux ? [
     {type: 'separator'},
     {
       id: 'open',
