@@ -4,7 +4,7 @@ import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
-import {isWindows} from '../utils'
+import {isMac, isWindows} from '../utils'
 import {Share} from '../share/Share'
 import {User} from '../share/User'
 import {configStore} from '../store/config'
@@ -16,7 +16,7 @@ export const Nav = observer(() => {
   return (
     <div
       className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
-      style={{paddingLeft: treeStore.fold ? isWindows ? 42 : 114 : treeStore.width}}
+      style={{paddingLeft: treeStore.fold ? !isMac ? 42 : 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {
           MainApi.maxSize()

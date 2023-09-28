@@ -5,7 +5,7 @@ import Folder from '../../icons/Folder'
 import ISearch from '../../icons/ISearch'
 import Collapse from '../../icons/Collapse'
 import {useSetState} from 'react-use'
-import {isWindows} from '../../utils'
+import {isMac, isWindows} from '../../utils'
 
 export const TreeTop = observer(() => {
   const [state, setState] = useSetState({
@@ -23,7 +23,7 @@ export const TreeTop = observer(() => {
   return (
     <div
       className={`fixed left-0 top-0 z-20 h-[40px] ${state.win ? 'pl-2' : state.full ? 'pl-5' : 'pl-20'} duration-200 width-duration`}
-      style={{width: treeStore.fold ? isWindows ? 42 : 114 : treeStore.width}}
+      style={{width: treeStore.fold ? !isMac ? 42 : 114 : treeStore.width}}
     >
       <div className={'flex h-full items-center'}>
         <div
