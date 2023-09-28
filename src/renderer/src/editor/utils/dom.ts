@@ -39,6 +39,8 @@ export const slugify = (str: string): string => {
 }
 
 export const mediaType = (name?: string) => {
+  name = name || ''
+  name = name.split('?')[0]
   const ext = extname(name || '')
   if (['.md', '.markdown'].includes(ext)) return 'markdown'
   if (['.png', '.jpg', '.gif', '.svg', '.jpeg', '.webp'].includes(ext)) return 'image'

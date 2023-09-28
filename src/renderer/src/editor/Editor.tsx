@@ -20,7 +20,8 @@ import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {saveRecord} from '../store/db'
-
+import {transformSchema} from './output/html/transform'
+import {renderToString} from 'react-dom/server'
 const countThrottle$ = new Subject<any>()
 export const saveDoc$ = new Subject<any[] | null>()
 const preventDefault = (e: React.CompositionEvent) => e.preventDefault()

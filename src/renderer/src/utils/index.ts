@@ -25,8 +25,8 @@ export const stat = (filePath: string) => {
   }
 }
 
-export const getImageData = (filePath: string = '') => {
-  const dev = process.env.NODE_ENV === 'development'
+export const getImageData = (filePath: string = '', force = false) => {
+  const dev = process.env.NODE_ENV === 'development' || force
   if (existsSync(filePath)) {
     if (dev && mediaType(filePath) === 'image') {
       const base64 = readFileSync(filePath, {'encoding': 'base64'})
