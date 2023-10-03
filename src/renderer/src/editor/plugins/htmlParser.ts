@@ -2,6 +2,7 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
 import {EditorUtils} from '../utils/editorUtils'
 import {BackspaceKey} from './hotKeyCommands/backspace'
+import {atRule} from 'postcss'
 
 const findElementByNode = (node: ChildNode) => {
   const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
@@ -32,8 +33,9 @@ const ELEMENT_TAGS = {
 const TEXT_TAGS = {
   A: (el: HTMLElement) => ({url: el.getAttribute('href')}),
   CODE: () => ({code: true}),
-  SPAN: (el: HTMLElement) => ({text: el.textContent}),
+  SPAN: (el: HTMLElement) => ({}),
   DEL: () => ({strikethrough: true}),
+  KBD: () => ({code: true}),
   EM: () => ({italic: true}),
   I: () => ({italic: true}),
   S: () => ({strikethrough: true}),
@@ -49,7 +51,6 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
   } else if (el.nodeName === 'BR') {
     return '\n'
   }
-
   const {nodeName} = el
   let target = el
   if (
@@ -72,7 +73,7 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
   if (fragment.has((el.nodeName.toLowerCase()))) {
     return jsx('fragment', {}, children)
   }
-  if (TEXT_TAGS[nodeName] && Array.from(el.childNodes).some(e => el.nodeType !== 3 && !TEXT_TAGS[e.nodeName])) {
+  if (TEXT_TAGS[nodeName] && Array.from(el.childNodes).some(e => e.nodeType !== 3 && !TEXT_TAGS[e.nodeName])) {
     return jsx('fragment', {}, children)
   }
   if (ELEMENT_TAGS[nodeName]) {
@@ -103,7 +104,7 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
       return jsx('element', attrs, children)
     }
   }
-  if (TEXT_TAGS[nodeName]) {
+  if (TEXT_TAGS[nodeName] && el.childNodes.length) {
     const attrs = TEXT_TAGS[nodeName](el)
     return children.map(child => {
       return jsx('text', attrs, child)

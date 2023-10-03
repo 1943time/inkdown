@@ -282,7 +282,7 @@ ol.m-list {
   &.katex-container{
     pre{
       position: relative;
-      padding: 20px 0;
+      padding: .74em 0;
       &:before,&:after{
         content: '$$';
         color: rgba(255, 255, 255, .5);
