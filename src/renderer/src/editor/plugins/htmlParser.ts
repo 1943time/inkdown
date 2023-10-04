@@ -132,33 +132,37 @@ const getTextsNode = (nodes: any[]) => {
   return text
 }
 
-const processFragment = (fragment: any[]) => {
+const processFragment = (fragment: any[], parentType = '') => {
   let trans:any[] = []
-  let list:any = null
+  let container: null | any = null
   for (let f of fragment) {
     if (f.text) {
       f.text = f.text.replace(/^\n+|\n+$/g, '')
       if (!f.text) continue
     }
-    if (['media', 'link'].includes(f.type)) {
-      f = {type: 'paragraph', children: [f]}
-    }
-    if (f.type === 'list-item') {
-      if (!list) {
-        list = {type: 'list', children: [f]}
+    if ((['media', 'link'].includes(f.type) || f.text) && !['paragraph', 'table-cell', 'head'].includes(parentType)) {
+      if (!container) {
+        f = {type: 'paragraph', children: [f]}
+        container = f
+        trans.push(container)
       } else {
-        list.children.push(f)
+        container.children.push(f)
       }
-    } else {
-      if (list) {
-        trans.push(list)
-        list = null
-      }
-      trans.push(f)
+      continue
     }
-  }
-  if (list) {
-    trans.push(list)
+    if (f.type === 'list-item' && parentType !== 'list') {
+      if (!container) {
+        container = {type: 'list', children: [f]}
+        trans.push(container)
+      } else {
+        container.children.push(f)
+      }
+      continue
+    }
+    if (f.children && f.type) {
+      f.children = processFragment(f.children, f.type)
+    }
+    trans.push(f)
   }
   return trans
 }

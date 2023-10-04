@@ -20,8 +20,6 @@ import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {saveRecord} from '../store/db'
-import {transformSchema} from './output/html/transform'
-import {renderToString} from 'react-dom/server'
 const countThrottle$ = new Subject<any>()
 export const saveDoc$ = new Subject<any[] | null>()
 const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
@@ -68,7 +66,7 @@ export const MEditor = observer(({note}: {
   const count = useCallback((nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
     const root = Editor.node(editor, [])
-    const res = toMarkdown(nodes, '', [root[0]])
+    const res = toMarkdown(nodes, '', root[0].children || [])
     const texts = Editor.nodes(editor, {
       at: [],
       match: n => n.text
