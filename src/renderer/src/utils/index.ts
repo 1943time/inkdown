@@ -5,6 +5,8 @@ import {mediaType} from '../editor/utils/dom'
 import {Subject} from 'rxjs'
 import {ArgsProps} from 'antd/es/message'
 import {HookAPI} from 'antd/es/modal/useModal'
+import { customAlphabet } from 'nanoid'
+export const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 13)
 
 const kb = 1024
 const mb = kb * 1024

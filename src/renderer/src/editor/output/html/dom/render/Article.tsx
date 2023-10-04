@@ -74,13 +74,13 @@ function Render(props: {
             {s.type === 'list-item' &&
               <li className={`m-list-item ${typeof s.checked === 'boolean' ? 'task' : ''}`}>
                 {typeof s.checked === 'boolean' &&
-                  <span className={'absolute left-0 top-[1px]'}>
+                  <span className={'task-check'}>
                   <input
                     type={'checkbox'}
                     defaultChecked={s.checked}
                     className={'w-[14px] h-[14px] align-baseline'}
                   />
-                </span>
+                  </span>
                 }
                 <Render schema={s.children} path={path}/>
               </li>

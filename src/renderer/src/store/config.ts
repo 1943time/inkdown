@@ -23,7 +23,7 @@ class ConfigStore {
     hideWebService: false
   }
   timer = 0
-
+  serviceConfig: null | Record<any, any> = null
   get mas() {
     return process.mas || false
   }
@@ -95,6 +95,11 @@ class ConfigStore {
 
   initial() {
     return new Promise(resolve => {
+      window.electron.ipcRenderer.invoke('get-service-config').then(res => {
+        if (res) {
+          runInAction(() => this.serviceConfig = res)
+        }
+      })
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
         // console.log('res', res)
         if (res.dark) document.documentElement.classList.add('dark')

@@ -48,7 +48,7 @@ export function Code({node, path}: {
         <pre
           className={'text-gray-200'}
           style={{
-            paddingLeft: ctx.showCodeLineNum ? 24 : 0,
+            paddingLeft: ctx.showCodeLineNum ? 24 : 0
           }}
           dangerouslySetInnerHTML={{__html: node.html}}
         /> :

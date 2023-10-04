@@ -17,7 +17,7 @@ type WinOptions = {
   openFolder?: string
   openFile?: string
 }
-
+console.log('path', app.getPath('userData'))
 const windows = new Map<number, WinOptions>()
 app.setAsDefaultProtocolClient('bluestone-markdown')
 function createWindow(initial?: WinOptions): void {

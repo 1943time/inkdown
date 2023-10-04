@@ -426,7 +426,7 @@ export const createAppMenus = () => {
       }
     }
   ]
-  const devTools:MenuOptions[number]['submenu'] = is.dev ? [
+  const devTools:MenuOptions[number]['submenu'] = is.dev || true ? [
     {role: 'toggleDevTools'}
   ] : []
   menus.push(

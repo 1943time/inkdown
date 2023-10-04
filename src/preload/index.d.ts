@@ -6,6 +6,7 @@ import {AliApi} from './sdk/ali'
 import {Sdk} from './sdk'
 import {Got} from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
+import {Service} from './service'
 
 
 declare global {
@@ -14,6 +15,7 @@ declare global {
     api: {
       sdk: typeof Sdk,
       dev: boolean
+      service: Service,
       got: Got
       toUnix: (path: string) => string
       md5: (str: string | Buffer) => string

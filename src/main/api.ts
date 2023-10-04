@@ -101,6 +101,13 @@ export const registerApi = () => {
   ipcMain.handle('get-system-dark', (e) => {
     return nativeTheme.shouldUseDarkColors
   })
+  ipcMain.handle('set-service-config', (e, config: any) => {
+    if (!config) store.delete('service-config')
+    else store.set('service-config', config)
+  })
+  ipcMain.handle('get-service-config', e => {
+    return store.get('service-config')
+  })
   ipcMain.on('setStore', (e, key: string, value: any) => {
     if (typeof value === 'undefined') {
       store.delete(key)

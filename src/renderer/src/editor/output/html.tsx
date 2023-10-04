@@ -15,13 +15,14 @@ const getAssets = async () => {
   const files = await fs.readdir(env.webPath)
   const scriptPath = files.find(f => f.endsWith('.js'))
   const cssPath = files.find(f => f === 'style.css')
+  const katexPath = files.find(f => f === 'katex.min.css')
   return {
     script: await fs.readFile(join(env.webPath, scriptPath!), {encoding:'utf-8'}),
+    katexCss: await fs.readFile(join(env.webPath, katexPath!), {encoding:'utf-8'}),
     css: await fs.readFile(join(env.webPath, cssPath!), {encoding:'utf-8'})
   }
 }
-
-export const exportHtml = async (node: IFileItem) => {
+export const exportToHtmlString = async (node: IFileItem, web = false) => {
   const tree = treeStore.schemaMap.get(node)?.state || []
   const title = parse(node.filePath).name
   const {script, css} = await getAssets()
@@ -35,20 +36,24 @@ export const exportHtml = async (node: IFileItem) => {
       <Doc schema={schema} title={title}/>
     </HtmlContext.Provider>
   )
-  const html = `<html lang="en">
+  return `<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="${icon}">
+  <link rel="icon" href="${web ? '/lib/favicon.png' : icon}">
   <title>${title}</title>
-  <style>${css}</style>
+  ${web ? '<link href="/lib/style.css" crossorigin="" rel="stylesheet"/>' : `<style>${css}</style>`}
+  ${web ? '<script src="/lib/script.js"></script>' : ''}
 </head>
 <body>
 <div id="root">${content}</div>
-<script>${script}</script>
+${web ? '' : `<script>${script}</script>`}
 </body>
 </html>
   `
+}
+export const exportHtml = async (node: IFileItem, web = false) => {
+  const html = await exportToHtmlString(node, web)
   const save = await saveDialog({
     filters: [{name: 'html', extensions: ['html']}]
   })

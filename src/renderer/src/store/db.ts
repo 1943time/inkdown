@@ -21,6 +21,15 @@ export interface IQuickOpen {
   dirPath: string
   time: number
 }
+export interface IShareNote{
+  id?: string
+  filePath: string
+  name: string
+  hash?: string
+  updated: number
+  details?: object
+}
+
 
 export interface IHistory {
   id?: string
@@ -33,14 +42,16 @@ class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
   public history!: Table<IHistory, string>
+  public shareNote!: Table<IShareNote, string>
 
   public constructor() {
     super('db')
-    this.version(4).stores({
+    this.version(5).stores({
       ebook: '++id,filePath,strategy,name,map,ignorePaths',
       recent: '&id,&filePath',
       quickOpen: '&id,filePath,dirPath',
-      history: '&id,filePath,schema,updated'
+      history: '&id,filePath,schema,updated',
+      shareNote: '&id,&filePath,name,updated,hash,details'
     })
   }
 }

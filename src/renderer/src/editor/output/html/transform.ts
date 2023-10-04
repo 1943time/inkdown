@@ -4,10 +4,11 @@ import mermaid from 'mermaid'
 import {configStore} from '../../../store/config'
 import katex from 'katex'
 import {EditorUtils} from '../../utils/editorUtils'
-import {isAbsolute, join} from 'path'
+import {isAbsolute, join, extname} from 'path'
 import {existsSync} from 'fs'
 import {mediaType} from '../../utils/dom'
 import {getImageData} from '../../../utils'
+import {db} from '../../../store/db'
 
 export const transformSchema = async (schema: any[], filePath: string) => {
   const data = JSON.parse(JSON.stringify(schema)) as any[]
