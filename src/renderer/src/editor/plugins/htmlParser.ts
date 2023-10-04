@@ -2,13 +2,12 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
 import {EditorUtils} from '../utils/editorUtils'
 import {BackspaceKey} from './hotKeyCommands/backspace'
-import {atRule} from 'postcss'
 
 const findElementByNode = (node: ChildNode) => {
   const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
   return node.parentElement!.children[index] as HTMLElement
 }
-const fragment = new Set(['figure', 'figcaption', 'noscript'])
+const fragment = new Set(['body', 'figure', 'div'])
 const ELEMENT_TAGS = {
   BLOCKQUOTE: () => ({type: 'blockquote'}),
   H1: () => ({type: 'head', level: 1}),
@@ -26,7 +25,6 @@ const ELEMENT_TAGS = {
   LI: () => ({type: 'list-item'}),
   OL: () => ({type: 'list', order: true}),
   P: () => ({type: 'paragraph'}),
-  DIV: () => ({type: 'paragraph'}),
   PRE: () => ({type: 'code'}),
   UL: () => ({type: 'list'}),
 }
@@ -34,9 +32,9 @@ const ELEMENT_TAGS = {
 const TEXT_TAGS = {
   A: (el: HTMLElement) => ({url: el.getAttribute('href')}),
   CODE: () => ({code: true}),
-  SPAN: (el: HTMLElement) => ({}),
-  DEL: () => ({strikethrough: true}),
   KBD: () => ({code: true}),
+  SPAN: (el: HTMLElement) => ({text: el.textContent}),
+  DEL: () => ({strikethrough: true}),
   EM: () => ({italic: true}),
   I: () => ({italic: true}),
   S: () => ({strikethrough: true}),
@@ -45,7 +43,7 @@ const TEXT_TAGS = {
 }
 
 export const deserialize = (el: ChildNode, parentTag: string = '') => {
-  if (fragment.has((el.nodeName.toLowerCase()))) return []
+  if (el.nodeName.toLowerCase() === 'noscript') return []
   if (el.nodeType === 3) {
     return el.textContent
   } else if (el.nodeType !== 1) {
@@ -53,6 +51,7 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
   } else if (el.nodeName === 'BR') {
     return '\n'
   }
+
   const {nodeName} = el
   let target = el
   if (
@@ -72,6 +71,9 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
     children = [{text: el.textContent || ''}]
   }
 
+  if (fragment.has((el.nodeName.toLowerCase()))) {
+    return jsx('fragment', {}, children)
+  }
   if (TEXT_TAGS[nodeName] && Array.from(el.childNodes).some(e => e.nodeType !== 3 && !TEXT_TAGS[e.nodeName])) {
     return jsx('fragment', {}, children)
   }
@@ -103,11 +105,11 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
       return jsx('element', attrs, children)
     }
   }
-  if (TEXT_TAGS[nodeName] && el.childNodes.length) {
+  if (TEXT_TAGS[nodeName]) {
     const attrs = TEXT_TAGS[nodeName](el)
     return children.map(child => {
       return jsx('text', attrs, child)
-    }).filter(c => !!c.text && c.text.toLowerCase() !== '&nbsp;')
+    }).filter(c => !!c.text)
   }
   return children
 }
@@ -138,7 +140,7 @@ const processFragment = (fragment: any[]) => {
       f.text = f.text.replace(/^\n+|\n+$/g, '')
       if (!f.text) continue
     }
-    if ((!f.type && f.text) || ['media', 'link'].includes(f.type)) {
+    if (['media', 'link'].includes(f.type)) {
       f = {type: 'paragraph', children: [f]}
     }
     if (f.type === 'list-item') {
@@ -163,7 +165,6 @@ const processFragment = (fragment: any[]) => {
 export const htmlParser = (editor: Editor, html: string) => {
   const parsed = new DOMParser().parseFromString(html, 'text/html').body
   const inner = !!parsed.querySelector('[data-be]')
-  console.log('parse', parsed)
   const sel = editor.selection
   let fragment = processFragment(deserialize(parsed))
   if (!fragment?.length) return
