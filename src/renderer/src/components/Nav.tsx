@@ -5,9 +5,6 @@ import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
 import {isMac, isWindows} from '../utils'
-import {Share} from '../share/Share'
-import {User} from '../share/User'
-import {configStore} from '../store/config'
 import {Server} from '../server/Server'
 export const Nav = observer(() => {
   const paths = useMemo(() => {

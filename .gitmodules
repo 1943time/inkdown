@@ -1,3 +1,0 @@
-[submodule "src/renderer/src/share"]
-	path = src/renderer/src/share
-	url = git@github.com:1943time/bluestone-user.git

@@ -23,9 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          token: ${{secrets.MD_TOKEN}}
-          submodules: true
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:

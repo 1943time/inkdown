@@ -81,19 +81,6 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                <span className={'mr-1'}>Hide Web Services</span> <Help text={(
-                  <>
-                    If you need to share documents with others, web services can share markdown documents online in a minimalist way,
-                    <a className={'link ml-1'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>more</a>.
-                  </>
-                )}/>
-              </div>
-              <div>
-                <Checkbox checked={configStore.config.hideWebService} onChange={e => configStore.setConfig('hideWebService', e.target.checked)}/>
-              </div>
-            </div>
-            <div className={'flex justify-between items-center py-3'}>
-              <div className={'text-sm'}>
                 Heading Mark Line
               </div>
               <div>

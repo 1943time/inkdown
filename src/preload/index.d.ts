@@ -6,7 +6,7 @@ import {AliApi} from './sdk/ali'
 import {Sdk} from './sdk'
 import {Got} from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
-import {Service} from './service'
+import {Service} from './service/service'
 
 
 declare global {

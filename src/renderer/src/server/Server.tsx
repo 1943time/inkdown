@@ -112,7 +112,12 @@ export const Server = observer(() => {
         const record = await db.shareNote.where('filePath').equals(note.filePath).first()
         const html = await exportToHtmlString(treeStore.openNote!, true)
         const name = record ? record.name : `doc/${nid()}.html`
-        await window.api.service.uploadDoc(name, html)
+        await window.api.service.uploadDoc({
+          name: name,
+          content: html,
+          filePath: treeStore.openNote!.filePath,
+          json: treeStore.schemaMap.get(treeStore.openNote!)?.state || []
+        })
         if (record) {
           await db.shareNote.where('filePath').equals(note.filePath).modify({
             updated: Date.now()
@@ -170,14 +175,16 @@ export const Server = observer(() => {
                   label: 'Share Note',
                   children: (
                     <div className={'relative'}>
-                      <Button
-                        className={'absolute right-0 -top-2'}
-                        type={'link'}
-                        onClick={() => {
-                          setState({mask: true, openSetting: true})
-                        }}
-                        icon={<SettingOutlined />}
-                      />
+                      {!!configStore.serviceConfig &&
+                        <Button
+                          className={'absolute right-0 -top-2'}
+                          type={'link'}
+                          onClick={() => {
+                            setState({mask: true, openSetting: true})
+                          }}
+                          icon={<SettingOutlined />}
+                        />
+                      }
                       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                         <Net className={'w-5 h-5 fill-gray-500'}/>
                         <span className={'ml-2'}>{configStore.serviceConfig ? 'Synchronize current note to service' : 'Share the current note to your own service'}</span>
@@ -185,7 +192,8 @@ export const Server = observer(() => {
                       {!configStore.serviceConfig &&
                         <>
                           <div className={'text-center text-[13px] mt-4 text-gray-500'}>
-                            This feature requires you to have basic technical skills, please refer to the <a className={'link'}>guide</a> for details.
+                            You can use it to synchronize the generated documents to your own server or cloud storage for easy sharing on the internet, please refer to the
+                            <a className={'link'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>guide</a> for details.
                           </div>
                           <Button
                             block={true} className={'mt-4'}
@@ -224,7 +232,7 @@ export const Server = observer(() => {
                                 <RemoveShare
                                   doc={state.curDoc!}
                                   onRemove={async () => {
-                                    await window.api.service.deleteDoc(state.curDoc!.name)
+                                    await window.api.service.deleteDoc(state.curDoc!.name, state.curDoc!.filePath)
                                     await db.shareNote.where('filePath').equals(state.curDoc!.filePath).delete()
                                     setState({refresh: !state.refresh})
                                   }}>
@@ -288,7 +296,7 @@ export const Server = observer(() => {
       <Record
         open={state.openRecord}
         onClose={() => {
-          setState({openRecord: false})
+          setState({openRecord: false, refresh: !state.refresh})
           closeMask()
         }}
       />

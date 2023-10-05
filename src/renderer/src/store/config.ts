@@ -19,8 +19,7 @@ class ConfigStore {
     mas: false,
     dragToSort: true,
     spellCheck: false,
-    autoRebuild: true,
-    hideWebService: false
+    autoRebuild: true
   }
   timer = 0
   serviceConfig: null | Record<any, any> = null

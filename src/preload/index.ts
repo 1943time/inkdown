@@ -11,7 +11,7 @@ const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])])
 let highlighter:Highlighter | null = null
 import {toUnix} from 'upath'
 import mime from 'mime-types'
-import {Service} from './service'
+import {Service} from './service/service'
 let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {

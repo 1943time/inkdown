@@ -1,39 +1,97 @@
 import {observer} from 'mobx-react-lite'
-import {Modal, Tabs} from 'antd'
+import {Button, Modal, Table, Tabs} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
-import {IShareNote} from '../store/db'
+import {db, IShareNote} from '../store/db'
+import {useCallback, useEffect} from 'react'
+import dayjs from 'dayjs'
+import {CopyOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons'
+import {RemoveShare} from './RemoveShare'
+import {message$} from '../utils'
 
 export const Record = observer((props: {
   open: boolean
   onClose: () => void
 }) => {
   const [state, setState] = useLocalState({
-    docs: [] as IShareNote[]
+    docs: [] as IShareNote[],
+    page: 1,
+    pageSize: 10,
+    total: 0,
+    config: null as any
   })
+  const getList = useCallback(async () => {
+    const total = await db.shareNote.count()
+    const list = await db.shareNote.offset((state.page - 1) * state.pageSize).limit(state.pageSize).toArray()
+    setState({docs: list, total: total})
+  }, [])
+
+  useEffect(() => {
+    if (props.open) {
+      setState({page: 1})
+      window.electron.ipcRenderer.invoke('get-service-config').then(res => {
+        setState({config: res})
+        if (res) {
+          getList()
+        }
+      })
+    }
+  }, [props.open])
   return (
     <Modal
       width={900}
       open={props.open}
-      title={'Records'}
+      title={'Shared Records'}
       onCancel={props.onClose}
       footer={null}
     >
-      <Tabs
+      <Table
+        dataSource={state.docs}
+        rowKey={'id'}
         size={'small'}
-        tabPosition={'left'}
-        items={[
+        columns={[
           {
-            label: 'Notes',
-            key: 'note',
-            children: (
-              <></>
-            )
+            title: 'Name',
+            dataIndex: 'name',
+            render: v => <a href={`${state.config?.domain || ''}/${v}`} target={'_blank'} className={'link'}>{v}</a>
           },
           {
-            label: 'Files',
-            key: 'file',
-            children: (
-              <></>
+            title: 'FilePath',
+            dataIndex: 'filePath'
+          },
+          {
+            title: 'Updated',
+            dataIndex: 'updated',
+            render: v => dayjs(v).format('MM-DD HH:mm')
+          },
+          {
+            title: 'Action',
+            dataIndex: 'action',
+            render: (_, record) => (
+              <div>
+                <Button
+                  icon={<CopyOutlined />}
+                  onClick={() => {
+                    window.api.copyToClipboard(`${state.config?.domain || ''}/${record.name}`)
+                    message$.next({
+                      type: 'success',
+                      content: 'Copied to clipboard'
+                    })
+                  }}
+                  type={'link'} size={'small'}
+                />
+                <RemoveShare
+                  onRemove={async () => {
+                    await window.api.service.deleteDoc(record.name, record.filePath)
+                    await db.shareNote.where('filePath').equals(record.filePath).delete()
+                    getList()
+                  }}>
+                  <Button
+                    className={'ml-1.5'}
+                    icon={<StopOutlined />}
+                    type={'link'} danger={true} size={'small'}
+                  />
+                </RemoveShare>
+              </div>
             )
           }
         ]}
