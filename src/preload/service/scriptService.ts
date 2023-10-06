@@ -66,7 +66,7 @@ export class ScriptService {
     })
     if (!res?.name) throw new Error('the method uploadDoc must return the format {name: string}')
     await got.get(domain + '/' + 'doc/test.html').catch(e => {
-      throw new Error(`url ${domain}/doc/text.html is not accessible`)
+      throw new Error(`url ${domain}/doc/test.html is not accessible`)
     })
     await service.removeFile({
       name: 'doc/test.html',

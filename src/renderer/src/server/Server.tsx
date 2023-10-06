@@ -193,7 +193,7 @@ export const Server = observer(() => {
                         <>
                           <div className={'text-center text-[13px] mt-4 text-gray-500'}>
                             You can use it to synchronize the generated documents to your own server or cloud storage for easy sharing on the internet, please refer to the
-                            <a className={'link'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>guide</a> for details.
+                            <a className={'link mx-0.5'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>guide</a>for details.
                           </div>
                           <Button
                             block={true} className={'mt-4'}

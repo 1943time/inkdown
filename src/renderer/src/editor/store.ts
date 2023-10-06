@@ -429,11 +429,6 @@ export class EditorStore {
             Transforms.delete(this.editor, {at: Path.parent(dragPath)})
           }
           outputCache.delete(dragNode)
-          let parentNode = Editor.parent(this.editor, Path.parent(dragPath))
-          while (parentNode[1].length) {
-            outputCache.delete(parentNode[0])
-            parentNode = Editor.parent(this.editor, Path.parent(parentNode[1]))
-          }
         }
       }
       this.dragEl!.draggable = false

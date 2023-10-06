@@ -4,11 +4,10 @@ import mermaid from 'mermaid'
 import {configStore} from '../../../store/config'
 import katex from 'katex'
 import {EditorUtils} from '../../utils/editorUtils'
-import {isAbsolute, join, extname} from 'path'
+import {isAbsolute, join} from 'path'
 import {existsSync} from 'fs'
 import {mediaType} from '../../utils/dom'
 import {getImageData} from '../../../utils'
-import {db} from '../../../store/db'
 const langMap = new Map([
   ['c++', 'cpp']
 ])
@@ -106,8 +105,9 @@ export const transformSchema = async (schema: any[], filePath: string) => {
           })
         } else {
           item.code = code
-          if (window.api.langSet.has(item.language)) {
-            item.html = window.api.highlightCodeToString(item.code, codeLangMap(item.language)).replace(/<\/?pre[^>]*>/g, '')
+          const lang = codeLangMap(item.language)
+          if (window.api.langSet.has(lang)) {
+            item.html = window.api.highlightCodeToString(item.code, lang).replace(/<\/?pre[^>]*>/g, '')
           }
         }
       } catch (e) {}
