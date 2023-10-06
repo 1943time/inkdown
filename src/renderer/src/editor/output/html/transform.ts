@@ -9,7 +9,12 @@ import {existsSync} from 'fs'
 import {mediaType} from '../../utils/dom'
 import {getImageData} from '../../../utils'
 import {db} from '../../../store/db'
-
+const langMap = new Map([
+  ['c++', 'cpp']
+])
+export const codeLangMap = (lang: string) => {
+  return langMap.get(lang) || lang
+}
 export const transformSchema = async (schema: any[], filePath: string) => {
   const data = JSON.parse(JSON.stringify(schema)) as any[]
   const stack = data.slice()
@@ -102,7 +107,7 @@ export const transformSchema = async (schema: any[], filePath: string) => {
         } else {
           item.code = code
           if (window.api.langSet.has(item.language)) {
-            item.html = window.api.highlightCodeToString(item.code, item.language).replace(/<\/?pre[^>]*>/g, '')
+            item.html = window.api.highlightCodeToString(item.code, codeLangMap(item.language)).replace(/<\/?pre[^>]*>/g, '')
           }
         }
       } catch (e) {}

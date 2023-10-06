@@ -7,6 +7,7 @@ import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
+import {codeLangMap} from '../output/html/transform'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]]*>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
@@ -116,7 +117,7 @@ export const SetNodeToDecorations = observer(() => {
     })
     for (let c of codes) {
       if (c.code.length > 20000) continue
-      const lang = c.node[0].language?.toLowerCase() || ''
+      const lang = codeLangMap(c.node[0].language?.toLowerCase() || '')
       if (!window.api.langSet.has(lang)) continue
       const el = c.node[0]
       let handle = codeCache.get(el)

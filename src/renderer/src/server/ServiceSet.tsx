@@ -10,8 +10,8 @@ import {CaretRightOutlined} from '@ant-design/icons'
 import {db} from '../store/db'
 
 const scriptInitialValue = `/**
- * Custom synchronization requires the implementation of the following three methods
- * After uploading, it is necessary to ensure that {domino}/{name} is accessible
+ * Custom synchronization requires the implementation of the following methods
+ * After uploading, it is necessary to ensure that {domain}/{name} is accessible
  * Get plain text: buffer.toString('utf-8'）
  */
 class Service {
@@ -39,7 +39,7 @@ class Service {
    */
 \tasync uploadDoc(ctx) {
 
-\t\treturn {name: ctx.name}
+\t\treturn {name: ctx.randomName}
 \t}
   /**
    * Will be called when deleting a document

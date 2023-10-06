@@ -1,5 +1,5 @@
 import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {BlockQuoteNode, Elements, ListNode, TableRowNode} from '../../el'
+import {Elements, ListNode, TableRowNode} from '../../el'
 import {EditorUtils} from '../utils/editorUtils'
 
 export const insertAfter = (editor: Editor, path: Path, node: Elements = {
@@ -81,7 +81,7 @@ export const MdElements: Record<string, MdNode> = {
     }
   },
   code: {
-    reg: /^\s*```(\w{1,15})?\s*$/,
+    reg: /^\s*```([\w#\-+*]{1,15})?\s*$/,
     run: ({editor, path, match}) => {
       const lang = match[1]
       Transforms.delete(editor, {at: path})

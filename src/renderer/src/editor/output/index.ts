@@ -119,7 +119,7 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
 }
 
 const parserNode = (node: any, preString = '', parent: any[]) => {
-  if (outputCache.get(node)) return outputCache.get(node)!
+  // if (outputCache.get(node)) return outputCache.get(node)!
   let str = ''
   const newParent = [...parent, node]
   switch (node.type) {

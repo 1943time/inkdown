@@ -16,6 +16,7 @@ import {useSubject} from '../../hooks/subscribe'
 import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
+import {codeLangMap} from '../output/html/transform'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
@@ -34,7 +35,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   const html = useMemo(() => {
     if (store.webview && !store.history) {
-      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), state().lang || '')
+      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), codeLangMap(state().lang) || '')
       html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
       return html
     }

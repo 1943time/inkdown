@@ -12,6 +12,7 @@ import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {outputCache} from './output'
 import {clearCodeCache} from './plugins/useHighlight'
+import {parserNode} from '../store/parserNode'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -404,12 +405,11 @@ export class EditorStore {
       this.readonly = false
       if (mark) this.container!.removeChild(mark)
       if (last && this.dragEl) {
-        const [dragPath, dragNode] = this.toPath(this.dragEl)
+        let [dragPath, dragNode] = this.toPath(this.dragEl)
         const [targetPath] = this.toPath(last.el)
         let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
         if (!Path.equals(targetPath, dragPath)) {
           const parent = Node.parent(this.editor, dragPath)
-          outputCache.delete(dragNode)
           if (dragNode.type === 'code') {
             clearCodeCache(dragNode)
           }
@@ -427,6 +427,12 @@ export class EditorStore {
           })
           if (parent.children?.length === 1) {
             Transforms.delete(this.editor, {at: Path.parent(dragPath)})
+          }
+          outputCache.delete(dragNode)
+          let parentNode = Editor.parent(this.editor, Path.parent(dragPath))
+          while (parentNode[1].length) {
+            outputCache.delete(parentNode[0])
+            parentNode = Editor.parent(this.editor, Path.parent(parentNode[1]))
           }
         }
       }
