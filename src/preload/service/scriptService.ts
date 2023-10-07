@@ -55,7 +55,7 @@ export class ScriptService {
     if (!service.removeFile) throw new Error('Please implement the removeFile method')
     const assets = await this.service.getAssets()
     await service.uploadDependencyLibrary('lib/script.js', readFileSync(assets.script))
-    await service.uploadDependencyLibrary('lib/favicon.png', readFileSync(assets.script))
+    await service.uploadDependencyLibrary('lib/favicon.png', readFileSync(assets.icon))
     await service.uploadDependencyLibrary('lib/style.css', readFileSync(assets.css))
     await service.uploadDependencyLibrary('lib/katex.min.css', readFileSync(assets.katex))
     const res = await service.uploadDoc({

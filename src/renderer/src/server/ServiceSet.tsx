@@ -65,7 +65,7 @@ export const ServiceSet = observer((props: {
     testPassed: false,
     loading: false,
     testing: false,
-    tab: 'ssh'
+    tab: 'server'
   })
   const [form] = Form.useForm()
   useEffect(() => {
@@ -73,7 +73,7 @@ export const ServiceSet = observer((props: {
       setState({
         testing: false,
         testPassed: false,
-        tab: 'ssh'
+        tab: 'server'
       })
       window.electron.ipcRenderer.invoke('get-service-config').then(res => {
         if (res) {
@@ -92,8 +92,8 @@ export const ServiceSet = observer((props: {
       db.shareNote.clear()
     }
     await window.electron.ipcRenderer.invoke('set-service-config', value)
-    if (value.type === 'ssh') {
-      await window.api.service.initialSsh(value)
+    if (value.type === 'server') {
+      await window.api.service.initial(value)
     } else {
       window.api.service.script.initial()
     }
@@ -114,70 +114,58 @@ export const ServiceSet = observer((props: {
       title={'Shared Service Settings'}
       confirmLoading={state.loading}
       onOk={async () => {
-        const value = form.getFieldsValue()
-        value.domain = value.domain.replace(/\/+$/,'')
-        if (state.tab === 'custom') {
-          if (!state.testPassed) {
-            message$.next({
-              type: 'warning',
-              content: 'Please test the service script first'
-            })
-          } else {
-            await setSuccess(value)
+        form.validateFields().then(async value => {
+          value.domain = value.domain.replace(/\/+$/,'')
+          if (state.tab === 'custom') {
+            if (!state.testPassed) {
+              message$.next({
+                type: 'warning',
+                content: 'Please test the service script first'
+              })
+            } else {
+              await setSuccess(value)
+            }
+            return
           }
-          return
-        }
-        setState({loading: true})
-        try {
-          await setSuccess(value)
-        } catch (e: any) {
-          console.error(e)
-          setState({error: e.toString()})
-          window.electron.ipcRenderer.invoke('set-service-config', null)
-        } finally {
-          setState({loading: false})
-        }
+          setState({loading: true})
+          try {
+            await setSuccess(value)
+          } catch (e: any) {
+            console.error(e)
+            setState({error: e.toString()})
+            window.electron.ipcRenderer.invoke('set-service-config', null)
+          } finally {
+            setState({loading: false})
+          }
+        })
       }}
       onCancel={props.onClose}
     >
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}} className={'mt-4'}>
-        <Form.Item label={'Synchronous mode'} name={'type'} initialValue={'ssh'}>
+        <Form.Item label={'Synchronous mode'} name={'type'} initialValue={'server'}>
           <Radio.Group onChange={e => setState({tab: e.target.value, testPassed: false})}>
-            <Radio value={'ssh'}>SSH</Radio>
+            <Radio value={'server'}>Server</Radio>
             <Radio value={'custom'}>Custom</Radio>
           </Radio.Group>
         </Form.Item>
-        {state.tab === 'ssh' &&
+        {state.tab === 'server' &&
           <>
-            <Form.Item
-              label={'Host'} name={['host']}
-              rules={[{required: true, message: 'Please enter the correct host address'}]}>
-              <Input/>
-            </Form.Item>
-            <Form.Item
-              label={'Username'} name={['username']}
-              rules={[{required: true, message: 'Please enter username'}]}>
-              <Input/>
-            </Form.Item>
-            <Form.Item
-              label={'Password'} name={['password']}
-              rules={[{required: true, message: 'Please enter password'}]}>
-              <Input type={'password'}/>
-            </Form.Item>
-            <Form.Item
-              initialValue={'22'}
-              label={'Port'} name={['port']}>
-              <Input/>
-            </Form.Item>
-            <Form.Item
-              rules={[{required: true, message: 'Please enter the storage folder path'}]}
-              label={'Storage directory'} name={['target']}>
-              <Input/>
-            </Form.Item>
+            <Alert
+              message={<>If you have your own server, you can set up your own document sharing service in 5 minutes by installing a simple service program.
+                <a href={"https://pb.bluemd.me/official/book/docs/share"} className={'link ml-1'} target={'_blank'}>docs</a></>}
+              type={'info'}
+              className={'mb-4'}
+            />
             <Form.Item
               rules={[{required: true, message: 'Please enter domain'}]}
-              label={'Domain'} name={['domain']}>
+              label={'Domain or IP'} name={['domain']}>
               <Input placeholder={'for example: https://www.bluemd.me'}/>
+            </Form.Item>
+            <Form.Item
+              initialValue={'BLUESTONE'}
+              rules={[{required: true, message: 'Please enter secret'}]}
+              label={'Secret'} name={['secret']}>
+              <Input/>
             </Form.Item>
           </>
         }
