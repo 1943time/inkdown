@@ -19,10 +19,10 @@ import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {saveRecord} from '../store/db'
+import {ipcRenderer} from 'electron'
 const countThrottle$ = new Subject<any>()
 export const saveDoc$ = new Subject<any[] | null>()
 const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
-
 export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
@@ -32,6 +32,7 @@ export const MEditor = observer(({note}: {
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(store)
   const saveTimer = useRef(0)
+  const changedTimer = useRef(0)
   const nodeRef = useRef<IFileItem>()
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
@@ -39,6 +40,7 @@ export const MEditor = observer(({note}: {
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
   const save = useCallback(async () => {
+    ipcRenderer.send('file-saved')
     if (nodeRef.current && store.docChanged) {
       runInAction(() => {
         store.docChanged = false
@@ -78,6 +80,7 @@ export const MEditor = observer(({note}: {
 
   useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
 
+
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -100,6 +103,10 @@ export const MEditor = observer(({note}: {
         store.docChanged = true
       })
       clearTimeout(saveTimer.current)
+      clearTimeout(changedTimer.current)
+      changedTimer.current = window.setTimeout(() => {
+        ipcRenderer.send('file-changed')
+      }, 300)
       saveTimer.current = window.setTimeout(() => {
         save()
       }, 3000)

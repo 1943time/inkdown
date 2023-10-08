@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, screen, shell} from 'electron'
+import {app, BrowserWindow, dialog, ipcMain, screen, shell} from 'electron'
 import {lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
@@ -19,6 +19,7 @@ type WinOptions = {
 }
 const windows = new Map<number, WinOptions>()
 app.setAsDefaultProtocolClient('bluestone-markdown')
+let fileChanged = false
 function createWindow(initial?: WinOptions): void {
   const dark = isDark()
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
@@ -66,16 +67,16 @@ function createWindow(initial?: WinOptions): void {
   window.on('blur', e => {
     window.webContents.send('window-blur')
   })
-  let firstClose = true
   window.on('close', (e) => {
-    if (firstClose) {
-      window.webContents.send('window-close')
-      windows.delete(window.id)
-      firstClose = false
-      e.preventDefault()
-      setTimeout(() => {
-        window.close()
-      }, 100)
+    if (fileChanged) {
+      const res = dialog.showMessageBoxSync(window, {
+        type: 'info',
+        message: 'The file has not been saved yet. Do you want to close the window now?',
+        buttons: ['Cancel', 'Ok']
+      })
+      if (res !== 1) {
+        e.preventDefault()
+      }
     }
   })
   windows.set(window.id, initial || {})
@@ -143,6 +144,12 @@ app.whenReady().then(() => {
   })
   ipcMain.on('add-recent-path', (e, path) => {
     app.addRecentDocument(path)
+  })
+  ipcMain.on('file-changed', () => {
+    fileChanged = true
+  })
+  ipcMain.on('file-saved', () => {
+    fileChanged = false
   })
   ipcMain.handle('get-win-set', (e) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
