@@ -1,6 +1,6 @@
 {
   "name": "bluestone",
-  "version": "1.3.8",
+  "version": "0.10.0",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",

@@ -66,8 +66,17 @@ function createWindow(initial?: WinOptions): void {
   window.on('blur', e => {
     window.webContents.send('window-blur')
   })
-  window.on('close', () => {
-    windows.delete(window.id)
+  let firstClose = true
+  window.on('close', (e) => {
+    if (firstClose) {
+      window.webContents.send('window-close')
+      windows.delete(window.id)
+      firstClose = false
+      e.preventDefault()
+      setTimeout(() => {
+        window.close()
+      }, 100)
+    }
   })
   windows.set(window.id, initial || {})
 
