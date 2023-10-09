@@ -298,6 +298,23 @@ ol.m-list {
       }
     }
   }
+  &.frontmatter{
+    pre {
+      position: relative;
+      padding-top: 2.3em;
+      &:before{
+        top:2px;
+        content: 'Front Matter';
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255, .1);
+        color: rgba(255, 255, 255, .5);
+        position: absolute;
+        left: 0;
+        padding-left: 10px;
+        font-size: 12px;
+      }
+    }
+  }
   pre{
     white-space: pre;
     padding: 0.74em 0;

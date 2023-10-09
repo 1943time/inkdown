@@ -73,7 +73,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         {...props.attributes}
         data-be={'code'}
         onDragStart={store.dragStart}
-        className={`drag-el ${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <DragHandle style={{top: '0.9em'}}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
@@ -109,17 +109,19 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                   <EyeOutlined className={`mr-2 text-sky-500 hover:text-sky-600 duration-200`}/>
                 </Tooltip>
               }
-              <div
-                className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
-                onClick={() => {
-                  if (!props.element.katex && !props.element.render) setState({editable: true})
-                }}
-              >
-                {props.element.language ?
-                  <span>{props.element.katex ? 'Formula' : props.element.language}</span> :
-                  <span>{'plain text'}</span>
-                }
-              </div>
+              {!props.element.frontmatter &&
+                <div
+                  className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
+                  onClick={() => {
+                    if (!props.element.katex && !props.element.render) setState({editable: true})
+                  }}
+                >
+                  {props.element.language ?
+                    <span>{props.element.katex ? 'Formula' : props.element.language}</span> :
+                    <span>{'plain text'}</span>
+                  }
+                </div>
+              }
             </>
           }
         </div>

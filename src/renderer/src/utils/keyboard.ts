@@ -194,6 +194,21 @@ export class MenuKey {
         case 'insertCode':
           insertCode(editor, node)
           break
+        case 'insertFrontmatter':
+          const topNode = Editor.node(editor, [0])
+          if (!topNode[0]?.frontmatter) {
+            Transforms.insertNodes(editor, {
+              type: 'code',
+              language: 'yaml',
+              children: [
+                {type:'code-line', children: [{text: ''}]},
+              ],
+              frontmatter: true
+            }, {at: [0], select: true})
+          } else {
+            Transforms.select(editor, Editor.start(editor, [0]))
+          }
+          break
         case 'insertKatex':
           insertCode(editor, node, true)
           break

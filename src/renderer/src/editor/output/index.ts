@@ -137,6 +137,8 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
         str += `${preString}$$\n${code}\n${preString}$$`
       } else if (node.language === 'html' && node.render) {
         str += `${preString}\n${code}\n${preString}`
+      } else if (node.frontmatter) {
+        str += `${preString}---\n${code}\n${preString}---`
       } else {
         str += `${preString}\`\`\`${node.language || '`'}\n${code}\n${preString}\`\`\`${!node.language ? '`' : ''}`
       }

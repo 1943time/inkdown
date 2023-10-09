@@ -310,6 +310,12 @@ export const createAppMenus = () => {
             }
           ]
         },
+        {
+          label: 'Front Matter',
+          id: 'frontmatter',
+          click: task('insertFrontmatter'),
+          enabled: false
+        },
         {type: 'separator'},
         {
           label: menusLabel.orderedList,

@@ -32,10 +32,8 @@ export class BackspaceKey {
         Transforms.delete(this.editor, {at: n[1]})
         if (n[0].type === 'code' && nodes.length === 1) {
           Transforms.insertNodes(this.editor, {
-            type: 'code',
-            language: n[0].language,
+            ...n[0],
             children: [{type: 'code-line', children: [{text: ''}]}],
-            katex: n[0].katex
           }, {at: n[1], select: true})
         }
         // 如果是首个元素 替换paragraph

@@ -2,6 +2,7 @@ import {unified} from 'unified'
 import remarkParse from 'remark-parse'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
+import remarkFrontmatter from 'remark-frontmatter'
 import {Element} from 'slate'
 import fs from 'fs'
 import {Content, Table} from 'mdast'
@@ -11,6 +12,7 @@ const parser = unified()
   .use(remarkParse)
   .use(remarkGfm)
   .use(remarkMath, {singleDollarTextMath: true})
+  .use(remarkFrontmatter, ['yaml'])
 
 const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
   let leafs: CustomLeaf[] = []
@@ -112,7 +114,9 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
       case 'image':
         el = {type: 'media', children: [{text: ''}], url: decodeURIComponent(n.url), alt: n.alt} as MediaNode
         break
+      // @ts-ignore
       case 'inlineMath':
+        // @ts-ignore
         el = {type: 'inline-katex', children: [{text: n.value}]} as InlineKatexNode
         break
       case 'list':
@@ -160,9 +164,22 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           })
         }
         break
+      case 'yaml':
+        el = {
+          type: 'code', language: 'yaml', frontmatter: true,
+          children: n.value.split('\n').map(s => {
+            return {
+              type: 'code-line',
+              children: [{text: s}]
+            }
+          })
+        }
+        break
+      // @ts-ignore
       case 'math':
         el = {
           type: 'code', language: 'latex', katex: true,
+          // @ts-ignore
           children: n.value.split('\n').map(s => {
             return {
               type: 'code-line',
@@ -227,7 +244,7 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
-    const schema = parserBlock(root.children, true)
+    const schema = parserBlock(root.children as any[], true)
     return {schema: schema as any[], nodes: root.children}
   } catch (e) {
     return {schema: [], nodes: []}
@@ -237,7 +254,7 @@ export const markdownParser = (filePath: string) => {
 export const markdownParserByText = (content: string) => {
   try {
     const root = parser.parse(content)
-    const schema = parserBlock(root.children, true)
+    const schema = parserBlock(root.children as any, true)
     return {schema: schema as any[], nodes: root.children}
   } catch (e) {
     return {schema: [], nodes: []}

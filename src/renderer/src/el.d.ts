@@ -4,7 +4,7 @@ import { HistoryEditor } from 'slate-history'
 import {RenderElementProps} from 'slate-react/dist/components/editable'
 
 type Align = 'left' | 'center' | 'right'
-export type CodeNode = {type: 'code', children: CodeLineNode[], language?: string, katex?: boolean, render?: boolean}
+export type CodeNode = {type: 'code', children: CodeLineNode[], language?: string, katex?: boolean, render?: boolean, frontmatter?: boolean}
 export type CodeLineNode = {type: 'code-line', children: BaseElement['children'], num?: number}
 export type ParagraphNode = {type: 'paragraph', children: BaseElement['children']}
 export type TableNode = {type: 'table', children: TableRowNode[]}
