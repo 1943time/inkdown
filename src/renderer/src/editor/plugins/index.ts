@@ -2,6 +2,7 @@ import {Editor} from 'slate'
 import {BackspaceKey} from './hotKeyCommands/backspace'
 
 const inlineNode = new Set(['media', 'inline-katex'])
+const voidNode = new Set(['hr'])
 export const withMarkdown = (editor: Editor) => {
   const {isInline, isVoid, deleteBackward, deleteFragment, deleteForward} = editor
   editor.isInline = element =>
@@ -9,7 +10,7 @@ export const withMarkdown = (editor: Editor) => {
   const back = new BackspaceKey(editor)
 
   editor.isVoid = (element) => {
-    return ['hr'].includes(element.type) || isVoid(element)
+    return voidNode.has(element.type) || isVoid(element)
   }
 
   editor.deleteBackward = (unit) => {

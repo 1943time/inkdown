@@ -218,6 +218,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             // @ts-ignore
             el = parseText(n.children, leaf)
           }
+        } else if (n.type === 'break') {
+          el = {text: '\n'}
         }
     }
 
@@ -244,6 +246,7 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
+    console.log('root', root, filePath)
     const schema = parserBlock(root.children as any[], true)
     return {schema: schema as any[], nodes: root.children}
   } catch (e) {

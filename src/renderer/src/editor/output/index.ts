@@ -22,7 +22,9 @@ const textHtml = (t: Text) => {
 }
 const textStyle = (t: Text) => {
   if (!t.text) return ''
-  let str = t.text.replace(/(?<!\\)\\/g, '\\')
+  let str = t.text
+    .replace(/(?<!\\)\\/g, '\\')
+    .replace(/\n/g, '  \n')
   let preStr = '', afterStr = ''
   if (t.code || t.bold || t.strikethrough || t.italic) {
     preStr = str.match(/^\s+/)?.[0] || ''
