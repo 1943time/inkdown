@@ -3,27 +3,52 @@ import {isAbsolute, join} from 'path'
 import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
 import Img from '../../svg/Img'
-import {useEffect, useMemo} from 'react'
+import {useEffect, useMemo, useRef} from 'react'
 import {treeStore} from '../../store/tree'
-import {useEditorStore} from '../store'
-import {useSubject} from '../../hooks/subscribe'
-import {Path, Transforms} from 'slate'
+import {Transforms} from 'slate'
 import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
+import {useSelStatus} from '../../hooks/editor'
 
+const startMoving = (options: {
+  dom: HTMLImageElement
+  startX: number
+  maxWidth: number
+  direction: 'left' | 'right',
+  onEnd: (width: number) => void
+}) => {
+  const startWidth = options.dom.clientWidth
+  let width = startWidth
+  const move = (e: MouseEvent) => {
+    if (options.direction === 'right') {
+      width = startWidth + e.clientX - options.startX
+      options.dom.width = width
+    } else {
+      width = startWidth - (e.clientX - options.startX)
+      options.dom.width = width
+    }
+    if (width < 20) {
+      width = 20
+      options.dom.width = width
+    }
+  }
+  window.addEventListener('mousemove', move)
+  window.addEventListener('mouseup', e => {
+    window.removeEventListener('mousemove', move)
+    options.onEnd(width)
+  }, {once: true})
+}
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
-  const store = useEditorStore()
+  const [selected, path, store] = useSelStatus(element)
+  const imgRef = useRef<HTMLImageElement>(null)
   const [state, setState] = useGetSetState({
     loadSuccess: false,
     url: '',
-    selected: false,
-    path: ReactEditor.findPath(store.editor, element)
+    selected: false
   })
-
   const type = useMemo(() => {
     return mediaType(element.url)
   }, [element.url])
-
   useEffect(() => {
     if (element.downloadUrl) {
       return
@@ -45,15 +70,13 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     img.referrerPolicy = 'no-referrer'
     img.crossOrigin = 'anonymous'
     img.src = realUrl
-    img.onload = () => setState({loadSuccess: true})
+    img.onload = () => {
+      setState({loadSuccess: true})
+    }
     img.onerror = () => setState({loadSuccess: false})
   }, [element.url, element.downloadUrl])
-  useSubject(store.mediaNode$, node => {
-    setState({selected: !!node && Path.equals(state().path, node[1])})
-  })
   useEffect(() => {
     if (!store.editor.selection) return
-    setState({selected: Path.equals(state().path, Path.parent(store.editor.selection.focus.path))})
     if (element.downloadUrl) {
       const url = decodeURIComponent(element.downloadUrl)
       const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
@@ -67,7 +90,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
           }).then(res => {
             Transforms.setNodes(store.editor, {
               url: res, downloadUrl: undefined, alt: ''
-            }, {at: state().path})
+            }, {at: path})
           })
         })
       }
@@ -95,7 +118,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       {state().loadSuccess && (type !== 'other' || state().url.startsWith('data:')) ?
         <span className={'inline-block top-1'}>
           <span
-            className={`relative border-2 ${state().selected ? ' border-blue-500/60' : 'border-transparent'} block`}
+            className={`media-frame ${selected ? 'active' : ''}`}
           >
             {type === 'video' &&
               <video src={element.url} controls={true}/>
@@ -104,18 +127,46 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
               <object data={element.url} className={'w-full h-auto'}/>
             }
             {(type === 'image' || state().url.startsWith('data:')) &&
-              <img
-                src={state().url} alt={element.alt}
-                referrerPolicy={'no-referrer'}
-                draggable={false}
-                className={'align-text-bottom border-2 border-red-500'}
-              />
+              <>
+                <img
+                  src={state().url} alt={element.alt}
+                  referrerPolicy={'no-referrer'}
+                  draggable={false}
+                  width={element.width}
+                  ref={imgRef}
+                  className={'align-text-bottom border-2 border-red-500'}
+                />
+                <span
+                  className={'img-drag-handle t1'}
+                  onMouseDown={e => startMoving({
+                    startX: e.clientX,
+                    dom: imgRef.current!,
+                    direction: 'left',
+                    maxWidth: (store.container!.querySelector('.edit-area') as HTMLElement).clientWidth - 12,
+                    onEnd: width => {
+                      Transforms.setNodes(store.editor, {width}, {at: path})
+                    }
+                  })}
+                />
+                <span
+                  className={'img-drag-handle t2'}
+                  onMouseDown={e => startMoving({
+                    startX: e.clientX,
+                    dom: imgRef.current!,
+                    direction: 'right',
+                    maxWidth: (store.container!.querySelector('.edit-area') as HTMLElement).clientWidth - 12,
+                    onEnd: width => {
+                      Transforms.setNodes(store.editor, {width}, {at: path})
+                    }
+                  })}
+                />
+              </>
             }
           </span>
         </span>
         :
         (
-          <span className={`inline-block align-text-top border rounded ${state().selected ? ' border-blue-500/60' : 'border-transparent'}`}>
+          <span className={`inline-block align-text-top border rounded ${selected ? ' border-blue-500/60' : 'border-transparent'}`}>
             <Img className={'fill-gray-300 align-middle text-xl'}/>
           </span>
         )

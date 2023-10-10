@@ -9,7 +9,7 @@ import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
 import {codeLangMap} from '../output/html/transform'
 
-const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]]*>(.*<\/[a-z]+>:?)?/g
+const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
 export const cacheTextNode = new WeakMap<object, Range[]>
 

@@ -423,3 +423,32 @@ ol.m-list {
     pointer-events: none;
   }
 }
+.media-frame{
+  @apply relative border-2 border-transparent block;
+  .img-drag-handle{
+    display: none;
+    position: absolute;
+    cursor: col-resize;
+    border-radius: 100%;
+    width: 9px;
+    height: 9px;
+    background: var(--bg);
+    @apply border border-gray-500 dark:border-gray-400;
+    &.t1{
+      left: -5px;
+      top: 50%;
+      margin-top: -5px;
+    }
+    &.t2{
+      right: -5px;
+      top: 50%;
+      margin-top: -5px;
+    }
+  }
+  &.active{
+    @apply border-blue-500/60;
+    .img-drag-handle{
+      display: inline-block;
+    }
+  }
+}

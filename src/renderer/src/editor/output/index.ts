@@ -2,6 +2,7 @@ import {Node, Text} from 'slate'
 import {TableNode} from '../../el'
 import stringWidth from 'string-width'
 import {EditorUtils} from '../utils/editorUtils'
+import {mediaType} from '../utils/dom'
 const space = '  '
 
 export const outputCache = new WeakMap<object, string>()
@@ -149,7 +150,11 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += toMarkdown(node.children, preString, newParent)
       break
     case 'media':
-      str += `![${node.alt}](${encodeURI(node.url)})`
+      if (mediaType(node.url) === 'image' && node.width) {
+        str += `<img src="${encodeURI(node.url)}" alt="" width="${node.width || ''}"/>`
+      } else {
+        str += `![${node.alt || ''}](${encodeURI(node.url)})`
+      }
       break
     case 'inline-katex':
       const inlineCode = Node.string(node)

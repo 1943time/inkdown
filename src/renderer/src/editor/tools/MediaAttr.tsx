@@ -3,7 +3,7 @@ import {Editor, NodeEntry, Path, Transforms} from 'slate'
 import {MediaNode} from '../../el'
 import {useGetSetState} from 'react-use'
 import {Input} from 'antd'
-import {CheckOutlined, DeleteOutlined} from '@ant-design/icons'
+import {CheckOutlined, DeleteOutlined, ReloadOutlined} from '@ant-design/icons'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {getOffsetLeft} from '../utils/dom'
 import {observer} from 'mobx-react-lite'
@@ -135,17 +135,7 @@ export const MediaAttr = observer(() => {
       }}
     >
       <Input
-        placeholder={'alt'}
-        size={'small'}
-        value={state().alt}
-        onKeyDown={keydown}
-        onChange={e => {
-          setState({alt: e.target.value})
-        }}
-        className={'w-16'}
-      />
-      <Input
-        className={'flex-1 ml-2 mpath'}
+        className={'flex-1 mpath'}
         size={'small'}
         value={state().url}
         onChange={e => {
@@ -165,6 +155,17 @@ export const MediaAttr = observer(() => {
             )
           }}
           className={'dark:text-gray-300 text-gray-500 cursor-default relative'}
+        />
+      </div>
+      <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0 mx-1'}></div>
+      <div className={'rounded-sm dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 px-1 py-0.5'}>
+        <ReloadOutlined
+          className={'dark:text-gray-300 text-gray-500 cursor-pointer'}
+          onClick={() => {
+            Transforms.setNodes(store.editor, {
+              width: undefined
+            }, {at: nodeRef.current![1]})
+          }}
         />
       </div>
       <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0 mx-1'}></div>

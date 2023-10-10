@@ -27,7 +27,7 @@ export const useMEditor = (el: BaseElement) => {
   return [editor, update, remove] as [typeof editor, typeof update, typeof remove]
 }
 
-export const useSelStatus = (element: BaseElement) => {
+export const useSelStatus = (element: any) => {
   const store = useEditorStore()
   const [state, setState] = useSetState({
     selected: false,

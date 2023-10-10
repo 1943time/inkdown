@@ -295,7 +295,7 @@ export class EditorStore {
     let node = ['image', 'audio', 'video', 'document'].includes(type) ? {
       type: 'media',
       url,
-      alt: p.name,
+      alt: '',
       children: [{text: ''}]
     } : {text: p.name, url}
     const sel = this.editor.selection

@@ -8,6 +8,18 @@ import fs from 'fs'
 import {Content, Table} from 'mdast'
 import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../el'
 
+const findImageElement = (str: string) => {
+  try {
+    const match = str.match(/^<img+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?$/)
+    if (match) {
+      return new DOMParser().parseFromString(match[0], 'text/html').body.querySelector('img') as HTMLImageElement
+    }
+    return null
+  } catch (e) {
+    return null
+  }
+}
+
 const parser = unified()
   .use(remarkParse)
   .use(remarkGfm)
@@ -61,17 +73,22 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       case 'html':
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
-          el = {
-            type: 'code', language: 'html', render: true,
-            children: n.value.split('\n').map(s => {
-              return {
-                type: 'code-line',
-                children: [{text: s}]
-              }
-            })
+          const img = findImageElement(n.value)
+          if (img) {
+            el = {type: 'paragraph', children: [{type: 'media',width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}]}
+          } else {
+            el = {
+              type: 'code', language: 'html', render: true,
+              children: n.value.split('\n').map(s => {
+                return {
+                  type: 'code-line',
+                  children: [{text: s}]
+                }
+              })
+            }
           }
         } else {
-          const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a).*?>/)
+          const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n\/]*?>/)
           if (htmlMatch) {
             const [str, tag] = htmlMatch
             if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {
@@ -107,7 +124,12 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
               }
             }
           } else {
-            el = {text: n.value}
+            const img = findImageElement(n.value)
+            if (img) {
+              el = {type: 'media', width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}
+            } else {
+              el = {text: n.value}
+            }
           }
         }
         break
@@ -246,7 +268,7 @@ export const markdownParser = (filePath: string) => {
   try {
     const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
     const root = parser.parse(mdStr)
-    console.log('root', root, filePath)
+    // console.log('root', root, filePath)
     const schema = parserBlock(root.children as any[], true)
     return {schema: schema as any[], nodes: root.children}
   } catch (e) {

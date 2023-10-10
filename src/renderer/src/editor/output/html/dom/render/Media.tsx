@@ -7,7 +7,7 @@ export function Media({node}: {
         <video src={node.url} controls={true} preload={'true'}></video>
       }
       {node.mediaType === 'image' &&
-        <img alt={node.alt} src={node.url}/>
+        <img alt={node.alt} src={node.url} width={node.width}/>
       }
       {node.mediaType === 'document' &&
         <object data={node.url} className={'w-full h-auto'}/>
