@@ -88,47 +88,52 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             }
           }
         } else {
-          const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n\/]*?>/)
-          if (htmlMatch) {
-            const [str, tag] = htmlMatch
-            if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {
-              htmlTag.pop()
-            }
-            if (!str.startsWith('</')) {
-              if (tag === 'span') {
-                try {
-                  const styles = str.match(/style="([^"\n]+)"/)
-                  if (styles) {
-                    // @ts-ignore
-                    const stylesMap = new Map(styles[1].split(';').map(item => item.split(':').map(item => item.trim())))
-                    if (stylesMap.get('color')) {
-                      htmlTag.push({
-                        tag: tag,
-                        color: stylesMap.get('color') as string
-                      })
-                    }
-                  }
-                } catch (e) {
-                  el = {text: n.value}
-                }
-              } else if (tag === 'a') {
-                const url = str.match(/href="([\w:.\/_\-#\\]+)"/)
-                if (url) {
-                  htmlTag.push({
-                    tag: tag,
-                    url: url[1]
-                  })
-                }
-              } else {
-                htmlTag.push({tag: tag})
-              }
-            }
+          const breakMatch = n.value.match(/<br\/?>/)
+          if (breakMatch) {
+            el = {type: 'break', children: [{text: ''}]}
           } else {
-            const img = findImageElement(n.value)
-            if (img) {
-              el = {type: 'media', width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}
+            const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n\/]*?>/)
+            if (htmlMatch) {
+              const [str, tag] = htmlMatch
+              if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {
+                htmlTag.pop()
+              }
+              if (!str.startsWith('</')) {
+                if (tag === 'span') {
+                  try {
+                    const styles = str.match(/style="([^"\n]+)"/)
+                    if (styles) {
+                      // @ts-ignore
+                      const stylesMap = new Map(styles[1].split(';').map(item => item.split(':').map(item => item.trim())))
+                      if (stylesMap.get('color')) {
+                        htmlTag.push({
+                          tag: tag,
+                          color: stylesMap.get('color') as string
+                        })
+                      }
+                    }
+                  } catch (e) {
+                    el = {text: n.value}
+                  }
+                } else if (tag === 'a') {
+                  const url = str.match(/href="([\w:.\/_\-#\\]+)"/)
+                  if (url) {
+                    htmlTag.push({
+                      tag: tag,
+                      url: url[1]
+                    })
+                  }
+                } else {
+                  htmlTag.push({tag: tag})
+                }
+              }
             } else {
-              el = {text: n.value}
+              const img = findImageElement(n.value)
+              if (img) {
+                el = {type: 'media', width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}
+              } else {
+                el = {text: n.value}
+              }
             }
           }
         }

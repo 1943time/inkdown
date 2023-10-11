@@ -254,6 +254,9 @@ export const TableAttr = observer(() => {
         case 'insertColAfter':
           insertCol(tableRef.current[1], rows, index + 1)
           break
+        case 'insertTableCellBreak':
+          Transforms.insertNodes(editor, [{type: 'break', children: [{text: ''}]}, {text: ''}], {select: true})
+          break
         case 'moveUpOneRow':
           if (row > 1) {
             Transforms.moveNodes(editor, {

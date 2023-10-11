@@ -3,10 +3,10 @@ import {TableNode} from '../../el'
 import stringWidth from 'string-width'
 import {EditorUtils} from '../utils/editorUtils'
 import {mediaType} from '../utils/dom'
+import {inlineNode} from '../plugins'
 const space = '  '
 
 export const outputCache = new WeakMap<object, string>()
-const inlineNode = new Set(['media', 'inline-katex'])
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
@@ -171,6 +171,9 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       break
     case 'hr':
       str += preString + '***'
+      break
+    case 'break':
+      str += preString + '<br/>'
       break
     default:
       if (node.text) str += composeText(node, parent)

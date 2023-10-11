@@ -300,6 +300,9 @@ export class MenuKey {
           if (node[0].type === 'paragraph') {
             Editor.insertText(editor, '\n')
           }
+          if (node[0].type === 'table-cell') {
+            Editor.insertNode(editor, {type: 'break', children: [{text: ''}]})
+          }
           break
       }
 

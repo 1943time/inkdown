@@ -163,6 +163,11 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
+        label: 'Line break within table-cell',
+        accelerator: `${cmd}+Shift+Enter`,
+        click: click('insertTableCellBreak')
+      },
+      {
         label: 'Move',
         submenu: [
           {
