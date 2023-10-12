@@ -3,7 +3,6 @@ import {Range, Editor, Element, Transforms, Path, Node, NodeEntry, Point} from '
 import {EditorUtils} from '../editor/utils/editorUtils'
 import React from 'react'
 import isHotkey from 'is-hotkey'
-import {outputCache} from '../editor/output'
 import {runInAction} from 'mobx'
 import {ReactEditor} from 'slate-react'
 import {markdownParserByText} from '../editor/parser'
@@ -20,7 +19,6 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
         match: n => n.type === 'list'
       })
 
-      if (list) outputCache.delete(list[0])
       const listItems = Array.from<any>(Editor.nodes(editor, {
         match: n => n.type === 'list-item',
         at: Path.parent(parent[1]),
@@ -29,7 +27,6 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       }))
 
       for (let l of listItems) {
-        outputCache.delete(l[0])
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }
     } else {

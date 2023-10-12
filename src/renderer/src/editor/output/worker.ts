@@ -1,12 +1,10 @@
 import {Node, Text} from 'slate'
 import {TableNode} from '../../el'
 import stringWidth from 'string-width'
-import {EditorUtils} from '../utils/editorUtils'
 import {mediaType} from '../utils/dom'
-import {inlineNode} from '../plugins'
-const space = '  '
 
-export const outputCache = new WeakMap<object, string>()
+const space = '  '
+const inlineNode = new Set(['media', 'inline-katex', 'break'])
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
@@ -86,7 +84,7 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
           str = ' '.repeat(length - strLength) + str
         } else if (head[j].align === 'center') {
           const spaceLength = length - strLength
-           const pre = Math.floor(spaceLength / 2)
+          const pre = Math.floor(spaceLength / 2)
           if (pre > 0) str = ' '.repeat(pre) + str
           const next = spaceLength - pre
           if (next > 0) str = str + ' '.repeat(next)
@@ -179,11 +177,10 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       if (node.text) str += composeText(node, parent)
       break
   }
-  outputCache.set(node, str)
   return str
 }
 
-export const toMarkdown = (tree: any[], preString = '', parent: any[]) => {
+export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: true}]) => {
   let str = ''
   for (let i = 0; i < tree.length; i++) {
     const node = tree[i]
@@ -240,4 +237,8 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[]) => {
     }
   }
   return str
+}
+
+onmessage = (e) => {
+  postMessage(toMarkdown(e.data.state))
 }

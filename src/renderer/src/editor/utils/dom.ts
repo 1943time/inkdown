@@ -1,5 +1,4 @@
 import { remove as removeDiacritics } from 'diacritics'
-import {extname} from 'path'
 const rControl = /[\u0000-\u001f]/g
 const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'<>,.?/]+/g
 export const getOffsetTop = (dom: HTMLElement, target: HTMLElement = document.body) => {
@@ -41,7 +40,8 @@ export const slugify = (str: string): string => {
 export const mediaType = (name?: string) => {
   name = name || ''
   name = name.split('?')[0]
-  const ext = extname(name || '')
+  const ext = name.match(/\.\w+$/)?.[0]
+  if (!ext) return 'other'
   if (['.md', '.markdown'].includes(ext)) return 'markdown'
   if (['.png', '.jpg', '.gif', '.svg', '.jpeg', '.webp'].includes(ext)) return 'image'
   if (['.mp3', '.ogg', '.aac', '.wav', '.oga', '.m4a'].includes(ext)) return 'audio'

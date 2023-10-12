@@ -11,7 +11,6 @@ import {IFileItem} from '../index'
 import {treeStore} from '../store/tree'
 import {EditorUtils} from './utils/editorUtils'
 import {Placeholder} from './tools/Placeholder'
-import {toMarkdown} from './output'
 import {useEditorStore} from './store'
 import {action, runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
@@ -20,6 +19,8 @@ import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {saveRecord} from '../store/db'
 import {ipcRenderer} from 'electron'
+import {toMarkdown} from './output/md'
+
 const countThrottle$ = new Subject<any>()
 export const saveDoc$ = new Subject<any[] | null>()
 const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
@@ -48,7 +49,7 @@ export const MEditor = observer(({note}: {
       const root = Editor.node(editor, [])
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
-        const res = toMarkdown(schema.state, '', [root[0]])
+        const res = await toMarkdown(schema.state)
         saveRecord(nodeRef.current.filePath, schema.state)
         await window.api.fs.writeFile(nodeRef.current.filePath, res, {encoding: 'utf-8'})
       }
@@ -64,10 +65,10 @@ export const MEditor = observer(({note}: {
       save()
     }
   })
-  const count = useCallback((nodes: any[]) => {
+  const count = useCallback(async (nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
     const root = Editor.node(editor, [])
-    const res = toMarkdown(nodes, '', root[0].children || [])
+    const res = await toMarkdown(nodes)
     const texts = Editor.nodes(editor, {
       at: [],
       match: n => n.text

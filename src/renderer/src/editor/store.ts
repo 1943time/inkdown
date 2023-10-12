@@ -10,9 +10,7 @@ import {isAbsolute, join, parse, relative} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
-import {outputCache} from './output'
 import {clearCodeCache} from './plugins/useHighlight'
-import {parserNode} from '../store/parserNode'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -428,7 +426,6 @@ export class EditorStore {
           if (parent.children?.length === 1) {
             Transforms.delete(this.editor, {at: Path.parent(dragPath)})
           }
-          outputCache.delete(dragNode)
         }
       }
       this.dragEl!.draggable = false
