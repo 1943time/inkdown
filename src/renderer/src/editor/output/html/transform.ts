@@ -24,8 +24,8 @@ export const transformSchema = async (schema: any[], filePath: string) => {
         if (!item.url.startsWith('http') && !item.url.startsWith('file:') && !item.url.startsWith('data:')) {
           const path = isAbsolute(item.url) ? item.url : join(filePath, '..', item.url)
           if (existsSync(path) && type === 'image') {
-            const base64 = readFileSync(filePath, {'encoding': 'base64'})
-            item.url = `data:image/${extname(filePath).slice(1)};base64,${base64}`
+            const base64 = readFileSync(path, {'encoding': 'base64'})
+            item.url = `data:image/${extname(path).slice(1)};base64,${base64}`
           }
         }
         item.mediaType = type
