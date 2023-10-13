@@ -1,4 +1,4 @@
-import {Menu, app, ipcMain, BrowserWindow, shell, dialog} from 'electron'
+import {Menu, app, ipcMain, BrowserWindow, shell, dialog, ipcRenderer} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'
 import {is} from '@electron-toolkit/utils'
@@ -13,8 +13,7 @@ const task = (task: string, parameter?: any) => {
     win?.webContents.send('key-task', task, parameter)
   }
 }
-
-export const createAppMenus = () => {
+const getSystemMenus = () => {
   const titles = Array.from(new Array(4)).map((_, i) => {
     const n = i + 1
     return {
@@ -99,7 +98,35 @@ export const createAppMenus = () => {
       ]
     }
   ]
-  const systemFileMenus: MenuOptions[number]['submenu'] = isMac || isLinux ? [
+  const getOpenPaths = () => {
+    const openPaths:string[] = store.get('recent-open-paths') as string[] || []
+    let openPathMenus:MenuOptions[number]['submenu'] = []
+    if (openPaths.length) {
+      const home = app.getPath('home')
+      openPathMenus.push(...openPaths.map(p => {
+        return {
+          label: p.replace(home, '~'),
+          click: e => {
+            ipcMain.emit('open-history-path', e, p)
+          }
+        }
+      }))
+      openPathMenus.push({
+        type: 'separator'
+      })
+    }
+    openPathMenus.push({
+      label: menusLabel.clearRecent,
+      click: () => {
+        app.clearRecentDocuments()
+        BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
+        store.delete('recent-open-paths')
+        ipcMain.emit('refresh-recent')
+      }
+    })
+    return openPathMenus
+  }
+  const systemFileMenus: MenuOptions[number]['submenu'] = isMac ? [
     {type: 'separator'},
     {
       id: 'open',
@@ -135,6 +162,12 @@ export const createAppMenus = () => {
       click: (menu, win) => {
         win?.webContents.send('open')
       }
+    },
+    {type: 'separator'},
+    {
+      id: 'recent-open-paths',
+      label: 'Open Recent',
+      submenu: getOpenPaths()
     }
   ]
   menus.push({
@@ -511,8 +544,11 @@ export const createAppMenus = () => {
       ]
     }
   )
-
-  const instance = Menu.buildFromTemplate(menus)
+  return menus
+}
+export const createAppMenus = () => {
+  const menus = getSystemMenus()
+  let instance = Menu.buildFromTemplate(menus)
   const setParagraph = (enable: boolean, exclude?: ['title']) => {
     const menu = instance.getMenuItemById('paragraph')
     menu?.submenu?.items.forEach(m => {
@@ -531,6 +567,14 @@ export const createAppMenus = () => {
   }
 
   Menu.setApplicationMenu(instance)
+  ipcMain.on('refresh-recent', () => {
+    if (!isMac) {
+      setTimeout(() => {
+        instance = Menu.buildFromTemplate(getSystemMenus())
+        Menu.setApplicationMenu(instance)
+      }, 300)
+    }
+  })
   ipcMain.on('changeContext', (e, ctx: string, isTop: boolean) => {
     const katex = instance.getMenuItemById('insertKatex')!
     const inlineKatex = instance.getMenuItemById('insertInlineKatex')!

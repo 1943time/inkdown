@@ -5,7 +5,6 @@ import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
-import log from 'electron-log'
 import {AppUpdate} from './update'
 const isWindows = process.platform === 'win32'
 
@@ -19,7 +18,7 @@ type WinOptions = {
 }
 const windows = new Map<number, WinOptions>()
 app.setAsDefaultProtocolClient('bluestone-markdown')
-let fileChanged = false
+let fileChangedWindow: BrowserWindow | null = null
 function createWindow(initial?: WinOptions): void {
   const dark = isDark()
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
@@ -68,7 +67,7 @@ function createWindow(initial?: WinOptions): void {
     window.webContents.send('window-blur')
   })
   window.on('close', (e) => {
-    if (fileChanged) {
+    if (fileChangedWindow === window) {
       const res = dialog.showMessageBoxSync(window, {
         type: 'info',
         message: 'The file has not been saved yet. Do you want to close the window now?',
@@ -78,9 +77,9 @@ function createWindow(initial?: WinOptions): void {
         e.preventDefault()
       }
     }
+    windows.delete(window.id)
   })
   windows.set(window.id, initial || {})
-
   window.show()
 }
 
@@ -96,9 +95,11 @@ app.on('will-finish-launching', () => {
     }
   })
   app.on('open-url', (event, url) => {
-    log.info('open-url', url)
     BrowserWindow.getFocusedWindow()?.webContents.send('open-schema', url)
   })
+})
+ipcMain.on('open-history-path', (e, path: string) => {
+  openFiles(path)
 })
 const openFiles = (filePath: string) => {
   try {
@@ -143,13 +144,15 @@ app.whenReady().then(() => {
     if (data.openFile) windows.get(window.id)!.openFile = data.openFile
   })
   ipcMain.on('add-recent-path', (e, path) => {
+    store.set('recent-open-paths', Array.from(new Set([...(store.get('recent-open-paths') as any[] || []), path])))
     app.addRecentDocument(path)
+    ipcMain.emit('refresh-recent')
   })
-  ipcMain.on('file-changed', () => {
-    fileChanged = true
+  ipcMain.on('file-changed', (e) => {
+    fileChangedWindow = BrowserWindow.fromWebContents(e.sender)
   })
   ipcMain.on('file-saved', () => {
-    fileChanged = false
+    fileChangedWindow = null
   })
   ipcMain.handle('get-win-set', (e) => {
     const window = BrowserWindow.fromWebContents(e.sender)!

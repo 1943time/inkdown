@@ -29,6 +29,7 @@ export const MEditor = observer(({note}: {
 }) => {
   const store = useEditorStore()
   const inCode = useRef(false)
+  const changedMark = useRef(false)
   const editor = store.editor
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(store)
@@ -42,6 +43,7 @@ export const MEditor = observer(({note}: {
   const first = useRef(true)
   const save = useCallback(async () => {
     ipcRenderer.send('file-saved')
+    changedMark.current = false
     if (nodeRef.current && store.docChanged) {
       runInAction(() => {
         store.docChanged = false
@@ -67,7 +69,6 @@ export const MEditor = observer(({note}: {
   })
   const count = useCallback(async (nodes: any[]) => {
     if (!configStore.config.showCharactersCount) return
-    const root = Editor.node(editor, [])
     const res = await toMarkdown(nodes)
     const texts = Editor.nodes(editor, {
       at: [],
@@ -90,6 +91,12 @@ export const MEditor = observer(({note}: {
       return
     }
     value.current = v
+
+    if (!changedMark.current) {
+      changedMark.current = true
+      ipcRenderer.send('file-changed')
+    }
+
     onChange(v)
     if (note) {
       treeStore.schemaMap.set(note, {
@@ -105,9 +112,6 @@ export const MEditor = observer(({note}: {
       })
       clearTimeout(saveTimer.current)
       clearTimeout(changedTimer.current)
-      changedTimer.current = window.setTimeout(() => {
-        ipcRenderer.send('file-changed')
-      }, 300)
       saveTimer.current = window.setTimeout(() => {
         save()
       }, 3000)

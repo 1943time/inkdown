@@ -4,10 +4,9 @@ import mermaid from 'mermaid'
 import {configStore} from '../../../store/config'
 import katex from 'katex'
 import {EditorUtils} from '../../utils/editorUtils'
-import {isAbsolute, join} from 'path'
-import {existsSync} from 'fs'
+import {extname, isAbsolute, join} from 'path'
+import {existsSync, readFileSync} from 'fs'
 import {mediaType} from '../../utils/dom'
-import {getImageData} from '../../../utils'
 const langMap = new Map([
   ['c++', 'cpp']
 ])
@@ -25,7 +24,8 @@ export const transformSchema = async (schema: any[], filePath: string) => {
         if (!item.url.startsWith('http') && !item.url.startsWith('file:') && !item.url.startsWith('data:')) {
           const path = isAbsolute(item.url) ? item.url : join(filePath, '..', item.url)
           if (existsSync(path) && type === 'image') {
-            item.url = getImageData(path, true)
+            const base64 = readFileSync(filePath, {'encoding': 'base64'})
+            item.url = `data:image/${extname(filePath).slice(1)};base64,${base64}`
           }
         }
         item.mediaType = type

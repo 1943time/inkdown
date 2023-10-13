@@ -18,15 +18,15 @@ import {History} from './History'
 export const Home = observer(() => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
-      const {openFile, openFolder} = res
-      try {
-        if (openFolder && existsSync(openFolder)) {
-          treeStore.open(openFolder, openFile || undefined)
-        } else if (openFile && existsSync(openFile)) {
-          treeStore.open(openFile)
-        }
-      } catch (e) {
-
+      if (res) {
+        const {openFile, openFolder} = res
+        try {
+          if (openFolder && existsSync(openFolder)) {
+            treeStore.open(openFolder, openFile || undefined)
+          } else if (openFile && existsSync(openFile)) {
+            treeStore.open(openFile)
+          }
+        } catch (e) {}
       }
     })
   }, [])
