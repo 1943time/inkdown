@@ -46,7 +46,7 @@ export const FloatBar = observer(() => {
     links: [] as {label: string, value: string}[],
     filterLinks: [] as {label: string, value: string}[]
   })
-  const getFileLinks = useCallback(() => {
+  const getFilePaths = useCallback(() => {
     if (treeStore.root) {
       let files: {label: string, value: string}[] = []
       const stack: IFileItem[] = treeStore.root.children!.slice()
@@ -86,7 +86,7 @@ export const FloatBar = observer(() => {
     el.current = Editor.parent(store.editor, sel.focus.path)
     store.highlightCache.set(el.current[0], [{...sel, highlight: true}])
     store.setState(state => state.refreshHighlight = !state.refreshHighlight)
-    setState({link: true, url: EditorUtils.getUrl(store.editor), links: getFileLinks()})
+    setState({link: true, url: EditorUtils.getUrl(store.editor), links: getFilePaths()})
     window.addEventListener('mousedown', closeLink)
   }, [])
 

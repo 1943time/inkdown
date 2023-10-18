@@ -1,16 +1,18 @@
 import {ReactEditor} from 'slate-react'
-import {Editor, NodeEntry, Path, Transforms} from 'slate'
+import {Editor, NodeEntry, Path, Text, Transforms} from 'slate'
 import {MediaNode} from '../../el'
 import {useGetSetState} from 'react-use'
-import {Input} from 'antd'
+import {AutoComplete, Input} from 'antd'
 import {CheckOutlined, DeleteOutlined, ReloadOutlined} from '@ant-design/icons'
 import React, {useCallback, useEffect, useRef} from 'react'
-import {getOffsetLeft} from '../utils/dom'
+import {getOffsetLeft, mediaType} from '../utils/dom'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
 import {treeStore} from '../../store/tree'
 import {keyArrow} from '../plugins/hotKeyCommands/arrow'
+import {IFileItem} from '../../index'
+import {join, relative} from 'path'
 
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
@@ -21,10 +23,35 @@ export const MediaAttr = observer(() => {
     alt: '',
     url: '',
     width: 0,
-    focus: false
+    focus: false,
+    filePaths: [] as {label: string, value: string}[],
+    filterPaths: [] as {label: string, value: string}[]
   })
   const nodeRef = useRef<NodeEntry<MediaNode>>()
   const domRef = useRef<HTMLDivElement>(null)
+
+  const getFilePaths = useCallback(() => {
+    if (treeStore.root) {
+      let files: {label: string, value: string}[] = []
+      const stack: IFileItem[] = treeStore.root.children!.slice()
+      while (stack.length) {
+        const node = stack.shift()!
+        if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
+          const path = relative(join(treeStore.openNote!.filePath, '..'), node.filePath!)
+          files.push({
+            label: path,
+            value: path
+          })
+        }
+        if (node.folder) {
+          stack.push(...node.children || [])
+        }
+      }
+      return files
+    }
+    return []
+  }, [])
+
   const save = useCallback(() => {
     if (nodeRef.current) {
       const node = nodeRef.current
@@ -97,7 +124,8 @@ export const MediaAttr = observer(() => {
       setState({
         focus: true,
         alt: node[0].alt || '',
-        url: node[0].url || ''
+        url: node[0].url || '',
+        filePaths: getFilePaths()
       })
       setTimeout(() => {
         resize()
@@ -125,7 +153,7 @@ export const MediaAttr = observer(() => {
   }, [treeStore.size, store.openSearch])
   return (
     <div
-      className={`dark:bg-zinc-900/70 bg-white/70 border-t border-l border-r border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
+      className={`dark:bg-zinc-900/70 bg-white border-t border-l border-r border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
       z-10 absolute dark:text-gray-300 text-gray-500 h-8 text-sm text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
       ref={domRef}
       style={{
@@ -134,15 +162,27 @@ export const MediaAttr = observer(() => {
         width: state().width
       }}
     >
-      <Input
-        className={'flex-1 mpath'}
-        size={'small'}
+      <AutoComplete
+        size={'small'} placeholder={'url or filepath'}
         value={state().url}
-        onChange={e => {
-          setState({url: e.target.value})
-        }}
+        bordered={false}
+        className={'flex-1 mpath'}
         onKeyDown={keydown}
-        placeholder={'url or file path'}
+        autoFocus={true}
+        allowClear={true}
+        onSelect={e => {
+          setState({url: e})
+        }}
+        options={state().filterPaths}
+        onSearch={e => {
+          setState({
+            url: e,
+            filterPaths: state().filePaths.filter(f => f.label.includes(e))
+          })
+        }}
+        onMouseDown={e => {
+          e.stopPropagation()
+        }}
       />
       <div className={'rounded-sm dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 ml-2 px-1 py-0.5'}>
         <CheckOutlined
