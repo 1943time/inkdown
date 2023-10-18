@@ -11,9 +11,11 @@ import {
   StrikethroughOutlined, UnderlineOutlined
 } from '@ant-design/icons'
 import {BaseRange, Editor, NodeEntry, Range, Text, Transforms} from 'slate'
-import {Input} from 'antd'
+import {AutoComplete, Input} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
+import {IFileItem} from '../../index'
+import {join, relative} from 'path'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},
@@ -40,8 +42,32 @@ export const FloatBar = observer(() => {
     link: false,
     url: '',
     hoverSelectColor: false,
-    openSelectColor: false
+    openSelectColor: false,
+    links: [] as {label: string, value: string}[],
+    filterLinks: [] as {label: string, value: string}[]
   })
+  const getFileLinks = useCallback(() => {
+    if (treeStore.root) {
+      let files: {label: string, value: string}[] = []
+      const stack: IFileItem[] = treeStore.root.children!.slice()
+      while (stack.length) {
+        const node = stack.shift()!
+        if (!node.folder && node.ext === 'md') {
+          const path = relative(join(treeStore.openNote!.filePath, '..'), node.filePath!)
+          files.push({
+            label: path,
+            value: path
+          })
+        }
+        if (node.folder) {
+          stack.push(...node.children || [])
+        }
+      }
+      return files
+    }
+    return []
+  }, [])
+
   const sel = useRef<BaseRange>()
   const el = useRef<NodeEntry<any>>()
   const closeLink = useCallback(() => {
@@ -60,7 +86,7 @@ export const FloatBar = observer(() => {
     el.current = Editor.parent(store.editor, sel.focus.path)
     store.highlightCache.set(el.current[0], [{...sel, highlight: true}])
     store.setState(state => state.refreshHighlight = !state.refreshHighlight)
-    setState({link: true, url: EditorUtils.getUrl(store.editor)})
+    setState({link: true, url: EditorUtils.getUrl(store.editor), links: getFileLinks()})
     window.addEventListener('mousedown', closeLink)
   }, [])
 
@@ -141,12 +167,17 @@ export const FloatBar = observer(() => {
     >
       {state.link ?
         <div className={'flex items-center h-full w-[300px] px-2'}>
-          <Input
+          <AutoComplete
             size={'small'} placeholder={'url or filepath'}
             value={state.url}
             bordered={false}
+            className={'w-full'}
             autoFocus={true}
             allowClear={true}
+            onSelect={e => {
+              setState({url: e})
+            }}
+            options={state.filterLinks}
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 Transforms.setNodes(
@@ -157,12 +188,17 @@ export const FloatBar = observer(() => {
                 closeLink()
               }
             }}
-            onChange={e => setState({url: e.target.value})}
+            onSearch={e => {
+              setState({
+                url: e,
+                filterLinks: state.links.filter(l => l.label.includes(e))
+              })
+            }}
             onMouseDown={e => {
               e.stopPropagation()
             }}
           />
-          <div className={'w-[1px] h-5 bg-gray-200/10 flex-shrink-0'}></div>
+          <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
           <CheckOutlined
             onClick={() => {
               Transforms.setNodes(

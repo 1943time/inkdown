@@ -68,11 +68,11 @@ export const FullSearch = observer(() => {
     clearTimeout(timer.current)
     setState({searching: true})
     timer.current = window.setTimeout(() => {
-      if (!treeStore.searchKeyWord.trim() || !treeStore.files.length) {
+      if (!treeStore.searchKeyWord.trim() || !treeStore.nodes.length) {
         return setState({searchResults: []})
       }
       let results: any[] = []
-      for (let f of treeStore.files) {
+      for (let f of treeStore.nodes) {
         const data = treeStore.schemaMap.get(f)
         let res: { file: IFileItem, results: { el: any, text: string }[] } | null = null
         if (data?.state) {

@@ -42,7 +42,7 @@ export class TreeStore {
     to: string
   }>()
 
-  get files() {
+  get nodes() {
     if (!this.root) return []
     let files: IFileItem[] = []
     const stack: IFileItem[] = this.root.children!.slice()
@@ -150,7 +150,7 @@ export class TreeStore {
   }
 
   getFileMap(root = false) {
-    const nodes = this.files
+    const nodes = this.nodes
     if (root) nodes.push(this.root)
     return new Map(nodes.map(n => [n.filePath, n]))
   }
@@ -241,7 +241,7 @@ export class TreeStore {
   openNewNote(filePath: string) {
     if (this.currentTab.current?.filePath === filePath) return
     if (this.root && filePath.startsWith(this.root.filePath)) {
-      const node = this.files.find(n => !n.folder && n.filePath === filePath)
+      const node = this.nodes.find(n => !n.folder && n.filePath === filePath)
       if (node) {
         this.selectNote(node)
         if (node.ext === 'md') {

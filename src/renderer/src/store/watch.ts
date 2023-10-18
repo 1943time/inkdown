@@ -40,7 +40,7 @@ export class Watcher {
       }
 
       if (!this.changeHistory.size) return
-      const filesMap = new Map(this.store.files.map(f => [f.filePath, f]))
+      const filesMap = new Map(this.store.nodes.map(f => [f.filePath, f]))
       for (let path of this.changeHistory) {
         if (mediaType(path) !== 'markdown') continue
         const node = filesMap.get(path)
