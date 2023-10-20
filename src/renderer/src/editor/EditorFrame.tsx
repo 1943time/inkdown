@@ -3,12 +3,8 @@ import {MEditor} from './Editor'
 import {Heading} from './tools/Leading'
 import {Empty} from '../components/Empty'
 import {Tab} from '../index'
-import React, {useCallback, useEffect, useMemo, useState} from 'react'
-import {withMarkdown} from './plugins'
-import {withReact} from 'slate-react'
-import {withHistory} from 'slate-history'
-import {createEditor} from 'slate'
-import {EditorStore, EditorStoreContext} from './store'
+import React, {useCallback, useEffect, useMemo} from 'react'
+import {EditorStoreContext} from './store'
 import {FloatBar} from './tools/FloatBar'
 import {TableAttr} from './tools/TableAttr'
 import {Search} from './tools/Search'
@@ -18,20 +14,13 @@ import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {getImageData} from '../utils'
-import {configStore} from '../store/config'
 import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
 import {InsertNetworkImage} from './tools/InsertNetworkImage'
+
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
-  const [editor] = useState(() => withMarkdown(withReact(withHistory(createEditor()))))
-  const store = useMemo(() => {
-    const store = new EditorStore(editor)
-    tab.store = store
-    return store
-  }, [])
-
   const click = useCallback((e: React.MouseEvent) => {
     if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement
@@ -49,12 +38,14 @@ export const EditorFrame = observer(({tab}: {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (isHotkey('esc', e) && store.openSearch) {
-        store.setOpenSearch(false)
+      if (isHotkey('esc', e) && tab.store.openSearch && treeStore.currentTab === tab) {
+        tab.store.setOpenSearch(false)
       }
     }
     const open = () => {
-      store.setOpenSearch(true)
+      if (treeStore.currentTab === tab) {
+        tab.store.setOpenSearch(true)
+      }
     }
     window.addEventListener('keydown', keydown)
     window.electron.ipcRenderer.on('open-search', open)
@@ -70,20 +61,27 @@ export const EditorFrame = observer(({tab}: {
       height: window.innerHeight - 40
     }
   }, [treeStore.size, treeStore.fold, treeStore.width])
+  const pt = useMemo(() => {
+    let pt = 0
+    if (tab.store.openSearch) pt += 46
+    if (treeStore.tabs.length > 1) pt += 32
+    return pt
+  }, [tab.store.openSearch, treeStore.tabs.length])
   return (
-    <EditorStoreContext.Provider value={store}>
+    <EditorStoreContext.Provider value={tab.store}>
       <Search/>
       <div
         className={'flex-1 h-full overflow-y-auto items-start relative'}
         ref={dom => {
-          store.setState(state => state.container = dom)
+          tab.store.setState(state => state.container = dom)
         }}
       >
         {tab.current &&
           <>
             <div
-              className={`items-start min-h-[calc(100vh_-_40px)] relative ${store.openSearch ? 'pt-[46px]' : ''} ${mt === 'markdown' ? '' : 'hidden'}`}
+              className={`items-start min-h-[calc(100vh_-_40px)] relative ${mt === 'markdown' ? '' : 'hidden'}`}
               onClick={click}
+              style={{paddingTop: pt}}
             >
               <div className={`flex-1 flex justify-center items-start h-full`}>
                 <div

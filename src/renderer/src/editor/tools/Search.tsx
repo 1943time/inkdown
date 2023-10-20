@@ -5,6 +5,7 @@ import {Tooltip} from 'antd'
 import {configStore} from '../../store/config'
 import IClose from '../../icons/IClose'
 import isHotkey from 'is-hotkey'
+import {treeStore} from '../../store/tree'
 export const Search = observer(() => {
   const store = useEditorStore()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -13,9 +14,15 @@ export const Search = observer(() => {
       inputRef.current?.focus()
     )
   }, [store.openSearch, store.focusSearch])
+  const top = useMemo(() => {
+    let pt = 40
+    if (treeStore.tabs.length > 1) pt += 32
+    return pt
+  }, [treeStore.tabs.length])
   return (
     <div
-      className={`absolute w-full duration-200 left-0 top-10 items-center z-30 def-bg overflow-hidden border-b b1 ${store.openSearch ? '' : 'hidden'}`}
+      className={`absolute w-full duration-200 left-0 items-center z-30 def-bg overflow-hidden border-b b1 ${store.openSearch ? '' : 'hidden'}`}
+      style={{top}}
     >
       <div className={'max-w-[700px] mx-auto '}>
         <div

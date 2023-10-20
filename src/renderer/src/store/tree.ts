@@ -1,9 +1,9 @@
-import {action, makeAutoObservable, observable, runInAction} from 'mobx'
+import {action, makeAutoObservable, observable, runInAction, toJS} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse, sep} from 'path'
-import {mkdirSync, appendFileSync, existsSync, renameSync, watch, statSync, readFileSync, readdirSync} from 'fs'
+import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
@@ -14,7 +14,9 @@ import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
 import {appendRecentDir, appendRecentNote, db, moveFileRecord} from './db'
 import {refactor, renameAllFiles} from './refactor'
-import {saveDoc$} from '../editor/Editor'
+import {EditorStore} from '../editor/store'
+import {ReactEditor} from 'slate-react'
+import {Editor, Transforms} from 'slate'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -302,7 +304,7 @@ export class TreeStore {
         state: markdownParser(file.filePath).schema
       })
       if (file.filePath === this.openNote?.filePath) {
-        saveDoc$.next(this.schemaMap.get(file)?.state || null)
+        treeStore.currentTab.store.saveDoc$.next(this.schemaMap.get(file)?.state || null)
       }
     }
     if (files.length) {
@@ -453,7 +455,18 @@ export class TreeStore {
       }
     }
   }
-
+  selectTab(i: number) {
+    this.currentTab.store.saveDoc$.next(null)
+    this.currentIndex = i
+    setTimeout(() => {
+      const backRange = this.currentTab.range
+      if (backRange) {
+        const selection = window.getSelection()!
+        selection.removeAllRanges()
+        selection.addRange(backRange)
+      }
+    })
+  }
   refactorFolder(oldPath: string, targetPath: string) {
     const files = readdirSync(targetPath)
     let changeFiles: [string, string][] = []
@@ -504,16 +517,17 @@ export class TreeStore {
       get hasPrev() {
         return this.index > 0
       },
-      store: null,
+      store: new EditorStore(),
       get hasNext() {
         return this.index < this.history.length - 1
       }
-    } as Tab)
+    } as Tab, {range: false, id: false, history: false})
     this.tabs.push(tab)
     this.currentIndex = this.tabs.length - 1
   }
 
   removeTab(i: number) {
+    this.currentTab.store.saveDoc$.next(null)
     if (this.tabs.length < 2) return
     this.tabs.splice(i, 1)
     if (i === this.currentIndex) {

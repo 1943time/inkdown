@@ -4,8 +4,9 @@ import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
-import {isMac, isWindows} from '../utils'
+import {isMac} from '../utils'
 import {Server} from '../server/Server'
+import IClose from '../icons/IClose'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openNote) return ['']
@@ -13,7 +14,7 @@ export const Nav = observer(() => {
   }, [treeStore.openNote?.filePath])
   return (
     <div
-      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
+      className={'fixed left-0 top-0 h-10 w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
       style={{paddingLeft: treeStore.fold ? !isMac ? 42 : 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {
@@ -22,7 +23,7 @@ export const Nav = observer(() => {
       }}
     >
       <div
-        className={'justify-between flex items-center h-full flex-1'}
+        className={`justify-between relative flex items-center h-full flex-1`}
       >
         <div className={'flex items-center h-full flex-1'}>
           <div className={`text-gray-300 flex items-center text-sm select-none ${treeStore.fold ? '' : 'ml-3'}`}>

@@ -19,7 +19,6 @@ import {MainApi} from '../../api/main'
 import isHotkey from 'is-hotkey'
 import IpcRendererEvent = Electron.IpcRendererEvent
 
-
 export const TableAttr = observer(() => {
   const store = useEditorStore()
   const editor = store.editor
@@ -44,7 +43,8 @@ export const TableAttr = observer(() => {
     if (!table) return
     const dom = ReactEditor.toDOMNode(editor, table[0]) as HTMLElement
     if (dom) {
-      const top = store.offsetTop(dom)
+      let top = store.offsetTop(dom)
+      if (treeStore.tabs.length > 1) top += 32
       let left = getOffsetLeft(dom)
       if (!treeStore.fold) left -= treeStore.width
       setState({

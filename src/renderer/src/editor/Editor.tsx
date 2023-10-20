@@ -22,7 +22,6 @@ import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
 
 const countThrottle$ = new Subject<any>()
-export const saveDoc$ = new Subject<any[] | null>()
 const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -48,7 +47,6 @@ export const MEditor = observer(({note}: {
       runInAction(() => {
         store.docChanged = false
       })
-      const root = Editor.node(editor, [])
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
         const res = await toMarkdown(schema.state)
@@ -58,7 +56,7 @@ export const MEditor = observer(({note}: {
     }
   }, [note])
 
-  useSubject(saveDoc$, data => {
+  useSubject(store.saveDoc$, data => {
     if (data && nodeRef.current) {
       const schema = treeStore.schemaMap.get(nodeRef.current)
       EditorUtils.reset(editor, data, schema?.history)
@@ -103,6 +101,9 @@ export const MEditor = observer(({note}: {
         state: v,
         history: editor.history
       })
+    }
+    if (editor.operations[0].type === 'set_selection') {
+      treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
       countThrottle$.next(v)

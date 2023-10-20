@@ -9,7 +9,6 @@ import {Webview} from './Webview'
 import {db, IHistory} from '../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
-import {saveDoc$} from '../editor/Editor'
 
 function Help(props: {
   text: string
@@ -114,7 +113,9 @@ export const History = observer(() => {
           type={'primary'} className={'ml-3'}
           disabled={!schema.length}
           onClick={() => {
-            if (schema.length) saveDoc$.next(schema)
+            if (schema.length) {
+              treeStore.currentTab.store.saveDoc$.next(schema)
+            }
             setState({open: false})
           }}
         >

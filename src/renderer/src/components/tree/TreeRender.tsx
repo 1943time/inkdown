@@ -6,7 +6,6 @@ import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
 import {MainApi} from '../../api/main'
 import {Input} from 'antd'
-import {configStore} from '../../store/config'
 import ArrowRight from '../../icons/ArrowRight'
 
 export const TreeRender = observer(() => {
@@ -103,8 +102,12 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                 }
               }}
               onClick={action(() => {
-                if (!c.folder) treeStore.selectNote(c)
-                else c.expand = !c.expand
+                if (!c.folder) {
+                  // treeStore.selectNote(c)
+                  treeStore.appendTab(c)
+                } else {
+                  c.expand = !c.expand
+                }
               })}
             >
               {!!c.mode ?

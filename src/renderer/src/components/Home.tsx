@@ -14,6 +14,7 @@ import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
 import {exportHtml} from '../editor/output/html'
 import {History} from './History'
+import IClose from '../icons/IClose'
 
 export const Home = observer(() => {
   const initial = useCallback(async () => {
@@ -121,9 +122,49 @@ export const Home = observer(() => {
       />
       <div className={'flex-1 overflow-hidden flex flex-col pt-10 relative'}>
         <Nav/>
-        {treeStore.tabs.map((t) =>
-          <EditorFrame tab={t} key={t.id}/>
-        )}
+        {treeStore.tabs.length > 1 &&
+          <div
+            className={`h-8 bg-white dark:border-gray-200/10 border-gray-200/80 border-b text-[13px] overflow-x-auto hide-scrollbar w-full absolute top-10 z-50`}
+          >
+            <div className={'flex h-full'}>
+              {treeStore.tabs.map((t, i) =>
+                <div
+                  onClick={() => {
+                    treeStore.selectTab(i)
+                  }}
+                  className={`${i === treeStore.currentIndex ? 'dark:bg-[#24262A] bg-white text-gray-600' : 'dark:text-gray-300 text-gray-500 dark:bg-[#1F2024] bg-gray-50 hover:text-gray-600'}
+              ${i !== 0 ? 'border-l dark:border-gray-200/10 border-gray-200' : ''}
+              relative flex-1 min-w-[200px] h-full flex items-center group px-8 cursor-default`}
+                  key={i}
+                >
+                  <div
+                    className={`opacity-0 group-hover:opacity-100 duration-200 text-gray-400 hover:text-gray-600
+                absolute p-1 left-1 top-1/2 -translate-y-1/2 dark:text-gray-500 dark:hover:text-gray-300`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      treeStore.removeTab(i)
+                    }}
+                  >
+                    <IClose
+                      className={'w-4 h-4'}
+                    />
+                  </div>
+                  <div className={'w-full truncate text-center'}>
+                    {t.current? t.current.filename : 'New Tab'}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        }
+          {treeStore.tabs.map((t) =>
+            <div
+              className={`flex-1 h-full overflow-y-auto items-start ${treeStore.currentTab === t ? '' : 'hidden'}`}
+              key={t.id}
+            >
+              <EditorFrame tab={t}/>
+            </div>
+          )}
         <Characters/>
       </div>
       <About/>
