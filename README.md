@@ -5,10 +5,15 @@ A WYSIWYG markdown editor. improving the Markdown reading and editing experience
 
 ***
 
-# Brief introduction
+# Introduction
 
 Bluestone is an WYSIWYG Markdown editor，use [GFM](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
 Supports light and dark color theme. and generate your Markdown files into online documents in the easiest and fastest way.
+
+Unlike source code mode, Bluestone is more like a rich text editor, and it uses Markdown as the host.
+The reason for this is that bluestone wants to maintain the universality and cross-platform features of Markdown,
+and add a rich text editing experience on this basis.
+
 [documentation](https://pb.bluemd.me/official/book/docs/introduction)
 
 ![](./docs/assets/d1.png)
