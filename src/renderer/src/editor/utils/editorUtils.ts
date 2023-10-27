@@ -130,7 +130,6 @@ export class EditorUtils {
   static toggleFormat(editor: Editor, format: any) {
     const str = editor.selection ? Editor.string(editor, editor.selection) : ''
     if (str) {
-      // EditorUtils.highColor(editor)
       const isActive = EditorUtils.isFormatActive(editor, format)
       Transforms.setNodes(
         editor,

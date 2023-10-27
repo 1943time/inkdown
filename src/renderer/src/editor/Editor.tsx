@@ -90,11 +90,6 @@ export const MEditor = observer(({note}: {
     }
     value.current = v
 
-    if (!changedMark.current) {
-      changedMark.current = true
-      ipcRenderer.send('file-changed')
-    }
-
     onChange(v)
     if (note) {
       treeStore.schemaMap.set(note, {
@@ -103,9 +98,15 @@ export const MEditor = observer(({note}: {
       })
     }
     if (editor.operations[0].type === 'set_selection') {
-      treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
+      try {
+        treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
+      } catch (e) {}
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
+      if (!changedMark.current) {
+        changedMark.current = true
+        ipcRenderer.send('file-changed')
+      }
       countThrottle$.next(v)
       runInAction(() => {
         note.refresh = !note.refresh
@@ -119,7 +120,7 @@ export const MEditor = observer(({note}: {
     }
   }, [note])
 
-  useEffect(() => {
+  const initialNote = useCallback(async () => {
     clearTimeout(saveTimer.current)
     save()
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
@@ -130,11 +131,14 @@ export const MEditor = observer(({note}: {
         count(data?.state || [])
       })
       first.current = true
-      if (!data) data = treeStore.getSchema(note)
+      if (!data) {
+        data = await treeStore.getSchema(note)
+        count(data?.state || [])
+        setTimeout(action(() => {
+          note.refresh = !note.refresh
+        }))
+      }
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
-      treeStore.schemaMap.set(note, {
-        ...data!,
-      })
       setTimeout(() => {
         store.setState(state => state.pauseCodeHighlight = false)
         requestIdleCallback(() => {
@@ -144,6 +148,10 @@ export const MEditor = observer(({note}: {
     } else {
       nodeRef.current = undefined
     }
+  }, [note])
+
+  useEffect(() => {
+    initialNote()
   }, [note, editor])
 
   useEffect(() => {

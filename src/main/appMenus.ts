@@ -190,6 +190,20 @@ const getSystemMenus = () => {
           ipcMain.emit('create-window')
         }
       },
+      {
+        label: 'New Tab',
+        accelerator: `${cmd}+t`,
+        click: (menu, win) => {
+          win?.webContents.send('new-tab')
+        }
+      },
+      {
+        label: 'Close current tab',
+        accelerator: `${cmd}+w`,
+        click: (menu, win) => {
+          win?.webContents.send('close-current-tab')
+        }
+      },
       ...systemFileMenus,
       {
         label: menusLabel.openQuickly,
@@ -497,6 +511,7 @@ const getSystemMenus = () => {
           }
         },
         {type: 'separator'},
+        {role: 'togglefullscreen'},
         {role: 'reload'},
         ...devTools
       ],

@@ -172,7 +172,7 @@ export const TableAttr = observer(() => {
 
   useEffect(() => {
     resize()
-  }, [treeStore.size, store.openSearch])
+  }, [treeStore.size, store.openSearch, treeStore.tabs.length])
 
   const insertRow = useCallback((path: Path, columns: number) => {
     Transforms.insertNodes(editor, {

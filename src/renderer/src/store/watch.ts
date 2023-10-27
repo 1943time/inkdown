@@ -2,11 +2,11 @@ import {TreeStore} from './tree'
 import {join, sep} from 'path'
 import {runInAction} from 'mobx'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
-import {markdownParser} from '../editor/parser'
 import {mediaType} from '../editor/utils/dom'
 import {IFileItem} from '../index'
-import {lstatSync} from 'fs'
-import {moveFileRecord} from './db'
+import {lstatSync, readFileSync} from 'fs'
+import {removeFileRecord} from './db'
+import {parserMdToSchema} from '../editor/parser/parser'
 
 export class Watcher {
   private changeHistory = new Set<string>()
@@ -28,7 +28,7 @@ export class Watcher {
         }
       }, 100)
     })
-    window.electron.ipcRenderer.on('window-focus', () => {
+    window.electron.ipcRenderer.on('window-focus', async () => {
       if (this.store.root?.filePath) {
         window.api.offWatcher(this.store.root.filePath)
       }
@@ -45,17 +45,19 @@ export class Watcher {
         if (mediaType(path) !== 'markdown') continue
         const node = filesMap.get(path)
         if (node) {
-          const schema = markdownParser(node.filePath).schema
+          const [schema] = await parserMdToSchema([readFileSync(node.filePath, {encoding: 'utf-8'})])
           this.store.schemaMap.set(node, {
             state: schema
           })
         } else {
-          for (let f of this.store.currentTab.history) {
-            if (f.independent && f.filePath === path) {
-              const schema = markdownParser(f.filePath).schema
-              this.store.schemaMap.set(f, {
-                state: schema
-              })
+          for (let t of this.store.tabs) {
+            for (let f of t.history) {
+              if (f.independent && f.filePath === path) {
+                const [schema] = await parserMdToSchema([readFileSync(f.filePath, {encoding: 'utf-8'})])
+                this.store.schemaMap.set(f, {
+                  state: schema
+                })
+              }
             }
           }
         }
@@ -74,23 +76,27 @@ export class Watcher {
       if (target.folder) {
         runInAction(() => {
           parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
-          this.store.currentTab.history  = this.store.currentTab.history.filter(f => !f.filePath.startsWith(path))
-          if (this.store.currentTab.index > 0 && this.store.currentTab.index > this.store.currentTab.history.length - 1) {
-            this.store.currentTab.index = this.store.currentTab.history.length - 1
-          }
+          this.store.tabs.forEach(t => {
+            t.history  = t.history.filter(f => !f.filePath.startsWith(path))
+            if (t.index > 0 && t.index > t.history.length - 1) {
+              t.index = t.history.length - 1
+            }
+          })
         })
       } else {
         runInAction(() => {
           const index = parent.children!.findIndex(n => n.filePath === path)
           if (index !== -1) {
             parent?.children!.splice(index, 1)
-            this.store.currentTab.history = this.store.currentTab.history.filter(h => h.filePath !== path)
-            if (this.store.currentTab.index > this.store.currentTab.history.length - 1) {
-              this.store.currentTab.index = this.store.currentTab.history.length - 1
-            }
+            this.store.tabs.forEach(t => {
+              t.history = t.history.filter(h => h.filePath !== path)
+              if (t.index > t.history.length - 1) {
+                t.index = t.history.length - 1
+              }
+            })
           }
           if (target.ext === 'md') {
-            moveFileRecord(target.filePath)
+            removeFileRecord(target.filePath)
           }
         })
       }
@@ -145,19 +151,20 @@ export class Watcher {
   }
 
   async openDirCheck() {
-    const history = this.store.currentTab.history
     const nodesMap = this.store.getFileMap(true)
-    for (let h of history) {
-      if (h.independent) {
-        await this.off(h.filePath)
-        this.watchNoteSet.delete(h.filePath)
-        if (h.filePath.startsWith(this.store.root.filePath)) {
-          runInAction(() => {
-            const node = nodesMap.get(h.filePath)
-            if (node) {
-              history.splice(history.indexOf(h), 1, node)
-            }
-          })
+    for (let t of this.store.tabs) {
+      for (let h of t.history) {
+        if (h.independent) {
+          await this.off(h.filePath)
+          this.watchNoteSet.delete(h.filePath)
+          if (h.filePath.startsWith(this.store.root.filePath)) {
+            runInAction(() => {
+              const node = nodesMap.get(h.filePath)
+              if (node) {
+                t.history.splice(t.history.indexOf(h), 1, node)
+              }
+            })
+          }
         }
       }
     }

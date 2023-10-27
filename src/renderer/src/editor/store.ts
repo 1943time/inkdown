@@ -168,6 +168,7 @@ export class EditorStore {
       }
       this.highlightCache.set(el, ranges)
     }
+    console.log('hi', this.highlightCache)
     this.matchCount = matchCount
     if (this.search.currentIndex > matchCount - 1) {
       this.search.currentIndex = 0

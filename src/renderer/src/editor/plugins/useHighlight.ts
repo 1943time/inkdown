@@ -13,7 +13,7 @@ const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
 export const cacheTextNode = new WeakMap<object, Range[]>
 
-const highlightNodes = new Set(['paragraph', 'table-cell', 'code', 'head', 'inline-katex'])
+const highlightNodes = new Set(['paragraph', 'table-cell', 'code', 'head', 'inline-katex', 'code-line'])
 let clearTimer = 0
 
 export const clearCodeCache = (node: any) => {

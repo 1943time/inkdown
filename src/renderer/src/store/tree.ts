@@ -1,22 +1,20 @@
-import {action, makeAutoObservable, observable, runInAction, toJS} from 'mobx'
+import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse, sep} from 'path'
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
-import {markdownParser} from '../editor/parser'
 import {MenuKey} from '../utils/keyboard'
 import {message$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {appendRecentDir, appendRecentNote, db, moveFileRecord} from './db'
+import {appendRecentDir, appendRecentNote, db, removeFileRecord} from './db'
 import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
-import {ReactEditor} from 'slate-react'
-import {Editor, Transforms} from 'slate'
+import {parserMdToSchema} from '../editor/parser/parser'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -25,9 +23,11 @@ export class TreeStore {
   dragNode: IFileItem | null = null
   dropNode: IFileItem | null = null
   tabs: Tab[] = []
+  loaded = true
   searchKeyWord = ''
   currentIndex = 0
   width = 260
+  tabContextIndex = 0
   size = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -46,7 +46,7 @@ export class TreeStore {
 
   get nodes() {
     if (!this.root) return []
-    let files: IFileItem[] = []
+    let files: IFileItem[] = [this.root]
     const stack: IFileItem[] = this.root.children!.slice()
     while (stack.length) {
       const node = stack.shift()!
@@ -62,8 +62,24 @@ export class TreeStore {
     return this.tabs[this.currentIndex]
   }
 
-  get openNote() {
+  get openedNote() {
     return this.tabs[this.currentIndex].current
+  }
+
+  get firstNote() {
+    let firstNote: IFileItem | null = null
+    let stack = this.root.children?.slice() || []
+    while (stack.length) {
+      const item = stack.shift()!
+      if (!item.folder && ['md', 'markdown'].includes(item.ext!)) {
+        firstNote = item
+        break
+      }
+      if (item.folder && item.children?.length) {
+        stack.unshift(...item.children.slice())
+      }
+    }
+    return firstNote
   }
 
   constructor() {
@@ -78,10 +94,10 @@ export class TreeStore {
         height: window.innerHeight
       }
     }))
-    this.appendTab()
+    this.tabs.push(this.createTab())
     new MenuKey(this)
     window.electron.ipcRenderer.on('copy-source-code', (e, filePath?: string) => {
-      if (this.openNote?.filePath.endsWith('.md') || filePath) {
+      if (this.openedNote?.filePath.endsWith('.md') || filePath) {
         const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
         window.api.copyToClipboard(content)
         message$.next({type: 'success', content: 'Copied to clipboard'})
@@ -89,7 +105,10 @@ export class TreeStore {
     })
 
     window.electron.ipcRenderer.on('open-path', (e, path: string) => {
-      this.open(path)
+      const s = stat(path)
+      if (s) {
+        s.isDirectory() ? this.openFolder(path) : this.openNote(path)
+      }
     })
     window.electron.ipcRenderer.on('tree-command', (e, params: {
       type: 'rootFolder' | 'file' | 'folder'
@@ -132,12 +151,7 @@ export class TreeStore {
             }
             break
           case 'openInNewTab':
-            if (!this.currentTab.current && this.ctxNode) {
-              this.currentTab.history.push(this.ctxNode)
-              this.currentTab.index = this.currentTab.history.length - 1
-            } else {
-              this.appendTab(this.ctxNode)
-            }
+            if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
             break
           case 'delete':
             if (filePath && this.ctxNode) {
@@ -152,6 +166,7 @@ export class TreeStore {
   }
 
   getFileMap(root = false) {
+    if (!this.root) return new Map()
     const nodes = this.nodes
     if (root) nodes.push(this.root)
     return new Map(nodes.map(n => [n.filePath, n]))
@@ -169,125 +184,24 @@ export class TreeStore {
     }
   }
 
-  selectNote(node: IFileItem, scroll = true) {
-    if (!this.schemaMap.get(node) && ['md', 'markdown'].includes(node.ext || '')) {
-      try {
-        const {schema, nodes} = markdownParser(node.filePath)
-        this.schemaMap.set(node, {
-          state: schema
-        })
-      } catch (e) {
-        console.error('parser err', e)
-      }
-    }
-    if (node.ext === 'md' && this.root) appendRecentNote(node.filePath, this.root.filePath)
-    document.title = this.root ? `${basename(this.root.filePath)}-${basename(node.filePath)}` : basename(node.filePath)
-    this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
-    this.currentTab.history.push(node)
-    this.openParentDir(node.filePath)
-    this.currentTab.index = this.currentTab.history.length - 1
-    MainApi.setWin({openFile: node.filePath})
-    if (this.currentTab.store?.openSearch) this.currentTab.store?.setSearchText(this.currentTab.store.search.text)
-    if (scroll) {
-      this.currentTab.store!.container?.scroll({
-        top: 0
-      })
-    }
-  }
-
-  selectPath(filePath: string) {
-    if (!stat(filePath)) return
-    if (this.root && filePath.startsWith(this.root.filePath)) {
-      let stack = this.root.children!.slice()
-      while (stack.length) {
-        const file = stack.shift()!
-        if (file.filePath === filePath && !file.folder) {
-          this.selectNote(file)
-          return
-        }
-        if (file.folder && file.children?.length) {
-          stack.push(...file.children)
-        }
-      }
-    } else {
-      this.openNewNote(filePath)
-    }
-    document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
-  }
-
-  createNewNote(filePath: string) {
-    let node: IFileItem
-    if (this.root && filePath.startsWith(this.root.filePath)) {
-      const map = this.getFileMap(true)
-      node = createFileNode({
-        parent: map.get(join(filePath, '..')),
-        folder: false,
-        filePath: filePath
-      })
-    } else {
-      node = createFileNode({
-        filePath: filePath,
-        folder: false
-      })
-    }
-    if ((!this.root || !filePath.startsWith(this.root.filePath)) && mediaType(filePath) === 'markdown') {
-      this.watcher.watchNote(filePath)
-    }
-    appendFileSync(filePath, '', {encoding: 'utf-8'})
-    if (this.root && filePath.startsWith(this.root.filePath)) this.watcher.onChange('update', filePath, node)
-    this.currentTab.history.push(node)
-    this.currentTab.index = this.currentTab.history.length - 1
-    MainApi.setWin({openFile: node.filePath})
-  }
-
-  openNewNote(filePath: string) {
-    if (this.currentTab.current?.filePath === filePath) return
-    if (this.root && filePath.startsWith(this.root.filePath)) {
-      const node = this.nodes.find(n => !n.folder && n.filePath === filePath)
-      if (node) {
-        this.selectNote(node)
-        if (node.ext === 'md') {
-          appendRecentNote(filePath, treeStore.root.filePath)
-        }
-      }
-    } else {
-      const node = createFileNode({
-        filePath: filePath,
-        folder: false
-      })
-      const media = mediaType(filePath)
-      if (media === 'markdown') {
-        const {schema} = markdownParser(filePath)
-        this.schemaMap.set(node, {
-          state: schema
-        })
-      }
-      if (media === 'markdown' && (!this.root || !filePath.startsWith(this.root.filePath))) {
-        this.watcher.watchNote(filePath)
-      }
-      MainApi.setWin({openFile: node.filePath})
-      this.currentTab.history.push(node)
-      this.currentTab.index = this.currentTab.history.length - 1
-    }
-  }
-
-  open(path: string, openFile?: string) {
-    try {
-      const stat = statSync(path)
-      document.title = basename(path)
-      if (stat.isDirectory()) {
-        this.currentTab.index = 0
-        this.currentTab.history = []
-        document.title = basename(path)
-        this.openFolder(path, openFile)
-        appendRecentDir(path)
+  async restoreTabs(tabs: string[]) {
+    const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
+    let first = true
+    for (let t of tabs) {
+      const tab = this.createTab()
+      if (nodeMap.get(t)) {
+        tab.history.push(nodeMap.get(t)!)
       } else {
-        document.title = this.root ? `${basename(this.root.filePath)}-${basename(path)}` : basename(path)
-        this.openNewNote(path)
-        this.openParentDir(path)
+        const st = stat(t)
+        if (st && !st.isDirectory()) {
+          const node = this.createSingleNode(t)
+          tab.history.push(node)
+        }
       }
-    } catch (e) {
+      first ? this.tabs[0] = tab : this.tabs.push(tab)
+      first = false
     }
+    if (this.currentTab.current?.filePath) this.openParentDir(this.currentTab.current.filePath)
   }
 
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
@@ -296,27 +210,12 @@ export class TreeStore {
     }
   }
 
-  parserQueue(files: IFileItem[], force = false) {
-    if (!files.length) return
-    const file = files.shift()!
-    if (!this.schemaMap.get(file) || force) {
-      this.schemaMap.set(file, {
-        state: markdownParser(file.filePath).schema
-      })
-      if (file.filePath === this.openNote?.filePath) {
-        treeStore.currentTab.store.saveDoc$.next(this.schemaMap.get(file)?.state || null)
-      }
-    }
-    if (files.length) {
-      requestIdleCallback(() => this.parserQueue(files, force))
-    }
-  }
-
-  getSchema(file: IFileItem) {
+  async getSchema(file: IFileItem) {
     if (file?.ext !== 'md' && file?.ext !== 'markdown') return
     if (this.schemaMap.get(file)) return this.schemaMap.get(file)
+    const [schema] = await parserMdToSchema([readFileSync(file.filePath, {encoding: 'utf-8'})])
     this.schemaMap.set(file, {
-      state: markdownParser(file.filePath).schema
+      state: schema
     })
     return this.schemaMap.get(file)
   }
@@ -336,34 +235,115 @@ export class TreeStore {
     }
   }
 
-  openFolder(path: string, openFile?: string) {
-    this.watcher.destroy()
-    MainApi.setWin({openFolder: path})
-    const {root, files} = parserNode(path)
-    this.root = root
-    requestIdleCallback(() => this.parserQueue(files))
-    if (openFile && existsSync(openFile)) {
-      this.open(openFile)
-      this.openParentDir(openFile)
-    } else {
-      let firstNote: IFileItem | null = null
-      let stack = this.root.children?.slice() || []
-      while (stack.length) {
-        const item = stack.shift()!
-        if (!item.folder && ['md', 'markdown'].includes(item.ext!)) {
-          firstNote = item
-          break
-        }
-        if (item.folder && item.children?.length) {
-          stack.unshift(...item.children.slice())
+  createSingleNode(filePath: string) {
+    const node = createFileNode({
+      filePath: filePath,
+      folder: false
+    })
+    const media = mediaType(filePath)
+    if (media === 'markdown' && (!this.root || !filePath.startsWith(this.root.filePath))) {
+      this.watcher.watchNote(filePath)
+    }
+    return node
+  }
+
+  openNote(file: string | IFileItem, scroll = true) {
+    const filePath = typeof file === 'string' ? file : file.filePath
+    document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
+    if (this.currentTab.current?.filePath === filePath) return
+    if (this.root && filePath.startsWith(this.root.filePath)) {
+      const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
+      let node = typeof file === 'string' ? nodeMap.get(filePath) : file
+      if (!node) {
+        if (!existsSync(filePath)) appendFileSync(filePath, '', {encoding: 'utf-8'})
+        const parent = nodeMap.get(join(filePath, '..'))
+        node = createFileNode({
+          filePath: filePath,
+          folder: false,
+          parent: parent
+        })
+        if (parent) parent.children = sortFiles([...parent.children!, node])
+      }
+      if (node) {
+        if (node.ext === 'md' && this.root) appendRecentNote(node.filePath, this.root.filePath)
+        this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
+        this.currentTab.history.push(node)
+        this.openParentDir(node.filePath)
+        this.currentTab.index = this.currentTab.history.length - 1
+        if (this.currentTab.store?.openSearch) this.currentTab.store.setSearchText(this.currentTab.store.search.text)
+        if (scroll) {
+          this.currentTab.store!.container?.scroll({
+            top: 0
+          })
         }
       }
-      if (firstNote) {
-        this.currentTab.history.push(firstNote)
+    } else {
+      const index = this.currentTab.history.findIndex(f => f.filePath === filePath)
+      if (index !== -1) {
+        this.currentTab.index = index
+      } else {
+        if (!existsSync(filePath)) {
+          appendFileSync(filePath, '', {encoding: 'utf-8'})
+        }
+        const node = this.createSingleNode(filePath)
+        this.currentTab.history.push(node)
+        this.currentTab.index = this.currentTab.history.length - 1
       }
     }
+    this.recordTabs()
+  }
+
+  openFolder(dirPath: string) {
+    this.watcher.destroy()
+    MainApi.setWin({openFolder: dirPath})
+    const {root} = parserNode(dirPath)
+    this.root = root
+    const pathMap = new Map(this.nodes.map(f => [f.filePath, f]))
+    for (let t of this.tabs) {
+      for (let f of t.history) {
+        if (f.filePath.startsWith(this.root.filePath)) {
+          const parentPath = join(f.filePath, '..')
+          if (pathMap.get(parentPath)) {
+            defineParent(f, pathMap.get(parentPath)!)
+          }
+        }
+      }
+    }
+    appendRecentDir(dirPath)
     setTimeout(action(() => this.fold = false), 100)
     this.watcher.openDirCheck()
+    this.parseFolder()
+  }
+
+  async parseFolder() {
+    const queue:IFileItem[] = []
+    const stack:IFileItem[] = this.root.children!.slice()
+    while (stack.length) {
+      const item = stack.shift()!
+      if (item.folder) {
+        stack.unshift(...item.children?.slice() || [])
+      } else if (['md', 'markdown'].includes(item.ext!)) {
+        queue.push(item)
+      }
+    }
+    const files: string[] = []
+    for (let f of queue) {
+      files.push(await window.api.fs.readFile(f.filePath, {encoding: 'utf-8'}))
+    }
+    const schemas = await parserMdToSchema(files)
+    queue.map((f, i) => {
+      if (!this.schemaMap.get(f)) {
+        this.schemaMap.set(f, {
+          state: schemas[i]
+        })
+      }
+    })
+  }
+  recordTabs() {
+    MainApi.setWin({
+      openTabs: this.tabs.filter(t => !!t.current).map(t => t.current!.filePath),
+      index: this.currentIndex
+    })
   }
 
   moveNode(to: IFileItem) {
@@ -385,22 +365,25 @@ export class TreeStore {
       renameSync(fromPath, targetPath)
       to.children!.push(this.dragNode)
       to.children = sortFiles(to.children!)
-      if (this.dragNode === this.currentTab.current) {
-        MainApi.setWin({openFile: this.dragNode.filePath})
-      }
+
       this.moveFile$.next({
         from: fromPath,
         to: targetPath
       })
+
       this.dragNode.filePath = targetPath
       defineParent(this.dragNode, to)
       if (this.dragNode.ext === 'md') {
-        moveFileRecord(fromPath, targetPath)
+        removeFileRecord(fromPath, targetPath)
       }
       if (this.dragNode.folder) {
         renameAllFiles(this.dragNode.filePath, this.dragNode.children || [])
       }
       this.checkDepends(fromPath, targetPath)
+
+      if (this.dragNode === this.currentTab.current) {
+        this.recordTabs()
+      }
     }
   }
 
@@ -419,7 +402,7 @@ export class TreeStore {
         if (file.folder) {
           mkdirSync(path)
         } else {
-          appendFileSync(path, '')
+          appendFileSync(path, '', {encoding: 'utf-8'})
         }
         file.ext = 'md'
         file.mode = undefined
@@ -451,11 +434,20 @@ export class TreeStore {
           to: newPath
         })
         file.mode = undefined
-        if (file.ext === 'md') moveFileRecord(path, newPath)
+        if (file.ext === 'md') removeFileRecord(path, newPath)
       }
     }
   }
+
   selectTab(i: number) {
+    if (this.currentTab.current?.ext === 'md') {
+      const path = this.currentTab.current?.filePath
+      this.tabs.forEach((t) => {
+        if (this.currentTab !== t && t.current?.filePath === path) {
+          this.externalChange$.next(t.current?.filePath)
+        }
+      })
+    }
     this.currentTab.store.saveDoc$.next(null)
     this.currentIndex = i
     setTimeout(() => {
@@ -466,7 +458,9 @@ export class TreeStore {
         selection.addRange(backRange)
       }
     })
+    this.recordTabs()
   }
+
   refactorFolder(oldPath: string, targetPath: string) {
     const files = readdirSync(targetPath)
     let changeFiles: [string, string][] = []
@@ -486,14 +480,24 @@ export class TreeStore {
   async checkDepends(oldPath: string, targetPath: string) {
     if (!configStore.config.autoRebuild) return
     const stat = statSync(targetPath)
+    let updateFiles: IFileItem[] = []
     if (stat.isDirectory()) {
       const changeFiles = this.refactorFolder(oldPath, targetPath)
-      const files = await refactor(changeFiles, this.root?.children || [])
-      this.parserQueue(files.slice(), true)
+      updateFiles  = await refactor(changeFiles, this.root?.children || [])
     } else {
-      const files = await refactor([[oldPath, targetPath]], this.root?.children || [])
-      this.parserQueue(files.slice(), true)
+      updateFiles = await refactor([[oldPath, targetPath]], this.root?.children || [])
     }
+    const filesStr:string[] = []
+    for (let f of updateFiles) {
+      filesStr.push(await window.api.fs.readFile(f.filePath, {encoding: 'utf-8'}))
+    }
+    const schemas = await parserMdToSchema(filesStr)
+    updateFiles.map((f, i) => {
+      if (this.schemaMap.get(f)) {
+        this.schemaMap.get(f)!.state = schemas[i]
+        this.externalChange$.next(f.filePath)
+      }
+    })
   }
 
   getAbsolutePath(file: IFileItem) {
@@ -504,14 +508,12 @@ export class TreeStore {
     }
   }
 
-  appendTab(file?: IFileItem | null) {
-    const history: IFileItem[] = []
-    if (file) history.push(file)
-    const tab = observable({
+  createTab() {
+    return observable({
       get current() {
         return this.history[this.index]
       },
-      history,
+      history: [],
       index: 0,
       id: nanoid(),
       get hasPrev() {
@@ -521,9 +523,28 @@ export class TreeStore {
       get hasNext() {
         return this.index < this.history.length - 1
       }
-    } as Tab, {range: false, id: false, history: false})
+    } as Tab, {range: false, id: false})
+  }
+
+  appendTab(file?: string | IFileItem) {
+    if (this.tabs.length >= 30) {
+      return message$.next({
+        type: 'warning',
+        content: 'Too many tabs open'
+      })
+    }
+    const tab = this.createTab()
     this.tabs.push(tab)
     this.currentIndex = this.tabs.length - 1
+    if (file) {
+      this.openNote(file)
+      this.recordTabs()
+    }
+    requestIdleCallback(() => {
+      document.querySelector('#nav-tabs')?.scroll({
+        left: 10000
+      })
+    })
   }
 
   removeTab(i: number) {
@@ -537,14 +558,17 @@ export class TreeStore {
     } else if (i < this.currentIndex) {
       this.currentIndex--
     }
+    this.recordTabs()
   }
 
   private removeSelf(node: IFileItem) {
-    this.currentTab.history = this.currentTab.history.filter(h => h !== node)
-    if (this.currentTab.history.length > 1 && this.currentTab.index > this.currentTab.history.length - 1) {
-      this.currentTab.index = this.currentTab.history.length - 1
-    } else if (!this.currentTab.history.length) {
-      this.currentTab.index = 0
+    for (let t of this.tabs) {
+      t.history = t.history.filter(h => h !== node)
+      if (t.history.length > 1 && t.index > t.history.length - 1) {
+        t.index = t.history.length - 1
+      } else if (!t.history.length) {
+        t.index = 0
+      }
     }
     node.parent!.children = node.parent!.children!.filter(c => c !== node)
   }

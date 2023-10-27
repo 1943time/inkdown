@@ -46,9 +46,9 @@ export const Server = observer(() => {
     shareSuccess(url)
   })
   const openNote = useMemo(() => {
-    if (treeStore.openNote && mediaType(treeStore.openNote.filePath) === 'markdown') return treeStore.openNote.filePath
+    if (treeStore.openedNote && mediaType(treeStore.openedNote.filePath) === 'markdown') return treeStore.openedNote.filePath
     return null
-  }, [treeStore.openNote, state.refresh])
+  }, [treeStore.openedNote, state.refresh])
 
   useEffect(() => {
     if (openNote) {
@@ -105,18 +105,18 @@ export const Server = observer(() => {
   }, [])
 
   const share = useCallback(async () => {
-    const note = treeStore.openNote
+    const note = treeStore.openedNote
     if (note && mediaType(note.filePath) === 'markdown') {
       setState({syncing: true})
       try {
         const record = await db.shareNote.where('filePath').equals(note.filePath).first()
-        const html = await exportToHtmlString(treeStore.openNote!, true)
+        const html = await exportToHtmlString(treeStore.openedNote!, true)
         const name = record ? record.name : `doc/${nid()}.html`
         await window.api.service.uploadDoc({
           name: name,
           content: html,
-          filePath: treeStore.openNote!.filePath,
-          json: treeStore.schemaMap.get(treeStore.openNote!)?.state || []
+          filePath: treeStore.openedNote!.filePath,
+          json: treeStore.schemaMap.get(treeStore.openedNote!)?.state || []
         })
         if (record) {
           await db.shareNote.where('filePath').equals(note.filePath).modify({

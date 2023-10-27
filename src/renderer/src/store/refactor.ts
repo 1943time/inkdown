@@ -3,6 +3,7 @@ import {basename, isAbsolute, join, relative} from 'path'
 import {mediaType} from '../editor/utils/dom'
 import {db} from './db'
 import {isExist} from '../utils'
+import {existsSync} from 'fs'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
 export const refactor = async (paths: [string, string][], files: IFileItem[]) => {
@@ -16,8 +17,9 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
     if (item.folder) {
       stack.push(...item.children || [])
     } else {
+      if (item.ext !== 'md') continue
       const filePath = item.filePath
-      if (changeFilesPath.has(filePath) && join(filePath, '..') !== join(changeFilesPath.get(filePath)!, '..') && mediaType(filePath) === 'markdown') {
+      if (changeFilesPath.has(filePath) && join(filePath, '..') !== join(changeFilesPath.get(filePath)!, '..')) {
         changeFiles.add(item)
       }
       let file = await window.api.fs.readFile(filePath, {encoding: 'utf-8'})
@@ -25,7 +27,7 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
       file = file.replace(urlRegexp, (m, text: string, url: string) => {
         if (/^https?:/.test(url)) return m
         const absolute = isAbsolute(url)
-        const linkPath = absolute ? url : join(filePath, '..', url)
+        const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || filePath, '..', url)
         if (oldPathMap.get(linkPath)) {
           fileChange = true
           if (absolute) {
@@ -36,6 +38,25 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
           }
         }
         return m
+      })
+      file = file.replace(/<img[^\n><]+\/?>(?:<\/img>)?/g, (str) => {
+        const match = str.match(/src="([^\n"]+)"/)
+        if (match) {
+          const url = match[1]
+          if (/^https?:/.test(url)) return str
+          const absolute = isAbsolute(url)
+          const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || '', '..', url)
+          if (existsSync(linkPath)) {
+            fileChange = true
+            if (absolute) {
+              str = str.replace(/src="[^\n"]+"/, `src="${linkPath}"`)
+            } else {
+              const changePath = relative(join(filePath, '..'), linkPath)
+              str = str.replace(/src="[^\n"]+"/, `src="${window.api.toUnix(changePath)}"`)
+            }
+          }
+        }
+        return str
       })
       if (fileChange) {
         await window.api.fs.writeFile(filePath, file, {encoding: 'utf-8'})

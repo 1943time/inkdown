@@ -2,13 +2,11 @@ import {Node, Text} from 'slate'
 import {TableNode} from '../../el'
 import stringWidth from 'string-width'
 import {mediaType} from '../utils/dom'
-
 const space = '  '
 const inlineNode = new Set(['media', 'inline-katex', 'break'])
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
-
 const textHtml = (t: Text) => {
   let str = t.text || ''
   if (t.highColor) str = `<span style="color:${t.highColor}">${str}</span>`
@@ -238,6 +236,7 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
   }
   return str
 }
+
 
 onmessage = (e) => {
   postMessage(toMarkdown(e.data.state))
