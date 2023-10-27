@@ -53,6 +53,7 @@ export class EditorStore {
   domRect: DOMRect | null = null
   container: null | HTMLDivElement = null
   history = false
+  inputComposition = false
   saveDoc$ = new Subject<any[] | null>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
@@ -65,6 +66,7 @@ export class EditorStore {
       searchRanges: false,
       editor: false,
       tableCellNode: false,
+      inputComposition: false,
       container: false,
       highlightCache: false,
       dragEl: false

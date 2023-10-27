@@ -8,12 +8,13 @@ import {keyArrow} from './hotKeyCommands/arrow'
 import {EditorUtils} from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
 import {MainApi} from '../../api/main'
-export const useKeyboard = (editor: Editor) => {
+import {EditorStore} from '../store'
+export const useKeyboard = (store: EditorStore) => {
   return useMemo(() => {
-    const tab = new TabKey(editor)
-    const backspace = new BackspaceKey(editor)
-    const enter = new EnterKey(editor, backspace)
-    const match = new MatchKey(editor)
+    const tab = new TabKey(store.editor)
+    const backspace = new BackspaceKey(store.editor)
+    const enter = new EnterKey(store, backspace)
+    const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
       if (isHotkey('mod+shift+v', e)) {
         e.preventDefault()
@@ -24,50 +25,50 @@ export const useKeyboard = (editor: Editor) => {
         return MainApi.sendToSelf('key-task', 'paste-markdown-code')
       }
 
-      if (isHotkey('mod+a', e) && editor.selection) {
-        const [code] = Editor.nodes(editor, {
+      if (isHotkey('mod+a', e) && store.editor.selection) {
+        const [code] = Editor.nodes(store.editor, {
           match: n => Element.isElement(n) && n.type === 'code'
         })
         if (code) {
-          Transforms.select(editor, {
-            anchor: Editor.start(editor, code[1]),
-            focus: Editor.end(editor, code[1])
+          Transforms.select(store.editor, {
+            anchor: Editor.start(store.editor, code[1]),
+            focus: Editor.end(store.editor, code[1])
           })
           e.preventDefault()
         }
       }
       match.run(e)
       if (isHotkey('mod+backspace', e)) {
-        const [inlineKatex] = Editor.nodes<any>(editor, {
+        const [inlineKatex] = Editor.nodes<any>(store.editor, {
           match: n => Element.isElement(n) && n.type === 'inline-katex'
         })
         if (inlineKatex && Node.string(inlineKatex[0])) {
           e.preventDefault()
-          Transforms.delete(editor, {
+          Transforms.delete(store.editor, {
             at: {
-              anchor: Editor.start(editor, inlineKatex[1]),
-              focus: Editor.end(editor, inlineKatex[1])
+              anchor: Editor.start(store.editor, inlineKatex[1]),
+              focus: Editor.end(store.editor, inlineKatex[1])
             },
             unit: 'character'
           })
         } else {
-          EditorUtils.clearMarks(editor)
+          EditorUtils.clearMarks(store.editor)
         }
       }
       if (e.key.toLowerCase().startsWith('arrow')) {
-        keyArrow(editor, e)
+        keyArrow(store.editor, e)
       } else {
         if (e.key === 'Tab') tab.run(e)
         if (e.key === 'Enter') {
-          const [node] = Editor.nodes<any>(editor, {
+          const [node] = Editor.nodes<any>(store.editor, {
             match: n => Element.isElement(n),
             mode: 'lowest'
           })
           if (node[0].type === 'paragraph') {
             const str = Node.string(node[0])
             if (/^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
-              Transforms.delete(editor, {at: node[1]})
-              Transforms.insertNodes(editor, {
+              Transforms.delete(store.editor, {at: node[1]})
+              Transforms.insertNodes(store.editor, {
                 type: 'code', language: 'html', render: true,
                 children: str.split('\n').map(s => {
                   return {type: 'code-line', children: [{text: s}]}
@@ -81,5 +82,5 @@ export const useKeyboard = (editor: Editor) => {
         }
       }
     }
-  }, [editor])
+  }, [store.editor])
 }

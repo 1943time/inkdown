@@ -37,7 +37,7 @@ export const MEditor = observer(({note}: {
   const nodeRef = useRef<IFileItem>()
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
-  const keydown = useKeyboard(editor)
+  const keydown = useKeyboard(store)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
   const save = useCallback(async () => {
@@ -258,8 +258,13 @@ export const MEditor = observer(({note}: {
             e.preventDefault()
           }
         }}
-        onCompositionStart={preventDefault}
+        onCompositionStart={e => {
+          e.preventDefault()
+          store.inputComposition = true
+        }}
         onCompositionEnd={e => {
+          e.preventDefault()
+          store.inputComposition = false
           const [code] = Editor.nodes<any>(store.editor, {
             match: el => el.type === 'code'
           })

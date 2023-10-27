@@ -5,24 +5,23 @@ import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
 import {isMod} from '../../../utils/keyboard'
-import isHotkey from 'is-hotkey'
-
+import {EditorStore} from '../../store'
 export class EnterKey {
   constructor(
-    private readonly editor: Editor,
+    private readonly store: EditorStore,
     private readonly backspace: BackspaceKey
-  ) {
+  ) {}
+  get editor() {
+    return this.store.editor
   }
-
   run(e: React.KeyboardEvent) {
     let sel = this.editor.selection
-    if (!sel) return
+    if (!sel || this.store.inputComposition) return
     if (!Range.isCollapsed(sel)) {
       e.preventDefault()
       this.backspace.range()
       return
     }
-
     const [node] = Editor.nodes<Element>(this.editor, {
       match: n => Element.isElement(n),
       mode: 'lowest'
