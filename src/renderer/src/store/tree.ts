@@ -251,6 +251,7 @@ export class TreeStore {
     const filePath = typeof file === 'string' ? file : file.filePath
     document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
     if (this.currentTab.current?.filePath === filePath) return
+    this.checkOtherTabsShouldUpdate()
     if (this.root && filePath.startsWith(this.root.filePath)) {
       const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
       let node = typeof file === 'string' ? nodeMap.get(filePath) : file
@@ -438,9 +439,8 @@ export class TreeStore {
       }
     }
   }
-
-  selectTab(i: number) {
-    if (this.currentTab.current?.ext === 'md') {
+  checkOtherTabsShouldUpdate() {
+    if (this.currentTab.current?.ext === 'md' && this.tabs.length > 1) {
       const path = this.currentTab.current?.filePath
       this.tabs.forEach((t) => {
         if (this.currentTab !== t && t.current?.filePath === path) {
@@ -448,6 +448,9 @@ export class TreeStore {
         }
       })
     }
+  }
+  selectTab(i: number) {
+    this.checkOtherTabsShouldUpdate()
     this.currentTab.store.saveDoc$.next(null)
     this.currentIndex = i
     setTimeout(() => {

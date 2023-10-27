@@ -13,6 +13,8 @@ import {Point} from 'slate'
 import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 import {InlineKatex} from './CodeUI/Katex/InlineKatex'
+import isHotkey from 'is-hotkey'
+import {existsSync} from 'fs'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -86,17 +88,22 @@ export const MLeaf = (props: RenderLeafProps) => {
           style={style}
           data-be={'link'}
           draggable={false}
+          title={'mod + click to open link, mod + alt + click to open link in new tab'}
           onDragStart={dragStart}
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
-            const sel = store.editor.selection
-            if (!sel || !Point.equals(sel.focus, sel.anchor) || !leaf.url) return
-            if (/^https?/.test(leaf.url)) {
-              window.open(leaf.url)
-            } else {
-              const path = isAbsolute(leaf.url) ? leaf.url : join(treeStore.currentTab.current!.filePath, '..', leaf.url)
-              treeStore.openNote(path)
+            if (e.metaKey || e.ctrlKey) {
+              const sel = store.editor.selection
+              if (!sel || !Point.equals(sel.focus, sel.anchor) || !leaf.url) return
+              if (/^https?/.test(leaf.url)) {
+                window.open(leaf.url)
+              } else {
+                const path = isAbsolute(leaf.url) ? leaf.url : join(treeStore.currentTab.current!.filePath, '..', leaf.url)
+                if (existsSync(path)) {
+                  e.altKey ? treeStore.appendTab(path) : treeStore.openNote(path)
+                }
+              }
             }
           }}
           data-slate-inline={true}

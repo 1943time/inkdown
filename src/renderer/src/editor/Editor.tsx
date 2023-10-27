@@ -49,9 +49,10 @@ export const MEditor = observer(({note}: {
       })
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
-        const res = await toMarkdown(schema.state)
-        saveRecord(nodeRef.current.filePath, schema.state)
-        await window.api.fs.writeFile(nodeRef.current.filePath, res, {encoding: 'utf-8'})
+        const path = nodeRef.current.filePath
+        const res = await toMarkdown(schema.state, path)
+        saveRecord(path, schema.state)
+        await window.api.fs.writeFile(path, res, {encoding: 'utf-8'})
       }
     }
   }, [note])
@@ -66,8 +67,8 @@ export const MEditor = observer(({note}: {
     }
   })
   const count = useCallback(async (nodes: any[]) => {
-    if (!configStore.config.showCharactersCount) return
-    const res = await toMarkdown(nodes)
+    if (!configStore.config.showCharactersCount || !nodeRef.current) return
+    const res = await toMarkdown(nodes, nodeRef.current.filePath)
     const texts = Editor.nodes(editor, {
       at: [],
       match: n => n.text
