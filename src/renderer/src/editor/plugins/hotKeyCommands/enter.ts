@@ -276,12 +276,14 @@ export class EnterKey {
             checked = false
           }
         }
+
         const text = Point.equals(Editor.end(this.editor, node[1]), sel.focus) ? [{text: ''}] : EditorUtils.cutText(this.editor, sel.focus)
         Transforms.insertNodes(this.editor, {
           type: 'list-item',
           children: [{type: 'paragraph', children: text}],
           checked
         }, {at: Path.next(parent[1])})
+
         if (!Point.equals(sel.anchor, Editor.end(this.editor, node[1]))) {
           Transforms.delete(this.editor, {
             at: {
@@ -290,6 +292,11 @@ export class EnterKey {
             }
           })
         }
+
+        if (Point.equals(sel.anchor, Editor.start(this.editor, node[1]))) {
+          EditorUtils.clearMarks(this.editor)
+        }
+
         Transforms.select(this.editor, Editor.start(this.editor, Path.next(parent[1])))
         if (Editor.hasPath(this.editor, Path.next(node[1]))) {
           EditorUtils.moveNodes(this.editor, Path.next(node[1]), Path.next(parent[1]), 1)

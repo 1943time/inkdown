@@ -13,7 +13,6 @@ import {Point} from 'slate'
 import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 import {InlineKatex} from './CodeUI/Katex/InlineKatex'
-import isHotkey from 'is-hotkey'
 import {existsSync} from 'fs'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
