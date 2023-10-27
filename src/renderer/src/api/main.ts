@@ -2,7 +2,7 @@ import * as Electron from 'electron'
 import {nanoid} from 'nanoid'
 import {dialog} from 'electron'
 import {configStore} from '../store/config'
-import {moveFileRecord} from '../store/db'
+import {removeFileRecord} from '../store/db'
 const ipcRenderer = window.electron.ipcRenderer
 
 let taskMap = new Map<string, Function>()
@@ -23,13 +23,10 @@ export const MainApi = {
   closeWindow() {
     ipcRenderer.send('close-window')
   },
-  openAuth(type: 'github') {
-    ipcRenderer.send('open-auth', type)
-  },
   getSystemDark() {
     return ipcRenderer.invoke('get-system-dark')
   },
-  setWin(data: {openFolder?: string, openFile?: string}) {
+  setWin(data: {openFolder?: string, openTabs?: string[], index?: number}) {
     ipcRenderer.send('set-win', data)
   },
   relaunch() {
@@ -88,24 +85,13 @@ export const MainApi = {
   },
   moveToTrash(path: string) {
     ipcRenderer.invoke('move-to-trash', path)
-    moveFileRecord(path)
+    removeFileRecord(path)
   },
   openToolMenu(filePath?: string) {
     ipcRenderer.send('tool-menu', filePath)
   },
   maxSize() {
     ipcRenderer.send('max-size')
-  },
-  getServerConfig() {
-    return ipcRenderer.invoke('getServerConfig')
-  },
-  parseFiles(files: string[]) {
-    return new Promise<[{path: string, schema: any}]>((resolve, reject) => {
-      const id = nanoid()
-      taskMap.set(id, resolve)
-      ipcRenderer.send('to-worker', 'parse-files', id, files)
-      setTimeout(reject, 10000)
-    })
   },
   getCachePath():Promise<string> {
     return ipcRenderer.invoke('getCachePath')

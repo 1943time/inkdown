@@ -7,11 +7,12 @@ import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
 import got from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
-const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
-let highlighter:Highlighter | null = null
 import {toUnix} from 'upath'
 import mime from 'mime-types'
 import {Service} from './service/service'
+
+const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
+let highlighter:Highlighter | null = null
 let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {

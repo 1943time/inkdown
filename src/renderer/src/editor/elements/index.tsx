@@ -96,7 +96,7 @@ export const MLeaf = (props: RenderLeafProps) => {
               window.open(leaf.url)
             } else {
               const path = isAbsolute(leaf.url) ? leaf.url : join(treeStore.currentTab.current!.filePath, '..', leaf.url)
-              treeStore.selectPath(path)
+              treeStore.openNote(path)
             }
           }}
           data-slate-inline={true}

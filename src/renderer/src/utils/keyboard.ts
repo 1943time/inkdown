@@ -5,7 +5,7 @@ import React from 'react'
 import isHotkey from 'is-hotkey'
 import {runInAction} from 'mobx'
 import {ReactEditor} from 'slate-react'
-import {markdownParserByText} from '../editor/parser'
+import {parserMdToSchema} from '../editor/parser/parser'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -266,28 +266,29 @@ export class MenuKey {
         case 'paste-markdown-code':
           const markdownCode = window.api.getClipboardText()
           if (markdownCode) {
-            const {schema} = markdownParserByText(markdownCode)
-            if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
-              const first = schema.shift()
-              Editor.insertNode(editor, first.children)
-            }
-            if (schema.length) {
-              if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
-                const [block] = Editor.nodes<any>(editor, {
-                  match: n => ['table', 'code', 'paragraph'].includes(n.type),
-                  mode: 'lowest'
-                })
-                Transforms.insertNodes(editor, schema, {
-                  at: Path.next(block[1]),
-                  select: true
-                })
-              } else {
-                Transforms.insertNodes(editor, schema, {
-                  at: Path.next(node[1]),
-                  select: true
-                })
+            parserMdToSchema([markdownCode]).then(([schema]) => {
+              if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+                const first = schema.shift()
+                Editor.insertNode(editor, first.children)
               }
-            }
+              if (schema.length) {
+                if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
+                  const [block] = Editor.nodes<any>(editor, {
+                    match: n => ['table', 'code', 'paragraph'].includes(n.type),
+                    mode: 'lowest'
+                  })
+                  Transforms.insertNodes(editor, schema, {
+                    at: Path.next(block[1]),
+                    select: true
+                  })
+                } else {
+                  Transforms.insertNodes(editor, schema, {
+                    at: Path.next(node[1]),
+                    select: true
+                  })
+                }
+              }
+            })
           }
           setTimeout(() => {
             runInAction(() => this.state!.refreshHighlight = !this.state!.refreshHighlight)

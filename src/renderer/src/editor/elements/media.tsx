@@ -58,7 +58,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       return
     }
     let realUrl = element.url
-    if (!element.url.startsWith('http') && !element.url.startsWith('file:') && treeStore.openNote) {
+    if (!element.url.startsWith('http') && !element.url.startsWith('file:') && treeStore.openedNote) {
       const file = isAbsolute(element.url) ? element.url : join(treeStore.currentTab.current!.filePath, '..', element.url)
       const data = getImageData(file)
       if (data) {

@@ -3,7 +3,7 @@ import {treeStore} from '../store/tree'
 import {configStore} from '../store/config'
 
 export const Characters = observer(() => {
-  if (!treeStore.openNote || !['md', 'markdown'].includes(treeStore.openNote.ext || '') || !configStore.config.showCharactersCount) return null
+  if (!treeStore.openedNote || !['md', 'markdown'].includes(treeStore.openedNote.ext || '') || !configStore.config.showCharactersCount) return null
   return (
     <div className={`
       px-2 absolute text-center z-10 bg-gray-200 text-gray-500
@@ -11,14 +11,14 @@ export const Characters = observer(() => {
       <span
         className={`w-20`}
         style={{
-          width: String(treeStore.currentTab.store?.count.words).length * 10 + 38
+          width: String(treeStore.currentTab?.store?.count.words).length * 10 + 38
         }}
       >
-        {treeStore.currentTab.store?.count.words} words
+        {treeStore.currentTab?.store?.count.words} words
       </span>
       <span
         style={{
-          width: String(treeStore.currentTab.store!.count.characters || 0).length * 10 + 72
+          width: String(treeStore.currentTab?.store!.count.characters || 0).length * 10 + 72
         }}
       >{treeStore.currentTab.store?.count.characters || 0} characters</span>
     </div>

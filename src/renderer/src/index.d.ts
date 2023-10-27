@@ -1,5 +1,6 @@
 /// <reference types="electron-vite/node" />
 import {EditorStore} from './editor/store'
+import {BaseRange} from 'slate'
 
 export interface IFileItem {
   id: string
@@ -24,7 +25,8 @@ export interface Tab {
   index: number
   hasNext: boolean
   hasPrev: boolean
-  store: EditorStore | null
+  range?: Range
+  store: EditorStore
   id: string
 }
 

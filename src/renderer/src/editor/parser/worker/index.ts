@@ -1,31 +1,22 @@
-import {unified} from 'unified'
-import remarkParse from 'remark-parse'
-import remarkGfm from 'remark-gfm'
-import remarkMath from 'remark-math'
-import remarkFrontmatter from 'remark-frontmatter'
+// pre-build to enable parse to run in the worker
+import parser from './bundle'
 import {Element} from 'slate'
-import fs from 'fs'
 import {Content, Table} from 'mdast'
-import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../el'
+import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../../el'
 
 const findImageElement = (str: string) => {
   try {
     const match = str.match(/^<img+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?$/)
     if (match) {
-      return new DOMParser().parseFromString(match[0], 'text/html').body.querySelector('img') as HTMLImageElement
+      const url = match[0].match(/src="([^"\n]+)"/)
+      const width = match[0].match(/width="(\d+)"/)
+      return {url: url?.[1], width: width?.[1]}
     }
     return null
   } catch (e) {
     return null
   }
 }
-
-const parser = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkMath, {singleDollarTextMath: true})
-  .use(remarkFrontmatter, ['yaml'])
-
 const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
   let leafs: CustomLeaf[] = []
   for (let n of els) {
@@ -75,7 +66,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
           const img = findImageElement(n.value)
           if (img) {
-            el = {type: 'paragraph', children: [{type: 'media',width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}]}
+            el = {type: 'paragraph', children: [{type: 'media',width: img?.width, url: img?.url, children: [{text: ''}]}]}
           } else {
             el = {
               type: 'code', language: 'html', render: true,
@@ -130,7 +121,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             } else {
               const img = findImageElement(n.value)
               if (img) {
-                el = {type: 'media', width: img.getAttribute('width'), url: img.getAttribute('src'), alt: img.getAttribute('alt'), children: [{text: ''}]}
+                el = {type: 'media', width: img?.width, url: img?.url, children: [{text: ''}]}
               } else {
                 el = {text: n.value}
               }
@@ -269,24 +260,11 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   }
   return els
 }
-export const markdownParser = (filePath: string) => {
-  try {
-    const mdStr = fs.readFileSync(filePath, {encoding: 'utf-8'})
-    const root = parser.parse(mdStr)
-    // console.log('root', root, filePath)
-    const schema = parserBlock(root.children as any[], true)
-    return {schema: schema as any[], nodes: root.children}
-  } catch (e) {
-    return {schema: [], nodes: []}
-  }
-}
 
-export const markdownParserByText = (content: string) => {
-  try {
-    const root = parser.parse(content)
-    const schema = parserBlock(root.children as any, true)
-    return {schema: schema as any[], nodes: root.children}
-  } catch (e) {
-    return {schema: [], nodes: []}
-  }
+onmessage = e => {
+  const files:string[] = e.data
+  postMessage(files.map(str => {
+    const root = parser.parse(str || '')
+    return parserBlock(root.children as any[], true)
+  }))
 }

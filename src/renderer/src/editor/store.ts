@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observe, runInAction} from 'mobx'
-import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
-import {ReactEditor} from 'slate-react'
+import {BaseSelection, createEditor, Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
+import {ReactEditor, withReact} from 'slate-react'
 import {GetFields, IFileItem} from '../index'
 import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
@@ -11,6 +11,8 @@ import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {clearCodeCache} from './plugins/useHighlight'
+import {withMarkdown} from './plugins'
+import {withHistory} from 'slate-history'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -18,7 +20,7 @@ export const useEditorStore = () => {
 }
 
 export class EditorStore {
-  editor!: Editor
+  editor = withMarkdown(withReact(withHistory(createEditor())))
   search = {
     text: '',
     currentIndex: 0,
@@ -51,12 +53,11 @@ export class EditorStore {
   domRect: DOMRect | null = null
   container: null | HTMLDivElement = null
   history = false
+  saveDoc$ = new Subject<any[] | null>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
-
-  constructor(editor: Editor, webview = false, history = false) {
-    this.editor = editor
+  constructor(webview = false, history = false) {
     this.webview = webview
     this.history = history
     this.dragStart = this.dragStart.bind(this)
@@ -167,6 +168,7 @@ export class EditorStore {
       }
       this.highlightCache.set(el, ranges)
     }
+    console.log('hi', this.highlightCache)
     this.matchCount = matchCount
     if (this.search.currentIndex > matchCount - 1) {
       this.search.currentIndex = 0

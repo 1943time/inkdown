@@ -4,14 +4,17 @@ import {useEditorStore} from '../store'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {treeStore} from '../../store/tree'
 import {
-  BoldOutlined, CaretDownOutlined, CheckOutlined,
-  ClearOutlined, HighlightOutlined,
+  BoldOutlined,
+  CaretDownOutlined,
+  CheckOutlined,
+  ClearOutlined,
+  HighlightOutlined,
   ItalicOutlined,
   LinkOutlined,
-  StrikethroughOutlined, UnderlineOutlined
+  StrikethroughOutlined
 } from '@ant-design/icons'
 import {BaseRange, Editor, NodeEntry, Range, Text, Transforms} from 'slate'
-import {AutoComplete, Input} from 'antd'
+import {AutoComplete} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
@@ -53,7 +56,7 @@ export const FloatBar = observer(() => {
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && node.ext === 'md') {
-          const path = relative(join(treeStore.openNote!.filePath, '..'), node.filePath!)
+          const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
           files.push({
             label: path,
             value: path
@@ -117,7 +120,7 @@ export const FloatBar = observer(() => {
     } else {
       setState({open: false})
     }
-  }, [store.domRect])
+  }, [store.domRect, store.openSearch])
 
   useEffect(() => {
     if (state.open) {

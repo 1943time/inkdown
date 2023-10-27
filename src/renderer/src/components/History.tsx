@@ -9,7 +9,6 @@ import {Webview} from './Webview'
 import {db, IHistory} from '../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
-import {saveDoc$} from '../editor/Editor'
 
 function Help(props: {
   text: string
@@ -31,11 +30,11 @@ export const History = observer(() => {
   })
   useEffect(() => {
     const open = async (e: any) => {
-      if (treeStore.openNote?.ext === 'md') {
-        const records = await db.history.where('filePath').equals(treeStore.openNote.filePath).toArray()
+      if (treeStore.openedNote?.ext === 'md') {
+        const records = await db.history.where('filePath').equals(treeStore.openedNote.filePath).toArray()
         setState({
           open: true,
-          fileName: basename(treeStore.openNote.filePath),
+          fileName: basename(treeStore.openedNote.filePath),
           selectIndex: 0,
           records: records.sort((a, b) => a.updated > b.updated ? -1 : 1),
           show: true
@@ -114,7 +113,9 @@ export const History = observer(() => {
           type={'primary'} className={'ml-3'}
           disabled={!schema.length}
           onClick={() => {
-            if (schema.length) saveDoc$.next(schema)
+            if (schema.length) {
+              treeStore.currentTab.store.saveDoc$.next(schema)
+            }
             setState({open: false})
           }}
         >

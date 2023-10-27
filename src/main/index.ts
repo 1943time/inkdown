@@ -15,6 +15,8 @@ type WinOptions = {
   y?: number
   openFolder?: string
   openFile?: string
+  openTabs?: string[]
+  index?: number
 }
 const windows = new Map<number, WinOptions>()
 app.setAsDefaultProtocolClient('bluestone-markdown')
@@ -141,26 +143,33 @@ app.whenReady().then(() => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     if (!windows.get(window.id)) return
     if (data.openFolder) windows.get(window.id)!.openFolder = data.openFolder
-    if (data.openFile) windows.get(window.id)!.openFile = data.openFile
+    if (data.openTabs) windows.get(window.id)!.openTabs = data.openTabs
+    if (data.index) windows.get(window.id)!.index = data.index
   })
   ipcMain.on('add-recent-path', (e, path) => {
     store.set('recent-open-paths', Array.from(new Set([...(store.get('recent-open-paths') as any[] || []), path])))
     app.addRecentDocument(path)
     ipcMain.emit('refresh-recent')
   })
+
   ipcMain.on('file-changed', (e) => {
     fileChangedWindow = BrowserWindow.fromWebContents(e.sender)
   })
+
   ipcMain.on('file-saved', () => {
     fileChangedWindow = null
   })
+
   ipcMain.handle('get-win-set', (e) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     const w = windows.get(window.id)
     if (w) {
       return {
         openFolder: w.openFolder,
-        openFile: w.openFile
+        index: w.index,
+        // openFile will be abandoned
+        openTabs: w.openTabs
+        // openTabs: ['/Users/huangjie/Documents/t1/dir/test.md', '/Users/huangjie/Documents/t1/demo.md']
       }
     }
     return null

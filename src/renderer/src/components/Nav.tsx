@@ -4,16 +4,16 @@ import {treeStore} from '../store/tree'
 import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
-import {isMac, isWindows} from '../utils'
+import {isMac} from '../utils'
 import {Server} from '../server/Server'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
-    if (!treeStore.openNote) return ['']
-    return treeStore.getAbsolutePath(treeStore.openNote)
-  }, [treeStore.openNote?.filePath])
+    if (!treeStore.openedNote) return ['']
+    return treeStore.getAbsolutePath(treeStore.openedNote)
+  }, [treeStore.openedNote?.filePath])
   return (
     <div
-      className={'fixed left-0 top-0 h-[40px] w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
+      className={'fixed left-0 top-0 h-10 w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
       style={{paddingLeft: treeStore.fold ? !isMac ? 42 : 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {
@@ -22,7 +22,7 @@ export const Nav = observer(() => {
       }}
     >
       <div
-        className={'justify-between flex items-center h-full flex-1'}
+        className={`justify-between relative flex items-center h-full flex-1`}
       >
         <div className={'flex items-center h-full flex-1'}>
           <div className={`text-gray-300 flex items-center text-sm select-none ${treeStore.fold ? '' : 'ml-3'}`}>
@@ -54,10 +54,10 @@ export const Nav = observer(() => {
                     >
                       {i === paths.length - 1 ? c.replace(/\.\w+/, '') : c}
                     </span>
-                    {i === paths.length - 1 && !['md', 'markdown'].includes(treeStore.openNote?.ext!) &&
-                      <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{treeStore.openNote?.ext}</sup>
+                    {i === paths.length - 1 && !['md', 'markdown'].includes(treeStore.openedNote?.ext!) &&
+                      <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{treeStore.openedNote?.ext}</sup>
                     }
-                    {i === paths.length - 1 && ['md', 'markdown'].includes(treeStore.openNote?.ext!) && treeStore.currentTab?.store?.docChanged &&
+                    {i === paths.length - 1 && ['md', 'markdown'].includes(treeStore.openedNote?.ext!) && treeStore.currentTab?.store?.docChanged &&
                       <sup className={'ml-0.5'}>*</sup>
                     }
                   </Fragment>
@@ -71,7 +71,7 @@ export const Nav = observer(() => {
           <Server/>
           <div
             className={'flex items-center justify-center p-1 group'}
-            onClick={() => MainApi.openToolMenu(treeStore.openNote?.filePath)}
+            onClick={() => MainApi.openToolMenu(treeStore.openedNote?.filePath)}
           >
             <AppstoreOutlined
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}

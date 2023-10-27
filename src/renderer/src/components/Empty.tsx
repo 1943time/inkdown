@@ -1,9 +1,9 @@
 import {observer} from 'mobx-react-lite'
-import {FileAddOutlined, FolderOpenOutlined, FolderOutlined} from '@ant-design/icons'
+import {CloseOutlined, FileAddOutlined, FolderOpenOutlined, FolderOutlined, HistoryOutlined} from '@ant-design/icons'
 import {MainApi} from '../api/main'
 import {configStore} from '../store/config'
 import logo from '../../../../resources/icon.png?asset'
-import {useEffect} from 'react'
+import {useEffect, useLayoutEffect} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
 import {db} from '../store/db'
 import {basename, dirname} from 'path'
@@ -14,7 +14,7 @@ export const Empty = observer(() => {
   const [state, setState] = useLocalState({
     records: [] as {name: string, filePath: string, dir: string}[]
   })
-  useEffect(() => {
+  useLayoutEffect(() => {
     MainApi.getPath('home').then(home => {
       db.recent.limit(5).toArray().then(res => {
         setState({records: res.sort((a, b) => a.time > b.time ? -1 : 1).
@@ -43,7 +43,7 @@ export const Empty = observer(() => {
     }
   }, [])
   return (
-    <div className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto'}>
+    <div className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}>
       <div className={'relative -top-12'}>
         <div className={'flex-col space-y-5 text-sky-600 '}>
           <div className={'text-lg dark:text-gray-400 text-gray-600 flex items-center'}>
@@ -64,20 +64,52 @@ export const Empty = observer(() => {
               {'Create a Markdown file'}
             </span>
           </div>
-          <div
-            className={'cursor-default hover:text-sky-400 duration-200'}
-            onClick={() => {
-              MainApi.sendToSelf('open')
-            }}
-          >
-            <FolderOpenOutlined/>
-            <span
-              className={'ml-2'}>
-            {'Open file or folder'}
-          </span>
-          </div>
+          {!!treeStore.root &&
+            <>
+              <div
+                className={'cursor-default hover:text-sky-400 duration-200'}
+                onClick={() => {
+                  MainApi.sendToSelf('open-quickly')
+                }}
+              >
+                <HistoryOutlined />
+                <span className={'ml-2'}>
+                  {'Recently opened notes'}
+                </span>
+              </div>
+              {treeStore.tabs.length > 1 &&
+                <div
+                  className={'cursor-default hover:text-sky-400 duration-200'}
+                  onClick={() => {
+                    treeStore.removeTab(treeStore.currentIndex)
+                  }}
+                >
+                  <CloseOutlined />
+                  <span className={'ml-2'}>
+                  {'Close'}
+                </span>
+                </div>
+              }
+            </>
+          }
+          {!treeStore.root &&
+            <>
+              <div
+                className={'cursor-default hover:text-sky-400 duration-200'}
+                onClick={() => {
+                  MainApi.sendToSelf('open')
+                }}
+              >
+                <FolderOpenOutlined/>
+                <span
+                  className={'ml-2'}>
+                  {'Open file or folder'}
+                </span>
+              </div>
+            </>
+          }
         </div>
-        {!!state.records.length &&
+        {!!state.records.length && !treeStore.root &&
           <div className={'mt-6'}>
             <div className={'text-lg text-gray-500'}>
               {'Recent'}
@@ -88,7 +120,7 @@ export const Empty = observer(() => {
                 <span
                   className={'cursor-default text-sky-600 duration-200 hover:text-sky-400'}
                   onClick={() => {
-                    treeStore.open(r.filePath)
+                    treeStore.openFolder(r.filePath)
                   }}
                 >
                   <FolderOutlined />

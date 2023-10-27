@@ -41,15 +41,15 @@ export const FullSearch = observer(() => {
   }, [])
 
   const toNode = useCallback((res: { el: any, file: IFileItem }) => {
-    if (treeStore.openNote !== res.file) {
-      treeStore.selectNote(res.file, false)
+    if (treeStore.openedNote !== res.file) {
+      treeStore.openNote(res.file, false)
       setTimeout(() => {
         requestIdleCallback(() => {
           try {
             const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
             if (dom) toPoint(dom)
           } catch (e) {
-            console.warn('dom not find')
+            console.warn('dom not find', e)
           }
         })
       }, 200)

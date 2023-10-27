@@ -68,7 +68,7 @@ export const clearExpiredRecord = async () => {
     }).delete()
   }
 }
-export const moveFileRecord = async (filePath: string, targetFilePath?: string) => {
+export const removeFileRecord = async (filePath: string, targetFilePath?: string) => {
   try {
     if (!targetFilePath) {
       await db.history.where('filePath').equals(filePath).delete()

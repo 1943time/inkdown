@@ -87,9 +87,19 @@ export const Heading = observer(({note}: {
     }
     return () => {}
   }, [])
+  const pt = useMemo(() => {
+    let pt = 40
+    if (store.openSearch) pt += 46
+    if (treeStore.tabs.length > 1) pt += 32
+    return pt
+  }, [treeStore.tabs.length, store.openSearch])
   return (
     <div
-      className={`${configStore.config.showLeading ? 'lg:block' : ''} hidden sticky ${store.openSearch ? 'top-[46px] h-[calc(100vh_-_86px)]' : 'top-0 h-[calc(100vh_-_40px)]'} pl-4 border-l b1 flex-shrink-0`}
+      style={{
+        top: pt - 40,
+        height: `calc(100vh - ${pt}px)`
+      }}
+      className={`${configStore.config.showLeading ? 'lg:block' : ''} hidden sticky pl-4 border-l b1 flex-shrink-0`}
       ref={e => {
         box.current = e?.parentElement?.parentElement?.parentElement || undefined
       }}

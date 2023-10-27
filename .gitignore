@@ -6,6 +6,7 @@ resources/lib/current.html
 resources/lib/current.json
 .env
 electron.vite.config.*.mjs
+mdparser/index.js
 dist
 web
 build/bluestone.provisionprofile
@@ -16,3 +17,4 @@ build/entitlements.mas.loginhelper.plist
 src/renderer/src/share
 mas-builder.yml
 src/main/auth.ts
+src/renderer/src/editor/parser/worker/bundle.js

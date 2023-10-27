@@ -2,7 +2,7 @@ import {ReactEditor} from 'slate-react'
 import {Editor, NodeEntry, Path, Text, Transforms} from 'slate'
 import {MediaNode} from '../../el'
 import {useGetSetState} from 'react-use'
-import {AutoComplete, Input} from 'antd'
+import {AutoComplete} from 'antd'
 import {CheckOutlined, DeleteOutlined, ReloadOutlined} from '@ant-design/icons'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {getOffsetLeft, mediaType} from '../utils/dom'
@@ -37,7 +37,7 @@ export const MediaAttr = observer(() => {
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
-          const path = relative(join(treeStore.openNote!.filePath, '..'), node.filePath!)
+          const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
           files.push({
             label: path,
             value: path
@@ -71,7 +71,8 @@ export const MediaAttr = observer(() => {
     const dom = ReactEditor.toDOMNode(store.editor, node[0]) as HTMLElement
     let width = dom.clientWidth < 400 ? 400 : dom.clientWidth
     if (dom) {
-      const top = store.offsetTop(dom)
+      let top = store.offsetTop(dom)
+      if (treeStore.tabs.length > 1) top += 32
       let left = getOffsetLeft(dom)
       if (!treeStore.fold) left -= treeStore.width
       if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 20
@@ -92,6 +93,7 @@ export const MediaAttr = observer(() => {
     Transforms.delete(store.editor, {at: nodeRef.current![1]})
     ReactEditor.focus(store.editor)
   }, [])
+
   const keyboard = useCallback((e: KeyboardEvent) => {
     if (state().focus && ['ArrowLeft', 'ArrowRight'].includes(e.key)) {
       keyArrow(store.editor, e)
@@ -150,10 +152,10 @@ export const MediaAttr = observer(() => {
 
   useEffect(() => {
     resize()
-  }, [treeStore.size, store.openSearch])
+  }, [treeStore.size, store.openSearch, treeStore.tabs.length])
   return (
     <div
-      className={`dark:bg-zinc-900/70 bg-white border-t border-l border-r border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
+      className={`dark:bg-zinc-900 bg-white border border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
       z-10 absolute dark:text-gray-300 text-gray-500 h-8 text-sm text-gray-200/70 px-2 select-none flex items-center ${!state().visible ? 'hidden' : ''}`}
       ref={domRef}
       style={{

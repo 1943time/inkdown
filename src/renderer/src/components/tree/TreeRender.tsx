@@ -6,7 +6,6 @@ import {Fragment, useCallback, useRef} from 'react'
 import {action} from 'mobx'
 import {MainApi} from '../../api/main'
 import {Input} from 'antd'
-import {configStore} from '../../store/config'
 import ArrowRight from '../../icons/ArrowRight'
 
 export const TreeRender = observer(() => {
@@ -49,7 +48,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
   const getClass = useCallback((c: IFileItem) => {
     if (c.mode) return ''
     if (treeStore.dropNode === c) return 'bg-sky-500/10'
-    if (treeStore.openNote === c) return 'dark:bg-gray-200/5 bg-gray-300/50'
+    if (treeStore.openedNote === c) return 'dark:bg-gray-200/5 bg-gray-300/50'
     return 'dark:hover:bg-gray-400/5 hover:bg-gray-400/10'
   }, [])
   const timer = useRef(0)
@@ -70,7 +69,7 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
             className={`rounded ${getClass(c)}`}
           >
             <div
-              className={`${treeStore.openNote === c ? 'dark:text-zinc-100 text-zinc-700' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+              className={`${treeStore.openedNote === c ? 'dark:text-zinc-100 text-zinc-700' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
               flex items-center text-sm space-x-1 cursor-default select-none h-7 px-2 mb-0.5
               `}
               draggable={!c.mode}
@@ -102,9 +101,16 @@ const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}
                   })
                 }
               }}
-              onClick={action(() => {
-                if (!c.folder) treeStore.selectNote(c)
-                else c.expand = !c.expand
+              onClick={action((e) => {
+                if (!c.folder) {
+                  if (e.metaKey || e.ctrlKey) {
+                    treeStore.appendTab(c)
+                  } else {
+                    treeStore.openNote(c)
+                  }
+                } else {
+                  c.expand = !c.expand
+                }
               })}
             >
               {!!c.mode ?

@@ -36,7 +36,7 @@ export const createFileNode = (params: {
   }
   return observable(node)
 }
-const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {
+const readDir = (path: string, parent: IFileItem) => {
   const files = readdirSync(path)
   let tree: IFileItem[] = []
   for (let f of files) {
@@ -49,7 +49,7 @@ const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {
         parent: parent,
         filePath: join(path, f)
       })
-      node.children = readDir(filePath, node, cacheFiles)
+      node.children = readDir(filePath, node)
       tree.push(node)
     } else {
       const node = createFileNode({
@@ -57,9 +57,6 @@ const readDir = (path: string, parent: IFileItem, cacheFiles:IFileItem[]) => {
         parent: parent,
         filePath: join(path, f)
       })
-      if (['md', 'markdown'].includes(node.ext!)) {
-        cacheFiles.push(node)
-      }
       tree.push(node)
     }
   }
@@ -80,7 +77,6 @@ export const parserNode = (dirPath: string) => {
     folder: true,
     id: nanoid()
   })
-  const files:IFileItem[] = []
-  root.children = readDir(dirPath, root, files)
-  return {root, files}
+  root.children = readDir(dirPath, root)
+  return {root}
 }

@@ -79,6 +79,26 @@ export const registerMenus = () => {
     })
   })
 
+  ipcMain.on('tab-context-menu', (e) => {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: 'Close Tab',
+        click: () => {
+          e.sender?.send('close-selected-tab')
+        }
+      },
+      {
+        label: 'Close Other Tab',
+        click: () => {
+          e.sender?.send('close-other-tabs')
+        }
+      }
+    ])
+    menu.popup({
+      window: BrowserWindow.fromWebContents(e.sender)!
+    })
+  })
+
   ipcMain.on('tree-context-menu', (e, params: {
     type: 'rootFolder' | 'file' | 'folder'
     filePath?: string
