@@ -22,7 +22,6 @@ import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
 
 const countThrottle$ = new Subject<any>()
-const preventDefault = (e: React.CompositionEvent) => e.preventDefault()
 export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
@@ -199,6 +198,70 @@ export const MEditor = observer(({note}: {
     })
     inCode.current = !!node
   }, [store.sel])
+
+  const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const dragNode = treeStore.dragNode
+    const file = e.dataTransfer.files[0]
+    if ((dragNode && !dragNode.folder) || file) {
+      setTimeout(() => {
+        if (dragNode) {
+          store.insertDragFile(dragNode)
+        } else {
+          store.insertFile(file)
+        }
+      }, 100)
+    }
+    return false
+  }, [])
+
+  const focus = useCallback(() => {
+    store.setState(state => state.focus = true)
+    store.hideRanges()
+  }, [])
+
+  const blur = useCallback(() => {
+    store.setState(state => {
+      state.focus = false
+      state.tableCellNode = null
+      state.refreshTableAttr = !state.refreshTableAttr
+    })
+  }, [])
+
+  const paste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    const text = window.api.getClipboardText()
+    if (text && text.startsWith('bsc::')) {
+      const [, path] = text.split('::')
+      e.preventDefault()
+      e.stopPropagation()
+      store.insertInlineNode(path)
+    }
+    const file = e.clipboardData?.files[0]
+    if (file) {
+      store.insertFile(file)
+      return
+    }
+    let paste = e.clipboardData.getData('text/html')
+    if (paste && htmlParser(editor, paste)) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+  }, [])
+
+  const compositionStart = useCallback((e: React.CompositionEvent) => {
+    e.preventDefault()
+    store.inputComposition = true
+  }, [])
+
+  const compositionEnd = useCallback((e: React.CompositionEvent) => {
+    store.inputComposition = false
+    const [code] = Editor.nodes<any>(store.editor, {
+      match: el => el.type === 'code'
+    })
+    if (code) {
+      codeCache.delete(code[0])
+      requestIdleCallback(action(() => store.refreshHighlight = !store.refreshHighlight))
+    }
+  }, [])
   return (
     <Slate
       editor={editor}
@@ -214,65 +277,12 @@ export const MEditor = observer(({note}: {
         className={`edit-area ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}
         style={{fontSize: configStore.config.editorTextSize || 16}}
         onMouseDown={checkEnd}
-        onDrop={e => {
-          const dragNode = treeStore.dragNode
-          const file = e.dataTransfer.files[0]
-          if ((dragNode && !dragNode.folder) || file) {
-            setTimeout(() => {
-              if (dragNode) {
-                store.insertDragFile(dragNode)
-              } else {
-                store.insertFile(file)
-              }
-            }, 100)
-          }
-          return false
-        }}
-        onFocus={() => {
-          store.setState(state => state.focus = true)
-          store.hideRanges()
-        }}
-        onBlur={() => {
-          store.setState(state => {
-            state.focus = false
-            state.tableCellNode = null
-            state.refreshTableAttr = !state.refreshTableAttr
-          })
-        }}
-        onPaste={e => {
-          const text = window.api.getClipboardText()
-          if (text && text.startsWith('bsc::')) {
-            const [, path] = text.split('::')
-            e.preventDefault()
-            e.stopPropagation()
-            store.insertInlineNode(path)
-          }
-          const file = e.clipboardData?.files[0]
-          if (file) {
-            store.insertFile(file)
-            return
-          }
-          let paste = e.clipboardData.getData('text/html')
-          if (paste && htmlParser(editor, paste)) {
-            e.stopPropagation()
-            e.preventDefault()
-          }
-        }}
-        onCompositionStart={e => {
-          e.preventDefault()
-          store.inputComposition = true
-        }}
-        onCompositionEnd={e => {
-          e.preventDefault()
-          store.inputComposition = false
-          const [code] = Editor.nodes<any>(store.editor, {
-            match: el => el.type === 'code'
-          })
-          if (code) {
-            codeCache.delete(code[0])
-            requestIdleCallback(action(() => store.refreshHighlight = !store.refreshHighlight))
-          }
-        }}
+        onDrop={drop}
+        onFocus={focus}
+        onBlur={blur}
+        onPaste={paste}
+        onCompositionStart={compositionStart}
+        onCompositionEnd={compositionEnd}
         renderElement={renderElement}
         onKeyDown={keydown}
         renderLeaf={renderLeaf}

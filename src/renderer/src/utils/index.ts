@@ -6,6 +6,7 @@ import {Subject} from 'rxjs'
 import {ArgsProps} from 'antd/es/message'
 import {HookAPI} from 'antd/es/modal/useModal'
 import { customAlphabet } from 'nanoid'
+import {slugify} from './sections'
 export const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 13)
 
 const kb = 1024
@@ -77,6 +78,14 @@ export const encodeHtml = (str: string) => {
   const encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;'},
     matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
   return str.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m; })
+}
+
+export const parsePath = (path: string) => {
+  const m = path.match(/#([^\n#\/]+)?$/)
+  if (m) {
+    return {path: path.replace(m[0], ''), hash: slugify(m[1] || '')}
+  }
+  return {path, hash: null}
 }
 
 export const isMac = /macintosh|mac os x/i.test(navigator.userAgent)

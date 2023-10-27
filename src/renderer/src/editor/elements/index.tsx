@@ -14,9 +14,20 @@ import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 import {InlineKatex} from './CodeUI/Katex/InlineKatex'
 import {existsSync} from 'fs'
+import {parsePath} from '../../utils'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
+}
+
+const toHash = (hash: string) => {
+  const dom = document.querySelector(`[data-head="${hash}"]`) as HTMLElement
+  if (dom) {
+    treeStore.currentTab.store.container?.scroll({
+      top: dom.offsetTop - 10,
+      behavior: 'smooth'
+    })
+  }
 }
 export const MElement = (props: RenderElementProps) => {
   switch (props.element.type) {
@@ -98,9 +109,18 @@ export const MLeaf = (props: RenderLeafProps) => {
               if (/^https?/.test(leaf.url)) {
                 window.open(leaf.url)
               } else {
-                const path = isAbsolute(leaf.url) ? leaf.url : join(treeStore.currentTab.current!.filePath, '..', leaf.url)
+                const parseRes = parsePath(leaf.url)
+                if (!parseRes.path && parseRes.hash) {
+                  return toHash(parseRes.hash)
+                }
+                const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
                 if (existsSync(path)) {
                   e.altKey ? treeStore.appendTab(path) : treeStore.openNote(path)
+                  if (parseRes.hash) {
+                    setTimeout(() => {
+                      toHash(parseRes.hash)
+                    }, 200)
+                  }
                 }
               }
             }

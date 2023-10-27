@@ -2,6 +2,8 @@ import {ElementProps, HeadNode} from '../../el'
 import {createElement, useMemo} from 'react'
 import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'
+import {slugify} from '../utils/dom'
+import {Node} from 'slate'
 
 const levelDragHandleTop = new Map([
   [1, '.52em'],
@@ -17,6 +19,7 @@ export function Head({element, attributes, children}: ElementProps<HeadNode>) {
       ...attributes,
       ['data-be']: 'head',
       className: 'drag-el',
+      ['data-head']: slugify(Node.string(element) || ''),
       onDragStart: store.dragStart
     }, (
       <>
