@@ -49,7 +49,7 @@ export const MEditor = observer(({note}: {
       const schema = treeStore.schemaMap.get(nodeRef.current)
       if (schema?.state) {
         const path = nodeRef.current.filePath
-        const res = await toMarkdown(schema.state, path)
+        const res = await toMarkdown(schema.state)
         saveRecord(path, schema.state)
         await window.api.fs.writeFile(path, res, {encoding: 'utf-8'})
       }
@@ -67,7 +67,7 @@ export const MEditor = observer(({note}: {
   })
   const count = useCallback(async (nodes: any[]) => {
     if (!configStore.config.showCharactersCount || !nodeRef.current) return
-    const res = await toMarkdown(nodes, nodeRef.current.filePath)
+    const res = await toMarkdown(nodes)
     const texts = Editor.nodes(editor, {
       at: [],
       match: n => n.text
@@ -80,7 +80,12 @@ export const MEditor = observer(({note}: {
 
   useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
 
-
+  useEffect(() => {
+    if (treeStore.currentTab.store === store) {
+      const schema = treeStore.schemaMap.get(note)?.state
+      if (schema) count(schema)
+    }
+  }, [treeStore.currentTab, note])
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -127,9 +132,6 @@ export const MEditor = observer(({note}: {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
       let data = treeStore.schemaMap.get(note)
-      setTimeout(() => {
-        count(data?.state || [])
-      })
       first.current = true
       if (!data) {
         data = await treeStore.getSchema(note)

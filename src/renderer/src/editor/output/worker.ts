@@ -240,7 +240,7 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
 
 onmessage = (e) => {
   postMessage({
-    path: e.data.path,
+    id: e.data.id,
     data: toMarkdown(e.data.state)
   })
 }
