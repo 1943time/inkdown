@@ -57,7 +57,7 @@ export const EditorFrame = observer(({tab}: {
 
   useLayoutEffect(() => {
     tab.store.openFilePath = tab.current?.filePath || null
-  }, [tab.current])
+  }, [tab.current?.filePath])
 
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
   const size = useMemo(() => {
