@@ -135,11 +135,11 @@ export const MEditor = observer(({note}: {
       first.current = true
       if (!data) {
         data = await treeStore.getSchema(note)
-        count(data?.state || [])
         setTimeout(action(() => {
           note.refresh = !note.refresh
         }), 200)
       }
+      count(data?.state || [])
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
       setTimeout(() => {
         store.setState(state => state.pauseCodeHighlight = false)
