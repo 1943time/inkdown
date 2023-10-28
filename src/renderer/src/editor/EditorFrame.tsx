@@ -3,7 +3,7 @@ import {MEditor} from './Editor'
 import {Heading} from './tools/Leading'
 import {Empty} from '../components/Empty'
 import {Tab} from '../index'
-import React, {useCallback, useEffect, useMemo} from 'react'
+import React, {useCallback, useEffect, useLayoutEffect, useMemo} from 'react'
 import {EditorStoreContext} from './store'
 import {FloatBar} from './tools/FloatBar'
 import {TableAttr} from './tools/TableAttr'
@@ -54,6 +54,11 @@ export const EditorFrame = observer(({tab}: {
       window.electron.ipcRenderer.removeListener('open-search', open)
     }
   }, [])
+
+  useLayoutEffect(() => {
+    tab.store.openFilePath = tab.current?.filePath || null
+  }, [tab.current])
+
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
   const size = useMemo(() => {
     return {

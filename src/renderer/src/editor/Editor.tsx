@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
 import {Editor} from 'slate'
 import {MElement, MLeaf} from './elements'

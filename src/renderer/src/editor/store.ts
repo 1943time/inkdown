@@ -54,6 +54,7 @@ export class EditorStore {
   container: null | HTMLDivElement = null
   history = false
   inputComposition = false
+  openFilePath: string | null = null
   saveDoc$ = new Subject<any[] | null>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
@@ -67,6 +68,7 @@ export class EditorStore {
       editor: false,
       tableCellNode: false,
       inputComposition: false,
+      openFilePath: false,
       container: false,
       highlightCache: false,
       dragEl: false
