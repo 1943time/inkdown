@@ -1,12 +1,10 @@
 import {existsSync, readFileSync, statSync} from 'fs'
-import {extname, join} from 'path'
-import {treeStore} from '../store/tree'
+import {extname} from 'path'
 import {mediaType} from '../editor/utils/dom'
 import {Subject} from 'rxjs'
 import {ArgsProps} from 'antd/es/message'
 import {HookAPI} from 'antd/es/modal/useModal'
 import { customAlphabet } from 'nanoid'
-import {slugify} from './sections'
 export const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 13)
 
 const kb = 1024
@@ -83,7 +81,7 @@ export const encodeHtml = (str: string) => {
 export const parsePath = (path: string) => {
   const m = path.match(/#([^\n#\/]+)?$/)
   if (m) {
-    return {path: path.replace(m[0], ''), hash: slugify(m[1] || '')}
+    return {path: path.replace(m[0], ''), hash: m[1] || ''}
   }
   return {path, hash: null}
 }

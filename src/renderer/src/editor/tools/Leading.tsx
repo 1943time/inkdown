@@ -11,7 +11,7 @@ import {ReactEditor} from 'slate-react'
 import {configStore} from '../../store/config'
 type Leading = {title: string, level: number, id: string, key: string, dom?: HTMLElement, schema: object}
 
-const cache = new WeakMap<object, Leading>
+const cache = new Map<object, Leading>
 const levelClass = new Map([
   [2, ''],
   [3, 'pl-4'],
@@ -27,12 +27,12 @@ export const Heading = observer(({note}: {
   })
   const box = useRef<HTMLElement>()
   useEffect(() => {
-    for (let h of state().headings) {
-      cache.delete(h.schema)
-    }
+    cache.clear()
+    getHeading()
     setState({active: ''})
-  }, [note])
-  useDebounce(() => {
+  }, [note, treeStore.currentTab])
+
+  const getHeading = useCallback(() => {
     if (note) {
       const schema = treeStore.schemaMap.get(note)?.state
       if (schema?.length) {
@@ -50,12 +50,12 @@ export const Heading = observer(({note}: {
                 level: s.level,
                 id: slugify(title),
                 key: nanoid(),
-                schema: s,
+                schema: s
               })
               headings.push(cache.get(s)!)
-              requestIdleCallback(() => {
-                cache.get(s)!.dom = ReactEditor.toDOMNode(store.editor, s)
-              })
+              setTimeout(() => {
+                cache.get(s)!.dom = store.container?.querySelector(`[data-head="${title}"]`) as HTMLElement
+              }, 200)
             }
           }
         }
@@ -66,7 +66,9 @@ export const Heading = observer(({note}: {
     } else {
       setState({headings: []})
     }
-  }, 100, [note, note?.refresh, configStore.config.leadingLevel])
+  }, [note])
+
+  useDebounce(getHeading, 100, [note, note?.refresh, configStore.config.leadingLevel])
 
   useEffect(() => {
     const div = box.current

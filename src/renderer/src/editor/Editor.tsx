@@ -136,7 +136,7 @@ export const MEditor = observer(({note}: {
         count(data?.state || [])
         setTimeout(action(() => {
           note.refresh = !note.refresh
-        }))
+        }), 200)
       }
       EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
       setTimeout(() => {

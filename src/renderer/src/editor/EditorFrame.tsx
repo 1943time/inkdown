@@ -89,7 +89,9 @@ export const EditorFrame = observer(({tab}: {
                 >
                   <MEditor note={tab.current}/>
                 </div>
-                <Heading note={tab.current}/>
+                {tab === treeStore.currentTab &&
+                  <Heading note={tab.current}/>
+                }
               </div>
             </div>
             {mt !== 'other' && mt !== 'markdown' &&
