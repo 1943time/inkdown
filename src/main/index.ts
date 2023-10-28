@@ -1,4 +1,4 @@
-import {app, BrowserWindow, dialog, ipcMain, screen, shell} from 'electron'
+import {app, BrowserWindow, dialog, ipcMain, screen, shell, globalShortcut} from 'electron'
 import {lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
@@ -126,6 +126,16 @@ const openFiles = (filePath: string) => {
   } catch (e) {
   }
 }
+
+app.on('browser-window-focus', () => {
+  globalShortcut.register("CommandOrControl+W", () => {
+    BrowserWindow.getFocusedWindow()?.webContents.send('close-current-tab')
+  })
+})
+
+app.on('browser-window-blur', () => {
+  globalShortcut.unregister('CommandOrControl+W')
+})
 app.whenReady().then(() => {
   createAppMenus()
   registerMenus()

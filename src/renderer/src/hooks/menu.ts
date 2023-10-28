@@ -38,7 +38,12 @@ export const useSystemMenus = () => {
           const filePath = res.filePaths[0]
           const s = stat(filePath)
           if (s) {
-            s.isDirectory() ? treeStore.openFolder(filePath) : treeStore.openNote(filePath)
+            if (s.isDirectory()) {
+              treeStore.openFolder(filePath)
+              treeStore.openFirst()
+            } else {
+              treeStore.openNote(filePath)
+            }
           }
           window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
         }

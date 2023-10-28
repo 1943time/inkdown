@@ -149,6 +149,7 @@ const getSystemMenus = () => {
       ]
     },
   ] : [
+    {type: 'separator'},
     {
       id: 'open',
       label: 'Open File',
@@ -190,6 +191,7 @@ const getSystemMenus = () => {
           ipcMain.emit('create-window')
         }
       },
+      {type: 'separator'},
       {
         label: 'New Tab',
         accelerator: `${cmd}+t`,
@@ -199,10 +201,7 @@ const getSystemMenus = () => {
       },
       {
         label: 'Close current tab',
-        accelerator: `${cmd}+w`,
-        click: (menu, win) => {
-          win?.webContents.send('close-current-tab')
-        }
+        accelerator: `${cmd}+w`
       },
       ...systemFileMenus,
       {

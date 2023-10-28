@@ -121,6 +121,7 @@ export const Empty = observer(() => {
                   className={'cursor-default text-sky-600 duration-200 hover:text-sky-400'}
                   onClick={() => {
                     treeStore.openFolder(r.filePath)
+                    treeStore.openFirst()
                   }}
                 >
                   <FolderOutlined />

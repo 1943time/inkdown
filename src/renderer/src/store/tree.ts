@@ -315,7 +315,16 @@ export class TreeStore {
     this.watcher.openDirCheck()
     this.parseFolder()
   }
-
+  openFirst() {
+    if (!treeStore.currentTab.current || this.tabs.length === 1) {
+      const first = this.firstNote
+      if (first) {
+        this.currentTab.history.push(first)
+        this.currentTab.index = 0
+        this.openParentDir(first.filePath)
+      }
+    }
+  }
   async parseFolder() {
     const queue:IFileItem[] = []
     const stack:IFileItem[] = this.root.children!.slice()
