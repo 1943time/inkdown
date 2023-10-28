@@ -2,7 +2,7 @@ import {IFileItem} from '../index'
 import {basename, isAbsolute, join, relative} from 'path'
 import {mediaType} from '../editor/utils/dom'
 import {db} from './db'
-import {isExist} from '../utils'
+import {isExist, parsePath} from '../utils'
 import {existsSync} from 'fs'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
@@ -26,15 +26,16 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
       let fileChange = false
       file = file.replace(urlRegexp, (m, text: string, url: string) => {
         if (/^https?:/.test(url)) return m
-        const absolute = isAbsolute(url)
-        const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || filePath, '..', url)
+        const parseRes = parsePath(url)
+        const absolute = isAbsolute(parseRes.path)
+        const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || filePath, '..', parseRes.path)
         if (oldPathMap.get(linkPath)) {
           fileChange = true
           if (absolute) {
-            return `[${text}](${oldPathMap.get(linkPath)})`
+            return `[${text}](${oldPathMap.get(linkPath)}${parseRes.hash ? `#${parseRes.hash}` : ''})`
           } else {
             const changePath = relative(join(filePath, '..'), oldPathMap.get(linkPath)!)
-            return `[${text}](${window.api.toUnix(changePath)})`
+            return `[${text}](${window.api.toUnix(changePath)}${parseRes.hash ? `#${parseRes.hash}` : ''})`
           }
         }
         return m
@@ -44,15 +45,16 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
         if (match) {
           const url = match[1]
           if (/^https?:/.test(url)) return str
-          const absolute = isAbsolute(url)
-          const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || '', '..', url)
+          const parseRes = parsePath(url)
+          const absolute = isAbsolute(parseRes.path)
+          const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || '', '..', parseRes.path)
           if (existsSync(linkPath)) {
             fileChange = true
             if (absolute) {
-              str = str.replace(/src="[^\n"]+"/, `src="${linkPath}"`)
+              str = str.replace(/src="[^\n"]+"/, `src="${linkPath}${parseRes.hash ? `#${parseRes.hash}` : ''}"`)
             } else {
               const changePath = relative(join(filePath, '..'), linkPath)
-              str = str.replace(/src="[^\n"]+"/, `src="${window.api.toUnix(changePath)}"`)
+              str = str.replace(/src="[^\n"]+"/, `src="${window.api.toUnix(changePath)}${parseRes.hash ? `#${parseRes.hash}` : ''}"`)
             }
           }
         }
@@ -70,12 +72,13 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
     file = file.replace(urlRegexp, (m, text: string, url: string) => {
       if (url.startsWith('http:')) return m
       if (!isAbsolute(url)) {
-        const linkPath = join(changeFilesPath.get(fileItem.filePath)!, '..', url)
-        if (isExist(linkPath)) {
+        const parseRes = parsePath(url)
+        const linkPath = join(changeFilesPath.get(fileItem.filePath)!, '..', parseRes.path)
+        if (existsSync(linkPath)) {
           const changePath = relative(join(fileItem.filePath, '..'), linkPath)
-          if (changePath !== url) {
+          if (changePath !== parseRes.path) {
             fileChange = true
-            return `[${text}](${window.api.toUnix(changePath)})`
+            return `[${text}](${window.api.toUnix(changePath)}${parseRes.hash ? `#${parseRes.hash}` : ''})`
           }
         }
       }
