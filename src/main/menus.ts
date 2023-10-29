@@ -125,6 +125,12 @@ export const registerMenus = () => {
         label: menusLabel.rename,
         click: () => sendCommand('rename')
       })
+      if (params.type === 'file') {
+        temp.add({
+          label: 'Open in New Tab',
+          click: () => sendCommand('openInNewTab')
+        })
+      }
       temp.add({
         type: 'separator'
       })
