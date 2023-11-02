@@ -9,12 +9,13 @@ import {Paragraph} from './paragraph'
 import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
 import {Media} from './media'
 import {useEditorStore} from '../store'
-import {Point} from 'slate'
+import {Editor, Point, Transforms} from 'slate'
 import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 import {InlineKatex} from './CodeUI/Katex/InlineKatex'
 import {existsSync} from 'fs'
 import {parsePath} from '../../utils'
+import {ReactEditor} from 'slate-react'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -123,6 +124,16 @@ export const MLeaf = (props: RenderLeafProps) => {
                   }
                 }
               }
+            } else if (e.detail === 2) {
+              try {
+                const path = ReactEditor.findPath(store.editor, props.text)
+                if (path) {
+                  Transforms.select(store.editor, {
+                    anchor: Editor.start(store.editor, path),
+                    focus: Editor.end(store.editor, path)
+                  })
+                }
+              } catch (e) {}
             }
           }}
           data-slate-inline={true}
