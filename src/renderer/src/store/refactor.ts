@@ -27,8 +27,9 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
       file = file.replace(urlRegexp, (m, text: string, url: string) => {
         if (/^https?:/.test(url)) return m
         const parseRes = parsePath(url)
+        if (!parseRes.path) return m
         const absolute = isAbsolute(parseRes.path)
-        const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || filePath, '..', parseRes.path)
+        const linkPath = absolute ? parseRes.path : join(changeFilesPath.get(filePath) || filePath, '..', parseRes.path)
         if (oldPathMap.get(linkPath)) {
           fileChange = true
           if (absolute) {
@@ -46,8 +47,9 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
           const url = match[1]
           if (/^https?:/.test(url)) return str
           const parseRes = parsePath(url)
+          if (!parseRes.path) return str
           const absolute = isAbsolute(parseRes.path)
-          const linkPath = absolute ? url : join(changeFilesPath.get(filePath) || '', '..', parseRes.path)
+          const linkPath = absolute ? parseRes.path : join(changeFilesPath.get(filePath) || '', '..', parseRes.path)
           if (existsSync(linkPath)) {
             fileChange = true
             if (absolute) {
@@ -71,8 +73,9 @@ export const refactor = async (paths: [string, string][], files: IFileItem[]) =>
     let fileChange = false
     file = file.replace(urlRegexp, (m, text: string, url: string) => {
       if (url.startsWith('http:')) return m
+      const parseRes = parsePath(url)
+      if (!parseRes.path) return m
       if (!isAbsolute(url)) {
-        const parseRes = parsePath(url)
         const linkPath = join(changeFilesPath.get(fileItem.filePath)!, '..', parseRes.path)
         if (existsSync(linkPath)) {
           const changePath = relative(join(fileItem.filePath, '..'), linkPath)
