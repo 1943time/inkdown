@@ -319,8 +319,7 @@ export class TreeStore {
     if (!treeStore.currentTab.current || this.tabs.length === 1) {
       const first = this.firstNote
       if (first) {
-        this.currentTab.history.push(first)
-        this.currentTab.index = 0
+        this.openNote(first)
         this.openParentDir(first.filePath)
       }
     }
@@ -468,6 +467,9 @@ export class TreeStore {
         const selection = window.getSelection()!
         selection.removeAllRanges()
         selection.addRange(backRange)
+      }
+      if (this.openedNote) {
+        document.title = this.root ? `${basename(this.root.filePath)}-${basename(this.openedNote.filePath)}` : basename(this.openedNote.filePath)
       }
     })
     this.recordTabs()
