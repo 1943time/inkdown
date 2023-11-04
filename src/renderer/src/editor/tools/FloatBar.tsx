@@ -13,12 +13,13 @@ import {
   LinkOutlined,
   StrikethroughOutlined
 } from '@ant-design/icons'
-import {BaseRange, Editor, NodeEntry, Range, Text, Transforms} from 'slate'
+import {BaseRange, Editor, Node, NodeEntry, Range, Text, Transforms} from 'slate'
 import {AutoComplete} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
-import {join, relative} from 'path'
+import {isAbsolute, join, relative} from 'path'
+import {parsePath} from '../../utils'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},
@@ -38,6 +39,8 @@ const colors = [
 ]
 export const FloatBar = observer(() => {
   const store = useEditorStore()
+  const fileMap = new Map<string, IFileItem>()
+  const linkOptionsVisible = useRef(false)
   const [state, setState] = useLocalState({
     open: false,
     left: 0,
@@ -47,8 +50,30 @@ export const FloatBar = observer(() => {
     hoverSelectColor: false,
     openSelectColor: false,
     links: [] as {label: string, value: string}[],
-    filterLinks: [] as {label: string, value: string}[]
+    filterLinks: [] as {label: string, value: string}[],
+    anchors: [] as {label: string, value: string}[]
   })
+
+  const getAnchors = useCallback(() => {
+    if (!state.url) return setState({anchors: []})
+    const parse = parsePath(state.url)
+    let filePath = ''
+    if (!parse.path) {
+      filePath = treeStore.openedNote?.filePath!
+    } else {
+      filePath = isAbsolute(state.url) ? state.url : join(treeStore.root.filePath, parse.path)
+    }
+    if (fileMap.get(filePath)) {
+      const anchors = (treeStore.schemaMap.get(fileMap.get(filePath)!)?.state || []).filter(e => e.type === 'head')
+      setState({anchors: anchors.map(e => {
+        const text = Node.string(e)
+        return {label: '# ' + text, value: text}
+      })})
+    } else {
+      setState({anchors: []})
+    }
+  }, [])
+
   const getFilePaths = useCallback(() => {
     if (treeStore.root) {
       let files: {label: string, value: string}[] = []
@@ -57,6 +82,7 @@ export const FloatBar = observer(() => {
         const node = stack.shift()!
         if (!node.folder && node.ext === 'md') {
           const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
+          fileMap.set(node.filePath, node)
           files.push({
             label: path,
             value: path
@@ -75,7 +101,8 @@ export const FloatBar = observer(() => {
   const el = useRef<NodeEntry<any>>()
   const closeLink = useCallback(() => {
     window.removeEventListener('mousedown', closeLink)
-    setState({link: false, open: false})
+    setState({link: false, open: false, anchors: []})
+    fileMap.clear()
     store.highlightCache.delete(el.current?.[0])
     store.setState(state => state.refreshHighlight = !state.refreshHighlight)
   }, [])
@@ -118,7 +145,8 @@ export const FloatBar = observer(() => {
       resize(true)
       sel.current = store.editor.selection!
     } else {
-      setState({open: false})
+      setState({open: false, anchors: []})
+      fileMap.clear()
     }
   }, [store.domRect, store.openSearch])
 
@@ -127,7 +155,8 @@ export const FloatBar = observer(() => {
       const close = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
           e.preventDefault()
-          setState({open: false})
+          setState({open: false, anchors: []})
+          fileMap.clear()
           Transforms.select(store.editor, Range.end(sel.current!))
         }
       }
@@ -171,16 +200,27 @@ export const FloatBar = observer(() => {
       {state.link ?
         <div className={'flex items-center h-full w-[300px] px-2'}>
           <AutoComplete
-            size={'small'} placeholder={'url or filepath'}
+            size={'small'} placeholder={'url, filepath or #hash'}
             value={state.url}
             bordered={false}
             className={'w-full'}
             autoFocus={true}
             allowClear={true}
-            onSelect={e => {
-              setState({url: e})
+            onDropdownVisibleChange={v => {
+              setTimeout(() => {
+                linkOptionsVisible.current = v
+              })
             }}
-            options={state.filterLinks}
+            onSelect={e => {
+              if (state.anchors.length) {
+                const parse = parsePath(state.url)
+                const path = parse.path === treeStore.openedNote?.filePath ? '' : parse.path
+                setState({url: path + '#' + e})
+              } else {
+                setState({url: e})
+              }
+            }}
+            options={state.anchors.length ? state.anchors : state.filterLinks}
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 Transforms.setNodes(
@@ -188,12 +228,19 @@ export const FloatBar = observer(() => {
                   {url: state.url || undefined},
                   {match: Text.isText, split: true}
                 )
-                closeLink()
+                if (!linkOptionsVisible.current) {
+                  closeLink()
+                }
+              }
+              if (e.key === '#') {
+                setTimeout(getAnchors)
+              } else if (!state.url?.includes('#') && state.anchors.length) {
+                setState({anchors: []})
               }
             }}
             onSearch={e => {
               setState({
-                url: e,
+                url: e || '',
                 filterLinks: state.links.filter(l => l.label.includes(e))
               })
             }}

@@ -16,6 +16,7 @@ import {InlineKatex} from './CodeUI/Katex/InlineKatex'
 import {existsSync} from 'fs'
 import {parsePath} from '../../utils'
 import {ReactEditor} from 'slate-react'
+import {EditorUtils} from '../utils/editorUtils'
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -93,13 +94,26 @@ export const MLeaf = (props: RenderLeafProps) => {
       style.background = '#f59e0b'
     }
     const dirty = leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || leaf.highColor
+    const selectFormat = () => {
+      try {
+        if (EditorUtils.isDirtLeaf(props.leaf)) {
+          const path = ReactEditor.findPath(store.editor, props.text)
+          if (path) {
+            Transforms.select(store.editor, {
+              anchor: Editor.start(store.editor, path),
+              focus: Editor.end(store.editor, path)
+            })
+          }
+        }
+      } catch (e) {}
+    }
     if (leaf.url) {
       return (
         <span
           style={style}
           data-be={'link'}
           draggable={false}
-          title={'mod + click to open link, mod + alt + click to open link in new tab'}
+          title={'mod + click to open link, mod + alt + click to open file in new tab'}
           onDragStart={dragStart}
           onClick={(e) => {
             e.stopPropagation()
@@ -125,15 +139,7 @@ export const MLeaf = (props: RenderLeafProps) => {
                 }
               }
             } else if (e.detail === 2) {
-              try {
-                const path = ReactEditor.findPath(store.editor, props.text)
-                if (path) {
-                  Transforms.select(store.editor, {
-                    anchor: Editor.start(store.editor, path),
-                    focus: Editor.end(store.editor, path)
-                  })
-                }
-              } catch (e) {}
+              selectFormat()
             }
           }}
           data-slate-inline={true}
@@ -155,6 +161,11 @@ export const MLeaf = (props: RenderLeafProps) => {
         data-be={'text'}
         draggable={false}
         onDragStart={dragStart}
+        onClick={e => {
+          if (e.detail === 2) {
+            selectFormat()
+          }
+        }}
         data-fnc={leaf.fnc ? 'fnc' : undefined}
         data-fnd={leaf.fnd ? 'fnd' : undefined}
         data-fnc-name={leaf.fnc ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}
