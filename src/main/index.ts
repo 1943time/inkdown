@@ -9,12 +9,7 @@ import {AppUpdate} from './update'
 const isWindows = process.platform === 'win32'
 
 type WinOptions = {
-  width?: number
-  height?: number
-  x?: number
-  y?: number
   openFolder?: string
-  openFile?: string
   openTabs?: string[]
   index?: number
 }
@@ -24,11 +19,9 @@ let fileChangedWindow: BrowserWindow | null = null
 function createWindow(initial?: WinOptions): void {
   const dark = isDark()
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
-  let openWidth = initial?.width ? initial.width < 800 ? 800 : initial.width : width
-  let openHeight = initial?.height ? initial.height < 400 ? 400 : initial.width : height
   const window = new BrowserWindow({
-    width: openWidth,
-    height: openHeight,
+    width,
+    height,
     titleBarStyle: 'hiddenInset',
     backgroundColor: dark ? '#222222' : '#ffffff',
     ...windowOptions
@@ -77,9 +70,13 @@ function createWindow(initial?: WinOptions): void {
       })
       if (res !== 1) {
         e.preventDefault()
+        return
       }
     }
-    windows.delete(window.id)
+    const id = window.id
+    setTimeout(() => {
+      windows.delete(id)
+    }, 500)
   })
   windows.set(window.id, initial || {})
   window.show()
@@ -106,10 +103,10 @@ ipcMain.on('open-history-path', (e, path: string) => {
 const openFiles = (filePath: string) => {
   try {
     const win = Array.from(windows).find(w => {
-      return (w[1].openFile === filePath || w[1].openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
+      return (w[1].openTabs?.includes(filePath) || w[1]?.openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
     })
     if (win) {
-      if (win[1].openFile === filePath || win[1].openFolder === filePath) {
+      if (win[1].openTabs?.includes(filePath) || win[1]?.openFolder === filePath) {
         BrowserWindow.fromId(win[0])?.focus()
       } else if (win[1].openFolder && filePath.startsWith(win[1].openFolder)) {
         const w = BrowserWindow.fromId(win[0])
@@ -120,7 +117,7 @@ const openFiles = (filePath: string) => {
       const stat = lstatSync(filePath)
       createWindow({
         openFolder: stat.isDirectory() ? filePath : undefined,
-        openFile: stat.isFile() ? filePath : undefined
+        openTabs: stat.isFile() ? [filePath] : undefined
       })
     }
   } catch (e) {
@@ -155,6 +152,7 @@ app.whenReady().then(() => {
     if (data.openFolder) windows.get(window.id)!.openFolder = data.openFolder
     if (data.openTabs) windows.get(window.id)!.openTabs = data.openTabs
     if (typeof data.index !== 'undefined') windows.get(window.id)!.index = data.index
+    console.log('set', data)
   })
   ipcMain.on('add-recent-path', (e, path) => {
     store.set('recent-open-paths', Array.from(new Set([...(store.get('recent-open-paths') as any[] || []), path])))
@@ -177,24 +175,13 @@ app.whenReady().then(() => {
       return {
         openFolder: w.openFolder,
         index: w.index,
-        // openFile will be abandoned
         openTabs: w.openTabs
-        // openTabs: ['/Users/huangjie/Documents/t1/dir/test.md', '/Users/huangjie/Documents/t1/demo.md']
       }
     }
     return null
   })
   app.on('before-quit', e => {
-    store.set('windows', BrowserWindow.getAllWindows().map(w => {
-      const bound = w.getBounds()
-      return {
-        ...windows.get(w.id),
-        width: bound.width,
-        height: bound.height,
-        x: bound.x,
-        y: bound.y,
-      }
-    }))
+    store.set('windows', Array.from(windows).map(w => w[1]))
   })
   if (isWindows) electronApp.setAppUserModelId('me.bluemd')
 
@@ -208,7 +195,6 @@ app.whenReady().then(() => {
   if (waitOpenFile === '.') waitOpenFile = ''
   try {
     const data = store.get('windows') as WinOptions[] || []
-    // console.log('data', data)
     if (data?.length) {
       for (let d of data) {
         createWindow(typeof d === 'object' ? d : undefined)
@@ -221,7 +207,7 @@ app.whenReady().then(() => {
   }
   if (waitOpenFile) {
     const win = Array.from(windows).find(w => {
-      return !w[1].openFolder && !w[1].openFile
+      return !w[1].openFolder
     })
     if (win) {
       setTimeout(() => {
@@ -229,7 +215,7 @@ app.whenReady().then(() => {
       }, 300)
     } else{
       createWindow({
-        openFile: waitOpenFile
+        openTabs: [waitOpenFile]
       })
     }
     waitOpenFile = ''

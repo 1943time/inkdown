@@ -234,7 +234,7 @@ export const FloatBar = observer(() => {
               }
               if (e.key === '#') {
                 setTimeout(getAnchors)
-              } else if (!state.url?.includes('#') && state.anchors.length) {
+              } else if (state.anchors.length && !state.url?.includes('#')) {
                 setState({anchors: []})
               }
             }}
