@@ -119,8 +119,17 @@ export const Empty = observer(() => {
                 <span
                   className={'cursor-default text-sky-600 duration-200 hover:text-sky-400'}
                   onClick={() => {
-                    treeStore.openFolder(r.filePath)
-                    treeStore.openFirst()
+                    try {
+                      treeStore.openFolder(r.filePath)
+                      treeStore.openFirst()
+                    } catch (e) {
+                      MainApi.open(r.filePath).then(res => {
+                        if (res.filePaths.length) {
+                          treeStore.openFolder(res.filePaths[0])
+                          treeStore.openFirst()
+                        }
+                      })
+                    }
                   }}
                 >
                   <FolderOutlined />
