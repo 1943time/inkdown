@@ -7,7 +7,6 @@ import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
 const isWindows = process.platform === 'win32'
-
 type WinOptions = {
   openFolder?: string
   openTabs?: string[]

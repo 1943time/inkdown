@@ -3,6 +3,7 @@ import {nanoid} from 'nanoid'
 import {dialog} from 'electron'
 import {configStore} from '../store/config'
 import {removeFileRecord} from '../store/db'
+import {Got} from 'got'
 const ipcRenderer = window.electron.ipcRenderer
 
 let taskMap = new Map<string, Function>()
@@ -29,6 +30,9 @@ export const MainApi = {
   setWin(data: {openFolder?: string, openTabs?: string[], index?: number}) {
     ipcRenderer.send('set-win', data)
   },
+  getServerConfig() {
+    return ipcRenderer.invoke('getServerConfig')
+  },
   relaunch() {
     ipcRenderer.send('relaunch')
   },
@@ -36,6 +40,9 @@ export const MainApi = {
     return openDialog({
       properties: ['openDirectory']
     })
+  },
+  getMachineId():Promise<string> {
+    return ipcRenderer.invoke('get-machine-id')
   },
   getPath(type: 'home') {
     return ipcRenderer.invoke('get-path', type)

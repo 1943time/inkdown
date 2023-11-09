@@ -1,3 +1,4 @@
+
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog, ipcRenderer} from 'electron'
 import MenuItem = Electron.MenuItem
 import {store} from './store'

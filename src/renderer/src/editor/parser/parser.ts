@@ -1,9 +1,9 @@
 import Worker from './worker?worker'
 
-export const parserMdToSchema = (files: string[]):Promise<any[]> => {
+export const parserMdToSchema = (codes: string[]):Promise<any[]> => {
   return new Promise((resolve, reject) => {
     const w = new Worker()
-    w.postMessage(files)
+    w.postMessage(codes)
     w.onmessage = e => {
       w.terminate()
       resolve(e.data)

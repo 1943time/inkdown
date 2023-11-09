@@ -13,16 +13,16 @@ import {nanoid} from 'nanoid'
 import Net from '../icons/Net'
 import {useLocalState} from '../hooks/useLocalState'
 import {treeStore} from '../store/tree'
-import {message$, nid} from '../utils'
+import {message$} from '../utils'
 import {mediaType} from '../editor/utils/dom'
-import {configStore} from '../store/config'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
 import {ServiceSet} from './ServiceSet'
 import {Record} from './Record'
 import {RemoveShare} from './RemoveShare'
-import {db, IShareNote} from '../store/db'
 import {exportToHtmlString} from '../editor/output/html'
+import {IDoc} from './model'
+import {shareStore} from './store'
 
 export const shareSuccess$ = new Subject<string>()
 export const Server = observer(() => {
@@ -37,7 +37,7 @@ export const Server = observer(() => {
     showData: false,
     openSetting: false,
     openRecord: false,
-    curDoc: null as null | IShareNote
+    curDoc: null as null | IDoc
   })
 
   const [api, contextHolder] = notification.useNotification()
@@ -52,9 +52,9 @@ export const Server = observer(() => {
 
   useEffect(() => {
     if (openNote) {
-      db.shareNote.where('filePath').equals(openNote).first().then(res => {
-        setState({curDoc: res || null})
-      })
+      // db.shareNote.where('filePath').equals(openNote).first().then(res => {
+      //   setState({curDoc: res || null})
+      // })
     } else {
       setState({curDoc: null})
     }
@@ -109,29 +109,31 @@ export const Server = observer(() => {
     if (note && mediaType(note.filePath) === 'markdown') {
       setState({syncing: true})
       try {
-        const record = await db.shareNote.where('filePath').equals(note.filePath).first()
-        const html = await exportToHtmlString(treeStore.openedNote!, true)
-        const name = record ? record.name : `doc/${nid()}.html`
-        await window.api.service.uploadDoc({
-          name: name,
-          content: html,
-          filePath: treeStore.openedNote!.filePath,
-          json: treeStore.schemaMap.get(treeStore.openedNote!)?.state || []
-        })
-        if (record) {
-          await db.shareNote.where('filePath').equals(note.filePath).modify({
-            updated: Date.now()
-          })
-        } else {
-          await db.shareNote.add({
-            id: nanoid(),
-            name,
-            filePath: note.filePath,
-            updated: Date.now()
-          })
-        }
+        const res = await shareStore.shareDoc(treeStore.openedNote!.filePath, treeStore.root?.filePath)
+        console.log('res', res)
+        // shareApi.shareDoc()
+        // const record = await db.shareNote.where('filePath').equals(note.filePath).first()
+        // const name = record ? record.name : `doc/${nid()}.html`
+        // await window.api.service.uploadDoc({
+        //   name: name,
+        //   content: html,
+        //   filePath: treeStore.openedNote!.filePath,
+        //   json: treeStore.schemaMap.get(treeStore.openedNote!)?.state || []
+        // })
+        // if (record) {
+        //   await db.shareNote.where('filePath').equals(note.filePath).modify({
+        //     updated: Date.now()
+        //   })
+        // } else {
+        //   await db.shareNote.add({
+        //     id: nanoid(),
+        //     name,
+        //     filePath: note.filePath,
+        //     updated: Date.now()
+        //   })
+        // }
         setState({refresh: !state.refresh})
-        shareSuccess(configStore.serviceConfig!.domain + '/' + name)
+        shareSuccess(shareStore.serviceConfig!.domain + '/' + name)
       } catch (e: any) {
         message$.next({
           type: 'error',
@@ -160,7 +162,7 @@ export const Server = observer(() => {
                 <>
                   <Button
                     type={'text'} icon={<DatabaseOutlined />}
-                    disabled={!configStore.serviceConfig}
+                    disabled={!shareStore.serviceConfig}
                     onClick={() => {
                       setState({mask: true, openRecord: true})
                     }}
@@ -175,7 +177,7 @@ export const Server = observer(() => {
                   label: 'Share Note',
                   children: (
                     <div className={'relative'}>
-                      {!!configStore.serviceConfig &&
+                      {!!shareStore.serviceConfig &&
                         <Button
                           className={'absolute right-0 -top-2'}
                           type={'link'}
@@ -187,13 +189,13 @@ export const Server = observer(() => {
                       }
                       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                         <Net className={'w-5 h-5 fill-gray-500'}/>
-                        <span className={'ml-2'}>{configStore.serviceConfig ? 'Synchronize current note to service' : 'Share the current note to your own service'}</span>
+                        <span className={'ml-2'}>{shareStore.serviceConfig ? 'Synchronize current note to service' : 'Build your own web service'}</span>
                       </div>
-                      {!configStore.serviceConfig &&
+                      {!shareStore.serviceConfig &&
                         <>
-                          <div className={'text-center text-[13px] mt-4 text-gray-500'}>
-                            You can use it to synchronize the generated documents to your own server or cloud storage for easy sharing on the internet, please refer to the
-                            <a className={'link mx-0.5'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>guide</a>for details.
+                          <div className={'text-center text-[13px] mt-3 text-gray-500'}>
+                            If you have your own server, you can set up your own web service in 5 minutes by installing a simple service program.<br/>
+                            It helps you share markdown docs, folders and backup files (in development). <a className={'link mx-0.5'} href={'https://pb.bluemd.me/official/book/docs/share'} target={'_blank'}>guide</a>for details.
                           </div>
                           <Button
                             block={true} className={'mt-4'}
@@ -205,7 +207,7 @@ export const Server = observer(() => {
                           </Button>
                         </>
                       }
-                      {!!configStore.serviceConfig &&
+                      {!!shareStore.serviceConfig &&
                         <div className={'mt-4'}>
                           <Space.Compact className={'w-full'}>
                             <Input
@@ -219,13 +221,13 @@ export const Server = observer(() => {
                                   type="default"
                                   icon={<CopyOutlined/>}
                                   className={'relative hover:z-10'}
-                                  onClick={() => copyDocUrl(`${configStore.serviceConfig?.domain}/${state.curDoc!.name}`)}
+                                  onClick={() => copyDocUrl(`${shareStore.serviceConfig?.domain}/${state.curDoc!.name}`)}
                                 />
                                 <Button
                                   type={'default'}
                                   className={'relative hover:z-10'}
                                   onClick={() => {
-                                    window.open(`${configStore.serviceConfig?.domain}/${state.curDoc!.name}`)
+                                    window.open(`${shareStore.serviceConfig?.domain}/${state.curDoc!.name}`)
                                   }}
                                   icon={<LinkOutlined/>}
                                 />
@@ -233,7 +235,7 @@ export const Server = observer(() => {
                                   doc={state.curDoc!}
                                   onRemove={async () => {
                                     await window.api.service.deleteDoc(state.curDoc!.name, state.curDoc!.filePath)
-                                    await db.shareNote.where('filePath').equals(state.curDoc!.filePath).delete()
+                                    // await db.shareNote.where('filePath').equals(state.curDoc!.filePath).delete()
                                     setState({refresh: !state.refresh})
                                   }}>
                                   <Button

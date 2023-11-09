@@ -1,11 +1,11 @@
 import {observer} from 'mobx-react-lite'
 import {Popconfirm} from 'antd'
 import {ReactNode} from 'react'
-import {IShareNote} from '../store/db'
+import {IDoc} from './model'
 
 export const RemoveShare = observer((props: {
   children: ReactNode
-  doc?: IShareNote
+  doc?: IDoc
   onRemove: () => void
 }) => {
   return (

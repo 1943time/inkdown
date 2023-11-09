@@ -1,16 +1,17 @@
-import {contextBridge, ipcRenderer, clipboard} from 'electron'
+import {contextBridge, ipcRenderer, clipboard, ipcMain} from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import {getHighlighter, Highlighter } from 'shiki'
 import {BUNDLED_LANGUAGES} from 'shiki'
 import * as fs from 'fs/promises'
 import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
-import got from 'got'
+import got, {Got} from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
 import {toUnix} from 'upath'
 import mime from 'mime-types'
 import {Service} from './service/service'
-
+import FormData from 'form-data'
+import {createReadStream} from 'fs'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
 let watchers = new Map<string, Watcher>()
@@ -25,6 +26,23 @@ const api = {
     return clipboard.readText('clipboard')
   },
   got,
+  uploadFile(options: {
+    url: string
+    domain: string
+    data: Record<string, string | number | {path: string}>
+  }, gotInstance?: Got) {
+    const form = new FormData()
+    Object.entries(options.data).forEach(item => {
+      if (typeof item[1] === 'object' && item[1].path) {
+        form.append(item[0], createReadStream(item[1].path))
+      } else {
+        form.append(item[0], item[1])
+      }
+    })
+    return (gotInstance || got).post(options.url, {
+      body: form
+    }).json()
+  },
   writeClipboardText(str: string) {
     return clipboard.writeText(str, 'clipboard')
   },

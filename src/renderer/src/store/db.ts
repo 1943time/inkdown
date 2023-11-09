@@ -1,13 +1,5 @@
 import Dexie, {Table} from 'dexie'
 import {nanoid} from 'nanoid'
-export interface Ebook {
-  id?: number
-  map?: string
-  strategy: 'auto' | 'custom'
-  name: string
-  filePath: string
-  ignorePaths?: string
-}
 
 export interface IRecent {
   id?: string
@@ -21,15 +13,6 @@ export interface IQuickOpen {
   dirPath: string
   time: number
 }
-export interface IShareNote{
-  id?: string
-  filePath: string
-  name: string
-  hash?: string
-  updated: number
-  details?: object
-}
-
 
 export interface IHistory {
   id?: string
@@ -38,20 +21,15 @@ export interface IHistory {
   updated: number
 }
 class Db extends Dexie {
-  public ebook!: Table<Ebook, number>
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
   public history!: Table<IHistory, string>
-  public shareNote!: Table<IShareNote, string>
-
   public constructor() {
     super('db')
     this.version(5).stores({
-      ebook: '++id,filePath,strategy,name,map,ignorePaths',
       recent: '&id,&filePath',
       quickOpen: '&id,filePath,dirPath',
-      history: '&id,filePath,schema,updated',
-      shareNote: '&id,&filePath,name,updated,hash,details'
+      history: '&id,filePath,schema,updated'
     })
   }
 }

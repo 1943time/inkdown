@@ -2,6 +2,7 @@ import {action, makeAutoObservable, runInAction} from 'mobx'
 import {MainApi} from '../api/main'
 import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
+import {shareStore} from '../server/store'
 
 class ConfigStore {
   visible = false
@@ -22,14 +23,15 @@ class ConfigStore {
     autoRebuild: true
   }
   timer = 0
-  serviceConfig: null | Record<any, any> = null
+  deviceId = ''
   get mas() {
     return process.mas || false
   }
 
   constructor() {
     makeAutoObservable(this, {
-      timer: false
+      timer: false,
+      deviceId: false
     })
     window.electron.ipcRenderer.on('openSet', () => {
       this.initial()
@@ -94,13 +96,7 @@ class ConfigStore {
 
   initial() {
     return new Promise(resolve => {
-      window.electron.ipcRenderer.invoke('get-service-config').then(res => {
-        if (res) {
-          runInAction(() => this.serviceConfig = res)
-        }
-      })
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
-        // console.log('res', res)
         if (res.dark) document.documentElement.classList.add('dark')
         this.config = {
           ...this.config,
@@ -114,6 +110,7 @@ class ConfigStore {
         }
         resolve(true)
       }))
+      shareStore.initial()
     })
   }
 }
