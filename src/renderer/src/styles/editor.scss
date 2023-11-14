@@ -315,6 +315,9 @@ ol.m-list {
         font-size: 12px;
       }
     }
+    &.num pre:before{
+      left: 32px;
+    }
   }
   pre{
     white-space: pre;
