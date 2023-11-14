@@ -138,8 +138,8 @@ export class EditorStore {
       let length = 0
       const children = el.children as any[] || []
       const childrenMap = children.map((e, i) => {
-        const end = length + e.text.length
-        const data = {index: i, start: length, end, length: e.text.length}
+        const end = length + (e.text?.length || 0)
+        const data = {index: i, start: length, end, length: e.text?.length || 0}
         length = end
         return data
       })

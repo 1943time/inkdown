@@ -14,6 +14,10 @@
   --md-high-line: rgba(11, 18, 24, .5);
 }
 
+body{
+  text-rendering: optimizeLegibility;
+  direction: ltr;
+}
 a {
   text-decoration: none;
 }
@@ -161,6 +165,7 @@ a {
   border-radius: 4px;
   padding: 2px 5px;
   position: relative;
+  word-break: break-word;
   top: -1px;
 }
 
@@ -300,9 +305,14 @@ ol.m-list {
     }
   }
   &.frontmatter{
+    .code-line-list{
+      top: 24px;
+      padding-top: 8px;
+      height: calc(100% - 24px);
+    }
     pre {
       position: relative;
-      padding-top: 2.3em;
+      padding-top: 32px;
       &:before{
         top:2px;
         content: 'Front Matter';
@@ -310,6 +320,7 @@ ol.m-list {
         border-bottom: 1px solid rgba(255,255,255, .1);
         color: rgba(255, 255, 255, .5);
         position: absolute;
+        z-index: 10;
         left: 0;
         padding-left: 10px;
         font-size: 12px;

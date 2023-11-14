@@ -40,6 +40,7 @@ const colors = [
 export const FloatBar = observer(() => {
   const store = useEditorStore()
   const fileMap = new Map<string, IFileItem>()
+  const inputRef = useRef<any>()
   const linkOptionsVisible = useRef(false)
   const [state, setState] = useLocalState({
     open: false,
@@ -61,7 +62,7 @@ export const FloatBar = observer(() => {
     if (!parse.path) {
       filePath = treeStore.openedNote?.filePath!
     } else {
-      filePath = isAbsolute(state.url) ? state.url : join(treeStore.root.filePath, parse.path)
+      filePath = isAbsolute(state.url) ? state.url : join(treeStore.openedNote!.filePath, '..', parse.path)
     }
     if (fileMap.get(filePath)) {
       const anchors = (treeStore.schemaMap.get(fileMap.get(filePath)!)?.state || []).filter(e => e.type === 'head')
@@ -69,6 +70,7 @@ export const FloatBar = observer(() => {
         const text = Node.string(e)
         return {label: '# ' + text, value: text}
       })})
+      inputRef.current?.focus()
     } else {
       setState({anchors: []})
     }
@@ -204,6 +206,7 @@ export const FloatBar = observer(() => {
             value={state.url}
             bordered={false}
             className={'w-full'}
+            ref={inputRef}
             autoFocus={true}
             allowClear={true}
             onDropdownVisibleChange={v => {

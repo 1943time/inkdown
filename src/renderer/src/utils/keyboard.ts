@@ -1,4 +1,4 @@
-import {TreeStore} from '../store/tree'
+import {treeStore, TreeStore} from '../store/tree'
 import {Range, Editor, Element, Transforms, Path, Node, NodeEntry, Point} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import React from 'react'
@@ -6,6 +6,7 @@ import isHotkey from 'is-hotkey'
 import {runInAction} from 'mobx'
 import {ReactEditor} from 'slate-react'
 import {parserMdToSchema} from '../editor/parser/parser'
+import {isAbsolute, join, relative} from 'path'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -114,6 +115,9 @@ export class MenuKey {
           mode: 'highest'
         })
         if (node && node[0].type === 'code') return
+        if (other && treeStore.root && isAbsolute(other) && treeStore.openedNote) {
+          other = relative(join(treeStore.openedNote.filePath, '..'), other)
+        }
         this.state.insertInlineNode(other || 'https://xxx/image.png')
         return
       }

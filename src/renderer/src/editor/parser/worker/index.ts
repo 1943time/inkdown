@@ -24,10 +24,9 @@ const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
     if (n.type === 'emphasis') leafs = leafs.concat(parseText(n.children, {...leaf, italic: true}))
     if (n.type === 'delete') leafs = leafs.concat(parseText(n.children, {...leaf, strikethrough: true}))
     if (n.type === 'link') leafs = leafs.concat(parseText(n.children, {...leaf, url: n.url}))
-    if (n.type === 'text') {
-      leafs.push({...leaf, text: n.value})
-    }
     if (n.type === 'inlineCode') leafs.push({...leaf, text: n.value, code: true})
+    // @ts-ignore
+    leafs.push({...leaf, text: n.value || ''})
   }
   return leafs
 }
@@ -163,7 +162,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {type: 'list-item', checked: n.checked, children: children}
         break
       case 'paragraph':
-        el = {type: 'paragraph', children: parserBlock(n.children, false, n)}
+        el = {type: 'paragraph', children: parserBlock(n.children?.length ? n.children : [{value: '', type: 'text'}], false, n)}
         break
       case 'inlineCode':
         el = {text:n.value, code: true}
@@ -215,13 +214,15 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
       default:
         if (n.type === 'text' && htmlTag.length) {
           el = {text: n.value}
-          for (let t of htmlTag) {
-            if (t.tag === 'code')  el.code = true
-            if (t.tag === 'i') el.italic = true
-            if (t.tag === 'b' || t.tag === 'strong') el.bold = true
-            if (t.tag === 'del') el.strikethrough = true
-            if (t.tag === 'span' && t.color) el.highColor = t.color
-            if (t.tag === 'a' && t.url) el.url = t.url
+          if (n.value) {
+            for (let t of htmlTag) {
+              if (t.tag === 'code')  el.code = true
+              if (t.tag === 'i') el.italic = true
+              if (t.tag === 'b' || t.tag === 'strong') el.bold = true
+              if (t.tag === 'del') el.strikethrough = true
+              if (t.tag === 'span' && t.color) el.highColor = t.color
+              if (t.tag === 'a' && t.url) el.url = t.url
+            }
           }
           break
         } else if (['strong', 'link', 'text', 'emphasis', 'delete', 'inlineCode'].includes(n.type)) {
@@ -234,7 +235,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             if (n.type === 'delete') leaf.strikethrough = true
             if (n.type === 'link') leaf.url = decodeURIComponent(n.url)
             // @ts-ignore
-            el = parseText(n.children, leaf)
+            el = parseText(n.children?.length ? n.children : [{value: leaf.url || ''}], leaf)
           }
         } else if (n.type === 'break') {
           el = {text: '\n'}
@@ -260,6 +261,11 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   }
   return els
 }
+
+// export const parse = (files: string[]) => {
+//   const root = parser.parse(files[0] || '')
+//   return parserBlock(root.children as any[], true)
+// }
 
 onmessage = e => {
   const files:string[] = e.data

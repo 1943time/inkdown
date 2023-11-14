@@ -53,7 +53,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     if (element.downloadUrl) {
       return
     }
-    if (!['image', 'video', 'document'].includes(type) || element.url?.startsWith('data:')) {
+    if (!['image'].includes(type) || element.url?.startsWith('data:')) {
       setState({loadSuccess: true, url: element.url})
       return
     }
