@@ -125,7 +125,6 @@ export class EditorStore {
       at: [],
       match: n => Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type),
     }))
-    console.log('nodes', nodes)
     let matchCount = 0
     const keyWord = this.search.text.toLowerCase()
     for (let n of nodes) {
