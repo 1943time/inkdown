@@ -31,14 +31,6 @@ function createWindow(initial?: WinOptions): void {
       callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
     },
   )
-  window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        'Access-Control-Allow-Origin': ['*'],
-        ...details.responseHeaders,
-      },
-    })
-  })
   window.on('enter-full-screen', () => {
     window.webContents?.send('enter-full-screen')
   })
