@@ -5,7 +5,6 @@ import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
 import dayjs from 'dayjs'
 import {CopyOutlined, DeleteOutlined, StopOutlined} from '@ant-design/icons'
-import {RemoveShare} from './RemoveShare'
 import {message$} from '../utils'
 import {IDoc} from './model'
 import {MainApi} from '../api/main'
@@ -81,18 +80,18 @@ export const Record = observer((props: {
                   }}
                   type={'link'} size={'small'}
                 />
-                <RemoveShare
-                  onRemove={async () => {
-                    await window.api.service.deleteDoc(record.name, record.filePath)
-                    // await db.shareNote.where('filePath').equals(record.filePath).delete()
-                    getList()
-                  }}>
-                  <Button
-                    className={'ml-1.5'}
-                    icon={<StopOutlined />}
-                    type={'link'} danger={true} size={'small'}
-                  />
-                </RemoveShare>
+                {/*<RemoveShare*/}
+                {/*  onRemove={async () => {*/}
+                {/*    await window.api.service.deleteDoc(record.name, record.filePath)*/}
+                {/*    // await db.shareNote.where('filePath').equals(record.filePath).delete()*/}
+                {/*    getList()*/}
+                {/*  }}>*/}
+                {/*  <Button*/}
+                {/*    className={'ml-1.5'}*/}
+                {/*    icon={<StopOutlined />}*/}
+                {/*    type={'link'} danger={true} size={'small'}*/}
+                {/*  />*/}
+                {/*</RemoveShare>*/}
               </div>
             )
           }

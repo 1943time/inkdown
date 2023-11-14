@@ -1,11 +1,11 @@
 import {observer} from 'mobx-react-lite'
 import {Alert, Button, Form, Input, Modal, Radio} from 'antd'
-import {useLocalState} from '../hooks/useLocalState'
-import {message$} from '../utils'
+import {useLocalState} from '../../hooks/useLocalState'
+import {message$} from '../../utils'
 import {useCallback, useEffect} from 'react'
 import {runInAction} from 'mobx'
-import {MainApi} from '../api/main'
-import {shareStore} from './store'
+import {MainApi} from '../../api/main'
+import {shareStore} from '../store'
 export const ServiceSet = observer((props: {
   open: boolean
   onClose: () => void

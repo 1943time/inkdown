@@ -3,6 +3,7 @@ import {configStore} from '../../store/config'
 import {createHmac} from 'crypto'
 import {IBook, IDoc, IFile} from '../model'
 import {ShareStore} from '../store'
+import {basename} from 'path'
 export class ShareApi {
   minVersion = '0.2.0'
   constructor(
@@ -16,7 +17,7 @@ export class ShareApi {
         if (this.store.serviceConfig) {
           const time = Date.now()
           const config = this.config
-          req.headers.authorization = createHmac('sha1', config.secret).update(time.toString(16) + req.url.pathname).digest('hex')
+          req.headers.authorization = this.sign(time, req.url.pathname)
           req.headers.time = String(time)
           req.headers['device-id'] = config.deviceId
         }
@@ -28,16 +29,21 @@ export class ShareApi {
       }]
     }
   })
+  private sign(time: number, path: string) {
+    return createHmac('sha1', this.config.secret).update(time.toString(16) + path).digest('hex')
+  }
   upload(data: Record<string, any>, progressCallback?: (progress: number) => void) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
       xhr.timeout = 60000
       const fileData = new FormData()
       Object.keys(data).forEach(key => fileData.append(key, data[key]))
-      document.querySelector('input')!.addEventListener('change', e => {
-        const el = e.target as HTMLInputElement
-      })
       xhr.open('POST', `${this.config.domain}/api/upload`, true)
+      const time = Date.now()
+      const path = '/api/upload'
+      xhr.setRequestHeader('Authorization', this.sign(time, path))
+      xhr.setRequestHeader('device-id', this.config.deviceId)
+      xhr.setRequestHeader('time', String(time))
       xhr.upload.addEventListener('error', reject)
       xhr.upload.addEventListener('abort', reject)
       xhr.upload.addEventListener('timeout', reject)
@@ -74,7 +80,7 @@ export class ShareApi {
     }).json<{deviceId: string}>()
   }
   getShareData() {
-    return this.http.get(`${this.config.domain}/api/bluestone?mode=shareData`).json<{
+    return this.http.get(`${this.config.domain}/api/data`).json<{
       docs: IDoc[],
       books: IBook[]
     }>()
@@ -124,7 +130,7 @@ export class ShareApi {
     docId?: string
   }) {
     return window.api.uploadFile<{name: string}>({
-      url: `${this.config.domain}/upload`,
+      url: `${this.config.domain}/api/upload`,
       data: {
         ...data,
         file: {path: data.filePath}
@@ -165,7 +171,7 @@ export class ShareApi {
         map: data.map,
         bookId: data.bookId
       }
-    }).json()
+    }).json<IBook>()
   }
   delDoc(id: string) {
     return this.http.delete(`${this.config.domain}/api/doc`, {

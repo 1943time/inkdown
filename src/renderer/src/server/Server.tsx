@@ -17,9 +17,8 @@ import {message$} from '../utils'
 import {mediaType} from '../editor/utils/dom'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
-import {ServiceSet} from './ServiceSet'
+import {ServiceSet} from './ui/ServiceSet'
 import {Record} from './Record'
-import {RemoveShare} from './RemoveShare'
 import {exportToHtmlString} from '../editor/output/html'
 import {IDoc} from './model'
 import {shareStore} from './store'
@@ -231,19 +230,19 @@ export const Server = observer(() => {
                                   }}
                                   icon={<LinkOutlined/>}
                                 />
-                                <RemoveShare
-                                  doc={state.curDoc!}
-                                  onRemove={async () => {
-                                    await window.api.service.deleteDoc(state.curDoc!.name, state.curDoc!.filePath)
-                                    // await db.shareNote.where('filePath').equals(state.curDoc!.filePath).delete()
-                                    setState({refresh: !state.refresh})
-                                  }}>
-                                  <Button
-                                    className={'relative hover:z-10'}
-                                    icon={<StopOutlined/>}
-                                  >
-                                  </Button>
-                                </RemoveShare>
+                                {/*<RemoveShare*/}
+                                {/*  doc={state.curDoc!}*/}
+                                {/*  onRemove={async () => {*/}
+                                {/*    await window.api.service.deleteDoc(state.curDoc!.name, state.curDoc!.filePath)*/}
+                                {/*    // await db.shareNote.where('filePath').equals(state.curDoc!.filePath).delete()*/}
+                                {/*    setState({refresh: !state.refresh})*/}
+                                {/*  }}>*/}
+                                {/*  <Button*/}
+                                {/*    className={'relative hover:z-10'}*/}
+                                {/*    icon={<StopOutlined/>}*/}
+                                {/*  >*/}
+                                {/*  </Button>*/}
+                                {/*</RemoveShare>*/}
                               </> :
                               <Button
                                 icon={<LinkOutlined/>}

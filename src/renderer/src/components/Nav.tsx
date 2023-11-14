@@ -5,7 +5,7 @@ import {Fragment, useMemo} from 'react'
 import {MainApi} from '../api/main'
 import {Update} from './Update'
 import {isMac} from '../utils'
-import {Server} from '../server/Server'
+import {Share} from '../server/Share'
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openedNote) return ['']
@@ -68,7 +68,7 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-400/70 space-x-1 text-gray-500'}>
           <Update/>
-          <Server/>
+          <Share/>
           <div
             className={'flex items-center justify-center p-1 group'}
             onClick={() => MainApi.openToolMenu(treeStore.openedNote?.filePath)}

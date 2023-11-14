@@ -66,6 +66,11 @@ export class BsFile {
       } else {
         try {
           let res: {name: string, message?: string}
+          console.log('upload', {
+            filePath: s.filePath,
+            docId: this.currentDocId,
+            bookId: this.currentBookId
+          })
           res = await this.api.uploadDocFile({
             filePath: s.filePath,
             docId: this.currentDocId,
