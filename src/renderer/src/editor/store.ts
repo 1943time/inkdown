@@ -125,6 +125,7 @@ export class EditorStore {
       at: [],
       match: n => Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type),
     }))
+    console.log('nodes', nodes)
     let matchCount = 0
     const keyWord = this.search.text.toLowerCase()
     for (let n of nodes) {
@@ -138,8 +139,8 @@ export class EditorStore {
       let length = 0
       const children = el.children as any[] || []
       const childrenMap = children.map((e, i) => {
-        const end = length + e.text.length
-        const data = {index: i, start: length, end, length: e.text.length}
+        const end = length + (e.text?.length || 0)
+        const data = {index: i, start: length, end, length: e.text?.length || 0}
         length = end
         return data
       })
