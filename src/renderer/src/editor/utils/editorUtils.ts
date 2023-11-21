@@ -67,16 +67,22 @@ export class EditorUtils {
   }
 
   static reset(editor: Editor, insertNodes?: any[], force?: boolean | History) {
-    const nodes = Editor.nodes(editor, {
+    const nodes = Array.from(Editor.nodes(editor, {
       at: [],
       match: n => Element.isElement(n),
       mode: 'highest',
       reverse: true
-    })
-    if (!insertNodes) insertNodes = [EditorUtils.p]
-    for (let n of Array.from(nodes)) {
-      Transforms.delete(editor, {at: n[1]})
+    }))
+    if (nodes.length) {
+      Transforms.delete(editor, {
+        at: {
+          anchor: Editor.start(editor, nodes[nodes.length - 1][1]),
+          focus: Editor.end(editor, nodes[0][1])
+        }
+      })
+      Transforms.delete(editor, {at: [0]})
     }
+    if (!insertNodes) insertNodes = [EditorUtils.p]
     Transforms.insertNodes(editor, insertNodes, {at: [0]})
     if (force) {
       Transforms.select(editor, Editor.start(editor, [0]))
