@@ -1,22 +1,21 @@
 import {observer} from 'mobx-react-lite'
 import Net from '../../icons/Net'
-import {Fragment, useCallback, useRef, useState} from 'react'
+import {Fragment, useCallback} from 'react'
 import IBook from '../../icons/IBook'
 import {IBook as ShareBook} from '../model'
-import {Button, Dropdown, Input, Modal, Tooltip} from 'antd'
+import {Button, Dropdown, Modal, Tooltip} from 'antd'
 import {
   BookOutlined,
-  CopyOutlined, LoadingOutlined,
-  LockOutlined,
+  CopyOutlined,
+  LoadingOutlined,
   MoreOutlined,
   SettingOutlined,
   StopOutlined,
-  SyncOutlined, UnlockOutlined
+  SyncOutlined
 } from '@ant-design/icons'
 import {treeStore} from '../../store/tree'
 import {useLocalState} from '../../hooks/useLocalState'
 import {action} from 'mobx'
-import {message$} from '../../utils'
 import {shareStore} from '../store'
 import {NotLogged} from './NotLogged'
 import {EBook} from './Ebook'
@@ -27,12 +26,11 @@ export const BookItem = observer((props: {
   onMask: (mask: boolean) => void
   onRefresh: () => void
   onShareSuccess: (url: string) => void
+  onOpenSetting: () => void
 }) => {
-  const passwordRef = useRef('')
   const [state, setState] = useLocalState({
     ebookOpen: false,
-    currentRootPath: '',
-    selectBook: undefined as undefined | ShareBook
+    currentRootPath: ''
   })
   const [modal, context] = Modal.useModal()
   const closeMask = useCallback(() => {
@@ -41,7 +39,7 @@ export const BookItem = observer((props: {
     })
   }, [])
   return (
-    <div>
+    <div className={'relative'}>
       {context}
       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
         <Net className={'w-5 h-5 fill-gray-500'}/>
@@ -50,7 +48,13 @@ export const BookItem = observer((props: {
         </span>
       </div>
       {!shareStore.serviceConfig &&
-        <NotLogged onSetupVisible={props.onMask}/>
+        <NotLogged onOpen={props.onOpenSetting}/>
+      }
+      {!!shareStore.serviceConfig &&
+        <SettingOutlined
+          className={'link absolute right-2 top-0'}
+          onClick={props.onOpenSetting}
+        />
       }
       {!!props.books.length &&
         <div className={'rounded dark:bg-black/20 bg-gray-200/50 py-1 mt-3 px-2 max-h-[200px] overflow-y-auto'}>
@@ -98,56 +102,9 @@ export const BookItem = observer((props: {
                           }
                         },
                         {
-                          label: b.password ? 'Cancel password access' : 'Enable Password Access', key: 'password', icon: b.password ? <UnlockOutlined/> : <LockOutlined/>,
-                          onClick: () =>  {
-                            props.onMask(true)
-                            if (b.password) {
-                              modal.confirm({
-                                title: 'Note',
-                                maskClosable: true,
-                                content: 'Confirm to cancel password access',
-                                onOk: () => {
-                                  return shareStore.api.unlock({
-                                    bookId: b.id
-                                  }).then(action(() => {
-                                    b.password = false
-                                    message$.next({
-                                      type: 'info',
-                                      content: 'Password access is canceled'
-                                    })
-                                  })).finally(closeMask)
-                                },
-                                onCancel: closeMask
-                              })
-                            } else {
-                              passwordRef.current = ''
-                              modal.confirm({
-                                title: 'Enable password access',
-                                width: 400,
-                                maskClosable: true,
-                                content: <Input onChange={e => passwordRef.current = e.target.value} placeholder={'Enter password'}/>,
-                                onOk: () => {
-                                  if (!passwordRef.current) return Promise.reject()
-                                  return shareStore.api.encrypt({
-                                    password: passwordRef.current,
-                                    bookId: b.id
-                                  }).then(action(() => {
-                                    b.password = true
-                                    message$.next({
-                                      type: 'info',
-                                      content: 'Password access is turned on'
-                                    })
-                                  })).finally(closeMask)
-                                },
-                                onCancel: closeMask
-                              })
-                            }
-                          }
-                        },
-                        {
                           label: 'Settings', key: 'setting', icon: <SettingOutlined/>,
                           onClick: () => {
-                            setState({ebookOpen: true, currentRootPath: '', selectBook: b})
+                            setState({ebookOpen: true, currentRootPath: b.filePath})
                             props.onMask(true)
                           }
                         },
@@ -160,7 +117,7 @@ export const BookItem = observer((props: {
                               title: 'Note',
                               content: `Confirm to remove shared book ${b.name}`,
                               onOk: () => {
-                                return shareStore.api.delBook(b.id).then(props.onRefresh).finally(closeMask)
+                                return shareStore.delBook(b).then(props.onRefresh).finally(closeMask)
                               },
                               onCancel: closeMask
                             })
@@ -182,29 +139,29 @@ export const BookItem = observer((props: {
           )}
         </div>
       }
-      <div className={'mt-3 flex space-x-5'}>
-        <Button
-          onClick={() => {
-            setState({ebookOpen: true, currentRootPath: treeStore.root?.filePath, selectBook: undefined})
-            props.onMask(true)
-          }}
-          icon={<BookOutlined/>}
-          disabled={!shareStore.serviceConfig}
-          className={'flex-1'}
-          block={true}>
-          <span>Create Books</span>
-        </Button>
-      </div>
+      {!!shareStore.serviceConfig &&
+        <div className={'mt-3 flex space-x-5'}>
+          <Button
+            onClick={() => {
+              setState({ebookOpen: true, currentRootPath: treeStore.root?.filePath})
+              props.onMask(true)
+            }}
+            icon={<BookOutlined/>}
+            disabled={!shareStore.serviceConfig}
+            className={'flex-1'}
+            block={true}>
+            <span>Create Books</span>
+          </Button>
+        </div>
+      }
       <EBook
         open={state.ebookOpen}
         defaultRootPath={state.currentRootPath}
-        selectBook={state.selectBook}
         onClose={() => {
           setState({ebookOpen: false})
           closeMask()
         }}
         onSave={book => {
-          shareStore.bookMap.set(book.path, book)
           props.onShareSuccess(`${shareStore.serviceConfig!.domain}/book/${book.path}`)
           props.onRefresh()
         }}

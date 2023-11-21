@@ -33,6 +33,9 @@ export const MainApi = {
   getServerConfig() {
     return ipcRenderer.invoke('getServerConfig')
   },
+  saveServerConfig(config: any) {
+    return ipcRenderer.invoke('saveServerConfig', config)
+  },
   relaunch() {
     ipcRenderer.send('relaunch')
   },

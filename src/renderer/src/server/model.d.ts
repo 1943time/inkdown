@@ -20,7 +20,6 @@ export interface IFile {
 
 export interface IBook {
   id: string
-  password: boolean
   path: string
   name: string
   filePath: string
@@ -31,4 +30,10 @@ export interface IBook {
     chapters?: any[]
     ignorePaths?: string
   }
+}
+
+export interface IDevice {
+  id: string
+  name: string
+  created: string
 }

@@ -91,6 +91,9 @@ devDependencies:
   antd:
     specifier: ^5.8.5
     version: 5.8.5(react-dom@18.2.0)(react@18.2.0)
+  compare-versions:
+    specifier: ^6.1.0
+    version: 6.1.0
   dayjs:
     specifier: ^1.11.7
     version: 1.11.9
@@ -2126,6 +2129,10 @@ packages:
   /compare-version@0.1.2:
     resolution: {integrity: sha512-pJDh5/4wrEnXX/VWRZvruAGHkzKdr46z11OlTPN+VrATlWWhSKewNCJ1futCO5C7eJB3nPMFZA1LeYtcFboZ2A==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /compare-versions@6.1.0:
+    resolution: {integrity: sha512-LNZQXhqUvqUTotpZ00qLSaify3b4VFD588aRr8MKFw4CMUr98ytzCW5wDH5qx/DEY5kCDXcbcRuCqL0szEf2tg==}
     dev: true
 
   /compute-scroll-into-view@1.0.20:

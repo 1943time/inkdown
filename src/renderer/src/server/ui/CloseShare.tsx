@@ -16,8 +16,15 @@ export const CloseShare = observer((props: {
       description="Network inaccessible after removal"
       placement={'bottom'}
       onConfirm={() => {
-        if (props.doc) return shareStore.api.delDoc(props.doc.id).then(props.onRemove)
-        if (props.book) return shareStore.api.delBook(props.book.id).then(props.onRemove)
+        if (props.doc) {
+          shareStore.api.delDoc(props.doc.id).then(() => {
+            shareStore.docMap.delete(props.doc!.filePath)
+            props.onRemove()
+          })
+        }
+        if (props.book) return shareStore.delBook(props.book).then(() => {
+          props.onRemove()
+        })
         return Promise.resolve()
       }}
       okText="Yes"

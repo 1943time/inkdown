@@ -1,11 +1,12 @@
 import {observer} from 'mobx-react-lite'
-import {Alert, Button, Form, Input, Modal, Radio} from 'antd'
+import {Alert, Button, Form, Input, Modal, Popconfirm, Radio, Space} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {message$} from '../../utils'
 import {useCallback, useEffect} from 'react'
-import {runInAction} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {MainApi} from '../../api/main'
 import {shareStore} from '../store'
+import {configStore} from '../../store/config'
 export const ServiceSet = observer((props: {
   open: boolean
   onClose: () => void
@@ -20,7 +21,6 @@ export const ServiceSet = observer((props: {
       setState({error: ''})
       form.resetFields()
       window.electron.ipcRenderer.invoke('getServerConfig').then(res => {
-        console.log('res', res)
         if (res) {
           form.setFieldsValue(res)
         } else {
@@ -36,9 +36,13 @@ export const ServiceSet = observer((props: {
       name: value.name,
       machineId,
       domain: value.domain,
-      secret: value.secret
+      secret: value.secret,
+      preferences: {
+        codeTabSize: configStore.config.codeTabSize,
+        codeTheme: configStore.config.codeTheme
+      }
     }).catch(e => {
-      if (e.response.body) {
+      if (e.response?.body) {
         const data = JSON.parse(e.response.body)
         throw new Error(data?.message)
       }
@@ -52,6 +56,7 @@ export const ServiceSet = observer((props: {
     }
     await window.electron.ipcRenderer.invoke('saveServerConfig', config)
     setState({error: ''})
+    shareStore.initial()
     message$.next({
       type: 'success',
       content: 'Setup successful'
@@ -61,28 +66,60 @@ export const ServiceSet = observer((props: {
     })
     props.onClose()
   }, [])
+
+  const save = useCallback(() => {
+    form.validateFields().then(async value => {
+      value.domain = value.domain.replace(/\/+$/,'')
+      setState({loading: true})
+      try {
+        await setSuccess(value)
+      } catch (e: any) {
+        console.error(e)
+        setState({error: e.toString()})
+        MainApi.saveServerConfig(null)
+      } finally {
+        setState({loading: false})
+      }
+    })
+  }, [])
+
   return (
     <Modal
       open={props.open}
       width={700}
       title={'Shared Service Settings'}
       confirmLoading={state.loading}
-      onOk={async () => {
-        form.validateFields().then(async value => {
-          value.domain = value.domain.replace(/\/+$/,'')
-          setState({loading: true})
-          try {
-            await setSuccess(value)
-          } catch (e: any) {
-            console.error(e)
-            setState({error: e.toString()})
-            window.electron.ipcRenderer.invoke('set-service-config', null)
-          } finally {
-            setState({loading: false})
-          }
-        })
-      }}
       onCancel={props.onClose}
+      footer={(
+        <Space className={'mt-4'}>
+          <Button onClick={props.onClose}>{'Cancel'}</Button>
+          {!!shareStore.serviceConfig &&
+            <Popconfirm
+              title="Note"
+              description="Network services will be suspended after reset"
+              placement={'bottom'}
+              onConfirm={() => {
+                return shareStore.reset().then(() => form.resetFields())
+              }}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                danger={true}
+              >
+                Reset
+              </Button>
+            </Popconfirm>
+          }
+          <Button
+            type={'primary'}
+            loading={state.loading}
+            onClick={save}
+          >
+            Connect and save
+          </Button>
+        </Space>
+      )}
     >
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}} className={'mt-4'}>
         <Form.Item

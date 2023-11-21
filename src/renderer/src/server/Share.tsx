@@ -1,17 +1,15 @@
 import {observer} from 'mobx-react-lite'
 import {
   CopyOutlined,
+  DatabaseOutlined,
   HistoryOutlined,
   LinkOutlined,
-  LockOutlined,
-  SendOutlined,
+  SendOutlined, SettingOutlined,
   StopOutlined,
-  SyncOutlined,
-  UnlockOutlined
+  SyncOutlined
 } from '@ant-design/icons'
-import {Alert, Button, Input, notification, Popconfirm, Popover, Space, Tabs} from 'antd'
+import {Button, Input, Modal, notification, Popover, Progress, Space, Tabs} from 'antd'
 import {useCallback, useEffect, useMemo} from 'react'
-import {action} from 'mobx'
 import {nanoid} from 'nanoid'
 import Net from '../icons/Net'
 import {useLocalState} from '../hooks/useLocalState'
@@ -19,7 +17,6 @@ import {treeStore} from '../store/tree'
 import {message$} from '../utils'
 import {mediaType} from '../editor/utils/dom'
 import {BookItem} from './ui/BookItem'
-import {CancelLock, Lock} from './ui/Lock'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
 import {IBook} from './model'
@@ -27,6 +24,9 @@ import {shareStore} from './store'
 import {NotLogged} from './ui/NotLogged'
 import {CloseShare} from './ui/CloseShare'
 import {ShareData} from './ui/ShareData'
+import {action} from 'mobx'
+import {ServiceSet} from './ui/ServiceSet'
+
 export const shareSuccess$ = new Subject<string>()
 export const Share = observer(() => {
   const [state, setState] = useLocalState({
@@ -34,7 +34,6 @@ export const Share = observer(() => {
     syncing: false,
     tab: 'doc',
     refresh: false,
-    inputPassword: '',
     books: [] as IBook[],
     mask: false,
     showData: false,
@@ -48,11 +47,6 @@ export const Share = observer(() => {
 
   useEffect(() => {
     if (state.popOpen) {
-      setState({inputPassword: ''})
-      // shareStore.initial().then(() => {
-      //   setState({refresh: !state.refresh})
-      //   getBooks()
-      // })
       getBooks()
       setState({refresh: !state.refresh})
     }
@@ -138,7 +132,7 @@ export const Share = observer(() => {
               }}
               tabBarExtraContent={(
                 <Button
-                  type={'text'} icon={<HistoryOutlined/>}
+                  type={'text'} icon={<DatabaseOutlined/>}
                   onClick={() => {
                     if (!shareStore.serviceConfig) {
                       message$.next({
@@ -150,7 +144,7 @@ export const Share = observer(() => {
                     }
                   }}
                 >
-                  Share Data
+                  Data
                 </Button>
               )}
               items={[
@@ -158,104 +152,79 @@ export const Share = observer(() => {
                   key: 'doc',
                   label: 'Note',
                   children: (
-                    <div>
+                    <div className={'relative'}>
+                      {!!shareStore.serviceConfig &&
+                        <SettingOutlined
+                          className={'link absolute right-2 top-0'}
+                          onClick={() => {
+                            setState({mask: true, openSetting: true})
+                          }}
+                        />
+                      }
                       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                         <Net className={'w-5 h-5 fill-gray-500'}/>
                         <span className={'ml-2'}>{'Share the current note'}</span>
                       </div>
                       {!shareStore.serviceConfig &&
-                        <NotLogged onSetupVisible={visible => {
-                          if (visible) {
-                            setState({mask: true})
-                          } else {
-                            closeMask()
-                          }
-                        }}/>
+                        <NotLogged onOpen={() => setState({mask: true, openSetting: true})}/>
                       }
-                      <div className={'mt-4'}>
-                        <Space.Compact className={'w-full'}>
-                          {curDoc &&
-                            <>
-                              {curDoc.password ?
-                                <CancelLock
-                                  doc={curDoc}
-                                  onSuccess={action(() => curDoc.password = false)}
-                                >
+                      {!!shareStore.serviceConfig &&
+                        <div className={'mt-4'}>
+                          <Space.Compact className={'w-full'}>
+                            <Input
+                              disabled={true}
+                              className={'cursor-default'}
+                              value={`${shareStore.serviceConfig?.domain || 'https://xxx'}/${curDoc ? `doc/${curDoc.name}` : 'Xxx'}`}
+                            />
+                            {curDoc ?
+                              <>
+                                <Button
+                                  type="default"
+                                  icon={<CopyOutlined/>}
+                                  className={'relative hover:z-10'}
+                                  onClick={() => copyDocUrl(`${shareStore.serviceConfig?.domain}/doc/${curDoc.name}`)}
+                                />
+                                <Button
+                                  type={'default'}
+                                  className={'relative hover:z-10'}
+                                  onClick={() => {
+                                    window.open(`${shareStore.serviceConfig?.domain}/doc/${curDoc.name}`)
+                                  }}
+                                  icon={<LinkOutlined/>}
+                                />
+                                <CloseShare doc={curDoc} onRemove={() => {
+                                  setState({refresh: !state.refresh})
+                                }}>
                                   <Button
-                                    icon={<UnlockOutlined className={'text-amber-500'}/>}
+                                    className={'relative hover:z-10'}
+                                    icon={<StopOutlined/>}
                                   >
                                   </Button>
-                                </CancelLock>
-                                :
-                                (
-                                  <Lock
-                                    onSuccess={action(() => {
-                                      curDoc.password = true
-                                      setState({refresh: !state.refresh})
-                                    })}>
-                                    <Button
-                                      icon={<LockOutlined/>}
-                                    >
-                                    </Button>
-                                  </Lock>
-                                )
-                              }
-                            </>
-                          }
-                          <Input
-                            disabled={true}
-                            className={'cursor-default'}
-                            value={`${shareStore.serviceConfig?.domain || 'https://xxx'}/${curDoc ? `doc/${curDoc.name}` : 'Xxx'}`}
-                          />
-                          {curDoc ?
-                            <>
+                                </CloseShare>
+                              </> :
                               <Button
-                                type="default"
-                                icon={<CopyOutlined/>}
-                                className={'relative hover:z-10'}
-                                onClick={() => copyDocUrl(`${shareStore.serviceConfig?.domain}/doc/${curDoc.name}`)}
-                              />
-                              <Button
-                                type={'default'}
-                                className={'relative hover:z-10'}
-                                onClick={() => {
-                                  window.open(`${shareStore.serviceConfig?.domain}/doc/${curDoc.name}`)
-                                }}
                                 icon={<LinkOutlined/>}
-                              />
-                              <CloseShare doc={curDoc} onRemove={() => {
-                                shareStore.docMap.delete(curDoc.filePath)
-                                setState({refresh: !state.refresh})
-                              }}>
-                                <Button
-                                  className={'relative hover:z-10'}
-                                  icon={<StopOutlined/>}
-                                >
-                                </Button>
-                              </CloseShare>
-                            </> :
+                                disabled={!shareStore.serviceConfig || mediaType(treeStore.openedNote?.filePath || '') !== 'markdown'}
+                                loading={state.syncing}
+                                onClick={share}
+                              >
+                                Create
+                              </Button>
+                            }
+                          </Space.Compact>
+                          {curDoc &&
                             <Button
-                              icon={<LinkOutlined/>}
-                              disabled={!shareStore.serviceConfig || mediaType(treeStore.openedNote?.filePath || '') !== 'markdown'}
+                              block={true}
                               loading={state.syncing}
+                              className={'mt-6'}
                               onClick={share}
+                              icon={<SyncOutlined/>}
                             >
-                              Create
+                              Update to Share
                             </Button>
                           }
-                        </Space.Compact>
-                        {curDoc &&
-                          <Button
-                            block={true}
-                            loading={state.syncing}
-                            className={'mt-6'}
-                            onClick={share}
-                            icon={<SyncOutlined/>}
-                          >
-                            Update to Share
-                          </Button>
-                        }
-                      </div>
+                        </div>
+                      }
                     </div>
                   )
                 },
@@ -266,6 +235,7 @@ export const Share = observer(() => {
                     <BookItem
                       books={state.books}
                       onCopy={copyDocUrl}
+                      onOpenSetting={() => setState({mask: true, openSetting: true})}
                       onShareSuccess={shareSuccess}
                       onRefresh={getBooks}
                       onMask={mask => setState({mask})}
@@ -280,6 +250,7 @@ export const Share = observer(() => {
         trigger="click" placement={'bottomRight'} open={state.popOpen}
         onOpenChange={v => {
           if ((!v && !state.mask) || v) {
+            treeStore.currentTab.store.saveDoc$.next(null)
             setState({popOpen: v})
           }
         }}
@@ -291,6 +262,13 @@ export const Share = observer(() => {
           />
         </div>
       </Popover>
+      <ServiceSet
+        open={state.openSetting}
+        onClose={() => {
+          setState({openSetting: false})
+          closeMask()
+        }}
+      />
       <ShareData
         open={state.showData}
         onClose={() => {
@@ -299,6 +277,49 @@ export const Share = observer(() => {
           getBooks()
         }}
       />
+      <Modal
+        title={`Update tips`}
+        width={600}
+        onCancel={action(() => shareStore.updateTips = false)}
+        open={shareStore.updateTips}
+        okText={'Details'}
+        onOk={action(() => {
+          shareStore.updateTips = false
+        })}
+        footer={(
+          <Space className={'mt-4'}>
+            <Button onClick={action(() => {
+              shareStore.updateTips = false
+            })}>{'Cancel'}</Button>
+            <Button onClick={action(() => {
+              shareStore.updateTips = false
+              localStorage.setItem('ignore-service-version', shareStore.remoteVersion)
+            })}>Ignore this version</Button>
+            <Button
+              type={'primary'}
+              onClick={action(() => {
+                shareStore.updateTips = false
+              })}
+            >
+              Details
+            </Button>
+          </Space>
+        )}
+      >
+        <div>
+          bbbbbbbbbbbbbbbbbb
+        </div>
+        {/*<div*/}
+        {/*  dangerouslySetInnerHTML={{__html: state.updateData.releaseNotes}}*/}
+        {/*  className={'py-2'}*/}
+        {/*/>*/}
+        {/*{state.startUpdate &&*/}
+        {/*  <div className={'flex items-center mt-4'}>*/}
+        {/*    <span className={'mr-4'}>{'Updating'}</span>*/}
+        {/*    <Progress percent={state.percent} className={'flex-1 mb-0'}/>*/}
+        {/*  </div>*/}
+        {/*}*/}
+      </Modal>
     </>
   )
 })

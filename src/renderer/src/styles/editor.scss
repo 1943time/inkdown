@@ -317,13 +317,13 @@ ol.m-list {
         top:2px;
         content: 'Front Matter';
         width: 100%;
-        border-bottom: 1px solid rgba(255,255,255, .1);
         color: rgba(255, 255, 255, .5);
         position: absolute;
         z-index: 10;
         left: 0;
         padding-left: 10px;
         font-size: 12px;
+        @apply border-b border-black/50;
       }
     }
   }
@@ -379,6 +379,7 @@ ol.m-list {
   .code-line {
     padding-right: 20px;
     position: relative;
+    height: 1.62em;
     //width: calc(100% + 24px);
   }
 

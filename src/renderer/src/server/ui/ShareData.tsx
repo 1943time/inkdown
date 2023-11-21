@@ -1,28 +1,23 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Modal, Pagination, Table, Tabs, Tooltip} from 'antd'
+import {Button, Checkbox, Modal, Pagination, Table, Tabs, Tooltip} from 'antd'
 import {useCallback, useEffect} from 'react'
 import dayjs from 'dayjs'
 import {
-  CloudUploadOutlined, FileTextOutlined,
-  LockOutlined,
-  QuestionCircleOutlined,
-  StopOutlined, SyncOutlined,
-  UnlockOutlined
+  CloudUploadOutlined, DeleteOutlined,
+  FileTextOutlined,
+  QuestionCircleOutlined, SettingOutlined, StarOutlined,
+  StopOutlined,
+  SyncOutlined
 } from '@ant-design/icons'
-import {action, runInAction} from 'mobx'
-// import {sizeUnit} from '../utils'
 import {basename} from 'path'
-// import {Book} from './Ebook'
 import {default as BookIcon} from '../../icons/IBook'
-import {act} from 'react-dom/test-utils'
-import {IBook, IDoc, IFile} from '../model'
+import {IBook, IDevice, IDoc, IFile} from '../model'
 import {useLocalState} from '../../hooks/useLocalState'
 import {shareStore} from '../store'
-import {treeStore} from '../../store/tree'
 import {shareSuccess$} from '../Share'
-import {CancelLock, Lock} from './Lock'
 import {CloseShare} from './CloseShare'
-import {sizeUnit} from '../../utils'
+import {message$, sizeUnit} from '../../utils'
+import {ServiceSet} from './ServiceSet'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -48,7 +43,7 @@ const Sync = observer((props: {
     } finally {
       setState({syncing: false})
     }
-  }, [])
+  }, [props.doc, props.book])
   return (
     <Button
       type={'link'} size={'small'}
@@ -65,7 +60,7 @@ export const ShareData = observer((props: {
 }) => {
   const [modal, contextHolder] = Modal.useModal()
   const [state, setState] = useLocalState({
-    activeKey: 'doc' as 'doc' | 'book' | 'file',
+    activeKey: 'doc' as 'doc' | 'book' | 'file' | 'device',
     docs: [] as IDoc[],
     docTotal: 0,
     books: [] as IBook[],
@@ -73,68 +68,75 @@ export const ShareData = observer((props: {
     bookPage: 1,
     docPage: 1,
     filePage: 1,
+    devicePage: 1,
+    deviceTotal: 0,
+    devices: [] as IDevice[],
     files: [] as IFile[],
+    all: false,
     fileTotal: 0,
     fileTotalSize: 0,
-    loading: false
+    loading: false,
+    openServiceSet: false
   })
-  const getDocs = useCallback( () => {
+  const getDocs = useCallback(() => {
     setState({loading: true})
     shareStore.api.getDocs({
       page: state.docPage,
-      pageSize: 10
+      pageSize: 10,
+      all: state.all ? true : undefined
     }).then(res => {
-      setState({docs: res.list, docTotal: res.count})
+      setState({docs: res.list, docTotal: res.total})
     }).finally(() => setState({loading: false}))
   }, [])
 
-  const getBooks = useCallback( () => {
+  const getDevices = useCallback(() => {
     setState({loading: true})
-    shareStore.api.getBooks().then(res => {
-      setState({books: res.list, bookTotal: res.count})
+    shareStore.api.getDevices({
+      page: state.devicePage,
+      pageSize: 10,
+    }).then(res => {
+      setState({devices: res.list, deviceTotal: res.total})
     }).finally(() => setState({loading: false}))
   }, [])
 
-  const getFiles = useCallback( () => {
+  const getBooks = useCallback(() => {
+    setState({loading: true})
+    shareStore.api.getBooks({
+      page: state.bookPage,
+      pageSize: 10,
+      all: state.all ? true : undefined
+    }).then(res => {
+      setState({books: res.list, bookTotal: res.total})
+    }).finally(() => setState({loading: false}))
+  }, [])
+
+  const getFiles = useCallback(() => {
     setState({loading: true})
     shareStore.api.getFiles({
       page: state.filePage,
-      pageSize: 10
+      pageSize: 10,
+      all: state.all ? true : undefined
     }).then(res => {
       setState({files: res.list})
     }).finally(() => setState({loading: false}))
   }, [])
-
-  const getFileData = useCallback(() => {
-    shareStore.api.getFileData().then(res => {
-      setState({fileTotal: res.total, fileTotalSize: res.size})
+  const initial = useCallback(() => {
+    setState({
+      docPage: 1,
+      docTotal: 0,
+      bookPage: 1,
+      bookTotal: 0,
+      filePage: 1,
+      fileTotal: 0
     })
+    if (state.activeKey === 'doc') getDocs()
+    if (state.activeKey === 'book') getBooks()
+    if (state.activeKey === 'file') getFiles()
+    if (state.activeKey === 'device') getDevices()
   }, [])
-
   useEffect(() => {
     if (props.open) {
-      setState({
-        docPage: 1,
-        docs: [],
-        docTotal: 0,
-        bookPage: 1,
-        bookTotal: 0,
-        books: [],
-        filePage: 1,
-        files: [],
-        fileTotal: 0,
-        fileTotalSize: 0
-      })
-      if (state.activeKey === 'doc') {
-        const docs = Array.from(shareStore.docMap).map(item => item[1])
-        setState({docs, docPage: 1})
-        getDocs()
-      }
-      if (state.activeKey === 'book') getBooks()
-      if (state.activeKey === 'file') {
-        getFiles()
-        getFileData()
-      }
+      initial()
     }
   }, [props.open])
   return (
@@ -146,20 +148,37 @@ export const ShareData = observer((props: {
       footer={null}
     >
       {contextHolder}
+      <ServiceSet open={state.openServiceSet} onClose={() => {
+        setState({openServiceSet: false})
+        getDevices()
+      }}/>
       <div className={'min-h-[260px]'}>
         <Tabs
           activeKey={state.activeKey}
           size={'small'}
+          tabBarExtraContent={(
+            <Checkbox checked={state.all} onChange={(e) => {
+              setState({all: e.target.checked})
+              initial()
+            }}>All devices</Checkbox>
+          )}
           onTabClick={key => {
             setState({activeKey: key as any})
-            if (key === 'doc' && !state.docs.length) {
+            if (key === 'doc') {
               setState({docPage: 1})
               getDocs()
             }
-            if (key === 'book' && !state.books.length) getBooks()
-            if (key === 'file' && !state.files.length) {
+            if (key === 'book') {
+              setState({bookPage: 1})
+              getBooks()
+            }
+            if (key === 'file') {
+              setState({filePage: 1})
               getFiles()
-              getFileData()
+            }
+            if (key === 'device') {
+              setState({devicePage: 1})
+              getDevices()
             }
           }}
           items={[
@@ -196,12 +215,18 @@ export const ShareData = observer((props: {
                           </>
                         )
                       },
+                      ...( state.all ?
+                        [{
+                        title: 'Device',
+                        dataIndex: ['device', 'name']
+                      }] : []),
                       {
                         title: 'Filepath',
                         dataIndex: 'filePath',
                         render: v => (
                           <Tooltip trigger={['click']} title={v}>
-                            <div className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
+                            <div
+                              className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
                           </Tooltip>
                         )
                       },
@@ -220,31 +245,6 @@ export const ShareData = observer((props: {
                         render: (v, record) => (
                           <div className={'space-x-1'}>
                             <Sync doc={record}/>
-                            {record.password ?
-                              <CancelLock
-                                doc={record}
-                                onSuccess={action(() => {
-                                  record.password = false
-                                  getDocs()
-                                })}
-                              >
-                                <Button
-                                  type={'link'} size={'small'}
-                                  icon={<UnlockOutlined className={'text-amber-500 duration-200 hover:text-amber-600'}/>}
-                                />
-                              </CancelLock> :
-                              <Lock
-                                doc={record}
-                                onSuccess={action(() => {
-                                  record.password = true
-                                  getDocs()
-                                })}>
-                                <Button
-                                  type={'link'} size={'small'}
-                                  icon={<LockOutlined />}
-                                />
-                              </Lock>
-                            }
                             <CloseShare doc={record} onRemove={() => {
                               getDocs()
                             }}>
@@ -292,12 +292,18 @@ export const ShareData = observer((props: {
                           >{v}</a>
                         )
                       },
+                      ...( state.all ?
+                        [{
+                          title: 'Device',
+                          dataIndex: ['device', 'name']
+                        }] : []),
                       {
                         title: 'Root Path',
                         dataIndex: 'filePath',
                         render: v => (
                           <Tooltip trigger={['click']} title={v}>
-                            <div className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
+                            <div
+                              className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
                           </Tooltip>
                         )
                       },
@@ -316,31 +322,6 @@ export const ShareData = observer((props: {
                         render: (v, record) => (
                           <div className={'space-x-1'}>
                             <Sync book={record}/>
-                            {record.password ?
-                              <CancelLock
-                                book={record}
-                                onSuccess={action(() => {
-                                  record.password = false
-                                  getBooks()
-                                })}
-                              >
-                                <Button
-                                  type={'link'} size={'small'}
-                                  icon={<UnlockOutlined className={'text-amber-500 duration-200 hover:text-amber-600'}/>}
-                                />
-                              </CancelLock> :
-                              <Lock
-                                book={record}
-                                onSuccess={action(() => {
-                                  record.password = true
-                                  getBooks()
-                                })}>
-                                <Button
-                                  type={'link'} size={'small'}
-                                  icon={<LockOutlined />}
-                                />
-                              </Lock>
-                            }
                             <CloseShare book={record} onRemove={() => {
                               getBooks()
                             }}>
@@ -369,18 +350,7 @@ export const ShareData = observer((props: {
                     loading={state.loading}
                     footer={() => (
                       <div className={'flex items-center justify-between mb-2'}>
-                        <div className={'flex items-center'}>
-                          <Tooltip title={'Total dependent files'}>
-                            <div className={'flex items-center text-sm dark:text-gray-400'}>
-                              <CloudUploadOutlined/>
-                              <span className={'ml-1'}>Files: {state.fileTotal}</span>
-                              <span className={'ml-2'}>File Size: {sizeUnit(state.fileTotalSize)}</span>
-                            </div>
-                          </Tooltip>
-                          <Tooltip title={'Bluestone will automatically manage note file dependencies, and pictures that are cited multiple times under the same book will not be uploaded repeatedly'}>
-                            <QuestionCircleOutlined className={'ml-4 dark:text-gray-500 text-gray-400 hover:dark:text-gray-300'}/>
-                          </Tooltip>
-                        </div>
+                        <div className={'flex items-center'}></div>
                         <div>
                           <Pagination
                             current={state.filePage}
@@ -408,12 +378,18 @@ export const ShareData = observer((props: {
                           >{basename(record.filePath)}</a>
                         )
                       },
+                      ...( state.all ?
+                        [{
+                          title: 'Device',
+                          dataIndex: ['device', 'name']
+                        }] : []),
                       {
                         title: 'filePath',
                         dataIndex: 'filePath',
                         render: v => (
                           <Tooltip trigger={['click']} title={v}>
-                            <div className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
+                            <div
+                              className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
                           </Tooltip>
                         )
                       },
@@ -430,15 +406,22 @@ export const ShareData = observer((props: {
                             <div className={'text-sm'}>
                               {record.doc &&
                                 <span>
-                                <FileTextOutlined className={'mr-1 w-4'} />
-                                  {record.doc.name}
-                              </span>
+                                  <FileTextOutlined className={'mr-1 w-4'}/>
+                                  <a href={`${shareStore.serviceConfig!.domain}/doc/${record.doc.name}`}
+                                     className={'link'} target={'_blank'}>
+                                    {record.doc.name}
+                                  </a>
+                                </span>
                               }
                               {record.book &&
                                 <span className={'flex items-center'}>
-                                <BookIcon className={'w-4 h-4 mr-1 dark:fill-gray-300'} />
-                                  {record.book.name}
-                              </span>
+                                  <BookIcon className={'w-4 h-4 mr-1 dark:fill-gray-300'}/>
+                                  <a className={'link'}
+                                     href={`${shareStore.serviceConfig!.domain}/book/${record.book.path}`}
+                                     target={'_blank'}>
+                                    {record.book.name}
+                                  </a>
+                                </span>
                               }
                             </div>
                           )
@@ -448,6 +431,94 @@ export const ShareData = observer((props: {
                         title: 'Created',
                         dataIndex: 'created',
                         render: v => dayjs(v).format('MM-DD HH:mm')
+                      }
+                    ]}
+                  />
+                </div>
+              )
+            },
+            {
+              key: 'device',
+              label: 'Devices',
+              children: (
+                <div>
+                  <Table
+                    size={'small'}
+                    dataSource={state.devices}
+                    rowKey={'id'}
+                    loading={state.loading}
+                    pagination={{
+                      pageSize: 10,
+                      current: state.devicePage,
+                      total: state.deviceTotal,
+                      onChange: page => {
+                        setState({devicePage: page})
+                        getDevices()
+                      }
+                    }}
+                    columns={[
+                      {
+                        title: 'Name',
+                        dataIndex: 'name',
+                        render: (v, record) => (
+                          <span>
+                            {record.id === shareStore.serviceConfig?.deviceId &&
+                              <StarOutlined className={'text-yellow-500 mr-1'}/>
+                            }
+                            {v}
+                          </span>
+                        )
+                      },
+                      {
+                        title: 'Created',
+                        dataIndex: 'created',
+                        render: v => dayjs(v).format('YYYY-MM-DD HH:mm')
+                      },
+                      {
+                        title: 'Action',
+                        key: 'handle',
+                        render: (v, record) => (
+                          <div className={'space-x-1'}>
+                            {record.id === shareStore.serviceConfig?.deviceId &&
+                              <Button
+                                type={'link'} size={'small'}
+                                onClick={() => setState({openServiceSet: true})}
+                                icon={<SettingOutlined />}
+                              />
+                            }
+                            <Button
+                              type={'link'} size={'small'} danger={true}
+                              onClick={() => {
+                                modal.confirm({
+                                  title: 'Note',
+                                  type: 'warning',
+                                  content: 'Deleting a device will clear all shared data under the device and will become inaccessible.',
+                                  onOk: () => {
+                                    const currentId = shareStore.serviceConfig?.deviceId
+                                    return shareStore.delDevice(record.id).then(() => {
+                                      message$.next({
+                                        type: 'success',
+                                        content: 'successfully deleted'
+                                      })
+                                      if (record.id === currentId) {
+                                        setState({
+                                          docs: [],
+                                          devices: [],
+                                          books: [],
+                                          files: []
+                                        })
+                                        props.onClose()
+                                      } else {
+                                        getDevices()
+                                      }
+                                    })
+                                  }
+                                })
+                              }}
+                              icon={<DeleteOutlined />}
+                            />
+                          </div>
+                        )
                       }
                     ]}
                   />

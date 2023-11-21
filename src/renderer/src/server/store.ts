@@ -5,21 +5,18 @@ import {IBook, IDoc} from './model'
 import {BsFile} from './sync/file'
 import {Book} from './sync/book'
 import {parserMdToSchema} from '../editor/parser/parser'
-
-export interface BookData {
-  path: string,
-  filePath: string,
-  ignorePaths?: string
-  name: string,
-  strategy: 'auto' | 'custom',
-  chapters?: any[]
-}
+import {MainApi} from '../api/main'
+import {compareVersions} from 'compare-versions'
+import {message$} from '../utils'
 
 export class ShareStore {
+  readonly version = '0.2.0'
+  remoteVersion = ''
   docMap = new Map<string, IDoc>()
   bookMap = new Map<string, IBook>()
   file: BsFile
   book: Book
+  updateTips = false
   serviceConfig: null | {
     domain: string
     secret: string
@@ -33,7 +30,9 @@ export class ShareStore {
     this.book = new Book(this.api, this.file)
     makeAutoObservable(this, {
       file: false,
-      book: false
+      book: false,
+      docMap: false,
+      bookMap: false
     })
   }
   getBooks(filePath: string) {
@@ -41,13 +40,31 @@ export class ShareStore {
   }
 
   initial() {
-    window.electron.ipcRenderer.invoke('getServerConfig').then(res => {
+    // window.electron.ipcRenderer.invoke('saveServerConfig', null)
+    MainApi.getServerConfig().then(async res => {
       if (res) {
         runInAction(() => this.serviceConfig = res)
-        this.api.getShareData().then(action(res => {
-          this.docMap = new Map(res.docs.map(c => [c.filePath, c]))
-          this.bookMap = new Map(res.books.map(c => [c.path, c]))
-        }))
+        // try {
+          const v = await this.api.getVersion()
+          if (v.version !== localStorage.getItem('ignore-service-version')) {
+            if (compareVersions(this.version, v.version) === -1) {
+              runInAction(() => {
+                this.updateTips = true
+                this.remoteVersion = v.version
+              })
+            }
+          }
+          await this.api.getShareData().then(action(res => {
+            this.docMap = new Map(res.docs.map(c => [c.filePath, c]))
+            this.bookMap = new Map(res.books.map(c => [c.path, c]))
+          }))
+        // } catch (e) {
+        //   console.log('e', e)
+        //   message$.next({
+        //     type: 'error',
+        //     content: 'Custom service connection failed'
+        //   })
+        // }
       }
     })
   }
@@ -70,20 +87,41 @@ export class ShareStore {
     return remote.doc
   }
 
-  // async delDoc(id: string, filePath: string) {
-  //   return shareApi.delDoc(id).then(() => this.docMap.delete(filePath))
-  // }
-
   async shareBook(data: Partial<IBook>) {
-    return this.book.syncBook(data)
+    return this.book.syncBook(data).then(res => {
+      this.bookMap.set(res.book.path, res.book)
+      return res
+    })
   }
 
-  // async delBook(book: ShareBook) {
-  //   return shareApi.delBook(book.id).then(() => this.bookMap.delete(book.filePath))
-  // }
+  async delBook(book: IBook) {
+    return this.api.delBook(book.id).then(() => this.bookMap.delete(book.path))
+  }
   clear() {
     this.docMap.clear()
     this.bookMap.clear()
+  }
+
+  reset() {
+    return MainApi.saveServerConfig(null).then(() => {
+      this.docMap.clear()
+      this.bookMap.clear()
+      runInAction(() => {
+        this.serviceConfig = null
+      })
+    })
+  }
+  async delDevice(id: string) {
+    return this.api.delDevice(id).then(async () => {
+      if (id === this.serviceConfig?.deviceId) {
+        this.docMap.clear()
+        this.bookMap.clear()
+        runInAction(() => {
+          this.serviceConfig = null
+        })
+        await window.electron.ipcRenderer.invoke('saveServerConfig', null)
+      }
+    })
   }
 }
 

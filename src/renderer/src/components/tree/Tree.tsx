@@ -6,12 +6,23 @@ import {TreeRender} from './TreeRender'
 import {FullSearch} from '../FullSearch'
 import {useCallback} from 'react'
 import {MainApi} from '../../api/main'
+import {shareStore} from '../../server/store'
+import {EBook} from '../../server/ui/Ebook'
+import {useLocalState} from '../../hooks/useLocalState'
+import {useSubject} from '../../hooks/subscribe'
 
 export const Tree = observer(() => {
   const context = useCallback(() => {
     treeStore.setState({ctxNode: null})
     MainApi.openTreeContextMenu({type: 'rootFolder'})
   }, [])
+  const [state, setState] = useLocalState({
+    openShareFolder: false,
+    defaultSharePath: ''
+  })
+  useSubject(treeStore.shareFolder$, path => {
+    setState({openShareFolder: true, defaultSharePath: path})
+  })
   return (
     <div className={'relative z-[60]'}>
       <TreeTop/>
@@ -43,6 +54,16 @@ export const Tree = observer(() => {
           </div>
         </div>
       </div>
+      <EBook
+        open={state.openShareFolder}
+        defaultRootPath={state.defaultSharePath}
+        onClose={() => {
+          setState({openShareFolder: false})
+        }}
+        onSave={book => {
+
+        }}
+      />
     </div>
   )
 })

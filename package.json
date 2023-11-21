@@ -54,6 +54,7 @@
     "@vitejs/plugin-react": "^4.0.4",
     "alfaaz": "^1.1.0",
     "antd": "^5.8.5",
+    "compare-versions": "^6.1.0",
     "dayjs": "^1.11.7",
     "dexie": "^3.2.4",
     "diacritics": "^1.3.0",

@@ -125,6 +125,22 @@ export const registerMenus = () => {
         label: menusLabel.rename,
         click: () => sendCommand('rename')
       })
+    }
+    if (params.type !== 'file') {
+      temp.add({
+        type: 'separator'
+      })
+      temp.add({
+        label: 'Share Folder',
+        click: () => sendCommand('shareFolder')
+      })
+      if (params.type !== 'rootFolder') {
+        temp.add({
+          type: 'separator'
+        })
+      }
+    }
+    if (params.type !== 'rootFolder') {
       if (params.type === 'file') {
         temp.add({
           label: 'Open in New Tab',

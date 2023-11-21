@@ -33,15 +33,6 @@ export class Book {
     private readonly api: ShareApi,
     private readonly file: BsFile
   ) {}
-  private validateConfig(config: Record<string, any>) {
-    if (!config.name) throw new Error('Please add name field in book.json file')
-    if (!config.id) throw new Error('Please add path field in book.json file')
-    if (config.id.startsWith('-') || config.id.endsWith('-')) throw new Error('Path cannot begin or end with a - dash')
-    if (
-      !/^[A-Za-z0-9\-]{2,30}$/.test(config.id)
-    ) throw new Error('The path consists of uppercase and lowercase letters, numbers and - characters')
-    if (config.strategy && !['auto', 'custom'].includes(config.strategy)) throw new Error('The strategy field must be auto or custom')
-  }
   async syncBook(book: Partial<IBook>) {
     this.root = book.filePath!
     const config = book.config!
@@ -86,22 +77,25 @@ export class Book {
         return c.id!
       })
     const add = await this.process(map)
+    const texts = add.map(c => {
+      return {path: c.path, texts: c.texts}
+    })
     const filesSet = await this.file.bookFile(add, res.book.id, this.root, res.files)
     const removeFiles = res.files.filter(d => !filesSet.has(d.filePath)).map(d => d.id)
     return this.api.shareBook({
       removeDocs: remove,
       removeFiles: removeFiles,
+      texts: JSON.stringify(texts),
       addChapters: add.filter(a => {
         return !chapterMap.get(a.path) || chapterMap.get(a.path)!.hash !== a.hash
       }).map(a => {
         return {
-          schema: a.schema,
-          text: a.texts,
+          schema: JSON.stringify(a.schema || []),
           path: a.path,
           hash: a.hash
         }
       }),
-      map: this.extractMap(map),
+      map: JSON.stringify(this.extractMap(map)),
       bookId: res.book.id
     })
   }
@@ -153,7 +147,6 @@ export class Book {
         map.push(item)
       } else if (path.toLowerCase().endsWith('.md') || path.toLowerCase().endsWith('.markdown')) {
         const md = readFileSync(path, {encoding: 'utf-8'})
-        if (md.length > 30000) throw new Error(`A single document cannot exceed 30,000 characters file:${path}`)
         const item:SpaceDocMap = {
           path: toPath(this.root, path),
           name: parse(f).name,
@@ -185,7 +178,6 @@ export class Book {
         if (!path.endsWith('.md')) path += '.md'
         if (!isExist(path)) throw new Error(`The file ${path} does not exist`)
         const md = readFileSync(path, {encoding: 'utf-8'})
-        if (md.length > 30000) throw new Error(`A single document cannot exceed 30,000 characters file:${path}`)
         const item:SpaceDocMap = {
           path: c.path.replace(/\.\w+$/, ''),
           name: c.name || c.path,

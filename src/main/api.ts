@@ -50,7 +50,7 @@ export const registerApi = () => {
     return app.getVersion()
   })
   ipcMain.handle('get-machine-id', () => {
-    return machineIdSync()
+    return machineIdSync(true)
   })
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)

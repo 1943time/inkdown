@@ -23,7 +23,6 @@ export class TreeStore {
   dragNode: IFileItem | null = null
   dropNode: IFileItem | null = null
   tabs: Tab[] = []
-  loaded = true
   searchKeyWord = ''
   currentIndex = 0
   width = 260
@@ -39,6 +38,7 @@ export class TreeStore {
   fold = true
   watcher: Watcher
   externalChange$ = new Subject<string>()
+  shareFolder$ = new Subject<string>()
   moveFile$ = new Subject<{
     from: string
     to: string
@@ -113,7 +113,7 @@ export class TreeStore {
     window.electron.ipcRenderer.on('tree-command', (e, params: {
       type: 'rootFolder' | 'file' | 'folder'
       filePath: string
-      command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab'
+      command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder'
     }) => {
       runInAction(() => {
         const {filePath, type} = params
@@ -152,6 +152,11 @@ export class TreeStore {
             break
           case 'openInNewTab':
             if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
+            break
+          case 'shareFolder':
+            if (this.ctxNode?.filePath || params.type === 'rootFolder') {
+              this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
+            }
             break
           case 'delete':
             if (filePath && this.ctxNode) {

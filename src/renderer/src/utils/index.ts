@@ -11,7 +11,6 @@ const kb = 1024
 const mb = kb * 1024
 const gb = mb * 1024
 export const sizeUnit = (size: number) => {
-  size = Number(size) * 1024
   if (size > gb) return (size / gb).toFixed(2) + ' GB'
   if (size > mb) return (size / mb).toFixed(2) + ' MB'
   if (size > kb) return (size / kb).toFixed(2) + ' KB'

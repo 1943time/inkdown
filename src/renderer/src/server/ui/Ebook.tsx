@@ -1,44 +1,52 @@
 import {observer} from 'mobx-react-lite'
-import {Form, Input, Modal, Radio} from 'antd'
+import {Button, Form, Input, Modal, Radio, Space} from 'antd'
 import {useEffect} from 'react'
 import {IBook} from '../model'
 import {shareStore} from '../store'
 import {useLocalState} from '../../hooks/useLocalState'
 import {stat} from '../../utils'
 import {AceCode} from '../../components/AceCode'
+import {MainApi, openDialog} from '../../api/main'
 
 export const EBook = observer((props: {
   open: boolean
   onClose: () => void
-  selectBook?: IBook
   onSave: (data: IBook) => void
   defaultRootPath?: string
 }) => {
   const [state, setState] = useLocalState({
     submitting: false,
-    config: {} as any
+    config: {} as any,
+    book: null as null | IBook
   })
   const [form] = Form.useForm()
 
   useEffect(() => {
     if (props.open) {
       form.resetFields()
-      if (!props.selectBook) {
-        form.setFieldsValue({
-          filePath: props.defaultRootPath
-        })
-      } else {
-        form.setFieldsValue({
-          path: props.selectBook.path,
-          name: props.selectBook.name,
-          filePath: props.selectBook.filePath,
-          strategy: props.selectBook.config.strategy,
-          ignorePaths: props.selectBook.config.ignorePaths,
-          chapters: props.selectBook.config.chapters ? JSON.stringify(props.selectBook.config.chapters, null, 2) : undefined
+      setState({book: null})
+      if (props.defaultRootPath) {
+        shareStore.api.findBookByFilepath(props.defaultRootPath).then(res => {
+          if (!res.book) {
+            form.setFieldsValue({
+              filePath: props.defaultRootPath,
+              strategy: 'auto'
+            })
+          } else {
+            setState({book: res.book})
+            form.setFieldsValue({
+              path: res.book.path,
+              name: res.book.name,
+              filePath: res.book.filePath,
+              strategy: res.book.config.strategy,
+              ignorePaths: res.book.config.ignorePaths,
+              chapters: res.book.config.chapters ? JSON.stringify(res.book.config.chapters, null, 2) : undefined
+            })
+          }
         })
       }
     }
-  }, [props.open, props.selectBook])
+  }, [props.open, props.defaultRootPath])
   return (
     <Modal
       title={(
@@ -57,7 +65,7 @@ export const EBook = observer((props: {
           setState({submitting: true})
           try {
             const res = await shareStore.shareBook({
-              id: props.selectBook?.id,
+              id: state.book?.id,
               name: v.name,
               path: v.path,
               filePath: v.filePath,
@@ -68,7 +76,7 @@ export const EBook = observer((props: {
               }
             })
             if (res) {
-              props.onSave(res)
+              props.onSave(res.book)
               props.onClose()
             }
           } finally {
@@ -92,9 +100,9 @@ export const EBook = observer((props: {
             },
             {
               validator: async (rule, value) => {
-                if (props.selectBook && props.selectBook.path === value) return Promise.resolve()
+                if (state.book && state.book.path === value) return Promise.resolve()
                 const res = await shareStore.api.checkBookPath(value)
-                return res.exist ? Promise.reject('The book id already exists') : Promise.resolve()
+                return res.book ? Promise.reject('The book id already exists') : Promise.resolve()
               },
               validateTrigger: 'submit'
             }
@@ -111,22 +119,43 @@ export const EBook = observer((props: {
         </Form.Item>
         <Form.Item
           label={'Book root path'}
-          name={'filePath'}
           tooltip={'Content extraction root directory'}
-          rules={[
-            {required: true, message: 'Please enter the path of the folder to be synchronized'},
-            {
-              validator: (rule, value) => {
-                if (!stat(value)?.isDirectory()) {
-                  return Promise.reject(`${value} is an incorrect file path`)
-                }
-                return Promise.resolve()
-              },
-              validateTrigger: 'submit'
-            }
-          ]}
         >
-          <Input maxLength={50} placeholder={'Enter book root path'}/>
+          <Space.Compact style={{ width: '100%' }}>
+            <Form.Item
+              noStyle={true}
+              name={'filePath'}
+              rules={[
+                {required: true, message: 'Please enter the path of the folder to be synchronized'},
+                {
+                  validator: (rule, value) => {
+                    if (!stat(value)?.isDirectory()) {
+                      return Promise.reject(`${value} is an incorrect folder path`)
+                    }
+                    return Promise.resolve()
+                  },
+                  validateTrigger: 'submit'
+                }
+              ]}
+            >
+              <Input maxLength={50} placeholder={'Enter book root path'}/>
+            </Form.Item>
+            <Button
+              onClick={() => {
+                openDialog({
+                  title: 'Select Folder',
+                  message: 'Select the folder you want to share',
+                  properties: ['openDirectory']
+                }).then(res => {
+                  if (res.filePaths.length) {
+                    form.setFieldValue('filePath', res.filePaths[0])
+                  }
+                })
+              }}
+            >
+              Select
+            </Button>
+          </Space.Compact>
         </Form.Item>
         <Form.Item
           label={'Strategy'} name={'strategy'}
