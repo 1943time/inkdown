@@ -30,7 +30,6 @@ export const Update = observer(() => {
   const [modal, context] = Modal.useModal()
   useEffect(() => {
     ipcRenderer.on('update-available', (e, data) => {
-      console.log('update-available', data)
       if (state.startUpdate) return
       setState({open: !!data, updateData: data})
     })

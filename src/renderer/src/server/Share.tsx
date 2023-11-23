@@ -2,7 +2,6 @@ import {observer} from 'mobx-react-lite'
 import {
   CopyOutlined,
   DatabaseOutlined,
-  HistoryOutlined,
   LinkOutlined,
   SendOutlined, SettingOutlined,
   StopOutlined,
@@ -37,7 +36,8 @@ export const Share = observer(() => {
     books: [] as IBook[],
     mask: false,
     showData: false,
-    openSetting: false
+    openSetting: false,
+    upgradeLoading: false
   })
   const getBooks = useCallback(() => {
     setState({
@@ -278,47 +278,44 @@ export const Share = observer(() => {
         }}
       />
       <Modal
-        title={`Update tips`}
-        width={600}
-        onCancel={action(() => shareStore.updateTips = false)}
-        open={shareStore.updateTips}
+        title={`Service program update - ${shareStore.remoteVersion}`}
+        width={700}
+        onCancel={action(() => shareStore.showUpdateTips = false)}
+        open={shareStore.showUpdateTips}
         okText={'Details'}
         onOk={action(() => {
-          shareStore.updateTips = false
+          shareStore.showUpdateTips = false
         })}
         footer={(
           <Space className={'mt-4'}>
             <Button onClick={action(() => {
-              shareStore.updateTips = false
+              shareStore.showUpdateTips = false
             })}>{'Cancel'}</Button>
-            <Button onClick={action(() => {
-              shareStore.updateTips = false
-              localStorage.setItem('ignore-service-version', shareStore.remoteVersion)
-            })}>Ignore this version</Button>
             <Button
               type={'primary'}
+              loading={state.upgradeLoading}
               onClick={action(() => {
-                shareStore.updateTips = false
+                setState({upgradeLoading: true})
+                shareStore.api.upgrade().then(() => {
+                  message$.next({
+                    type: 'success',
+                    content: 'Upgrade completed'
+                  })
+                  setState({upgradeLoading: false})
+                }).catch(e => {
+                  message$.next({
+                    type: 'error',
+                    content: 'Upgrade failed'
+                  })
+                })
               })}
             >
-              Details
+              Update now
             </Button>
           </Space>
         )}
       >
-        <div>
-          bbbbbbbbbbbbbbbbbb
-        </div>
-        {/*<div*/}
-        {/*  dangerouslySetInnerHTML={{__html: state.updateData.releaseNotes}}*/}
-        {/*  className={'py-2'}*/}
-        {/*/>*/}
-        {/*{state.startUpdate &&*/}
-        {/*  <div className={'flex items-center mt-4'}>*/}
-        {/*    <span className={'mr-4'}>{'Updating'}</span>*/}
-        {/*    <Progress percent={state.percent} className={'flex-1 mb-0'}/>*/}
-        {/*  </div>*/}
-        {/*}*/}
+        <div dangerouslySetInnerHTML={{__html: shareStore.updateTips}} className={'whitespace-pre overflow-auto'}/>
       </Modal>
     </>
   )

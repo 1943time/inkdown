@@ -12,11 +12,13 @@ import {message$} from '../utils'
 export class ShareStore {
   readonly version = '0.2.0'
   remoteVersion = ''
+
   docMap = new Map<string, IDoc>()
   bookMap = new Map<string, IBook>()
   file: BsFile
   book: Book
-  updateTips = false
+  showUpdateTips = false
+  updateTips = ''
   serviceConfig: null | {
     domain: string
     secret: string
@@ -38,19 +40,24 @@ export class ShareStore {
   getBooks(filePath: string) {
     return Array.from(this.bookMap).filter(item => item[1].filePath.startsWith(filePath)).map(item => item[1])
   }
-
   initial() {
-    // window.electron.ipcRenderer.invoke('saveServerConfig', null)
     MainApi.getServerConfig().then(async res => {
       if (res) {
         runInAction(() => this.serviceConfig = res)
-        // try {
+        try {
           const v = await this.api.getVersion()
           if (v.version !== localStorage.getItem('ignore-service-version')) {
-            if (compareVersions(this.version, v.version) === -1) {
-              runInAction(() => {
-                this.updateTips = true
-                this.remoteVersion = v.version
+            if (compareVersions(this.version, v.version) === 1) {
+              fetch('https://api.github.com/repos/1943time/bs-service/releases/latest').then(async res => {
+                const data = await res.json() as {
+                  tag_name: string
+                  body: string
+                }
+                runInAction(() => {
+                  this.updateTips = data.body
+                  this.showUpdateTips = true
+                  this.remoteVersion = data.tag_name
+                })
               })
             }
           }
@@ -58,13 +65,13 @@ export class ShareStore {
             this.docMap = new Map(res.docs.map(c => [c.filePath, c]))
             this.bookMap = new Map(res.books.map(c => [c.path, c]))
           }))
-        // } catch (e) {
-        //   console.log('e', e)
-        //   message$.next({
-        //     type: 'error',
-        //     content: 'Custom service connection failed'
-        //   })
-        // }
+        } catch (e) {
+          console.log('e', e)
+          message$.next({
+            type: 'error',
+            content: 'Custom service connection failed'
+          })
+        }
       }
     })
   }

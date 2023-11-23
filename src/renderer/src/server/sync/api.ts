@@ -233,7 +233,7 @@ export class ShareApi {
             }
           })
         }
-        setTimeout(polling, 1000)
+        setTimeout(polling, 3000)
       }).catch(reject)
     })
   }
