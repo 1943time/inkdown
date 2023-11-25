@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Alert, Button, Form, Input, Modal, Popconfirm, Radio, Space} from 'antd'
+import {Alert, Button, Form, Input, Modal, Popconfirm, Radio, Space, Tag} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {message$} from '../../utils'
 import {useCallback, useEffect} from 'react'
@@ -29,6 +29,7 @@ export const ServiceSet = observer((props: {
       })
     }
   }, [props.open])
+
   const setSuccess = useCallback(async (value: any) => {
     value.domain = value.domain.replace(/\/+$/,'')
     const machineId = await MainApi.getMachineId()
@@ -122,6 +123,12 @@ export const ServiceSet = observer((props: {
       )}
     >
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}} className={'mt-4'}>
+        {shareStore.currentVersion &&
+          <Form.Item
+            label={'Service Version'}>
+            <Tag>{shareStore.currentVersion}</Tag>
+          </Form.Item>
+        }
         <Form.Item
           rules={[{required: true, message: 'Please enter domain'}]}
           label={'Domain or IP'} name={['domain']}>

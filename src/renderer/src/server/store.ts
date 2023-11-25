@@ -8,15 +8,17 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {MainApi} from '../api/main'
 import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
+import {run} from 'node:test'
 
 export class ShareStore {
-  readonly version = '0.2.0'
+  readonly minVersion = '0.2.0'
   remoteVersion = ''
-
+  currentVersion = ''
   docMap = new Map<string, IDoc>()
   bookMap = new Map<string, IBook>()
   file: BsFile
   book: Book
+  pausedUpdate = false
   showUpdateTips = false
   updateTips = ''
   serviceConfig: null | {
@@ -46,9 +48,10 @@ export class ShareStore {
         runInAction(() => this.serviceConfig = res)
         try {
           const v = await this.api.getVersion()
-          if (v.version !== localStorage.getItem('ignore-service-version')) {
-            if (compareVersions(this.version, v.version) === 1) {
-              fetch('https://api.github.com/repos/1943time/bs-service/releases/latest').then(async res => {
+          runInAction(() => this.currentVersion = v.version)
+          if (v.version !== localStorage.getItem('ignore-service-version') && !shareStore.pausedUpdate) {
+            if (compareVersions(this.minVersion, v.version) === 1) {
+              fetch('https://api.github.com/repos/1943time/bluestone-service/releases/latest').then(async res => {
                 const data = await res.json() as {
                   tag_name: string
                   body: string

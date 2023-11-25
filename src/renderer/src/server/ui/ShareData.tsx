@@ -374,7 +374,7 @@ export const ShareData = observer((props: {
                           <a
                             className={'link'}
                             target={'_blank'}
-                            href={`${shareStore.serviceConfig!.domain}/files/${v}`}
+                            href={`${shareStore.serviceConfig!.domain}/stream/${v}`}
                           >{basename(record.filePath)}</a>
                         )
                       },

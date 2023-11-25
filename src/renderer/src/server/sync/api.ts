@@ -18,7 +18,7 @@ export class ShareApi {
           req.headers.authorization = this.sign(time, req.url.pathname)
           req.headers.time = String(time)
           req.headers['device-id'] = config.deviceId
-          req.headers['version'] = this.store.version
+          req.headers['version'] = this.store.minVersion
         }
       }],
       afterResponse: [async response => {

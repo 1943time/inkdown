@@ -23,7 +23,7 @@ import {shareStore} from './store'
 import {NotLogged} from './ui/NotLogged'
 import {CloseShare} from './ui/CloseShare'
 import {ShareData} from './ui/ShareData'
-import {action} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {ServiceSet} from './ui/ServiceSet'
 
 export const shareSuccess$ = new Subject<string>()
@@ -280,7 +280,10 @@ export const Share = observer(() => {
       <Modal
         title={`Service program update - ${shareStore.remoteVersion}`}
         width={700}
-        onCancel={action(() => shareStore.showUpdateTips = false)}
+        onCancel={action(() => {
+          shareStore.showUpdateTips = false
+          shareStore.pausedUpdate = true
+        })}
         open={shareStore.showUpdateTips}
         okText={'Details'}
         onOk={action(() => {
@@ -290,6 +293,7 @@ export const Share = observer(() => {
           <Space className={'mt-4'}>
             <Button onClick={action(() => {
               shareStore.showUpdateTips = false
+              shareStore.pausedUpdate = true
             })}>{'Cancel'}</Button>
             <Button
               type={'primary'}
@@ -302,6 +306,7 @@ export const Share = observer(() => {
                     content: 'Upgrade completed'
                   })
                   setState({upgradeLoading: false})
+                  runInAction(() => shareStore.showUpdateTips = false)
                 }).catch(e => {
                   message$.next({
                     type: 'error',
