@@ -92,7 +92,7 @@ class ConfigStore {
   setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
     ipcRenderer.send('setStore', `config.${key}`, value)
-    if (key === 'codeTabSize' || key === 'codeTheme' && shareStore.serviceConfig) {
+    if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && shareStore.serviceConfig) {
       shareStore.api.setPreferences({
         [key]: value
       })

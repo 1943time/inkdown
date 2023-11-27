@@ -10,7 +10,7 @@ import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
 
 export class ShareStore {
-  readonly minVersion = '0.2.0'
+  readonly minVersion = '0.2.1'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()

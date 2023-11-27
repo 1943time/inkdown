@@ -40,7 +40,8 @@ export const ServiceSet = observer((props: {
       secret: value.secret,
       preferences: {
         codeTabSize: configStore.config.codeTabSize,
-        codeTheme: configStore.config.codeTheme
+        codeTheme: configStore.config.codeTheme,
+        codeLineNumber: configStore.config.codeLineNumber
       }
     }).catch(e => {
       if (e.response?.body) {

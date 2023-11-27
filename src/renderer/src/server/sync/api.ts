@@ -91,6 +91,7 @@ export class ShareApi {
     preferences: {
       codeTabSize: number
       codeTheme: string
+      codeLineNumber: boolean
     }
   }) {
     const time = Date.now()
