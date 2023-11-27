@@ -122,6 +122,9 @@ export const registerApi = () => {
   ipcMain.handle('mkdirp', (e, path: string) => {
     return mkdirp(path)
   })
+  ipcMain.handle('get-local', () => {
+    return app.getLocale()
+  })
   ipcMain.handle('save-dialog', async (e, options: Parameters<typeof dialog['showSaveDialog']>[0]) => {
     return dialog.showSaveDialog(options)
   })

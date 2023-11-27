@@ -55,11 +55,13 @@ export class ShareStore {
                   tag_name: string
                   body: string
                 }
-                runInAction(() => {
-                  this.updateTips = data.body
-                  this.showUpdateTips = true
-                  this.remoteVersion = data.tag_name
-                })
+                if (!/-\w+$/.test(data.tag_name) || import.meta.env.DEV) {
+                  runInAction(() => {
+                    this.updateTips = data.body
+                    this.showUpdateTips = true
+                    this.remoteVersion = data.tag_name
+                  })
+                }
               })
             }
           }

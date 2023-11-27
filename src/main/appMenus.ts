@@ -535,7 +535,11 @@ const getSystemMenus = () => {
         {
           label: menusLabel.doc,
           click: () => {
-            shell.openExternal(`https://docs.bluemd.me/book/docs`)
+            if (app.getLocale() === 'zh-CN') {
+              shell.openExternal(`https://doc.bluemd.me/book/zh-docs`)
+            } else {
+              shell.openExternal(`https://doc.bluemd.me/book/docs`)
+            }
           }
         },
         {

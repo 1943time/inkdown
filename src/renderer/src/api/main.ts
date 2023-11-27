@@ -53,6 +53,9 @@ export const MainApi = {
   showMessageBox(options: Parameters<typeof dialog['showMessageBoxSync']>[0]) {
     return ipcRenderer.invoke('message-dialog', options) as Promise<number>
   },
+  getLocal() {
+    return ipcRenderer.invoke('get-local') as Promise<string>
+  },
   sendToSelf(task: string, ...args: any[]) {
     ipcRenderer.send('send-to-self', task, ...args)
   },

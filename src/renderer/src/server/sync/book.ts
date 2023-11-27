@@ -62,6 +62,7 @@ export class Book {
       })
       throw e
     }
+
     const res = await this.api.prefetchBook(book.name ? {
       id: book.id,
       filePath: book.filePath!,

@@ -1,4 +1,4 @@
-import {BrowserWindow, ipcMain, Menu, shell} from 'electron'
+import {app, BrowserWindow, ipcMain, Menu, shell} from 'electron'
 
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
@@ -25,7 +25,13 @@ export const registerMenus = () => {
     const temp: Menus = [
       {
         label: 'Documentation',
-        click: () => shell.openExternal('https://doc.bluemd.me/book/docs')
+        click: () => {
+          if (app.getLocale() === 'zh-CN') {
+            shell.openExternal(`https://doc.bluemd.me/book/zh-docs`)
+          } else {
+            shell.openExternal(`https://doc.bluemd.me/book/docs`)
+          }
+        }
       },
       {
         type: 'separator'

@@ -142,7 +142,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       case 'footnoteReference':
         if (share) {
-          el = {type: 'footnoteReference', identifier: n.identifier}
+          el = {type: 'footnoteReference', identifier: n.identifier, children: [{text: n.identifier}]}
         } else {
           el = {text: `[^${n.identifier}]`}
         }

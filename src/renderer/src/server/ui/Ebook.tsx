@@ -18,14 +18,15 @@ export const EBook = observer((props: {
     submitting: false,
     config: {} as any,
     book: null as null | IBook,
-    loading: false
+    loading: false,
+    edit: false
   })
   const [form] = Form.useForm()
 
   useEffect(() => {
     if (props.open) {
       form.resetFields()
-      setState({book: null})
+      setState({book: null, edit: false})
       if (props.defaultRootPath) {
         setState({loading: true})
         shareStore.api.findBookByFilepath(props.defaultRootPath).then(res => {
@@ -34,6 +35,7 @@ export const EBook = observer((props: {
               filePath: props.defaultRootPath,
               strategy: 'auto'
             })
+            setState({edit: false})
           } else {
             setState({book: res.book})
             form.setFieldsValue({
@@ -44,6 +46,7 @@ export const EBook = observer((props: {
               ignorePaths: res.book.config.ignorePaths,
               chapters: res.book.config.chapters ? JSON.stringify(res.book.config.chapters, null, 2) : undefined
             })
+            setState({edit: true})
           }
         }).finally(() => setState({loading: false}))
       }
@@ -110,6 +113,7 @@ export const EBook = observer((props: {
             }
           ]}>
           <Input
+            disabled={state.edit}
             placeholder={'Composition of uppercase and lowercase letters, numbers and - characters'}
           />
         </Form.Item>
