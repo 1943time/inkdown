@@ -4,7 +4,6 @@ import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
 import Img from '../../icons/Img'
 import {useEffect, useMemo, useRef} from 'react'
-import {treeStore} from '../../store/tree'
 import {Transforms} from 'slate'
 import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
@@ -59,7 +58,8 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     }
     let realUrl = element.url
     if (!element.url.startsWith('http') && !element.url.startsWith('file:')) {
-      const file = isAbsolute(element.url) ? element.url : join(store.openFilePath || '', '..', element.url)
+      const currentFilePath = store.webview ? store.webviewFilePath : store.openFilePath
+      const file = isAbsolute(element.url) ? element.url : join(currentFilePath || '', '..', element.url)
       const data = getImageData(file)
       if (data) {
         realUrl = data
@@ -74,7 +74,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       setState({loadSuccess: true})
     }
     img.onerror = () => setState({loadSuccess: false})
-  }, [element.url, element.downloadUrl])
+  }, [element.url, element.downloadUrl, store.webviewFilePath])
   useEffect(() => {
     if (!store.editor.selection) return
     if (element.downloadUrl) {

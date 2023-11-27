@@ -5,7 +5,6 @@ import {Editable, Slate, withReact} from 'slate-react'
 import {MElement, MLeaf} from '../editor/elements'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, EditorStoreContext} from '../editor/store'
-import {treeStore} from '../store/tree'
 import {observer} from 'mobx-react-lite'
 import {configStore} from '../store/config'
 import {parserMdToSchema} from '../editor/parser/parser'
@@ -14,18 +13,21 @@ import {readFileSync} from 'fs'
 export const Webview = observer((props: {
   value?: any[]
   history?: boolean
+  filePath?: string
 }) => {
+  const [ready, setReady] = useState(!!props.history)
   const store = useMemo(() => new EditorStore(true, props.history), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
   const high = useHighlight(store)
   const print = async (filePath: string) => {
-    treeStore.openNote(filePath)
+    store.webviewFilePath = filePath
+    setReady(true)
     const schema = await parserMdToSchema([readFileSync(filePath, {encoding: 'utf-8'})])
     EditorUtils.reset(store.editor, schema[0] || [])
     setTimeout(() => {
       window.electron.ipcRenderer.send('print-pdf-ready', filePath)
-    }, 100)
+    }, 300)
   }
   useEffect(() => {
     if (!props.history) window.electron.ipcRenderer.invoke('print-dom-ready').then(print)
@@ -33,8 +35,10 @@ export const Webview = observer((props: {
 
   useEffect(() => {
     EditorUtils.reset(store.editor, props.value)
-  }, [props.value])
+    store.webviewFilePath = props.filePath || null
+  }, [props.value, props.filePath])
 
+  if (!ready) return null
   return (
     <div className={`view w-full ${props.history ? '' : 'h-full'} content p-5 ${configStore.config.headingMarkLine ? 'heading-line' : ''}`}>
       <EditorStoreContext.Provider value={store}>

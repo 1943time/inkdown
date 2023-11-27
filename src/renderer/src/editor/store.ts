@@ -55,6 +55,7 @@ export class EditorStore {
   history = false
   inputComposition = false
   openFilePath: string | null = null
+  webviewFilePath: string | null = null
   saveDoc$ = new Subject<any[] | null>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement

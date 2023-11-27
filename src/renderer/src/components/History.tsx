@@ -97,7 +97,7 @@ export const History = observer(() => {
         <div className={'flex-1 flex-shrink-0 overflow-y-auto'}>
           {state.show &&
             <div className={'opacity-0 animate-show'}>
-              <Webview value={schema} history={true}/>
+              <Webview value={schema} history={true} filePath={state.records[state.selectIndex]?.filePath}/>
             </div>
           }
         </div>

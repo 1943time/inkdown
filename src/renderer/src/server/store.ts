@@ -8,7 +8,6 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {MainApi} from '../api/main'
 import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
-import {run} from 'node:test'
 
 export class ShareStore {
   readonly minVersion = '0.2.0'
