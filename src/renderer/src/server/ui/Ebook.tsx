@@ -49,12 +49,7 @@ export const EBook = observer((props: {
   }, [props.open, props.defaultRootPath])
   return (
     <Modal
-      title={(
-        <div>
-          <span>Share Book</span>
-          <a className={'link text-sm font-normal ml-2'} target={'_blank'}>view guide</a>
-        </div>
-      )}
+      title={'Share Folder'}
       width={700}
       onCancel={props.onClose}
       open={props.open}
@@ -163,7 +158,7 @@ export const EBook = observer((props: {
           tooltip={'Automatically generate according to the current file directory or manually define the chapter structure'}
         >
           <Radio.Group>
-            <Radio.Button value={'auto'}>{'based on directories'}</Radio.Button>
+            <Radio.Button value={'auto'}>{'Based on directories'}</Radio.Button>
             <Radio.Button value={'custom'}>{'Custom chapters'}</Radio.Button>
           </Radio.Group>
         </Form.Item>

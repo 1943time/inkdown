@@ -128,12 +128,12 @@ export class ShareApi {
       json: data
     }).json()
   }
-  getDocs(query: {page: number, pageSize: number, all?: true}) {
+  getDocs(query: {page: number, pageSize: number, all?: boolean | string}) {
     return this.http.get(`${this.config.domain}/api/doc`, {
       searchParams: query
     }).json<{list: any[], total: number}>()
   }
-  getFiles(query: {page: number, pageSize: number, docId?: string, bookId?: string, all?: true}) {
+  getFiles(query: {page: number, pageSize: number, docId?: string, bookId?: string, all?: boolean | string}) {
     return this.http.get(`${this.config.domain}/api/file`, {
       searchParams: query
     }).json<{list: any[], total: number}>()
@@ -141,7 +141,7 @@ export class ShareApi {
   getBooks(data: {
     page: number
     pageSize: number
-    all?: true
+    all?: boolean | string
   }) {
     return this.http.get(`${this.config.domain}/api/book`, {
       searchParams: data

@@ -25,7 +25,7 @@ export const registerMenus = () => {
     const temp: Menus = [
       {
         label: 'Documentation',
-        click: () => shell.openExternal('https://pb.bluemd.me/official/book/docs/introduction')
+        click: () => shell.openExternal('https://doc.bluemd.me/book/docs')
       },
       {
         type: 'separator'

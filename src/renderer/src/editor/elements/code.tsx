@@ -130,7 +130,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }
         </div>
         {configStore.config.codeLineNumber &&
-          <div className={'code-line-list'}>
+          <div className={'code-line-list'} contentEditable={false}>
             {(props.children || []).map((c, i) =>
               <div key={i}/>
             )}

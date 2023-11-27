@@ -83,7 +83,7 @@ export const ShareData = observer((props: {
     shareStore.api.getDocs({
       page: state.docPage,
       pageSize: 10,
-      all: state.all ? true : undefined
+      all: state.all ? true : ''
     }).then(res => {
       setState({docs: res.list, docTotal: res.total})
     }).finally(() => setState({loading: false}))
@@ -104,7 +104,7 @@ export const ShareData = observer((props: {
     shareStore.api.getBooks({
       page: state.bookPage,
       pageSize: 10,
-      all: state.all ? true : undefined
+      all: state.all ? true : ''
     }).then(res => {
       setState({books: res.list, bookTotal: res.total})
     }).finally(() => setState({loading: false}))
@@ -115,7 +115,7 @@ export const ShareData = observer((props: {
     shareStore.api.getFiles({
       page: state.filePage,
       pageSize: 10,
-      all: state.all ? true : undefined
+      all: state.all ? true : ''
     }).then(res => {
       setState({files: res.list, fileTotal: res.total})
     }).finally(() => setState({loading: false}))

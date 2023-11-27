@@ -11,7 +11,6 @@ import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
-const isImage = /[\w_-]+\.(png|webp|jpg|jpeg|gif)/i
 
 export const useSystemMenus = () => {
   const initial = useCallback(async () => {

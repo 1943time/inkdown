@@ -535,7 +535,7 @@ const getSystemMenus = () => {
         {
           label: menusLabel.doc,
           click: () => {
-            shell.openExternal(`https://pb.bluemd.me/official/book/docs`)
+            shell.openExternal(`https://docs.bluemd.me/book/docs`)
           }
         },
         {

@@ -150,7 +150,7 @@ export const BookItem = observer((props: {
             disabled={!shareStore.serviceConfig}
             className={'flex-1'}
             block={true}>
-            <span>Create Books</span>
+            <span>Create Book</span>
           </Button>
         </div>
       }
