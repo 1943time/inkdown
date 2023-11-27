@@ -17,10 +17,6 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
     const parent = Editor.parent(editor, node[1])
     if (parent[0].type === 'list-item') {
       Transforms.setNodes(editor, {order: isOrder ? true : undefined}, {at: Path.parent(parent[1])})
-      const [list] = Editor.nodes<any>(editor, {
-        match: n => n.type === 'list'
-      })
-
       const listItems = Array.from<any>(Editor.nodes(editor, {
         match: n => n.type === 'list-item',
         at: Path.parent(parent[1]),

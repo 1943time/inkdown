@@ -136,7 +136,7 @@ export class ShareApi {
   getFiles(query: {page: number, pageSize: number, docId?: string, bookId?: string, all?: true}) {
     return this.http.get(`${this.config.domain}/api/file`, {
       searchParams: query
-    }).json<{list: any[]}>()
+    }).json<{list: any[], total: number}>()
   }
   getBooks(data: {
     page: number

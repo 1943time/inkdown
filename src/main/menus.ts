@@ -53,6 +53,11 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
+        label: 'Convert remote images to local',
+        enabled: filePath?.endsWith('.md'),
+        click: (e, win) => win?.webContents.send('convert-remote-images')
+      },
+      {
         label: 'File History',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('open-file-history')

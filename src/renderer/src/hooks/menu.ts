@@ -1,14 +1,18 @@
 import {useCallback, useEffect} from 'react'
 import {MainApi} from '../api/main'
 import {treeStore} from '../store/tree'
-import {message$, modal$, stat} from '../utils'
+import {message$, modal$, stat, toArrayBuffer} from '../utils'
 import {exportHtml} from '../editor/output/html'
 import {clearExpiredRecord, db} from '../store/db'
 import {runInAction} from 'mobx'
 import {isAbsolute, join} from 'path'
 import {existsSync} from 'fs'
+import {Transforms} from 'slate'
+import {ReactEditor} from 'slate-react'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
+const isImage = /[\w_-]+\.(png|webp|jpg|jpeg|gif)/i
+
 export const useSystemMenus = () => {
   const initial = useCallback(async () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
@@ -117,7 +121,7 @@ export const useSystemMenus = () => {
         params: {
           type: 'info',
           title: 'Note',
-          content: 'Unused images in .images folder will be deleted',
+          content: 'Unused images in .images folder will be moved to trash',
           onOk: async () => {
             const imgDir = join(treeStore.root.filePath, '.images')
             if (existsSync(imgDir)) {
@@ -168,8 +172,48 @@ export const useSystemMenus = () => {
         }
       })
     }
-    initial()
 
+    const convertRemoteImages = async () => {
+      if (treeStore.openedNote?.ext === 'md') {
+        const schema = treeStore.schemaMap.get(treeStore.openedNote)
+        if (schema?.state) {
+          const stack = schema.state.slice()
+          const store = treeStore.currentTab.store
+          let change = false
+          while (stack.length) {
+            const item = stack.pop()!
+            if (!item.text && item.type !== 'media' && item.children?.length) {
+              stack.push(...item.children!.slice())
+            } else {
+              if (item.type === 'media' && item.url?.startsWith('http')) {
+                const ext = item.url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
+                if (ext) {
+                  try {
+                    change = true
+                    const res = await window.api.got.get(item.url, {
+                      responseType: 'buffer'
+                    })
+                    const path = await store.saveFile({
+                      name: Date.now().toString(16) + '.' + ext[1].toLowerCase(),
+                      buffer: toArrayBuffer(res.rawBody)
+                    })
+                    Transforms.setNodes(store.editor, {
+                      url: path
+                    }, {at: ReactEditor.findPath(store.editor, item)})
+                  } catch (e) {}
+                }
+              }
+            }
+          }
+          message$.next({
+            type: 'info',
+            content: change ? 'Conversion successful' : 'The current note does not include network images'
+          })
+        }
+      }
+    }
+
+    initial()
     setTimeout(() => {
       clearExpiredRecord()
     }, 10000)
@@ -185,6 +229,7 @@ export const useSystemMenus = () => {
     window.electron.ipcRenderer.on('call-print-html', printHtml)
     window.electron.ipcRenderer.on('clear-recent', clearRecent)
     window.electron.ipcRenderer.on('clear-unused-images', clearUnusedImages)
+    window.electron.ipcRenderer.on('convert-remote-images', convertRemoteImages)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
       window.electron.ipcRenderer.removeListener('close-other-tabs', closeOtherTabs)
@@ -197,6 +242,7 @@ export const useSystemMenus = () => {
       window.electron.ipcRenderer.removeListener('call-print-html', printHtml)
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
       window.electron.ipcRenderer.removeListener('clear-unused-images', clearUnusedImages)
+      window.electron.ipcRenderer.removeListener('convert-remote-images', convertRemoteImages)
     }
   }, [])
 }

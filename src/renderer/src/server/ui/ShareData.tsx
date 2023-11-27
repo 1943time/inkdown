@@ -117,7 +117,7 @@ export const ShareData = observer((props: {
       pageSize: 10,
       all: state.all ? true : undefined
     }).then(res => {
-      setState({files: res.list})
+      setState({files: res.list, fileTotal: res.total})
     }).finally(() => setState({loading: false}))
   }, [])
   const initial = useCallback(() => {
