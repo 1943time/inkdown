@@ -77,6 +77,7 @@ export const registerApi = () => {
     return {
       showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
       theme: theme,
+      autoDownload: !!config.autoDownload,
       dark: dark,
       spellCheck: !!config.spellCheck,
       codeLineNumber: !!config.codeLineNumber,
@@ -86,7 +87,6 @@ export const registerApi = () => {
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: isBoolean(config.showCharactersCount) ? config.showCharactersCount : true,
       mas: process.mas || false,
-      headingMarkLine: isBoolean(config.headingMarkLine) ? config.headingMarkLine : true,
       dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
       autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true
     }

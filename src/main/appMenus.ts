@@ -201,7 +201,7 @@ const getSystemMenus = () => {
         }
       },
       {
-        label: 'Close current tab',
+        label: 'Close Current Tab',
         accelerator: `${cmd}+w`
       },
       ...systemFileMenus,
@@ -210,6 +210,12 @@ const getSystemMenus = () => {
         accelerator: `${cmd}+o`,
         click: () => {
           BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
+        }
+      },
+      {
+        label: 'Clear Unused Images',
+        click: (e, win) => {
+          win?.webContents.send('clear-unused-images')
         }
       },
       {type: 'separator'},

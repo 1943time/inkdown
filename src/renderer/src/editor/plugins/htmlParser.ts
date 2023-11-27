@@ -2,6 +2,7 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
 import {EditorUtils} from '../utils/editorUtils'
 import {BackspaceKey} from './hotKeyCommands/backspace'
+import {configStore} from '../../store/config'
 
 const findElementByNode = (node: ChildNode) => {
   const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
@@ -17,7 +18,7 @@ const ELEMENT_TAGS = {
   H5: () => ({type: 'head', level: 5}),
   TABLE: () => ({type: 'table'}),
   IMG: (el: HTMLImageElement) => {
-    return {type: 'media', url: el.src, downloadUrl: el.src && /^https?:/.test(el.src) ? el.src : undefined}
+    return {type: 'media', url: el.src, downloadUrl: configStore.config.autoDownload && el.src && /^https?:/.test(el.src) ? el.src : undefined }
   },
   TR: () => ({type: 'table-row'}),
   TH: () => ({type: 'table-cell', title: true}),

@@ -81,12 +81,20 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                Heading Mark Line
+                <span className={'mr-1'}>Automatically Download Images</span> <Help text={'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'}/>
               </div>
               <div>
-                <Checkbox checked={configStore.config.headingMarkLine} onChange={e => configStore.setConfig('headingMarkLine', e.target.checked)}/>
+                <Checkbox checked={configStore.config.autoDownload} onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
               </div>
             </div>
+            {/*<div className={'flex justify-between items-center py-3'}>*/}
+            {/*  <div className={'text-sm'}>*/}
+            {/*    Heading Mark Line*/}
+            {/*  </div>*/}
+            {/*  <div>*/}
+            {/*    <Checkbox checked={configStore.config.headingMarkLine} onChange={e => configStore.setConfig('headingMarkLine', e.target.checked)}/>*/}
+            {/*  </div>*/}
+            {/*</div>*/}
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
                 Drag To Sort

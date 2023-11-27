@@ -100,7 +100,7 @@ export const registerMenus = () => {
   })
 
   ipcMain.on('tree-context-menu', (e, params: {
-    type: 'rootFolder' | 'file' | 'folder'
+    type: 'rootFolder' | 'file' | 'folder',
     filePath?: string
   }) => {
     const temp = new Set<Menus[number]>()

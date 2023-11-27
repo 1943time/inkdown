@@ -8,9 +8,9 @@ class ConfigStore {
   visible = false
   config = {
     showLeading: true,
+    autoDownload: false,
     theme: 'system' as 'system' | 'dark' | 'light',
     dark: false,
-    headingMarkLine: true,
     codeLineNumber: false,
     codeTabSize: 2,
     editorTextSize: 16,
