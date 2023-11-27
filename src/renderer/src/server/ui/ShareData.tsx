@@ -3,9 +3,10 @@ import {Button, Checkbox, Modal, Pagination, Table, Tabs, Tooltip} from 'antd'
 import {useCallback, useEffect} from 'react'
 import dayjs from 'dayjs'
 import {
-  CloudUploadOutlined, DeleteOutlined,
+  DeleteOutlined,
   FileTextOutlined,
-  QuestionCircleOutlined, SettingOutlined, StarOutlined,
+  SettingOutlined,
+  StarOutlined,
   StopOutlined,
   SyncOutlined
 } from '@ant-design/icons'
@@ -18,6 +19,7 @@ import {shareSuccess$} from '../Share'
 import {CloseShare} from './CloseShare'
 import {message$, sizeUnit} from '../../utils'
 import {ServiceSet} from './ServiceSet'
+import {EBook} from './Ebook'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -76,7 +78,9 @@ export const ShareData = observer((props: {
     fileTotal: 0,
     fileTotalSize: 0,
     loading: false,
-    openServiceSet: false
+    openServiceSet: false,
+    openBookSetting: false,
+    selectBookFilePath: ''
   })
   const getDocs = useCallback(() => {
     setState({loading: true})
@@ -152,6 +156,14 @@ export const ShareData = observer((props: {
         setState({openServiceSet: false})
         getDevices()
       }}/>
+      <EBook
+        open={state.openBookSetting}
+        onClose={() => setState({openBookSetting: false})}
+        onSave={data => {
+          getBooks()
+        }}
+        defaultRootPath={state.selectBookFilePath}
+      />
       <div className={'min-h-[260px]'}>
         <Tabs
           activeKey={state.activeKey}
@@ -321,6 +333,16 @@ export const ShareData = observer((props: {
                         key: 'handle',
                         render: (v, record) => (
                           <div className={'space-x-1'}>
+                            <Button
+                              type={'link'} size={'small'}
+                              onClick={() => {
+                                setState({
+                                  openBookSetting: true,
+                                  selectBookFilePath: v.filePath
+                                })
+                              }}
+                              icon={<SettingOutlined/>}
+                            />
                             <Sync book={record}/>
                             <CloseShare book={record} onRemove={() => {
                               getBooks()

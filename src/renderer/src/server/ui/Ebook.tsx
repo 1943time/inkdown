@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Form, Input, Modal, Radio, Space} from 'antd'
+import {Button, Form, Input, Modal, Radio, Space, Spin} from 'antd'
 import {useEffect} from 'react'
 import {IBook} from '../model'
 import {shareStore} from '../store'
@@ -17,7 +17,8 @@ export const EBook = observer((props: {
   const [state, setState] = useLocalState({
     submitting: false,
     config: {} as any,
-    book: null as null | IBook
+    book: null as null | IBook,
+    loading: false
   })
   const [form] = Form.useForm()
 
@@ -26,6 +27,7 @@ export const EBook = observer((props: {
       form.resetFields()
       setState({book: null})
       if (props.defaultRootPath) {
+        setState({loading: true})
         shareStore.api.findBookByFilepath(props.defaultRootPath).then(res => {
           if (!res.book) {
             form.setFieldsValue({
@@ -43,7 +45,7 @@ export const EBook = observer((props: {
               chapters: res.book.config.chapters ? JSON.stringify(res.book.config.chapters, null, 2) : undefined
             })
           }
-        })
+        }).finally(() => setState({loading: false}))
       }
     }
   }, [props.open, props.defaultRootPath])
@@ -80,6 +82,11 @@ export const EBook = observer((props: {
         })
       }}
     >
+      {state.loading &&
+        <div className={'absolute inset-0 z-10 bg-white/30 flex items-center justify-center'}>
+          <Spin/>
+        </div>
+      }
       <Form form={form} layout={'horizontal'} labelCol={{span: 5}} className={'mt-6'}>
         <Form.Item
           label={'Book Id'} name={'path'}

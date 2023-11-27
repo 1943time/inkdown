@@ -37,7 +37,7 @@ const matchText = (insert: (ctx: CheckMdParams) => void, matchString?: string) =
     }
     Transforms.select(editor, {
       anchor: {path: sel.anchor.path, offset: match.index!},
-      focus: {path: sel.anchor.path, offset: match.index! + startText.length}
+      focus: {path: sel.anchor.path, offset: match.index! + startText.length - 1}
     })
     insert(ctx)
     const addSel = editor.selection
@@ -272,7 +272,7 @@ export const MdElements: Record<string, MdNode> = {
     reg: /`([^\n`]+)`/,
     matchKey: '`',
     run: matchText(({editor, match}) => {
-      Transforms.insertNodes(editor, [{text: match[1], code: true}], {select: true})
+      Transforms.insertNodes(editor, [{text: match[1], code: true}])
     })
   },
   boldAndItalic: {
