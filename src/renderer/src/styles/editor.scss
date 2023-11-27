@@ -286,6 +286,11 @@ ol.m-list {
   line-height: 1.62em;
   direction: ltr;
   &.katex-container{
+    &.num pre{
+      &:before,&:after{
+        left: 40px;
+      }
+    }
     pre{
       position: relative;
       padding: 1.8em 0;
@@ -302,6 +307,9 @@ ol.m-list {
       &:after{
         bottom:4px
       }
+    }
+    .code-line-list{
+      padding-top: 1.8em;
     }
   }
   &.frontmatter{
