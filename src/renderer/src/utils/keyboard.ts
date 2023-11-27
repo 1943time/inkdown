@@ -7,6 +7,7 @@ import {runInAction} from 'mobx'
 import {ReactEditor} from 'slate-react'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {isAbsolute, join, relative} from 'path'
+import {configStore} from '../store/config'
 
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
@@ -271,6 +272,18 @@ export class MenuKey {
           const markdownCode = window.api.getClipboardText()
           if (markdownCode) {
             parserMdToSchema([markdownCode]).then(([schema]) => {
+              if (configStore.config.autoDownload) {
+                const stack = schema.slice()
+                while (stack.length) {
+                  const item = stack.pop()!
+                  if (item.type === 'media' && item.url?.startsWith('http')) {
+                    item.downloadUrl = item.url
+                  }
+                  if (item.children?.length) {
+                    stack.push(...item.children)
+                  }
+                }
+              }
               if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
                 const first = schema.shift()
                 Editor.insertNode(editor, first.children)
