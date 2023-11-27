@@ -263,13 +263,17 @@ export const Share = observer(() => {
               loading={state.upgradeLoading}
               onClick={action(() => {
                 setState({upgradeLoading: true})
-                shareStore.api.upgrade().then(() => {
+                shareStore.api.upgrade().then(async () => {
                   message$.next({
                     type: 'success',
                     content: 'Upgrade completed'
                   })
                   setState({upgradeLoading: false})
-                  runInAction(() => shareStore.showUpdateTips = false)
+                  const v = await shareStore.api.getVersion()
+                  runInAction(() => {
+                    shareStore.showUpdateTips = false
+                    shareStore.currentVersion = v.version
+                  })
                 }).catch(e => {
                   message$.next({
                     type: 'error',
