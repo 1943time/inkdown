@@ -25,8 +25,8 @@ import {CloseShare} from './ui/CloseShare'
 import {ShareData} from './ui/ShareData'
 import {action, runInAction} from 'mobx'
 import {ServiceSet} from './ui/ServiceSet'
+import {shareSuccessfully$, Successfully} from './ui/Successfully'
 
-export const shareSuccess$ = new Subject<string>()
 export const Share = observer(() => {
   const [state, setState] = useLocalState({
     popOpen: false,
@@ -45,23 +45,6 @@ export const Share = observer(() => {
     })
   }, [])
 
-  useEffect(() => {
-    if (state.popOpen) {
-      getBooks()
-      setState({refresh: !state.refresh})
-    }
-  }, [state.popOpen])
-
-  const [api, contextHolder] = notification.useNotification()
-
-  useSubject(shareSuccess$, (url: string) => {
-    shareSuccess(url)
-  })
-
-  const curDoc = useMemo(() => {
-    return shareStore.docMap.get(treeStore.openedNote?.filePath || '')
-  }, [treeStore.openNote, state.refresh])
-
   const copyDocUrl = useCallback((url: string) => {
     window.api.copyToClipboard(url)
     message$.next({
@@ -70,39 +53,20 @@ export const Share = observer(() => {
     })
   }, [])
 
+  useEffect(() => {
+    if (state.popOpen) {
+      getBooks()
+      setState({refresh: !state.refresh})
+    }
+  }, [state.popOpen])
+
+  const curDoc = useMemo(() => {
+    return shareStore.docMap.get(treeStore.openedNote?.filePath || '')
+  }, [treeStore.openNote, state.refresh])
+
   const closeMask = useCallback(() => {
     setTimeout(() => {
       setState({mask: false})
-    })
-  }, [])
-
-  const shareSuccess = useCallback((url: string) => {
-    const key = nanoid()
-    api.success({
-      key,
-      message: 'Synchronization succeeded',
-      duration: 3,
-      btn: (
-        <Space>
-          <Button
-            onClick={() => {
-              api.destroy(key)
-              copyDocUrl(url)
-            }}
-          >
-            Copy Link
-          </Button>
-          <Button
-            type={'primary'}
-            onClick={() => {
-              window.open(url)
-              api.destroy(key)
-            }}
-          >
-            Open
-          </Button>
-        </Space>
-      )
     })
   }, [])
 
@@ -112,14 +76,14 @@ export const Share = observer(() => {
       setState({syncing: true})
       shareStore.shareDoc(note.filePath, treeStore.root?.filePath).then(res => {
         setState({refresh: !state.refresh})
-        shareSuccess(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
+        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
       }).finally(() => setState({syncing: false}))
     }
   }, [])
 
   return (
     <>
-      {contextHolder}
+      <Successfully/>
       <Popover
         zIndex={100}
         content={(
@@ -236,7 +200,6 @@ export const Share = observer(() => {
                       books={state.books}
                       onCopy={copyDocUrl}
                       onOpenSetting={() => setState({mask: true, openSetting: true})}
-                      onShareSuccess={shareSuccess}
                       onRefresh={getBooks}
                       onMask={mask => setState({mask})}
                     />

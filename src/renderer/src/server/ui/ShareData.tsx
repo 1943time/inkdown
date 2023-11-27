@@ -15,11 +15,11 @@ import {default as BookIcon} from '../../icons/IBook'
 import {IBook, IDevice, IDoc, IFile} from '../model'
 import {useLocalState} from '../../hooks/useLocalState'
 import {shareStore} from '../store'
-import {shareSuccess$} from '../Share'
 import {CloseShare} from './CloseShare'
 import {message$, sizeUnit} from '../../utils'
 import {ServiceSet} from './ServiceSet'
 import {EBook} from './Ebook'
+import {shareSuccessfully$} from './Successfully'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -33,14 +33,14 @@ const Sync = observer((props: {
     try {
       if (props.doc) {
         const res = await shareStore.shareDoc(props.doc.filePath)
-        shareSuccess$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
+        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
       }
       if (props.book) {
         await shareStore.shareBook({
           ...props.book,
           name: ''
         })
-        shareSuccess$.next(`${shareStore.serviceConfig!.domain}/book/${props.book.path}`)
+        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${props.book.path}`)
       }
     } finally {
       setState({syncing: false})

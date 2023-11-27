@@ -19,13 +19,13 @@ import {action} from 'mobx'
 import {shareStore} from '../store'
 import {NotLogged} from './NotLogged'
 import {EBook} from './Ebook'
+import {shareSuccessfully$} from './Successfully'
 
 export const BookItem = observer((props: {
   books: ShareBook[]
   onCopy: (url: string) => void
   onMask: (mask: boolean) => void
   onRefresh: () => void
-  onShareSuccess: (url: string) => void
   onOpenSetting: () => void
 }) => {
   const [state, setState] = useLocalState({
@@ -80,7 +80,7 @@ export const BookItem = observer((props: {
                           ...b,
                           name: ''
                         }).then(() => {
-                          props.onShareSuccess(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
+                          shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
                         }).finally(action(() => b.updating = false))
                       })}
                     >
@@ -162,7 +162,6 @@ export const BookItem = observer((props: {
           closeMask()
         }}
         onSave={book => {
-          props.onShareSuccess(`${shareStore.serviceConfig!.domain}/book/${book.path}`)
           props.onRefresh()
         }}
       />

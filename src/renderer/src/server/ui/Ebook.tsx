@@ -7,6 +7,7 @@ import {useLocalState} from '../../hooks/useLocalState'
 import {stat} from '../../utils'
 import {AceCode} from '../../components/AceCode'
 import {MainApi, openDialog} from '../../api/main'
+import {shareSuccessfully$} from './Successfully'
 
 export const EBook = observer((props: {
   open: boolean
@@ -77,6 +78,7 @@ export const EBook = observer((props: {
             })
             if (res) {
               props.onSave(res.book)
+              shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${res.book.path}`)
               props.onClose()
             }
           } finally {
