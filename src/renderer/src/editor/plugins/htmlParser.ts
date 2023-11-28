@@ -160,7 +160,7 @@ const processFragment = (fragment: any[], parentType = '') => {
       }
       continue
     }
-    if (f.children && f.type) {
+    if (f.children && f.type && f.type !== 'code') {
       f.children = processFragment(f.children, f.type)
     }
     trans.push(f)
