@@ -121,6 +121,7 @@ export class TreeStore {
           case 'createNote':
             const addNote = createFileNode({
               folder: false,
+              editName: 'untitled',
               parent: this.ctxNode || this.root,
               mode: 'create',
               filePath: ''
@@ -424,6 +425,7 @@ export class TreeStore {
         file.filePath = path
         file.filename = parse(path).name
         file.editName = undefined
+        this.openNote(file)
       }
       parent.children = sortFiles(parent.children!)
     }

@@ -18,11 +18,13 @@ export const createFileNode = (params: {
   parent?: IFileItem
   filePath: string
   mode?: IFileItem['mode']
+  editName?: string
 }) => {
   const p = parse(params.filePath).name
   const node = {
     id: nanoid(),
     filename: p,
+    editName: params.editName,
     folder: params.folder,
     children: params.folder ? [] : undefined,
     mode: params.mode,
