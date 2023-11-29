@@ -12,6 +12,7 @@ import {action} from 'mobx'
 import {History} from './History'
 import IClose from '../icons/IClose'
 import {useSystemMenus} from '../hooks/menu'
+import {Tabs} from './Tabs'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -47,55 +48,15 @@ export const Home = observer(() => {
       />
       <div className={'flex-1 overflow-hidden flex flex-col pt-10 relative'}>
         <Nav/>
-        {treeStore.tabs.length > 1 &&
+        <Tabs/>
+        {treeStore.tabs.map((t) =>
           <div
-            id={'nav-tabs'}
-            className={`h-8 bg-gray-50 dark:bg-zinc-900 border-gray-200/80 dark:border-gray-200/10 border-b text-[13px] overflow-x-auto hide-scrollbar w-full absolute top-10 z-50`}
+            className={`flex-1 h-full overflow-y-auto items-start ${treeStore.currentTab === t ? '' : 'hidden'}`}
+            key={t.id}
           >
-            <div className={'flex h-full'}>
-              {treeStore.tabs.map((t, i) =>
-                <div
-                  onContextMenu={action(() => {
-                    treeStore.tabContextIndex = i
-                    window.electron.ipcRenderer.send('tab-context-menu')
-                  })}
-                  title={t.current?.filePath}
-                  onClick={() => {
-                    treeStore.selectTab(i)
-                  }}
-                  className={`${i === treeStore.currentIndex ? 'dark:bg-zinc-300/5 bg-white text-gray-600 dark:text-gray-200' : 'dark:text-gray-300 text-gray-500  hover:text-gray-600 dark:hover:text-gray-200'}
-              ${i !== 0 ? 'border-l dark:border-gray-200/10 border-gray-200' : ''}
-              relative flex-1 min-w-[200px] h-full flex items-center group px-8 cursor-default`}
-                  key={i}
-                >
-                  <div
-                    className={`opacity-0 group-hover:opacity-100 duration-200 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-200/10
-                absolute left-1 p-[1px] top-1/2 -translate-y-1/2 dark:text-gray-500 dark:hover:text-gray-300`}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      treeStore.removeTab(i)
-                    }}
-                  >
-                    <IClose
-                      className={'w-[14px] h-[14px]'}
-                    />
-                  </div>
-                  <div className={'w-full truncate text-center select-none'}>
-                    {t.current? t.current.filename : 'New Tab'}
-                  </div>
-                </div>
-              )}
-            </div>
+            <EditorFrame tab={t}/>
           </div>
-        }
-          {treeStore.tabs.map((t) =>
-            <div
-              className={`flex-1 h-full overflow-y-auto items-start ${treeStore.currentTab === t ? '' : 'hidden'}`}
-              key={t.id}
-            >
-              <EditorFrame tab={t}/>
-            </div>
-          )}
+        )}
         <Characters/>
       </div>
       <About/>
