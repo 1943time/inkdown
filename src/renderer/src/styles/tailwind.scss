@@ -64,6 +64,10 @@
 .animate-show{
   animation: show .1s .3s forwards;
 }
+.pdf .code-highlight pre{
+  white-space: pre-wrap;
+  word-break: break-all;
+}
 @keyframes show {
   from{
     opacity: 0;

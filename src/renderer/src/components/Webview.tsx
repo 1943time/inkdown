@@ -40,7 +40,7 @@ export const Webview = observer((props: {
 
   if (!ready) return null
   return (
-    <div className={`view w-full ${props.history ? '' : 'h-full'} content p-5 heading-line`}>
+    <div className={`view w-full ${props.history ? '' : 'h-full'} content p-5 heading-line ${props.history ? '' : 'pdf'}`}>
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={store.editor}

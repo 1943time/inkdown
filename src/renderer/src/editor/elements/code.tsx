@@ -77,7 +77,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         {...props.attributes}
         data-be={'code'}
         onDragStart={store.dragStart}
-        className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <DragHandle style={{top: '0.9em'}}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
@@ -129,7 +129,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             </>
           }
         </div>
-        {configStore.config.codeLineNumber &&
+        {configStore.config.codeLineNumber && !store.webview &&
           <div className={'code-line-list'} contentEditable={false}>
             {(props.children || []).map((c, i) =>
               <div key={i}/>
@@ -141,7 +141,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             data-bl-type={'code'}
             className={`text-gray-200`}
             style={{
-              paddingLeft: configStore.config.codeLineNumber ? 44 : 20,
+              paddingLeft: configStore.config.codeLineNumber && !store.webview ? 44 : 20,
               paddingRight: 20
             }}
             data-bl-lang={state().lang}
