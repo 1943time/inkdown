@@ -162,7 +162,7 @@ export class BackspaceKey {
             return true
           }
         }
-        if (!pre) {
+        if (!pre && !Editor.previous<any>(this.editor, {at: sel.anchor.path})) {
           const parent = Editor.parent(this.editor, path)
           if (parent[0].type === 'blockquote') {
             if (Editor.hasPath(this.editor, Path.next(path))) {

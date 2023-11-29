@@ -9,7 +9,6 @@ export const Tabs = observer(() => {
   const [state, setState] = useLocalState({
     dragIndex: 0,
     dragging: false,
-    mode: '',
     targetIndex: -1,
     markLeft: 0
   })
@@ -26,11 +25,15 @@ export const Tabs = observer(() => {
     <div
       id={'nav-tabs'}
       ref={tabRef}
+      onDragOver={e => {
+        e.preventDefault()
+        findIndex(e.clientX)
+      }}
       className={`h-8 bg-gray-50 dark:bg-zinc-900 border-gray-200/80 dark:border-gray-200/10 border-b text-[13px] overflow-x-auto hide-scrollbar w-full absolute top-10 z-50`}
     >
       <div className={'flex h-full relative'}>
         <div
-          className={`absolute w-0.5 bg-sky-500 left-0 top-0 h-full duration-100 ${state.dragging && state.targetIndex !== state.dragIndex ? '' : 'hidden'}`}
+          className={`absolute w-0.5 bg-sky-500 -left-[1px] top-0 h-full ${state.dragging && state.dragIndex !== state.targetIndex ? '' : 'hidden'}`}
           style={{
             transform: `translateX(${state.markLeft}px)`
           }}
@@ -40,14 +43,9 @@ export const Tabs = observer(() => {
             draggable={true}
             onDragStart={e => {
               setState({dragging: true, dragIndex: i, targetIndex: -1})
-              findIndex(e.clientX)
-            }}
-            onDragOver={e => {
-              e.preventDefault()
-              findIndex(e.clientX)
             }}
             onDrop={e => {
-              if (state.targetIndex - 1 !== state.dragIndex) {
+              if (state.targetIndex > 0 && state.targetIndex - 1 !== state.dragIndex && state.dragIndex !== state.targetIndex) {
                 runInAction(() => {
                   const currentTab = treeStore.tabs[treeStore.currentIndex]
                   const [tab] = treeStore.tabs.splice(state.dragIndex, 1)
@@ -58,7 +56,7 @@ export const Tabs = observer(() => {
                 })
               }
             }}
-            onDragEnd={e => setState({dragging: false})}
+            onDragEnd={e => setState({dragging: false, targetIndex: -1})}
             onContextMenu={action(() => {
               treeStore.tabContextIndex = i
               window.electron.ipcRenderer.send('tab-context-menu')
