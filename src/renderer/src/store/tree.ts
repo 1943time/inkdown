@@ -120,7 +120,7 @@ export class TreeStore {
         const {filePath, type} = params
         switch (params.command) {
           case 'createNote':
-            const addNote = createFileNode({
+            let addNote = createFileNode({
               folder: false,
               editName: 'untitled',
               parent: this.ctxNode || this.root,
@@ -132,6 +132,7 @@ export class TreeStore {
             } else {
               this.ctxNode.children!.unshift(addNote)
             }
+            addNote.parent!.expand = true
             break
           case 'createFolder':
             const addFolder = createFileNode({

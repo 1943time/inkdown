@@ -82,6 +82,7 @@ export const MainApi = {
   }) {
     return openDialog({
       title: data?.title || 'Open File',
+      message: data?.title || 'Open File',
       properties: ['openFile'],
       defaultPath: data?.defaultFilePath,
       filters: [{name: 'f', extensions: data?.ext || ['md', 'markdown']}]
