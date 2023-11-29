@@ -1,5 +1,5 @@
 import {action, makeAutoObservable, runInAction} from 'mobx'
-import {readFileSync} from 'fs'
+import {existsSync, readdirSync, readFileSync, statSync} from 'fs'
 import {ShareApi} from './sync/api'
 import {IBook, IDoc} from './model'
 import {BsFile} from './sync/file'
@@ -8,9 +8,10 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {MainApi} from '../api/main'
 import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
+import {join} from 'path'
 
 export class ShareStore {
-  readonly minVersion = '0.2.1'
+  readonly minVersion = '0.2.2'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()
@@ -27,6 +28,8 @@ export class ShareStore {
     deviceId: string
   } = null
   api: ShareApi
+  private changedDocs: {from: string, to: string}[] = []
+  private changedBooks: {from: string, to: string}[] = []
   constructor() {
     this.api = new ShareApi(this)
     this.file = new BsFile(this.api)
@@ -37,6 +40,61 @@ export class ShareStore {
       docMap: false,
       bookMap: false
     })
+  }
+  private detectFolderFiles(from: string, to: string) {
+    for (let f of readdirSync(to)) {
+      const sf = join(from, f), st = join(to, f)
+      const stat = statSync(st)
+      if (this.docMap.get(sf)) {
+        this.changedDocs.push({from: sf, to: st})
+      }
+      if (this.bookMap.get(sf) && stat.isDirectory()) {
+        this.changedBooks.push({from: sf, to: st})
+      }
+      if (stat.isDirectory()) {
+        this.detectFolderFiles(sf, st)
+      }
+    }
+  }
+  renameFilePath(from: string, to: string) {
+    if (this.serviceConfig && existsSync(to)) {
+      this.changedDocs = []
+      this.changedBooks = []
+      if (statSync(to).isDirectory()) {
+        if (this.bookMap.get(from)) {
+          this.changedBooks.push({from, to})
+        }
+        this.detectFolderFiles(from, to)
+      } else {
+        if (this.docMap.get(from)) {
+          this.changedDocs = [{from, to}]
+        }
+        if (this.bookMap.get(from)) {
+          this.changedBooks = [{from, to}]
+        }
+      }
+      if (this.changedDocs.length) {
+        this.api.updateFilePath({
+          mode: 'updateDocs',
+          files: this.changedDocs
+        }).then(res => {
+          res.docs?.map(d => this.docMap.set(d.filePath, d))
+        })
+      }
+      if (this.changedBooks.length) {
+        this.api.updateFilePath({
+          mode: 'updateBooks',
+          files: this.changedBooks
+        }).then(res => {
+          for (let b of this.changedBooks) {
+            this.bookMap.delete(b.from)
+          }
+          res.books?.map(d => {
+            this.bookMap.set(d.filePath, d)
+          })
+        })
+      }
+    }
   }
   getBooks(filePath: string) {
     return Array.from(this.bookMap).filter(item => item[1].filePath.startsWith(filePath)).map(item => item[1])
@@ -67,7 +125,7 @@ export class ShareStore {
           }
           await this.api.getShareData().then(action(res => {
             this.docMap = new Map(res.docs.map(c => [c.filePath, c]))
-            this.bookMap = new Map(res.books.map(c => [c.path, c]))
+            this.bookMap = new Map(res.books.map(c => [c.filePath, c]))
           }))
         } catch (e) {
           console.log('e', e)
@@ -100,13 +158,13 @@ export class ShareStore {
 
   async shareBook(data: Partial<IBook>) {
     return this.book.syncBook(data).then(res => {
-      this.bookMap.set(res.book.path, res.book)
+      this.bookMap.set(res.book.filePath, res.book)
       return res
     })
   }
 
   async delBook(book: IBook) {
-    return this.api.delBook(book.id).then(() => this.bookMap.delete(book.path))
+    return this.api.delBook(book.id).then(() => this.bookMap.delete(book.filePath))
   }
   clear() {
     this.docMap.clear()

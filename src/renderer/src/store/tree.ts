@@ -15,6 +15,7 @@ import {appendRecentDir, appendRecentNote, db, removeFileRecord} from './db'
 import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
+import {shareStore} from '../server/store'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -374,10 +375,13 @@ export class TreeStore {
       }
       const fromPath = this.dragNode.filePath
       const toPath = to.filePath!
+      const dragNode = this.dragNode
       this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
       this.dropNode = null
       const targetPath = join(toPath, basename(fromPath))
       renameSync(fromPath, targetPath)
+      // Synchronize remote mapping
+      if (dragNode.folder || dragNode.ext === 'md') shareStore.renameFilePath(fromPath, targetPath)
       to.children!.push(this.dragNode)
       to.children = sortFiles(to.children!)
 
@@ -425,7 +429,7 @@ export class TreeStore {
         file.filePath = path
         file.filename = parse(path).name
         file.editName = undefined
-        this.openNote(file)
+        if (!file.folder) this.openNote(file)
       }
       parent.children = sortFiles(parent.children!)
     }
@@ -451,6 +455,7 @@ export class TreeStore {
         })
         file.mode = undefined
         if (file.ext === 'md') removeFileRecord(path, newPath)
+        if (file.ext === 'md' || file.folder) shareStore.renameFilePath(path, newPath)
       }
     }
   }

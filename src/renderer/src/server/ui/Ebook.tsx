@@ -65,6 +65,7 @@ export const EBook = observer((props: {
         form.validateFields().then(async v => {
           setState({submitting: true})
           try {
+            const oldFilePath = state.book?.filePath
             const res = await shareStore.shareBook({
               id: state.book?.id,
               name: v.name,
@@ -76,6 +77,9 @@ export const EBook = observer((props: {
                 chapters: v.chapters ? JSON.parse(v.chapters) : undefined
               }
             })
+            if (state.book?.id && state.book.filePath !==  v.filePath) {
+              shareStore.bookMap.delete(oldFilePath!)
+            }
             if (res) {
               props.onSave(res.book)
               shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${res.book.path}`)

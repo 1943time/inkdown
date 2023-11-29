@@ -75,11 +75,16 @@ export const MainApi = {
       ...options
     })
   },
-  openFile(ext = ['md', 'markdown']) {
+  openFile(data?: {
+    ext?: string[],
+    title?: string
+    defaultFilePath?: string
+  }) {
     return openDialog({
-      title: 'Open File',
+      title: data?.title || 'Open File',
       properties: ['openFile'],
-      filters: [{name: 'f', extensions: ext}]
+      defaultPath: data?.defaultFilePath,
+      filters: [{name: 'f', extensions: data?.ext || ['md', 'markdown']}]
     })
   },
   open(rootPath?: string) {

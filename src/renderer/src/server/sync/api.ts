@@ -122,6 +122,14 @@ export class ShareApi {
       json: data
     }).json<{doc: IDoc, deps: IFile[]}>()
   }
+  updateFilePath(data: {
+    mode: 'updateDocs' | 'updateBooks',
+    files: {from: string, to: string}[]
+  }) {
+    return this.http.put(`${this.config.domain}/api/device`, {
+      json: data
+    }).json<{docs?: IDoc[], books?: IBook[]}>()
+  }
   shareDoc(data: {
     id: string, schema: string, remove: string[], hash: string
   }) {

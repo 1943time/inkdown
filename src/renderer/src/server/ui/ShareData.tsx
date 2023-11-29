@@ -4,7 +4,7 @@ import {useCallback, useEffect} from 'react'
 import dayjs from 'dayjs'
 import {
   DeleteOutlined,
-  FileTextOutlined,
+  FileTextOutlined, FolderOpenOutlined,
   SettingOutlined,
   StarOutlined,
   StopOutlined,
@@ -20,6 +20,9 @@ import {message$, sizeUnit} from '../../utils'
 import {ServiceSet} from './ServiceSet'
 import {EBook} from './Ebook'
 import {shareSuccessfully$} from './Successfully'
+import {existsSync} from 'fs'
+import {MainApi} from '../../api/main'
+import {treeStore} from '../../store/tree'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -236,10 +239,35 @@ export const ShareData = observer((props: {
                         title: 'Filepath',
                         dataIndex: 'filePath',
                         render: v => (
-                          <Tooltip trigger={['click']} title={v}>
-                            <div
-                              className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
-                          </Tooltip>
+                          <div className={'flex'}>
+                            <FolderOpenOutlined
+                              className={'link mr-2'}
+                              onClick={() => {
+                                MainApi.openFile({
+                                  title: 'Change mapping file',
+                                  defaultFilePath: treeStore.root?.filePath
+                                }).then(res => {
+                                  if (res.filePaths.length) {
+                                    shareStore.api.updateFilePath({
+                                      files: [{from: v, to: res.filePaths[0]}],
+                                      mode: 'updateDocs'
+                                    }).then(res => {
+                                      res.docs?.map(d => shareStore.docMap.set(d.filePath, d))
+                                      message$.next({
+                                        type: 'success',
+                                        content: 'Mapping file changed'
+                                      })
+                                      getDocs()
+                                    })
+                                  }
+                                })
+                              }}
+                            />
+                            <Tooltip trigger={['click']} title={v}>
+                              <div
+                                className={`cursor-default max-w-[300px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
+                            </Tooltip>
+                          </div>
                         )
                       },
                       {
@@ -315,7 +343,7 @@ export const ShareData = observer((props: {
                         render: v => (
                           <Tooltip trigger={['click']} title={v}>
                             <div
-                              className={'cursor-default max-w-[300px] truncate text-xs dark:text-gray-300/80 text-gray-500'}>{v}</div>
+                              className={`cursor-default max-w-[300px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
                           </Tooltip>
                         )
                       },
