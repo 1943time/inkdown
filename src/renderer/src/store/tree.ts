@@ -209,7 +209,7 @@ export class TreeStore {
       first ? this.tabs[0] = tab : this.tabs.push(tab)
       first = false
     }
-    if (this.currentTab.current?.filePath) this.openParentDir(this.currentTab.current.filePath)
+    if (this.currentTab.current?.filePath) this.openParentDir(this.currentTab.current)
   }
 
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
@@ -228,18 +228,10 @@ export class TreeStore {
     return this.schemaMap.get(file)
   }
 
-  openParentDir(filePath: string) {
-    const stack = this.root?.children?.slice() || []
-    while (stack.length) {
-      const item = stack.shift()!
-      if (filePath.startsWith(item.filePath)) {
-        if (item.folder) {
-          item.expand = true
-          if (filePath !== item.filePath) {
-            stack.push(...item.children!)
-          }
-        }
-      }
+  openParentDir(item: IFileItem) {
+    while (item.parent) {
+      item.parent.expand = true
+      item = item.parent
     }
   }
 
@@ -261,30 +253,31 @@ export class TreeStore {
     if (this.currentTab.current?.filePath === filePath) return
     this.checkOtherTabsShouldUpdate()
     if (this.root && filePath.startsWith(this.root.filePath)) {
-      const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
-      let node = typeof file === 'string' ? nodeMap.get(filePath) : file
-      if (!node) {
-        if (!existsSync(filePath)) appendFileSync(filePath, '', {encoding: 'utf-8'})
-        const parent = nodeMap.get(join(filePath, '..'))
-        node = createFileNode({
-          filePath: filePath,
-          folder: false,
-          parent: parent
-        })
-        if (parent) parent.children = sortFiles([...parent.children!, node])
-      }
-      if (node) {
-        if (node.ext === 'md' && this.root) appendRecentNote(node.filePath, this.root.filePath)
-        this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
-        this.currentTab.history.push(node)
-        this.openParentDir(node.filePath)
-        this.currentTab.index = this.currentTab.history.length - 1
-        if (this.currentTab.store?.openSearch) this.currentTab.store.setSearchText(this.currentTab.store.search.text)
-        if (scroll) {
-          this.currentTab.store!.container?.scroll({
-            top: 0
+      let item = typeof file === 'string' ? undefined : file
+      if (!item) {
+        const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
+        item = nodeMap.get(filePath)
+        if (!item) {
+          if (!existsSync(filePath)) appendFileSync(filePath, '', {encoding: 'utf-8'})
+          const parent = nodeMap.get(join(filePath, '..'))
+          item = createFileNode({
+            filePath: filePath,
+            folder: false,
+            parent: parent
           })
+          if (parent) parent.children = sortFiles([...parent.children!, item])
         }
+      }
+      if (item.ext === 'md' && this.root) appendRecentNote(item.filePath, this.root.filePath)
+      this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
+      this.currentTab.history.push(item)
+      this.openParentDir(item)
+      this.currentTab.index = this.currentTab.history.length - 1
+      if (this.currentTab.store?.openSearch) this.currentTab.store.setSearchText(this.currentTab.store.search.text)
+      if (scroll) {
+        this.currentTab.store!.container?.scroll({
+          top: 0
+        })
       }
     } else {
       const index = this.currentTab.history.findIndex(f => f.filePath === filePath)
@@ -328,7 +321,7 @@ export class TreeStore {
       const first = this.firstNote
       if (first) {
         this.openNote(first)
-        this.openParentDir(first.filePath)
+        this.openParentDir(first)
       }
     }
   }

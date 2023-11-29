@@ -67,7 +67,7 @@ const Item = observer((
     }
   }, [item.mode])
   return (
-    <Fragment key={item.id}>
+    <Fragment>
       <div
         data-eid={item.id}
         style={{
