@@ -33,7 +33,7 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       Transforms.insertNodes(editor, {
           type: 'list', order: isOrder ? true : undefined,
           children: [{type: 'list-item', checked: task ? false : undefined, children: [{type: 'paragraph', children: text}]}]
-        }, {at: node[1]}
+        }, {at: node[1], select: true}
       )
     }
   }

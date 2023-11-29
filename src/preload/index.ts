@@ -9,7 +9,6 @@ import got, {Got} from 'got'
 import {ExtendOptions} from 'got/dist/source/types'
 import {toUnix} from 'upath'
 import mime from 'mime-types'
-import {Service} from './service/service'
 import FormData from 'form-data'
 import {createReadStream} from 'fs'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
@@ -18,7 +17,6 @@ let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
   langSet,
-  service: new Service,
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
