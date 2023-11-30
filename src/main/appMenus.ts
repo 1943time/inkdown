@@ -443,7 +443,7 @@ const getSystemMenus = () => {
               accelerator: `${cmd}+p`,
               click: (e, win) => {
                 dialog.showOpenDialog({
-                  properties: ['openFile'],
+                  properties: ['openFile', 'showHiddenFiles'],
                   filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
                   securityScopedBookmarks: true
                 }).then(res => {

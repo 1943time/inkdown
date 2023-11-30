@@ -79,6 +79,11 @@ export const MediaAttr = observer(() => {
       setState({
         top: top - 32, left, width, visible: true
       })
+      if (!nodeRef.current?.[0].url) {
+        setTimeout(() => {
+          domRef.current?.querySelector('input')?.select()
+        })
+      }
     }
   }, [])
 

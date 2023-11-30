@@ -115,7 +115,32 @@ export class MenuKey {
         if (other && treeStore.root && isAbsolute(other) && treeStore.openedNote) {
           other = relative(join(treeStore.openedNote.filePath, '..'), other)
         }
-        this.state.insertInlineNode(other || 'https://xxx/image.png')
+        if (other) {
+          this.state.insertInlineNode(other)
+        } else {
+          let node = {
+            type: 'media',
+            url: '',
+            alt: '',
+            children: [{text: ''}]
+          }
+          const [cur] = Editor.nodes<any>(this.state.editor, {
+            match: n => Element.isElement(n),
+            mode: 'lowest'
+          })
+
+          if (cur[0].type === 'paragraph') {
+            Transforms.insertNodes(this.state.editor, node, {select: true})
+          } else {
+            const [par] = Editor.nodes<any>(this.state.editor, {
+              match: n => Element.isElement(n) && ['table', 'code', 'head'].includes(n.type)
+            })
+            Transforms.insertNodes(this.state.editor, {
+              type: 'paragraph',
+              children: [node]
+            }, {select: true, at: Path.next(par[1])})
+          }
+        }
         return
       }
 

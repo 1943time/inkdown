@@ -40,10 +40,9 @@ export class EditorStore {
   openSearch = false
   focusSearch = false
   docChanged = false
-  searchRanges: (Range[])[] = []
+  searchRanges: Range[] = []
   highlightCache = new Map<object, Range[]>()
   private searchTimer = 0
-  matchCount = 0
   refreshFloatBar = false
   refreshTableAttr = false
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
@@ -73,9 +72,6 @@ export class EditorStore {
       container: false,
       highlightCache: false,
       dragEl: false
-    })
-    observe(this.search, 'text', () => {
-      this.matchCount = 0
     })
   }
   hideRanges() {
@@ -118,7 +114,6 @@ export class EditorStore {
     this.searchRanges = []
     if (!this.search.text) {
       this.search.currentIndex = 0
-      this.matchCount = 0
       this.refreshHighlight = !this.refreshHighlight
       return
     }
@@ -134,46 +129,37 @@ export class EditorStore {
       if (!str || /^\s+$/.test(str) || !str.includes(keyWord)) {
         continue
       }
-      let offset = 0
-      const parts = str.split(keyWord)
-      let length = 0
-      const children = el.children as any[] || []
-      const childrenMap = children.map((e, i) => {
-        const end = length + (e.text?.length || 0)
-        const data = {index: i, start: length, end, length: e.text?.length || 0}
-        length = end
-        return data
-      })
       let ranges: Range[] = []
-      let itemRanges: Range[] = []
-      for (let i = 0; i < parts.length; i++) {
-        if (i !== 0) {
-          const start = offset - keyWord.length
-          for (let c of childrenMap) {
-            if (c.start < offset && c.end > start) {
-              const anchorOffset = start < c.start ? 0 : start - c.start
-              const focusOffset = offset > c.end ? c.length : offset - c.start
-              const range: Range = {
-                anchor: {path: [...path, c.index], offset: anchorOffset},
-                focus: {path: [...path, c.index], offset: focusOffset},
-                current: matchCount === this.search.currentIndex,
-                highlight: true
-              }
-              itemRanges.push(range)
-              ranges.push(range)
-              if (c.end >= offset) {
-                matchCount++
-                this.searchRanges.push(itemRanges)
-                itemRanges = []
-              }
+      for (let i = 0; i < el.children.length; i++) {
+        const text = el.children[i].text?.toLowerCase()
+        if (text && text.includes(keyWord)) {
+          const sep = text.split(keyWord)
+          let offset = 0
+          for (let j = 0; j < sep.length; j++) {
+            if (j === 0) {
+              offset += sep[j].length
+              continue
             }
+            ranges.push({
+              anchor: {
+                path: [...path, i],
+                offset: offset
+              },
+              focus: {
+                path: [...path, i],
+                offset: offset + keyWord.length
+              },
+              current: matchCount === this.search.currentIndex,
+              highlight: true
+            })
+            offset += (sep[j].length + keyWord.length)
+            matchCount++
           }
         }
-        offset += parts[i].length + keyWord.length
       }
+      this.searchRanges.push(...ranges)
       this.highlightCache.set(el, ranges)
     }
-    this.matchCount = matchCount
     if (this.search.currentIndex > matchCount - 1) {
       this.search.currentIndex = 0
     }
@@ -209,15 +195,7 @@ export class EditorStore {
 
   private changeCurrent() {
     this.searchRanges.forEach((r, i) => {
-      if (i === this.search.currentIndex) {
-        r.forEach(e => {
-          e.current = true
-        })
-      } else {
-        r.forEach(e => {
-          e.current = false
-        })
-      }
+      this.searchRanges[i].current = i === this.search.currentIndex
     })
     this.refreshHighlight = !this.refreshHighlight
   }
@@ -323,8 +301,8 @@ export class EditorStore {
 
   private toPoint() {
     const cur = this.searchRanges[this.search.currentIndex]
-    if (!cur?.length) return
-    const node = Node.get(this.editor, Path.parent(cur[0].focus.path))
+    if (!cur) return
+    const node = Node.get(this.editor, Path.parent(cur.focus.path))
     const dom = ReactEditor.toDOMNode(this.editor, node)
     if (dom) {
       const top = this.offsetTop(dom)
