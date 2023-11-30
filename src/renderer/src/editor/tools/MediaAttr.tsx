@@ -153,6 +153,15 @@ export const MediaAttr = observer(() => {
   useEffect(() => {
     resize()
   }, [treeStore.size, store.openSearch, treeStore.tabs.length])
+
+  const setUrl = useCallback(() => {
+    const path = nodeRef.current![1]
+    Transforms.setNodes(
+      store.editor,
+      {url: state().url || '', alt: state().alt || ''},
+      {at: path}
+    )
+  }, [])
   return (
     <div
       className={`dark:bg-zinc-900 bg-white border border-gray-100 dark:border-gray-100/10 rounded-tr rounded-tl
@@ -174,6 +183,7 @@ export const MediaAttr = observer(() => {
         allowClear={true}
         onSelect={e => {
           setState({url: e})
+          setUrl()
         }}
         options={state().filterPaths}
         onSearch={e => {
@@ -188,14 +198,7 @@ export const MediaAttr = observer(() => {
       />
       <div className={'rounded-sm dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 ml-2 px-1 py-0.5'}>
         <CheckOutlined
-          onClick={() => {
-            const path = nodeRef.current![1]
-            Transforms.setNodes(
-              store.editor,
-              {url: state().url || '', alt: state().alt || ''},
-              {at: path}
-            )
-          }}
+          onClick={setUrl}
           className={'dark:text-gray-300 text-gray-500 cursor-default relative'}
         />
       </div>
