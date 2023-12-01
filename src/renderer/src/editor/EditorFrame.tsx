@@ -17,6 +17,7 @@ import {getImageData} from '../utils'
 import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
 import {InsertNetworkImage} from './tools/InsertNetworkImage'
+import {LangAutocomplete} from './tools/LangAutocomplete'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
@@ -137,6 +138,7 @@ export const EditorFrame = observer(({tab}: {
         <TableAttr/>
         <MediaAttr/>
         <InsertNetworkImage/>
+        <LangAutocomplete/>
       </div>
     </EditorStoreContext.Provider>
   )

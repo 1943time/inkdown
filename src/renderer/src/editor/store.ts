@@ -45,6 +45,8 @@ export class EditorStore {
   private searchTimer = 0
   refreshFloatBar = false
   refreshTableAttr = false
+  openLangCompletion = false
+  langCompletionText = new Subject<string>()
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
   tableCellNode: null | NodeEntry<TableCellNode> = null
   refreshHighlight = false

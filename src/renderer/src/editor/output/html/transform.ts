@@ -11,7 +11,7 @@ const langMap = new Map([
   ['c++', 'cpp']
 ])
 export const codeLangMap = (lang: string) => {
-  return langMap.get(lang) || lang
+  return langMap.get(lang) || lang?.toLowerCase()
 }
 export const transformSchema = async (schema: any[], filePath: string) => {
   const data = JSON.parse(JSON.stringify(schema)) as any[]

@@ -9,6 +9,8 @@ import {EditorUtils} from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
 import {MainApi} from '../../api/main'
 import {EditorStore} from '../store'
+import {runInAction} from 'mobx'
+
 export const useKeyboard = (store: EditorStore) => {
   return useMemo(() => {
     const tab = new TabKey(store.editor)
@@ -55,30 +57,56 @@ export const useKeyboard = (store: EditorStore) => {
           EditorUtils.clearMarks(store.editor)
         }
       }
+
       if (e.key.toLowerCase().startsWith('arrow')) {
+        if (store.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
         keyArrow(store.editor, e)
       } else {
         if (e.key === 'Tab') tab.run(e)
         if (e.key === 'Enter') {
-          const [node] = Editor.nodes<any>(store.editor, {
-            match: n => Element.isElement(n),
-            mode: 'lowest'
-          })
-          if (node[0].type === 'paragraph') {
-            const str = Node.string(node[0])
-            if (/^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
-              Transforms.delete(store.editor, {at: node[1]})
-              Transforms.insertNodes(store.editor, {
-                type: 'code', language: 'html', render: true,
-                children: str.split('\n').map(s => {
-                  return {type: 'code-line', children: [{text: s}]}
-                })
-              }, {select: true, at: node[1]})
-              e.preventDefault()
-              return
-            }
+          if (store.openLangCompletion) {
+            setTimeout(() => {
+              runInAction(() => store.openLangCompletion = false)
+            })
+          } else {
+            enter.run(e)
           }
-          enter.run(e)
+        }
+        const [node] = Editor.nodes<any>(store.editor, {
+          match: n => Element.isElement(n),
+          mode: 'lowest'
+        })
+        let str = Node.string(node[0]) || ''
+        if (node[0].type === 'paragraph') {
+          if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
+            Transforms.delete(store.editor, {at: node[1]})
+            Transforms.insertNodes(store.editor, {
+              type: 'code', language: 'html', render: true,
+              children: str.split('\n').map(s => {
+                return {type: 'code-line', children: [{text: s}]}
+              })
+            }, {select: true, at: node[1]})
+            e.preventDefault()
+            return
+          }
+          setTimeout(() => {
+            const [node] = Editor.nodes<any>(store.editor, {
+              match: n => Element.isElement(n),
+              mode: 'lowest'
+            })
+            if (node[0].type === 'paragraph' && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
+              let str = Node.string(node[0]) || ''
+              const codeMatch = str.match(/^```([\w+\-#]+)$/i)
+              if (codeMatch) {
+                runInAction(() => store.openLangCompletion = true)
+                store.langCompletionText.next(codeMatch[1])
+              } else if (store.openLangCompletion) {
+                runInAction(() => store.openLangCompletion = false)
+              }
+            } else {
+              runInAction(() => store.openLangCompletion = false)
+            }
+          })
         }
       }
     }

@@ -81,7 +81,7 @@ export const MdElements: Record<string, MdNode> = {
     }
   },
   code: {
-    reg: /^\s*```([\w#\-+*]{1,15})?\s*$/,
+    reg: /^\s*```([\w#\-+*]{1,30})?\s*$/,
     run: ({editor, path, match}) => {
       const lang = match[1]
       Transforms.delete(editor, {at: path})
