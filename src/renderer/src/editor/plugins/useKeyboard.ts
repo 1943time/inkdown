@@ -24,7 +24,6 @@ export const useKeyboard = (store: EditorStore) => {
         } else {
           if (backspace.range()) e.preventDefault()
         }
-        return
       }
       if (isHotkey('mod+shift+v', e)) {
         e.preventDefault()
@@ -102,7 +101,7 @@ export const useKeyboard = (store: EditorStore) => {
               match: n => Element.isElement(n),
               mode: 'lowest'
             })
-            if (node && node[0].type === 'paragraph' && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
+            if (node && node[0].type === 'paragraph' && node[0].children.length === 1 && !EditorUtils.isDirtLeaf(node[0].children[0]) && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {

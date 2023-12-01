@@ -22,9 +22,9 @@ a {
   text-decoration: none;
 }
 .edit-area{
-  padding-bottom: 128px;
-  min-height: calc(100vh - 40px);
-  @apply pt-10;
+  padding-bottom: 180px;
+  min-height: calc(100vh - 220px);
+  padding-top: 40px;
 }
 .pure-modal{
   .ant-modal-content{

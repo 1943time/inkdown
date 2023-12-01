@@ -104,14 +104,12 @@ export const Search = observer(() => {
                 className={'w-full input pr-8'}
                 onChange={e => store.setSearchText(e.target.value)}
               />
-              <Tooltip title={'Use Enter key to switch to the next search result'} mouseEnterDelay={1}>
-                <div
-                  className={`absolute right-1 top-1/2 -mt-[10px] p-0.5 rounded-sm cursor-pointer ${state.openReplace ? 'bg-black/10' : ''}`}
-                  onClick={() => setState({openReplace: !state.openReplace})}
-                >
-                  <Replace className={'w-4 h-4'}/>
-                </div>
-              </Tooltip>
+              <div
+                className={`absolute right-1 top-1/2 -mt-[10px] p-0.5 rounded-sm cursor-pointer ${state.openReplace ? 'bg-black/10 dark:bg-white/20' : ''}`}
+                onClick={() => setState({openReplace: !state.openReplace})}
+              >
+                <Replace className={'w-4 h-4 dark:text-gray-200 text-gray-700'}/>
+              </div>
             </div>
             {state.openReplace &&
               <div className={'flex-1 flex items-center'}>
@@ -125,7 +123,8 @@ export const Search = observer(() => {
               </div>
             }
           </div>
-          <div className={`${state.openReplace ? 'ml-2' : 'ml-4'} flex justify-end dark:text-gray-400 text-gray-500 items-center select-none`}>
+          <div
+            className={`${state.openReplace ? 'ml-2' : 'ml-4'} flex justify-end dark:text-gray-400 text-gray-500 items-center select-none`}>
             <div className={'space-x-3 text-[13px] leading-5 flex items-center mr-2'}>
               {!state.openReplace &&
                 <>
@@ -147,16 +146,16 @@ export const Search = observer(() => {
                 <>
                   <div className={'flex space-x-2'}>
                     <div
-                      className={'flex items-center justify-center w-5 h-5 border border-gray-300 rounded cursor-pointer'}
+                      className={'flex items-center justify-center w-5 h-5 border border-gray-300 dark:border-gray-500 rounded cursor-pointer hover:text-gray-600 dark:hover:text-gray-300'}
                       onClick={() => store.prevSearch()}
                     >
-                      <UpOutlined />
+                      <UpOutlined/>
                     </div>
                     <div
-                      className={'flex items-center justify-center w-5 h-5 border border-gray-300 rounded cursor-pointer'}
+                      className={'flex items-center justify-center w-5 h-5 border border-gray-300 dark:border-gray-500 rounded cursor-pointer hover:text-gray-600 dark:hover:text-gray-300'}
                       onClick={() => store.nextSearch()}
                     >
-                      <DownOutlined />
+                      <DownOutlined/>
                     </div>
                   </div>
                   <div
