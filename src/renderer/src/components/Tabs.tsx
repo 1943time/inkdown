@@ -32,12 +32,12 @@ export const Tabs = observer(() => {
       className={`h-8 bg-gray-50 dark:bg-zinc-900 border-gray-200/80 dark:border-gray-200/10 border-b text-[13px] overflow-x-auto hide-scrollbar w-full absolute top-10 z-50`}
     >
       <div className={'flex h-full relative'}>
-        <div
-          className={`absolute w-0.5 bg-sky-500 -left-[1px] top-0 h-full ${state.dragging && state.dragIndex !== state.targetIndex ? '' : 'hidden'}`}
-          style={{
-            transform: `translateX(${state.markLeft}px)`
-          }}
-        />
+        {/*<div*/}
+        {/*  className={`absolute z-50 w-0.5 bg-sky-500 top-0 h-full ${state.dragging && state.dragIndex !== state.targetIndex ? '' : 'hidden'}`}*/}
+        {/*  style={{*/}
+        {/*    transform: `translateX(${state.markLeft}px)`*/}
+        {/*  }}*/}
+        {/*/>*/}
         {treeStore.tabs.map((t, i) =>
           <div
             draggable={true}
@@ -45,7 +45,7 @@ export const Tabs = observer(() => {
               setState({dragging: true, dragIndex: i, targetIndex: -1})
             }}
             onDrop={e => {
-              if (state.targetIndex > 0 && state.targetIndex - 1 !== state.dragIndex && state.dragIndex !== state.targetIndex) {
+              if (state.targetIndex >= 0 && state.dragIndex !== state.targetIndex) {
                 runInAction(() => {
                   const currentTab = treeStore.tabs[treeStore.currentIndex]
                   const [tab] = treeStore.tabs.splice(state.dragIndex, 1)
