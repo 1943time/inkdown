@@ -348,10 +348,11 @@ export const LangAutocomplete = observer(() => {
     }
   }, [])
   useSubject(store.langCompletionText, text => {
+    text = text || ''
     setState({
       index: -1,
       text,
-      showOptions: list.filter(l => l.lang.startsWith(text))
+      showOptions: list.filter(l => l.lang.startsWith(text.toLowerCase()))
     })
   })
   useEffect(() => {
@@ -393,7 +394,11 @@ export const LangAutocomplete = observer(() => {
   return (
     <div
       ref={dom}
-      className={`${!store.openLangCompletion || !state.showOptions.length ? 'hidden' : ''} shadow shadow-slate-500/10 absolute z-50 left-0 top-0 w-40 max-h-40 overflow-y-auto border border-slate-100 rounded-lg py-1 bg-white text-gray-700`}
+      className={`
+      ${!store.openLangCompletion || !state.showOptions.length ? 'hidden' : ''}
+      shadow shadow-slate-500/10 absolute z-50 left-0 top-0 w-40 max-h-40 overflow-y-auto
+      border border-slate-100 rounded-lg py-1 bg-white text-gray-700 dark:text-gray-300 dark:bg-zinc-900 dark:border-zinc-800 dark:shadow-zinc-800/10
+      `}
       style={{
         left: state.left,
         top: state.top
@@ -403,9 +408,11 @@ export const LangAutocomplete = observer(() => {
         <div
           key={l.lang}
           className={`px-2 py-1.5 flex items-center cursor-pointer
-          ${i === state.index ? 'bg-gray-100' : ''}`}
+          ${i === state.index ? 'bg-gray-100 dark:bg-gray-300/10' : ''}`}
           onMouseEnter={() => setState({index: i})}
           onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
             createCodeFence(l.lang)
           }}
         >

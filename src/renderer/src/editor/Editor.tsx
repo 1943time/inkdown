@@ -227,7 +227,9 @@ export const MEditor = observer(({note}: {
       state.focus = false
       state.tableCellNode = null
       state.refreshTableAttr = !state.refreshTableAttr
-      store.openLangCompletion = false
+      setTimeout(action(() => {
+        store.openLangCompletion = false
+      }), 30)
     })
   }, [])
 

@@ -94,6 +94,22 @@ export function useHighlight(store?: EditorStore) {
           }
         }
       }
+      if (node.type === 'paragraph' && node.children.length === 1 && !EditorUtils.isDirtLeaf(node.children[0])) {
+        const str = Node.string(node)
+        if (str.startsWith('```')) {
+          ranges.push({
+            anchor: {
+              path: [...path, 0],
+              offset: 0
+            },
+            focus: {
+              path: [...path, 0],
+              offset: 3
+            },
+            color: '#a3a3a3'
+          })
+        }
+      }
       return ranges
     }
     return []
