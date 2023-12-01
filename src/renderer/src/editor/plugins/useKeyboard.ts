@@ -18,6 +18,14 @@ export const useKeyboard = (store: EditorStore) => {
     const enter = new EnterKey(store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
+      if (isHotkey('backspace', e) && store.editor.selection) {
+        if (Range.isCollapsed(store.editor.selection)) {
+          if (backspace.run()) e.preventDefault()
+        } else {
+          if (backspace.range()) e.preventDefault()
+        }
+        return
+      }
       if (isHotkey('mod+shift+v', e)) {
         e.preventDefault()
         return MainApi.sendToSelf('key-task', 'paste-plain-text')
@@ -94,7 +102,7 @@ export const useKeyboard = (store: EditorStore) => {
               match: n => Element.isElement(n),
               mode: 'lowest'
             })
-            if (node[0].type === 'paragraph' && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
+            if (node && node[0].type === 'paragraph' && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {
