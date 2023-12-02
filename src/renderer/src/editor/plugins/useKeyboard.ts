@@ -35,13 +35,15 @@ export const useKeyboard = (store: EditorStore) => {
       }
 
       if (isHotkey('mod+a', e) && store.editor.selection) {
-        const [code] = Editor.nodes(store.editor, {
-          match: n => Element.isElement(n) && n.type === 'code'
+        const [node] = Editor.nodes<any>(store.editor, {
+          match: n => Element.isElement(n),
+          mode: 'lowest'
         })
-        if (code) {
+        if (node[0].type === 'code-line' || node[0].type === 'table-cell') {
+          const parentPath = node[0].type === 'code-line' ? Path.parent(node[1]) : Path.parent(Path.parent(node[1]))
           Transforms.select(store.editor, {
-            anchor: Editor.start(store.editor, code[1]),
-            focus: Editor.end(store.editor, code[1])
+            anchor: Editor.start(store.editor, parentPath),
+            focus: Editor.end(store.editor, parentPath)
           })
           e.preventDefault()
         }

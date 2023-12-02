@@ -34,6 +34,7 @@ export class BackspaceKey {
             ...n[0],
             children: [{type: 'code-line', children: [{text: ''}]}],
           }, {at: n[1], select: true})
+          return true
         }
         // 如果是首个元素 替换paragraph
       } else if (n[0].type === 'table') {
@@ -119,7 +120,6 @@ export class BackspaceKey {
         return true
       }
     }
-
     if (el.type === 'table-cell') {
       const start = Range.start(sel)
       if (start.offset === 0 && !Path.hasPrevious(start.path)) {
@@ -132,6 +132,11 @@ export class BackspaceKey {
           if (preRow) {
             Transforms.select(this.editor, Editor.end(this.editor, Path.previous(rowPath)))
           }
+        }
+        const parent = Editor.parent(this.editor, Path.parent(node[1]))
+        if (!Path.hasPrevious(path) && parent[0].children?.every((c: any) => !Node.string(c))) {
+          Transforms.delete(this.editor, {at: parent[1]})
+          Transforms.insertNodes(this.editor, EditorUtils.p, {select: true, at: parent[1]})
         }
         return true
       }
@@ -214,17 +219,15 @@ export class BackspaceKey {
 
       if (el.type === 'code-line') {
         const pre = Path.hasPrevious(path)
-        if (!pre) {
-          const hasNext = Editor.hasPath(this.editor, Path.next(path))
-          if (!hasNext) {
-            const str = Node.string(el)
-            const parent = Path.parent(path)
-            Transforms.delete(this.editor, {at: parent})
-            Transforms.insertNodes(this.editor, {
-              type: 'paragraph', children: [{text: str || ''}]
-            }, {at: parent})
-            Transforms.select(this.editor, Editor.start(this.editor, parent))
-          }
+        const hasNext = Editor.hasPath(this.editor, Path.next(path))
+        if (!pre && !hasNext) {
+          const str = Node.string(el)
+          const parent = Path.parent(path)
+          Transforms.delete(this.editor, {at: parent})
+          Transforms.insertNodes(this.editor, {
+            type: 'paragraph', children: [{text: str || ''}]
+          }, {at: parent})
+          Transforms.select(this.editor, Editor.start(this.editor, parent))
           return true
         }
       }
