@@ -272,7 +272,22 @@ const getSystemMenus = () => {
       {role: 'cut'},
       {role: 'delete'},
       ...delRange,
-      {role: 'selectAll'},
+      {
+        label: 'Selection',
+        submenu: [
+          {role: 'selectAll'},
+          {
+            accelerator: `${cmd}+l`,
+            click: task('select-line'),
+            label: 'Select Line'
+          },
+          {
+            accelerator: `${cmd}+d`,
+            click: task('select-word'),
+            label: 'Select Word'
+          }
+        ]
+      },
       {type: 'separator'},
       {
         id: 'break-line',

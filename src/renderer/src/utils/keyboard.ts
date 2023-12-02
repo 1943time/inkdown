@@ -340,6 +340,67 @@ export class MenuKey {
             Editor.insertNode(editor, {type: 'break', children: [{text: ''}]})
           }
           break
+        case 'select-line':
+          if (editor.selection) {
+            Transforms.select(editor, Path.parent(editor.selection.anchor.path))
+            const text = Node.leaf(editor, editor.selection.anchor.path).text || ''
+            if (text) {
+              setTimeout(() => {
+                try {
+                  const domRange = window.getSelection()?.getRangeAt(0)
+                  const rect = domRange?.getBoundingClientRect()
+                  if (rect) {
+                    this.state.setState(state => state.domRect = rect)
+                  }
+                } catch (e) {}
+              })
+            }
+          }
+          break
+        case 'select-word':
+          const sel = editor.selection
+          if (sel && Range.isCollapsed(sel)) {
+            const text = Node.leaf(editor, sel.anchor.path).text || ''
+            let start = sel.anchor.offset
+            let end = start
+            const next = text.slice(start)
+            const pre = text.slice(0, start)
+            let m1 = next.match(/^(\w+)/)
+            if (m1) {
+              end += m1[1].length
+              let m2 = pre.match(/(\w+)$/)
+              if (m2) start = start - m2[1].length
+            } else {
+              m1 = next.match(/^([\u4e00-\u9fa5]+)/)
+              if (m1) {
+                end += m1[1].length
+                let m2 = pre.match(/([\u4e00-\u9fa5]+)$/)
+                if (m2) start = start - m2[1].length
+              } else {
+                let m2 = pre.match(/(\w+)$/)
+                if (!m2) m2 = pre.match(/([\u4e00-\u9fa5]+)$/)
+                if (m2) start -= m2[1].length
+              }
+            }
+            if (start === sel.anchor.offset && end === sel.anchor.offset && next) {
+              end = start + 1
+            } else {
+              setTimeout(() => {
+                try {
+                  const domRange = window.getSelection()?.getRangeAt(0)
+                  const rect = domRange?.getBoundingClientRect()
+                  if (rect) {
+                    this.state.setState(state => state.domRect = rect)
+                  }
+                } catch (e) {}
+              })
+            }
+            Transforms.select(editor, {
+              anchor: {path: sel.anchor.path, offset: start},
+              focus: {path: sel.anchor.path, offset: end}
+            })
+          }
+          break
       }
 
       if (Range.isCollapsed(sel) || !Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path)) || node[0].type === 'code-line') return
