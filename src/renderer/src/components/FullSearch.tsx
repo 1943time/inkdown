@@ -114,14 +114,14 @@ export const FullSearch = observer(() => {
             treeStore.setState({searchKeyWord: e.target.value})
             search()
           }}
-          placeholder={'Search'}
+          placeholder={configStore.zh ? '搜索' : 'Search'}
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>
         {!state().searching && !state().searchResults.length && treeStore.searchKeyWord &&
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
-              No content found for <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
+              {configStore.zh ? '未找到相关内容' : 'No content found for'} <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
             </span>
           </div>
         }

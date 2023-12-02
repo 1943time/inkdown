@@ -118,11 +118,15 @@ export class EditorUtils {
   }
 
   static isFormatActive(editor: Editor, format: string, value?: any) {
-    const [match] = Editor.nodes(editor, {
-      match: n => !!n[format],
-      mode: 'lowest'
-    })
-    return value ? match?.[0]?.[format] === value : !!match
+    try {
+      const [match] = Editor.nodes(editor, {
+        match: n => !!n[format],
+        mode: 'lowest'
+      })
+      return value ? match?.[0]?.[format] === value : !!match
+    } catch (e) {
+      return false
+    }
   }
 
   static getUrl(editor: Editor) {

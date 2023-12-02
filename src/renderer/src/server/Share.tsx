@@ -26,6 +26,7 @@ import {ShareData} from './ui/ShareData'
 import {action, runInAction} from 'mobx'
 import {ServiceSet} from './ui/ServiceSet'
 import {shareSuccessfully$, Successfully} from './ui/Successfully'
+import {configStore} from '../store/config'
 
 export const Share = observer(() => {
   const [state, setState] = useLocalState({
@@ -49,7 +50,7 @@ export const Share = observer(() => {
     window.api.copyToClipboard(url)
     message$.next({
       type: 'success',
-      content: 'Copied to clipboard'
+      content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
     })
   }, [])
 
@@ -101,7 +102,7 @@ export const Share = observer(() => {
                     if (!shareStore.serviceConfig) {
                       message$.next({
                         type: 'info',
-                        content: 'You need to set up your service first'
+                        content: configStore.zh ? '请先设置服务参数' : 'Please set service parameters first'
                       })
                     } else {
                       setState({showData: true, mask: true})
@@ -127,7 +128,7 @@ export const Share = observer(() => {
                       }
                       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                         <Net className={'w-5 h-5 fill-gray-500'}/>
-                        <span className={'ml-2'}>{'Share the current note'}</span>
+                        <span className={'ml-2'}>{configStore.zh ? '分享当前笔记' : 'Share the current note'}</span>
                       </div>
                       {!shareStore.serviceConfig &&
                         <NotLogged onOpen={() => setState({mask: true, openSetting: true})}/>
@@ -172,7 +173,7 @@ export const Share = observer(() => {
                                 loading={state.syncing}
                                 onClick={share}
                               >
-                                Create
+                                {configStore.zh ? '分享' : 'Share'}
                               </Button>
                             }
                           </Space.Compact>
@@ -184,7 +185,7 @@ export const Share = observer(() => {
                               onClick={share}
                               icon={<SyncOutlined/>}
                             >
-                              Update to Share
+                              {configStore.zh ? '更新并分享' : 'Update to Share'}
                             </Button>
                           }
                         </div>
@@ -248,7 +249,6 @@ export const Share = observer(() => {
           shareStore.pausedUpdate = true
         })}
         open={shareStore.showUpdateTips}
-        okText={'Details'}
         onOk={action(() => {
           shareStore.showUpdateTips = false
         })}
@@ -257,7 +257,7 @@ export const Share = observer(() => {
             <Button onClick={action(() => {
               shareStore.showUpdateTips = false
               shareStore.pausedUpdate = true
-            })}>{'Cancel'}</Button>
+            })}>{configStore.zh ? '取消' : 'Cancel'}</Button>
             <Button
               type={'primary'}
               loading={state.upgradeLoading}
@@ -266,7 +266,7 @@ export const Share = observer(() => {
                 shareStore.api.upgrade().then(async () => {
                   message$.next({
                     type: 'success',
-                    content: 'Upgrade completed'
+                    content: configStore.zh ? '更新完成' : 'Upgrade completed'
                   })
                   setState({upgradeLoading: false})
                   const v = await shareStore.api.getVersion()
@@ -277,12 +277,12 @@ export const Share = observer(() => {
                 }).catch(e => {
                   message$.next({
                     type: 'error',
-                    content: 'Upgrade failed'
+                    content: configStore.zh ? '更新失败' : 'Upgrade failed'
                   })
                 })
               })}
             >
-              Update now
+              {configStore.zh ? '立即更新' : 'Update now'}
             </Button>
           </Space>
         )}

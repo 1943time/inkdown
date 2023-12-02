@@ -23,6 +23,7 @@ import {shareSuccessfully$} from './Successfully'
 import {existsSync} from 'fs'
 import {MainApi} from '../../api/main'
 import {treeStore} from '../../store/tree'
+import {configStore} from '../../store/config'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -148,7 +149,7 @@ export const ShareData = observer((props: {
   }, [props.open])
   return (
     <Modal
-      title={'Share Records'}
+      title={configStore.zh ? '分享数据' : 'Share Records'}
       width={1000}
       open={props.open}
       onCancel={props.onClose}
@@ -199,7 +200,7 @@ export const ShareData = observer((props: {
           items={[
             {
               key: 'doc',
-              label: 'Share Note',
+              label: configStore.zh ? '分享笔记' : 'Share Note',
               children: (
                 <div>
                   <Table
@@ -303,7 +304,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'book',
-              label: 'Share Book',
+              label: configStore.zh ? '分享文件夹' : 'Share Book',
               children: (
                 <div>
                   <Table
@@ -390,7 +391,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'file',
-              label: 'Files',
+              label: configStore.zh ? '依赖文件' : 'Files',
               children: (
                 <div>
                   <Table
@@ -489,7 +490,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'device',
-              label: 'Devices',
+              label: configStore.zh ? '设备' : 'Devices',
               children: (
                 <div>
                   <Table

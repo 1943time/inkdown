@@ -1,32 +1,17 @@
 import {app, BrowserWindow, ipcMain, Menu, shell} from 'electron'
+import {getLocale} from './store'
 
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
 
 export const registerMenus = () => {
-  const menusLabel = {
-    copyMarkdown: 'Copy Markdown Source Code',
-    pdf: 'Export To PDF',
-    html: 'Export To HTML',
-    openInFinder: 'Reveal in Finder',
-    openInDefault: 'Open in default app',
-    delete: 'Delete',
-    createNote: 'New note',
-    createFolder: 'New folder',
-    rename: 'Rename',
-    insertRowAbove: 'Add Row Above',
-    insertRowBelow: 'Add Row Below',
-    insertColBefore: 'Add Column before',
-    insertColAfter: 'Add Column after',
-    delCol: 'Delete col',
-    delRow: 'Delete row'
-  }
   ipcMain.on('tool-menu', (e, filePath?: string) => {
+    const zh = getLocale() === 'zh'
     const temp: Menus = [
       {
-        label: 'Documentation',
+        label: zh ? '使用文档' : 'Documentation',
         click: () => {
-          if (app.getLocale() === 'zh-CN') {
+          if (zh) {
             shell.openExternal(`https://doc.bluemd.me/book/zh-docs`)
           } else {
             shell.openExternal(`https://doc.bluemd.me/book/docs`)
@@ -37,19 +22,19 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: menusLabel.copyMarkdown,
+        label:zh ? '复制Markdown代码' : 'Copy Markdown Source Code',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('copy-source-code')
       },
       {
-        label: menusLabel.pdf,
+        label: zh ? '导出PDF' : 'Export To PDF',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => {
           win?.webContents.send('call-print-pdf')
         }
       },
       {
-        label: menusLabel.html,
+        label: zh ? '导出HTML' : 'Export To HTML',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => {
           win?.webContents.send('call-print-html')
@@ -59,12 +44,12 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: 'Convert remote images to local',
+        label: zh ? '转换远程图片至本机' : 'Convert remote images to local',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('convert-remote-images')
       },
       {
-        label: 'File History',
+        label: zh ? '文件历史' : 'File History',
         enabled: filePath?.endsWith('.md'),
         click: (e, win) => win?.webContents.send('open-file-history')
       },
@@ -72,12 +57,12 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: menusLabel.openInFinder,
+        label: zh ? '在Finder中显示' : 'Reveal in Finder',
         enabled: !!filePath,
         click: () => shell.showItemInFolder(filePath!)
       },
       {
-        label: menusLabel.openInDefault,
+        label: zh ? '使用默认APP打开' : 'Open in default app',
         click: () => shell.openPath(filePath!),
         enabled: !!filePath
       }
@@ -91,15 +76,16 @@ export const registerMenus = () => {
   })
 
   ipcMain.on('tab-context-menu', (e) => {
+    const zh = getLocale() === 'zh'
     const menu = Menu.buildFromTemplate([
       {
-        label: 'Close Tab',
+        label: zh ? '关闭标签' : 'Close Tab',
         click: () => {
           e.sender?.send('close-selected-tab')
         }
       },
       {
-        label: 'Close Other Tab',
+        label: zh ? '关闭其他标签' : 'Close Other Tab',
         click: () => {
           e.sender?.send('close-other-tabs')
         }
@@ -114,6 +100,7 @@ export const registerMenus = () => {
     type: 'rootFolder' | 'file' | 'folder',
     filePath?: string
   }) => {
+    const zh = getLocale() === 'zh'
     const temp = new Set<Menus[number]>()
     const sendCommand = (command: string) => {
       e.sender.send('tree-command', {
@@ -123,17 +110,17 @@ export const registerMenus = () => {
     }
     if (params.type !== 'file') {
       temp.add({
-        label: menusLabel.createNote,
+        label: zh ? '新建笔记' : 'New Note',
         click: () => sendCommand('createNote')
       })
       temp.add({
-        label: menusLabel.createFolder,
+        label: zh ? '新建文件夹' : 'New Folder',
         click: () => sendCommand('createFolder')
       })
     }
     if (params.type !== 'rootFolder') {
       temp.add({
-        label: menusLabel.rename,
+        label: zh ? '重命名' : 'Rename',
         click: () => sendCommand('rename')
       })
     }
@@ -142,7 +129,7 @@ export const registerMenus = () => {
         type: 'separator'
       })
       temp.add({
-        label: 'Share Folder',
+        label: zh ? '分享文件夹' : 'Share Folder',
         click: () => sendCommand('shareFolder')
       })
       if (params.type !== 'rootFolder') {
@@ -154,7 +141,7 @@ export const registerMenus = () => {
     if (params.type !== 'rootFolder') {
       if (params.type === 'file') {
         temp.add({
-          label: 'Open in New Tab',
+          label: zh ? '在新标签中打开' :'Open in New Tab',
           click: () => sendCommand('openInNewTab')
         })
       }
@@ -162,24 +149,24 @@ export const registerMenus = () => {
         type: 'separator'
       })
       temp.add({
-        label: menusLabel.openInFinder,
+        label: zh ? '在Finder中显示' : 'Reveal in Finder',
         click: () => shell.showItemInFolder(params.filePath!)
       })
       if (params.type === 'file') {
         temp.add({
-          label: menusLabel.openInDefault,
+          label: zh ? '使用默认APP打开' : 'Open in default app',
           click: () => shell.openPath(params.filePath!)
         })
         if (params.filePath?.endsWith('.md')) {
           temp.add({
-            label: menusLabel.copyMarkdown,
+            label: zh ? '复制Markdown代码' : 'Copy Markdown Source Code',
             click: (e, win) => win?.webContents.send('copy-source-code', params.filePath)
           })
         }
       }
       temp.add({type: 'separator'})
       temp.add({
-        label: menusLabel.delete,
+        label: zh ? '移到废纸篓' : 'Move to Trash',
         click: () => sendCommand('delete')
       })
     }
@@ -190,33 +177,34 @@ export const registerMenus = () => {
   })
 
   ipcMain.on('table-menu', (e, head?: boolean) => {
+    const zh = getLocale() === 'zh'
     const click = (task: string) => {
       return () => e.sender.send('table-task', task)
     }
     const temp: Menus = [
       {
-        label: menusLabel.insertRowAbove,
+        label: zh ? '在上面添加行' : 'Add Row Above',
         click: click('insertRowBefore'),
       },
       {
-        label: menusLabel.insertRowBelow,
+        label: zh ? '在下面添加行' : 'Add Row Below',
         accelerator: `${cmd}+Enter`,
         click: click('insertRowAfter'),
       },
       {type: 'separator'},
       {
-        label: menusLabel.insertColBefore,
+        label: zh ? '在前面添加列' : 'Add Column Before',
         click: click('insertColBefore'),
       },
       {
-        label: menusLabel.insertColAfter,
+        label: zh ? '在后面添加列' : 'Add Column After',
         click: click('insertColAfter'),
       },
       {
         type: 'separator'
       },
       {
-        label: 'Line break within table-cell',
+        label: zh ? '表格项中换行' : 'Line break within table-cell',
         accelerator: `${cmd}+Shift+Enter`,
         click: click('insertTableCellBreak')
       },
@@ -224,32 +212,32 @@ export const registerMenus = () => {
         label: 'Move',
         submenu: [
           {
-            label: 'Move Up One Row',
+            label: zh ? '上移一行' : 'Move Up One Row',
             click: click('moveUpOneRow'),
             enabled: !head
           },
           {
-            label: 'Move Down One Row',
+            label: zh ? '下移一行' : 'Move Down One Row',
             click: click('moveDownOneRow'),
             enabled: !head
           },
           {
-            label: 'Move Left One Col',
+            label: zh ? '左移一列' : 'Move Left One Col',
             click: click('moveLeftOneCol')
           },
           {
-            label: 'Move Right One Col',
+            label: zh ? '右移一列' : 'Move Right One Col',
             click: click('moveRightOneCol')
           }
         ]
       },
       {type: 'separator'},
       {
-        label: menusLabel.delCol,
+        label: zh ? '删除列' : 'Delete Col',
         click: click('removeCol')
       },
       {
-        label: menusLabel.delRow,
+        label: zh ? '删除行' : 'Delete Row',
         accelerator: `${cmd}+Shift+Backspace`,
         click: click('removeRow')
       }

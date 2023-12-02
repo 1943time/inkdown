@@ -2,6 +2,7 @@ import {CloseOutlined, GithubOutlined} from '@ant-design/icons'
 import {useSetState} from 'react-use'
 import {useEffect} from 'react'
 import icon from '../../../resources/icon.png?asset'
+import {configStore} from './store/config'
 export function About() {
   const [state, setState] = useSetState({
     version: '',
@@ -32,7 +33,7 @@ export function About() {
           <CloseOutlined />
         </div>
         <img src={icon} alt="" className={'w-14 h-14'}/>
-        <div className={'mt-4 text-sm'}>bluestone</div>
+        <div className={'mt-4 text-sm'}>{configStore.zh ? '青石' : 'bluestone'}</div>
         <div className={'flex items-center mt-3'}>
           <div className={'flex items-center text-xs mr-3'}>
             <GithubOutlined className={'text-base'} />
@@ -44,7 +45,7 @@ export function About() {
               1943time
             </a>
           </div>
-          <div className={'text-xs'}>version {state.version}</div>
+          <div className={'text-xs'}>{configStore.zh ? '版本' : 'version'} {state.version}</div>
         </div>
       </div>
     </div>

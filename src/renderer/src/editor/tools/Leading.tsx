@@ -7,7 +7,6 @@ import {Node} from 'slate'
 import {slugify} from '../utils/dom'
 import {nanoid} from 'nanoid'
 import {useEditorStore} from '../store'
-import {ReactEditor} from 'slate-react'
 import {configStore} from '../../store/config'
 type Leading = {title: string, level: number, id: string, key: string, dom?: HTMLElement, schema: object}
 
@@ -107,7 +106,7 @@ export const Heading = observer(({note}: {
       }}
     >
       <div className={`w-56 h-full pt-10 pb-10 pr-4 overflow-y-auto`}>
-        <div className={'text-gray-500 text-sm mb-4'}>{'Outline'}</div>
+        <div className={'text-gray-500 text-sm mb-4'}>{configStore.zh ? '大纲' : 'Outline'}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm'}>
           {state().headings.map(h =>
             <div

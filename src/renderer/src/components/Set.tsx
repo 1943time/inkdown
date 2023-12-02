@@ -4,6 +4,8 @@ import {CloseOutlined, QuestionCircleOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
 import {ReactNode, useCallback, useEffect} from 'react'
 import {action} from 'mobx'
+import {treeStore} from '../store/tree'
+import {ReactEditor} from 'slate-react'
 
 function Help(props: {
   text: string | ReactNode
@@ -20,6 +22,11 @@ export const Set = observer(() => {
     configStore.visible = false
   }), [])
   useEffect(() => {
+    if (configStore.visible) {
+      for (let t of treeStore.tabs) {
+        ReactEditor.blur(t.store.editor)
+      }
+    }
     const esc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         close()
@@ -45,7 +52,7 @@ export const Set = observer(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <div className={'flex justify-between text-gray-500 dark:text-gray-400 border-b modal-border pb-2 items-center'}>
-            <span>{'Preferences'}</span>
+            <span>{configStore.zh ? '偏好设置' : 'Preferences'}</span>
             <div
               className={'p-1 hover:text-gray-700 dark:hover:text-gray-300 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30'}
               onClick={close}
@@ -56,7 +63,27 @@ export const Set = observer(() => {
           <div className={'divide-y divide-gray-200 dark:divide-gray-200/20 text-gray-600 dark:text-gray-300'}>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Themes'}
+                {'Language'}
+              </div>
+              <div>
+                <Radio.Group
+                  value={configStore.config.locale}
+                  onChange={e => {
+                    configStore.setConfig('locale', e.target.value)
+                    modal.info({
+                      title: configStore.zh ? '提示' : 'Note',
+                      content: configStore.zh ? '语言切换将在应用重启后完全生效。' : 'The language switch will take full effect after the application restarts.'
+                    })
+                  }}
+                >
+                  <Radio.Button value={'en'}>{'English'}</Radio.Button>
+                  <Radio.Button value={'zh'}>{'简体中文'}</Radio.Button>
+                </Radio.Group>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                {configStore.zh ? '主题' : 'Themes'}
               </div>
               <div>
                 <Radio.Group
@@ -65,15 +92,19 @@ export const Set = observer(() => {
                     configStore.setTheme(e.target.value)
                   }}
                 >
-                  <Radio.Button value={'system'}>{'System'}</Radio.Button>
-                  <Radio.Button value={'light'}>{'Light'}</Radio.Button>
-                  <Radio.Button value={'dark'}>{'Dark'}</Radio.Button>
+                  <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>
+                  <Radio.Button value={'light'}>{configStore.zh ? '明亮' : 'Light'}</Radio.Button>
+                  <Radio.Button value={'dark'}>{configStore.zh ? '暗黑' : 'Dark'}</Radio.Button>
                 </Radio.Group>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                <span className={'mr-1'}>Automatic Rebuild</span> <Help text={'When a file or folder is renamed or moved, its related dependent links or image paths will automatically change'}/>
+                <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic Rebuild'}</span> <Help text={
+                  configStore.zh ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改' :
+                    'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
+                }
+                />
               </div>
               <div>
                 <Checkbox checked={configStore.config.autoRebuild} onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
@@ -81,23 +112,19 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                <span className={'mr-1'}>Automatically Download Images</span> <Help text={'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'}/>
+                <span className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically Download Images'}</span>
+                <Help text={
+                  configStore.zh ? '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址' :
+                    'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'
+                }/>
               </div>
               <div>
                 <Checkbox checked={configStore.config.autoDownload} onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
               </div>
             </div>
-            {/*<div className={'flex justify-between items-center py-3'}>*/}
-            {/*  <div className={'text-sm'}>*/}
-            {/*    Heading Mark Line*/}
-            {/*  </div>*/}
-            {/*  <div>*/}
-            {/*    <Checkbox checked={configStore.config.headingMarkLine} onChange={e => configStore.setConfig('headingMarkLine', e.target.checked)}/>*/}
-            {/*  </div>*/}
-            {/*</div>*/}
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                Drag To Sort
+                {configStore.zh ? '拖拽排序' : 'Drag To Sort'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.dragToSort} onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
@@ -105,7 +132,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Show Code Line Number'}
+                {configStore.zh ? '显示代码段行号' : 'Show Code Line Number'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.codeLineNumber} onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
@@ -113,7 +140,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Displays character statistics'}
+                {configStore.zh ? '显示字符统计' : 'Displays character statistics'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.showCharactersCount} onChange={e => configStore.setConfig('showCharactersCount', e.target.checked)}/>
@@ -121,7 +148,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                Spell Check
+                {configStore.zh ? '拼写检查' : 'Spell Check'}
               </div>
               <div>
                 <Checkbox checked={configStore.config.spellCheck} onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
@@ -129,7 +156,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Code TabSize'}
+                {configStore.zh ? '代码段 TabSize' : 'Code TabSize'}
               </div>
               <div>
                 <Radio.Group
@@ -145,7 +172,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Code Style'}
+                {configStore.zh ? '代码风格' : 'Code Style'}
               </div>
               <div>
                 <Select
@@ -154,8 +181,8 @@ export const Set = observer(() => {
                   onChange={e => {
                     configStore.setConfig('codeTheme', e)
                     modal.info({
-                      title: 'Note',
-                      content: 'Code style settings will take effect after restarting applications'
+                      title: configStore.zh ? '提示' : 'Note',
+                      content: configStore.zh ? '代码风格设置将在应用重启后生效' : 'Code style settings will take effect after restarting applications'
                     })
                   }}
                   options={[
@@ -178,7 +205,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Edit area text size'}
+                {configStore.zh ? '编辑区文字大小' : 'Edit area text size'}
               </div>
               <div className={'w-32'}>
                 <Slider
@@ -191,7 +218,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Show Outline'}
+                {configStore.zh ? '显示大纲' : 'Show Outline'}
               </div>
               <div>
                 <Checkbox
@@ -204,7 +231,7 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
-                {'Outline extraction level'}
+                {configStore.zh ? '大纲提取级别' : 'Outline extraction level'}
               </div>
               <div>
                 <Radio.Group

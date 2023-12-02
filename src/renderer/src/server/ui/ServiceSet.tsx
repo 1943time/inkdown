@@ -61,7 +61,7 @@ export const ServiceSet = observer((props: {
     shareStore.initial()
     message$.next({
       type: 'success',
-      content: 'Setup successful'
+      content: configStore.zh ? '设置成功' : 'Setup successful'
     })
     runInAction(() => {
       shareStore.serviceConfig = config
@@ -89,27 +89,27 @@ export const ServiceSet = observer((props: {
     <Modal
       open={props.open}
       width={700}
-      title={'Shared Service Settings'}
+      title={configStore.zh ? '分享服务设置' : 'Shared Service Settings'}
       confirmLoading={state.loading}
       onCancel={props.onClose}
       footer={(
         <Space className={'mt-4'}>
-          <Button onClick={props.onClose}>{'Cancel'}</Button>
+          <Button onClick={props.onClose}>{configStore.zh ? '取消' : 'Cancel'}</Button>
           {!!shareStore.serviceConfig &&
             <Popconfirm
-              title="Note"
-              description="Network services will be suspended after reset"
+              title={configStore.zh ? '提示' : 'Note'}
+              description={configStore.zh ? '重置后将不可分享，已分享数据不会被清除' : 'After resetting, it will not be shareable and shared data will not be cleared'}
               placement={'bottom'}
               onConfirm={() => {
                 return shareStore.reset().then(() => form.resetFields())
               }}
-              okText="Yes"
-              cancelText="No"
+              okText={configStore.zh ? '确定' : 'Yes'}
+              cancelText={configStore.zh ? '取消' : 'No'}
             >
               <Button
                 danger={true}
               >
-                Reset
+                {configStore.zh ? '重置' : 'Reset'}
               </Button>
             </Popconfirm>
           }
@@ -118,7 +118,7 @@ export const ServiceSet = observer((props: {
             loading={state.loading}
             onClick={save}
           >
-            Connect and save
+            {configStore.zh ? '链接并保存' : 'Connect and save'}
           </Button>
         </Space>
       )}
@@ -126,25 +126,27 @@ export const ServiceSet = observer((props: {
       <Form form={form} layout={'horizontal'} labelCol={{span: 6}} className={'mt-4'}>
         {shareStore.currentVersion &&
           <Form.Item
-            label={'Service Version'}>
+            label={configStore.zh ? '服务版本' : 'Service Version'}>
             <Tag>{shareStore.currentVersion}</Tag>
           </Form.Item>
         }
         <Form.Item
-          rules={[{required: true, message: 'Please enter domain'}]}
-          label={'Domain or IP'} name={['domain']}>
-          <Input placeholder={'for example: https://www.bluemd.me'}/>
+          rules={[{required: true, message: configStore.zh ? '请输入域名' : 'Please enter domain'}]}
+          tooltip={configStore.zh ? '需要http前缀' : 'HTTP prefix required'}
+          label={configStore.zh ? '域名或IP' : 'Domain or IP'} name={['domain']}>
+          <Input placeholder={`${configStore.zh ? '例如' : 'for example'}: https://www.bluemd.me`}/>
         </Form.Item>
         <Form.Item
           initialValue={'BLUESTONE'}
-          rules={[{required: true, message: 'Please enter secret'}]}
+          tooltip={configStore.zh ? '在服务程序中设置，具体请参考文档' : 'Set in the service program, please refer to the documentation for details'}
+          rules={[{required: true, message: configStore.zh ? '请输入secret' : 'Please enter secret'}]}
           label={'Secret'} name={['secret']}>
           <Input/>
         </Form.Item>
         <Form.Item
-          rules={[{required: true, message: 'Please enter device name'}]}
-          tooltip={'Synced files will be bound to the device'}
-          label={'Device Name'} name={['name']}>
+          rules={[{required: true, message: configStore.zh ? '请输入设备名称' : 'Please enter device name'}]}
+          tooltip={configStore.zh ? '自由填写，同步文件将与此设备绑定' : 'Free to fill in, Synced files will be bound to the device'}
+          label={configStore.zh ? '设备名称' : 'Device Name'} name={['name']}>
           <Input/>
         </Form.Item>
       </Form>

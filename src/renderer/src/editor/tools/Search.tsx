@@ -90,7 +90,7 @@ export const Search = observer(() => {
             <div className={'flex-1 relative'}>
               <input
                 value={store.search.text}
-                placeholder={'Find'}
+                placeholder={configStore.zh ? '查找' : 'Find'}
                 autoFocus={true}
                 ref={inputRef}
                 onFocus={() => {
@@ -116,7 +116,7 @@ export const Search = observer(() => {
                 <ArrowRightOutlined className={'px-2 text-sm text-gray-500 dark:text-gray-300'}/>
                 <input
                   value={state.replaceText}
-                  placeholder={'Replace'}
+                  placeholder={configStore.zh ? '替换' : 'Replace'}
                   className={'w-full input'}
                   onChange={e => setState({replaceText: e.target.value})}
                 />
@@ -132,13 +132,13 @@ export const Search = observer(() => {
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={() => store.prevSearch()}
                   >
-                    {'Prev'}
+                    {configStore.zh ? '上一个' : 'Prev'}
                   </div>
                   <div
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={() => store.nextSearch()}
                   >
-                    {'Next'}
+                    {configStore.zh ? '下一个' : 'Next'}
                   </div>
                 </>
               }
@@ -162,13 +162,13 @@ export const Search = observer(() => {
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={replace}
                   >
-                    {'Replace'}
+                    {configStore.zh ? '替换' : 'Replace'}
                   </div>
                   <div
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={replaceAll}
                   >
-                    {'Replace All'}
+                    {configStore.zh ? '替换所有' : 'Replace All'}
                   </div>
                 </>
               }
@@ -183,7 +183,7 @@ export const Search = observer(() => {
               }
               {!store.searchRanges.length && !!store.search.text &&
                 <div className={'text-gray-500 text-sm'}>
-                  {'No result'}
+                  {configStore.zh ? '没有结果' : 'No result'}
                 </div>
               }
             </div>

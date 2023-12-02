@@ -3,6 +3,7 @@ import {Popconfirm} from 'antd'
 import {ReactNode} from 'react'
 import {IBook, IDoc} from '../model'
 import {shareStore} from '../store'
+import {configStore} from '../../store/config'
 
 export const CloseShare = observer((props: {
   children: ReactNode
@@ -12,8 +13,8 @@ export const CloseShare = observer((props: {
 }) => {
   return (
     <Popconfirm
-      title="Note"
-      description="Network inaccessible after removal"
+      title={configStore.zh ? '提示' : 'Note'}
+      description={configStore.zh ? '删除后无法访问' : 'Network inaccessible after removal'}
       placement={'bottom'}
       onConfirm={() => {
         if (props.doc) {
@@ -27,8 +28,8 @@ export const CloseShare = observer((props: {
         })
         return Promise.resolve()
       }}
-      okText="Yes"
-      cancelText="No"
+      okText={configStore.zh ? '确定' : 'Yes'}
+      cancelText={configStore.zh ? '取消' : 'No'}
     >
       {props.children}
     </Popconfirm>

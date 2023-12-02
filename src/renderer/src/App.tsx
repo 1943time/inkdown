@@ -5,6 +5,7 @@ import { useSubject } from './hooks/subscribe'
 import { configStore } from './store/config'
 import {message$, modal$} from './utils'
 import { Home } from './components/Home'
+import zhCN from 'antd/locale/zh_CN';
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()
@@ -15,6 +16,10 @@ const App = observer(() => {
   useSubject(modal$, args => {
     modal[args.type](args.params)
   })
+
+  const locale = useMemo(() => {
+    return configStore.zh ? zhCN : undefined
+  }, [])
 
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -31,6 +36,7 @@ const App = observer(() => {
   if (!ready) return null
   return (
     <ConfigProvider
+      locale={locale}
       theme={{
         algorithm: themeObject,
         token: {

@@ -8,6 +8,7 @@ import {db} from '../store/db'
 import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
+import {configStore} from '../store/config'
 
 export const Empty = observer(() => {
   const [state, setState] = useLocalState({
@@ -50,7 +51,7 @@ export const Empty = observer(() => {
             Bluestone
           </div>
           <div className={'text-lg text-gray-500'}>
-            {'No open files'}
+            {configStore.zh ? '没有打开的文件' : 'No open files'}
           </div>
           <div
             className={'cursor-default hover:text-sky-400 duration-200'}
@@ -60,7 +61,7 @@ export const Empty = observer(() => {
           >
             <FileAddOutlined/>
             <span className={'ml-2'}>
-              {'Create a Markdown file'}
+              {configStore.zh ? '新建笔记' : 'New Note'}
             </span>
           </div>
           {!!treeStore.root &&
@@ -73,7 +74,7 @@ export const Empty = observer(() => {
               >
                 <HistoryOutlined />
                 <span className={'ml-2'}>
-                  {'Recently opened notes'}
+                  {configStore.zh ? '最近打开的笔记' : 'Recently opened notes'}
                 </span>
               </div>
               {treeStore.tabs.length > 1 &&
@@ -85,7 +86,7 @@ export const Empty = observer(() => {
                 >
                   <CloseOutlined />
                   <span className={'ml-2'}>
-                  {'Close'}
+                  {configStore.zh ? '关闭' : 'Close'}
                 </span>
                 </div>
               }
@@ -102,7 +103,7 @@ export const Empty = observer(() => {
                 <FolderOpenOutlined/>
                 <span
                   className={'ml-2'}>
-                  {'Open file or folder'}
+                  {configStore.zh ? '打开文件或文件夹' : 'Open file or folder'}
                 </span>
               </div>
             </>
@@ -111,7 +112,7 @@ export const Empty = observer(() => {
         {!!state.records.length && !treeStore.root &&
           <div className={'mt-6'}>
             <div className={'text-lg text-gray-500'}>
-              {'Recent'}
+              {configStore.zh ? '最近打开' : 'Recent'}
             </div>
             <div className={'mt-2'}>
               {state.records.map(r =>

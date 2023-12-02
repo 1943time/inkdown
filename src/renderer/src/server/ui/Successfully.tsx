@@ -5,6 +5,7 @@ import {nanoid} from 'nanoid'
 import {Button, notification, Space} from 'antd'
 import {Subject} from 'rxjs'
 import {message$} from '../../utils'
+import {configStore} from '../../store/config'
 export const shareSuccessfully$ = new Subject<string>()
 export const Successfully = observer(() => {
   const [api, contextHolder] = notification.useNotification()
@@ -12,14 +13,14 @@ export const Successfully = observer(() => {
     window.api.copyToClipboard(url)
     message$.next({
       type: 'success',
-      content: 'Copied to clipboard'
+      content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
     })
   }, [])
   useSubject(shareSuccessfully$, (url: string) => {
     const key = nanoid()
     api.success({
       key,
-      message: 'Synchronization succeeded',
+      message: configStore.zh ? '同步成功' : 'Synchronization succeeded',
       duration: 3,
       btn: (
         <Space>
@@ -29,7 +30,7 @@ export const Successfully = observer(() => {
               copyDocUrl(url)
             }}
           >
-            Copy Link
+            {configStore.zh ? '复制链接' : 'Copy Link'}
           </Button>
           <Button
             type={'primary'}
@@ -38,7 +39,7 @@ export const Successfully = observer(() => {
               api.destroy(key)
             }}
           >
-            Open
+            {configStore.zh ? '打开' : 'Open'}
           </Button>
         </Space>
       )

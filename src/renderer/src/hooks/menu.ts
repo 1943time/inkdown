@@ -9,6 +9,7 @@ import {isAbsolute, join} from 'path'
 import {existsSync} from 'fs'
 import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
+import {configStore} from '../store/config'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
 
@@ -113,14 +114,14 @@ export const useSystemMenus = () => {
     const clearUnusedImages = () => {
       if (!treeStore.root) return message$.next({
         type: 'warning',
-        content: 'Need to open a folder'
+        content: configStore.zh ? '需要打开文件夹' : 'Need to open a folder'
       })
       modal$.next({
         type: 'confirm',
         params: {
           type: 'info',
-          title: 'Note',
-          content: 'Unused images in .images folder will be moved to trash',
+          title: configStore.zh ? '提示' : 'Note',
+          content: configStore.zh ? '在.images文件夹中未被使用的图片将被移入废纸篓' : 'Unused images in .images folder will be moved to trash',
           onOk: async () => {
             const imgDir = join(treeStore.root.filePath, '.images')
             if (existsSync(imgDir)) {
@@ -164,7 +165,7 @@ export const useSystemMenus = () => {
               }
               message$.next({
                 type: 'success',
-                content: 'Clear successfully'
+                content: configStore.zh ? '清除成功' : 'Clear successfully'
               })
             }
           }
@@ -222,7 +223,7 @@ export const useSystemMenus = () => {
           }
           message$.next({
             type: 'info',
-            content: change ? 'Conversion successful' : 'The current note does not include network images'
+            content: change ? configStore.zh ? '转换成功' : 'Conversion successful' : configStore.zh ? '当前文档未引入网络图片' : 'The current note does not include network images'
           })
         }
       }

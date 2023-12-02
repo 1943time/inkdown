@@ -2,7 +2,7 @@ import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserVi
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
-import {store} from './store'
+import {getLocale, store} from './store'
 import {writeFileSync} from 'fs'
 import {machineIdSync} from 'node-machine-id'
 import icon from '../../resources/icon.png?asset'
@@ -88,7 +88,8 @@ export const registerApi = () => {
       showCharactersCount: isBoolean(config.showCharactersCount) ? config.showCharactersCount : true,
       mas: process.mas || false,
       dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
-      autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true
+      autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true,
+      locale: getLocale()
     }
   })
 
@@ -112,6 +113,9 @@ export const registerApi = () => {
       store.delete(key)
     } else {
       store.set(key, value)
+      if (key === 'config.locale') {
+        ipcMain.emit('set-locale', value)
+      }
     }
   })
   ipcMain.on('toggleShowLeading', (e, show: boolean) => {

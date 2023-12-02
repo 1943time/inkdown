@@ -60,9 +60,7 @@ export const Tree = observer(() => {
         onClose={() => {
           setState({openShareFolder: false})
         }}
-        onSave={book => {
-
-        }}
+        onSave={book => {}}
       />
     </div>
   )

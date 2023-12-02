@@ -45,7 +45,7 @@ export const Update = observer(() => {
       if (!manual) return
       message$.next({
         type: 'info',
-        content: 'No updates are available'
+        content: configStore.zh ? '没有可用的更新' : 'No updates are available'
       })
     })
 
@@ -54,7 +54,7 @@ export const Update = observer(() => {
       if (state.startUpdate || state.manual) {
         let msg = typeof err === 'string' ? err : err instanceof Error ? err.message : 'The network is abnormal, please try again later or download manually'
         api.error({
-          message: 'The update failed',
+          message: configStore.zh ? '更新失败' : 'The update failed',
           description: msg
         })
       }
@@ -64,7 +64,7 @@ export const Update = observer(() => {
       setState({startUpdate: false, percent: 0})
       modal.confirm({
         type: 'warning',
-        content: 'Download the update is complete, do you want to restart it now?',
+        content: configStore.zh ? '下载更新已完成，是否立即重新启动？' : 'Download the update is complete, do you want to restart it now?',
         onOk: () => {
           ipcRenderer.send('install-update')
         },
@@ -103,7 +103,7 @@ export const Update = observer(() => {
                     setState({startUpdate: false, percent: 0})
                   }}
                 >
-                  {'Cancel update'}
+                  {configStore.zh ? '取消更新' : 'Cancel update'}
                 </Button>
               </>
             ) : (
@@ -116,7 +116,7 @@ export const Update = observer(() => {
                     setState({startUpdate: true, open: false})
                   }}
                 >
-                  {'Update now'}
+                  {configStore.zh ? '立即更新' : 'Update now'}
                 </Button>
               </>
             )}

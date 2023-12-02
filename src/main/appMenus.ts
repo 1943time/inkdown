@@ -1,7 +1,7 @@
 
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog, ipcRenderer} from 'electron'
 import MenuItem = Electron.MenuItem
-import {store} from './store'
+import {getLocale, store} from './store'
 import {is} from '@electron-toolkit/utils'
 
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
@@ -15,58 +15,20 @@ const task = (task: string, parameter?: any) => {
   }
 }
 const getSystemMenus = () => {
+  const zh = getLocale() === 'zh'
   const titles = Array.from(new Array(4)).map((_, i) => {
     const n = i + 1
     return {
-      label: `Heading ${n}`,
+      label: `${zh ? '标题' : 'Heading'} ${n}`,
       id: `title-${n}`,
       accelerator: `${cmd}+${n}`,
       click: task('head', n),
       enabled: false
     }
   })
-  const menusLabel = {
-    about: 'About Bluestone',
-    update: 'Check for Updates',
-    set: 'Settings',
-    file: 'File',
-    create: 'Create',
-    createWindow: 'New Window',
-    openQuickly: 'Open Quickly',
-    open: 'Open',
-    openRecent: 'Open Recent',
-    clearRecent: 'Clear Items',
-    pdf: 'Export To PDF',
-    html: 'Export To HTML',
-    eBook: 'Export eBook',
-    edit: 'Edit',
-    paragraph: 'Paragraph',
-    titleIncrease: 'Increase Heading Level',
-    titleDecrease: 'Decrease Heading Level',
-    insertTable: 'Insert Table',
-    code: 'Code Fences',
-    orderedList: 'Ordered List',
-    unorderedList: 'Unordered List',
-    orderedTaskList: 'Ordered Task List',
-    unorderedTaskList: 'Unordered Task List',
-    horizontalLine: 'Horizontal Line',
-    format: 'Format',
-    bold: 'Bold',
-    italic: 'Italic',
-    strikethrough: 'Strikethrough',
-    inlineCode: 'Inline Code',
-    clear: 'Clear',
-    view: 'View',
-    zoomIn: 'Zoom In',
-    zoomOut: 'Zoom Out',
-    leading: 'Outline',
-    search: 'Search',
-    help: 'Help',
-    doc: 'Documentation'
-  }
   const update: MenuOptions[number]['submenu'] = !isMas ? [
     {
-      label: menusLabel.update,
+      label: zh ? '检查更新' : 'Check for Updates',
       click: () => {
         ipcMain.emit('check-updated')
         BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
@@ -75,11 +37,13 @@ const getSystemMenus = () => {
   ] : []
   const menus: MenuOptions = [
     {
-      label: 'Bluestone',
+      label: zh ? '青石' : 'Bluestone',
       role: 'appMenu',
+      id: 'app',
       submenu: [
         {
-          label: menusLabel.about,
+          label: zh ? '关于' : 'About',
+          id: 'about',
           click: (e, win) => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
           }
@@ -87,7 +51,8 @@ const getSystemMenus = () => {
         ...update,
         {type: 'separator'},
         {
-          label: menusLabel.set,
+          label: zh ? '设置' : 'Settings',
+          id: 'settings',
           accelerator: `${cmd}+,`,
           click: e => {
             BrowserWindow.getFocusedWindow()?.webContents.send('openSet')
@@ -117,7 +82,8 @@ const getSystemMenus = () => {
       })
     }
     openPathMenus.push({
-      label: menusLabel.clearRecent,
+      label: zh ? '清除记录' : 'Clear Recent',
+      id: 'clear-recent',
       click: () => {
         app.clearRecentDocuments()
         BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
@@ -131,17 +97,18 @@ const getSystemMenus = () => {
     {type: 'separator'},
     {
       id: 'open',
-      label: menusLabel.open,
+      label: zh ? '打开' : 'Open',
       click: (menu, win) => {
         win?.webContents.send('open')
       }
     },
     {
-      label: menusLabel.openRecent,
+      label: zh ? '最近打开' : 'Open Recent',
+      id: 'open-recent',
       role: 'recentDocuments',
       submenu: [
         {
-          label: menusLabel.clearRecent,
+          label: zh ? '清除记录' : 'Clear Recent',
           click: () => {
             app.clearRecentDocuments()
             BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
@@ -152,15 +119,15 @@ const getSystemMenus = () => {
   ] : [
     {type: 'separator'},
     {
-      id: 'open',
-      label: 'Open File',
+      id: 'open-file',
+      label: zh ? '打开文件' : 'Open File',
       click: (menu, win) => {
         win?.webContents.send('open-file')
       }
     },
     {
-      id: 'open',
-      label: 'Open Folder',
+      id: 'open-folder',
+      label: zh ? '打开文件夹' : 'Open Folder',
       click: (menu, win) => {
         win?.webContents.send('open')
       }
@@ -168,59 +135,64 @@ const getSystemMenus = () => {
     {type: 'separator'},
     {
       id: 'recent-open-paths',
-      label: 'Open Recent',
+      label: zh ? '最近打开' : 'Open Recent',
       submenu: getOpenPaths()
     }
   ]
   menus.push({
-    label: menusLabel.file,
+    label: zh ? '文件' : 'File',
     id: 'file',
     role: 'fileMenu',
     submenu: [
       {
         id: 'create',
-        label: menusLabel.create,
+        label: zh ? '新建笔记' : 'New Note',
         accelerator: `${cmd}+n`,
         click: (menu, win) => {
           win?.webContents.send('create')
         }
       },
       {
-        label: menusLabel.createWindow,
+        label: zh ? '新建窗口' : 'New Window',
         accelerator: `${cmd}+shift+n`,
+        id: 'create-window',
         click: () => {
           ipcMain.emit('create-window')
         }
       },
       {type: 'separator'},
       {
-        label: 'New Tab',
+        label: zh ? '新建标签' : 'New Tab',
+        id: 'new-tab',
         accelerator: `${cmd}+t`,
         click: (menu, win) => {
           win?.webContents.send('new-tab')
         }
       },
       {
-        label: 'Close Current Tab',
+        label: zh ? '关闭当前标签' : 'Close Current Tab',
+        id: 'close-current-tab',
         accelerator: `${cmd}+w`
       },
       ...systemFileMenus,
       {
-        label: menusLabel.openQuickly,
+        label: zh ? '快速打开' : 'Open Quickly',
+        id: 'open-quickly',
         accelerator: `${cmd}+o`,
         click: () => {
           BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
         }
       },
       {
-        label: 'Clear Unused Images',
+        label: zh ? '清除未使用的图片' : 'Clear Unused Images',
+        id: 'clear-unused-images',
         click: (e, win) => {
           win?.webContents.send('clear-unused-images')
         }
       },
       {type: 'separator'},
       {
-        label: menusLabel.pdf,
+        label: zh ? '导出PDF' : 'Export To PDF',
         id: 'print-pdf',
         enabled: false,
         click: (e, win) => {
@@ -228,7 +200,7 @@ const getSystemMenus = () => {
         }
       },
       {
-        label: menusLabel.html,
+        label: zh ? '导出HTML' : 'Export To HTML',
         id: 'print-html',
         enabled: false,
         click: (e, win) => {
@@ -239,21 +211,22 @@ const getSystemMenus = () => {
   })
   const delRange = isMac ? [
     {
-      label: 'Delete Range',
+      label: zh ? '删除范围' : 'Delete Range',
+      id: 'delete-range',
       submenu: [
         {
-          label: 'Delete Line',
+          label: zh ? '删除行' : 'Delete Line',
           accelerator: `${cmd}+Backspace`
         },
         {
-          label: 'Delete Word',
+          label: zh ? '删除词' : 'Delete Word',
           accelerator: `Alt+Backspace`
         }
       ]
     }
   ] : []
   menus.push({
-    label: menusLabel.edit,
+    label: zh ? '编辑' : 'Edit',
     id: 'edit',
     role: 'editMenu',
     submenu: [
@@ -261,7 +234,7 @@ const getSystemMenus = () => {
       {role: 'redo'},
       {type: 'separator'},
       {
-        label: 'Save',
+        label: zh ? '保存' : 'Save',
         accelerator: `${cmd}+s`,
         click: () => {
           BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')
@@ -273,23 +246,26 @@ const getSystemMenus = () => {
       {role: 'delete'},
       ...delRange,
       {
-        label: 'Selection',
+        label: zh ? '选择' : 'Selection',
         submenu: [
-          {role: 'selectAll'},
+          {
+            role: 'selectAll',
+            label: zh ? '全选' : 'Select All'
+          },
           {
             accelerator: `${cmd}+l`,
             click: task('select-line'),
-            label: 'Select Line'
+            label: zh ? '选择行' : 'Select Line'
           },
           {
             accelerator: `${cmd}+e`,
             click: task('select-format'),
-            label: 'Select Format'
+            label: zh ? '选择格式' : 'Select Format'
           },
           {
             accelerator: `${cmd}+d`,
             click: task('select-word'),
-            label: 'Select Word'
+            label: zh ? '选择词' : 'Select Word'
           }
         ]
       },
@@ -297,31 +273,31 @@ const getSystemMenus = () => {
       {
         id: 'break-line',
         accelerator: `${cmd}+Enter`,
-        label: 'Line Break Within Paragraph',
+        label: zh ? '段落内换行' :'Line Break Within Paragraph',
         click: task('key-break')
       },
       {type: 'separator'},
       {
         accelerator: `${cmd}+shift+v`,
-        label: 'Paste as Plain Text',
+        label: zh ? '黏贴为纯文本' : 'Paste as Plain Text',
         click: task('paste-plain-text')
       },
       {
         accelerator: `${cmd}+alt+v`,
-        label: 'Paste Markdown Code',
+        label: zh ? '黏贴为Markdown代码' : 'Paste Markdown Code',
         click: task('paste-markdown-code')
       }
     ]
   })
   menus.push(
     {
-      label: menusLabel.paragraph,
+      label: zh ? '段落' : 'Paragraph',
       id: 'paragraph',
       submenu: [
         ...titles,
         {type: 'separator'},
         {
-          label: menusLabel.paragraph,
+          label: zh ? '段落' : 'Paragraph',
           id: 'paragraph',
           accelerator: `${cmd}+0`,
           enabled: false,
@@ -329,53 +305,53 @@ const getSystemMenus = () => {
         },
         {type: 'separator'},
         {
-          label: menusLabel.titleIncrease,
+          label: zh ? '提升标题等级' : 'Increase Heading Level',
           id: 'titleIncrease',
           accelerator: `${cmd}+]`,
           enabled: false,
           click: task('head+')
         },
         {
-          label: menusLabel.titleDecrease,
+          label: zh ? '降低标题等级' : 'Decrease Heading Level',
           id: 'titleDecrement',
           enabled: false,
           accelerator: `${cmd}+[`,
           click: task('head-')
         },
         {
-          label: 'Quote',
+          label: zh ? '引用' : 'Quote',
           id: 'quote',
           accelerator: `${cmd}+Alt+q`,
           click: task('quote'),
           enabled: false
         },
         {
-          label: menusLabel.insertTable,
+          label: zh ? '插入表格' : 'Insert Table',
           id: 'insertTable',
           accelerator: `${cmd}+Alt+t`,
           click: task('insertTable'),
           enabled: false
         },
         {
-          label: menusLabel.code,
+          label: zh ? '代码栏' : 'Code Fences',
           id: 'insertCode',
           accelerator: `${cmd}+Alt+c`,
           click: task('insertCode'),
           enabled: false
         },
         {
-          label: 'Formula',
+          label: zh ? '公式' : 'Formula',
           id: 'formula',
           submenu: [
             {
-              label: 'Formula Block',
+              label: zh ? '块级公式' : 'Formula Block',
               id: 'insertKatex',
               accelerator: `${cmd}+k`,
               click: task('insertKatex'),
               enabled: false
             },
             {
-              label: 'Inline Formula',
+              label: zh ? '行内公式' : 'Inline Formula',
               id: 'insertInlineKatex',
               accelerator: `${cmd}+Alt+k`,
               click: task('insertInlineKatex'),
@@ -391,28 +367,28 @@ const getSystemMenus = () => {
         },
         {type: 'separator'},
         {
-          label: menusLabel.orderedList,
+          label: zh ? '有序列表' : 'Ordered List',
           id: 'insertOrderedList',
           accelerator: `${cmd}+Alt+o`,
           click: task('insertOrderedList'),
           enabled: false
         },
         {
-          label: menusLabel.unorderedList,
+          label: zh ? '无序列表' : 'Unordered List',
           id: 'insertUnorderedList',
           accelerator: `${cmd}+Alt+u`,
           click: task('insertUnorderedList'),
           enabled: false
         },
         {
-          label: menusLabel.orderedTaskList,
+          label: zh ? '有序任务列表' : 'Ordered Task List',
           id: 'insertTaskOrderedList',
           accelerator: `${cmd}+Shift+o`,
           click: task('insertTaskOrderedList'),
           enabled: false
         },
         {
-          label: menusLabel.unorderedTaskList,
+          label: zh ? '无序任务列表' : 'Unordered Task List',
           id: 'insertTaskUnorderedList',
           accelerator: `${cmd}+Shift+u`,
           click: task('insertTaskUnorderedList'),
@@ -420,7 +396,7 @@ const getSystemMenus = () => {
         },
         {type: 'separator'},
         {
-          label: menusLabel.horizontalLine,
+          label: zh ? '水平线' : 'Horizontal Line',
           id: 'insertHorizontalRule',
           accelerator: `${cmd}+Alt+/`,
           click: task('insertHorizontalRule'),
@@ -431,35 +407,35 @@ const getSystemMenus = () => {
   )
   menus.push(
     {
-      label: menusLabel.format,
+      label: zh ? '格式' : 'Format',
       id: 'format',
       submenu: [
         {
-          label: menusLabel.bold,
+          label: zh ? '加粗' : 'Bold',
           accelerator: `${cmd}+b`,
           click: task('bold')
         },
         {
-          label: menusLabel.italic,
+          label: zh ? '斜体' : 'Italic',
           accelerator: `${cmd}+i`,
           click: task('italic')
         },
         {
-          label: menusLabel.strikethrough,
+          label: zh ? '删除线' : 'Strikethrough',
           accelerator: `Ctrl+Shift+\``,
           click: task('strikethrough')
         },
         {
-          label: menusLabel.inlineCode,
+          label: 'Inline Code',
           accelerator: `Ctrl+\``,
           click: task('code')
         },
         {
-          label: 'Image',
+          label: zh ? '图片' : 'Image',
           accelerator: `${cmd}+p`,
           submenu: [
             {
-              label: 'Insert local image',
+              label: zh ? '插入本机图片' : 'Insert local image',
               accelerator: `${cmd}+p`,
               click: (e, win) => {
                 dialog.showOpenDialog({
@@ -475,7 +451,7 @@ const getSystemMenus = () => {
             },
             {
               accelerator: `${cmd}+shift+p`,
-              label: 'Insert image via url',
+              label: zh ? '自定义插入' : 'Custom insertion',
               click: (e, win) => {
                 win?.webContents.send('key-task', 'insertNetworkImage')
               }
@@ -484,7 +460,7 @@ const getSystemMenus = () => {
         },
         {type: 'separator'},
         {
-          label: menusLabel.clear,
+          label: zh ? '清除' : 'Clear',
           accelerator: `${cmd}+\\`,
           click: task('clear')
         }
@@ -493,7 +469,7 @@ const getSystemMenus = () => {
   )
   const winMenus:MenuOptions[number]['submenu']  = isMac ? [] : [
     {
-      label: 'Show Menu Bar',
+      label: zh ? '显示菜单栏' : 'Show Menu Bar',
       type: 'checkbox',
       checked: !!store.get('showMenuBar'),
       accelerator: 'Alt+1',
@@ -510,15 +486,15 @@ const getSystemMenus = () => {
   ] : []
   menus.push(
     {
-      label: menusLabel.view,
+      label: zh ? '视图' : 'View',
       role: 'viewMenu',
       submenu: [
-        {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: menusLabel.zoomIn},
-        {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: menusLabel.zoomOut},
+        {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: 'Zoom In'},
+        {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: 'Zoom Out'},
         {type: 'separator'},
         ...winMenus,
         {
-          label: menusLabel.leading,
+          label: zh ? '大纲' : 'Outline',
           type: 'checkbox',
           id: 'showLeading',
           checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
@@ -529,7 +505,7 @@ const getSystemMenus = () => {
           }
         },
         {
-          label: menusLabel.search,
+          label: zh ? '搜索' : 'Search',
           id: 'search',
           accelerator: `${cmd}+f`,
           click: e => {
@@ -549,11 +525,11 @@ const getSystemMenus = () => {
 
   menus.push(
     {
-      label: menusLabel.help,
+      label: zh ? '帮助' : 'Help',
       role: 'help',
       submenu: [
         {
-          label: menusLabel.doc,
+          label: 'Documentation',
           click: () => {
             if (app.getLocale() === 'zh-CN') {
               shell.openExternal(`https://doc.bluemd.me/book/zh-docs`)
@@ -652,5 +628,10 @@ export const createAppMenus = () => {
   ipcMain.on('open-file', (e, isMarkdown: boolean) => {
     instance.getMenuItemById('print-pdf')!.enabled = isMarkdown
     instance.getMenuItemById('print-html')!.enabled = isMarkdown
+  })
+  ipcMain.on('set-locale', (e, lc: string) => {
+    const menus = getSystemMenus()
+    instance = Menu.buildFromTemplate(menus)
+    Menu.setApplicationMenu(instance)
   })
 }

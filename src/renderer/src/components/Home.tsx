@@ -10,7 +10,6 @@ import {Characters} from './Characters'
 import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
 import {History} from './History'
-import IClose from '../icons/IClose'
 import {useSystemMenus} from '../hooks/menu'
 import {Tabs} from './Tabs'
 

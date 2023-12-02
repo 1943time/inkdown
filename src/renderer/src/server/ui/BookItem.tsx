@@ -20,6 +20,7 @@ import {shareStore} from '../store'
 import {NotLogged} from './NotLogged'
 import {EBook} from './Ebook'
 import {shareSuccessfully$} from './Successfully'
+import {configStore} from '../../store/config'
 
 export const BookItem = observer((props: {
   books: ShareBook[]
@@ -44,7 +45,7 @@ export const BookItem = observer((props: {
       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
         <Net className={'w-5 h-5 fill-gray-500'}/>
         <span className={'ml-1'}>
-          {props.books.length ? 'Books in current worker space folder' : 'Combine multiple notes into a book'}
+          {props.books.length ? configStore.zh ? '当前工作区中分享的文件夹' : 'Books in current worker space folder' : configStore.zh ? '将多个笔记组合为 Book' : 'Combine multiple notes into a book'}
         </span>
       </div>
       {!shareStore.serviceConfig &&
@@ -96,13 +97,13 @@ export const BookItem = observer((props: {
                     menu={{
                       items: [
                         {
-                          label: 'Copy Link', key: 'copy', icon: <CopyOutlined/>,
+                          label: configStore.zh ? '复制链接' : 'Copy Link', key: 'copy', icon: <CopyOutlined/>,
                           onClick: () => {
                             props.onCopy(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
                           }
                         },
                         {
-                          label: 'Settings', key: 'setting', icon: <SettingOutlined/>,
+                          label: configStore.zh ? '设置' : 'Settings', key: 'setting', icon: <SettingOutlined/>,
                           onClick: () => {
                             setState({ebookOpen: true, currentRootPath: b.filePath})
                             props.onMask(true)
@@ -110,12 +111,12 @@ export const BookItem = observer((props: {
                         },
                         {type: 'divider'},
                         {
-                          label: 'Remove', key: 'remove', icon: <StopOutlined/>, danger: true,
+                          label: configStore.zh ? '删除' : 'Remove', key: 'remove', icon: <StopOutlined/>, danger: true,
                           onClick: () =>  {
                             props.onMask(true)
                             modal.confirm({
                               title: 'Note',
-                              content: `Confirm to remove shared book ${b.name}`,
+                              content: configStore.zh ? `确认删除已分享的文件夹 ${b.name}` : `Confirm to remove shared book ${b.name}`,
                               onOk: () => {
                                 return shareStore.delBook(b).then(props.onRefresh).finally(closeMask)
                               },
@@ -150,7 +151,7 @@ export const BookItem = observer((props: {
             disabled={!shareStore.serviceConfig}
             className={'flex-1'}
             block={true}>
-            <span>Create Book</span>
+            <span>{configStore.zh ? '分享文件夹' : 'Create Book'}</span>
           </Button>
         </div>
       }

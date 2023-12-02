@@ -11,6 +11,7 @@ class ConfigStore {
     autoDownload: false,
     theme: 'system' as 'system' | 'dark' | 'light',
     dark: false,
+    locale: 'en' as 'en' | 'zh',
     codeLineNumber: false,
     codeTabSize: 2,
     editorTextSize: 16,
@@ -27,7 +28,9 @@ class ConfigStore {
   get mas() {
     return process.mas || false
   }
-
+  get zh() {
+    return this.config.locale === 'zh'
+  }
   constructor() {
     makeAutoObservable(this, {
       timer: false,
