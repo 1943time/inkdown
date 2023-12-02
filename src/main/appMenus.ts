@@ -282,6 +282,11 @@ const getSystemMenus = () => {
             label: 'Select Line'
           },
           {
+            accelerator: `${cmd}+e`,
+            click: task('select-format'),
+            label: 'Select Format'
+          },
+          {
             accelerator: `${cmd}+d`,
             click: task('select-word'),
             label: 'Select Word'

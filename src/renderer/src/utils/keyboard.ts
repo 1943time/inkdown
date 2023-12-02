@@ -8,7 +8,19 @@ import {ReactEditor} from 'slate-react'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {isAbsolute, join, relative} from 'path'
 import {configStore} from '../store/config'
+import {EditorStore} from '../editor/store'
 
+const openFloatBar = (store: EditorStore) => {
+  setTimeout(() => {
+    try {
+      const domRange = window.getSelection()?.getRangeAt(0)
+      const rect = domRange?.getBoundingClientRect()
+      if (rect) {
+        store.setState(state => state.domRect = rect)
+      }
+    } catch (e) {}
+  })
+}
 const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
   const task = ['insertTaskUnorderedList', 'insertTaskOrderedList'].includes(type)
@@ -345,16 +357,14 @@ export class MenuKey {
             Transforms.select(editor, Path.parent(editor.selection.anchor.path))
             const text = Node.leaf(editor, editor.selection.anchor.path).text || ''
             if (text) {
-              setTimeout(() => {
-                try {
-                  const domRange = window.getSelection()?.getRangeAt(0)
-                  const rect = domRange?.getBoundingClientRect()
-                  if (rect) {
-                    this.state.setState(state => state.domRect = rect)
-                  }
-                } catch (e) {}
-              })
+              openFloatBar(this.state)
             }
+          }
+          break
+        case 'select-format':
+          if (editor.selection) {
+            Transforms.select(editor, editor.selection.anchor.path)
+            openFloatBar(this.state)
           }
           break
         case 'select-word':
@@ -385,15 +395,7 @@ export class MenuKey {
             if (start === sel.anchor.offset && end === sel.anchor.offset && next) {
               end = start + 1
             } else {
-              setTimeout(() => {
-                try {
-                  const domRange = window.getSelection()?.getRangeAt(0)
-                  const rect = domRange?.getBoundingClientRect()
-                  if (rect) {
-                    this.state.setState(state => state.domRect = rect)
-                  }
-                } catch (e) {}
-              })
+              openFloatBar(this.state)
             }
             Transforms.select(editor, {
               anchor: {path: sel.anchor.path, offset: start},
