@@ -265,7 +265,7 @@ export const ShareData = observer((props: {
                             />
                             <Tooltip trigger={['click']} title={v}>
                               <div
-                                className={`cursor-default max-w-[300px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
+                                className={`cursor-default max-w-[400px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
                             </Tooltip>
                           </div>
                         )
@@ -343,7 +343,7 @@ export const ShareData = observer((props: {
                         render: v => (
                           <Tooltip trigger={['click']} title={v}>
                             <div
-                              className={`cursor-default max-w-[300px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
+                              className={`cursor-default max-w-[400px] truncate text-xs ${existsSync(v) ? 'text-gray-500 dark:text-gray-300/80' : 'text-red-500'}`}>{v}</div>
                           </Tooltip>
                         )
                       },

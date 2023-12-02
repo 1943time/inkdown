@@ -4,7 +4,7 @@ import {MediaNode} from '../../el'
 import {useGetSetState} from 'react-use'
 import {AutoComplete} from 'antd'
 import {CheckOutlined, DeleteOutlined, ReloadOutlined} from '@ant-design/icons'
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {ReactNode, useCallback, useEffect, useRef} from 'react'
 import {getOffsetLeft, mediaType} from '../utils/dom'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
@@ -13,6 +13,7 @@ import {treeStore} from '../../store/tree'
 import {keyArrow} from '../plugins/hotKeyCommands/arrow'
 import {IFileItem} from '../../index'
 import {join, relative} from 'path'
+import {getImageData} from '../../utils'
 
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
@@ -24,22 +25,29 @@ export const MediaAttr = observer(() => {
     url: '',
     width: 0,
     focus: false,
-    filePaths: [] as {label: string, value: string}[],
-    filterPaths: [] as {label: string, value: string}[]
+    filePaths: [] as {label: string | ReactNode, value: string}[],
+    filterPaths: [] as {label: string | ReactNode, value: string}[]
   })
   const nodeRef = useRef<NodeEntry<MediaNode>>()
   const domRef = useRef<HTMLDivElement>(null)
 
   const getFilePaths = useCallback(() => {
     if (treeStore.root) {
-      let files: {label: string, value: string}[] = []
+      let files: {label: string | ReactNode, value: string}[] = []
       const stack: IFileItem[] = treeStore.root.children!.slice()
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
           const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
           files.push({
-            label: path,
+            label: (
+              <div className={'flex items-center'}>
+                <div className={'flex-1 max-w-full truncate'}>{path}</div>
+                <div>
+                  <img src={getImageData(node.filePath)} alt="" className={'w-7 h-7 ml-4 rounded-sm'}/>
+                </div>
+              </div>
+            ),
             value: path
           })
         }
@@ -194,7 +202,7 @@ export const MediaAttr = observer(() => {
         onSearch={e => {
           setState({
             url: e,
-            filterPaths: state().filePaths.filter(f => f.label.includes(e))
+            filterPaths: state().filePaths.filter(f => f.value.includes(e))
           })
         }}
         onMouseDown={e => {
