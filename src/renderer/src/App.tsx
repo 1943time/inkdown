@@ -9,6 +9,7 @@ import zhCN from 'antd/locale/zh_CN';
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()
+  const [locale, setLocale] = useState('en')
   useSubject(message$, args => {
     args === 'destroy' ? messageApi.destroy() : messageApi.open(args)
   })
@@ -17,16 +18,13 @@ const App = observer(() => {
     modal[args.type](args.params)
   })
 
-  const locale = useMemo(() => {
-    return configStore.zh ? zhCN : undefined
-  }, [])
-
   const [ready, setReady] = useState(false)
   useEffect(() => {
     Promise.allSettled([
       window.api.ready(),
       configStore.initial()
     ]).then(() => {
+      setLocale(configStore.zh ? 'zh' : 'en')
       setReady(true)
     })
   }, [])
@@ -36,7 +34,7 @@ const App = observer(() => {
   if (!ready) return null
   return (
     <ConfigProvider
-      locale={locale}
+      locale={locale === 'zh' ? zhCN : undefined}
       theme={{
         algorithm: themeObject,
         token: {
