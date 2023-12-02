@@ -1,7 +1,7 @@
 import {useCallback, useEffect} from 'react'
 import {MainApi} from '../api/main'
 import {treeStore} from '../store/tree'
-import {message$, modal$, stat, toArrayBuffer} from '../utils'
+import {base64ToArrayBuffer, message$, modal$, stat, toArrayBuffer} from '../utils'
 import {exportHtml} from '../editor/output/html'
 import {clearExpiredRecord, db} from '../store/db'
 import {runInAction} from 'mobx'
@@ -184,22 +184,38 @@ export const useSystemMenus = () => {
             if (!item.text && item.type !== 'media' && item.children?.length) {
               stack.push(...item.children!.slice())
             } else {
-              if (item.type === 'media' && item.url?.startsWith('http')) {
-                const ext = item.url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
-                if (ext) {
-                  try {
-                    change = true
-                    const res = await window.api.got.get(item.url, {
-                      responseType: 'buffer'
-                    })
-                    const path = await store.saveFile({
-                      name: Date.now().toString(16) + '.' + ext[1].toLowerCase(),
-                      buffer: toArrayBuffer(res.rawBody)
-                    })
-                    Transforms.setNodes(store.editor, {
-                      url: path
-                    }, {at: ReactEditor.findPath(store.editor, item)})
-                  } catch (e) {}
+              if (item.type === 'media') {
+                if (item.url?.startsWith('http')) {
+                  const ext = item.url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
+                  if (ext) {
+                    try {
+                      change = true
+                      const res = await window.api.got.get(item.url, {
+                        responseType: 'buffer'
+                      })
+                      const path = await store.saveFile({
+                        name: Date.now().toString(16) + '.' + ext[1].toLowerCase(),
+                        buffer: toArrayBuffer(res.rawBody)
+                      })
+                      Transforms.setNodes(store.editor, {
+                        url: path
+                      }, {at: ReactEditor.findPath(store.editor, item)})
+                    } catch (e) {}
+                  }
+                } else if (item.url?.startsWith('data:')) {
+                  const m = item.url.match(/data:image\/(\w+);base64,(.*)/)
+                  if (m) {
+                    try {
+                      change = true
+                      const path = await store.saveFile({
+                        name: Date.now().toString(16) + '.' + m[1].toLowerCase(),
+                        buffer: base64ToArrayBuffer(m[2])
+                      })
+                      Transforms.setNodes(store.editor, {
+                        url: path
+                      }, {at: ReactEditor.findPath(store.editor, item)})
+                    } catch (e) {}
+                  }
                 }
               }
             }
