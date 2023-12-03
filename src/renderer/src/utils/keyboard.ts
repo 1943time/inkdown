@@ -354,17 +354,19 @@ export class MenuKey {
           break
         case 'select-line':
           if (editor.selection) {
+            const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
             Transforms.select(editor, Path.parent(editor.selection.anchor.path))
             const text = Node.leaf(editor, editor.selection.anchor.path).text || ''
-            if (text) {
+            if (text && node?.[0].type !== 'code-line') {
               openFloatBar(this.state)
             }
           }
           break
         case 'select-format':
           if (editor.selection) {
+            const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
             Transforms.select(editor, editor.selection.anchor.path)
-            openFloatBar(this.state)
+            if (node?.[0].type !== 'code-line') openFloatBar(this.state)
           }
           break
         case 'select-word':
@@ -395,7 +397,8 @@ export class MenuKey {
             if (start === sel.anchor.offset && end === sel.anchor.offset && next) {
               end = start + 1
             } else {
-              openFloatBar(this.state)
+              const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
+              if (node?.[0].type !== 'code-line') openFloatBar(this.state)
             }
             Transforms.select(editor, {
               anchor: {path: sel.anchor.path, offset: start},
