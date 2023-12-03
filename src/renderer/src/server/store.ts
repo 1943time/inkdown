@@ -9,6 +9,7 @@ import {MainApi} from '../api/main'
 import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
 import {join} from 'path'
+import {configStore} from '../store/config'
 
 export class ShareStore {
   readonly minVersion = '0.2.2'
@@ -131,7 +132,7 @@ export class ShareStore {
           console.log('e', e)
           message$.next({
             type: 'error',
-            content: 'Custom service connection failed'
+            content: configStore.zh ? '服务连接失败' : 'Custom service connection failed'
           })
         }
       }

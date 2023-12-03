@@ -256,7 +256,7 @@ export const ShareData = observer((props: {
                                       res.docs?.map(d => shareStore.docMap.set(d.filePath, d))
                                       message$.next({
                                         type: 'success',
-                                        content: 'Mapping file changed'
+                                        content: configStore.zh ? '映射文件路径已更改' : 'Mapping file changed'
                                       })
                                       getDocs()
                                     })
@@ -541,15 +541,15 @@ export const ShareData = observer((props: {
                               type={'link'} size={'small'} danger={true}
                               onClick={() => {
                                 modal.confirm({
-                                  title: 'Note',
+                                  title: configStore.zh ? '提示' : 'Note',
                                   type: 'warning',
-                                  content: 'Deleting a device will clear all shared data under the device and will become inaccessible.',
+                                  content: configStore.zh ? '删除设备将清除设备下的所有共享数据，删除后无法访问。' : 'Deleting a device will clear all shared data under the device and will become inaccessible.',
                                   onOk: () => {
                                     const currentId = shareStore.serviceConfig?.deviceId
                                     return shareStore.delDevice(record.id).then(() => {
                                       message$.next({
                                         type: 'success',
-                                        content: 'successfully deleted'
+                                        content: configStore.zh ? '删除成功' : 'successfully deleted'
                                       })
                                       if (record.id === currentId) {
                                         setState({

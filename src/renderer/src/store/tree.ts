@@ -101,7 +101,7 @@ export class TreeStore {
       if (this.openedNote?.filePath.endsWith('.md') || filePath) {
         const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
         window.api.copyToClipboard(content)
-        message$.next({type: 'success', content: 'Copied to clipboard'})
+        message$.next({type: 'success', content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'})
       }
     })
 
@@ -363,7 +363,7 @@ export class TreeStore {
       })) {
         message$.next({
           type: 'warning',
-          content: 'filename already exists'
+          content: configStore.zh ? '文件名已存在' : 'filename already exists'
         })
         return
       }
@@ -410,7 +410,7 @@ export class TreeStore {
         if (!file.folder && !path.endsWith('.md')) path += '.md'
         if (parent.children?.find(c => c.filePath === path) || existsSync(path)) return message$.next({
           type: 'warning',
-          content: 'The name already exists'
+          content: configStore.zh ? '文件名已存在' : 'The name already exists'
         })
         if (file.folder) {
           mkdirSync(path)
