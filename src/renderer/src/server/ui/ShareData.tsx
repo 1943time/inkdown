@@ -168,7 +168,7 @@ export const ShareData = observer((props: {
         }}
         defaultRootPath={state.selectBookFilePath}
       />
-      <div className={'min-h-[260px]'}>
+      <div className={'min-h-[260px] overflow-x-auto'}>
         <Tabs
           activeKey={state.activeKey}
           size={'small'}
@@ -426,7 +426,7 @@ export const ShareData = observer((props: {
                             className={'link'}
                             target={'_blank'}
                             href={`${shareStore.serviceConfig!.domain}/stream/${v}`}
-                          >{basename(record.filePath)}</a>
+                          >{record.filePath.includes('/') ? record.filePath.split('/').pop() : record.filePath.split('\\').pop()}</a>
                         )
                       },
                       ...( state.all ?
