@@ -499,6 +499,7 @@ const getSystemMenus = () => {
           id: 'showLeading',
           checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
           click: e => {
+            store.set('config.showLeading', typeof store.get('config.showLeading') === 'boolean' ? !store.get('config.showLeading') : false)
             BrowserWindow.getAllWindows().forEach(w => {
               w.webContents.send('changeConfig', 'showLeading', e.checked)
             })
