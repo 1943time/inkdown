@@ -1,6 +1,5 @@
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
-import {EditorUtils} from '../utils/editorUtils'
 import {BackspaceKey} from './hotKeyCommands/backspace'
 import {configStore} from '../../store/config'
 
@@ -180,8 +179,6 @@ export const htmlParser = (editor: Editor, html: string) => {
     if (!Range.isCollapsed(sel)) {
       const back = new BackspaceKey(editor)
       back.range()
-      const start = Range.start(sel)
-      Transforms.select(editor, Editor.start(editor, start.path))
       setTimeout(() => {
         const node = Editor.node(editor, [0])
         if (editor.children.length > 1 && node[0].type === 'paragraph' && !Node.string(node[0])) {
@@ -237,6 +234,7 @@ export const htmlParser = (editor: Editor, html: string) => {
     }
   }
   if (inner && !['code', 'code-line', 'table-cell'].includes(node?.[0].type)) return false
+
   Transforms.insertFragment(editor, fragment)
   return true
 }
