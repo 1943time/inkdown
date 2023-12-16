@@ -408,7 +408,7 @@ export class MenuKey {
           break
       }
 
-      if (Range.isCollapsed(sel) || !Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path)) || node[0].type === 'code-line') return
+      if (!Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path)) || node[0].type === 'code-line') return
       switch (task) {
         case 'bold':
           this.format('bold')
@@ -423,7 +423,7 @@ export class MenuKey {
           this.format('code')
           break
         case 'clear':
-          EditorUtils.clearMarks(this.state.editor, true)
+          EditorUtils.clearMarks(this.state.editor, !Range.isCollapsed(sel))
           break
       }
     }, 40)

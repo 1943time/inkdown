@@ -33,6 +33,7 @@ export class EditorUtils {
       count++
     }
   }
+
   static moveAfterSpace(editor: Editor, path: Path) {
     const next = Editor.next(editor, {at: path})
     if (!next || !Text.isText(next[0])) {
@@ -99,6 +100,7 @@ export class EditorUtils {
   static copy(data: object) {
     return JSON.parse(JSON.stringify(data))
   }
+
   static cutText(editor: Editor, start: Point, end?: Point) {
     let leaf = Node.leaf(editor, start.path)
     let texts: CustomLeaf[] = [{...leaf, text: leaf.text?.slice(start.offset) || ''}]
