@@ -108,6 +108,18 @@ export function useHighlight(store?: EditorStore) {
             },
             color: '#a3a3a3'
           })
+        } else if (/^\|([^|]+\|)+$/.test(str)){
+          ranges.push({
+            anchor: {
+              path: [...path, 0],
+              offset: 0
+            },
+            focus: {
+              path: [...path, 0],
+              offset: str.length
+            },
+            color: '#a3a3a3'
+          })
         }
       }
       return ranges
