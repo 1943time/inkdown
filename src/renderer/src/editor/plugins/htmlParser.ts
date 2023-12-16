@@ -179,6 +179,7 @@ export const htmlParser = (editor: Editor, html: string) => {
     if (!Range.isCollapsed(sel)) {
       const back = new BackspaceKey(editor)
       back.range()
+      Transforms.select(editor, Range.start(sel))
       setTimeout(() => {
         const node = Editor.node(editor, [0])
         if (editor.children.length > 1 && node[0].type === 'paragraph' && !Node.string(node[0])) {
