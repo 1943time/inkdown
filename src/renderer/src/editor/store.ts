@@ -395,7 +395,11 @@ export class EditorStore {
         if (!Path.equals(targetPath, dragPath)) {
           const parent = Node.parent(this.editor, dragPath)
           if (dragNode.type === 'code') {
-            clearCodeCache(dragNode)
+            const codes = Array.from(Editor.nodes(this.editor, {
+              match: n => Element.isElement(n) && n.type === 'code',
+              at: []
+            }))
+            codes.map(c => clearCodeCache(c[0]))
           }
           if (dragNode.type === 'table') {
             setTimeout(action(() => {
