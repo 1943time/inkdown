@@ -68,8 +68,5 @@ jobs:
           draft: false
           prerelease: true
           files: |
-            dist/Bluestone*-arm64-*.*
-            dist/Bluestone*-x64-*.*
-            dist/Bluestone*-x86_64-*.*
-            dist/Bluestone*-amd64-*.*
+            dist/Bluestone*.*
             dist/latest*.yml
