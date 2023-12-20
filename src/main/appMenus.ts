@@ -435,8 +435,15 @@ const getSystemMenus = () => {
           accelerator: `${cmd}+p`,
           submenu: [
             {
-              label: zh ? '插入本机图片' : 'Insert local image',
               accelerator: `${cmd}+p`,
+              label: zh ? '插入图片' : 'Insert Image',
+              click: (e, win) => {
+                win?.webContents.send('key-task', 'insertNetworkImage')
+              }
+            },
+            {
+              label: zh ? '插入本机图片' : 'Insert Local Image',
+              accelerator: `${cmd}+shift+p`,
               click: (e, win) => {
                 dialog.showOpenDialog({
                   properties: ['openFile', 'showHiddenFiles'],
@@ -447,13 +454,6 @@ const getSystemMenus = () => {
                     win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
                   }
                 })
-              }
-            },
-            {
-              accelerator: `${cmd}+shift+p`,
-              label: zh ? '自定义插入' : 'Custom insertion',
-              click: (e, win) => {
-                win?.webContents.send('key-task', 'insertNetworkImage')
               }
             }
           ]
