@@ -366,7 +366,7 @@ export class MenuKey {
           if (editor.selection) {
             const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
             Transforms.select(editor, editor.selection.anchor.path)
-            if (node?.[0].type !== 'code-line') openFloatBar(this.state)
+            if (node?.[0].type !== 'code-line' && editor.selection && !Range.isCollapsed(editor.selection)) openFloatBar(this.state)
           }
           break
         case 'select-word':
@@ -396,14 +396,13 @@ export class MenuKey {
             }
             if (start === sel.anchor.offset && end === sel.anchor.offset && next) {
               end = start + 1
-            } else {
-              const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
-              if (node?.[0].type !== 'code-line') openFloatBar(this.state)
             }
             Transforms.select(editor, {
               anchor: {path: sel.anchor.path, offset: start},
               focus: {path: sel.anchor.path, offset: end}
             })
+            const [node] = Editor.nodes<any>(editor, {mode: 'lowest', match: m => Element.isElement(m)})
+            if (node?.[0].type !== 'code-line' && editor.selection && !Range.isCollapsed(editor.selection)) openFloatBar(this.state)
           }
           break
       }
