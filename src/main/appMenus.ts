@@ -326,7 +326,7 @@ const getSystemMenus = () => {
           enabled: false
         },
         {
-          label: zh ? '插入表格' : 'Insert Table',
+          label: zh ? '表格' : 'Table',
           id: 'insertTable',
           accelerator: `${cmd}+Alt+t`,
           click: task('insertTable'),
@@ -351,7 +351,7 @@ const getSystemMenus = () => {
               enabled: false
             },
             {
-              label: zh ? '行内公式' : 'Inline Formula',
+              label: zh ? '行内公式' : 'Formula Inline',
               id: 'insertInlineKatex',
               accelerator: `${cmd}+Alt+k`,
               click: task('insertInlineKatex'),
