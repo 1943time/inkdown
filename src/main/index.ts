@@ -7,7 +7,6 @@ import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
 const isWindows = process.platform === 'win32'
-
 type WinOptions = {
   openFolder?: string
   openTabs?: string[]
@@ -123,20 +122,21 @@ const openFiles = (filePath: string) => {
   } catch (e) {
   }
 }
-
-app.on('browser-window-focus', () => {
-  globalShortcut.register("CommandOrControl+W", () => {
-    BrowserWindow.getFocusedWindow()?.webContents.send('close-current-tab')
-  })
-})
-
-app.on('browser-window-blur', () => {
-  globalShortcut.unregister('CommandOrControl+W')
-})
 app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
   registerApi()
+  if (isWindows) {
+    app.on('browser-window-focus', () => {
+      globalShortcut.register("CommandOrControl+W", () => {
+        BrowserWindow.getFocusedWindow()?.webContents.send('close-current-tab')
+      })
+    })
+
+    app.on('browser-window-blur', () => {
+      globalShortcut.unregisterAll()
+    })
+  }
   new AppUpdate()
   ipcMain.on('create-window', (e, filePath?: string) => {
     if (filePath) {

@@ -172,7 +172,10 @@ const getSystemMenus = () => {
       {
         label: zh ? '关闭当前标签' : 'Close Current Tab',
         id: 'close-current-tab',
-        accelerator: `${cmd}+w`
+        accelerator: `${cmd}+w`,
+        click: () => {
+          BrowserWindow.getFocusedWindow()?.webContents.send('close-current-tab')
+        }
       },
       ...systemFileMenus,
       {
