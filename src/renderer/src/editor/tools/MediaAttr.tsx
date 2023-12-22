@@ -90,7 +90,7 @@ export const MediaAttr = observer(() => {
       if (!nodeRef.current?.[0].url) {
         setTimeout(() => {
           domRef.current?.querySelector('input')?.select()
-        })
+        }, 30)
       }
     }
   }, [])

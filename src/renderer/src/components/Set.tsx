@@ -164,8 +164,8 @@ export const Set = observer(() => {
               <div className={'text-sm'}>
                 <span className={'mr-1'}>{configStore.zh ? '显示浮动栏' : 'Show floating bar'}</span>
                 <Help text={
-                  configStore.zh ? '选中文字不再显示浮动栏，仍然可以可以使用Format菜单中的快捷键操作文字格式，或使用Markdown语法转换' :
-                    'Selecting text will no longer display a floating bar, and you can still use the shortcut keys in the Format menu to manipulate text formatting or use Markdown syntax conversion'
+                  configStore.zh ? '选中文字不再显示浮动栏，仍然可以可以使用"格式"菜单中的快捷键操作文字格式，或使用Markdown语法转换' :
+                    'Selecting text will no longer display a floating bar, and you can still use the shortcut keys in the "Format" menu to manipulate text formatting or use Markdown syntax conversion'
                 }/>
               </div>
               <div>
