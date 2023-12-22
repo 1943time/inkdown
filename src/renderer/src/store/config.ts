@@ -21,7 +21,8 @@ class ConfigStore {
     mas: false,
     dragToSort: true,
     spellCheck: false,
-    autoRebuild: true
+    autoRebuild: true,
+    renameFileWhenSaving: false
   }
   timer = 0
   deviceId = ''

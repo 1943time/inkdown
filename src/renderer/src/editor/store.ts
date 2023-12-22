@@ -1,4 +1,4 @@
-import {action, makeAutoObservable, observe, runInAction} from 'mobx'
+import {action, makeAutoObservable, runInAction} from 'mobx'
 import {BaseSelection, createEditor, Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
 import {ReactEditor, withReact} from 'slate-react'
 import {GetFields, IFileItem} from '../index'
@@ -244,7 +244,7 @@ export class EditorStore {
     let mediaUrl = ''
     const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
     const p = parse(file.name)
-    const base = Date.now().toString(16) + p.ext
+    const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
     if (treeStore.root) {
       const imageDir = join(treeStore.root!.filePath, '.images')
       if (!existsSync(imageDir)) {

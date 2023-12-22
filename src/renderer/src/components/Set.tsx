@@ -101,13 +101,14 @@ export const Set = observer(() => {
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
                 <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic Rebuild'}</span> <Help text={
-                  configStore.zh ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改' :
-                    'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
-                }
-                />
+                configStore.zh ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改' :
+                  'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
+              }
+              />
               </div>
               <div>
-                <Checkbox checked={configStore.config.autoRebuild} onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
+                <Checkbox checked={configStore.config.autoRebuild}
+                          onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
@@ -119,7 +120,8 @@ export const Set = observer(() => {
                 }/>
               </div>
               <div>
-                <Checkbox checked={configStore.config.autoDownload} onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
+                <Checkbox checked={configStore.config.autoDownload}
+                          onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
@@ -127,7 +129,8 @@ export const Set = observer(() => {
                 {configStore.zh ? '拖拽排序' : 'Drag To Sort'}
               </div>
               <div>
-                <Checkbox checked={configStore.config.dragToSort} onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
+                <Checkbox checked={configStore.config.dragToSort}
+                          onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
@@ -135,7 +138,8 @@ export const Set = observer(() => {
                 {configStore.zh ? '显示代码段行号' : 'Show Code Line Number'}
               </div>
               <div>
-                <Checkbox checked={configStore.config.codeLineNumber} onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
+                <Checkbox checked={configStore.config.codeLineNumber}
+                          onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
@@ -143,7 +147,8 @@ export const Set = observer(() => {
                 {configStore.zh ? '显示字符统计' : 'Displays character statistics'}
               </div>
               <div>
-                <Checkbox checked={configStore.config.showCharactersCount} onChange={e => configStore.setConfig('showCharactersCount', e.target.checked)}/>
+                <Checkbox checked={configStore.config.showCharactersCount}
+                          onChange={e => configStore.setConfig('showCharactersCount', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>
@@ -151,7 +156,21 @@ export const Set = observer(() => {
                 {configStore.zh ? '拼写检查' : 'Spell Check'}
               </div>
               <div>
-                <Checkbox checked={configStore.config.spellCheck} onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
+                <Checkbox checked={configStore.config.spellCheck}
+                          onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                <span className={'mr-1'}>{configStore.zh ? '黏贴文件重命名' : 'Paste file to rename'}</span>
+                <Help text={
+                  configStore.zh ? '黏贴图片至编辑区，显示保存文件重命名弹窗' :
+                    'Paste the image into the editing area and display the save file rename pop-up window'
+                }/>
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.renameFileWhenSaving}
+                          onChange={e => configStore.setConfig('renameFileWhenSaving', e.target.checked)}/>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>

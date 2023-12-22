@@ -89,7 +89,8 @@ export const registerApi = () => {
       mas: process.mas || false,
       dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
       autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true,
-      locale: getLocale()
+      locale: getLocale(),
+      renameFileWhenSaving: !!config.renameFileWhenSaving
     }
   })
 

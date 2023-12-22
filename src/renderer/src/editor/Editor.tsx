@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
 import {Editor} from 'slate'
 import {MElement, MLeaf} from './elements'
@@ -20,11 +20,18 @@ import {debounceTime, Subject} from 'rxjs'
 import {saveRecord} from '../store/db'
 import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
+import {useLocalState} from '../hooks/useLocalState'
+import {parse} from 'path'
+import {RenamePasteFile} from './RenamePasteFile'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
+  const [state, setState] = useLocalState({
+    openRenameModal: false
+  })
+  const saveFile = useRef<File>()
   const store = useEditorStore()
   const inCode = useRef(false)
   const changedMark = useRef(false)
@@ -243,7 +250,12 @@ export const MEditor = observer(({note}: {
     }
     const file = e.clipboardData?.files[0]
     if (file) {
-      store.insertFile(file)
+      if (configStore.config.renameFileWhenSaving) {
+        saveFile.current = file
+        setState({openRenameModal: true})
+      } else {
+        store.insertFile(file)
+      }
       return
     }
     let paste = e.clipboardData.getData('text/html')
@@ -293,6 +305,12 @@ export const MEditor = observer(({note}: {
         onKeyDown={keydown}
         renderLeaf={renderLeaf}
       />
+     <RenamePasteFile
+       file={saveFile.current!}
+       onClose={() => setState({openRenameModal: false})}
+       open={state.openRenameModal}
+       store={store}
+     />
     </Slate>
   )
 })
