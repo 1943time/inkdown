@@ -107,7 +107,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         }
       }
       if (el.type === 'paragraph') {
-        if (path[0] === 0 && !Node.string(el) && Editor.isEditor(Node.get(editor, Path.parent(path)))) {
+        if (path[0] === 0 && !Node.string(el) && Editor.isEditor(Node.get(editor, Path.parent(path))) && Editor.hasPath(editor, Path.next(path))) {
           const next = Editor.node(editor, Path.next(path))
           if (['table', 'code', 'blockquote'].includes(next[0].type)) {
             e.preventDefault()
