@@ -256,7 +256,7 @@ const getSystemMenus = () => {
             label: zh ? '全选' : 'Select All'
           },
           {
-            accelerator: `${cmd}+l`,
+            accelerator: `${cmd}+shift+l`,
             click: task('select-line'),
             label: zh ? '选择行' : 'Select Line'
           },
@@ -466,6 +466,17 @@ const getSystemMenus = () => {
           label: zh ? '清除' : 'Clear',
           accelerator: `${cmd}+\\`,
           click: task('clear')
+        },
+        {type: 'separator'},
+        {
+          label: zh ? '链接' : 'Link',
+          accelerator: `${cmd}+l`,
+          click: task('link')
+        },
+        {
+          label: zh ? '高亮' : 'Highlight',
+          accelerator: `${cmd}+shift+h`,
+          click: task('highlight')
         }
       ]
     }

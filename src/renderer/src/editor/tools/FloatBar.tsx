@@ -20,6 +20,9 @@ import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
 import {isAbsolute, join, relative} from 'path'
 import {parsePath} from '../../utils'
+import {configStore} from '../../store/config'
+import {useSubject} from '../../hooks/subscribe'
+import {ReactEditor} from 'slate-react'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},
@@ -121,7 +124,15 @@ export const FloatBar = observer(() => {
     setState({link: true, url: EditorUtils.getUrl(store.editor), links: getFilePaths()})
     window.addEventListener('mousedown', closeLink)
   }, [])
-
+  useSubject(store.floatBar$, type => {
+    if (type === 'link') {
+      resize(true)
+      openLink()
+    } else if (type === 'highlight') {
+      setState({openSelectColor: true, hoverSelectColor: false})
+      resize(true)
+    }
+  })
   useEffect(() => {}, [store.refreshFloatBar])
 
   const resize = useCallback((force = false) => {
@@ -142,6 +153,10 @@ export const FloatBar = observer(() => {
   }, [])
 
   useEffect(() => {
+    if (!configStore.config.showFloatBar) {
+      if (state.open) setState({open: false})
+      return
+    }
     if (state.link && store.domRect) return
     if (store.domRect) {
       resize(true)
@@ -330,9 +345,14 @@ export const FloatBar = observer(() => {
               <div
                 className={'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'}
                 onClick={() => {
-                  setState({openSelectColor: false})
-                  resize()
                   EditorUtils.highColor(store.editor)
+                  if (configStore.config.showFloatBar) {
+                    setState({openSelectColor: false})
+                    resize()
+                  } else {
+                    store.highlightCache.delete(el.current?.[0])
+                    setState({openSelectColor: false, open: false})
+                  }
                 }}
               >
                 /
@@ -345,8 +365,12 @@ export const FloatBar = observer(() => {
                   onClick={() => {
                     localStorage.setItem('high-color', c.color)
                     EditorUtils.highColor(store.editor, c.color)
-                    setState({openSelectColor: false})
-                    resize()
+                    if (configStore.config.showFloatBar) {
+                      setState({openSelectColor: false})
+                      resize()
+                    } else {
+                      setState({openSelectColor: false, open: false})
+                    }
                   }}
                 />
               )}

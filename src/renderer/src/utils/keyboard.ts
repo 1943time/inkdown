@@ -421,6 +421,12 @@ export class MenuKey {
         case 'code':
           this.format('code')
           break
+        case 'link':
+          this.state.floatBar$.next('link')
+          break
+        case 'highlight':
+          this.state.floatBar$.next('highlight')
+          break
         case 'clear':
           EditorUtils.clearMarks(this.state.editor, !Range.isCollapsed(sel))
           break

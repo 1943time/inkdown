@@ -90,7 +90,8 @@ export const registerApi = () => {
       dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
       autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true,
       locale: getLocale(),
-      renameFileWhenSaving: !!config.renameFileWhenSaving
+      renameFileWhenSaving: !!config.renameFileWhenSaving,
+      showFloatBar: isBoolean(config.showFloatBar) ? config.showFloatBar : true,
     }
   })
 

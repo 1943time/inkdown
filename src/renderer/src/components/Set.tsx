@@ -162,6 +162,19 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                <span className={'mr-1'}>{configStore.zh ? '显示浮动栏' : 'Show floating bar'}</span>
+                <Help text={
+                  configStore.zh ? '选中文字不再显示浮动栏，仍然可以可以使用Format菜单中的快捷键操作文字格式，或使用Markdown语法转换' :
+                    'Selecting text will no longer display a floating bar, and you can still use the shortcut keys in the Format menu to manipulate text formatting or use Markdown syntax conversion'
+                }/>
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.showFloatBar}
+                          onChange={e => configStore.setConfig('showFloatBar', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 <span className={'mr-1'}>{configStore.zh ? '黏贴文件重命名' : 'Paste file to rename'}</span>
                 <Help text={
                   configStore.zh ? '黏贴图片至编辑区，显示保存文件重命名弹窗' :

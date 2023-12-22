@@ -47,6 +47,7 @@ export class EditorStore {
   refreshTableAttr = false
   openLangCompletion = false
   langCompletionText = new Subject<string>()
+  floatBar$ = new Subject<string>()
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
   tableCellNode: null | NodeEntry<TableCellNode> = null
   refreshHighlight = false
