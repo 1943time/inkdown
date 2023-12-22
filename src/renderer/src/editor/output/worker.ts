@@ -36,7 +36,7 @@ const textStyle = (t: Text) => {
 }
 const composeText = (t: Text, parent: any[]) => {
   if (!t.text) return ''
-  if (t.highColor) return textHtml(t)
+  if (t.highColor || (t.strikethrough && (t.bold || t.italic || t.code))) return textHtml(t)
 
   const siblings = parent[parent.length -1]?.children
   const index = siblings?.findIndex(n => n === t)
