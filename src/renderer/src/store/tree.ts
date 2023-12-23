@@ -584,7 +584,7 @@ export class TreeStore {
   private removeSelf(node: IFileItem) {
     for (let t of this.tabs) {
       t.history = t.history.filter(h => h !== node)
-      if (t.history.length > 1 && t.index > t.history.length - 1) {
+      if (t.history.length > 0 && t.index > t.history.length - 1) {
         t.index = t.history.length - 1
       } else if (!t.history.length) {
         t.index = 0
