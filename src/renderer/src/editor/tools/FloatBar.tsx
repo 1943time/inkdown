@@ -40,9 +40,9 @@ const colors = [
   {color: 'rgba(99,102, 241,1)'},
   {color: 'rgba(244,63,94,1)'}
 ]
+const fileMap = new Map<string, IFileItem>()
 export const FloatBar = observer(() => {
   const store = useEditorStore()
-  const fileMap = new Map<string, IFileItem>()
   const inputRef = useRef<any>()
   const linkOptionsVisible = useRef(false)
   const [state, setState] = useLocalState({
@@ -81,6 +81,7 @@ export const FloatBar = observer(() => {
 
   const getFilePaths = useCallback(() => {
     if (treeStore.root) {
+      fileMap.clear()
       let files: {label: string, value: string}[] = []
       const stack: IFileItem[] = treeStore.root.children!.slice()
       while (stack.length) {
