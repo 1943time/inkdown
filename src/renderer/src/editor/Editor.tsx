@@ -106,7 +106,8 @@ export const MEditor = observer(({note}: {
     if (note) {
       treeStore.schemaMap.set(note, {
         state: v,
-        history: editor.history
+        history: editor.history,
+        sel: editor.selection
       })
     }
     if (editor.operations[0].type === 'set_selection') {
@@ -148,7 +149,11 @@ export const MEditor = observer(({note}: {
         }), 200)
       }
       count(data?.state || [])
-      EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true)
+      try {
+        EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true, data?.sel)
+      } catch (e) {
+        EditorUtils.deleteAll(editor)
+      }
       setTimeout(() => {
         store.setState(state => state.pauseCodeHighlight = false)
         requestIdleCallback(() => {

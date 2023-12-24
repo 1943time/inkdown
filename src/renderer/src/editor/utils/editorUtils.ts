@@ -1,4 +1,4 @@
-import {Editor, Element, Node, Path, Point, Range, Text, Transforms} from 'slate'
+import {BaseSelection, Editor, Element, Node, Path, Point, Range, Text, Transforms} from 'slate'
 import {CustomLeaf} from '../../el'
 import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
@@ -66,8 +66,7 @@ export class EditorUtils {
       match: Text.isText
     })
   }
-
-  static reset(editor: Editor, insertNodes?: any[], force?: boolean | History) {
+  static deleteAll(editor: Editor) {
     const nodes = Array.from(Editor.nodes(editor, {
       at: [],
       match: n => Element.isElement(n),
@@ -83,12 +82,21 @@ export class EditorUtils {
       })
       Transforms.delete(editor, {at: [0]})
     }
+    Transforms.insertNodes(editor, [EditorUtils.p], {at: [0]})
+  }
+  static reset(editor: Editor, insertNodes?: any[], force?: boolean | History, sel?: BaseSelection) {
     if (!insertNodes) insertNodes = [EditorUtils.p]
-    Transforms.insertNodes(editor, insertNodes, {at: [0]})
+    editor.children = JSON.parse(JSON.stringify(insertNodes))
     if (force) {
-      Transforms.select(editor, Editor.start(editor, [0]))
       editor.history = typeof force === 'boolean' ? {redos: [], undos: []} : force
     }
+    if (sel) {
+      Transforms.select(editor, sel)
+      ReactEditor.focus(editor)
+    } else {
+      Transforms.select(editor, Editor.start(editor, []))
+    }
+    editor.onChange()
   }
 
   static includeAll(editor: Editor, sel: Range, nodePath: Path) {

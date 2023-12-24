@@ -16,6 +16,7 @@ import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
+import {BaseSelection} from 'slate'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -34,7 +35,8 @@ export class TreeStore {
   }
   schemaMap = new WeakMap<IFileItem, {
     history?: any,
-    state: any[]
+    state: any[],
+    sel?: BaseSelection
   }>()
   fold = true
   watcher: Watcher

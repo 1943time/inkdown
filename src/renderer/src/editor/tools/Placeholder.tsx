@@ -1,7 +1,6 @@
 import {useSlate} from 'slate-react'
 import {Node} from 'slate'
 import {observer} from 'mobx-react-lite'
-import {configStore} from '../../store/config'
 
 export const Placeholder = observer(() => {
   const editor = useSlate()

@@ -17,7 +17,7 @@ export class BackspaceKey {
       return true
     }
     if (Point.equals(start, Editor.start(this.editor, [])) && Point.equals(end, Editor.end(this.editor, []))) {
-      EditorUtils.reset(this.editor)
+      EditorUtils.deleteAll(this.editor)
       Transforms.select(this.editor, Editor.start(this.editor, []))
       return true
     }
