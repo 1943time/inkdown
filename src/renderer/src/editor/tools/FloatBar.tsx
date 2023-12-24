@@ -201,6 +201,13 @@ export const FloatBar = observer(() => {
     window.addEventListener('resize', change)
     return () => window.removeEventListener('resize', change)
   }, [])
+  const setLink = useCallback(() => {
+    Transforms.setNodes(
+      store.editor,
+      {url: state.url || undefined},
+      {match: Text.isText, split: true}
+    )
+  }, [])
   return (
     <div
       style={{
@@ -238,15 +245,12 @@ export const FloatBar = observer(() => {
               } else {
                 setState({url: e})
               }
+              setLink()
             }}
             options={state.anchors.length ? state.anchors : state.filterLinks}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                Transforms.setNodes(
-                  store.editor,
-                  {url: state.url || undefined},
-                  {match: Text.isText, split: true}
-                )
+                setLink()
                 if (!linkOptionsVisible.current) {
                   closeLink()
                 }
