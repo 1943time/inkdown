@@ -174,7 +174,7 @@ export class EditorUtils {
       match: n => Element.isElement(n),
       reverse: true
     })
-    if (node[0].type !== 'paragraph' || Node.string(node[0])) {
+    if (node && node[0].type !== 'paragraph' || Node.string(node[0]) || (node[0].children?.length === 1 && node[0].children[0].type === 'media')) {
       Transforms.insertNodes(editor, EditorUtils.p, {
         at: Path.next(node[1])
       })

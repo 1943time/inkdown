@@ -63,7 +63,7 @@ export const Share = observer(() => {
 
   const curDoc = useMemo(() => {
     return shareStore.docMap.get(treeStore.openedNote?.filePath || '')
-  }, [treeStore.openNote, state.refresh])
+  }, [treeStore.openedNote, state.refresh])
 
   const closeMask = useCallback(() => {
     setTimeout(() => {
