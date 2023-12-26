@@ -3,7 +3,7 @@ import {isAbsolute, join} from 'path'
 import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
 import Img from '../../icons/Img'
-import {useEffect, useMemo, useRef} from 'react'
+import {useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {Transforms} from 'slate'
 import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
@@ -41,14 +41,14 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   const [selected, path, store] = useSelStatus(element)
   const imgRef = useRef<HTMLImageElement>(null)
   const [state, setState] = useGetSetState({
-    loadSuccess: false,
+    loadSuccess: true,
     url: '',
     selected: false
   })
   const type = useMemo(() => {
     return mediaType(element.url)
   }, [element.url])
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (element.downloadUrl) {
       return
     }
@@ -70,9 +70,6 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     img.referrerPolicy = 'no-referrer'
     img.crossOrigin = 'anonymous'
     img.src = realUrl
-    img.onload = () => {
-      setState({loadSuccess: true})
-    }
     img.onerror = () => setState({loadSuccess: false})
   }, [element.url, element.downloadUrl, store.webviewFilePath])
   useEffect(() => {
