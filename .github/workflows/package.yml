@@ -61,11 +61,11 @@ jobs:
           npm run build:win
           npm run build:linux
       - name: GH Release
-        uses: softprops/action-gh-release@v0.1.15
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          draft: false
+          draft: ''
           prerelease: true
           files: |
             dist/Bluestone*.*
