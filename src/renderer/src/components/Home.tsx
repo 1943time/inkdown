@@ -12,6 +12,7 @@ import {action} from 'mobx'
 import {History} from './History'
 import {useSystemMenus} from '../hooks/menu'
 import {Tabs} from './Tabs'
+import {isWindows} from '../utils'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -38,7 +39,7 @@ export const Home = observer(() => {
   }, [treeStore.openedNote])
 
   return (
-    <div className={'flex h-screen overflow-hidden'}>
+    <div className={`flex h-screen overflow-hidden ${isWindows ? 'win' : ''}`}>
       <Tree/>
       <div
         className={'fixed w-1 bg-transparent z-[200] left-0 top-0 h-screen -ml-0.5 cursor-col-resize select-none'}

@@ -379,9 +379,7 @@ ol.m-list {
     }
   }
   &.num {
-    code{
-      padding-left: 44px;
-    }
+    padding-left: 32px;
   }
   code{
     padding-left: 20px;
@@ -474,5 +472,15 @@ ol.m-list {
     .img-drag-handle{
       display: inline-block;
     }
+  }
+}
+.win{
+  ::-webkit-scrollbar{
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb{
+    @apply dark:bg-zinc-900 bg-gray-400/90;
+    border-radius: 20px;
   }
 }
