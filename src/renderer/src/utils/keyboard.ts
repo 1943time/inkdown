@@ -35,7 +35,7 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
         reverse: true,
         mode: 'lowest'
       }))
-
+      Transforms.setNodes(editor, {start: undefined}, {at: Path.parent(parent[1])})
       for (let l of listItems) {
         Transforms.setNodes(editor, {checked: task ? l[0].checked || false : undefined}, {at: l[1]})
       }

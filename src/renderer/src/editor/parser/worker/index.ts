@@ -138,7 +138,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {type: 'inline-katex', children: [{text: n.value}]} as InlineKatexNode
         break
       case 'list':
-        el = {type: 'list', order: n.ordered, children: parserBlock(n.children, false, n)}
+        el = {type: 'list', order: n.ordered, start: n.start, children: parserBlock(n.children, false, n)}
         break
       case 'footnoteReference':
         if (share) {

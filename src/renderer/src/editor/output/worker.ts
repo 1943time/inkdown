@@ -186,7 +186,8 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
     if (p.type === 'list-item') {
       const list = parent[parent.length - 2]
       let pre = preString + (list.order ? (space + ' ') : space)
-      const index = list.children.findIndex(c => c === p)
+      let index = list.children.findIndex(c => c === p)
+      if (list.start) index += (list.start - 1)
       if (i === 0) {
         str += preString
         str += list.order ? `${index + 1}. ` : '- '

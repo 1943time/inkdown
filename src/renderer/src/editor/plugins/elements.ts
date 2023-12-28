@@ -190,9 +190,11 @@ export const MdElements: Record<string, MdNode> = {
       Transforms.delete(editor, {
         at: path
       })
+      const start = match[1].match(/^\s*(\d+)\./)
       Transforms.insertNodes(editor, {
         type: 'list',
-        order: /^\s*\d+\./.test(match[1]),
+        order: !!start,
+        start: start ? +start[1] : undefined,
         children: [
           {
             type: 'list-item',
