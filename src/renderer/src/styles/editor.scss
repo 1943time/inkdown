@@ -286,11 +286,6 @@ ol.m-list {
   line-height: 1.62em;
   direction: ltr;
   &.katex-container{
-    &.num pre{
-      &:before,&:after{
-        left: 40px;
-      }
-    }
     pre{
       position: relative;
       padding: 1.8em 0;
@@ -313,27 +308,27 @@ ol.m-list {
     }
   }
   &.frontmatter{
+    &:before{
+      top:2px;
+      height: 22px;
+      content: 'Front Matter';
+      width: 100%;
+      color: rgba(255, 255, 255, .5);
+      position: absolute;
+      z-index: 10;
+      left: 0;
+      padding-left: 10px;
+      font-size: 12px;
+      @apply border-b border-black/50;
+    }
     .code-line-list{
       top: 24px;
       padding-top: 8px;
       height: calc(100% - 24px);
     }
     pre {
-      position: relative;
       padding-top: 32px;
-      &:before{
-        top:2px;
-        height: 22px;
-        content: 'Front Matter';
-        width: 100%;
-        color: rgba(255, 255, 255, .5);
-        position: absolute;
-        z-index: 10;
-        left: 0;
-        padding-left: 10px;
-        font-size: 12px;
-        @apply border-b border-black/50;
-      }
+      position: relative;
     }
   }
   pre{
@@ -380,6 +375,9 @@ ol.m-list {
   }
   &.num {
     padding-left: 32px;
+    code{
+      padding-left: 14px;
+    }
   }
   code{
     padding-left: 20px;
