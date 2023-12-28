@@ -90,7 +90,15 @@ export class EditorUtils {
     if (force) {
       editor.history = typeof force === 'boolean' ? {redos: [], undos: []} : force
     }
-    if (sel) editor.selection = sel
+    if (sel) {
+      editor.selection = sel
+    } else {
+      const start = Editor.start(editor, [])
+      editor.selection = {
+        anchor: start,
+        focus: start
+      }
+    }
     editor.onChange()
   }
 

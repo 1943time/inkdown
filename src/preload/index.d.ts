@@ -16,6 +16,7 @@ declare global {
       dev: boolean
       got: Got
       createFormData(data: Record<string, string | number | {path: string}>): FormData
+      resetHighlighter: () => Promise<any>
       uploadFile<T = any>(options: {
         url: string
         data: Record<string, string | number | {path: string}>

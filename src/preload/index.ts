@@ -71,6 +71,14 @@ const api = {
   md5(str: string | Buffer) {
     return createHash('md5').update(str).digest('hex')
   },
+  async resetHighlighter() {
+    const config = await ipcRenderer.invoke('getConfig')
+    return getHighlighter({
+      theme: config.codeTheme
+    }).then(res => {
+      highlighter = res
+    })
+  },
   async ready() {
     const config = await ipcRenderer.invoke('getConfig')
     return new Promise(resolve => {

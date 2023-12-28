@@ -49,3 +49,9 @@ export const mediaType = (name?: string) => {
   if (['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt'].includes(ext)) return 'document'
   return 'other'
 }
+
+export const getSelRect = () => {
+  const domSelection = window.getSelection()
+  const domRange = domSelection?.getRangeAt(0)
+  return domRange?.getBoundingClientRect() || null
+}

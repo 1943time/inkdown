@@ -3,9 +3,10 @@ import {Checkbox, Modal, Radio, Select, Slider, Tooltip} from 'antd'
 import {CloseOutlined, QuestionCircleOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
 import {ReactNode, useCallback, useEffect} from 'react'
-import {action} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {treeStore} from '../store/tree'
 import {ReactEditor} from 'slate-react'
+import {codeCache} from '../editor/plugins/useHighlight'
 
 function Help(props: {
   text: string | ReactNode
@@ -38,6 +39,20 @@ export const Set = observer(() => {
       window.removeEventListener('keydown', esc)
     }
   }, [configStore.visible])
+
+  const clearCache = useCallback((schema: any[]) => {
+    const stack = schema.slice()
+    while (stack.length) {
+      const item = stack.pop()
+      if (['blockquote', 'list', 'list-item'].includes(item.type) && item.children) {
+        stack.push(...item.children)
+      }
+      if (item.type === 'code') {
+        codeCache.delete(item)
+      }
+    }
+  }, [])
+
   const [modal, context] = Modal.useModal()
   if (!configStore.visible) return null
   return (

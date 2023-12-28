@@ -23,6 +23,7 @@ import {parsePath} from '../../utils'
 import {configStore} from '../../store/config'
 import {useSubject} from '../../hooks/subscribe'
 import {ReactEditor} from 'slate-react'
+import {getSelRect} from '../utils/dom'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},
@@ -127,11 +128,25 @@ export const FloatBar = observer(() => {
   }, [])
   useSubject(store.floatBar$, type => {
     if (type === 'link') {
-      resize(true)
-      openLink()
+      const [text] = Editor.nodes(store.editor, {
+        match: Text.isText
+      })
+      if (text && text[0].url) {
+        Transforms.select(store.editor, text[1])
+      }
+      setTimeout(() => {
+        store.setState(store => store.domRect = getSelRect())
+        resize(true)
+        openLink()
+        setTimeout(() => {
+          inputRef.current?.focus()
+        }, 16)
+      })
     } else if (type === 'highlight') {
-      setState({openSelectColor: true, hoverSelectColor: false})
-      resize(true)
+      if (!Range.isCollapsed(store.editor.selection!)) {
+        setState({openSelectColor: true, hoverSelectColor: false})
+        resize(true)
+      }
     }
   })
   useEffect(() => {}, [store.refreshFloatBar])
@@ -189,9 +204,7 @@ export const FloatBar = observer(() => {
   useEffect(() => {
     const change = () => {
       if (state.open) {
-        const domSelection = window.getSelection()
-        const domRange = domSelection?.getRangeAt(0)
-        const rect = domRange?.getBoundingClientRect()
+        const rect = getSelRect()
         if (rect) {
           store.setState(state => state.domRect = rect)
         }
