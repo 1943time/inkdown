@@ -227,7 +227,7 @@ export const MdElements: Record<string, MdNode> = {
         children: [{
           type: 'code-line', children: [{text: ''}]
         }]
-      }, {select: true})
+      }, {select: true, at: path})
     }
   },
   blockquote: {
