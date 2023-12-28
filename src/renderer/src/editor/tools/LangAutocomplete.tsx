@@ -369,7 +369,7 @@ export const LangAutocomplete = observer(() => {
           let top = getOffsetTop(el, store.container!)
           if (store.container!.scrollTop + window.innerHeight - 186 < top) {
             store.container!.scroll({
-              top: top +186
+              top: top - 100
             })
           }
           setState({
