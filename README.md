@@ -3,14 +3,13 @@ A WYSIWYG markdown editor. improving the Markdown reading and editing experience
 
 <a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px"/><a>
 
-[Documentation](https://doc.bluemd.me/book/docs/introduction) | [中文文档](https://doc.bluemd.me/book/zh-docs/introduction)
+[Documentation](https://doc.bluemd.me/book/docs/introduction) | [中文文档](https://doc.bluemd.me/book/zh-docs/introduction) | [👻 Try Online >>>](https://online.bluemd.me/editor)
 
 > The release time of mac store will be delayed by 1-3 days
 
 ***
 
 # Introduction
-
 Bluestone is an WYSIWYG Markdown editor，use [GFM](https://github.github.com/gfm/) syntax，expanded [Mermaid](https://mermaid.js.org/) graphics [Katex](https://katex.org/) formula，
 Supports light and dark color theme. and generate your Markdown files into online documents in the easiest and fastest way.
 
@@ -37,22 +36,3 @@ and on this basis, enhance Markdown's editing and reading experience
 - Supports multi tab editing mode
 - Support pasting HTML, plain text, and markdown code. When pasting HTML and markdown code, it can be configured to automatically download network images to the local machine and convert paths during pasting.
 - Provides a powerful sharing program, Linux server required.
-
-## Format
-
-Text format can be converted with floating bar or syntax
-
-![](./docs/assets/text.png)
-
-![](./docs/assets/test1.gif)
-
-## Drag
-![](./docs/assets/drag.gif)
-
-## Link
-Links and images support file paths, usually imported files can be dragged in from the file tree, or directly use ctrl + v
-![](./docs/assets/link.gif)
-
-## Custom sharing service
-![](./docs/assets/share.gif)
-

@@ -86,7 +86,7 @@ export class EditorUtils {
   }
   static reset(editor: Editor, insertNodes?: any[], force?: boolean | History, sel?: BaseSelection) {
     if (!insertNodes) insertNodes = [EditorUtils.p]
-    editor.children = JSON.parse(JSON.stringify(insertNodes))
+    editor.children = insertNodes
     if (force) {
       editor.history = typeof force === 'boolean' ? {redos: [], undos: []} : force
     }

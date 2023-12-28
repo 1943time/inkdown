@@ -446,6 +446,7 @@ export class TreeStore {
         file.filePath = path
         file.filename = parse(path).name
         file.editName = undefined
+        file.copyItem = undefined
         if (!file.folder) this.openNote(file)
       }
       parent.children = sortFiles(parent.children!)
