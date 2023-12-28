@@ -3,21 +3,19 @@ import {
   CopyOutlined,
   DatabaseOutlined,
   LinkOutlined,
-  SendOutlined, SettingOutlined,
+  SendOutlined,
+  SettingOutlined,
   StopOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import {Button, Input, Modal, notification, Popover, Progress, Space, Tabs} from 'antd'
+import {Button, Input, Modal, Popover, Space, Tabs} from 'antd'
 import {useCallback, useEffect, useMemo} from 'react'
-import {nanoid} from 'nanoid'
 import Net from '../icons/Net'
 import {useLocalState} from '../hooks/useLocalState'
 import {treeStore} from '../store/tree'
 import {message$} from '../utils'
 import {mediaType} from '../editor/utils/dom'
 import {BookItem} from './ui/BookItem'
-import {Subject} from 'rxjs'
-import {useSubject} from '../hooks/subscribe'
 import {IBook} from './model'
 import {shareStore} from './store'
 import {NotLogged} from './ui/NotLogged'

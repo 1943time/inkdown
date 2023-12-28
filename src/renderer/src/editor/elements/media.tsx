@@ -66,11 +66,13 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }
     }
     setState({url: realUrl})
-    const img = document.createElement('img')
-    img.referrerPolicy = 'no-referrer'
-    img.crossOrigin = 'anonymous'
-    img.src = realUrl
-    img.onerror = () => setState({loadSuccess: false})
+    if (type === 'image') {
+      const img = document.createElement('img')
+      img.referrerPolicy = 'no-referrer'
+      img.crossOrigin = 'anonymous'
+      img.src = realUrl
+      img.onerror = () => setState({loadSuccess: false})
+    }
   }, [element.url, element.downloadUrl, store.webviewFilePath])
   useEffect(() => {
     if (!store.editor.selection) return

@@ -323,6 +323,7 @@ ol.m-list {
       padding-top: 32px;
       &:before{
         top:2px;
+        height: 22px;
         content: 'Front Matter';
         width: 100%;
         color: rgba(255, 255, 255, .5);
@@ -337,7 +338,7 @@ ol.m-list {
   }
   pre{
     white-space: pre;
-    padding: 0.74em 0;
+    padding: 10px 0;
     position: relative;
   }
   code{
@@ -387,7 +388,8 @@ ol.m-list {
   .code-line {
     padding-right: 20px;
     position: relative;
-    height: 1.62em;
+    height: 22px;
+    line-height: 22px;
     //width: calc(100% + 24px);
   }
 
