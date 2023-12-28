@@ -1,7 +1,6 @@
 import {app, BrowserWindow, clipboard, ipcMain, Menu, shell} from 'electron'
 import {getLocale} from './store'
-import {readFile} from 'node:fs/promises'
-import {exec} from 'child_process'
+import {extname} from 'path'
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
 const isMac = process.platform === 'darwin'
@@ -146,6 +145,12 @@ export const registerMenus = () => {
           label: zh ? '在新标签中打开' :'Open in New Tab',
           click: () => sendCommand('openInNewTab')
         })
+        if (params.filePath?.endsWith('.md')) {
+          temp.add({
+            label: zh ? '新建副本' : 'New Copy',
+            click: () => sendCommand('newCopy')
+          })
+        }
       }
       temp.add({
         type: 'separator'
@@ -154,31 +159,11 @@ export const registerMenus = () => {
         label: zh ? '在Finder中显示' : 'Reveal in Finder',
         click: () => shell.showItemInFolder(params.filePath!)
       })
-      if (params.type === 'folder' && isMac) {
-        temp.add({
-          label: zh ? '复制文件夹' : 'Copy Folder',
-          click: async () => {
-            if (params.filePath) {
-              clipboard.writeBuffer('public.file-url', Buffer.from(`file://${encodeURI(params.filePath)}`, 'utf-8'))
-            }
-          }
-        })
-      }
       if (params.type === 'file') {
         temp.add({
           label: zh ? '使用默认APP打开' : 'Open in default app',
           click: () => shell.openPath(params.filePath!)
         })
-        if (isMac) {
-          temp.add({
-            label: zh ? '复制文件' : 'Copy File',
-            click: async () => {
-              if (params.filePath) {
-                clipboard.writeBuffer('public.file-url', Buffer.from(`file://${encodeURI(params.filePath)}`, 'utf-8'))
-              }
-            }
-          })
-        }
         if (params.filePath?.endsWith('.md')) {
           temp.add({
             label: zh ? '复制Markdown代码' : 'Copy Markdown Source Code',

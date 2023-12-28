@@ -14,7 +14,8 @@ export interface IFileItem {
   root?: boolean
   editName?: string
   independent?: boolean
-  mode?: 'edit' | 'create'
+  mode?: 'edit' | 'create' | 'copy'
+  copyItem?: IFileItem
   changed?: boolean
   refresh?: boolean
 }

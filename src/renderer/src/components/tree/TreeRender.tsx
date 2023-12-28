@@ -59,7 +59,7 @@ const Item = observer((
   }
 ) => {
   useEffect(() => {
-    if (item.mode === 'create' || item.mode === 'edit') {
+    if (item.mode) {
       try {
         const input = document.querySelector(`[data-eid="${item.id}"] input`) as HTMLInputElement
         if (input) input.select()

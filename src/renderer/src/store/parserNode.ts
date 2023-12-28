@@ -19,6 +19,7 @@ export const createFileNode = (params: {
   filePath: string
   mode?: IFileItem['mode']
   editName?: string
+  copyItem?: IFileItem
 }) => {
   const p = parse(params.filePath).name
   const node = {
@@ -29,6 +30,7 @@ export const createFileNode = (params: {
     children: params.folder ? [] : undefined,
     mode: params.mode,
     filePath: params.filePath,
+    copyItem: params.copyItem,
     ext: params.folder ? undefined : extname(params.filePath).replace(/^\./, ''),
   } as IFileItem
   if (params.parent) {

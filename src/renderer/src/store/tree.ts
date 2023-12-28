@@ -116,7 +116,7 @@ export class TreeStore {
     window.electron.ipcRenderer.on('tree-command', (e, params: {
       type: 'rootFolder' | 'file' | 'folder'
       filePath: string
-      command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder'
+      command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder' | 'newCopy'
     }) => {
       runInAction(() => {
         const {filePath, type} = params
@@ -157,6 +157,20 @@ export class TreeStore {
             break
           case 'openInNewTab':
             if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
+            break
+          case 'newCopy':
+            if (this.ctxNode && !this.ctxNode.folder) {
+              let addNote = createFileNode({
+                folder: false,
+                editName: `${this.ctxNode.filename}_copy`,
+                parent: this.ctxNode.parent,
+                mode: 'copy',
+                copyItem: this.ctxNode,
+                filePath: ''
+              })
+              this.ctxNode.parent?.children!.unshift(addNote)
+              addNote.parent!.expand = true
+            }
             break
           case 'shareFolder':
             if (this.ctxNode?.filePath || params.type === 'rootFolder') {
@@ -404,7 +418,7 @@ export class TreeStore {
 
   saveNote(file: IFileItem) {
     const parent = file.parent!
-    if (file.mode === 'create') {
+    if (file.mode === 'create' || file.mode === 'copy') {
       if (!file.editName) {
         parent.children = parent.children!.filter(c => c !== file)
       } else {
@@ -417,7 +431,14 @@ export class TreeStore {
         if (file.folder) {
           mkdirSync(path)
         } else {
-          appendFileSync(path, '', {encoding: 'utf-8'})
+          if (file.mode === 'copy') {
+            appendFileSync(path, readFileSync(file.copyItem!.filePath, {encoding: 'utf-8'}), {encoding: 'utf-8'})
+            this.schemaMap.set(file, {
+              state: this.schemaMap.get(file.copyItem!)?.state || []
+            })
+          } else {
+            appendFileSync(path, '', {encoding: 'utf-8'})
+          }
         }
         file.ext = 'md'
         file.mode = undefined
