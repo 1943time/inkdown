@@ -434,7 +434,7 @@ export class TreeStore {
           if (file.mode === 'copy') {
             appendFileSync(path, readFileSync(file.copyItem!.filePath, {encoding: 'utf-8'}), {encoding: 'utf-8'})
             this.schemaMap.set(file, {
-              state: this.schemaMap.get(file.copyItem!)?.state || []
+              state: JSON.parse(JSON.stringify(this.schemaMap.get(file.copyItem!)?.state || []))
             })
           } else {
             appendFileSync(path, '', {encoding: 'utf-8'})

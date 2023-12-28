@@ -90,12 +90,7 @@ export class EditorUtils {
     if (force) {
       editor.history = typeof force === 'boolean' ? {redos: [], undos: []} : force
     }
-    if (sel) {
-      Transforms.select(editor, sel)
-      ReactEditor.focus(editor)
-    } else {
-      Transforms.select(editor, Editor.start(editor, []))
-    }
+    if (sel) editor.selection = sel
     editor.onChange()
   }
 
