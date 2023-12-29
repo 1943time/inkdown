@@ -1,4 +1,4 @@
-# Bluestone Markdown
+<h1><img src="resources/icon.png" width="25"/> Bluestone Markdown</h1>
 Improve markdown reading and editing experience, and facilitate network sharing. [Download](https://github.com/1943time/bluestone/releases/latest) or
 
 <a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px"/><a>

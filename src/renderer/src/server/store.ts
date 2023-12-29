@@ -12,7 +12,7 @@ import {join} from 'path'
 import {configStore} from '../store/config'
 
 export class ShareStore {
-  readonly minVersion = '0.2.2'
+  readonly minVersion = '0.2.3'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()
