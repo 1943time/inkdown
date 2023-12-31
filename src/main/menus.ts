@@ -1,5 +1,5 @@
-import {app, BrowserWindow, clipboard, ipcMain, Menu, shell} from 'electron'
-import {getLocale} from './store'
+import {app, BrowserWindow, clipboard, ipcMain, Menu, nativeImage, shell} from 'electron'
+import {getLocale, mediaType} from './store'
 import {extname} from 'path'
 type Menus = Parameters<typeof Menu.buildFromTemplate>[0]
 const cmd = 'CmdOrCtrl'
@@ -149,6 +149,14 @@ export const registerMenus = () => {
           temp.add({
             label: zh ? '新建副本' : 'New Copy',
             click: () => sendCommand('newCopy')
+          })
+        }
+        if (mediaType(params.filePath) === 'image') {
+          temp.add({
+            label: zh ? '复制图片文件' : 'Copy Image File',
+            click: () => {
+              clipboard.writeImage(nativeImage.createFromPath(params.filePath!))
+            }
           })
         }
       }

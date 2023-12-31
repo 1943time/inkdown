@@ -1,4 +1,16 @@
-import {dialog, ipcMain, Menu, BrowserWindow, shell, app, nativeTheme, BrowserView, systemPreferences} from 'electron'
+import {
+  dialog,
+  ipcMain,
+  Menu,
+  BrowserWindow,
+  shell,
+  app,
+  nativeTheme,
+  BrowserView,
+  systemPreferences,
+  clipboard,
+  nativeImage
+} from 'electron'
 import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
@@ -109,6 +121,9 @@ export const registerApi = () => {
   })
   ipcMain.handle('get-service-config', e => {
     return store.get('service-config')
+  })
+  ipcMain.handle('copy-image', (e, path: string) => {
+    return clipboard.writeImage(nativeImage.createFromPath(path))
   })
   ipcMain.on('setStore', (e, key: string, value: any) => {
     if (typeof value === 'undefined') {

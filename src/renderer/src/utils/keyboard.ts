@@ -9,6 +9,8 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {isAbsolute, join, relative} from 'path'
 import {configStore} from '../store/config'
 import {EditorStore} from '../editor/store'
+import {existsSync} from 'fs'
+import {message$} from './index'
 
 const openFloatBar = (store: EditorStore) => {
   setTimeout(() => {
@@ -88,11 +90,25 @@ export class MenuKey {
         const [start, end] = Range.edges(this.state.editor.selection)
         if (node && Path.compare(start.path, node[1]) === 0 && Path.compare(end.path, node[1]) === 0) {
           e.preventDefault()
-          window.api.writeClipboardText(`bsc::${node[0].url}`)
+          const url = node[0].url, currentFilePath = this.store.currentTab.store.openFilePath || ''
+          const file = isAbsolute(url) ? url : join(currentFilePath || '', '..', url)
+          if (url && currentFilePath && isHotkey('mod+c', e)) {
+            if (existsSync(file)) {
+              window.electron.ipcRenderer.invoke('copy-image', file)
+              if (isHotkey('mod+c', e)) {
+                message$.next({
+                  type: 'success',
+                  content: configStore.zh ? '已将图片复制到剪贴板' : 'Image copied to clipboard'
+                })
+              }
+            }
+          } else if (existsSync(file)){
+            window.api.writeClipboardText(file)
+          }
           if (isHotkey('mod+x', e)) {
             Transforms.delete(this.state.editor, {at: node[1]})
+            ReactEditor.focus(this.state.editor)
           }
-          ReactEditor.focus(this.state.editor)
         }
       }
       if (isHotkey('enter', e) && this.state) {

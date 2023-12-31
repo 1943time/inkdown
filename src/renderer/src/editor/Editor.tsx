@@ -21,8 +21,8 @@ import {saveRecord} from '../store/db'
 import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
 import {useLocalState} from '../hooks/useLocalState'
-import {parse} from 'path'
 import {RenamePasteFile} from './RenamePasteFile'
+import {isAbsolute} from 'path'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
@@ -247,11 +247,10 @@ export const MEditor = observer(({note}: {
 
   const paste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
     const text = window.api.getClipboardText()
-    if (text && text.startsWith('bsc::')) {
-      const [, path] = text.split('::')
+    if (text && (text.startsWith('http') || isAbsolute(text))) {
       e.preventDefault()
       e.stopPropagation()
-      store.insertInlineNode(path)
+      store.insertInlineNode(text)
     }
     const file = e.clipboardData?.files[0]
     if (file) {
