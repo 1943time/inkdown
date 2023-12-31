@@ -24,10 +24,10 @@ export const RenamePasteFile = observer(({open, file, onClose, store}: {
   })
   useEffect(() => {
     if (open) {
-      const p = parse(file.name)
+      const ext = file.name.match(/\.\w+$/)
       setState({
         saveFileName: Date.now().toString(16),
-        ext: p.ext
+        ext: ext?.[0] || ''
       })
       setTimeout(() => {
         (document.querySelector('.rename-input input') as HTMLInputElement)?.select()
