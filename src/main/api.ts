@@ -15,7 +15,7 @@ import {mkdirp} from 'mkdirp'
 import {is} from '@electron-toolkit/utils'
 import {join} from 'path'
 import {getLocale, store} from './store'
-import {writeFileSync} from 'fs'
+import {readFileSync, writeFileSync} from 'fs'
 import {machineIdSync} from 'node-machine-id'
 import icon from '../../resources/icon.png?asset'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')

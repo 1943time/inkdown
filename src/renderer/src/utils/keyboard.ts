@@ -93,7 +93,7 @@ export class MenuKey {
           const url = node[0].url, currentFilePath = this.store.currentTab.store.openFilePath || ''
           const file = isAbsolute(url) ? url : join(currentFilePath || '', '..', url)
           if (url && currentFilePath && isHotkey('mod+c', e)) {
-            if (existsSync(file)) {
+            if (existsSync(file) && /\.(png|jpeg|jpg)$/.test(file)) {
               window.electron.ipcRenderer.invoke('copy-image', file)
               if (isHotkey('mod+c', e)) {
                 message$.next({

@@ -151,7 +151,7 @@ export const registerMenus = () => {
             click: () => sendCommand('newCopy')
           })
         }
-        if (mediaType(params.filePath) === 'image') {
+        if (mediaType(params.filePath) === 'image' && /\.(png|jpeg|jpg)$/.test(params.filePath!)) {
           temp.add({
             label: zh ? '复制图片文件' : 'Copy Image File',
             click: () => {
