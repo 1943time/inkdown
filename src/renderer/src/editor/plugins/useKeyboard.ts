@@ -18,6 +18,14 @@ export const useKeyboard = (store: EditorStore) => {
     const enter = new EnterKey(store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
+      if (isHotkey('mod+ArrowDown', e)) {
+        e.preventDefault()
+        Transforms.select(store.editor, Editor.end(store.editor, []))
+      }
+      if (isHotkey('mod+ArrowUp', e)) {
+        e.preventDefault()
+        Transforms.select(store.editor, Editor.start(store.editor, []))
+      }
       if (isHotkey('mod+a', e)) {
         e.preventDefault()
         const [node] = Editor.nodes<any>(store.editor, {mode: 'lowest', match: m => Element.isElement(m)})

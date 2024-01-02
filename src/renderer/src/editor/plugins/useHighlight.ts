@@ -95,31 +95,37 @@ export function useHighlight(store?: EditorStore) {
         }
       }
       if (node.type === 'paragraph' && node.children.length === 1 && !EditorUtils.isDirtLeaf(node.children[0])) {
-        const str = Node.string(node)
-        if (str.startsWith('```')) {
-          ranges.push({
-            anchor: {
-              path: [...path, 0],
-              offset: 0
-            },
-            focus: {
-              path: [...path, 0],
-              offset: 3
-            },
-            color: '#a3a3a3'
-          })
-        } else if (/^\|([^|]+\|)+$/.test(str)){
-          ranges.push({
-            anchor: {
-              path: [...path, 0],
-              offset: 0
-            },
-            focus: {
-              path: [...path, 0],
-              offset: str.length
-            },
-            color: '#a3a3a3'
-          })
+        if (cacheTextNode.get(node)) {
+          ranges.push(...cacheTextNode.get(node)!)
+        } else {
+          const str = Node.string(node)
+          if (str.startsWith('```')) {
+            ranges.push({
+              anchor: {
+                path: [...path, 0],
+                offset: 0
+              },
+              focus: {
+                path: [...path, 0],
+                offset: 3
+              },
+              color: '#a3a3a3'
+            })
+            cacheTextNode.set(node, ranges)
+          } else if (/^\|([^|]+\|)+$/.test(str)) {
+            ranges.push({
+              anchor: {
+                path: [...path, 0],
+                offset: 0
+              },
+              focus: {
+                path: [...path, 0],
+                offset: str.length
+              },
+              color: '#a3a3a3'
+            })
+            cacheTextNode.set(node, ranges)
+          }
         }
       }
       return ranges
