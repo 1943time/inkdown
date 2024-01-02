@@ -69,7 +69,7 @@ export class BackspaceKey {
           }
         }
         const parent = Editor.parent(this.editor, Path.parent(node[1]))
-        if (!Path.hasPrevious(path) && parent[0].children?.every((c: any) => !Node.string(c))) {
+        if (!Path.hasPrevious(path) && !Path.hasPrevious(Path.parent(path)) && parent[0].children?.every((c: any) => !Node.string(c))) {
           Transforms.delete(this.editor, {at: parent[1]})
           Transforms.insertNodes(this.editor, EditorUtils.p, {select: true, at: parent[1]})
         }
