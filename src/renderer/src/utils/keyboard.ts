@@ -94,13 +94,12 @@ export class MenuKey {
           const file = isAbsolute(url) ? url : join(currentFilePath || '', '..', url)
           if (url && currentFilePath && isHotkey('mod+c', e)) {
             if (existsSync(file) && /\.(png|jpeg|jpg)$/.test(file)) {
-              window.electron.ipcRenderer.invoke('copy-image', file)
-              if (isHotkey('mod+c', e)) {
+              window.electron.ipcRenderer.invoke('copy-image', file).then(() => {
                 message$.next({
                   type: 'success',
                   content: configStore.zh ? '已将图片复制到剪贴板' : 'Image copied to clipboard'
                 })
-              }
+              })
             }
           } else if (existsSync(file)){
             window.api.writeClipboardText(file)

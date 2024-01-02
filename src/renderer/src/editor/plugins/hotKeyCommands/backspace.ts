@@ -9,7 +9,7 @@ export class BackspaceKey {
   range() {
     const sel = this.editor.selection
     if (!sel) return
-    const [start, end] = Range.edges(sel)
+    let [start, end] = Range.edges(sel)
     if (Path.isCommon(start.path, end.path)) {
       Transforms.delete(this.editor, {
         at: {anchor: start, focus: end}
@@ -21,72 +21,7 @@ export class BackspaceKey {
       Transforms.select(this.editor, Editor.start(this.editor, []))
       return true
     }
-    const nodes = Array.from(Editor.nodes<Elements>(this.editor, {
-      match: n => Element.isElement(n),
-      reverse: true,
-      mode: 'highest'
-    }))
-    for (let n of nodes) {
-      if (EditorUtils.includeAll(this.editor, sel, n[1])) {
-        Transforms.delete(this.editor, {at: n[1]})
-        if (n[0].type === 'code' && nodes.length === 1) {
-          Transforms.insertNodes(this.editor, {
-            ...n[0],
-            children: [{type: 'code-line', children: [{text: ''}]}],
-          }, {at: n[1], select: true})
-          return true
-        }
-        // 如果是首个元素 替换paragraph
-      } else if (n[0].type === 'table') {
-        const cells = Array.from(Editor.nodes(this.editor, {
-          match: n => n?.type === 'table-cell'
-        }))
-        for (let c of cells) {
-          if (EditorUtils.includeAll(this.editor, sel, c[1])) {
-            Transforms.insertFragment(this.editor, [{text: ''}], {
-              at: {
-                anchor: Editor.start(this.editor, c[1]),
-                focus: Editor.end(this.editor, c[1])
-              }
-            })
-          } else {
-            const nStart = Editor.start(this.editor, c[1])
-            const nEnd = Editor.end(this.editor, c[1])
-            if (!Point.isBefore(start, nEnd)) continue
-            Transforms.delete(this.editor, {
-              at: {
-                anchor: Point.isBefore(start, nStart) ? nStart : start,
-                focus: Point.isAfter(end, nEnd) ? nEnd : end
-              }
-            })
-          }
-        }
-      } else {
-        const nStart = Editor.start(this.editor, n[1])
-        const nEnd = Editor.end(this.editor, n[1])
-        if (!Point.isBefore(start, nEnd)) continue
-        Transforms.delete(this.editor, {
-          at: {
-            anchor: Point.isBefore(start, nStart) ? nStart : start,
-            focus: Point.isAfter(end, nEnd) ? nEnd : end
-          }
-        })
-      }
-    }
-    if (Editor.hasPath(this.editor, start.path)) {
-      return false
-    } else if (Path.hasPrevious(start.path)) {
-      Transforms.select(this.editor, Editor.end(this.editor, Path.previous(start.path)))
-    } else {
-      const top = Path.ancestors(start.path)[1]
-      if (Path.hasPrevious(top)) {
-        const end = Editor.end(this.editor, Path.previous(top))
-        Transforms.select(this.editor, end)
-      } else {
-        Transforms.select(this.editor, Editor.start(this.editor, []))
-      }
-    }
-    return true
+    return false
   }
 
   private clearStyle(sel: Range) {
