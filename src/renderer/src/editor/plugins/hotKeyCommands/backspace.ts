@@ -10,12 +10,6 @@ export class BackspaceKey {
     const sel = this.editor.selection
     if (!sel) return
     let [start, end] = Range.edges(sel)
-    if (Path.isCommon(start.path, end.path)) {
-      Transforms.delete(this.editor, {
-        at: {anchor: start, focus: end}
-      })
-      return true
-    }
     if (Point.equals(start, Editor.start(this.editor, [])) && Point.equals(end, Editor.end(this.editor, []))) {
       EditorUtils.deleteAll(this.editor)
       Transforms.select(this.editor, Editor.start(this.editor, []))

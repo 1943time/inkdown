@@ -77,7 +77,7 @@ export const MediaAttr = observer(() => {
       return
     }
     const dom = ReactEditor.toDOMNode(store.editor, node[0]) as HTMLElement
-    let width = dom.clientWidth < 600 ? 600 : dom.clientWidth
+    let width = dom.clientWidth < 400 ? 400 : dom.clientWidth
     if (dom) {
       let top = store.offsetTop(dom)
       if (treeStore.tabs.length > 1) top += 32
