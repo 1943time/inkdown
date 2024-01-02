@@ -1,4 +1,4 @@
-import {Editor, Transforms} from 'slate'
+import {Editor, Node, Transforms} from 'slate'
 
 export const inlineNode = new Set(['media', 'inline-katex', 'break'])
 const voidNode = new Set(['hr', 'break'])
@@ -12,6 +12,10 @@ export const withMarkdown = (editor: Editor) => {
   }
   editor.apply = operation => {
     if (operation.type === 'merge_node' && operation.properties?.type === 'table-cell') return
+    if (operation.type === 'move_node') {
+      const node = Node.get(editor, operation.path)
+      if (node?.type === 'table-cell') return
+    }
     if (operation.type === 'remove_node') {
       const { node } = operation
       if (['table-row', 'table-cell'].includes(node.type)) {
