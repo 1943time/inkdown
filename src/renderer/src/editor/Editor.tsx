@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
-import {Editor} from 'slate'
+import {Editor, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -246,6 +246,9 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const paste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (!Range.isCollapsed(store.editor.selection!)) {
+      Transforms.delete(store.editor, {at: store.editor.selection!})
+    }
     const text = window.api.getClipboardText()
     if (text && (text.startsWith('http') || isAbsolute(text))) {
       e.preventDefault()
