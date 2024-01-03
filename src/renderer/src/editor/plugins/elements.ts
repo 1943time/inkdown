@@ -1,6 +1,7 @@
 import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {Elements, ListNode, TableRowNode} from '../../el'
 import {EditorUtils} from '../utils/editorUtils'
+import {clearAllCodeCache, codeCache} from './useHighlight'
 
 export const insertAfter = (editor: Editor, path: Path, node: Elements = {
   type: 'paragraph',
@@ -84,10 +85,12 @@ export const MdElements: Record<string, MdNode> = {
     reg: /^\s*```([\w#\-+*]{1,30})?\s*$/,
     run: ({editor, path, match}) => {
       const lang = match[1]
+      clearAllCodeCache(editor)
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
         type: 'code', language: lang, children: [{type: 'code-line', children: [{text: ''}]}]
       }, {at: path, select: true})
+      return true
     }
   },
   katex: {

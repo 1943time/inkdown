@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
 import {Editor, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
-import {codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
+import {clearAllCodeCache, codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
 import {useOnchange} from './plugins/useOnchange'
 import {htmlParser} from './plugins/htmlParser'
@@ -151,6 +151,7 @@ export const MEditor = observer(({note}: {
       count(data?.state || [])
       try {
         EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true, data?.sel)
+        clearAllCodeCache(editor)
       } catch (e) {
         EditorUtils.deleteAll(editor)
       }
@@ -275,17 +276,12 @@ export const MEditor = observer(({note}: {
   const compositionStart = useCallback((e: React.CompositionEvent) => {
     e.preventDefault()
     store.inputComposition = true
+    runInAction(() => store.pauseCodeHighlight = true)
   }, [])
 
   const compositionEnd = useCallback((e: React.CompositionEvent) => {
     store.inputComposition = false
-    const [code] = Editor.nodes<any>(store.editor, {
-      match: el => el.type === 'code'
-    })
-    if (code) {
-      codeCache.delete(code[0])
-      requestIdleCallback(action(() => store.refreshHighlight = !store.refreshHighlight))
-    }
+    runInAction(() => store.pauseCodeHighlight = false)
   }, [])
   return (
     <Slate

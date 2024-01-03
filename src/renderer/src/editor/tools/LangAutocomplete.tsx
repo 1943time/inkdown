@@ -133,6 +133,7 @@ import {getOffsetLeft, getOffsetTop} from '../utils/dom'
 import isHotkey from 'is-hotkey'
 import {useSubject} from '../../hooks/subscribe'
 import {runInAction} from 'mobx'
+import {clearAllCodeCache, codeCache} from '../plugins/useHighlight'
 
 const iconMap = new Map([
   ['zig', zig],
@@ -384,6 +385,7 @@ export const LangAutocomplete = observer(() => {
   }, [store.openLangCompletion])
 
   const createCodeFence = useCallback((lang: string) => {
+    clearAllCodeCache(store.editor)
     Transforms.delete(store.editor, {at: path.current})
     Transforms.insertNodes(store.editor, {
       type: 'code', language: lang, children: [{type: 'code-line', children: [{text: ''}]}]
