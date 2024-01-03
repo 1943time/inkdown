@@ -73,10 +73,9 @@ export const FullSearch = observer(() => {
       }
       let results: any[] = []
       for (let f of treeStore.nodes) {
-        const data = treeStore.schemaMap.get(f)
         let res: { file: IFileItem, results: { el: any, text: string }[] } | null = null
-        if (data?.state) {
-          visitSchema(data.state, node => {
+        if (f.schema) {
+          visitSchema(f.schema, node => {
             if (['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
               let str = Node.string(node)
               let matchText = treeStore.searchKeyWord

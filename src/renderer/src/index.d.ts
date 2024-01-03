@@ -1,6 +1,6 @@
 /// <reference types="electron-vite/node" />
 import {EditorStore} from './editor/store'
-import {BaseRange} from 'slate'
+import {BaseRange, BaseSelection} from 'slate'
 
 export interface IFileItem {
   id: string
@@ -18,6 +18,9 @@ export interface IFileItem {
   copyItem?: IFileItem
   changed?: boolean
   refresh?: boolean
+  schema?: any[]
+  history?: any
+  sel?: BaseSelection
 }
 
 export interface Tab {

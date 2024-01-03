@@ -12,7 +12,6 @@ import {codeLangMap} from '../output/html/transform'
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
 export const cacheTextNode = new WeakMap<object, Range[]>
-
 export const clearAllCodeCache = (editor: Editor) => {
   const codes = Array.from<any>(Editor.nodes(editor, {
     match: n => Element.isElement(n) && n.type === 'code',

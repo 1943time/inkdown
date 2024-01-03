@@ -69,7 +69,7 @@ export const FloatBar = observer(() => {
       filePath = isAbsolute(state.url) ? state.url : join(treeStore.openedNote!.filePath, '..', parse.path)
     }
     if (fileMap.get(filePath)) {
-      const anchors = (treeStore.schemaMap.get(fileMap.get(filePath)!)?.state || []).filter(e => e.type === 'head')
+      const anchors = (fileMap.get(filePath)?.schema || []).filter(e => e.type === 'head')
       setState({anchors: anchors.map(e => {
         const text = Node.string(e)
         return {label: '# ' + text, value: text}

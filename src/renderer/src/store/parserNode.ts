@@ -30,6 +30,9 @@ export const createFileNode = (params: {
     children: params.folder ? [] : undefined,
     mode: params.mode,
     filePath: params.filePath,
+    schema: undefined,
+    history: undefined,
+    sel: undefined,
     copyItem: params.copyItem,
     ext: params.folder ? undefined : extname(params.filePath).replace(/^\./, ''),
   } as IFileItem
@@ -38,7 +41,11 @@ export const createFileNode = (params: {
   } else {
     node.independent = true
   }
-  return observable(node)
+  return observable(node, {
+    schema: false,
+    sel: false,
+    history: false
+  })
 }
 const readDir = (path: string, parent: IFileItem) => {
   const files = readdirSync(path)

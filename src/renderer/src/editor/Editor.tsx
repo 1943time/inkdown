@@ -48,16 +48,16 @@ export const MEditor = observer(({note}: {
   const first = useRef(true)
   const save = useCallback(async () => {
     ipcRenderer.send('file-saved')
+    const node = nodeRef.current
     changedMark.current = false
-    if (nodeRef.current && store.docChanged) {
+    if (node && store.docChanged) {
       runInAction(() => {
         store.docChanged = false
       })
-      const schema = treeStore.schemaMap.get(nodeRef.current)
-      if (schema?.state) {
-        const path = nodeRef.current.filePath
-        const res = await toMarkdown(schema.state)
-        saveRecord(path, schema.state)
+      if (node.schema) {
+        const path = node.filePath
+        const res = await toMarkdown(node.schema)
+        saveRecord(path, node.schema)
         await window.api.fs.writeFile(path, res, {encoding: 'utf-8'})
       }
     }
@@ -65,8 +65,7 @@ export const MEditor = observer(({note}: {
 
   useSubject(store.saveDoc$, data => {
     if (data && nodeRef.current) {
-      const schema = treeStore.schemaMap.get(nodeRef.current)
-      EditorUtils.reset(editor, data, schema?.history)
+      EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
     } else {
       save()
@@ -89,8 +88,7 @@ export const MEditor = observer(({note}: {
 
   useEffect(() => {
     if (treeStore.currentTab.store === store) {
-      const schema = treeStore.schemaMap.get(note)?.state
-      if (schema) count(schema)
+      if (note) count(note.schema || [])
     }
   }, [treeStore.currentTab, note])
   const change = useCallback((v: any[]) => {
@@ -104,11 +102,9 @@ export const MEditor = observer(({note}: {
 
     onChange(v)
     if (note) {
-      treeStore.schemaMap.set(note, {
-        state: v,
-        history: editor.history,
-        sel: editor.selection
-      })
+      note.schema = v
+      note.history = editor.history
+      note.sel = editor.selection
     }
     if (editor.operations[0].type === 'set_selection') {
       try {
@@ -140,17 +136,16 @@ export const MEditor = observer(({note}: {
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
-      let data = treeStore.schemaMap.get(note)
       first.current = true
-      if (!data) {
-        data = await treeStore.getSchema(note)
+      if (!note.schema?.length) {
+        await treeStore.getSchema(note)
         setTimeout(action(() => {
           note.refresh = !note.refresh
         }), 200)
       }
-      count(data?.state || [])
+      count(note.schema|| [])
       try {
-        EditorUtils.reset(editor, data?.state.length ? data.state : undefined, data?.history || true, data?.sel)
+        EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true, note.sel)
         clearAllCodeCache(editor)
       } catch (e) {
         EditorUtils.deleteAll(editor)
@@ -185,7 +180,7 @@ export const MEditor = observer(({note}: {
   useSubject(treeStore.externalChange$, path => {
     if (path === note?.filePath) {
       first.current = true
-      EditorUtils.reset(editor, treeStore.schemaMap.get(note)!.state)
+      EditorUtils.reset(editor, note.schema)
     }
   }, [note])
 

@@ -33,7 +33,7 @@ export const Heading = observer(({note}: {
 
   const getHeading = useCallback(() => {
     if (note) {
-      const schema = treeStore.schemaMap.get(note)?.state
+      const schema = note.schema
       if (schema?.length) {
         const headings: Leading[] = []
         for (let s of schema) {

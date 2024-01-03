@@ -33,11 +33,6 @@ export class TreeStore {
     width: window.innerWidth,
     height: window.innerHeight
   }
-  schemaMap = new WeakMap<IFileItem, {
-    history?: any,
-    state: any[],
-    sel?: BaseSelection
-  }>()
   fold = true
   watcher: Watcher
   externalChange$ = new Subject<string>()
@@ -88,7 +83,6 @@ export class TreeStore {
   constructor() {
     this.watcher = new Watcher(this)
     makeAutoObservable(this, {
-      schemaMap: false,
       watcher: false
     })
     window.addEventListener('resize', action(() => {
@@ -236,12 +230,10 @@ export class TreeStore {
 
   async getSchema(file: IFileItem) {
     if (file?.ext !== 'md' && file?.ext !== 'markdown') return
-    if (this.schemaMap.get(file)) return this.schemaMap.get(file)
+    if (file.schema) return file
     const [schema] = await parserMdToSchema([readFileSync(file.filePath, {encoding: 'utf-8'})])
-    this.schemaMap.set(file, {
-      state: schema
-    })
-    return this.schemaMap.get(file)
+    file.schema = schema
+    return file
   }
 
   openParentDir(item: IFileItem) {
@@ -358,11 +350,7 @@ export class TreeStore {
     }
     const schemas = await parserMdToSchema(files)
     queue.map((f, i) => {
-      if (!this.schemaMap.get(f)) {
-        this.schemaMap.set(f, {
-          state: schemas[i]
-        })
-      }
+      if (!f.schema) f.schema = schemas[i]
     })
   }
   recordTabs() {
@@ -433,9 +421,7 @@ export class TreeStore {
         } else {
           if (file.mode === 'copy') {
             appendFileSync(path, readFileSync(file.copyItem!.filePath, {encoding: 'utf-8'}), {encoding: 'utf-8'})
-            this.schemaMap.set(file, {
-              state: JSON.parse(JSON.stringify(this.schemaMap.get(file.copyItem!)?.state || []))
-            })
+            file.schema = file.copyItem?.schema || []
           } else {
             appendFileSync(path, '', {encoding: 'utf-8'})
           }
@@ -537,10 +523,8 @@ export class TreeStore {
     }
     const schemas = await parserMdToSchema(filesStr)
     updateFiles.map((f, i) => {
-      if (this.schemaMap.get(f)) {
-        this.schemaMap.get(f)!.state = schemas[i]
-        this.externalChange$.next(f.filePath)
-      }
+      f.schema = schemas[i]
+      this.externalChange$.next(f.filePath)
     })
   }
 

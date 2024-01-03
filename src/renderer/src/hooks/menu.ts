@@ -175,9 +175,9 @@ export const useSystemMenus = () => {
 
     const convertRemoteImages = async () => {
       if (treeStore.openedNote?.ext === 'md') {
-        const schema = treeStore.schemaMap.get(treeStore.openedNote)
-        if (schema?.state) {
-          const stack = schema.state.slice()
+        const schema = treeStore.openedNote.schema
+        if (schema) {
+          const stack = schema.slice()
           const store = treeStore.currentTab.store
           let change = false
           while (stack.length) {

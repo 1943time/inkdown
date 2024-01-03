@@ -46,17 +46,13 @@ export class Watcher {
         const node = filesMap.get(path)
         if (node) {
           const [schema] = await parserMdToSchema([readFileSync(node.filePath, {encoding: 'utf-8'})])
-          this.store.schemaMap.set(node, {
-            state: schema
-          })
+          node.schema = schema
         } else {
           for (let t of this.store.tabs) {
             for (let f of t.history) {
               if (f.independent && f.filePath === path) {
                 const [schema] = await parserMdToSchema([readFileSync(f.filePath, {encoding: 'utf-8'})])
-                this.store.schemaMap.set(f, {
-                  state: schema
-                })
+                f.schema = schema
               }
             }
           }
