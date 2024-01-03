@@ -411,7 +411,7 @@ ol.m-list {
 }
 
 .drag-handle {
-  @apply absolute opacity-0 flex items-center;
+  @apply absolute opacity-0 flex items-center select-none;
   padding-left: 2px;
   padding-right: 6px;
   left: -24px;

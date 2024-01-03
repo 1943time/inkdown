@@ -26,7 +26,18 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
           Transforms.move(editor, { unit: 'offset', reverse: true })
         }
       } else {
-        Transforms.select(editor, Editor.start(editor, Path.parent(sel.focus.path)))
+        const [node] = Editor.nodes(editor, {
+          match: n => n.type === 'code-line'
+        })
+        if (node) {
+          const str = Node.string(node[0]) || ''
+          Transforms.select(editor, {
+            path: [...node[1], 0],
+            offset: str.match(/^[\s\t]*/)?.[0].length || 0
+          })
+        } else {
+          Transforms.select(editor, Editor.start(editor, Path.parent(sel.focus.path)))
+        }
       }
       return
     }

@@ -93,7 +93,7 @@ export const registerApi = () => {
       dark: dark,
       spellCheck: !!config.spellCheck,
       codeLineNumber: !!config.codeLineNumber,
-      codeTabSize: config.codeTabSize || 2,
+      codeTabSize: config.codeTabSize || 4,
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,

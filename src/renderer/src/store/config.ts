@@ -13,7 +13,7 @@ class ConfigStore {
     dark: false,
     locale: 'en' as 'en' | 'zh',
     codeLineNumber: false,
-    codeTabSize: 2,
+    codeTabSize: 4,
     editorTextSize: 16,
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4,
@@ -29,6 +29,9 @@ class ConfigStore {
   deviceId = ''
   get mas() {
     return process.mas || false
+  }
+  get tab() {
+    return ' '.repeat(this.config.codeTabSize)
   }
   get zh() {
     return this.config.locale === 'zh'

@@ -6,7 +6,12 @@ import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
 import {isMod} from '../../../utils/keyboard'
 import {EditorStore} from '../../store'
+import {configStore} from '../../../store/config'
 export class EnterKey {
+  bracketsMap = new Map([
+    ['[', ']'],
+    ['{', '}']
+  ])
   constructor(
     private readonly store: EditorStore,
     private readonly backspace: BackspaceKey
@@ -327,16 +332,23 @@ export class EnterKey {
       })
     }
     if (['[', '{'].includes(str[end.offset - 1]) && remainText) {
-      const line = {type: 'code-line', children: [{text: space + '\t'}]}
-      Transforms.insertNodes(this.editor, [
-        line,
-        {type: 'code-line', children: [{text: space + remainText}]},
-      ], {at: next})
-
-      Transforms.select(this.editor, {
-        path: [...next, 0],
-        offset: space.length + 1
-      })
+      if (this.bracketsMap.get(str[end.offset - 1]) === str[end.offset]) {
+        const line = {type: 'code-line', children: [{text: space + configStore.tab}]}
+        Transforms.insertNodes(this.editor, [
+          line,
+          {type: 'code-line', children: [{text: space + remainText}]},
+        ], {at: next})
+        Transforms.select(this.editor, Editor.end(this.editor, Path.next(path)))
+      } else {
+        const text = space + configStore.tab + str.slice(end.offset)
+        Transforms.insertNodes(this.editor, [
+          {type: 'code-line', children: [{text}]}
+        ], {at: next})
+        Transforms.select(this.editor, {
+          path: [...Path.next(path), 0],
+          offset: (space + configStore.tab).length
+        })
+      }
     } else if (remainText) {
       Transforms.insertNodes(this.editor, {
         type: 'code-line', children: [{text: space + remainText}]

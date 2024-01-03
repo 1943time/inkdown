@@ -1,6 +1,7 @@
 import {Editor, Element, Node, Path, Point, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import {Elements} from '../../../el'
+import {configStore} from '../../../store/config'
 export class BackspaceKey {
   constructor(
     private readonly editor: Editor
@@ -67,6 +68,27 @@ export class BackspaceKey {
           Transforms.delete(this.editor, {at: parent[1]})
           Transforms.insertNodes(this.editor, EditorUtils.p, {select: true, at: parent[1]})
         }
+        return true
+      }
+    }
+    if (el.type === 'code-line') {
+      let str = el.children[0].text as string
+      str = str.slice(0, sel.anchor.offset)
+      let m = str.match(/\s+$/)
+      str = m?.[0] || ''
+      if (str) {
+        let decrement = str.length % configStore.config.codeTabSize
+        if (decrement === 0) decrement = configStore.config.codeTabSize
+        let ao = sel.anchor.offset - decrement
+        Transforms.delete(this.editor, {
+          at: {
+            anchor: {
+              path: sel.anchor.path,
+              offset: ao < 0 ? 0 : ao
+            },
+            focus: sel.anchor
+          }
+        })
         return true
       }
     }

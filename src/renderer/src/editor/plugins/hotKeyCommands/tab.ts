@@ -51,7 +51,8 @@ export class TabKey {
             const start = Editor.start(this.editor, path)
             if (e.shiftKey) {
               const str = Node.string(el)
-              const m = str.match(/^(\t|\s{1,2})/)
+              const reg = configStore.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
+              const m = str.match(reg)
               if (m) {
                 const length = m[0].length
                 Transforms.delete(this.editor, {
@@ -68,7 +69,7 @@ export class TabKey {
                 })
               }
             } else {
-              Transforms.insertText(this.editor, '\t', {
+              Transforms.insertFragment(this.editor, [{text: configStore.tab}], {
                 at: start
               })
             }
@@ -85,7 +86,8 @@ export class TabKey {
   private codeLine(e: React.KeyboardEvent, node: NodeEntry<CodeLineNode>, sel: Range) {
     if (e.shiftKey) {
       const str = Node.string(node[0])
-      const m = str.match(/^\t|\s{1,2}/)
+      const reg = configStore.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
+      const m = str.match(reg)
       if (m) {
         const length = m[0].length
         Transforms.delete(this.editor, {
@@ -109,9 +111,10 @@ export class TabKey {
           focus: point
         })
       }
-      return true
+    } else {
+      Transforms.insertText(this.editor, configStore.tab)
     }
-    return false
+    return true
   }
   private tableCell(node: TableCellNode, nodePath: Path) {
     const sel = this.editor.selection!
