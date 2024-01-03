@@ -110,19 +110,6 @@ export class MenuKey {
           }
         }
       }
-      if (isHotkey('enter', e) && this.state) {
-        const [node] = Editor.nodes<any>(this.state.editor, {
-          match: n => n.type === 'media'
-        })
-        if (node) {
-          e.preventDefault()
-          Transforms.select(this.state.editor, {
-            path: Path.next(node[1]),
-            offset: 0
-          })
-          ReactEditor.focus(this.state.editor)
-        }
-      }
     }, false)
     window.electron.ipcRenderer.on('key-task', (e, task: string, other: any) => {
       this.run(task, other)

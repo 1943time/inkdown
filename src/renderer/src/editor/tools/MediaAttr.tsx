@@ -14,6 +14,8 @@ import {keyArrow} from '../plugins/hotKeyCommands/arrow'
 import {IFileItem} from '../../index'
 import {join, relative} from 'path'
 import {getImageData} from '../../utils'
+import isHotkey from 'is-hotkey'
+import {EditorUtils} from '../utils/editorUtils'
 
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
@@ -115,6 +117,31 @@ export const MediaAttr = observer(() => {
     if (e.key === 'Backspace' && nodeRef.current) {
       e.preventDefault()
       del()
+    }
+    if (isHotkey('enter', e)) {
+      e.preventDefault()
+      e.stopPropagation()
+      const node = nodeRef.current
+      if (node) {
+        const nextLinePath = Path.next(Path.parent(node[1]))
+        const nextPath = Path.next(node[1])
+        if (Editor.hasPath(store.editor, nextPath)) {
+          Transforms.transform(store.editor, {
+            type: 'insert_node',
+            path: nextPath,
+            node: {text: ''},
+          })
+          Transforms.select(store.editor, nextPath)
+          Transforms.liftNodes(store.editor, {
+            at: nextPath,
+            mode: 'lowest'
+          })
+          Transforms.select(store.editor, Editor.start(store.editor, nextLinePath))
+        } else {
+          Transforms.insertNodes(store.editor, EditorUtils.p, {at: nextLinePath, select: true})
+        }
+        ReactEditor.focus(store.editor)
+      }
     }
   }, [])
 

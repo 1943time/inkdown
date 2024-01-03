@@ -13,7 +13,12 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const pre = Editor.previous<any>(editor, {at: sel.focus.path})
-        if (sel.focus.offset === 0 && pre && pre[0].type === 'media') {
+        const [node] = Editor.nodes(editor, {
+          match: n => n.type === 'media'
+        })
+        if (node) {
+          EditorUtils.moveBeforeSpace(editor, node[1])
+        } else if (sel.focus.offset === 0 && pre && pre[0].type === 'media') {
           Transforms.select(editor, pre[1])
         } else if (sel.focus.offset === 0 && dirt) {
           EditorUtils.moveBeforeSpace(editor, sel.focus.path)
@@ -32,7 +37,12 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
-        if (sel.focus.offset === leaf.text?.length && next && next[0].type === 'media') {
+        const [node] = Editor.nodes(editor, {
+          match: n => n.type === 'media'
+        })
+        if (node) {
+          EditorUtils.moveAfterSpace(editor, node[1])
+        } else if (sel.focus.offset === leaf.text?.length && next && next[0].type === 'media') {
           Transforms.select(editor, next[1])
         } else if (sel.focus.offset === leaf.text?.length && dirt && !Editor.next(editor, {at: sel.focus.path})) {
           EditorUtils.moveAfterSpace(editor, sel.focus.path)
