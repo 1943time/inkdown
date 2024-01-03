@@ -60,7 +60,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   for (let n of nodes) {
     switch (n.type) {
       case 'heading':
-        el = {type: 'head', level: n.depth, children: parserBlock(n.children, false, n)}
+        el = {type: 'head', level: n.depth, children: n.children?.length ? parserBlock(n.children, false, n) : [{text: ''}]}
         break
       case 'html':
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
