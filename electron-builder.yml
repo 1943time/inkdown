@@ -17,7 +17,7 @@ files:
   - '!dist.zip'
 asarUnpack:
   - resources/*
-artifactName: "Bluestone-${os}-${arch}-${version}.${ext}"
+artifactName: "Bluestone-${os}-${arch}.${ext}"
 extraResources:
   - web
 fileAssociations:
