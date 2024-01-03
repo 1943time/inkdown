@@ -6,7 +6,7 @@ import {ReactNode, useCallback, useEffect} from 'react'
 import {action, runInAction} from 'mobx'
 import {treeStore} from '../store/tree'
 import {ReactEditor} from 'slate-react'
-import {codeCache} from '../editor/plugins/useHighlight'
+import {clearAllCodeCache, codeCache} from '../editor/plugins/useHighlight'
 
 function Help(props: {
   text: string | ReactNode
@@ -227,10 +227,20 @@ export const Set = observer(() => {
                   className={'w-[220px]'}
                   onChange={e => {
                     configStore.setConfig('codeTheme', e)
-                    modal.info({
-                      title: configStore.zh ? '提示' : 'Note',
-                      content: configStore.zh ? '代码风格设置将在应用重启后生效' : 'Code style settings will take effect after restarting applications'
-                    })
+                    setTimeout(async () => {
+                      await window.api.loadCodeTheme(e)
+                      for (const t of treeStore.tabs) {
+                        clearAllCodeCache(t.store.editor)
+                        t.store.setState(state => state.pauseCodeHighlight = true)
+                        setTimeout(() => {
+                          t.store.setState(state => {
+                            state.pauseCodeHighlight = false
+                            state.refreshHighlight = !state.refreshHighlight
+                            console.log('refresh')
+                          })
+                        }, 30)
+                      }
+                    }, 300)
                   }}
                   options={[
                     {label: 'dracula', value: 'dracula'},

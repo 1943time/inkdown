@@ -23,6 +23,13 @@ const api = {
   getClipboardText() {
     return clipboard.readText('clipboard')
   },
+  loadCodeTheme(theme: string) {
+    return getHighlighter({
+      theme
+    }).then(res => {
+      highlighter = res
+    })
+  },
   got,
   uploadFile(options: {
     url: string
