@@ -236,7 +236,6 @@ export const Set = observer(() => {
                           t.store.setState(state => {
                             state.pauseCodeHighlight = false
                             state.refreshHighlight = !state.refreshHighlight
-                            console.log('refresh')
                           })
                         }, 30)
                       }
