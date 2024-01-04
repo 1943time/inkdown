@@ -18,6 +18,9 @@ export const useKeyboard = (store: EditorStore) => {
     const enter = new EnterKey(store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
+      if (isHotkey('mod+z', e) || isHotkey('mod+shift+z', e)) {
+        store.doManual()
+      }
       if (isHotkey('mod+ArrowDown', e)) {
         e.preventDefault()
         Transforms.select(store.editor, Editor.end(store.editor, []))

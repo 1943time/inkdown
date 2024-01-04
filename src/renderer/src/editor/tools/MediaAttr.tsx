@@ -110,7 +110,7 @@ export const MediaAttr = observer(() => {
   }, [])
 
   const keyboard = useCallback((e: KeyboardEvent) => {
-    if (state().focus && ['ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    if (state().focus && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
       keyArrow(store.editor, e)
       ReactEditor.focus(store.editor)
     }

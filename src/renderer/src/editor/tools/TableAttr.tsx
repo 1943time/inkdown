@@ -75,6 +75,7 @@ export const TableAttr = observer(() => {
   }, [store.tableCellNode, store.refreshTableAttr])
 
   const resetGird = useCallback((row: number, col: number) => {
+    store.doManual()
     setState({scaleOpen: false})
     const [table, path] = tableRef.current!
     if (state().rows > row) {
@@ -95,7 +96,7 @@ export const TableAttr = observer(() => {
         const row: TableRowNode = {
           type: 'table-row',
           children: Array.from(new Array(col)).map((_, j) => {
-            return {type: 'table-cell', children: [], align: heads[j]?.align} as TableCellNode
+            return {type: 'table-cell', children: [{text: ''}], align: heads[j]?.align} as TableCellNode
           })
         }
         Transforms.insertNodes(editor, row, {
@@ -116,7 +117,7 @@ export const TableAttr = observer(() => {
               editor,
               {
                 type: 'table-cell',
-                children: [],
+                children: [{text: ''}],
                 title: i === 0,
                 align: heads[j + state().cols]?.align
               } as TableCellNode,
@@ -125,6 +126,9 @@ export const TableAttr = observer(() => {
           })
         }
       }
+    }
+    if (tableCellRef.current && !Editor.hasPath(editor, tableCellRef.current[1])) {
+      Transforms.select(editor, Editor.start(editor, path))
     }
     ReactEditor.focus(editor)
   }, [editor])
@@ -233,8 +237,7 @@ export const TableAttr = observer(() => {
       const index = path[path.length - 1]
       const row = path[path.length - 2]
       const rowPath = Path.parent(path)
-      store.manual = true
-      setTimeout(() => store.manual = false)
+      store.doManual()
       switch (task) {
         case 'insertRowBefore':
           insertRow(row === 0 ? Path.next(Path.parent(path)) : Path.parent(path), columns)

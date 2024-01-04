@@ -64,6 +64,10 @@ export class EditorStore {
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
+  doManual() {
+    this.manual = true
+    setTimeout(() => this.manual = false, 30)
+  }
   constructor(webview = false, history = false) {
     this.webview = webview
     this.history = history

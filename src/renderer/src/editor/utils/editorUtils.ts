@@ -17,7 +17,34 @@ export class EditorUtils {
     const p = Editor.parent(editor, path)
     return Editor.isEditor(p[0])
   }
-
+  static findPrev(editor: Editor, path: Path) {
+    while (path.length) {
+      if (Path.hasPrevious(path)) {
+        if (Node.get(editor, Path.previous(path))?.type === 'hr') {
+          path = Path.previous(path)
+        } else {
+          return Path.previous(path)
+        }
+      } else {
+        path = Path.parent(path)
+      }
+    }
+    return []
+  }
+  static findNext(editor: Editor, path: Path) {
+    while (path.length) {
+      if (Editor.hasPath(editor, Path.next(path))) {
+        if (Node.get(editor, Path.next(path))?.type === 'hr') {
+          path = Path.next(path)
+        } else {
+          return Path.next(path)
+        }
+      } else {
+        path = Path.parent(path)
+      }
+    }
+    return []
+  }
   static moveNodes(editor: Editor, from: Path, to: Path, index = 1) {
     let count = 0
     while (Editor.hasPath(editor, from)) {

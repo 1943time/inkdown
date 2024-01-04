@@ -96,6 +96,11 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
           e.preventDefault()
         }
       }
+      if (el.type === 'media') {
+        e.preventDefault()
+        const pre = EditorUtils.findPrev(editor, Path.parent(path))
+        Transforms.select(editor, Editor.start(editor, pre))
+      }
     }
     if (e.key === 'ArrowDown') {
       const [node] = Editor.nodes<any>(editor, {
@@ -126,6 +131,11 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
             at: Path.next(code), select: true
           })
         }
+      }
+      if (el.type === 'media') {
+        const next = EditorUtils.findNext(editor, path)
+        e.preventDefault()
+        Transforms.select(editor, Editor.end(editor, next))
       }
       if (el.type === 'paragraph') {
         if (path[0] === 0 && !Node.string(el) && Editor.isEditor(Node.get(editor, Path.parent(path))) && Editor.hasPath(editor, Path.next(path))) {
