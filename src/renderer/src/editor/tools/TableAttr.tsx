@@ -184,7 +184,7 @@ export const TableAttr = observer(() => {
       at: path
     })
     Transforms.select(editor, Editor.start(editor, path))
-  }, [])
+  }, [editor])
 
   const insertCol = useCallback((tablePath: Path, rows: number, index: number) => {
     Array.from(new Array(rows)).map((_, i) => {
@@ -195,7 +195,7 @@ export const TableAttr = observer(() => {
       })
     })
     Transforms.select(editor, [...tablePath, 0, index, 0])
-  }, [])
+  }, [editor])
 
   const removeRow = useCallback((path: Path, index: number, columns: number) => {
     if (Path.hasPrevious(path)) {
@@ -213,27 +213,19 @@ export const TableAttr = observer(() => {
         })
       })
     }
-  }, [])
+  }, [editor])
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (isHotkey('mod+shift+backspace', e)) {
         if (!tableCellRef.current || !tableRef.current) return
         e.preventDefault()
-        const rows = tableRef.current[0].children.length
-        const path = tableCellRef.current[1]
-        const index = path[path.length - 1]
-        const columns = tableRef.current[0].children[0].children.length
-        if (rows < 2) {
-          remove()
-        } else {
-          removeRow(Path.parent(path), index, columns)
-        }
+        task(null, 'removeRow')
       }
     }
 
     window.addEventListener('keydown', keydown)
-    const task = (e: IpcRendererEvent, task: string) => {
+    const task = (e: IpcRendererEvent | null, task: string) => {
       if (!tableCellRef.current || !tableRef.current) return
       const columns = tableRef.current[0].children[0].children.length
       const rows = tableRef.current[0].children.length
@@ -241,6 +233,8 @@ export const TableAttr = observer(() => {
       const index = path[path.length - 1]
       const row = path[path.length - 2]
       const rowPath = Path.parent(path)
+      store.manual = true
+      setTimeout(() => store.manual = false)
       switch (task) {
         case 'insertRowBefore':
           insertRow(row === 0 ? Path.next(Path.parent(path)) : Path.parent(path), columns)

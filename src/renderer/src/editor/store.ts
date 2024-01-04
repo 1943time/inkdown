@@ -20,7 +20,7 @@ export const useEditorStore = () => {
 }
 
 export class EditorStore {
-  editor = withMarkdown(withReact(withHistory(createEditor())))
+  editor = withMarkdown(withReact(withHistory(createEditor())), this)
   search = {
     text: '',
     currentIndex: 0,
@@ -30,6 +30,8 @@ export class EditorStore {
     words: 0,
     characters: 0
   }
+  // Manually perform editor operations
+  manual = false
   openInsertNetworkImage = false
   webview = false
   sel: BaseSelection | undefined
@@ -74,7 +76,8 @@ export class EditorStore {
       openFilePath: false,
       container: false,
       highlightCache: false,
-      dragEl: false
+      dragEl: false,
+      manual: false
     })
   }
   hideRanges() {
