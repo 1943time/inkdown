@@ -121,9 +121,9 @@ export const useSystemMenus = () => {
         params: {
           type: 'info',
           title: configStore.zh ? '提示' : 'Note',
-          content: configStore.zh ? '在.images文件夹中未被使用的图片将被移入废纸篓' : 'Unused images in .images folder will be moved to trash',
+          content: configStore.zh ? '存储区中未被引用的图片将被删除' : 'Unreferenced images in the storage area will be deleted',
           onOk: async () => {
-            const imgDir = join(treeStore.root.filePath, '.images')
+            const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
             if (existsSync(imgDir)) {
               const usedImages = new Set<string>()
               const stack = treeStore.root.children!.slice()
@@ -155,7 +155,7 @@ export const useSystemMenus = () => {
                   MainApi.moveToTrash(path)
                 }
               }
-              const imgFolder = treeStore.root.children!.find(c => c.filename === '.images')
+              const imgFolder = treeStore.root.children!.find(c => c.filename === configStore.config.imagesFolder)
               if (imgFolder) {
                 runInAction(() => {
                   imgFolder.children = imgFolder.children!.filter(img => {

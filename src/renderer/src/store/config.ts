@@ -19,6 +19,7 @@ class ConfigStore {
     leadingLevel: 4,
     showCharactersCount: true,
     mas: false,
+    imagesFolder: '.images',
     dragToSort: true,
     spellCheck: false,
     autoRebuild: true,

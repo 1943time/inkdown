@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Checkbox, Modal, Radio, Select, Slider, Tooltip} from 'antd'
+import {Button, Checkbox, Input, message, Modal, Radio, Select, Slider, Space, Tooltip} from 'antd'
 import {CloseOutlined, QuestionCircleOutlined} from '@ant-design/icons'
 import {configStore} from '../store/config'
 import {ReactNode, useCallback, useEffect} from 'react'
@@ -7,6 +7,10 @@ import {action, runInAction} from 'mobx'
 import {treeStore} from '../store/tree'
 import {ReactEditor} from 'slate-react'
 import {clearAllCodeCache, codeCache} from '../editor/plugins/useHighlight'
+import {useLocalState} from '../hooks/useLocalState'
+import {message$} from '../utils'
+import {existsSync, mkdirSync, statSync} from 'fs'
+import {join} from 'path'
 
 function Help(props: {
   text: string | ReactNode
@@ -28,6 +32,7 @@ export const Set = observer(() => {
         ReactEditor.blur(t.store.editor)
       }
     }
+    setState({imagesFolder: configStore.config.imagesFolder})
     const esc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         close()
@@ -39,19 +44,9 @@ export const Set = observer(() => {
       window.removeEventListener('keydown', esc)
     }
   }, [configStore.visible])
-
-  const clearCache = useCallback((schema: any[]) => {
-    const stack = schema.slice()
-    while (stack.length) {
-      const item = stack.pop()
-      if (['blockquote', 'list', 'list-item'].includes(item.type) && item.children) {
-        stack.push(...item.children)
-      }
-      if (item.type === 'code') {
-        codeCache.delete(item)
-      }
-    }
-  }, [])
+  const [state, setState] = useLocalState({
+    imagesFolder: ''
+  })
 
   const [modal, context] = Modal.useModal()
   if (!configStore.visible) return null
@@ -199,6 +194,54 @@ export const Set = observer(() => {
               <div>
                 <Checkbox checked={configStore.config.renameFileWhenSaving}
                           onChange={e => configStore.setConfig('renameFileWhenSaving', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
+                <span className={'mr-1'}>{configStore.zh ? '图片存储文件夹' : 'Image storage folder'}</span>
+                <Help text={
+                  configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置' :
+                    'Save location for pasting images when opening a folder'
+                }/>
+              </div>
+              <div>
+                <Space.Compact style={{ width: '100%' }}>
+                  <Input placeholder={'folder name'} value={state.imagesFolder} onChange={e => setState({imagesFolder: e.target.value})} />
+                  <Button
+                    type="primary"
+                    onClick={() => {
+                      if (!/^\.?[\w\u4e00-\u9fa5@#*$!]+$/.test(state.imagesFolder)) {
+                        message$.next({
+                          type: 'warning',
+                          content: configStore.zh ? '请输入正确文件夹名称' : 'Please enter the correct folder name'
+                        })
+                      }
+                      if (treeStore.root) {
+                        const path = join(treeStore.root.filePath, state.imagesFolder)
+                        if (existsSync(path)) {
+                          if (!statSync(path).isDirectory()) {
+                            message$.next({
+                              type: 'warning',
+                              content: configStore.zh ? '该文件名已存在' : 'The file name already exists'
+                            })
+                          } else {
+                            treeStore.watcher.onChange('update', path)
+                          }
+                        } else {
+                          mkdirSync(path)
+                          treeStore.watcher.onChange('update', path)
+                        }
+                      }
+                      configStore.setConfig('imagesFolder', state.imagesFolder)
+                      message$.next({
+                        type: 'success',
+                        content: configStore.zh ? '设置成功' : 'Set successfully'
+                      })
+                    }}
+                  >
+                    {configStore.zh ? '保存' : 'Save'}
+                  </Button>
+                </Space.Compact>
               </div>
             </div>
             <div className={'flex justify-between items-center py-3'}>

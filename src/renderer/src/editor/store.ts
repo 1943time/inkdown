@@ -13,6 +13,7 @@ import {MainApi} from '../api/main'
 import {clearCodeCache} from './plugins/useHighlight'
 import {withMarkdown} from './plugins'
 import {withHistory} from 'slate-history'
+import {configStore} from '../store/config'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -254,17 +255,16 @@ export class EditorStore {
     const p = parse(file.name)
     const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
     if (treeStore.root) {
-      const imageDir = join(treeStore.root!.filePath, '.images')
+      const imageDir = join(treeStore.root!.filePath, configStore.config.imagesFolder)
       if (!existsSync(imageDir)) {
         mkdirSync(imageDir)
-        await MainApi.mkdirp(imageDir)
         treeStore.watcher.onChange('update', imageDir)
       }
       targetPath = join(imageDir, base)
       mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
     } else {
       const path = await MainApi.getCachePath()
-      const imageDir = join(path, 'images')
+      const imageDir = join(path, configStore.config.imagesFolder)
       if (!existsSync(imageDir)) mkdirSync(imageDir)
       targetPath = join(imageDir, base)
       mediaUrl = targetPath

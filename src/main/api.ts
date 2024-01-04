@@ -92,6 +92,7 @@ export const registerApi = () => {
       autoDownload: !!config.autoDownload,
       dark: dark,
       spellCheck: !!config.spellCheck,
+      imagesFolder: config.imagesFolder || '.images',
       codeLineNumber: !!config.codeLineNumber,
       codeTabSize: config.codeTabSize || 4,
       codeTheme: config.codeTheme || 'material-theme-palenight',

@@ -3,6 +3,7 @@ import {readdirSync, statSync} from 'fs'
 import {basename, extname, join, parse} from 'path'
 import {observable} from 'mobx'
 import {nanoid} from 'nanoid'
+import {configStore} from './config'
 
 export const defineParent = (node: IFileItem, parent: IFileItem) => {
   Object.defineProperty(node, 'parent', {
@@ -51,7 +52,7 @@ const readDir = (path: string, parent: IFileItem) => {
   const files = readdirSync(path)
   let tree: IFileItem[] = []
   for (let f of files) {
-    if (f.startsWith('.') && f !== '.images') continue
+    if (f.startsWith('.') && f !== configStore.config.imagesFolder && f !== '.images') continue
     const filePath = join(path, f)
     const s = statSync(filePath)
     if (s.isDirectory()) {
