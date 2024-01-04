@@ -307,6 +307,7 @@ export class MenuKey {
           const markdownCode = window.api.getClipboardText()
           if (markdownCode) {
             parserMdToSchema([markdownCode]).then(([schema]) => {
+              if (!schema.length) return
               if (configStore.config.autoDownload) {
                 const stack = schema.slice()
                 while (stack.length) {
@@ -319,7 +320,11 @@ export class MenuKey {
                   }
                 }
               }
-              if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+              if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
+                Transforms.delete(editor, {at: node[1]})
+                Transforms.insertNodes(editor, schema, {at: node[1]})
+                return
+              } else if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
                 const first = schema.shift()
                 Editor.insertNode(editor, first.children)
               }
