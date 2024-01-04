@@ -24,6 +24,7 @@ import {configStore} from '../../store/config'
 import {useSubject} from '../../hooks/subscribe'
 import {ReactEditor} from 'slate-react'
 import {getSelRect} from '../utils/dom'
+import isHotkey from 'is-hotkey'
 
 const tools = [
   {type: 'bold', icon: <BoldOutlined/>},
@@ -272,6 +273,10 @@ export const FloatBar = observer(() => {
                 setTimeout(getAnchors)
               } else if (state.anchors.length && !state.url?.includes('#')) {
                 setState({anchors: []})
+              }
+              if (isHotkey('esc', e) && store.editor.selection) {
+                EditorUtils.moveAfterSpace(store.editor, store.editor.selection.anchor.path)
+                ReactEditor.focus(store.editor)
               }
             }}
             onSearch={e => {

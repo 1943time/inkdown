@@ -188,6 +188,14 @@ export const MediaAttr = observer(() => {
     if (e.key === 'Enter') {
       save()
     }
+    if (isHotkey('backspace', e) && nodeRef.current) {
+      e.preventDefault()
+      EditorUtils.moveBeforeSpace(store.editor, nodeRef.current[1])
+      Transforms.delete(store.editor, {at: nodeRef.current[1]})
+      close()
+      window.removeEventListener('keydown', keyboard)
+      ReactEditor.focus(store.editor)
+    }
   }, [])
 
   useEffect(() => {
