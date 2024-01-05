@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
-import {Editor, Node, Range, Transforms} from 'slate'
+import {Editor, Element, Node, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {clearAllCodeCache, codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -270,6 +270,16 @@ export const MEditor = observer(({note}: {
         store.insertFile(file)
       }
       return
+    }
+    if (text) {
+      const [node] = Editor.nodes<Element>(editor, {
+        match: n => Element.isElement(n) && n.type === 'code'
+      })
+      if (node) {
+        Transforms.insertFragment(editor, text.split('\n').map(c => {
+          return {type: 'code-line', children: [{text: c.replace(/\t/g, configStore.tab)}]}
+        }))
+      }
     }
     let paste = e.clipboardData.getData('text/html')
     if (paste && htmlParser(editor, paste)) {

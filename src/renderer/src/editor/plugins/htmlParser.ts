@@ -204,7 +204,7 @@ export const htmlParser = (editor: Editor, html: string) => {
         let text = parserCodeText(parsed)
         if (text) {
           Transforms.insertFragment(editor, text.split('\n').map(c => {
-            return {type: 'code-line', children: [{text: c}]}
+            return {type: 'code-line', children: [{text: c.replace(/\t/g, configStore.tab)}]}
           }))
         }
         return true
