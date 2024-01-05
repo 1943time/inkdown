@@ -44,6 +44,7 @@ const parseTable = (table: Table) => {
             type: 'table-cell',
             align: aligns?.[i] || undefined,
             title: l === 0,
+            // @ts-ignore
             children: c.children?.length ? parserBlock(c.children, false, c) : [{text: ''}]
           }
         })
@@ -53,6 +54,7 @@ const parseTable = (table: Table) => {
   return node
 }
 const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
+  if (!nodes?.length) return [{type: 'paragraph', children: [{text: ''}]}]
   let els:(Elements | Text) [] = []
   let el:Element | null | Element[] = null
   let preNode:null | Content = null
@@ -218,7 +220,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         }
         break
       case 'blockquote':
-        el = {type: 'blockquote', children: parserBlock(n.children, false, n)}
+        el = {type: 'blockquote', children: n.children?.length ? parserBlock(n.children, false, n) : [{type: 'paragraph', children: [{text: ''}]}]}
         break
       case 'table':
         el = parseTable(n)
@@ -251,6 +253,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           }
         } else if (n.type === 'break') {
           el = {text: '\n'}
+        } else {
+          el = {text: ''}
         }
     }
 

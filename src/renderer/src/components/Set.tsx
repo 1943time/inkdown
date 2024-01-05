@@ -224,6 +224,7 @@ export const Set = observer(() => {
                               type: 'warning',
                               content: configStore.zh ? '该文件名已存在' : 'The file name already exists'
                             })
+                            return
                           } else {
                             treeStore.watcher.onChange('update', path)
                           }
