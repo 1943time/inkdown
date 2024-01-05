@@ -430,7 +430,7 @@ export class TreeStore {
         file.mode = undefined
         file.children = file.folder ? [] : undefined
         file.filePath = path
-        file.filename = parse(path).name
+        file.filename = file.editName
         file.editName = undefined
         file.copyItem = undefined
         if (!file.folder) this.openNote(file)
