@@ -279,6 +279,9 @@ export const MEditor = observer(({note}: {
         Transforms.insertFragment(editor, text.split('\n').map(c => {
           return {type: 'code-line', children: [{text: c.replace(/\t/g, configStore.tab)}]}
         }))
+        e.stopPropagation()
+        e.preventDefault()
+        return
       }
     }
     let paste = e.clipboardData.getData('text/html')
