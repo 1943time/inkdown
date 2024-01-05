@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, Slate} from 'slate-react'
-import {Editor, Range, Transforms} from 'slate'
+import {Editor, Node, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {clearAllCodeCache, codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -181,6 +181,16 @@ export const MEditor = observer(({note}: {
     if (path === note?.filePath) {
       first.current = true
       EditorUtils.reset(editor, note.schema)
+      if (note.sel) {
+        try {
+          if (Editor.hasPath(editor, note.sel.anchor.path)) {
+            const node = Node.get(editor, note.sel.anchor.path)
+            if (node?.text && node.text?.length >= note.sel.anchor.offset) {
+              Transforms.select(editor, note.sel)
+            }
+          }
+        } catch (e) {}
+      }
     }
   }, [note])
 
