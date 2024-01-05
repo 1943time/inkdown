@@ -11,8 +11,8 @@ import ArrowRight from '../../icons/ArrowRight'
 const getClass = (c: IFileItem) => {
   if (c.mode) return ''
   if (treeStore.dropNode === c) return 'bg-sky-500/10'
-  if (treeStore.openedNote === c) return 'dark:bg-gray-200/5 bg-gray-300/50'
-  return 'dark:hover:bg-gray-400/5 hover:bg-gray-400/10'
+  if (treeStore.openedNote === c) return 'dark:bg-gray-400/10 bg-gray-300/50'
+  return 'dark:hover:bg-gray-600/10 hover:bg-gray-300/30'
 }
 
 export const TreeRender = observer(() => {
@@ -76,7 +76,7 @@ const Item = observer((
         className={`rounded ${getClass(item)}`}
       >
         <div
-          className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-700' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+          className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-700 font-semibold' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
               flex items-center text-sm space-x-1 cursor-default select-none h-7 px-2 mb-0.5
               `}
           draggable={!item.mode}
