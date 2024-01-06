@@ -639,6 +639,9 @@ export class TreeStore {
       }
     }
     node.parent!.children = node.parent!.children!.filter(c => c !== node)
+    if (!this.openedNote || this.openedNote.ext !== '.md') {
+      this.currentTab.store.editor.selection = null
+    }
   }
 }
 
