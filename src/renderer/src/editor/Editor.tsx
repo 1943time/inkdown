@@ -33,7 +33,6 @@ export const MEditor = observer(({note}: {
   })
   const saveFile = useRef<File>()
   const store = useEditorStore()
-  const inCode = useRef(false)
   const changedMark = useRef(false)
   const editor = store.editor
   const value = useRef<any[]>([EditorUtils.p])
@@ -212,13 +211,6 @@ export const MEditor = observer(({note}: {
       window.electron.ipcRenderer.removeListener('save-doc', save)
     }
   }, [])
-  useEffect(() => {
-    const [node] = Editor.nodes(store.editor, {
-      match: n => n.type === 'code',
-      mode: 'highest'
-    })
-    inCode.current = !!node
-  }, [store.sel])
 
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const dragNode = treeStore.dragNode

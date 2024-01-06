@@ -6,7 +6,7 @@ import {basename, join, parse, sep} from 'path'
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
-import {message$, modal$, stat} from '../utils'
+import {message$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
@@ -16,9 +16,8 @@ import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
-import {BaseSelection} from 'slate'
-import {mix} from 'framer-motion'
 import isHotkey from 'is-hotkey'
+import {EditorUtils} from '../editor/utils/editorUtils'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -269,7 +268,7 @@ export class TreeStore {
     if (file?.ext !== 'md' && file?.ext !== 'markdown') return
     if (file.schema) return file
     const [schema] = await parserMdToSchema([readFileSync(file.filePath, {encoding: 'utf-8'})])
-    file.schema = schema
+    file.schema = schema?.length ? schema : [EditorUtils.p]
     return file
   }
 
@@ -294,7 +293,6 @@ export class TreeStore {
 
   openNote(file: string | IFileItem, scroll = true) {
     const filePath = typeof file === 'string' ? file : file.filePath
-    document.title = this.root ? `${basename(this.root.filePath)}-${basename(filePath)}` : basename(filePath)
     if (this.currentTab.current?.filePath === filePath) return
     this.checkOtherTabsShouldUpdate()
     if (this.root && filePath.startsWith(this.root.filePath)) {
@@ -461,7 +459,7 @@ export class TreeStore {
         } else {
           if (file.mode === 'copy') {
             appendFileSync(path, readFileSync(file.copyItem!.filePath, {encoding: 'utf-8'}), {encoding: 'utf-8'})
-            file.schema = file.copyItem?.schema || []
+            file.schema = file.copyItem?.schema || [EditorUtils.p]
           } else {
             appendFileSync(path, '', {encoding: 'utf-8'})
           }
