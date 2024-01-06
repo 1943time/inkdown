@@ -182,6 +182,7 @@ export const registerMenus = () => {
       temp.add({type: 'separator'})
       temp.add({
         label: zh ? '移到废纸篓' : 'Move to Trash',
+        accelerator: `${cmd}+backspace`,
         click: () => sendCommand('delete')
       })
     }

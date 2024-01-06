@@ -24,7 +24,8 @@ class ConfigStore {
     spellCheck: false,
     autoRebuild: true,
     renameFileWhenSaving: false,
-    showFloatBar: true
+    showFloatBar: true,
+    showRemoveFileDialog: true
   }
   timer = 0
   deviceId = ''

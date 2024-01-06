@@ -11,6 +11,7 @@ import ArrowRight from '../../icons/ArrowRight'
 const getClass = (c: IFileItem) => {
   if (c.mode) return ''
   if (treeStore.dropNode === c) return 'bg-sky-500/10'
+  if (treeStore.selectItem === c) return 'dark:bg-sky-500/10 bg-sky-500/20'
   if (treeStore.openedNote === c) return 'dark:bg-gray-400/10 bg-gray-300/50'
   return 'dark:hover:bg-gray-600/10 hover:bg-gray-300/30'
 }
@@ -73,6 +74,7 @@ const Item = observer((
         style={{
           paddingLeft: level * 15,
         }}
+        data-el={'file-item'}
         className={`rounded ${getClass(item)}`}
       >
         <div
@@ -109,6 +111,8 @@ const Item = observer((
             }
           }}
           onClick={action((e) => {
+            e.stopPropagation()
+            treeStore.selectItem = item
             if (!item.folder) {
               if (e.metaKey || e.ctrlKey) {
                 treeStore.appendTab(item)

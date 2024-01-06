@@ -13,6 +13,7 @@ import {History} from './History'
 import {useSystemMenus} from '../hooks/menu'
 import {Tabs} from './Tabs'
 import {isWindows} from '../utils'
+import {RemoveFileConfirm} from './RemoveFileConfirm'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -37,7 +38,6 @@ export const Home = observer(() => {
   useEffect(() => {
     window.electron.ipcRenderer.send('open-file', treeStore.openedNote && treeStore.openedNote.ext === 'md')
   }, [treeStore.openedNote])
-
   return (
     <div className={`flex h-screen overflow-hidden ${isWindows ? 'win' : ''}`}>
       <Tree/>
@@ -63,6 +63,7 @@ export const Home = observer(() => {
       <Set/>
       <QuickOpen/>
       <History/>
+      <RemoveFileConfirm/>
     </div>
   )
 })

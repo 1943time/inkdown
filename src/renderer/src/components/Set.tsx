@@ -172,6 +172,15 @@ export const Set = observer(() => {
             </div>
             <div className={'flex justify-between items-center py-3'}>
               <div className={'text-sm'}>
+                {configStore.zh ? '删除文件确认' : 'Delete file confirmation'}
+              </div>
+              <div>
+                <Checkbox checked={configStore.config.showRemoveFileDialog}
+                          onChange={e => configStore.setConfig('showRemoveFileDialog', e.target.checked)}/>
+              </div>
+            </div>
+            <div className={'flex justify-between items-center py-3'}>
+              <div className={'text-sm'}>
                 <span className={'mr-1'}>{configStore.zh ? '显示浮动栏' : 'Show floating bar'}</span>
                 <Help text={
                   configStore.zh ? '选中文字不再显示浮动栏，仍然可以可以使用"格式"菜单中的快捷键操作文字格式，或使用Markdown语法转换' :
@@ -205,8 +214,9 @@ export const Set = observer(() => {
                 }/>
               </div>
               <div>
-                <Space.Compact style={{ width: '100%' }}>
-                  <Input placeholder={'folder name'} value={state.imagesFolder} onChange={e => setState({imagesFolder: e.target.value})} />
+                <Space.Compact style={{width: '100%'}}>
+                  <Input placeholder={'folder name'} value={state.imagesFolder}
+                         onChange={e => setState({imagesFolder: e.target.value})}/>
                   <Button
                     type="primary"
                     onClick={() => {

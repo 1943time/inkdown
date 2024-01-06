@@ -66,11 +66,11 @@ html{
 
 .modal-panel{
   @extend .modal-border;
-  @apply dark:bg-zinc-900 bg-white rounded-lg border shadow-lg shadow-gray-300/30 dark:shadow-gray-600/5;
+  @apply dark:bg-zinc-900 bg-white rounded-lg border shadow-lg shadow-gray-400/30 dark:shadow-gray-600/5;
 }
 
 .modal-border{
-  @apply dark:border-gray-200/20 border-gray-300/80;
+  @apply dark:border-gray-200/20 border-gray-300;
 }
 
 .float-bar-icon{

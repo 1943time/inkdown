@@ -6,7 +6,7 @@ import {basename, join, parse, sep} from 'path'
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
-import {message$, stat} from '../utils'
+import {message$, modal$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
@@ -17,6 +17,8 @@ import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import {BaseSelection} from 'slate'
+import {mix} from 'framer-motion'
+import isHotkey from 'is-hotkey'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -25,6 +27,7 @@ export class TreeStore {
   dragNode: IFileItem | null = null
   dropNode: IFileItem | null = null
   tabs: Tab[] = []
+  selectItem: IFileItem | null = null
   searchKeyWord = ''
   currentIndex = 0
   width = 260
@@ -91,6 +94,23 @@ export class TreeStore {
         height: window.innerHeight
       }
     }))
+    window.addEventListener('click', e => {
+      if (this.selectItem) {
+        runInAction(() => {
+          this.selectItem = null
+        })
+      }
+    })
+    window.addEventListener('keydown', e => {
+      if (this.selectItem && isHotkey('enter', e)) {
+        const item = this.selectItem
+        runInAction(() => {
+          item.mode = 'edit'
+          item.editName = item.filename
+          this.selectItem = null
+        })
+      }
+    })
     this.tabs.push(this.createTab())
     new MenuKey(this)
     window.electron.ipcRenderer.on('copy-source-code', (e, filePath?: string) => {
@@ -112,75 +132,92 @@ export class TreeStore {
       filePath: string
       command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder' | 'newCopy'
     }) => {
-      runInAction(() => {
-        const {filePath, type} = params
-        switch (params.command) {
-          case 'createNote':
-            let addNote = createFileNode({
-              folder: false,
-              editName: 'untitled',
-              parent: this.ctxNode || this.root,
-              mode: 'create',
-              filePath: ''
-            })
-            if (!this.ctxNode) {
-              this.root.children!.unshift(addNote)
-            } else {
-              this.ctxNode.children!.unshift(addNote)
-            }
-            addNote.parent!.expand = true
-            break
-          case 'createFolder':
-            const addFolder = createFileNode({
-              folder: true,
-              parent: this.ctxNode || this.root,
-              mode: 'create',
-              filePath: ''
-            })
-            if (!this.ctxNode) {
-              this.root.children!.unshift(addFolder)
-            } else {
-              this.ctxNode.children!.unshift(addFolder)
-            }
-            break
-          case 'rename':
-            if (this.ctxNode) {
-              this.ctxNode.mode = 'edit'
-              this.ctxNode.editName = this.ctxNode.filename
-            }
-            break
-          case 'openInNewTab':
-            if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
-            break
-          case 'newCopy':
-            if (this.ctxNode && !this.ctxNode.folder) {
-              let addNote = createFileNode({
-                folder: false,
-                editName: `${this.ctxNode.filename}_copy`,
-                parent: this.ctxNode.parent,
-                mode: 'copy',
-                copyItem: this.ctxNode,
-                filePath: ''
-              })
-              this.ctxNode.parent?.children!.unshift(addNote)
-              addNote.parent!.expand = true
-            }
-            break
-          case 'shareFolder':
-            if (this.ctxNode?.filePath || params.type === 'rootFolder') {
-              this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
-            }
-            break
-          case 'delete':
-            if (filePath && this.ctxNode) {
-              this.removeSelf(this.ctxNode)
-              MainApi.moveToTrash(filePath)
-              db.history.where('filePath').equals(filePath).delete()
-            }
-            break
-        }
-      })
+      this.command(params)
     })
+  }
+
+  command(params: {
+    type?: 'rootFolder' | 'file' | 'folder'
+    filePath: string
+    command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder' | 'newCopy'
+  }) {
+    const {filePath} = params
+    switch (params.command) {
+      case 'createNote':
+        let addNote = createFileNode({
+          folder: false,
+          editName: 'untitled',
+          parent: this.ctxNode || this.root,
+          mode: 'create',
+          filePath: ''
+        })
+        if (!this.ctxNode) {
+          this.root.children!.unshift(addNote)
+        } else {
+          this.ctxNode.children!.unshift(addNote)
+        }
+        addNote.parent!.expand = true
+        break
+      case 'createFolder':
+        const addFolder = createFileNode({
+          folder: true,
+          parent: this.ctxNode || this.root,
+          mode: 'create',
+          filePath: ''
+        })
+        if (!this.ctxNode) {
+          this.root.children!.unshift(addFolder)
+        } else {
+          this.ctxNode.children!.unshift(addFolder)
+        }
+        break
+      case 'rename':
+        if (this.ctxNode) {
+          this.ctxNode.mode = 'edit'
+          this.ctxNode.editName = this.ctxNode.filename
+        }
+        break
+      case 'openInNewTab':
+        if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
+        break
+      case 'newCopy':
+        if (this.ctxNode && !this.ctxNode.folder) {
+          let addNote = createFileNode({
+            folder: false,
+            editName: `${this.ctxNode.filename}_copy`,
+            parent: this.ctxNode.parent,
+            mode: 'copy',
+            copyItem: this.ctxNode,
+            filePath: ''
+          })
+          this.ctxNode.parent?.children!.unshift(addNote)
+          addNote.parent!.expand = true
+        }
+        break
+      case 'shareFolder':
+        if (this.ctxNode?.filePath || params.type === 'rootFolder') {
+          this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
+        }
+        break
+      case 'delete':
+        if (filePath && this.ctxNode) {
+          this.moveToTrash(this.ctxNode)
+        }
+        break
+    }
+  }
+  moveToTrash(item: IFileItem, force = false) {
+    if (item) {
+      if (configStore.config.showRemoveFileDialog && !force) {
+        MainApi.sendToSelf('showRemoveFileDialog')
+      } else {
+        this.removeSelf(item)
+        MainApi.moveToTrash(item.filePath)
+        if (!item.folder) db.history.where('filePath').equals(item.filePath).delete()
+        if (this.selectItem) this.selectItem = null
+        if (this.ctxNode) this.ctxNode = null
+      }
+    }
   }
 
   getFileMap(root = false) {
@@ -324,6 +361,7 @@ export class TreeStore {
     this.watcher.openDirCheck()
     this.parseFolder()
   }
+
   openFirst() {
     if (!treeStore.currentTab.current || this.tabs.length === 1) {
       const first = this.firstNote
@@ -333,9 +371,10 @@ export class TreeStore {
       }
     }
   }
+
   async parseFolder() {
-    const queue:IFileItem[] = []
-    const stack:IFileItem[] = this.root.children!.slice()
+    const queue: IFileItem[] = []
+    const stack: IFileItem[] = this.root.children!.slice()
     while (stack.length) {
       const item = stack.shift()!
       if (item.folder) {
@@ -353,6 +392,7 @@ export class TreeStore {
       if (!f.schema) f.schema = schemas[i]
     })
   }
+
   recordTabs() {
     MainApi.setWin({
       openTabs: this.tabs.filter(t => !!t.current).map(t => t.current!.filePath),
@@ -463,6 +503,7 @@ export class TreeStore {
       }
     }
   }
+
   checkOtherTabsShouldUpdate() {
     if (this.currentTab.current?.ext === 'md' && this.tabs.length > 1) {
       const path = this.currentTab.current?.filePath
@@ -473,6 +514,7 @@ export class TreeStore {
       })
     }
   }
+
   selectTab(i: number) {
     this.checkOtherTabsShouldUpdate()
     this.currentTab.store.saveDoc$.next(null)
@@ -513,11 +555,11 @@ export class TreeStore {
     let updateFiles: IFileItem[] = []
     if (stat.isDirectory()) {
       const changeFiles = this.refactorFolder(oldPath, targetPath)
-      updateFiles  = await refactor(changeFiles, this.root?.children || [])
+      updateFiles = await refactor(changeFiles, this.root?.children || [])
     } else {
       updateFiles = await refactor([[oldPath, targetPath]], this.root?.children || [])
     }
-    const filesStr:string[] = []
+    const filesStr: string[] = []
     for (let f of updateFiles) {
       filesStr.push(await window.api.fs.readFile(f.filePath, {encoding: 'utf-8'}))
     }
