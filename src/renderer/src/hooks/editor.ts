@@ -15,12 +15,16 @@ export const useMEditor = (el: BaseElement) => {
   }, [editor, el])
 
   const remove = useCallback((current?: BaseElement) => {
-    const path = ReactEditor.findPath(editor, current || el)
-    Transforms.delete(editor, {at: path})
-    if (Path.equals([0], path) && !Editor.hasPath(editor, Path.next(path))) {
-      const dom = ReactEditor.toDOMNode(editor, editor)
-      dom.focus()
-      Transforms.insertNodes(editor, {type: 'paragraph', children: [{text: ''}]}, {select: true})
+    try {
+      const path = ReactEditor.findPath(editor, current || el)
+      Transforms.delete(editor, {at: path})
+      if (Path.equals([0], path) && !Editor.hasPath(editor, Path.next(path))) {
+        const dom = ReactEditor.toDOMNode(editor, editor)
+        dom.focus()
+        Transforms.insertNodes(editor, {type: 'paragraph', children: [{text: ''}]}, {select: true})
+      }
+    } catch (e) {
+      console.error('remove note', e)
     }
   }, [editor, el])
 

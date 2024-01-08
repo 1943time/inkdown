@@ -78,22 +78,26 @@ export const MediaAttr = observer(() => {
       setState({visible: false})
       return
     }
-    const dom = ReactEditor.toDOMNode(store.editor, node[0]) as HTMLElement
-    let width = dom.clientWidth < 400 ? 400 : dom.clientWidth
-    if (dom) {
-      let top = store.offsetTop(dom)
-      if (treeStore.tabs.length > 1) top += 32
-      let left = getOffsetLeft(dom)
-      if (!treeStore.fold) left -= treeStore.width
-      if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 20
-      setState({
-        top: top - 32, left, width, visible: true
-      })
-      if (!nodeRef.current?.[0].url) {
-        setTimeout(() => {
-          domRef.current?.querySelector('input')?.select()
-        }, 30)
+    try {
+      const dom = ReactEditor.toDOMNode(store.editor, node[0]) as HTMLElement
+      let width = dom.clientWidth < 400 ? 400 : dom.clientWidth
+      if (dom) {
+        let top = store.offsetTop(dom)
+        if (treeStore.tabs.length > 1) top += 32
+        let left = getOffsetLeft(dom)
+        if (!treeStore.fold) left -= treeStore.width
+        if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 20
+        setState({
+          top: top - 32, left, width, visible: true
+        })
+        if (!nodeRef.current?.[0].url) {
+          setTimeout(() => {
+            domRef.current?.querySelector('input')?.select()
+          }, 30)
+        }
       }
+    } catch (e) {
+      console.error('media resize', e)
     }
   }, [])
 

@@ -358,26 +358,30 @@ export const LangAutocomplete = observer(() => {
   })
   useEffect(() => {
     if (store.openLangCompletion) {
-      const [node] = Editor.nodes<any>(store.editor, {
-        match: n => Element.isElement(n),
-        mode: 'lowest'
-      })
-      path.current = node[1]
-      window.addEventListener('keydown', keydown)
-      if (node[0].type === 'paragraph') {
-        const el = ReactEditor.toDOMNode(store.editor, node[0])
-        if (el) {
-          let top = getOffsetTop(el, store.container!)
-          if (store.container!.scrollTop + window.innerHeight - 186 < top) {
-            store.container!.scroll({
-              top: top - 100
+      try {
+        const [node] = Editor.nodes<any>(store.editor, {
+          match: n => Element.isElement(n),
+          mode: 'lowest'
+        })
+        path.current = node[1]
+        if (node[0].type === 'paragraph') {
+          const el = ReactEditor.toDOMNode(store.editor, node[0])
+          if (el) {
+            let top = getOffsetTop(el, store.container!)
+            if (store.container!.scrollTop + window.innerHeight - 186 < top) {
+              store.container!.scroll({
+                top: top - 100
+              })
+            }
+            setState({
+              left: getOffsetLeft(el, store.container!),
+              top: top + el.clientHeight
             })
           }
-          setState({
-            left: getOffsetLeft(el, store.container!),
-            top: top + el.clientHeight
-          })
         }
+        window.addEventListener('keydown', keydown)
+      } catch (e) {
+        console.error('openLangCompletion', e)
       }
     } else {
       window.removeEventListener('keydown', keydown)

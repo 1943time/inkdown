@@ -310,16 +310,20 @@ export class EditorStore {
   }
 
   private toPoint() {
-    const cur = this.searchRanges[this.search.currentIndex]
-    if (!cur) return
-    const node = Node.get(this.editor, Path.parent(cur.focus.path))
-    const dom = ReactEditor.toDOMNode(this.editor, node)
-    if (dom) {
-      const top = this.offsetTop(dom)
-      if (top > this.container!.scrollTop && top < this.container!.scrollTop + window.innerHeight) return
-      this.container!.scroll({
-        top: top - 100
-      })
+    try {
+      const cur = this.searchRanges[this.search.currentIndex]
+      if (!cur) return
+      const node = Node.get(this.editor, Path.parent(cur.focus.path))
+      const dom = ReactEditor.toDOMNode(this.editor, node)
+      if (dom) {
+        const top = this.offsetTop(dom)
+        if (top > this.container!.scrollTop && top < this.container!.scrollTop + window.innerHeight) return
+        this.container!.scroll({
+          top: top - 100
+        })
+      }
+    } catch (e) {
+      console.error('toPoint', e)
     }
   }
   private toPath(el: HTMLElement) {

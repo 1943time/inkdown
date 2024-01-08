@@ -41,19 +41,23 @@ export const TableAttr = observer(() => {
   const resize = useCallback(() => {
     const table = tableRef.current
     if (!table) return
-    const dom = ReactEditor.toDOMNode(editor, table[0]) as HTMLElement
-    if (dom) {
-      let top = store.offsetTop(dom)
-      if (treeStore.tabs.length > 1) top += 32
-      let left = getOffsetLeft(dom)
-      if (!treeStore.fold) left -= treeStore.width
-      setState({
-        rows: table[0].children.length,
-        cols: table[0].children[0].children.length,
-        top: top - 24, left,
-        width: dom.clientWidth
-      })
-    }
+    setTimeout(() => {
+      try {
+        const dom = ReactEditor.toDOMNode(editor, table[0]) as HTMLElement
+        if (dom) {
+          let top = store.offsetTop(dom)
+          if (treeStore.tabs.length > 1) top += 32
+          let left = getOffsetLeft(dom)
+          if (!treeStore.fold) left -= treeStore.width
+          setState({
+            rows: table[0].children.length,
+            cols: table[0].children[0].children.length,
+            top: top - 24, left,
+            width: dom.clientWidth
+          })
+        }
+      } catch (e) {console.log('err', e)}
+    }, 30)
   }, [])
 
   useEffect(() => {
