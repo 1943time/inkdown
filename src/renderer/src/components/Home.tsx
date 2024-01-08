@@ -13,7 +13,7 @@ import {History} from './History'
 import {useSystemMenus} from '../hooks/menu'
 import {Tabs} from './Tabs'
 import {isWindows} from '../utils'
-import {RemoveFileConfirm} from './RemoveFileConfirm'
+import {ConfirmDialog} from './ConfirmDialog'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -63,7 +63,7 @@ export const Home = observer(() => {
       <Set/>
       <QuickOpen/>
       <History/>
-      <RemoveFileConfirm/>
+      <ConfirmDialog/>
     </div>
   )
 })

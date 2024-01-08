@@ -9,11 +9,12 @@ import {MainApi} from '../../api/main'
 import {EBook} from '../../server/ui/Ebook'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useSubject} from '../../hooks/subscribe'
+import {action} from 'mobx'
 
 export const Tree = observer(() => {
   const context = useCallback(() => {
     treeStore.setState({ctxNode: null})
-    MainApi.openTreeContextMenu({type: 'rootFolder'})
+    MainApi.openTreeContextMenu({type: 'rootFolder', filePath: treeStore.root?.filePath})
   }, [])
   const [state, setState] = useLocalState({
     openShareFolder: false,
@@ -33,6 +34,10 @@ export const Tree = observer(() => {
           <div
             className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'} pb-10 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
             onContextMenu={context}
+            onClick={action((e) => {
+              e.stopPropagation()
+              treeStore.selectItem = treeStore.root
+            })}
             onDragOver={e => {
               if (treeStore.dragNode) {
                 e.preventDefault()

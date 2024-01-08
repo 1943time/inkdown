@@ -186,6 +186,12 @@ export const registerMenus = () => {
         click: () => sendCommand('delete')
       })
     }
+    if (params.type === 'rootFolder') {
+      temp.add({
+        label: zh ? '在Finder中显示' : 'Reveal in Finder',
+        click: () => shell.showItemInFolder(params.filePath!)
+      })
+    }
     const menu = Menu.buildFromTemplate(Array.from(temp))
     menu.popup({
       window: BrowserWindow.fromWebContents(e.sender)!

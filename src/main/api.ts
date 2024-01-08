@@ -154,9 +154,6 @@ export const registerApi = () => {
   ipcMain.handle('message-dialog', async (e, options: Parameters<typeof dialog['showMessageBoxSync']>[0]) => {
     return dialog.showMessageBoxSync(options)
   })
-  ipcMain.handle('copy-file', (e, filePath: string) => {
-    clipboard.writeBuffer('public.file-url', Buffer.from(`file://${encodeURI(filePath)}`, 'utf-8'))
-  })
   ipcMain.on('send-to-self', (e, task: string, ...args) => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.webContents.send(task, ...args)

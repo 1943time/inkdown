@@ -18,10 +18,14 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
+import {cpSync} from 'fs'
+import {openConfirmDialog$} from '../components/ConfirmDialog'
+import {Checkbox} from 'antd'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
+  copyItem: IFileItem | null = null
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
   dropNode: IFileItem | null = null
@@ -101,7 +105,7 @@ export class TreeStore {
       }
     })
     window.addEventListener('keydown', e => {
-      if (this.selectItem && isHotkey('enter', e)) {
+      if (this.selectItem && !this.selectItem.root && isHotkey('enter', e)) {
         const item = this.selectItem
         runInAction(() => {
           item.mode = 'edit'
@@ -109,14 +113,60 @@ export class TreeStore {
           this.selectItem = null
         })
       }
-      if (this.selectItem && isHotkey('mod+c', e) && isMac) {
-        const item = this.selectItem
-        window.electron.ipcRenderer.invoke('copy-file', item.filePath).then(() => {
-          message$.next({
-            type: 'success',
-            content: configStore.zh ? `已复制${item.folder ? '文件夹' : '文件'}` : `${item.folder ? 'Folder' : 'file'} copied`
-          })
-        })
+      if (this.selectItem && isHotkey('mod+backspace', e)) {
+        this.moveToTrash(this.selectItem)
+      }
+      if (isHotkey('mod+c', e)) {
+        if (this.selectItem) {
+          this.copyItem = this.selectItem
+        } else {
+          this.copyItem = null
+        }
+      }
+      if (isHotkey('mod+v', e) && this.copyItem) {
+        const copyItem = this.copyItem
+        if (this.selectItem) {
+          const folder = this.selectItem.folder ? this.selectItem : this.selectItem.parent
+          if (folder && folder.filePath !== copyItem.parent?.filePath) {
+            const targetPath = join(folder.filePath, this.copyItem.filename + `${this.copyItem.ext ? '.' + this.copyItem.ext : ''}`)
+            if (folder.children?.some(c => c.filename === copyItem.filename && (!!c.folder === !!copyItem.folder))) {
+              openConfirmDialog$.next({
+                title: configStore.zh ? `该${copyItem.folder ? '文件夹' : '文件'}已存在，是否覆盖？` : `The ${copyItem.folder ? 'folder' : 'file'} already exists, do you want to overwrite it?`,
+                onConfirm: () => {
+                  this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
+                  try {
+                    const map = this.getFileMap()
+                    if (!copyItem.folder && copyItem.ext === 'md') {
+                      const node = map.get(targetPath)
+                      if (node) {
+                        this.getSchema(node, true)
+                      }
+                    } else if (copyItem.folder) {
+                      const stack = map.get(targetPath)?.children?.slice() || []
+                      while (stack.length) {
+                        const item = stack.pop()!
+                        if (item.folder) {
+                          stack.push(...item.children || [])
+                        } else if (item.ext === 'md') {
+                          this.getSchema(item, true)
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    console.error('paste file', e)
+                  } finally {
+                    this.copyItem = null
+                  }
+                }
+              })
+            } else {
+              this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
+              this.copyItem = null
+            }
+          }
+        } else {
+          this.copyItem = null
+        }
       }
     })
     this.tabs.push(this.createTab())
@@ -143,7 +193,10 @@ export class TreeStore {
       this.command(params)
     })
   }
-
+  private pasteFile(from: string, to: string, folder = false) {
+    cpSync(from, to, {force: true, recursive: folder})
+    this.watcher.onChange('update', to)
+  }
   command(params: {
     type?: 'rootFolder' | 'file' | 'folder'
     filePath: string
@@ -215,9 +268,29 @@ export class TreeStore {
     }
   }
   moveToTrash(item: IFileItem, force = false) {
-    if (item) {
+    if (item && !item.root) {
+      this.selectItem = null
       if (configStore.config.showRemoveFileDialog && !force) {
-        MainApi.sendToSelf('showRemoveFileDialog')
+        let save = false
+        openConfirmDialog$.next({
+          title: configStore.zh ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'` : `Are you sure you want to delete '${item.filename}' ${item.folder ? 'and its contents?' : '?'}`,
+          description: configStore.zh ? '您可以从垃圾箱中恢复此文件。' : 'You can restore this file from the Trash.',
+          onConfirm: () => {
+            treeStore.moveToTrash(item, true)
+            if (save) {
+              configStore.setConfig('showRemoveFileDialog', false)
+            }
+          },
+          okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash',
+          footer: (
+            <Checkbox
+              defaultChecked={save}
+              className={'mt-6'}
+              onChange={e => save = e.target.checked}>
+              {configStore.zh ? '不再询问' : 'Do not ask me again'}
+            </Checkbox>
+          )
+        })
       } else {
         this.removeSelf(item)
         MainApi.moveToTrash(item.filePath)
@@ -273,11 +346,14 @@ export class TreeStore {
     }
   }
 
-  async getSchema(file: IFileItem) {
+  async getSchema(file: IFileItem, force = false) {
     if (file?.ext !== 'md' && file?.ext !== 'markdown') return
-    if (file.schema) return file
+    if (file.schema && !force) return file
     const [schema] = await parserMdToSchema([readFileSync(file.filePath, {encoding: 'utf-8'})])
     file.schema = schema?.length ? schema : [EditorUtils.p]
+    if (force && file === this.openedNote) {
+      this.externalChange$.next(file.filePath)
+    }
     return file
   }
 

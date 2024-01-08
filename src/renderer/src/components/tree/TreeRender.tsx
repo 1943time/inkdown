@@ -19,7 +19,7 @@ const getClass = (c: IFileItem) => {
 export const TreeRender = observer(() => {
   const context = useCallback(() => {
     treeStore.setState({ctxNode: null})
-    MainApi.openTreeContextMenu({type: 'rootFolder'})
+    MainApi.openTreeContextMenu({type: 'rootFolder', filePath: treeStore.root?.filePath})
   }, [])
   return (
     <div
