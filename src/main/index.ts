@@ -190,7 +190,7 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-  if (isWindows) waitOpenFile = process.argv[1] || ''
+  if (process.argv[1]) waitOpenFile = process.argv[1] || ''
   if (waitOpenFile === '.') waitOpenFile = ''
   try {
     const data = store.get('windows') as WinOptions[] || []

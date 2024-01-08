@@ -18,7 +18,6 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
-import {str} from 'ajv'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
