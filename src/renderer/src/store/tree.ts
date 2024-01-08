@@ -595,24 +595,31 @@ export class TreeStore {
   }
 
   appendTab(file?: string | IFileItem) {
-    if (this.tabs.length >= 30) {
-      return message$.next({
-        type: 'warning',
-        content: 'Too many tabs open'
-      })
-    }
-    const tab = this.createTab()
-    this.tabs.push(tab)
-    this.currentIndex = this.tabs.length - 1
-    if (file) {
-      this.openNote(file)
-      this.recordTabs()
-    }
-    requestIdleCallback(() => {
-      document.querySelector('#nav-tabs')?.scroll({
-        left: 10000
-      })
+    const index = this.tabs.findIndex(t => {
+      return t.current === file
     })
+    if (index !== -1) {
+      this.currentIndex = index
+    } else {
+      if (this.tabs.length >= 30) {
+        return message$.next({
+          type: 'warning',
+          content: 'Too many tabs open'
+        })
+      }
+      const tab = this.createTab()
+      this.tabs.push(tab)
+      this.currentIndex = this.tabs.length - 1
+      if (file) {
+        this.openNote(file)
+        this.recordTabs()
+      }
+      requestIdleCallback(() => {
+        document.querySelector('#nav-tabs')?.scroll({
+          left: 10000
+        })
+      })
+    }
   }
 
   removeTab(i: number) {
