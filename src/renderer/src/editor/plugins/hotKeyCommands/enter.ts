@@ -47,19 +47,23 @@ export class EnterKey {
           const end = Range.end(sel)
           const leaf = Node.leaf(this.editor, end.path)
           const dirt = EditorUtils.isDirtLeaf(leaf)
-          if (dirt && end.offset === leaf.text?.length) {
-            if (Editor.hasPath(this.editor, Path.next(end.path))) {
-              Transforms.move(this.editor, {unit: 'offset'})
-            } else {
-              const parent = Editor.parent(this.editor, node[1])
-              if (parent[0].type !== 'list-item' || Path.hasPrevious(path)) {
-                Transforms.transform(this.editor, {
-                  type: 'insert_node',
-                  path: Path.next(end.path),
-                  node: {text: ''}
-                })
+          if (dirt) {
+            if (end.offset === leaf.text?.length) {
+              if (Editor.hasPath(this.editor, Path.next(end.path))) {
                 Transforms.move(this.editor, {unit: 'offset'})
+              } else {
+                const parent = Editor.parent(this.editor, node[1])
+                if (parent[0].type !== 'list-item' || Path.hasPrevious(path)) {
+                  Transforms.transform(this.editor, {
+                    type: 'insert_node',
+                    path: Path.next(end.path),
+                    node: {text: ''}
+                  })
+                  Transforms.move(this.editor, {unit: 'offset'})
+                }
               }
+            } else if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
+              EditorUtils.moveBeforeSpace(this.editor, sel.anchor.path)
             }
           }
           const str = Node.string(el)
