@@ -6,7 +6,7 @@ import {basename, join, parse, sep} from 'path'
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
-import {message$, stat} from '../utils'
+import {isMac, message$, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
@@ -18,6 +18,7 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
+import {str} from 'ajv'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -107,6 +108,15 @@ export class TreeStore {
           item.mode = 'edit'
           item.editName = item.filename
           this.selectItem = null
+        })
+      }
+      if (this.selectItem && isHotkey('mod+c', e) && isMac) {
+        const item = this.selectItem
+        window.electron.ipcRenderer.invoke('copy-file', item.filePath).then(() => {
+          message$.next({
+            type: 'success',
+            content: configStore.zh ? `已复制${item.folder ? '文件夹' : '文件'}` : `${item.folder ? 'Folder' : 'file'} copied`
+          })
         })
       }
     })
@@ -596,7 +606,9 @@ export class TreeStore {
 
   appendTab(file?: string | IFileItem) {
     const index = this.tabs.findIndex(t => {
-      return t.current === file
+      if (typeof file === 'string') return t.current?.filePath === file
+      if (typeof file === 'object') return t.current === file
+      return false
     })
     if (index !== -1) {
       this.currentIndex = index
