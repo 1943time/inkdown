@@ -14,6 +14,7 @@ import {clearCodeCache} from './plugins/useHighlight'
 import {withMarkdown} from './plugins'
 import {withHistory} from 'slate-history'
 import {configStore} from '../store/config'
+import {selChange$} from './plugins/useOnchange'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -306,6 +307,17 @@ export class EditorStore {
         type: 'paragraph',
         children: [node]
       }, {select: true, at: Path.next(par[1])})
+    }
+    const [media] = Editor.nodes(this.editor, {
+      match: el => el.type === 'media'
+    })
+    if (media && this.editor.selection) {
+      setTimeout(() => {
+        selChange$.next({
+          sel: this.editor.selection!,
+          node: media
+        })
+      }, 16)
     }
   }
 

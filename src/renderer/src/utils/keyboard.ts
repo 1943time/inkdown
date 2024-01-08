@@ -11,6 +11,7 @@ import {configStore} from '../store/config'
 import {EditorStore} from '../editor/store'
 import {existsSync} from 'fs'
 import {message$} from './index'
+import {selChange$} from '../editor/plugins/useOnchange'
 
 const openFloatBar = (store: EditorStore) => {
   setTimeout(() => {
@@ -20,10 +21,11 @@ const openFloatBar = (store: EditorStore) => {
       if (rect) {
         store.setState(state => state.domRect = rect)
       }
-    } catch (e) {}
+    } catch (e) {
+    }
   })
 }
-const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
+const formatList = (editor: Editor, node: NodeEntry<any>, type: string) => {
   const isOrder = ['insertOrderedList', 'insertTaskOrderedList'].includes(type)
   const task = ['insertTaskUnorderedList', 'insertTaskOrderedList'].includes(type)
 
@@ -46,7 +48,11 @@ const formatList =  (editor: Editor, node: NodeEntry<any>, type: string) => {
       Transforms.delete(editor, {at: node[1]})
       Transforms.insertNodes(editor, {
           type: 'list', order: isOrder ? true : undefined,
-          children: [{type: 'list-item', checked: task ? false : undefined, children: [{type: 'paragraph', children: text}]}]
+          children: [{
+            type: 'list-item',
+            checked: task ? false : undefined,
+            children: [{type: 'paragraph', children: text}]
+          }]
         }, {at: node[1], select: true}
       )
     }
@@ -61,21 +67,33 @@ const insertCode = (editor: Editor, node: NodeEntry<any>, katex?: boolean) => {
     const path = node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
     Transforms.insertNodes(editor, {
       type: 'code',
-      language: katex ? 'latex': undefined,
+      language: katex ? 'latex' : undefined,
       children: [
-        {type:'code-line', children: [{text: ''}]},
+        {type: 'code-line', children: [{text: ''}]},
       ],
       katex: katex
     }, {at: path})
 
-    Transforms.select(editor, Editor.start(editor, path))
+    setTimeout(() => {
+      let start = Editor.start(editor, path)
+      const [entry] = Editor.nodes(editor, {at: path})
+      Transforms.select(editor, start)
+      if (entry) {
+        selChange$.next({
+          node: entry, sel: {anchor: start, focus: start}
+        })
+      }
+    }, 16)
   }
 }
+
 export class MenuKey {
   timer = 0
+
   get state() {
     return this.store.currentTab.store
   }
+
   constructor(
     private readonly store: TreeStore,
   ) {
@@ -101,7 +119,7 @@ export class MenuKey {
                 })
               })
             }
-          } else if (existsSync(file)){
+          } else if (existsSync(file)) {
             window.api.writeClipboardText(file)
           }
           if (isHotkey('mod+x', e)) {
@@ -115,6 +133,7 @@ export class MenuKey {
       this.run(task, other)
     })
   }
+
   run(task: string, other?: any) {
     clearTimeout(this.timer)
     this.timer = window.setTimeout(() => {
@@ -219,9 +238,28 @@ export class MenuKey {
             Transforms.insertNodes(editor, {
               type: 'table',
               children: [
-                {type:'table-row', children: [{type: 'table-cell', title: true, children: [{text: ''}]}, {type: 'table-cell', title: true, children: [{text: ''}]}, {type: 'table-cell', title: true, children: [{text: ''}]}]},
-                {type:'table-row', children: [{type: 'table-cell', children: [{text: ''}]}, {type: 'table-cell', children: [{text: ''}]}, {type: 'table-cell', children: [{text: ''}]}]},
-                {type:'table-row', children: [{type: 'table-cell', children: [{text: ''}]}, {type: 'table-cell', children: [{text: ''}]}, {type: 'table-cell', children: [{text: ''}]}]}
+                {
+                  type: 'table-row',
+                  children: [{type: 'table-cell', title: true, children: [{text: ''}]}, {
+                    type: 'table-cell',
+                    title: true,
+                    children: [{text: ''}]
+                  }, {type: 'table-cell', title: true, children: [{text: ''}]}]
+                },
+                {
+                  type: 'table-row',
+                  children: [{type: 'table-cell', children: [{text: ''}]}, {
+                    type: 'table-cell',
+                    children: [{text: ''}]
+                  }, {type: 'table-cell', children: [{text: ''}]}]
+                },
+                {
+                  type: 'table-row',
+                  children: [{type: 'table-cell', children: [{text: ''}]}, {
+                    type: 'table-cell',
+                    children: [{text: ''}]
+                  }, {type: 'table-cell', children: [{text: ''}]}]
+                }
               ]
             }, {at: path})
 
@@ -238,7 +276,7 @@ export class MenuKey {
               type: 'code',
               language: 'yaml',
               children: [
-                {type:'code-line', children: [{text: ''}]},
+                {type: 'code-line', children: [{text: ''}]},
               ],
               frontmatter: true
             }, {at: [0], select: true})
@@ -252,8 +290,20 @@ export class MenuKey {
         case 'insertInlineKatex':
           Transforms.insertNodes(editor, {
             type: 'inline-katex',
-            children: [{text: ''}]
-          }, {select: true})
+            children: [{text: ''}],
+            select: true
+          })
+          const [katexNode] = Editor.nodes(editor, {
+            match: n => n.type === 'inline-katex'
+          })
+          if (katexNode) {
+            setTimeout(() => {
+              selChange$.next({
+                node: katexNode,
+                sel: {anchor: {path: katexNode[1], offset: 0}, focus: {path: katexNode[1], offset: 0}}
+              })
+            }, 16)
+          }
           break
         case 'insertOrderedList':
           formatList(editor, node, task)
@@ -377,7 +427,6 @@ export class MenuKey {
           }
           break
         case 'select-word':
-          const sel = editor.selection
           if (sel && Range.isCollapsed(sel)) {
             const text = Node.leaf(editor, sel.anchor.path).text || ''
             let start = sel.anchor.offset
@@ -440,6 +489,7 @@ export class MenuKey {
       }
     }, 40)
   }
+
   format(type: string) {
     EditorUtils.toggleFormat(this.state!.editor, type)
   }
