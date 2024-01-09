@@ -83,13 +83,19 @@ const Item = observer((
               `}
           draggable={!item.mode}
           onDragOver={e => {
-            if (item.folder && !item.mode && treeStore.dragNode) {
+            if (item.folder) {
               e.preventDefault()
-              treeStore.setState({dropNode: item})
+              if (!item.mode && treeStore.dragNode) {
+                treeStore.setState({dropNode: item})
+              }
             }
           }}
           onDrop={e => {
-            treeStore.moveNode(item)
+            if (treeStore.dragNode) {
+              treeStore.moveNode(item)
+            } else if (e.dataTransfer.files?.length) {
+              treeStore.insertFiles(e.dataTransfer.files, item)
+            }
           }}
           onDragEnd={e => {
             treeStore.setState({dragNode: null, dropNode: null})

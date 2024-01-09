@@ -11,6 +11,7 @@ import {toUnix} from 'upath'
 import mime from 'mime-types'
 import FormData from 'form-data'
 import {createReadStream} from 'fs'
+const isWindows = process.platform === 'win32'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
 let watchers = new Map<string, Watcher>()
@@ -24,7 +25,11 @@ const api = {
     return clipboard.readText('clipboard')
   },
   getClipboardFile() {
-    return clipboard.read('public.file-url')
+    if (isWindows) {
+      const rawFilePath = clipboard.read('FileNameW')
+      return rawFilePath?.replace(new RegExp(String.fromCharCode(0), 'g'), '')
+    }
+    return clipboard.read('public.file-url')?.replace('file://', '')
   },
   loadCodeTheme(theme: string) {
     return getHighlighter({

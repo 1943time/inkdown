@@ -39,13 +39,17 @@ export const Tree = observer(() => {
               treeStore.selectItem = treeStore.root
             })}
             onDragOver={e => {
+              e.preventDefault()
               if (treeStore.dragNode) {
-                e.preventDefault()
                 treeStore.setState({dropNode: treeStore.root})
               }
             }}
             onDrop={e => {
-              treeStore.moveNode(treeStore.root)
+              if (treeStore.dragNode) {
+                treeStore.moveNode(treeStore.root)
+              } else if (e.dataTransfer.files?.length) {
+                treeStore.insertFiles(e.dataTransfer.files, treeStore.root)
+              }
             }}
           >
             {!!treeStore.root ?

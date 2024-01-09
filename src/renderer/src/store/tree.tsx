@@ -2,7 +2,7 @@ import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
-import {basename, join, parse, sep} from 'path'
+import {basename, join, parse, sep, extname} from 'path'
 import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
@@ -104,9 +104,6 @@ export class TreeStore {
         })
       }
     })
-    window.addEventListener('paste', e => {
-      console.log('e', window.api.getClipboardFile())
-    })
     window.addEventListener('keydown', e => {
       if (this.selectItem && !this.selectItem.root && isHotkey('enter', e)) {
         const item = this.selectItem
@@ -136,34 +133,12 @@ export class TreeStore {
               openConfirmDialog$.next({
                 title: configStore.zh ? `该${copyItem.folder ? '文件夹' : '文件'} '${copyItem.filename}' 已存在，是否覆盖？` : `The ${copyItem.folder ? 'folder' : 'file'} '${copyItem.filename}' already exists, do you want to overwrite it?`,
                 onConfirm: () => {
-                  this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
-                  try {
-                    const map = this.getFileMap()
-                    if (!copyItem.folder && copyItem.ext === 'md') {
-                      const node = map.get(targetPath)
-                      if (node) {
-                        this.getSchema(node, true)
-                      }
-                    } else if (copyItem.folder) {
-                      const stack = map.get(targetPath)?.children?.slice() || []
-                      while (stack.length) {
-                        const item = stack.pop()!
-                        if (item.folder) {
-                          stack.push(...item.children || [])
-                        } else if (item.ext === 'md') {
-                          this.getSchema(item, true)
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    console.error('paste file', e)
-                  } finally {
-                    this.copyItem = null
-                  }
+                  this.override(copyItem.filePath, targetPath, copyItem.folder)
                 }
               })
             } else {
               this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
+              this.parseFolder()
               this.copyItem = null
             }
           }
@@ -196,9 +171,54 @@ export class TreeStore {
       this.command(params)
     })
   }
+  private override(from: string, targetPath: string, folder = false) {
+    this.pasteFile(from, targetPath, folder)
+    try {
+      const map = this.getFileMap()
+      if (!folder && extname(targetPath) === '.md') {
+        const node = map.get(targetPath)
+        if (node) {
+          this.getSchema(node, true)
+        }
+      } else if (folder) {
+        const stack = map.get(targetPath)?.children?.slice() || []
+        while (stack.length) {
+          const item = stack.pop()!
+          if (item.folder) {
+            stack.push(...item.children || [])
+          } else if (item.ext === 'md') {
+            this.getSchema(item, true)
+          }
+        }
+      }
+    } catch (e) {
+      console.error('paste file', e)
+    } finally {
+      this.copyItem = null
+    }
+  }
   private pasteFile(from: string, to: string, folder = false) {
     cpSync(from, to, {force: true, recursive: folder})
     this.watcher.onChange('update', to)
+  }
+  insertFiles(files: FileList, item: IFileItem) {
+    if (item?.folder) {
+      try {
+        const folder = item.folder
+        if (folder) {
+          for (let f of files) {
+            if (f.path && f.path !== item.filePath) {
+              const target = join(item.filePath, basename(f.path))
+              cpSync(f.path, target, {recursive: true})
+              this.watcher.onChange('update', target)
+            }
+          }
+        }
+        this.parseFolder()
+      } catch (e) {
+        console.error('insert files', e)
+      }
+    }
   }
   command(params: {
     type?: 'rootFolder' | 'file' | 'folder'
@@ -465,7 +485,7 @@ export class TreeStore {
       const item = stack.shift()!
       if (item.folder) {
         stack.unshift(...item.children?.slice() || [])
-      } else if (['md', 'markdown'].includes(item.ext!)) {
+      } else if (['md', 'markdown'].includes(item.ext!) && !item.schema?.length) {
         queue.push(item)
       }
     }
