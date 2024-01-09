@@ -104,6 +104,9 @@ export class TreeStore {
         })
       }
     })
+    window.addEventListener('paste', e => {
+      console.log('e', window.api.getClipboardFile())
+    })
     window.addEventListener('keydown', e => {
       if (this.selectItem && !this.selectItem.root && isHotkey('enter', e)) {
         const item = this.selectItem
@@ -131,7 +134,7 @@ export class TreeStore {
             const targetPath = join(folder.filePath, this.copyItem.filename + `${this.copyItem.ext ? '.' + this.copyItem.ext : ''}`)
             if (folder.children?.some(c => c.filename === copyItem.filename && (!!c.folder === !!copyItem.folder))) {
               openConfirmDialog$.next({
-                title: configStore.zh ? `该${copyItem.folder ? '文件夹' : '文件'}已存在，是否覆盖？` : `The ${copyItem.folder ? 'folder' : 'file'} already exists, do you want to overwrite it?`,
+                title: configStore.zh ? `该${copyItem.folder ? '文件夹' : '文件'} '${copyItem.filename}' 已存在，是否覆盖？` : `The ${copyItem.folder ? 'folder' : 'file'} '${copyItem.filename}' already exists, do you want to overwrite it?`,
                 onConfirm: () => {
                   this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
                   try {

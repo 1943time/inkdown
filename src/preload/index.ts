@@ -23,6 +23,9 @@ const api = {
   getClipboardText() {
     return clipboard.readText('clipboard')
   },
+  getClipboardFile() {
+    return clipboard.read('public.file-url')
+  },
   loadCodeTheme(theme: string) {
     return getHighlighter({
       theme

@@ -18,6 +18,7 @@ import isHotkey from 'is-hotkey'
 import {isMod} from '../utils/keyboard'
 import {InsertNetworkImage} from './tools/InsertNetworkImage'
 import {LangAutocomplete} from './tools/LangAutocomplete'
+import {configStore} from '../store/config'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
@@ -91,7 +92,8 @@ export const EditorFrame = observer(({tab}: {
             >
               <div className={`flex-1 flex justify-center items-start h-full`}>
                 <div
-                  className={`max-w-[900px] flex-1 content px-14`}
+                  style={{maxWidth: configStore.config.editorMaxWidth || 900}}
+                  className={`flex-1 content px-14`}
                 >
                   <MEditor note={tab.current}/>
                 </div>
