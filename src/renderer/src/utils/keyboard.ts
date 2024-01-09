@@ -134,7 +134,7 @@ export class MenuKey {
     })
   }
 
-  run(task: string, other?: any) {
+  run(task: string, other?: string) {
     clearTimeout(this.timer)
     this.timer = window.setTimeout(() => {
       const sel = this.state?.editor.selection
@@ -145,7 +145,7 @@ export class MenuKey {
           mode: 'highest'
         })
         if (node && node[0].type === 'code') return
-        if (other && treeStore.root && isAbsolute(other) && treeStore.openedNote) {
+        if (other && treeStore.root && isAbsolute(other) && other.startsWith(treeStore.root.filePath) && treeStore.openedNote) {
           other = relative(join(treeStore.openedNote.filePath, '..'), other)
         }
         if (other) {

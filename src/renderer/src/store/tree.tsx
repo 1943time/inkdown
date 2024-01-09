@@ -3,7 +3,7 @@ import {GetFields, IFileItem, Tab} from '../index'
 import {createFileNode, defineParent, parserNode, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse, sep, extname} from 'path'
-import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
+import {appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, cpSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
 import {isMac, message$, stat} from '../utils'
@@ -18,7 +18,6 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
-import {cpSync} from 'fs'
 import {openConfirmDialog$} from '../components/ConfirmDialog'
 import {Checkbox} from 'antd'
 
@@ -207,9 +206,9 @@ export class TreeStore {
         const folder = item.folder
         if (folder) {
           for (let f of files) {
-            if (f.path && f.path !== item.filePath) {
+            if (f.path && f.path !== item.filePath && !f.path.startsWith(this.root.filePath)) {
               const target = join(item.filePath, basename(f.path))
-              cpSync(f.path, target, {recursive: true})
+              renameSync(f.path, target)
               this.watcher.onChange('update', target)
             }
           }

@@ -30,7 +30,7 @@ export const Set = observer(() => {
 
   const [state, setState] = useLocalState({
     imagesFolder: '',
-    tab: 'Appearance' as 'Appearance' | 'Editor' | 'General',
+    tab: 'Overview' as 'Overview' | 'Editor',
     editorMaxWidth: configStore.config.editorMaxWidth as number | null,
     version: ''
   })
@@ -80,20 +80,15 @@ export const Set = observer(() => {
             <div className={'py-4 px-2 w-[230px] border-r b1 tree-bg rounded-tl-lg rounded-bl-lg'}>
               <div className={'mb-4 px-2 text-gray-500'}>{'Preferences'}</div>
               <div
-                onClick={() => setState({tab: 'General'})}
-                className={`py-1 cursor-default px-3 text-sm mb-1 rounded  ${state.tab === 'General' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
+                onClick={() => setState({tab: 'Overview'})}
+                className={`py-1 cursor-default px-3 text-sm mb-1 rounded  ${state.tab === 'Overview' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
               >
-                General
-              </div>
-              <div
-                onClick={() => setState({tab: 'Appearance'})}
-                className={`py-1 cursor-default px-3 text-sm mb-1 rounded ${state.tab === 'Appearance' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
-              >
-                Appearance
+                Overview
               </div>
               <div
                 onClick={() => setState({tab: 'Editor'})}
-                className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>Editor
+                className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                Editor
               </div>
             </div>
             <div className={'flex-1 dark:bg-zinc-900 bg-white'}>
@@ -102,16 +97,16 @@ export const Set = observer(() => {
                   {state.tab}
                 </div>
               </div>
-              {state.tab === 'General' &&
+              {state.tab === 'Overview' &&
                 <div
                   className={'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'}>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      Version{configStore.mas ? '(App Store)' : ''}: {state.version}
+                      Version{configStore.mas ? ' (App Store) ' : ''}: {state.version}
                     </div>
                     <div>
                       <Button
-                        icon={<LinkOutlined />}
+                        icon={<LinkOutlined/>}
                         onClick={() => {
                           window.open('https://github.com/1943time/bluestone/releases')
                         }}
@@ -137,6 +132,23 @@ export const Set = observer(() => {
                       >
                         <Radio.Button value={'en'}>{'English'}</Radio.Button>
                         <Radio.Button value={'zh'}>{'简体中文'}</Radio.Button>
+                      </Radio.Group>
+                    </div>
+                  </div>
+                  <div className={'flex justify-between items-center py-3'}>
+                    <div className={'text-sm'}>
+                      {configStore.zh ? '主题' : 'Themes'}
+                    </div>
+                    <div>
+                      <Radio.Group
+                        value={configStore.config.theme}
+                        onChange={e => {
+                          configStore.setTheme(e.target.value)
+                        }}
+                      >
+                        <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>
+                        <Radio.Button value={'light'}>{configStore.zh ? '明亮' : 'Light'}</Radio.Button>
+                        <Radio.Button value={'dark'}>{configStore.zh ? '暗黑' : 'Dark'}</Radio.Button>
                       </Radio.Group>
                     </div>
                   </div>
@@ -197,28 +209,6 @@ export const Set = observer(() => {
                           {configStore.zh ? '保存' : 'Save'}
                         </Button>
                       </Space.Compact>
-                    </div>
-                  </div>
-                </div>
-              }
-              {state.tab === 'Appearance' &&
-                <div
-                  className={'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'}>
-                  <div className={'flex justify-between items-center py-3'}>
-                    <div className={'text-sm'}>
-                      {configStore.zh ? '主题' : 'Themes'}
-                    </div>
-                    <div>
-                      <Radio.Group
-                        value={configStore.config.theme}
-                        onChange={e => {
-                          configStore.setTheme(e.target.value)
-                        }}
-                      >
-                        <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>
-                        <Radio.Button value={'light'}>{configStore.zh ? '明亮' : 'Light'}</Radio.Button>
-                        <Radio.Button value={'dark'}>{configStore.zh ? '暗黑' : 'Dark'}</Radio.Button>
-                      </Radio.Group>
                     </div>
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
@@ -314,7 +304,8 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      <span className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically Download Images'}</span>
+                      <span
+                        className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically Download Images'}</span>
                       <Help text={
                         configStore.zh ? '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址' :
                           'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'
