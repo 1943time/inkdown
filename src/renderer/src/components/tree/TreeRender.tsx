@@ -64,7 +64,8 @@ const Item = observer((
       try {
         const input = document.querySelector(`[data-eid="${item.id}"] input`) as HTMLInputElement
         if (input) input.select()
-      } catch (e) {}
+      } catch (e) {
+      }
     }
   }, [item.mode])
   return (
@@ -146,7 +147,8 @@ const Item = observer((
             /> :
             <>
               {item.folder &&
-                <ArrowRight className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}/>
+                <ArrowRight
+                  className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}/>
               }
               <span style={{paddingLeft: item.folder ? 0 : 4}} className={'truncate w-[100%_-_10px]'}>
                     {item.filename}
@@ -165,7 +167,7 @@ const Item = observer((
   )
 })
 
-const RenderItem = observer(({items, level}: {items: IFileItem[], level: number}) => {
+const RenderItem = observer(({items, level}: { items: IFileItem[], level: number }) => {
   const timer = useRef(0)
   const saveNote = useCallback((item: IFileItem) => {
     clearTimeout(timer.current)

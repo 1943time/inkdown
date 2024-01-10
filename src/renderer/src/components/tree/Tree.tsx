@@ -30,7 +30,7 @@ export const Tree = observer(() => {
         className={'flex-shrink-0 b1 tree-bg h-full border-r pt-[39px] duration-200 overflow-hidden width-duration'}
         style={{width: treeStore.fold ? 0 : treeStore.width}}
       >
-        <div style={{width: treeStore.width}} className={'h-full border-t b1'}>
+        <div style={{width: treeStore.width}} className={'h-full border-t b1 relative'}>
           <div
             className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'} pb-10 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
             onContextMenu={context}
@@ -60,6 +60,9 @@ export const Tree = observer(() => {
           <div className={`h-full ${treeStore.treeTab === 'search' ? '' : 'hidden'}`}>
             <FullSearch/>
           </div>
+          {treeStore.treeTab === 'folder' && treeStore.selectItem === treeStore.root &&
+            <div className={'absolute z-10 left-[1px] top-0 right-[1px] bottom-0 bg-sky-500/5 pointer-events-none'}/>
+          }
         </div>
       </div>
       <EBook
