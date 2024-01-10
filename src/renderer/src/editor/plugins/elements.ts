@@ -1,7 +1,7 @@
 import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {Elements, ListNode, TableRowNode} from '../../el'
 import {EditorUtils} from '../utils/editorUtils'
-import {clearAllCodeCache, codeCache} from './useHighlight'
+import {clearAllCodeCache} from './useHighlight'
 
 export const insertAfter = (editor: Editor, path: Path, node: Elements = {
   type: 'paragraph',
@@ -63,7 +63,7 @@ export const MdElements: Record<string, MdNode> = {
     }
   },
   inlineKatex: {
-    reg: /\$\s+\$$/,
+    reg: /\$([^\n$]+)\$$/,
     matchKey: '$',
     checkAllow: ctx => {
       return ['paragraph', 'table-cell'].includes(ctx.node[0].type)
@@ -75,7 +75,7 @@ export const MdElements: Record<string, MdNode> = {
       })
       Transforms.insertNodes(editor, {
         type: 'inline-katex',
-        children: [{text: ''}],
+        children: [{text: match[1].trim()}],
         select: true
       })
       return true

@@ -213,7 +213,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '显示字符统计' : 'Displays character statistics'}
+                      {configStore.zh ? '显示字符统计' : 'Show character statistics'}
                     </div>
                     <div>
                       <Checkbox checked={configStore.config.showCharactersCount}
@@ -256,7 +256,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '显示大纲' : 'Show Outline'}
+                      {configStore.zh ? '显示大纲' : 'Show outline'}
                     </div>
                     <div>
                       <Checkbox
@@ -291,7 +291,7 @@ export const Set = observer(() => {
                   className={'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'}>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic Rebuild'}</span> <Help text={
+                      <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic rebuild'}</span> <Help text={
                       configStore.zh ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改' :
                         'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
                     }
@@ -305,7 +305,7 @@ export const Set = observer(() => {
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
                       <span
-                        className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically Download Images'}</span>
+                        className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically download images'}</span>
                       <Help text={
                         configStore.zh ? '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址' :
                           'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'
@@ -318,7 +318,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '拖拽排序' : 'Drag To Sort'}
+                      {configStore.zh ? '拖拽排序' : 'Drag to sort'}
                     </div>
                     <div>
                       <Checkbox checked={configStore.config.dragToSort}
@@ -327,7 +327,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '显示代码段行号' : 'Show Code Line Number'}
+                      {configStore.zh ? '显示代码段行号' : 'Show code line number'}
                     </div>
                     <div>
                       <Checkbox checked={configStore.config.codeLineNumber}
@@ -336,7 +336,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '代码段 TabSize' : 'Code TabSize'}
+                      {configStore.zh ? '代码段 TabSize' : 'Code tab size'}
                     </div>
                     <div>
                       <Radio.Group
@@ -352,7 +352,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '代码风格' : 'Code Style'}
+                      {configStore.zh ? '代码风格' : 'Code style'}
                     </div>
                     <div>
                       <Select
@@ -394,7 +394,7 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
-                      {configStore.zh ? '拼写检查' : 'Spell Check'}
+                      {configStore.zh ? '拼写检查' : 'Spell check'}
                     </div>
                     <div>
                       <Checkbox checked={configStore.config.spellCheck}
