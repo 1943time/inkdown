@@ -47,6 +47,9 @@ export const ConfirmDialog = observer(() => {
     if (isHotkey('enter', e)) {
       confirm()
     }
+    if (isHotkey('esc', e)) {
+      close()
+    }
   }, [])
 
   const close = useCallback(() => {
@@ -84,7 +87,7 @@ export const ConfirmDialog = observer(() => {
   return (
     <Dialog
       open={state.open}
-      onClose={() => setState({open: false})}
+      onClose={close}
     >
       <div className={'w-[260px] p-4 flex flex-col items-center text-center'}>
         <img src={logo} alt="" className={'w-12 h-12'}/>
