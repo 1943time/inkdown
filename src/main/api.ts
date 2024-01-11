@@ -107,7 +107,8 @@ export const registerApi = () => {
       renameFileWhenSaving: !!config.renameFileWhenSaving,
       showFloatBar: isBoolean(config.showFloatBar) ? config.showFloatBar : true,
       showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true,
-      fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true
+      fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true,
+      relativePathForImageStore: isBoolean(config.relativePathForImageStore) ? config.relativePathForImageStore : false
     }
   })
 

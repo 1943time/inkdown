@@ -12,6 +12,7 @@ import {message$} from '../utils'
 import {existsSync, mkdirSync, statSync} from 'fs'
 import {join} from 'path'
 import isHotkey from 'is-hotkey'
+import {MainApi} from '../api/main'
 
 function Help(props: {
   text: string | ReactNode
@@ -178,24 +179,25 @@ export const Set = observer(() => {
                     <div className={'text-sm'}>
                       <span className={'mr-1'}>{configStore.zh ? '图片存储文件夹' : 'Image storage folder'}</span>
                       <Help text={
-                        configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置' :
-                          'Save location for pasting images when opening a folder'
+                        configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置，如果使用相对路劲，则路径相对于当前文档的路径' :
+                          'Save location for pasting images when opening a folder, If relative road force is used, the path is relative to the path of the current document'
                       }/>
                     </div>
-                    <div>
-                      <Space.Compact style={{width: '100%'}}>
+                    <div className={'flex items-center'}>
+                      <Checkbox checked={configStore.config.relativePathForImageStore} onChange={e => configStore.setConfig('relativePathForImageStore', e.target.checked)}>Relative path</Checkbox>
+                      <Space.Compact style={{width: 300}}>
                         <Input placeholder={'folder name'} value={state.imagesFolder}
                                onChange={e => setState({imagesFolder: e.target.value})}/>
                         <Button
                           type="primary"
-                          onClick={() => {
-                            if (!/^\.?[\w\u4e00-\u9fa5@#*$!]+$/.test(state.imagesFolder)) {
+                          onClick={async () => {
+                            if (!/^\.?[\w\u4e00-\u9fa5@#*$!\/]+$/.test(state.imagesFolder)) {
                               message$.next({
                                 type: 'warning',
                                 content: configStore.zh ? '请输入正确文件夹名称' : 'Please enter the correct folder name'
                               })
                             }
-                            if (treeStore.root) {
+                            if (treeStore.root && !configStore.config.relativePathForImageStore) {
                               const path = join(treeStore.root.filePath, state.imagesFolder)
                               if (existsSync(path)) {
                                 if (!statSync(path).isDirectory()) {
@@ -208,7 +210,7 @@ export const Set = observer(() => {
                                   treeStore.watcher.onChange('update', path)
                                 }
                               } else {
-                                mkdirSync(path)
+                                await MainApi.mkdirp(path)
                                 treeStore.watcher.onChange('update', path)
                               }
                             }

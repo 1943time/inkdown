@@ -39,7 +39,13 @@ export const RenamePasteFile = observer(({open, file, onClose, store}: {
     if (/^[\w\u4e00-\u9fa5]+$/.test(state.saveFileName)) {
       const name = state.saveFileName + state.ext
       const path = await MainApi.getCachePath()
-      const targetPath = treeStore.root ? join(treeStore.root!.filePath, configStore.config.imagesFolder, name) : join(path, 'images', name)
+      let targetPath = ''
+      if (treeStore.root) {
+        const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
+        targetPath = join(imageDir, name)
+      } else {
+        targetPath = join(path, 'images', name)
+      }
       if (existsSync(targetPath)) {
         return message$.next({
           type: 'warning',

@@ -26,7 +26,8 @@ class ConfigStore {
     renameFileWhenSaving: false,
     showFloatBar: true,
     showRemoveFileDialog: true,
-    fileWatcher: true
+    fileWatcher: true,
+    relativePathForImageStore: false
   }
   timer = 0
   homePath = ''

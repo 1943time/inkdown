@@ -52,9 +52,9 @@ const readDir = (path: string, parent: IFileItem) => {
   const files = readdirSync(path)
   let tree: IFileItem[] = []
   for (let f of files) {
-    if (f.startsWith('.') && f !== configStore.config.imagesFolder && f !== '.images') continue
     const filePath = join(path, f)
     const s = statSync(filePath)
+    if (f.startsWith('.') && s.isFile()) continue
     if (s.isDirectory()) {
       const node = createFileNode({
         folder: true,

@@ -6,7 +6,7 @@ import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {Subject} from 'rxjs'
 import {existsSync, mkdirSync, writeFileSync} from 'fs'
-import {isAbsolute, join, parse, relative} from 'path'
+import {isAbsolute, join, parse, relative, sep} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
@@ -249,6 +249,23 @@ export class EditorStore {
     const mediaPath = await this.saveFile(file)
     this.insertInlineNode(mediaPath)
   }
+  private async createDir(path: string) {
+    try {
+      let rootPath = treeStore.root.filePath
+      const stack = path.replace(rootPath, '').split(sep).slice(1)
+      while (stack.length) {
+        const name = stack.shift()!
+        const curPath = join(rootPath, name)
+        if (!existsSync(curPath)) {
+          mkdirSync(curPath)
+          treeStore.watcher.onChange('update', curPath)
+        }
+        rootPath = curPath
+      }
+    } catch (e) {
+      console.error('create dir', e)
+    }
+  }
   async saveFile(file: File | {name: string, buffer: ArrayBuffer}) {
     let targetPath = ''
     let mediaUrl = ''
@@ -256,11 +273,8 @@ export class EditorStore {
     const p = parse(file.name)
     const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
     if (treeStore.root) {
-      const imageDir = join(treeStore.root!.filePath, configStore.config.imagesFolder)
-      if (!existsSync(imageDir)) {
-        mkdirSync(imageDir)
-        treeStore.watcher.onChange('update', imageDir)
-      }
+      const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
+      if (!existsSync(imageDir)) await this.createDir(imageDir)
       targetPath = join(imageDir, base)
       mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
     } else {
