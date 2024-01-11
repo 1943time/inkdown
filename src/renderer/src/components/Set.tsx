@@ -154,6 +154,19 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
+                      <span className={'mr-1'}>{configStore.zh ? '文件变更检测' : 'File change detection'}</span>
+                      <Help text={
+                        configStore.zh ? '当编辑器失去焦点，如果其他程序改变了markdown文件，编辑器会自动更新该文档' :
+                          'When the editor loses focus, if other programs change the markdown file, the editor will automatically update the document'
+                      }/>
+                    </div>
+                    <div>
+                      <Checkbox checked={configStore.config.fileWatcher}
+                                onChange={e => configStore.setConfig('fileWatcher', e.target.checked)}/>
+                    </div>
+                  </div>
+                  <div className={'flex justify-between items-center py-3'}>
+                    <div className={'text-sm'}>
                       {configStore.zh ? '删除文件确认' : 'Delete file confirmation'}
                     </div>
                     <div>

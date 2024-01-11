@@ -25,7 +25,8 @@ class ConfigStore {
     autoRebuild: true,
     renameFileWhenSaving: false,
     showFloatBar: true,
-    showRemoveFileDialog: true
+    showRemoveFileDialog: true,
+    fileWatcher: true
   }
   timer = 0
   homePath = ''

@@ -18,16 +18,18 @@ export class Watcher {
   ) {
     this.onChange = this.onChange.bind(this)
     window.electron.ipcRenderer.on('window-blur', () => {
-      setTimeout(() => {
-        if (this.store.root?.filePath) {
-          window.api.watch(this.store.root.filePath, this.onChange)
-        }
-        if (this.watchNoteSet.size) {
-          for (let f of this.watchNoteSet) {
-            window.api.watch(f, this.onChange)
+      if (configStore.config.fileWatcher) {
+        setTimeout(() => {
+          if (this.store.root?.filePath) {
+            window.api.watch(this.store.root.filePath, this.onChange)
           }
-        }
-      }, 100)
+          if (this.watchNoteSet.size) {
+            for (let f of this.watchNoteSet) {
+              window.api.watch(f, this.onChange)
+            }
+          }
+        }, 100)
+      }
     })
     window.electron.ipcRenderer.on('window-focus', async () => {
       if (this.store.root?.filePath) {

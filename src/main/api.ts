@@ -106,7 +106,8 @@ export const registerApi = () => {
       locale: getLocale(),
       renameFileWhenSaving: !!config.renameFileWhenSaving,
       showFloatBar: isBoolean(config.showFloatBar) ? config.showFloatBar : true,
-      showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true
+      showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true,
+      fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true
     }
   })
 
