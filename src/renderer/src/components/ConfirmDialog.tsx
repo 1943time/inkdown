@@ -36,7 +36,7 @@ export const ConfirmDialog = observer(() => {
 
   const confirm = useCallback(async () => {
     const res = paramsRef.current.onConfirm?.()
-    if (res instanceof Promise) {
+    if (res && res instanceof Promise) {
       setState({loading: true})
       await res
     }
@@ -89,7 +89,7 @@ export const ConfirmDialog = observer(() => {
       open={state.open}
       onClose={close}
     >
-      <div className={'w-[260px] p-4 flex flex-col items-center text-center'}>
+      <div className={'w-[260px] px-4 py-6 flex flex-col items-center text-center'}>
         <img src={logo} alt="" className={'w-12 h-12'}/>
         <div className={'font-semibold mt-4 text-sm dark:text-gray-200'}>{state.title}</div>
         {state.description &&

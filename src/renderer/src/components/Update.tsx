@@ -4,6 +4,7 @@ import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
 import {message$} from '../utils'
 import {configStore} from '../store/config'
+import {openConfirmDialog$} from './ConfirmDialog'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
   const [state, setState] = useLocalState({
@@ -62,10 +63,10 @@ export const Update = observer(() => {
     })
     ipcRenderer.on('update-downloaded', e => {
       setState({startUpdate: false, percent: 0})
-      modal.confirm({
-        type: 'warning',
-        content: configStore.zh ? '下载更新已完成，是否立即重新启动？' : 'Download the update is complete, do you want to restart it now?',
-        onOk: () => {
+      openConfirmDialog$.next({
+        title: configStore.zh ? '下载更新已完成，是否立即重新启动？' : 'Download the update is complete, do you want to restart it now?',
+        okText: 'Restart now',
+        onConfirm: () => {
           ipcRenderer.send('install-update')
         },
         onCancel: () => {

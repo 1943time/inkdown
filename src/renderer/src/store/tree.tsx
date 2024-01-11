@@ -20,7 +20,6 @@ import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {openConfirmDialog$} from '../components/ConfirmDialog'
 import {Checkbox} from 'antd'
-import {toUnix} from 'upath'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
@@ -115,8 +114,15 @@ export class TreeStore {
       if (this.selectItem && isHotkey('mod+backspace', e)) {
         this.moveToTrash(this.selectItem)
       }
-      if (isHotkey('mod+v', e) && this.selectItem) {
-
+      if (isHotkey('mod+v', e) && this.selectItem && this.selectItem.folder) {
+        try {
+          const path = window.api.getClipboardFile()
+          if (path && existsSync(path)) {
+            this.insertFiles([path], this.selectItem, 'copy')
+          }
+        } catch (e) {
+          console.error('paste file', e)
+        }
       }
     })
     this.tabs.push(this.createTab())
@@ -171,22 +177,30 @@ export class TreeStore {
     cpSync(from, to, {force: true, recursive: folder})
     this.watcher.onChange('update', to)
   }
-  insertFiles(files: FileList, item: IFileItem) {
+  insertFiles(files: FileList | string[], item: IFileItem, mode: 'cut' | 'copy' = 'cut') {
     if (item?.folder) {
       try {
         const folder = item.folder
         if (folder) {
           for (let f of files) {
-            if (f.path && f.path !== item.filePath && !f.path.startsWith(this.root.filePath)) {
-              const target = join(item.filePath, basename(f.path))
-              renameSync(f.path, target)
+            const path = typeof f === 'string' ? f : f.path
+            if (path && path !== item.filePath && !path.startsWith(this.root.filePath)) {
+              const target = join(item.filePath, basename(path))
+              if (mode === 'cut') {
+                renameSync(path, target)
+              } else {
+                cpSync(path, target, {recursive: true})
+              }
               this.watcher.onChange('update', target)
             }
           }
         }
         this.parseFolder()
-      } catch (e) {
-        console.error('insert files', e)
+      } catch (e: any) {
+        message$.next({
+          type: 'warning',
+          content: e?.message || 'Failed to insert file'
+        })
       }
     }
   }

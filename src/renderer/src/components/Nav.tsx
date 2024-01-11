@@ -6,6 +6,7 @@ import {MainApi} from '../api/main'
 import {Update} from './Update'
 import {isMac} from '../utils'
 import {Share} from '../server/Share'
+
 export const Nav = observer(() => {
   const paths = useMemo(() => {
     if (!treeStore.openedNote) return ['']
