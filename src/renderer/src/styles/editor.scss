@@ -55,6 +55,12 @@ a {
   position: relative;
   line-height: 1.625em;
   white-space: normal;
+  &.line-height-compact {
+    line-height: 1.5em;
+  }
+  &.line-height-loose{
+    line-height: 1.9em;
+  }
   .link{
     text-decoration: underline;
   }

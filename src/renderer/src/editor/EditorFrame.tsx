@@ -93,7 +93,7 @@ export const EditorFrame = observer(({tab}: {
               <div className={`flex-1 flex justify-center items-start h-full`}>
                 <div
                   style={{maxWidth: configStore.config.editorMaxWidth || 900}}
-                  className={`flex-1 content px-14`}
+                  className={`flex-1 content px-14 ${configStore.config.editorLineHeight === 'compact' ? 'line-height-compact' : configStore.config.editorLineHeight === 'loose' ? 'line-height-loose' : ''}`}
                 >
                   <MEditor note={tab.current}/>
                 </div>

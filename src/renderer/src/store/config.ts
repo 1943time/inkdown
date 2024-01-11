@@ -28,7 +28,8 @@ class ConfigStore {
     showRemoveFileDialog: true,
     fileWatcher: true,
     relativePathForImageStore: false,
-    showHiddenFiles: true
+    showHiddenFiles: false,
+    editorLineHeight: 'default' as 'default' | 'loose' | 'compact'
   }
   timer = 0
   homePath = ''

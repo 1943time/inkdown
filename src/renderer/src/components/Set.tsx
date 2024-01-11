@@ -353,6 +353,23 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
+                      {configStore.zh ? '段落行高' : 'Paragraph line height'}
+                    </div>
+                    <div>
+                      <Radio.Group
+                        value={configStore.config.editorLineHeight}
+                        onChange={e => {
+                          configStore.setConfig('editorLineHeight', e.target.value)
+                        }}
+                      >
+                        <Radio value={'compact'}>{configStore.zh ? '紧凑' : 'Compact'}</Radio>
+                        <Radio value={'default'}>{configStore.zh ? '默认' : 'Default'}</Radio>
+                        <Radio value={'loose'}>{configStore.zh ? '宽松' : 'Loose'}</Radio>
+                      </Radio.Group>
+                    </div>
+                  </div>
+                  <div className={'flex justify-between items-center py-3'}>
+                    <div className={'text-sm'}>
                       {configStore.zh ? '显示代码段行号' : 'Show code line number'}
                     </div>
                     <div>

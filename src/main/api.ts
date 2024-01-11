@@ -109,7 +109,8 @@ export const registerApi = () => {
       showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true,
       fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true,
       relativePathForImageStore: isBoolean(config.relativePathForImageStore) ? config.relativePathForImageStore : false,
-      showHiddenFiles: isBoolean(config.showHiddenFiles) ? config.showHiddenFiles : true
+      showHiddenFiles: isBoolean(config.showHiddenFiles) ? config.showHiddenFiles : false,
+      editorLineHeight: config.editorLineHeight || 'default'
     }
   })
 
