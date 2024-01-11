@@ -60,9 +60,6 @@ export const Tree = observer(() => {
           <div className={`h-full ${treeStore.treeTab === 'search' ? '' : 'hidden'}`}>
             <FullSearch/>
           </div>
-          {treeStore.treeTab === 'folder' && treeStore.selectItem === treeStore.root &&
-            <div className={'absolute z-10 left-[1px] top-0 right-[1px] bottom-0 bg-sky-500/5 pointer-events-none'}/>
-          }
         </div>
       </div>
       <EBook

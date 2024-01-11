@@ -295,6 +295,11 @@ export const MEditor = observer(({note}: {
     store.inputComposition = false
     if (store.pauseCodeHighlight) runInAction(() => store.pauseCodeHighlight = false)
   }, [])
+
+  const onError = useCallback((e: React.SyntheticEvent) => {
+    console.error('Editor exception', e)
+  }, [])
+
   return (
     <Slate
       editor={editor}
@@ -304,6 +309,7 @@ export const MEditor = observer(({note}: {
       <SetNodeToDecorations/>
       <Placeholder/>
       <Editable
+        onError={onError}
         decorate={high}
         spellCheck={configStore.config.spellCheck}
         readOnly={store.readonly}
