@@ -7,31 +7,14 @@ import isHotkey from 'is-hotkey'
 export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
   const sel = editor.selection
   if (sel && Range.isCollapsed(sel)) {
-    if (isHotkey('left', e)) {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!isMod(e)) {
-        const leaf = Node.leaf(editor, sel.focus.path)
-        const dirt = EditorUtils.isDirtLeaf(leaf)
-        const pre = Editor.previous<any>(editor, {at: sel.focus.path})
-        const [node] = Editor.nodes(editor, {
-          match: n => n.type === 'media'
-        })
-        if (node) {
-          EditorUtils.moveBeforeSpace(editor, node[1])
-        } else if (sel.focus.offset === 0 && pre && pre[0].type === 'media') {
-          Transforms.select(editor, pre[1])
-        } else if (sel.focus.offset === 0 && dirt) {
-          EditorUtils.moveBeforeSpace(editor, sel.focus.path)
-        } else {
-          Transforms.move(editor, { unit: 'offset', reverse: true })
-        }
-      } else {
-        const [node] = Editor.nodes(editor, {
-          match: n => n.type === 'code-line'
-        })
-        if (node) {
-          const str = Node.string(node[0]) || ''
+    if (isHotkey('mod+left', e)) {
+      const [node] = Editor.nodes(editor, {
+        match: n => n.type === 'code-line'
+      })
+      if (node) {
+        const str = Node.string(node[0]) || ''
+        const pre = str.slice(0, sel.anchor.offset)
+        if (/[^\s\t]+/.test(pre)) {
           Transforms.select(editor, {
             path: [...node[1], 0],
             offset: str.match(/^[\s\t]*/)?.[0].length || 0
@@ -39,6 +22,26 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         } else {
           Transforms.select(editor, Editor.start(editor, Path.parent(sel.focus.path)))
         }
+        e.preventDefault()
+      }
+    }
+    if (isHotkey('left', e)) {
+      e.preventDefault()
+      e.stopPropagation()
+      const leaf = Node.leaf(editor, sel.focus.path)
+      const dirt = EditorUtils.isDirtLeaf(leaf)
+      const pre = Editor.previous<any>(editor, {at: sel.focus.path})
+      const [node] = Editor.nodes(editor, {
+        match: n => n.type === 'media'
+      })
+      if (node) {
+        EditorUtils.moveBeforeSpace(editor, node[1])
+      } else if (sel.focus.offset === 0 && pre && pre[0].type === 'media') {
+        Transforms.select(editor, pre[1])
+      } else if (sel.focus.offset === 0 && dirt) {
+        EditorUtils.moveBeforeSpace(editor, sel.focus.path)
+      } else {
+        Transforms.move(editor, {unit: 'offset', reverse: true})
       }
       return
     }
@@ -59,7 +62,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         } else if (sel.focus.offset === leaf.text?.length && dirt && !Editor.next(editor, {at: sel.focus.path})) {
           EditorUtils.moveAfterSpace(editor, sel.focus.path)
         } else {
-          Transforms.move(editor, { unit: 'offset'})
+          Transforms.move(editor, {unit: 'offset'})
         }
       } else {
         Transforms.select(editor, Editor.end(editor, Path.parent(sel.focus.path)))

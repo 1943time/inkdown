@@ -284,14 +284,16 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const compositionStart = useCallback((e: React.CompositionEvent) => {
-    e.preventDefault()
     store.inputComposition = true
     runInAction(() => store.pauseCodeHighlight = true)
+    if (editor.selection && Range.isCollapsed(editor.selection)) {
+      e.preventDefault()
+    }
   }, [])
 
   const compositionEnd = useCallback((e: React.CompositionEvent) => {
     store.inputComposition = false
-    runInAction(() => store.pauseCodeHighlight = false)
+    if (store.pauseCodeHighlight) runInAction(() => store.pauseCodeHighlight = false)
   }, [])
   return (
     <Slate
