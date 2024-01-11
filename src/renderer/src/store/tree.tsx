@@ -20,11 +20,11 @@ import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {openConfirmDialog$} from '../components/ConfirmDialog'
 import {Checkbox} from 'antd'
+import {toUnix} from 'upath'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' = 'folder'
   root!: IFileItem
-  copyItem: IFileItem | null = null
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
   dropNode: IFileItem | null = null
@@ -115,35 +115,8 @@ export class TreeStore {
       if (this.selectItem && isHotkey('mod+backspace', e)) {
         this.moveToTrash(this.selectItem)
       }
-      if (isHotkey('mod+c', e)) {
-        if (this.selectItem) {
-          this.copyItem = this.selectItem
-        } else {
-          this.copyItem = null
-        }
-      }
-      if (isHotkey('mod+v', e) && this.copyItem) {
-        const copyItem = this.copyItem
-        if (this.selectItem) {
-          const folder = this.selectItem.folder ? this.selectItem : this.selectItem.parent
-          if (folder && folder.filePath !== copyItem.parent?.filePath) {
-            const targetPath = join(folder.filePath, this.copyItem.filename + `${this.copyItem.ext ? '.' + this.copyItem.ext : ''}`)
-            if (folder.children?.some(c => c.filename === copyItem.filename && (!!c.folder === !!copyItem.folder))) {
-              openConfirmDialog$.next({
-                title: configStore.zh ? `该${copyItem.folder ? '文件夹' : '文件'} '${copyItem.filename}' 已存在，是否覆盖？` : `The ${copyItem.folder ? 'folder' : 'file'} '${copyItem.filename}' already exists, do you want to overwrite it?`,
-                onConfirm: () => {
-                  this.override(copyItem.filePath, targetPath, copyItem.folder)
-                }
-              })
-            } else {
-              this.pasteFile(copyItem.filePath, targetPath, copyItem.folder)
-              this.parseFolder()
-              this.copyItem = null
-            }
-          }
-        } else {
-          this.copyItem = null
-        }
+      if (isHotkey('mod+v', e) && this.selectItem) {
+
       }
     })
     this.tabs.push(this.createTab())
@@ -192,8 +165,6 @@ export class TreeStore {
       }
     } catch (e) {
       console.error('paste file', e)
-    } finally {
-      this.copyItem = null
     }
   }
   private pasteFile(from: string, to: string, folder = false) {
@@ -676,10 +647,14 @@ export class TreeStore {
   }
 
   getAbsolutePath(file: IFileItem) {
-    if (this.root) {
+    if (this.root && file.filePath.startsWith(this.root.filePath)) {
       return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
     } else {
-      return [file.filename]
+      if (file.filePath.startsWith(configStore.homePath)) {
+        return ['~', ...file.filePath.replace(configStore.homePath, '').split(sep).slice(1)]
+      } else {
+        return file.filePath.split(sep).slice(1)
+      }
     }
   }
 

@@ -28,6 +28,7 @@ class ConfigStore {
     showRemoveFileDialog: true
   }
   timer = 0
+  homePath = ''
   deviceId = ''
   get mas() {
     return process.mas || false
@@ -110,6 +111,9 @@ class ConfigStore {
   }
 
   initial() {
+    MainApi.getPath('home').then(res => {
+      this.homePath = res
+    })
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
         if (res.dark) document.documentElement.classList.add('dark')
