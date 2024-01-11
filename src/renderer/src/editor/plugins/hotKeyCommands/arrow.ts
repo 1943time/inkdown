@@ -2,11 +2,12 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
 import {isMod} from '../../../utils/keyboard'
+import isHotkey from 'is-hotkey'
 
 export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
   const sel = editor.selection
   if (sel && Range.isCollapsed(sel)) {
-    if (e.key === 'ArrowLeft') {
+    if (isHotkey('left', e)) {
       e.preventDefault()
       e.stopPropagation()
       if (!isMod(e)) {
@@ -41,7 +42,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       }
       return
     }
-    if (e.key === 'ArrowRight') {
+    if (isHotkey('right', e)) {
       e.preventDefault()
       e.stopPropagation()
       if (!isMod(e)) {
@@ -65,7 +66,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       }
       return
     }
-    if (e.key === 'ArrowUp') {
+    if (isHotkey('up', e)) {
       const [node] = Editor.nodes<any>(editor, {
         match: n => Element.isElement(n),
         mode: 'lowest'
@@ -102,7 +103,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         Transforms.select(editor, Editor.start(editor, pre))
       }
     }
-    if (e.key === 'ArrowDown') {
+    if (isHotkey('down', e)) {
       const [node] = Editor.nodes<any>(editor, {
         match: n => Element.isElement(n),
         mode: 'lowest'
