@@ -1,11 +1,12 @@
 import {app, BrowserWindow, dialog, ipcMain, screen, shell, globalShortcut} from 'electron'
-import {lstatSync} from 'fs'
+import {existsSync, lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
+import {isAbsolute, join} from 'path'
 const isWindows = process.platform === 'win32'
 type WinOptions = {
   openFolder?: string
@@ -99,25 +100,39 @@ app.on('will-finish-launching', () => {
 ipcMain.on('open-history-path', (e, path: string) => {
   openFiles(path)
 })
+
 const openFiles = (filePath: string) => {
   try {
     const win = Array.from(windows).find(w => {
       return (w[1].openTabs?.includes(filePath) || w[1]?.openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
     })
-    if (win) {
-      if (win[1].openTabs?.includes(filePath) || win[1]?.openFolder === filePath) {
-        BrowserWindow.fromId(win[0])?.focus()
-      } else if (win[1].openFolder && filePath.startsWith(win[1].openFolder)) {
-        const w = BrowserWindow.fromId(win[0])
-        w?.focus()
-        if (lstatSync(filePath).isFile()) w?.webContents.send('open-path', filePath)
-      }
+    if (win && (win[1].openTabs?.includes(filePath) || win[1]?.openFolder === filePath)) {
+      BrowserWindow.fromId(win[0])?.focus()
     } else {
-      const stat = lstatSync(filePath)
-      createWindow({
-        openFolder: stat.isDirectory() ? filePath : undefined,
-        openTabs: stat.isFile() ? [filePath] : undefined
-      })
+      try {
+        if (existsSync(filePath)) {
+          const isDir = lstatSync(filePath).isDirectory()
+          const curWin = BrowserWindow.getFocusedWindow()
+          if (!isDir) {
+            curWin?.webContents.send('open-path', filePath, true)
+          } else {
+            createWindow({
+              openFolder: filePath
+            })
+          }
+        }
+      } catch (e) {
+        if (process.mas) {
+          dialog.showOpenDialog({
+            defaultPath: filePath,
+            properties: ['openFile', 'openDirectory']
+          }).then(res => {
+            if (res.filePaths.length) {
+              openFiles(res.filePaths[0])
+            }
+          })
+        }
+      }
     }
   } catch (e) {
   }
@@ -192,32 +207,29 @@ app.whenReady().then(() => {
   })
   if (process.argv[1]) waitOpenFile = process.argv[1] || ''
   if (waitOpenFile === '.') waitOpenFile = ''
-  try {
-    const data = store.get('windows') as WinOptions[] || []
-    if (data?.length) {
-      for (let d of data) {
-        createWindow(typeof d === 'object' ? d : undefined)
-      }
-    } else if (!waitOpenFile) {
-      createWindow()
-    }
-  } catch (e) {
-    // log.error('create error', e)
-  }
   if (waitOpenFile) {
-    const win = Array.from(windows).find(w => {
-      return !w[1].openFolder
-    })
-    if (win) {
-      setTimeout(() => {
-        BrowserWindow.fromId(win[0])?.webContents.send('open-path', waitOpenFile)
-      }, 300)
-    } else{
+    try {
+      if (!isAbsolute(waitOpenFile)) {
+        waitOpenFile = join(process.cwd(), waitOpenFile)
+      }
       createWindow({
         openTabs: [waitOpenFile]
       })
+      waitOpenFile = ''
+    } catch (e) {}
+  } else {
+    try {
+      const data = store.get('windows') as WinOptions[] || []
+      if (data?.length) {
+        for (let d of data) {
+          createWindow(typeof d === 'object' ? d : undefined)
+        }
+      } else if (!waitOpenFile) {
+        createWindow()
+      }
+    } catch (e) {
+      // log.error('create error', e)
     }
-    waitOpenFile = ''
   }
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

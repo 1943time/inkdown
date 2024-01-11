@@ -49,7 +49,7 @@ export const isDark = (config?: any) => {
   }
   return dark
 }
-const isBoolean = (v: any) => typeof v === 'boolean'
+const getBoolean = (v: any, def: boolean) => typeof v === 'boolean' ? v : def
 
 export const registerApi = () => {
   store.delete('service-config')
@@ -87,7 +87,7 @@ export const registerApi = () => {
     const theme = typeof config.theme === 'string' ? config.theme : nativeTheme.themeSource
     const dark = isDark(config)
     return {
-      showLeading: typeof config.showLeading === 'boolean' ? config.showLeading : true,
+      showLeading: getBoolean(config.showLeading, true),
       theme: theme,
       autoDownload: !!config.autoDownload,
       dark: dark,
@@ -99,17 +99,17 @@ export const registerApi = () => {
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
-      showCharactersCount: isBoolean(config.showCharactersCount) ? config.showCharactersCount : true,
+      showCharactersCount: getBoolean(config.showCharactersCount, true),
       mas: process.mas || false,
-      dragToSort: isBoolean(config.dragToSort) ? config.dragToSort : true,
-      autoRebuild: isBoolean(config.autoRebuild) ? config.autoRebuild : true,
+      dragToSort: getBoolean(config.dragToSort, true),
+      autoRebuild: getBoolean(config.autoRebuild, true),
       locale: getLocale(),
       renameFileWhenSaving: !!config.renameFileWhenSaving,
-      showFloatBar: isBoolean(config.showFloatBar) ? config.showFloatBar : true,
-      showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true,
-      fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true,
-      relativePathForImageStore: isBoolean(config.relativePathForImageStore) ? config.relativePathForImageStore : false,
-      showHiddenFiles: isBoolean(config.showHiddenFiles) ? config.showHiddenFiles : false,
+      showFloatBar: getBoolean(config.showFloatBar, true),
+      showRemoveFileDialog: getBoolean(config.showRemoveFileDialog, true),
+      fileWatcher: getBoolean(config.fileWatcher, true),
+      relativePathForImageStore: getBoolean(config.relativePathForImageStore, false),
+      showHiddenFiles: getBoolean(config.showHiddenFiles, false),
       editorLineHeight: config.editorLineHeight || 'default'
     }
   })

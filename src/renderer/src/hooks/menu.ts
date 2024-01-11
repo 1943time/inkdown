@@ -18,7 +18,7 @@ export const useSystemMenus = () => {
     window.electron.ipcRenderer.invoke('get-win-set').then(res => {
       if (res) {
         let {openTabs, openFolder, index} = res as {openTabs: string[], openFolder: string, index: number}
-        openTabs = openTabs ? openTabs.filter(t => !!t) : []
+        openTabs = openTabs ? Array.from(new Set(openTabs.filter(t => !!t) )): []
         try {
           const s = stat(openFolder)
           if (openFolder && s && s.isDirectory()) {
@@ -32,6 +32,13 @@ export const useSystemMenus = () => {
           }
           if (typeof index === 'number' && treeStore.tabs[index]) {
             treeStore.selectTab(index)
+          }
+          if (treeStore.currentTab?.current) {
+            if (treeStore.root) {
+              document.title = `${treeStore.root}-${treeStore.currentTab.current.filename}`
+            } else {
+              document.title = `${treeStore.currentTab.current.filename}`
+            }
           }
         } catch (e) {}
       }

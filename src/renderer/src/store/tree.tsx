@@ -138,7 +138,13 @@ export class TreeStore {
     window.electron.ipcRenderer.on('open-path', (e, path: string) => {
       const s = stat(path)
       if (s) {
-        s.isDirectory() ? this.openFolder(path) : this.openNote(path)
+        if (s.isDirectory()) {
+          if (path !== treeStore.root?.filePath) this.openFolder(path)
+        } else {
+          if (!treeStore.tabs.some(t => t.current?.filePath === path)) {
+            this.appendTab(path)
+          }
+        }
       }
     })
     window.electron.ipcRenderer.on('tree-command', (e, params: {
@@ -407,6 +413,7 @@ export class TreeStore {
       this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
       this.currentTab.history.push(item)
       this.openParentDir(item)
+      document.title = this.root.filename + '-' + item.filename
       this.currentTab.index = this.currentTab.history.length - 1
       if (this.currentTab.store?.openSearch) this.currentTab.store.setSearchText(this.currentTab.store.search.text)
       if (scroll) {
@@ -423,6 +430,7 @@ export class TreeStore {
           appendFileSync(filePath, '', {encoding: 'utf-8'})
         }
         const node = this.createSingleNode(filePath)
+        document.title = node.filename
         this.currentTab.history.push(node)
         this.currentTab.index = this.currentTab.history.length - 1
       }
