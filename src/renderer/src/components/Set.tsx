@@ -168,6 +168,15 @@ export const Set = observer(() => {
                   </div>
                   <div className={'flex justify-between items-center py-3'}>
                     <div className={'text-sm'}>
+                      {configStore.zh ? '显示隐藏文件' : 'Show hidden files'}
+                    </div>
+                    <div>
+                      <Checkbox checked={configStore.config.showHiddenFiles}
+                                onChange={e => configStore.setConfig('showHiddenFiles', e.target.checked)}/>
+                    </div>
+                  </div>
+                  <div className={'flex justify-between items-center py-3'}>
+                    <div className={'text-sm'}>
                       {configStore.zh ? '删除文件确认' : 'Delete file confirmation'}
                     </div>
                     <div>
@@ -179,12 +188,14 @@ export const Set = observer(() => {
                     <div className={'text-sm'}>
                       <span className={'mr-1'}>{configStore.zh ? '图片存储文件夹' : 'Image storage folder'}</span>
                       <Help text={
-                        configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置，如果使用相对路劲，则路径相对于当前文档的路径' :
-                          'Save location for pasting images when opening a folder, If relative road force is used, the path is relative to the path of the current document'
+                        configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径' :
+                          'The save location for pasting images when opening a folder, if using a relative path, the path is relative to the current document\'s path'
                       }/>
                     </div>
                     <div className={'flex items-center'}>
-                      <Checkbox checked={configStore.config.relativePathForImageStore} onChange={e => configStore.setConfig('relativePathForImageStore', e.target.checked)}>Relative path</Checkbox>
+                      <Checkbox checked={configStore.config.relativePathForImageStore}
+                                onChange={e => configStore.setConfig('relativePathForImageStore', e.target.checked)}>Relative
+                        path</Checkbox>
                       <Space.Compact style={{width: 300}}>
                         <Input placeholder={'folder name'} value={state.imagesFolder}
                                onChange={e => setState({imagesFolder: e.target.value})}/>

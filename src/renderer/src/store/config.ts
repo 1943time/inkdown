@@ -27,7 +27,8 @@ class ConfigStore {
     showFloatBar: true,
     showRemoveFileDialog: true,
     fileWatcher: true,
-    relativePathForImageStore: false
+    relativePathForImageStore: false,
+    showHiddenFiles: true
   }
   timer = 0
   homePath = ''

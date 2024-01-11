@@ -108,7 +108,8 @@ export const registerApi = () => {
       showFloatBar: isBoolean(config.showFloatBar) ? config.showFloatBar : true,
       showRemoveFileDialog: isBoolean(config.showRemoveFileDialog) ? config.showRemoveFileDialog : true,
       fileWatcher: isBoolean(config.fileWatcher) ? config.fileWatcher : true,
-      relativePathForImageStore: isBoolean(config.relativePathForImageStore) ? config.relativePathForImageStore : false
+      relativePathForImageStore: isBoolean(config.relativePathForImageStore) ? config.relativePathForImageStore : false,
+      showHiddenFiles: isBoolean(config.showHiddenFiles) ? config.showHiddenFiles : true
     }
   })
 

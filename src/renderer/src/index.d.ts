@@ -21,6 +21,7 @@ export interface IFileItem {
   schema?: any[]
   history?: any
   sel?: BaseSelection
+  hidden?: boolean
 }
 
 export interface Tab {

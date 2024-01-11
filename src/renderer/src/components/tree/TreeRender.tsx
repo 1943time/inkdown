@@ -7,6 +7,8 @@ import {action} from 'mobx'
 import {MainApi} from '../../api/main'
 import {Input} from 'antd'
 import ArrowRight from '../../icons/ArrowRight'
+import {configStore} from '../../store/config'
+import {join} from 'path'
 
 const getClass = (c: IFileItem) => {
   if (c.mode) return ''
@@ -175,9 +177,17 @@ const RenderItem = observer(({items, level}: { items: IFileItem[], level: number
       treeStore.saveNote(item)
     }, 30)
   }, [])
+  const filter = useCallback((items: IFileItem[]) => {
+    return items.filter(c => {
+      const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
+      return configStore.config.showHiddenFiles ||
+        !c.hidden ||
+        (!configStore.config.relativePathForImageStore && c.filePath === imgDir)
+    })
+  }, [configStore.config.showHiddenFiles])
   return (
     <>
-      {items.map(c =>
+      {filter(items).map(c =>
         <Item
           key={c.id}
           item={c}

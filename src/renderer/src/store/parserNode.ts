@@ -21,6 +21,7 @@ export const createFileNode = (params: {
   mode?: IFileItem['mode']
   editName?: string
   copyItem?: IFileItem
+  hidden?: boolean
 }) => {
   const name = params.folder ? params.filePath.split(sep).pop() : parse(params.filePath).name
   const node = {
@@ -35,6 +36,7 @@ export const createFileNode = (params: {
     history: undefined,
     sel: undefined,
     copyItem: params.copyItem,
+    hidden: params.hidden,
     ext: params.folder ? undefined : extname(params.filePath).replace(/^\./, ''),
   } as IFileItem
   if (params.parent) {
@@ -54,12 +56,12 @@ const readDir = (path: string, parent: IFileItem) => {
   for (let f of files) {
     const filePath = join(path, f)
     const s = statSync(filePath)
-    if (f.startsWith('.') && s.isFile()) continue
     if (s.isDirectory()) {
       const node = createFileNode({
         folder: true,
         parent: parent,
-        filePath: join(path, f)
+        filePath: join(path, f),
+        hidden: f.startsWith('.')
       })
       node.children = readDir(filePath, node)
       tree.push(node)
@@ -67,7 +69,8 @@ const readDir = (path: string, parent: IFileItem) => {
       const node = createFileNode({
         folder: false,
         parent: parent,
-        filePath: join(path, f)
+        filePath: join(path, f),
+        hidden: f.startsWith('.')
       })
       tree.push(node)
     }
