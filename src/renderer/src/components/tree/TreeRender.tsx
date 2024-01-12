@@ -8,7 +8,7 @@ import {MainApi} from '../../api/main'
 import {Input} from 'antd'
 import ArrowRight from '../../icons/ArrowRight'
 import {configStore} from '../../store/config'
-import {join} from 'path'
+import {basename, join} from 'path'
 
 const getClass = (c: IFileItem) => {
   if (c.mode) return ''
@@ -178,13 +178,15 @@ const RenderItem = observer(({items, level}: { items: IFileItem[], level: number
     }, 30)
   }, [])
   const filter = useCallback((items: IFileItem[]) => {
+    const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
+    const base = basename(imgDir)
     return items.filter(c => {
-      const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
       return configStore.config.showHiddenFiles ||
+        c.filename === base ||
         !c.hidden ||
         (!configStore.config.relativePathForImageStore && c.filePath === imgDir)
     })
-  }, [configStore.config.showHiddenFiles])
+  }, [configStore.config.showHiddenFiles, configStore.config.imagesFolder])
   return (
     <>
       {filter(items).map(c =>
