@@ -96,6 +96,7 @@ export const useKeyboard = (store: EditorStore) => {
           match: n => Element.isElement(n),
           mode: 'lowest'
         })
+        if (!node) return
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
           if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {

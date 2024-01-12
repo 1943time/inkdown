@@ -1,8 +1,8 @@
 import React, {useCallback, useEffect, useRef} from 'react'
-import {Editable, Slate} from 'slate-react'
+import {Editable, ReactEditor, Slate} from 'slate-react'
 import {Editor, Element, Node, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
-import {clearAllCodeCache, codeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
+import {clearAllCodeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
 import {useOnchange} from './plugins/useOnchange'
 import {htmlParser} from './plugins/htmlParser'
@@ -109,7 +109,8 @@ export const MEditor = observer(({note}: {
       try {
         runInAction(() => store.openLangCompletion = false)
         treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
-      } catch (e) {}
+      } catch (e) {
+      }
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
       if (!changedMark.current) {
@@ -142,7 +143,7 @@ export const MEditor = observer(({note}: {
           note.refresh = !note.refresh
         }), 200)
       }
-      count(note.schema|| [])
+      count(note.schema || [])
       try {
         EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true, note.sel)
         clearAllCodeCache(editor)
@@ -178,18 +179,11 @@ export const MEditor = observer(({note}: {
 
   useSubject(treeStore.externalChange$, path => {
     if (path === note?.filePath) {
-      first.current = true
-      EditorUtils.reset(editor, note.schema)
-      if (note.sel) {
-        try {
-          if (Editor.hasPath(editor, note.sel.anchor.path)) {
-            const node = Node.get(editor, note.sel.anchor.path)
-            if (node?.text && node.text?.length >= note.sel.anchor.offset) {
-              Transforms.select(editor, note.sel)
-            }
-          }
-        } catch (e) {}
-      }
+      try {
+        first.current = true
+        ReactEditor.blur(editor)
+        EditorUtils.deleteAll(editor, note.schema)
+      } catch (e) {}
     }
   }, [note])
 
@@ -326,12 +320,12 @@ export const MEditor = observer(({note}: {
         onKeyDown={keydown}
         renderLeaf={renderLeaf}
       />
-     <RenamePasteFile
-       file={saveFile.current!}
-       onClose={() => setState({openRenameModal: false})}
-       open={state.openRenameModal}
-       store={store}
-     />
+      <RenamePasteFile
+        file={saveFile.current!}
+        onClose={() => setState({openRenameModal: false})}
+        open={state.openRenameModal}
+        store={store}
+      />
     </Slate>
   )
 })

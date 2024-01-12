@@ -93,7 +93,7 @@ export class EditorUtils {
       match: Text.isText
     })
   }
-  static deleteAll(editor: Editor) {
+  static deleteAll(editor: Editor, insertNodes?: any[]) {
     const nodes = Array.from(Editor.nodes(editor, {
       at: [],
       match: n => Element.isElement(n),
@@ -109,7 +109,8 @@ export class EditorUtils {
       })
       Transforms.delete(editor, {at: [0]})
     }
-    Transforms.insertNodes(editor, [EditorUtils.p], {at: [0]})
+    if (!insertNodes) insertNodes = [EditorUtils.p]
+    Transforms.insertNodes(editor, insertNodes, {at: [0]})
   }
   static reset(editor: Editor, insertNodes?: any[], force?: boolean | History, sel?: BaseSelection) {
     if (!insertNodes) insertNodes = [EditorUtils.p]
