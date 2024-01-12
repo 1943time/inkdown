@@ -291,7 +291,9 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const onError = useCallback((e: React.SyntheticEvent) => {
-    console.warn('Editor exception', e)
+    if (import.meta.env.DEV) {
+      console.warn('Editor exception', e)
+    }
   }, [])
 
   return (

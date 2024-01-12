@@ -29,6 +29,7 @@ export class TreeStore {
   dropNode: IFileItem | null = null
   tabs: Tab[] = []
   selectItem: IFileItem | null = null
+  openQuickly = false
   searchKeyWord = ''
   currentIndex = 0
   width = 260
@@ -111,7 +112,7 @@ export class TreeStore {
           this.selectItem = null
         })
       }
-      if (this.selectItem && isHotkey('mod+backspace', e)) {
+      if (this.selectItem && isHotkey('mod+backspace', e) && !configStore.visible && !this.openQuickly) {
         this.moveToTrash(this.selectItem)
       }
       if (isHotkey('mod+v', e) && this.selectItem && this.selectItem.folder) {

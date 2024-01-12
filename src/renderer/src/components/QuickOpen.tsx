@@ -6,6 +6,7 @@ import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
 import {configStore} from '../store/config'
 import {sep} from 'path'
+import {runInAction} from 'mobx'
 
 export const QuickOpen = observer(() => {
   const [state, setState] = useLocalState({
@@ -71,12 +72,14 @@ export const QuickOpen = observer(() => {
       open: true,
       activeIndex: 0
     })
+    runInAction(() => treeStore.openQuickly = true)
     window.addEventListener('keydown', keydown)
   }, [])
 
   const close = useCallback(() => {
     window.removeEventListener('keydown', keydown)
     setState({open: false})
+    runInAction(() => treeStore.openQuickly = false)
   }, [])
 
   useEffect(() => {

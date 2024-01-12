@@ -5,11 +5,12 @@ import {base64ToArrayBuffer, message$, modal$, stat, toArrayBuffer} from '../uti
 import {exportHtml} from '../editor/output/html'
 import {clearExpiredRecord, db} from '../store/db'
 import {runInAction} from 'mobx'
-import {isAbsolute, join} from 'path'
+import {basename, isAbsolute, join} from 'path'
 import {existsSync, readFileSync} from 'fs'
 import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {configStore} from '../store/config'
+import {IFileItem} from '../index'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
 
@@ -137,8 +138,24 @@ export const useSystemMenus = () => {
           title: configStore.zh ? '提示' : 'Note',
           content: configStore.zh ? '存储区中未被引用的图片将被删除' : 'Unreferenced images in the storage area will be deleted',
           onOk: async () => {
-            const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
-            if (existsSync(imgDir)) {
+            let imgDirs: IFileItem[] = []
+            if (configStore.config.relativePathForImageStore) {
+              const stack = treeStore.root.children!.slice()
+              const base = basename(configStore.config.imagesFolder)
+              while (stack.length) {
+                const item = stack.shift()!
+                if (item.folder && item.children) {
+                  stack.unshift(...item.children)
+                  if (item.filename === base) {
+                    imgDirs.push(item)
+                  }
+                }
+              }
+            } else {
+              const item = treeStore.root.children?.find(item => item.filePath === join(treeStore.root.filePath, configStore.config.imagesFolder))
+              if (item) imgDirs.push(item)
+            }
+            if (imgDirs.length) {
               const usedImages = new Set<string>()
               const stack = treeStore.root.children!.slice()
               while (stack.length) {
@@ -160,19 +177,18 @@ export const useSystemMenus = () => {
                   }
                 }
               }
-              const images = await window.api.fs.readdir(imgDir)
-              const remove = new Set<string>()
-              for (let img of images) {
-                const path = join(imgDir, img)
-                if (!usedImages.has(path)) {
-                  remove.add(path)
-                  MainApi.moveToTrash(path)
+              for (let dir of imgDirs) {
+                const images = await window.api.fs.readdir(dir.filePath)
+                const remove = new Set<string>()
+                for (let img of images) {
+                  const path = join(dir.filePath, img)
+                  if (!usedImages.has(path)) {
+                    remove.add(path)
+                    MainApi.moveToTrash(path)
+                  }
                 }
-              }
-              const imgFolder = treeStore.root.children!.find(c => c.filename === configStore.config.imagesFolder)
-              if (imgFolder) {
                 runInAction(() => {
-                  imgFolder.children = imgFolder.children!.filter(img => {
+                  dir.children = dir.children?.filter(img => {
                     return !remove.has(img.filePath)
                   })
                 })
