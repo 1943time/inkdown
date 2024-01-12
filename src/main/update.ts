@@ -9,7 +9,6 @@ autoUpdater.setFeedURL({
   owner: '1943time',
   repo: 'bluestone'
 })
-
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
 
@@ -20,18 +19,22 @@ export class AppUpdate {
     return BrowserWindow.getFocusedWindow()
   }
   constructor() {
-    setTimeout(() => {
-      autoUpdater.checkForUpdatesAndNotify()
-    }, 3000)
+    // setTimeout(() => {
+    //   autoUpdater.checkForUpdatesAndNotify()
+    // }, 3000)
 
-    ipcMain.on('check-updated', () => {
+    ipcMain.handle('check-updated', () => {
       this.manual = true
       autoUpdater.checkForUpdatesAndNotify()
+      return new Promise((resolve, reject) => {
+        autoUpdater.once('update-available', resolve)
+        autoUpdater.once('update-not-available', reject)
+      })
     })
 
-    ipcMain.on('start-update', () => {
+    ipcMain.handle('start-update', () => {
       this.cancelToken = new CancellationToken()
-      autoUpdater.downloadUpdate(this.cancelToken)
+      return autoUpdater.downloadUpdate(this.cancelToken)
     })
 
     ipcMain.on('cancel-update', () => {

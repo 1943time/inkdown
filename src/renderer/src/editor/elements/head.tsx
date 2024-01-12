@@ -5,11 +5,11 @@ import {DragHandle} from '../tools/DragHandle'
 import {Node} from 'slate'
 
 const levelDragHandleTop = new Map([
-  [1, '.52em'],
-  [2, '.45em'],
-  [3, '.33em'],
-  [4, '.25em'],
-  [5, '.25em']
+  [1, 0.52],
+  [2, 0.45],
+  [3, 0.33],
+  [4, 0.25],
+  [5, 0.25]
 ])
 export function Head({element, attributes, children}: ElementProps<HeadNode>) {
   const store = useEditorStore()
@@ -22,7 +22,7 @@ export function Head({element, attributes, children}: ElementProps<HeadNode>) {
       onDragStart: store.dragStart
     }, (
       <>
-        <DragHandle style={{top: levelDragHandleTop.get(element.level), left: -28, paddingRight: 10}}/>
+        <DragHandle style={{left: -28, paddingRight: 10}} top={levelDragHandleTop.get(element.level)!}/>
         {children}
       </>
     ))

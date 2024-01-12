@@ -6,6 +6,8 @@ import {shareStore} from '../server/store'
 
 class ConfigStore {
   visible = false
+  enableUpgrade = false
+  openUpdateDialog = false
   config = {
     showLeading: true,
     autoDownload: false,
@@ -17,6 +19,7 @@ class ConfigStore {
     editorTextSize: 16,
     codeTheme: 'material-theme-palenight',
     leadingLevel: 4,
+    mas: false,
     showCharactersCount: true,
     imagesFolder: '.images',
     dragToSort: true,
@@ -35,7 +38,7 @@ class ConfigStore {
   homePath = ''
   deviceId = ''
   get mas() {
-    return process.mas || false
+    return this.config.mas || false
   }
   get tab() {
     return ' '.repeat(this.config.codeTabSize)

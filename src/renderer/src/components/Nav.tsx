@@ -6,6 +6,9 @@ import {MainApi} from '../api/main'
 import {Update} from './Update'
 import {isMac} from '../utils'
 import {Share} from '../server/Share'
+import IUpgrade from '../icons/IUpgrade'
+import {configStore} from '../store/config'
+import {action} from 'mobx'
 
 export const Nav = observer(() => {
   const paths = useMemo(() => {
@@ -78,6 +81,15 @@ export const Nav = observer(() => {
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
             />
           </div>
+          {configStore.enableUpgrade &&
+            <div
+              className={'group p-1 mr-0.5'}
+              onClick={action(() => configStore.openUpdateDialog = true)}
+            >
+              <IUpgrade
+                className={'w-5 h-5 duration-200 dark:text-sky-300 text-sky-500 dark:group-hover:text-sky-500 group-hover:text-sky-700'}/>
+            </div>
+          }
         </div>
       </div>
     </div>

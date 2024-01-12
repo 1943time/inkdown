@@ -100,7 +100,7 @@ export const registerApi = () => {
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       showCharactersCount: getBoolean(config.showCharactersCount, true),
-      mas: process.mas || false,
+      mas: getBoolean(process.mas, false),
       dragToSort: getBoolean(config.dragToSort, true),
       autoRebuild: getBoolean(config.autoRebuild, true),
       locale: getLocale(),

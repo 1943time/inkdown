@@ -57,9 +57,15 @@ a {
   white-space: normal;
   &.line-height-compact {
     line-height: 1.5em;
+    .check-item{
+      top: 2px
+    }
   }
   &.line-height-loose{
     line-height: 1.9em;
+    .check-item{
+      top: 5px;
+    }
   }
   .link{
     text-decoration: underline;

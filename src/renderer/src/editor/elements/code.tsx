@@ -78,7 +78,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         data-be={'code'}
         onDragStart={store.dragStart}
         className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
-        <DragHandle style={{top: '0.9em'}}/>
+        <DragHandle top={0.9}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
           contentEditable={false}>

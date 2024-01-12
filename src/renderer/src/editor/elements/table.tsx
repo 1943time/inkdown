@@ -37,7 +37,7 @@ export const Table = observer((props: RenderElementProps) => {
   return useMemo(() => {
     return (
       <div className={'m-table drag-el'} {...props.attributes} data-be={'table'} onDragStart={store.dragStart}>
-        <DragHandle style={{top: '0.65em'}}/>
+        <DragHandle top={0.65}/>
         <table>
           <tbody>{props.children}</tbody>
         </table>

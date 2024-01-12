@@ -1,39 +1,61 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Modal, notification, Progress, Space} from 'antd'
+import {Button, Checkbox, Modal, notification, Progress, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
 import {message$} from '../utils'
 import {configStore} from '../store/config'
 import {openConfirmDialog$} from './ConfirmDialog'
+import * as process from 'process'
+import IUpgrade from '../icons/IUpgrade'
+import {action, runInAction} from 'mobx'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
   const [state, setState] = useLocalState({
-    open: false,
     startUpdate: false,
     percent: 0,
     manual: false,
+    mas: configStore.mas,
+    loading: false,
+    enableUpgrade: false,
     updateData: {
       tag: '',
-      releaseNotes: '',
-      releaseDate: '',
-      version: '',
-      files: [] as {url: string}[]
+      englishInfo: [] as string[],
+      zhInfo: [] as string[]
     }
   })
   const downLoad = useCallback(() => {
-    const file = state.updateData.files.find(f => f.url.endsWith('.dmg'))
-    if (file) {
-      window.open(`https://github.com/1943time/bluestone/releases/latest`)
+    window.open(`https://github.com/1943time/bluestone/releases/latest`)
+  }, [])
+
+  const check = useCallback(async () => {
+    const v = await window.electron.ipcRenderer.invoke('get-version')
+    const res = await window.api.got.get('https://www.bluemd.me/api/version', {
+      searchParams: {
+        version: v,
+        mas: configStore.mas ? 'true' : undefined
+      }
+    }).json<{
+      masVersion: string
+      github: Record<string, any>
+    }>()
+    if (res.github) {
+      const info:string[] = res.github.body.split('***')
+      setState({
+        updateData: {
+          tag: configStore.mas ? 'v' + res.masVersion : res.github.tag_name,
+          englishInfo: info[0]?.split(/\n|\r\n/).filter(item => !!item) || [],
+          zhInfo: info[1]?.split(/\n|\r\n/).filter(item => !!item) || []
+        }
+      })
+      runInAction(() => configStore.enableUpgrade = true)
+    } else {
+      setTimeout(check, 60 * 1000 * 60)
     }
   }, [])
 
   const [api, contextHolder] = notification.useNotification()
-  const [modal, context] = Modal.useModal()
   useEffect(() => {
-    ipcRenderer.on('update-available', (e, data) => {
-      if (state.startUpdate) return
-      setState({open: !!data, updateData: data})
-    })
+    check()
     ipcRenderer.on('check-updated', e => {
       setState({manual: true})
     })
@@ -81,59 +103,89 @@ export const Update = observer(() => {
   return (
     <>
       {contextHolder}
-      {context}
-      <div
-        className={`w-28 mr-2 hover:bg-black/10 rounded px-2 cursor-pointer ${state.startUpdate ? '' : 'hidden'}`}
-        onClick={() => setState({open: true})}
-      >
-        <Progress percent={state.percent} className={'m-0'}/>
-      </div>
+      {state.startUpdate &&
+        <div
+          className={`w-28 mr-2 hover:bg-black/10 rounded px-2 cursor-pointer`}
+          onClick={action(() => configStore.openUpdateDialog = true)}
+        >
+          <Progress percent={state.percent} className={'m-0'}/>
+        </div>
+      }
       <Modal
         title={`Update Bluestone-${state.updateData.tag}`}
         width={600}
-        onCancel={() => setState({open: false})}
-        open={state.open}
-        footer={(
-          <Space className={'mt-4'}>
-            {state.startUpdate ? (
-              <>
-                <Button onClick={downLoad}>{'Download manually'}</Button>
-                <Button
-                  onClick={() => {
-                    ipcRenderer.send('cancel-update')
-                    setState({startUpdate: false, percent: 0})
-                  }}
-                >
-                  {configStore.zh ? '取消更新' : 'Cancel update'}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button onClick={downLoad}>{'Download manually'}</Button>
-                <Button
-                  type={'primary'}
-                  onClick={() => {
-                    ipcRenderer.send('start-update')
-                    setState({startUpdate: true, open: false})
-                  }}
-                >
-                  {configStore.zh ? '立即更新' : 'Update now'}
-                </Button>
-              </>
-            )}
-          </Space>
-        )}
+        onCancel={action(() => configStore.openUpdateDialog = false)}
+        open={configStore.openUpdateDialog}
+        footer={null}
       >
         <div
-          dangerouslySetInnerHTML={{__html: state.updateData.releaseNotes}}
-          className={'py-2'}
-        />
+          className={'py-2 break-words'}
+        >
+          {configStore.zh ? (
+            state.updateData.zhInfo.map((item, i) =>
+              <p key={i} className={'mb-2'}>{item}</p>
+            )
+          ) : (
+            state.updateData.englishInfo.map((item, i) =>
+              <p key={i} className={'mb-2'}>{item}</p>
+            )
+          )}
+        </div>
         {state.startUpdate &&
           <div className={'flex items-center mt-4'}>
             <span className={'mr-4'}>{'Updating'}</span>
             <Progress percent={state.percent} className={'flex-1 mb-0'}/>
           </div>
         }
+        <div className={'mt-4 flex justify-center space-x-4 px-20'}>
+          {state.startUpdate ? (
+            <>
+              <Button onClick={downLoad}>{'Download manually'}</Button>
+              <Button
+                onClick={() => {
+                  ipcRenderer.send('cancel-update')
+                  setState({startUpdate: false, percent: 0})
+                }}
+              >
+                {configStore.zh ? '取消更新' : 'Cancel update'}
+              </Button>
+            </>
+          ) : (
+            <>
+              {!state.mas &&
+                <Button onClick={downLoad}>{configStore.zh ? '手动下载' : 'Download manually'}</Button>
+              }
+              <Button
+                type={'primary'}
+                block={state.mas}
+                loading={state.loading}
+                onClick={async () => {
+                  if (state.mas) {
+                    window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
+                  } else {
+                    setState({loading: true})
+                    ipcRenderer.invoke('check-updated').then(async () => {
+                      await ipcRenderer.invoke('start-update')
+                      setState({startUpdate: true})
+                      runInAction(() => configStore.openUpdateDialog = false)
+                    }).catch(e => {
+                      let msg = typeof e === 'string' ? e : e instanceof Error ? e.message : 'The network is abnormal, please try again later or download manually'
+                      api.error({
+                        message: configStore.zh ? '更新失败' : 'The update failed',
+                        description: msg
+                      })
+                      console.error('update fail', e)
+                    }).finally(() => {
+                      setState({loading: false})
+                    })
+                  }
+                }}
+              >
+                {configStore.zh ? '立即更新' : 'Update now'}
+              </Button>
+            </>
+          )}
+        </div>
       </Modal>
     </>
   )
