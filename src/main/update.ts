@@ -14,17 +14,11 @@ autoUpdater.autoInstallOnAppQuit = true
 
 export class AppUpdate {
   cancelToken?: CancellationToken
-  manual = false
   get win() {
     return BrowserWindow.getFocusedWindow()
   }
   constructor() {
-    // setTimeout(() => {
-    //   autoUpdater.checkForUpdatesAndNotify()
-    // }, 3000)
-
     ipcMain.handle('check-updated', () => {
-      this.manual = true
       autoUpdater.checkForUpdatesAndNotify()
       return new Promise((resolve, reject) => {
         autoUpdater.once('update-available', resolve)
@@ -51,7 +45,7 @@ export class AppUpdate {
     })
 
     autoUpdater.on('update-not-available', (info) => {
-      this.win?.webContents.send('update-not-available', this.manual)
+      this.win?.webContents.send('update-not-available')
     })
 
     autoUpdater.on('error', (e, message) => {

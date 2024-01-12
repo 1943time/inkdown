@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import {Button, Checkbox, Modal, notification, Progress, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
-import {useCallback, useEffect} from 'react'
+import {useCallback, useEffect, useRef} from 'react'
 import {message$} from '../utils'
 import {configStore} from '../store/config'
 import {openConfirmDialog$} from './ConfirmDialog'
@@ -23,6 +23,7 @@ export const Update = observer(() => {
       zhInfo: [] as string[]
     }
   })
+  const checkTimer = useRef(0)
   const downLoad = useCallback(() => {
     window.open(`https://github.com/1943time/bluestone/releases/latest`)
   }, [])
@@ -49,8 +50,9 @@ export const Update = observer(() => {
       })
       runInAction(() => configStore.enableUpgrade = true)
     } else {
-      setTimeout(check, 60 * 1000 * 60)
+      checkTimer.current = window.setTimeout(check, 60 * 1000 * 60)
     }
+    return !!res.github
   }, [])
 
   const [api, contextHolder] = notification.useNotification()
@@ -58,19 +60,30 @@ export const Update = observer(() => {
     check()
     ipcRenderer.on('check-updated', e => {
       setState({manual: true})
+      clearTimeout(checkTimer.current)
+      check().then((updated) => {
+        if (updated) {
+          runInAction(() => configStore.openUpdateDialog = true)
+        } else {
+          message$.next({
+            type: 'info',
+            content: configStore.zh ? '没有可用的更新' : 'No updates are available'
+          })
+        }
+      })
     })
     ipcRenderer.on('update-progress', (e, data) => {
       const percent = (data.percent as number || 0).toFixed(1)
       setState({percent: +percent})
     })
 
-    ipcRenderer.on('update-not-available', (e, manual) => {
-      if (!manual) return
-      message$.next({
-        type: 'info',
-        content: configStore.zh ? '没有可用的更新' : 'No updates are available'
-      })
-    })
+    // ipcRenderer.on('update-not-available', (e, manual) => {
+    //   if (!manual) return
+    //   message$.next({
+    //     type: 'info',
+    //     content: configStore.zh ? '没有可用的更新' : 'No updates are available'
+    //   })
+    // })
 
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)

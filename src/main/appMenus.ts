@@ -30,7 +30,6 @@ const getSystemMenus = () => {
     {
       label: zh ? '检查更新' : 'Check for Updates',
       click: () => {
-        ipcMain.emit('check-updated')
         BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
       }
     }
