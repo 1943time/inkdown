@@ -1,9 +1,7 @@
 import * as Electron from 'electron'
-import {nanoid} from 'nanoid'
-import {dialog} from 'electron'
-import {configStore} from '../store/config'
+import {app, dialog} from 'electron'
 import {removeFileRecord} from '../store/db'
-import {Got} from 'got'
+
 const ipcRenderer = window.electron.ipcRenderer
 
 let taskMap = new Map<string, Function>()
@@ -47,7 +45,7 @@ export const MainApi = {
   getMachineId():Promise<string> {
     return ipcRenderer.invoke('get-machine-id')
   },
-  getPath(type: 'home') {
+  getPath(type: Parameters<typeof app.getPath>[0]) {
     return ipcRenderer.invoke('get-path', type)
   },
   showMessageBox(options: Parameters<typeof dialog['showMessageBoxSync']>[0]) {

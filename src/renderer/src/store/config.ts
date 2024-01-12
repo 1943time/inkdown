@@ -114,9 +114,13 @@ class ConfigStore {
     }
   }
 
-  initial() {
-    MainApi.getPath('home').then(res => {
+  async initial() {
+    await MainApi.getPath('home').then(res => {
       this.homePath = res
+      if (this.mas) {
+        const m = this.homePath.match(/\/Users\/[^\/]+/)
+        if (m) this.homePath = m[0]
+      }
     })
     return new Promise(resolve => {
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {

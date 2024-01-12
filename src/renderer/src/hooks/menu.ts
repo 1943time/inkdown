@@ -6,7 +6,7 @@ import {exportHtml} from '../editor/output/html'
 import {clearExpiredRecord, db} from '../store/db'
 import {runInAction} from 'mobx'
 import {isAbsolute, join} from 'path'
-import {existsSync} from 'fs'
+import {existsSync, readFileSync} from 'fs'
 import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {configStore} from '../store/config'
@@ -15,10 +15,17 @@ const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
 
 export const useSystemMenus = () => {
   const initial = useCallback(async () => {
-    window.electron.ipcRenderer.invoke('get-win-set').then(res => {
+    window.electron.ipcRenderer.invoke('get-win-set').then(async res => {
       if (res) {
         let {openTabs, openFolder, index} = res as {openTabs: string[], openFolder: string, index: number}
         openTabs = openTabs ? Array.from(new Set(openTabs.filter(t => !!t) )): []
+        if (openTabs?.length === 1 && !openFolder) {
+          try {
+            readFileSync(openTabs[0])
+          } catch (e) {
+            await MainApi.open(openTabs[0])
+          }
+        }
         try {
           const s = stat(openFolder)
           if (openFolder && s && s.isDirectory()) {
