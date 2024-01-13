@@ -5,8 +5,6 @@ import {useCallback, useEffect, useRef} from 'react'
 import {message$} from '../utils'
 import {configStore} from '../store/config'
 import {openConfirmDialog$} from './ConfirmDialog'
-import * as process from 'process'
-import IUpgrade from '../icons/IUpgrade'
 import {action, runInAction} from 'mobx'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
@@ -178,7 +176,7 @@ export const Update = observer(() => {
                   } else {
                     setState({loading: true})
                     ipcRenderer.invoke('check-updated').then(async () => {
-                      await ipcRenderer.invoke('start-update')
+                      ipcRenderer.invoke('start-update')
                       setState({startUpdate: true})
                       runInAction(() => configStore.openUpdateDialog = false)
                     }).catch(e => {
