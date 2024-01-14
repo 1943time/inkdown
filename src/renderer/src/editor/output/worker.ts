@@ -205,7 +205,7 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
           str += nodeStr
         }
         if (tree.length > 1) {
-          str += '\n'
+          str += '\n\n'
         }
       } else {
         if (node.type === 'paragraph' && tree[i - 1]?.type === 'list' && tree[i + 1]?.type === 'list') {
@@ -215,11 +215,8 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
             str += '\n\n' + pre + (parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '')) + '\n\n'
           }
         } else {
-          if (node.type !== 'list') {
-            str += '\n'
-          }
-          str += parserNode(node, pre, parent)
-          if (node.type !== 'list') {
+          str += parserNode(node, pre, parent) + '\n'
+          if (tree.length - 1 !== i) {
             str += '\n'
           }
         }
