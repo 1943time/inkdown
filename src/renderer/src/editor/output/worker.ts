@@ -118,7 +118,6 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
 }
 
 const parserNode = (node: any, preString = '', parent: any[]) => {
-  // if (outputCache.get(node)) return outputCache.get(node)!
   let str = ''
   const newParent = [...parent, node]
   switch (node.type) {
@@ -209,12 +208,20 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
           str += '\n'
         }
       } else {
-        if (node.type !== 'list') {
-          str += '\n'
-        }
-        str += parserNode(node, pre, parent)
-        if (node.type !== 'list') {
-          str += '\n'
+        if (node.type === 'paragraph' && tree[i - 1]?.type === 'list' && tree[i + 1]?.type === 'list') {
+          if (!Node.string(node)?.replace(/\s|\t/g, '')) {
+            str += `\n\n${pre}<br/>\n\n`
+          } else {
+            str += '\n\n' + pre + (parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '')) + '\n\n'
+          }
+        } else {
+          if (node.type !== 'list') {
+            str += '\n'
+          }
+          str += parserNode(node, pre, parent)
+          if (node.type !== 'list') {
+            str += '\n'
+          }
         }
       }
     } else if (p.type === 'blockquote') {
@@ -224,6 +231,12 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
         if (p.type !== 'list') {
           str += '\n'
         }
+      }
+    } else if (node.type === 'paragraph' && tree[i - 1]?.type === 'list' && tree[i + 1]?.type === 'list') {
+      if (!Node.string(node)?.replace(/\s|\t/g, '')) {
+        str += '<br/>\n\n'
+      } else {
+        str += preString + (parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '')) + '\n\n'
       }
     } else {
       str += parserNode(node, preString, parent)
