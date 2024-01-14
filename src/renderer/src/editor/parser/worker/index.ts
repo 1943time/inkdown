@@ -1,6 +1,6 @@
 // pre-build to enable parse to run in the worker
 import parser from './bundle'
-import {Element} from 'slate'
+import {Element, Node} from 'slate'
 import {Content, Table} from 'mdast'
 import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../../el'
 
@@ -70,14 +70,18 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           if (img) {
             el = {type: 'paragraph', children: [{type: 'media',width: img?.width, url: img?.url, children: [{text: ''}]}]}
           } else {
-            el = {
-              type: 'code', language: 'html', render: true,
-              children: n.value.split('\n').map(s => {
-                return {
-                  type: 'code-line',
-                  children: [{text: s}]
-                }
-              })
+            if (n.value === '<br/>') {
+              el = {type: 'paragraph', children: [{text: ''}]}
+            } else {
+              el = {
+                type: 'code', language: 'html', render: true,
+                children: n.value.split('\n').map(s => {
+                  return {
+                    type: 'code-line',
+                    children: [{text: s}]
+                  }
+                })
+              }
             }
           }
         } else {
