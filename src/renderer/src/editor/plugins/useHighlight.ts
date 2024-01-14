@@ -71,7 +71,7 @@ export function useHighlight(store?: EditorStore) {
       if (['paragraph', 'table-cell'].includes(node.type)) {
         for (let i = 0; i < node.children.length; i++) {
           const c = node.children[i]
-          if (c.text && !EditorUtils.isDirtLeaf(node)) {
+          if (c.text && !EditorUtils.isDirtLeaf(c)) {
             const cache = cacheTextNode.get(c)
             if (cache) {
               ranges.push(...cache)
