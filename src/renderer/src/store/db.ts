@@ -20,16 +20,27 @@ export interface IHistory {
   schema: any[]
   updated: number
 }
+
+export interface IBookMark {
+  id?: string
+  title: string
+  path?: string
+  folder: boolean
+  parentId?: string
+}
+
 class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
   public history!: Table<IHistory, string>
+  public bookmark!: Table<IBookMark, string>
   public constructor() {
     super('db')
-    this.version(5).stores({
+    this.version(6).stores({
       recent: '&id,&filePath',
       quickOpen: '&id,filePath,dirPath',
-      history: '&id,filePath,schema,updated'
+      history: '&id,filePath,schema,updated',
+      bookmark: '&id,title,path,parentId'
     })
   }
 }
