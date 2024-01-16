@@ -86,7 +86,7 @@ export const deserialize = (el: ChildNode, parentTag: string = '') => {
         if (inner) {
           return {
             type: 'code', language: dataset?.blLang, children: Array.from(target.childNodes.values()).map(n => {
-              return {type: 'code-line', children: [{text: n.textContent?.replace(/\n/g, '') || ''}]}
+              return {type: 'code-line', children: [{text: n.textContent?.replace(/\n/g, '')?.replace(/\t/g, configStore.tab) || ''}]}
             })
           }
         } else {
