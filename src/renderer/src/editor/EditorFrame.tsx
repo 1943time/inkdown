@@ -105,14 +105,18 @@ export const EditorFrame = observer(({tab}: {
             {mt !== 'other' && mt !== 'markdown' &&
               <>
                 {mt === 'image' ?
-                  <div className={'text-center px-14 py-5'}>
+                  <div className={'text-center px-14 pb-5'} style={{paddingTop: pt + 20}}>
                     <img src={getImageData(tab.current?.filePath)} alt="" className={'inline'}/>
                   </div> :
                   (
-                    <div style={{
-                      ...size
-                    }}>
-                      <iframe className={'w-full h-full px-14 py-5'} src={tab.current.filePath}/>
+                    <div
+                      style={{
+                        ...size,
+                        paddingTop: pt + 20
+                      }}
+                      className={'px-10 pb-5'}
+                    >
+                      <iframe className={'w-full h-full rounded border b1'} src={tab.current.filePath}/>
                     </div>
                   )
                 }
