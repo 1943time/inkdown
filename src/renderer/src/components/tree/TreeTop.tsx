@@ -6,6 +6,9 @@ import ISearch from '../../icons/ISearch'
 import Collapse from '../../icons/Collapse'
 import {useSetState} from 'react-use'
 import {isMac} from '../../utils'
+import IBookmark from '../../icons/IconTag'
+import {TagsOutlined} from '@ant-design/icons'
+import IconTag from '../../icons/IconTag'
 
 export const TreeTop = observer(() => {
   const [state, setState] = useSetState({
@@ -26,7 +29,7 @@ export const TreeTop = observer(() => {
     >
       <div className={'flex h-full items-center'}>
         <div
-          className={`h-full space-x-3 items-center flex duration-200 ${treeStore.fold ? 'opacity-0 -translate-x-10' : ''}`}>
+          className={`h-full space-x-2 items-center flex duration-200 ${treeStore.fold ? 'opacity-0 -translate-x-10' : ''}`}>
           <div
             className={`p-1 rounded  ${treeStore.treeTab === 'folder' ? 'dark:bg-gray-300/10 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-gray-400/10 hover:bg-black/5'}`}
             onClick={() => {
@@ -42,6 +45,14 @@ export const TreeTop = observer(() => {
             }}
           >
             <ISearch className={'w-[18px] h-[18px]'}/>
+          </div>
+          <div
+            className={`p-1 rounded  ${treeStore.treeTab === 'bookmark' ? 'dark:bg-gray-300/10 bg-black/10 dark:fill-gray-300 fill-gray-600' : 'dark:fill-gray-400 fill-gray-500 dark:hover:bg-gray-400/10 hover:bg-black/5'}`}
+            onClick={() => {
+              treeStore.setState({treeTab: 'bookmark'})
+            }}
+          >
+            <IconTag className={'w-[18px] h-[18px]'} />
           </div>
         </div>
         <div

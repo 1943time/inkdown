@@ -10,6 +10,8 @@ import {EBook} from '../../server/ui/Ebook'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useSubject} from '../../hooks/subscribe'
 import {action} from 'mobx'
+import {Tag} from '../tag/Tag'
+import {AddTagToFile} from '../tag/AddTagToFile'
 
 export const Tree = observer(() => {
   const context = useCallback(() => {
@@ -60,6 +62,11 @@ export const Tree = observer(() => {
           <div className={`h-full ${treeStore.treeTab === 'search' ? '' : 'hidden'}`}>
             <FullSearch/>
           </div>
+          {treeStore.treeTab === 'bookmark' &&
+            <div className={`h-full`}>
+              <Tag/>
+            </div>
+          }
         </div>
       </div>
       <EBook
@@ -70,6 +77,7 @@ export const Tree = observer(() => {
         }}
         onSave={book => {}}
       />
+      <AddTagToFile/>
     </div>
   )
 })

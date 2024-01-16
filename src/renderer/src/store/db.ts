@@ -1,7 +1,7 @@
 import Dexie, {Table} from 'dexie'
 import {nanoid} from 'nanoid'
 import {readdirSync, statSync} from 'fs'
-import {join, parse} from 'path'
+import {join} from 'path'
 
 export interface IRecent {
   id?: string
@@ -23,27 +23,33 @@ export interface IHistory {
   updated: number
 }
 
-export interface IBookMark {
+export interface ITag {
   id?: string
   title: string
-  filePath?: string
-  folder: boolean
-  parentId?: string
-  children?: IBookMark[]
+  config?: Record<string, any>
+  children?: ITagFile[]
+}
+
+export interface ITagFile {
+  id?: string
+  filePath: string
+  tagId: string
 }
 
 class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
   public history!: Table<IHistory, string>
-  public bookmark!: Table<IBookMark, string>
+  public tag!: Table<ITag, string>
+  public tagFile!: Table<ITagFile, string>
   public constructor() {
     super('db')
     this.version(6).stores({
       recent: '&id,&filePath',
       quickOpen: '&id,filePath,dirPath',
       history: '&id,filePath,schema,updated',
-      bookmark: '&id,title,&filePath,parentId'
+      tag: '&id,title',
+      tagFile: '&id,filePath,tagId'
     })
   }
   async checkRenameFolder(from: string, to: string) {
@@ -58,90 +64,15 @@ class Db extends Dexie {
         }
       }
       if (fileMap.size) {
-        const records = await this.bookmark.where('filePath').anyOf(Object.keys(fileMap)).toArray()
+        const records = await this.tagFile.where('filePath').anyOf(Object.keys(fileMap)).toArray()
         for (const item of records) {
-          this.bookmark.where('id').equals(item.id!).modify({
+          this.tagFile.where('id').equals(item.id!).modify({
             filePath: fileMap.get(item.filePath!)
           })
         }
       }
     } catch (e) {
       console.error('checkRenameFolder', e)
-    }
-  }
-  async removeFolderBookmark(filePath: string) {
-    try {
-      const removePaths = [filePath]
-      const stack = readdirSync(filePath).map(f => join(filePath, f))
-      while (stack.length) {
-        const item = stack.pop()!
-        if (statSync(item).isDirectory()) {
-          stack.push(...readdirSync(item).map(f => join(item, f)))
-        } else {
-          removePaths.push(item)
-        }
-      }
-      await this.bookmark.where('filePath').anyOf(removePaths).delete()
-    } catch (e) {
-      console.error('removeFolderBookmark', e)
-    }
-  }
-  async removeBookmarkGroup(bookmark: IBookMark) {
-    try {
-      const removeIds = [bookmark.id!]
-      const stack = bookmark.children?.slice() || []
-      while (stack.length) {
-        const item = stack.pop()!
-        removeIds.push(item.id!)
-        if (item.folder && item.children?.length) {
-          stack.push(...item.children)
-        }
-      }
-      await this.bookmark.where('id').anyOf(removeIds).delete()
-    } catch (e) {
-      console.error('removeFolderBookmark', e)
-    }
-  }
-  async getBookmarkTree() {
-    let records = await this.bookmark.toArray()
-    records = records.sort((a, b) => {
-      if (a.folder !== b.folder) return a.folder ? -1 : 1
-      else return a.title > b.title ? 1 : -1
-    })
-    const groups:IBookMark[] = []
-    const top:IBookMark[] = []
-    const groupMap = new Map<string, IBookMark[]>()
-    for (const item of records) {
-      if (!item.parentId) {
-        top.push(item)
-      } else {
-        if (!groupMap.get(item.parentId)) groupMap.set(item.parentId, [])
-        groupMap.get(item.parentId)!.push(item)
-      }
-      if (item.folder) {
-        groups.push(item)
-      }
-    }
-    for (const g of groups) {
-      g.children = groupMap.get(g.id!) || []
-    }
-    return top
-  }
-
-  async addBookmark(filePath: string, parentId?: string) {
-    const record = await this.bookmark.where('filePath').equals(filePath).first()
-    if (record) {
-      await this.bookmark.where('id').equals(record.id!).modify({
-        parentId
-      })
-    } else {
-      await this.bookmark.add({
-        id: nanoid(),
-        folder: false,
-        title: parse(filePath).name,
-        filePath: filePath,
-        parentId
-      })
     }
   }
 }

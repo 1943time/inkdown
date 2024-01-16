@@ -173,6 +173,7 @@ export const Update = observer(() => {
                 onClick={async () => {
                   if (state.mas) {
                     window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
+                    // window.open('itms-apps://apps.apple.com/us/app/bluestone-markdown/id6451391474')
                   } else {
                     setState({loading: true})
                     ipcRenderer.invoke('check-updated').then(async () => {

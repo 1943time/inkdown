@@ -9,6 +9,7 @@ import {Share} from '../server/Share'
 import IUpgrade from '../icons/IUpgrade'
 import {configStore} from '../store/config'
 import {action} from 'mobx'
+import {tagStore} from '../store/tag'
 
 export const Nav = observer(() => {
   const paths = useMemo(() => {
@@ -75,7 +76,9 @@ export const Nav = observer(() => {
           <Share/>
           <div
             className={'flex items-center justify-center p-1 group'}
-            onClick={() => MainApi.openToolMenu(treeStore.openedNote?.filePath)}
+            onClick={() => {
+              MainApi.openToolMenu(treeStore.openedNote?.filePath)
+            }}
           >
             <AppstoreOutlined
               className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}

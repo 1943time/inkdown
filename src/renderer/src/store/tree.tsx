@@ -22,7 +22,7 @@ import {openConfirmDialog$} from '../components/ConfirmDialog'
 import {Checkbox} from 'antd'
 
 export class TreeStore {
-  treeTab: 'folder' | 'search' = 'folder'
+  treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   root!: IFileItem
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
@@ -155,34 +155,6 @@ export class TreeStore {
     }) => {
       this.command(params)
     })
-  }
-  private override(from: string, targetPath: string, folder = false) {
-    this.pasteFile(from, targetPath, folder)
-    try {
-      const map = this.getFileMap()
-      if (!folder && extname(targetPath) === '.md') {
-        const node = map.get(targetPath)
-        if (node) {
-          this.getSchema(node, true)
-        }
-      } else if (folder) {
-        const stack = map.get(targetPath)?.children?.slice() || []
-        while (stack.length) {
-          const item = stack.pop()!
-          if (item.folder) {
-            stack.push(...item.children || [])
-          } else if (item.ext === 'md') {
-            this.getSchema(item, true)
-          }
-        }
-      }
-    } catch (e) {
-      console.error('paste file', e)
-    }
-  }
-  private pasteFile(from: string, to: string, folder = false) {
-    cpSync(from, to, {force: true, recursive: folder})
-    this.watcher.onChange('update', to)
   }
   insertFiles(files: FileList | string[], item: IFileItem, mode: 'cut' | 'copy' = 'cut') {
     if (item?.folder) {

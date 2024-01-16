@@ -43,6 +43,7 @@
     "@ant-design/icons": "^5.0.1",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^2.1.0",
+    "@iconify/react": "^4.1.1",
     "@types/mime-types": "^2.1.1",
     "@types/node": "^18.17.5",
     "@types/node-fetch": "^2.6.4",

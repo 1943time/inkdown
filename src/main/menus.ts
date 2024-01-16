@@ -20,6 +20,13 @@ export const registerMenus = () => {
         }
       },
       {
+        label: zh ? '编辑标签' : 'Edit Tag',
+        enabled: !!filePath,
+        click: (e, win) => {
+          win?.webContents.send('addFileTag', filePath)
+        }
+      },
+      {
         type: 'separator'
       },
       {
@@ -145,6 +152,10 @@ export const registerMenus = () => {
           label: zh ? '在新标签中打开' :'Open in New Tab',
           click: () => sendCommand('openInNewTab')
         })
+        temp.add({
+          label: zh ? '编辑标签' :'Edit Tag',
+          click: () => e.sender.send('addFileTag', params.filePath)
+        })
         if (params.filePath?.endsWith('.md')) {
           temp.add({
             label: zh ? '新建副本' : 'New Copy',
@@ -196,6 +207,38 @@ export const registerMenus = () => {
     menu.popup({
       window: BrowserWindow.fromWebContents(e.sender)!
     })
+  })
+  ipcMain.on('tag-menu', (e, file?: string) => {
+    const zh = getLocale() === 'zh'
+    const click = (task: string) => {
+      return () => e.sender.send('tag-task', task)
+    }
+    if (file) {
+      const menu = Menu.buildFromTemplate([
+        {
+          label: zh ? '删除' : 'Delete',
+          click: click('delete'),
+          accelerator: `${cmd}+Backspace`
+        }
+      ])
+      menu.popup({
+        window: BrowserWindow.fromWebContents(e.sender)!
+      })
+    } else {
+      const menu = Menu.buildFromTemplate([
+        {
+          label: zh ? '重命名' : 'Rename',
+          click: click('rename')
+        },
+        {
+          label: zh ? '删除' : 'Delete',
+          click: click('delete')
+        }
+      ])
+      menu.popup({
+        window: BrowserWindow.fromWebContents(e.sender)!
+      })
+    }
   })
 
   ipcMain.on('table-menu', (e, head?: boolean) => {
