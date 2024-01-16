@@ -32,7 +32,7 @@ export class TreeStore {
   openQuickly = false
   searchKeyWord = ''
   currentIndex = 0
-  width = 260
+  width = 280
   tabContextIndex = 0
   size = {
     width: window.innerWidth,

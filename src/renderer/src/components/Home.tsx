@@ -23,7 +23,7 @@ export const Home = observer(() => {
     document.documentElement.classList.add('move')
     const move = action((e: MouseEvent) => {
       let width = startWidth + (e.clientX - left)
-      if (width < 220) width = 220
+      if (width < 240) width = 240
       if (width > 500) width = 500
       treeStore.width = width
     })
