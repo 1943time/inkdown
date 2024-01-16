@@ -23,6 +23,7 @@ import {toMarkdown} from './output/md'
 import {useLocalState} from '../hooks/useLocalState'
 import {RenamePasteFile} from './RenamePasteFile'
 import {isAbsolute} from 'path'
+import {stat} from '../utils'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
@@ -249,6 +250,7 @@ export const MEditor = observer(({note}: {
     }
     const file = e.clipboardData?.files[0]
     if (file) {
+      if (file.path && stat(file.path)?.isDirectory()) return
       if (configStore.config.renameFileWhenSaving) {
         saveFile.current = file
         setState({openRenameModal: true})
