@@ -57,16 +57,15 @@ export const AddTag = observer(() => {
     <Dialog
       open={state.open}
       onClose={close}
+      title={configStore.zh ? '标签' : 'Tag'}
     >
-      <div className={'w-[300px] p-4 flex flex-col space-y-4'}>
-        <div className={'text-center font-medium dark:text-gray-400 text-gray-500 text-sm'}>{configStore.zh ? '标签' : 'Tag'}</div>
+      <div className={'w-[300px] p-4 flex flex-col space-y-5'}>
         <Input
           className={'w-full'} placeholder={'tag name'} autoFocus={true} maxLength={50}
           value={state.tagName}
           onChange={e => setState({tagName: e.target.value})}
         />
-        <div className={'flex space-x-3'}>
-          <Button block={true} onClick={close}>{configStore.zh ? '取消' : 'Cancel'}</Button>
+        <div className={'flex'}>
           <Button type={'primary'} block={true} disabled={!state.tagName} onClick={create}>
             {configStore.zh ? state.curTag ? '保存' : '添加' : state.curTag ? 'Save' : 'Add'}
           </Button>

@@ -48,12 +48,12 @@ export const AddTagToFile = observer(() => {
   return (
     <Dialog
       open={state.open}
+      title={configStore.zh ? '选择标签' : 'Select tag'}
       onClose={() => setState({open: false})}
     >
-      <div className={'w-[320px] p-4 flex flex-col space-y-4'}>
-        <div className={'text-center font-medium dark:text-gray-300 text-gray-600 text-sm'}>{configStore.zh ? '选择标签' : 'Select tag'}</div>
+      <div className={'w-[360px] p-4 flex flex-col space-y-4'}>
         {!!state.tags.length &&
-          <div className={'flex flex-wrap justify-center'}>
+          <div className={'flex flex-wrap justify-center mt-2'}>
             {state.tags.map(t =>
               <Tag
                 icon={<TagOutlined/>}
@@ -75,8 +75,7 @@ export const AddTagToFile = observer(() => {
         {!state.tags.length &&
           <div className={'text-center dark:text-gray-400 text-gray-500 text-sm'}>{configStore.zh ? '没有标签，请先添加标签' : 'No tags, please add tags first'}</div>
         }
-        <div className={'flex space-x-3'}>
-          <Button block={true} onClick={() => setState({open: false})}>{configStore.zh ? '取消' : 'Cancel'}</Button>
+        <div className={'flex px-5'}>
           <Button
             type={'primary'} block={true} disabled={!state.selectedTags.length}
             onClick={addTag}
