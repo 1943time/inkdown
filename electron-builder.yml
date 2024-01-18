@@ -27,6 +27,11 @@ win:
   verifyUpdateCodeSignature: false
   target:
     - nsis
+nsis:
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  oneClick: false
+  perMachine: true
 mac:
 #  identity: null
   entitlementsInherit: build/entitlements.mac.plist
