@@ -35,7 +35,8 @@ class ConfigStore {
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
     interfaceFont: 'System',
     editorFont: 'System',
-    isLinux: false
+    isLinux: false,
+    detectionMarkdown: false
   }
   timer = 0
   homePath = ''

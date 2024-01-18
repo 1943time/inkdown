@@ -112,7 +112,8 @@ export const registerApi = () => {
       editorLineHeight: config.editorLineHeight || 'default',
       interfaceFont: config.interfaceFont || 'System',
       editorFont: config.editorFont || 'System',
-      isLinux: process.platform === 'linux'
+      isLinux: process.platform === 'linux',
+      detectionMarkdown: getBoolean(config.detectionMarkdown, false)
     }
   })
 

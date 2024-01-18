@@ -1,15 +1,18 @@
-import {Editor, Element, Path, Range, NodeEntry, BaseSelection} from 'slate'
+import {Editor, Element, Path, Range, NodeEntry, BaseSelection, Text, Node, Transforms} from 'slate'
 import {useMemo, useRef} from 'react'
 import {EditorStore, useEditorStore} from '../store'
 import {MainApi} from '../../api/main'
 import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
+import {parserMdToSchema} from '../parser/parser'
+import {configStore} from '../../store/config'
 export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>}>()
 const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   const currentType = useRef('')
+  const curText = useRef<NodeEntry>()
   return useMemo(() => {
     return (value: any) => {
       const sel = editor.selection
@@ -17,11 +20,42 @@ export function useOnchange(editor: Editor, store: EditorStore) {
         match: n => Element.isElement(n),
         mode: 'lowest'
       })
+      if (configStore.config.detectionMarkdown) {
+        const [text] = Editor.nodes(editor, {
+          match: n => Text.isText(n),
+          mode: 'lowest'
+        })
+
+        if (text && curText.current && !Path.equals(text[1], curText.current[1]) && !EditorUtils.isDirtLeaf(curText.current[0])) {
+          const text = Node.string(curText.current[0])
+          const node = curText.current
+          if (text) {
+            parserMdToSchema([text]).then(res => {
+              try {
+                const frame = res[0]?.[0]?.children || []
+                if (frame.length > 1 || (frame.length === 1 && (EditorUtils.isDirtLeaf(frame[0]) || frame[0].type))) {
+                  Transforms.insertFragment(editor, frame, {
+                    at: {
+                      anchor: {path: node[1], offset: 0},
+                      focus: {path: node[1], offset: text.length}
+                    }
+                  })
+                }
+              } catch (e) {
+                console.error('detection markdown', e)
+              }
+            })
+          }
+        }
+        if (text && ['paragraph', 'table-cell'].includes(node[0].type)) curText.current = text
+      }
+
       setTimeout(() => {
         selChange$.next({
           sel, node
         })
       })
+
       runInAction(() => store.sel = sel)
       if (!node) return
       if (currentType.current !== node[0].type) {

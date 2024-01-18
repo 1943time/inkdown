@@ -39,6 +39,20 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
+                      <span
+                        className={'mr-1'}>{configStore.zh ? '失焦检测Markdown' : 'Out of focus detection Markdown'}</span>
+          <TextHelp text={
+            configStore.zh ? '当光标离开当前段落，自动检测未被转换的markdown文字格式并转换' :
+              'When the cursor leaves the current paragraph, automatically detect unconverted markdown text formats and convert them'
+          }/>
+        </div>
+        <div>
+          <Checkbox checked={configStore.config.detectionMarkdown}
+                    onChange={e => configStore.setConfig('detectionMarkdown', e.target.checked)}/>
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>
           {configStore.zh ? '拖拽排序' : 'Drag to sort'}
         </div>
         <div>
