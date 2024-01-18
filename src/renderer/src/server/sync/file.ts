@@ -74,7 +74,7 @@ export class BsFile {
           if (res.message) return message$.next({type: 'warning', content: res.message})
           this.fileMap.set(s.filePath, {
             ...s,
-            label: res.name
+            name: res.name
           })
           s.el.url = res.name
         } catch (e: any) {

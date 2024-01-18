@@ -42,7 +42,7 @@ const Sync = observer((props: {
       if (props.book) {
         await shareStore.shareBook({
           ...props.book,
-          label: ''
+          name: ''
         })
         shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${props.book.path}`)
       }

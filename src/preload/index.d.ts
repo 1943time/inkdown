@@ -15,7 +15,6 @@ declare global {
       sdk: typeof Sdk,
       dev: boolean
       got: Got
-      getSystemFonts(): Promise<any>
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
       loadCodeTheme: (theme: string) => Promise<any>

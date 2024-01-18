@@ -27,7 +27,7 @@ export const Empty = observer(() => {
           }
           }).sort((a, b) => a.time > b.time ? -1 : 1).map(r => {
             return {
-              label: basename(r.filePath),
+              name: basename(r.filePath),
               filePath: r.filePath,
               dir: r.filePath.startsWith(home)  ? '~' + dirname(r.filePath).replace(home, '') : dirname(r.filePath)
             }

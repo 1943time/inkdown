@@ -66,7 +66,7 @@ export class Book {
     const res = await this.api.prefetchBook(book.name ? {
       id: book.id,
       filePath: book.filePath!,
-      label: book.name!,
+      name: book.name!,
       path: book.path!,
       config: book.config!
     }: {id: book.id!})
@@ -122,7 +122,7 @@ export class Book {
           hash: m.hash!,
           schema,
           texts: schemaToTexts(schema),
-          label: m.name,
+          name: m.name,
           filePath: m.filePath
         })
       } else if (m.children?.length) {
@@ -140,7 +140,7 @@ export class Book {
       if (stat(path)!.isDirectory()) {
         const item:SpaceDocMap = {
           path: toPath(this.root, path),
-          label: parse(f).name,
+          name: parse(f).name,
           filePath: path,
           folder: true
         }
@@ -150,7 +150,7 @@ export class Book {
         const md = readFileSync(path, {encoding: 'utf-8'})
         const item:SpaceDocMap = {
           path: toPath(this.root, path),
-          label: parse(f).name,
+          name: parse(f).name,
           filePath: path,
           hash: window.api.md5(md),
           md
@@ -168,7 +168,7 @@ export class Book {
       if (c.folder) {
         const item:SpaceDocMap = {
           path: nanoid(),
-          label: c.name || c.path,
+          name: c.name || c.path,
           filePath: '',
           folder: true
         }
@@ -181,7 +181,7 @@ export class Book {
         const md = readFileSync(path, {encoding: 'utf-8'})
         const item:SpaceDocMap = {
           path: c.path.replace(/\.\w+$/, ''),
-          label: c.name || c.path,
+          name: c.name || c.path,
           filePath: path,
           hash: window.api.md5(md),
           md

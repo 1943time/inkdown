@@ -34,13 +34,18 @@ export const AddTagToFile = observer(() => {
   const addTag = useCallback(async () => {
     if (state.curFilePath) {
       await db.tagFile.where('filePath').equals(state.curFilePath).delete()
-      await db.tagFile.bulkAdd(state.selectedTags.map(t => {
-        return {
-          id: nanoid(),
-          tagId: t,
-          filePath: state.curFilePath
+      if (state.selectedTags.length) {
+        await db.tagFile.bulkAdd(state.selectedTags.map(t => {
+          return {
+            id: nanoid(),
+            tagId: t,
+            filePath: state.curFilePath
+          }
+        }))
+        if (treeStore.treeTab === 'bookmark') {
+          tagStore.init()
         }
-      }))
+      }
     }
     setState({open: false})
   }, [])
@@ -77,8 +82,9 @@ export const AddTagToFile = observer(() => {
         }
         <div className={'flex px-5'}>
           <Button
-            type={'primary'} block={true} disabled={!state.selectedTags.length}
+            block={true}
             onClick={addTag}
+            disabled={!state.tags?.length}
           >
             {configStore.zh ? '添加标签至文件' : 'Add tags to file'}
           </Button>

@@ -34,7 +34,7 @@ export const ServiceSet = observer((props: {
     value.domain = value.domain.replace(/\/+$/,'')
     const machineId = await MainApi.getMachineId()
     const res = await shareStore.api.connect({
-      label: value.name,
+      name: value.name,
       machineId,
       domain: value.domain,
       secret: value.secret,

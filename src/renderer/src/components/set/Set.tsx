@@ -23,12 +23,6 @@ export const Set = observer(() => {
   })
 
   useEffect(() => {
-    window.api.getSystemFonts().then(res => {
-      console.log('res', res)
-    })
-  }, [])
-
-  useEffect(() => {
     if (configStore.visible) {
       for (let t of treeStore.tabs) {
         ReactEditor.blur(t.store.editor)
