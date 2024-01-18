@@ -75,14 +75,6 @@ export const Update = observer(() => {
       setState({percent: +percent})
     })
 
-    // ipcRenderer.on('update-not-available', (e, manual) => {
-    //   if (!manual) return
-    //   message$.next({
-    //     type: 'info',
-    //     content: configStore.zh ? '没有可用的更新' : 'No updates are available'
-    //   })
-    // })
-
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)
       if (state.startUpdate || state.manual) {
@@ -172,8 +164,8 @@ export const Update = observer(() => {
                 loading={state.loading}
                 onClick={async () => {
                   if (state.mas) {
-                    window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
-                    // window.open('itms-apps://apps.apple.com/us/app/bluestone-markdown/id6451391474')
+                    // window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
+                    window.open('itms-apps://apps.apple.com/us/app/bluestone-markdown/id6451391474')
                   } else {
                     setState({loading: true})
                     ipcRenderer.invoke('check-updated').then(async () => {
