@@ -57,11 +57,12 @@ export const EditorFrame = observer(({tab}: {
     }
   }, [])
 
+  const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
+
   useLayoutEffect(() => {
     tab.store.openFilePath = tab.current?.filePath || null
   }, [tab.current?.filePath])
 
-  const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
   const size = useMemo(() => {
     return {
       width: window.innerWidth - (treeStore.fold ? 0 : treeStore.width),
@@ -116,7 +117,9 @@ export const EditorFrame = observer(({tab}: {
                       }}
                       className={'px-10 pb-5'}
                     >
-                      <iframe className={'w-full h-full rounded border b1'} src={tab.current.filePath}/>
+                      <iframe
+                        className={'w-full h-full rounded border b1'} src={tab.current.filePath}
+                      />
                     </div>
                   )
                 }

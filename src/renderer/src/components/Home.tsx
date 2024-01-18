@@ -51,7 +51,8 @@ export const Home = observer(() => {
         <Tabs/>
         {treeStore.tabs.map((t) =>
           <div
-            className={`flex-1 h-full overflow-y-auto items-start ${treeStore.currentTab === t ? '' : 'hidden'}`}
+            className={`flex-1 overflow-y-auto items-start ${treeStore.currentTab === t ? 'h-full' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
+            style={{contentVisibility: treeStore.currentTab === t ? 'inherit' : 'hidden'}}
             key={t.id}
           >
             <EditorFrame tab={t}/>
