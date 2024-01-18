@@ -47,9 +47,6 @@ export const ConfirmDialog = observer(() => {
     if (isHotkey('enter', e)) {
       confirm()
     }
-    if (isHotkey('esc', e)) {
-      close()
-    }
   }, [])
 
   const close = useCallback(() => {

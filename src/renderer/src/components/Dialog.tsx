@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite'
 import {ReactNode, useCallback, useEffect, useState} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
 import {CloseOutlined} from '@ant-design/icons'
+import isHotkey from 'is-hotkey'
 
 export const Dialog = observer((props: {
   open: boolean
@@ -21,6 +22,12 @@ export const Dialog = observer((props: {
     }, 230)
   }, [props.onClose])
 
+  const keydown = useCallback((e: KeyboardEvent) => {
+    if (isHotkey('esc', e)) {
+      close()
+    }
+  }, [])
+
   useEffect(() => {
     if (props.open) {
       setState({open: true})
@@ -29,6 +36,12 @@ export const Dialog = observer((props: {
       }, 30)
     } else {
       close()
+    }
+
+    if (props.open) {
+      window.addEventListener('keydown', keydown)
+    } else {
+      window.removeEventListener('keydown', keydown)
     }
   }, [props.open])
   if (!state.open) return null
