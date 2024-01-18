@@ -304,7 +304,7 @@ export class EditorStore {
       url,
       alt: '',
       children: [{text: ''}]
-    } : {text: p.name, url}
+    } : {text: filePath.startsWith('http') ? filePath : p.name, url}
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     const [cur] = Editor.nodes<any>(this.editor, {

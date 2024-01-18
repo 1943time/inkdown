@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Checkbox, Modal, notification, Progress, Space} from 'antd'
+import {Button, Modal, notification, Progress, Space} from 'antd'
 import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect, useRef} from 'react'
 import {message$} from '../utils'

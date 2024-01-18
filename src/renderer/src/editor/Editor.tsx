@@ -24,6 +24,7 @@ import {useLocalState} from '../hooks/useLocalState'
 import {RenamePasteFile} from './RenamePasteFile'
 import {isAbsolute} from 'path'
 import {stat} from '../utils'
+import {existsSync} from 'fs'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
@@ -243,10 +244,16 @@ export const MEditor = observer(({note}: {
       Transforms.delete(store.editor, {at: store.editor.selection!})
     }
     const text = window.api.getClipboardText()
-    if (text && (text.startsWith('http') || isAbsolute(text))) {
-      e.preventDefault()
-      e.stopPropagation()
-      store.insertInlineNode(text)
+    if (text) {
+      try {
+        if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
+          e.preventDefault()
+          e.stopPropagation()
+          store.insertInlineNode(text)
+        }
+      } catch (e) {
+        console.log('paste text error', text, e)
+      }
     }
     const file = e.clipboardData?.files[0]
     if (file) {
