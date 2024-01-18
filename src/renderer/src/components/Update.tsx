@@ -28,29 +28,35 @@ export const Update = observer(() => {
 
   const check = useCallback(async () => {
     const v = await window.electron.ipcRenderer.invoke('get-version')
-    const res = await window.api.got.get('https://www.bluemd.me/api/version', {
-      searchParams: {
-        version: v,
-        mas: configStore.mas ? 'true' : undefined
-      }
-    }).json<{
-      masVersion: string
-      github: Record<string, any>
-    }>()
-    if (res.github) {
-      const info:string[] = res.github.body.split('***')
-      setState({
-        updateData: {
-          tag: configStore.mas ? 'v' + res.masVersion : res.github.tag_name,
-          englishInfo: info[0]?.split(/\n|\r\n/).filter(item => !!item) || [],
-          zhInfo: info[1]?.split(/\n|\r\n/).filter(item => !!item) || []
+    // https://www.bluemd.me/api/version
+    try {
+      const res = await window.api.got.get('https://www.bluemd.me/api/version', {
+        searchParams: {
+          version: v,
+          mas: configStore.mas ? 'true' : undefined
         }
-      })
-      runInAction(() => configStore.enableUpgrade = true)
-    } else {
+      }).json<{
+        masVersion: string
+        github: Record<string, any>
+      }>()
+      if (res.github) {
+        const info:string[] = res.github.body.split('***')
+        setState({
+          updateData: {
+            tag: configStore.mas ? 'v' + res.masVersion : res.github.tag_name,
+            englishInfo: info[0]?.split(/\n|\r\n/).filter(item => !!item) || [],
+            zhInfo: info[1]?.split(/\n|\r\n/).filter(item => !!item) || []
+          }
+        })
+        runInAction(() => configStore.enableUpgrade = true)
+      } else {
+        checkTimer.current = window.setTimeout(check, 60 * 1000 * 60)
+      }
+      return !!res.github
+    } catch (e) {
       checkTimer.current = window.setTimeout(check, 60 * 1000 * 60)
+      return null
     }
-    return !!res.github
   }, [])
 
   const [api, contextHolder] = notification.useNotification()
