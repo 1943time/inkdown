@@ -68,7 +68,7 @@ export const MainApi = {
       properties: ['createDirectory'],
       securityScopedBookmarks: true,
       filters: [
-        {name: 'markdown', extensions: ['md']}
+        {label: 'markdown', extensions: ['md']}
       ],
       ...options
     })
@@ -83,7 +83,7 @@ export const MainApi = {
       message: data?.title || 'Open File',
       properties: ['openFile'],
       defaultPath: data?.defaultFilePath,
-      filters: [{name: 'f', extensions: data?.ext || ['md', 'markdown']}]
+      filters: [{label: 'f', extensions: data?.ext || ['md', 'markdown']}]
     })
   },
   open(rootPath?: string) {
@@ -91,7 +91,7 @@ export const MainApi = {
       title: 'Open File Or Folder',
       properties: ['openFile', 'openDirectory'],
       defaultPath: rootPath,
-      filters: [{name: 'f', extensions: ['md', 'markdown']}]
+      filters: [{label: 'f', extensions: ['md', 'markdown']}]
     })
   },
   openTreeContextMenu(params: {

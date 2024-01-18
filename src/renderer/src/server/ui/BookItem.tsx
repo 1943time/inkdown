@@ -79,7 +79,7 @@ export const BookItem = observer((props: {
                         b.updating = true
                         shareStore.shareBook({
                           ...b,
-                          name: ''
+                          label: ''
                         }).then(() => {
                           shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
                         }).finally(action(() => b.updating = false))

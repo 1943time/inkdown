@@ -7,7 +7,6 @@ import {
   app,
   nativeTheme,
   BrowserView,
-  systemPreferences,
   clipboard,
   nativeImage
 } from 'electron'
@@ -110,7 +109,10 @@ export const registerApi = () => {
       fileWatcher: getBoolean(config.fileWatcher, true),
       relativePathForImageStore: getBoolean(config.relativePathForImageStore, false),
       showHiddenFiles: getBoolean(config.showHiddenFiles, false),
-      editorLineHeight: config.editorLineHeight || 'default'
+      editorLineHeight: config.editorLineHeight || 'default',
+      interfaceFont: config.interfaceFont || 'System',
+      editorFont: config.editorFont || 'System',
+      isLinux: process.platform === 'linux'
     }
   })
 

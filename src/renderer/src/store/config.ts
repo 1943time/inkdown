@@ -32,7 +32,10 @@ class ConfigStore {
     fileWatcher: true,
     relativePathForImageStore: false,
     showHiddenFiles: false,
-    editorLineHeight: 'default' as 'default' | 'loose' | 'compact'
+    editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
+    interfaceFont: 'System',
+    editorFont: 'System',
+    isLinux: false
   }
   timer = 0
   homePath = ''
@@ -116,7 +119,16 @@ class ConfigStore {
       })
     }
   }
+  setInterfaceFont(value: string) {
+    for (let key of document.body.classList.values()) {
+      if (key.startsWith('font-')) {
+        document.body.classList.remove(key)
+      }
+    }
 
+    document.body.classList.add('font-' + value!)
+    this.setConfig('interfaceFont', value)
+  }
   async initial() {
     await MainApi.getPath('home').then(res => {
       this.homePath = res
@@ -138,6 +150,7 @@ class ConfigStore {
             theme: 'dark'
           })
         }
+        document.body.classList.add('font-' + this.config.interfaceFont)
         resolve(true)
       }))
       shareStore.initial()

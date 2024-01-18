@@ -70,7 +70,7 @@ export const EBook = observer((props: {
             const oldFilePath = state.book?.filePath
             const res = await shareStore.shareBook({
               id: state.book?.id,
-              name: v.name,
+              label: v.name,
               path: v.path,
               filePath: v.filePath,
               config: {

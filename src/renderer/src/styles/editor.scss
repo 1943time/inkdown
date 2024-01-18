@@ -13,10 +13,47 @@
   --shadow: rgba(0, 0, 0, .3);
   --md-high-line: rgba(11, 18, 24, .5);
 }
-
 body{
+  font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   text-rendering: optimizeLegibility;
   direction: ltr;
+}
+
+.font-system {
+  font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+.font-lucida {
+  font-family: "lucida grande", "lucida sans unicode", lucida;
+}
+.font-helvetica{
+  font-family: "Helvetica Neue";
+}
+.font-hiragino-sans-gb {
+  font-family: "Hiragino Sans GB";
+}
+.font-heiti-sc{
+  font-family: "Heiti SC";
+}
+.font-times-new-roman {
+  font-family: "Times New Roman";
+}
+.font-pingfang-sc {
+  font-family: "PingFang SC";
+}
+.font-microsoft-yahei {
+  font-family: "Microsoft Yahei";
+}
+.font-tahoma {
+  font-family: Tahoma;
+}
+.font-simsun{
+  font-family: SimSun;
+}
+.font-arial {
+  font-family: Arial;
+}
+.font-verdana {
+  font-family: Verdana;
 }
 a {
   text-decoration: none;
@@ -47,7 +84,6 @@ a {
 }
 .content {
   @extend .md-text;
-  font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   outline: none;
   tab-size: 4;
   caret-color: #60a5fa;

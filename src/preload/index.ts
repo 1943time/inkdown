@@ -11,6 +11,7 @@ import {toUnix} from 'upath'
 import mime from 'mime-types'
 import FormData from 'form-data'
 import {createReadStream} from 'fs'
+import getSystemFonts from 'get-system-fonts'
 const isWindows = process.platform === 'win32'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
@@ -23,6 +24,9 @@ const api = {
   },
   getClipboardText() {
     return clipboard.readText('clipboard')
+  },
+  getSystemFonts() {
+    return getSystemFonts()
   },
   getClipboardFile() {
     if (isWindows) {
