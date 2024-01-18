@@ -503,9 +503,11 @@ export class TreeStore {
       defineParent(this.dragNode, to)
       if (this.dragNode.ext === 'md') {
         removeFileRecord(fromPath, targetPath)
+        db.tagFile.where('filePath').equals(fromPath).modify({filePath: targetPath})
       }
       if (this.dragNode.folder) {
         renameAllFiles(this.dragNode.filePath, this.dragNode.children || [])
+        db.checkRenameFolder(fromPath, targetPath)
       }
       this.checkDepends(fromPath, targetPath)
 
@@ -562,6 +564,8 @@ export class TreeStore {
         renameSync(path, newPath)
         if (file.folder) {
           renameAllFiles(file.filePath, file.children || [])
+          console.log('check', path, newPath)
+          db.checkRenameFolder(path, newPath)
         }
         this.checkDepends(path, newPath)
         this.moveFile$.next({
@@ -569,7 +573,12 @@ export class TreeStore {
           to: newPath
         })
         file.mode = undefined
-        if (file.ext === 'md') removeFileRecord(path, newPath)
+        if (file.ext === 'md') {
+          removeFileRecord(path, newPath)
+          db.tagFile.where('filePath').equals(path).modify({
+            filePath: newPath
+          })
+        }
         if (file.ext === 'md' || file.folder) shareStore.renameFilePath(path, newPath)
       }
     }

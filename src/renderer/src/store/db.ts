@@ -64,7 +64,7 @@ class Db extends Dexie {
         }
       }
       if (fileMap.size) {
-        const records = await this.tagFile.where('filePath').anyOf(Object.keys(fileMap)).toArray()
+        const records = await this.tagFile.where('filePath').anyOf(Array.from(fileMap.keys())).toArray()
         for (const item of records) {
           this.tagFile.where('id').equals(item.id!).modify({
             filePath: fileMap.get(item.filePath!)
