@@ -32,14 +32,22 @@ export function useOnchange(editor: Editor, store: EditorStore) {
           if (text) {
             parserMdToSchema([text]).then(res => {
               try {
-                const frame = res[0]?.[0]?.children || []
-                if (frame.length > 1 || (frame.length === 1 && (EditorUtils.isDirtLeaf(frame[0]) || frame[0].type))) {
-                  Transforms.insertFragment(editor, frame, {
-                    at: {
-                      anchor: {path: node[1], offset: 0},
-                      focus: {path: node[1], offset: text.length}
-                    }
-                  })
+                if (!Editor.hasPath(editor, node[1])) return
+                const [el] = Editor.nodes<Element>(editor, {
+                  match: n => Element.isElement(n),
+                  mode: 'lowest',
+                  at: node[1]
+                })
+                if (el && ['paragraph', 'table-cell'].includes(el[0].type)) {
+                  const frame = res[0]?.[0]?.children || []
+                  if (frame.length > 1 || (frame.length === 1 && (EditorUtils.isDirtLeaf(frame[0]) || frame[0].type))) {
+                    Transforms.insertFragment(editor, frame, {
+                      at: {
+                        anchor: {path: node[1], offset: 0},
+                        focus: {path: node[1], offset: text.length}
+                      }
+                    })
+                  }
                 }
               } catch (e) {
                 console.error('detection markdown', e)
