@@ -84,9 +84,11 @@ export const registerMenus = () => {
         }
       }
     ]
+
     const showLeading = Menu.getApplicationMenu()?.getMenuItemById('showLeading')
     if (showLeading) temp.unshift(showLeading)
     const menu = Menu.buildFromTemplate(temp)
+
     menu.popup({
       window: BrowserWindow.fromWebContents(e.sender)!
     })
