@@ -73,6 +73,15 @@ export const registerMenus = () => {
         label: zh ? '使用默认APP打开' : 'Open in default app',
         click: () => shell.openPath(filePath!),
         enabled: !!filePath
+      },
+      {type: 'separator'},
+      {
+        label: zh ? '设置' : 'Settings',
+        id: 'settings',
+        accelerator: `${cmd}+,`,
+        click: e => {
+          BrowserWindow.getFocusedWindow()?.webContents.send('openSet')
+        }
       }
     ]
     const showLeading = Menu.getApplicationMenu()?.getMenuItemById('showLeading')
