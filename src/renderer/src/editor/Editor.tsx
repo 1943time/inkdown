@@ -210,15 +210,20 @@ export const MEditor = observer(({note}: {
 
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const dragNode = treeStore.dragNode
-    const file = e.dataTransfer.files[0]
-    if ((dragNode && !dragNode.folder) || file) {
-      setTimeout(() => {
-        if (dragNode) {
-          store.insertDragFile(dragNode)
-        } else {
-          store.insertFile(file)
-        }
-      }, 100)
+    if (!e.dataTransfer?.files?.length) return
+    if (e.dataTransfer?.files?.length > 1) {
+       store.insertMultipleFiles(e.dataTransfer.files)
+    } else {
+      const file = e.dataTransfer.files[0]
+      if ((dragNode && !dragNode.folder) || file) {
+        setTimeout(() => {
+          if (dragNode) {
+            store.insertDragFile(dragNode)
+          } else {
+            store.insertFile(file)
+          }
+        }, 100)
+      }
     }
     return false
   }, [])
@@ -255,8 +260,11 @@ export const MEditor = observer(({note}: {
         console.log('paste text error', text, e)
       }
     }
-    const file = e.clipboardData?.files[0]
-    if (file) {
+    const files = e.clipboardData?.files
+    if (files?.length > 1) {
+      store.insertMultipleFiles(files)
+    } else if (files?.length === 1) {
+      const file = files[0]
       if (file.path && stat(file.path)?.isDirectory()) return
       if (configStore.config.renameFileWhenSaving) {
         saveFile.current = file

@@ -241,7 +241,27 @@ export class EditorStore {
       }
     }
   }
-
+  async insertMultipleFiles(files: FileList) {
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
+    const paths:string[] = []
+    for (let f of imageFiles) {
+      paths.push(await this.saveFile(f))
+    }
+    const [node] = Editor.nodes<any>(this.editor, {
+      mode: 'highest',
+      match: node => Element.isElement(node)
+    })
+    if (node) {
+      let path = Path.next(node[1])
+      if (node[0].type === 'paragraph' && !Node.string(node[0])) {
+        path = node[1]
+        Transforms.delete(this.editor, {at: path})
+      }
+      Transforms.insertNodes(this.editor, paths.map(p => {
+        return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
+      }), {at: path, select: true})
+    }
+  }
   async insertFile(file: File) {
     if (file.path && mediaType(file.path) !== 'image') {
       return this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
