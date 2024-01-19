@@ -85,14 +85,6 @@ export const Overview = observer(() => {
       <InterfaceFont/>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          {configStore.zh ? '字体' : 'Font'}
-        </div>
-        <div>
-
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
           <span className={'mr-1'}>{configStore.zh ? '文件变更检测' : 'File change detection'}</span>
           <TextHelp text={
             configStore.zh ? '当编辑器失去焦点，如果其他程序改变了markdown文件，编辑器会自动更新该文档' :
