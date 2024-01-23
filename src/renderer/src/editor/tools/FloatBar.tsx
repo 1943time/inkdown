@@ -14,24 +14,64 @@ import {
   StrikethroughOutlined
 } from '@ant-design/icons'
 import {BaseRange, Editor, Node, NodeEntry, Range, Text, Transforms} from 'slate'
-import {AutoComplete} from 'antd'
+import {AutoComplete, Tooltip} from 'antd'
 import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
 import {isAbsolute, join, relative} from 'path'
-import {parsePath} from '../../utils'
+import {isMac, isWindows, parsePath} from '../../utils'
 import {configStore} from '../../store/config'
 import {useSubject} from '../../hooks/subscribe'
 import {ReactEditor} from 'slate-react'
 import {getSelRect} from '../utils/dom'
 import isHotkey from 'is-hotkey'
+import Command from '../../icons/keyboard/Command'
+import Ctrl from '../../icons/keyboard/Ctrl'
+import Shift from '../../icons/keyboard/Shift'
+import Option from '../../icons/keyboard/Option'
 
+function Mod() {
+  if (isMac) {
+    return <Command className={'w-3 h-3'}/>
+  } else {
+    return <Ctrl className={'w-3 h-3'}/>
+  }
+}
 const tools = [
-  {type: 'bold', icon: <BoldOutlined/>},
-  {type: 'italic', icon: <ItalicOutlined/>},
-  {type: 'strikethrough', icon: <StrikethroughOutlined/>},
-  {type: 'code', icon: <ICode className={'w-5 h-5'}/>},
-  {type: 'url', icon: <LinkOutlined/>}
+  {type: 'bold', icon: <BoldOutlined/>, tooltip: (
+    <div
+      className = {'text-xs flex items-center space-x-1'} >
+      <Mod/><span>B</span>
+    </div>
+  )},
+  {type: 'italic', icon: <ItalicOutlined/>, tooltip: (
+      <div
+        className={'text-xs flex items-center space-x-1'}>
+        <Mod/><span>I</span>
+      </div>
+    )
+  },
+  {type: 'strikethrough', icon: <StrikethroughOutlined/>, tooltip: (
+      <div
+        className={'text-xs flex items-center space-x-1'}>
+        <Mod/><Option className={'w-3 h-3'}/><span>S</span>
+      </div>
+    )
+  },
+  {type: 'code', icon: <ICode className={'w-5 h-5'}/>, tooltip: (
+      <div
+        className={'text-xs flex items-center space-x-0.5'}>
+        <Mod/><span>`</span>
+      </div>
+    )
+  },
+  {type: 'url', icon: <LinkOutlined/>, tooltip: (
+      <div
+        className={'text-xs flex items-center space-x-0.5'}>
+        <Mod/><span>L</span>
+      </div>
+    )
+  }
 ]
 
 const colors = [
@@ -55,9 +95,9 @@ export const FloatBar = observer(() => {
     url: '',
     hoverSelectColor: false,
     openSelectColor: false,
-    links: [] as {label: string, value: string}[],
-    filterLinks: [] as {label: string, value: string}[],
-    anchors: [] as {label: string, value: string}[]
+    links: [] as { label: string, value: string }[],
+    filterLinks: [] as { label: string, value: string }[],
+    anchors: [] as { label: string, value: string }[]
   })
 
   const getAnchors = useCallback(() => {
@@ -71,10 +111,12 @@ export const FloatBar = observer(() => {
     }
     if (fileMap.get(filePath)) {
       const anchors = (fileMap.get(filePath)?.schema || []).filter(e => e.type === 'head')
-      setState({anchors: anchors.map(e => {
-        const text = Node.string(e)
-        return {label: '# ' + text, value: text}
-      })})
+      setState({
+        anchors: anchors.map(e => {
+          const text = Node.string(e)
+          return {label: '# ' + text, value: text}
+        })
+      })
       inputRef.current?.focus()
     } else {
       setState({anchors: []})
@@ -84,7 +126,7 @@ export const FloatBar = observer(() => {
   const getFilePaths = useCallback(() => {
     if (treeStore.root) {
       fileMap.clear()
-      let files: {label: string, value: string}[] = []
+      let files: { label: string, value: string }[] = []
       const stack: IFileItem[] = treeStore.root.children!.slice()
       while (stack.length) {
         const node = stack.shift()!
@@ -150,7 +192,8 @@ export const FloatBar = observer(() => {
       }
     }
   })
-  useEffect(() => {}, [store.refreshFloatBar])
+  useEffect(() => {
+  }, [store.refreshFloatBar])
 
   const resize = useCallback((force = false) => {
     if (store.domRect) {
@@ -306,22 +349,24 @@ export const FloatBar = observer(() => {
           {!state.openSelectColor &&
             <div className={'flex items-center space-x-0.5 justify-center h-full'}>
               {tools.map(t =>
-                <div
-                  key={t.type}
-                  onMouseDown={e => e.preventDefault()}
-                  onClick={(e) => {
-                    if (t.type !== 'url') {
-                      EditorUtils.toggleFormat(store.editor, t.type)
-                    } else {
-                      openLink()
-                    }
-                  }}
-                  className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-sky-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
+                <Tooltip title={t.tooltip} key={t.type} mouseEnterDelay={.3}>
+                  <div
+                    key={t.type}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={(e) => {
+                      if (t.type !== 'url') {
+                        EditorUtils.toggleFormat(store.editor, t.type)
+                      } else {
+                        openLink()
+                      }
+                    }}
+                    className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-sky-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
               cursor-default py-0.5 px-2 rounded
               `}
-                >
-                  {t.icon}
-                </div>
+                  >
+                    {t.icon}
+                  </div>
+                </Tooltip>
               )}
               <div
                 className={`flex items-center`}
@@ -337,7 +382,7 @@ export const FloatBar = observer(() => {
                     }
                   }}
                 >
-                  <HighlightOutlined />
+                  <HighlightOutlined/>
                 </div>
                 <div
                   className={'h-6 text-xs rounded-tr rounded-br float-bar-icon flex items-center px-0.5'}
@@ -352,15 +397,22 @@ export const FloatBar = observer(() => {
                 </div>
               </div>
               <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
-              <div
-                className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
-                onClick={() => {
-                  EditorUtils.clearMarks(store.editor, true)
-                  EditorUtils.highColor(store.editor)
-                }}
-              >
-                <ClearOutlined/>
-              </div>
+              <Tooltip mouseEnterDelay={.3} title={(
+                <div
+                  className={'text-xs flex items-center space-x-1'}>
+                  <Mod/><span>\</span>
+                </div>
+              )}>
+                <div
+                  className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
+                  onClick={() => {
+                    EditorUtils.clearMarks(store.editor, true)
+                    EditorUtils.highColor(store.editor)
+                  }}
+                >
+                  <ClearOutlined/>
+                </div>
+              </Tooltip>
             </div>
           }
           {state.openSelectColor &&

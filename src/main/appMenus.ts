@@ -424,12 +424,12 @@ const getSystemMenus = () => {
         },
         {
           label: zh ? '删除线' : 'Strikethrough',
-          accelerator: `Ctrl+Shift+\``,
+          accelerator: `${cmd}+Alt+s`,
           click: task('strikethrough')
         },
         {
           label: 'Inline Code',
-          accelerator: `Ctrl+\``,
+          accelerator: `${cmd}+\``,
           click: task('code')
         },
         {
