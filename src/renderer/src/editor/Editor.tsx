@@ -100,8 +100,7 @@ export const MEditor = observer(({note}: {
       return
     }
     value.current = v
-
-    onChange(v)
+    onChange(v, editor.operations)
     if (note) {
       note.schema = v
       note.history = editor.history

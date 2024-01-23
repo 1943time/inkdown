@@ -1,4 +1,4 @@
-import {Editor, Element, Path, Range, NodeEntry, BaseSelection, Text, Node, Transforms} from 'slate'
+import {Editor, Element, Path, Range, NodeEntry, BaseSelection, Text, Node, Transforms, BaseOperation} from 'slate'
 import {useMemo, useRef} from 'react'
 import {EditorStore, useEditorStore} from '../store'
 import {MainApi} from '../../api/main'
@@ -14,7 +14,7 @@ export function useOnchange(editor: Editor, store: EditorStore) {
   const currentType = useRef('')
   const curText = useRef<NodeEntry>()
   return useMemo(() => {
-    return (value: any) => {
+    return (value: any, operations: BaseOperation[]) => {
       const sel = editor.selection
       const [node] = Editor.nodes<Element>(editor, {
         match: n => Element.isElement(n),
@@ -26,7 +26,7 @@ export function useOnchange(editor: Editor, store: EditorStore) {
           mode: 'lowest'
         })
 
-        if (text && curText.current && !Path.equals(text[1], curText.current[1]) && !EditorUtils.isDirtLeaf(curText.current[0])) {
+        if (operations?.length === 1 && operations[0].type === 'set_selection' && text && curText.current && !Path.equals(text[1], curText.current[1]) && !EditorUtils.isDirtLeaf(curText.current[0])) {
           const text = Node.string(curText.current[0])
           const node = curText.current
           if (text) {
