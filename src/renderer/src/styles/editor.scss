@@ -526,7 +526,7 @@ ol.m-list {
     height: 8px;
   }
   ::-webkit-scrollbar-thumb{
-    @apply dark:bg-zinc-900 bg-gray-400/90;
+    @apply dark:bg-zinc-900/90 bg-gray-400/90;
     border-radius: 20px;
   }
 }
