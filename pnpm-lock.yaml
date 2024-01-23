@@ -15,8 +15,8 @@ dependencies:
     specifier: ^8.12.0
     version: 8.12.0
   electron-log:
-    specifier: ^4.4.8
-    version: 4.4.8
+    specifier: ^5.1.0
+    version: 5.1.0
   electron-store:
     specifier: ^8.1.0
     version: 8.1.0
@@ -2745,8 +2745,9 @@ packages:
       - supports-color
     dev: true
 
-  /electron-log@4.4.8:
-    resolution: {integrity: sha512-QQ4GvrXO+HkgqqEOYbi+DHL7hj5JM+nHi/j+qrN9zeeXVKy8ZABgbu4CnG+BBqDZ2+tbeq9tUC4DZfIWFU5AZA==}
+  /electron-log@5.1.0:
+    resolution: {integrity: sha512-Qwl8J41jqps2ibE2WSolOyoGkZ/kbpenggxPTCyT/0jlMl1DfPXpjROIL7m85SOhRkuw56sFGRG0rAlmzgxZQA==}
+    engines: {node: '>= 14'}
     dev: false
 
   /electron-publish@24.5.0:

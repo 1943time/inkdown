@@ -15,6 +15,7 @@ import {withMarkdown} from './plugins'
 import {withHistory} from 'slate-history'
 import {configStore} from '../store/config'
 import {selChange$} from './plugins/useOnchange'
+import {withErrorReporting} from './plugins/catchError'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -74,6 +75,7 @@ export class EditorStore {
     this.webview = webview
     this.history = history
     this.dragStart = this.dragStart.bind(this)
+    withErrorReporting(this.editor)
     makeAutoObservable(this, {
       searchRanges: false,
       editor: false,

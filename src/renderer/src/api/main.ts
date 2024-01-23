@@ -104,6 +104,13 @@ export const MainApi = {
     ipcRenderer.invoke('move-to-trash', path)
     removeFileRecord(path)
   },
+  errorLog(e: any, other: Record<string, any> = {}) {
+    console.error(e, other)
+    const message = e instanceof  Error ? e.message : e
+    window.electron.ipcRenderer.send('error-log', {
+      message, ...other
+    })
+  },
   openToolMenu(filePath?: string) {
     ipcRenderer.send('tool-menu', filePath)
   },

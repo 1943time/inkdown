@@ -254,36 +254,40 @@ export class TreeStore {
     }
   }
   moveToTrash(item: IFileItem, force = false) {
-    if (item && !item.root) {
-      this.selectItem = null
-      if (configStore.config.showRemoveFileDialog && !force) {
-        let save = false
-        openConfirmDialog$.next({
-          title: configStore.zh ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'` : `Are you sure you want to delete '${item.filename}' ${item.folder ? 'and its contents?' : '?'}`,
-          description: configStore.zh ? '您可以从垃圾箱中恢复此文件。' : 'You can restore this file from the Trash.',
-          onConfirm: () => {
-            treeStore.moveToTrash(item, true)
-            if (save) {
-              configStore.setConfig('showRemoveFileDialog', false)
-            }
-          },
-          okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash',
-          footer: (
-            <Checkbox
-              defaultChecked={save}
-              className={'mt-6'}
-              onChange={e => save = e.target.checked}>
-              {configStore.zh ? '不再询问' : 'Do not ask me again'}
-            </Checkbox>
-          )
-        })
-      } else {
-        this.removeSelf(item)
-        MainApi.moveToTrash(item.filePath)
-        if (!item.folder) db.history.where('filePath').equals(item.filePath).delete()
-        if (this.selectItem) this.selectItem = null
-        if (this.ctxNode) this.ctxNode = null
+    try {
+      if (item && !item.root) {
+        this.selectItem = null
+        if (configStore.config.showRemoveFileDialog && !force) {
+          let save = false
+          openConfirmDialog$.next({
+            title: configStore.zh ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'` : `Are you sure you want to delete '${item.filename}' ${item.folder ? 'and its contents?' : '?'}`,
+            description: configStore.zh ? '您可以从垃圾箱中恢复此文件。' : 'You can restore this file from the Trash.',
+            onConfirm: () => {
+              treeStore.moveToTrash(item, true)
+              if (save) {
+                configStore.setConfig('showRemoveFileDialog', false)
+              }
+            },
+            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash',
+            footer: (
+              <Checkbox
+                defaultChecked={save}
+                className={'mt-6'}
+                onChange={e => save = e.target.checked}>
+                {configStore.zh ? '不再询问' : 'Do not ask me again'}
+              </Checkbox>
+            )
+          })
+        } else {
+          this.removeSelf(item)
+          MainApi.moveToTrash(item.filePath)
+          if (!item.folder) db.history.where('filePath').equals(item.filePath).delete()
+          if (this.selectItem) this.selectItem = null
+          if (this.ctxNode) this.ctxNode = null
+        }
       }
+    } catch (e) {
+      MainApi.errorLog(e, {name: 'moveToTrash'})
     }
   }
 

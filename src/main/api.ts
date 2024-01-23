@@ -20,6 +20,7 @@ import icon from '../../resources/icon.png?asset'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
+import log from 'electron-log'
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
   // autoHideMenuBar: true,
@@ -56,7 +57,9 @@ export const registerApi = () => {
     const window = BrowserWindow.fromWebContents(e.sender)!
     window?.getBrowserView()?.webContents.send('task', ...args)
   })
-
+  ipcMain.on('error-log', (e, data) => {
+    log.error(data)
+  })
   ipcMain.handle('get-version', () => {
     return app.getVersion()
   })
