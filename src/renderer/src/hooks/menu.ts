@@ -121,7 +121,7 @@ export const useSystemMenus = () => {
     }
 
     const closeCurrentTab = () => {
-      if (treeStore.tabs.length > 1) {
+      if ( treeStore.tabs.length > 1 ) {
         treeStore.removeTab(treeStore.currentIndex)
       } else {
         MainApi.closeWindow()
