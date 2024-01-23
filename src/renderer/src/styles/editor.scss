@@ -94,13 +94,13 @@ a {
   &.line-height-compact {
     line-height: 1.5em;
     .check-item{
-      top: 2px
+      height: 1.5em;
     }
   }
   &.line-height-loose{
     line-height: 1.9em;
     .check-item{
-      top: 5px;
+      height: 1.9em;
     }
   }
   .link{
@@ -298,14 +298,18 @@ ol.m-list {
   }
 
   .check-item {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     position: absolute;
     user-select: none;
     height: 1.625em;
     left: 0;
-    top: 3px;
+    top: 0.1875em;
     z-index: 10;
+    label{
+      height: 16px;
+      align-items: center;
+    }
   }
 }
 .katex-container {
