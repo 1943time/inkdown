@@ -82,9 +82,9 @@ export const MdElements: Record<string, MdNode> = {
     }
   },
   code: {
-    reg: /^\s*```([\w#\-+*]{1,30})?\s*$/,
+    reg: /^\s*(```|···)([\w#\-+*]{1,30})?\s*$/,
     run: ({editor, path, match}) => {
-      const lang = match[1]
+      const lang = match[2]
       clearAllCodeCache(editor)
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
@@ -94,7 +94,7 @@ export const MdElements: Record<string, MdNode> = {
     }
   },
   katex: {
-    reg: /^\s*\$\$\s*$/,
+    reg: /^\s*(\$\$|￥￥)\s*$/,
     run: ({editor, path, match}) => {
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
