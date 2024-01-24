@@ -125,8 +125,8 @@ devDependencies:
     specifier: ^0.2.0
     version: 0.2.0
   katex:
-    specifier: ^0.16.4
-    version: 0.16.4
+    specifier: ^0.16.9
+    version: 0.16.9
   mermaid:
     specifier: ^10.0.2
     version: 10.0.2
@@ -3726,8 +3726,8 @@ packages:
       setimmediate: 1.0.5
     dev: false
 
-  /katex@0.16.4:
-    resolution: {integrity: sha512-WudRKUj8yyBeVDI4aYMNxhx5Vhh2PjpzQw1GRu/LVGqL4m1AxwD1GcUp0IMbdJaf5zsjtj8ghP0DOQRYhroNkw==}
+  /katex@0.16.9:
+    resolution: {integrity: sha512-fsSYjWS0EEOwvy81j3vRA8TEAhQhKiqO+FQaKWp0m39qwOzHVBgAUBIXWj1pB+O2W3fIpNa6Y9KSKCVbfPhyAQ==}
     hasBin: true
     dependencies:
       commander: 8.3.0
@@ -4206,7 +4206,7 @@ packages:
     resolution: {integrity: sha512-es0CcOV89VNS9wFmyn+wyFTKweXGW4CEvdaAca6SWRWPyYCbBisnjaHLjWO4Nszuiud84jCpkHsqAJoa768Pvg==}
     dependencies:
       '@types/katex': 0.16.2
-      katex: 0.16.4
+      katex: 0.16.9
       micromark-factory-space: 1.1.0
       micromark-util-character: 1.2.0
       micromark-util-symbol: 1.1.0
