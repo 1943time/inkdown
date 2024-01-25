@@ -97,6 +97,7 @@ const getSystemMenus = () => {
     {
       id: 'open',
       label: zh ? '打开' : 'Open',
+      accelerator: `${cmd}+alt+f`,
       click: (menu, win) => {
         win?.webContents.send('open')
       }
