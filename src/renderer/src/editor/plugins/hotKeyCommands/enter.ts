@@ -235,6 +235,7 @@ export class EnterKey {
       if (parent[0].type !== 'list-item' || Path.hasPrevious(node[1])) {
         const str = Node.string(node[0])
         for (let n of BlockMathNodes) {
+          if (n.checkAllow && !n.checkAllow({editor: this.editor, node, sel})) continue
           const m = str.match(n.reg)
           if (m) {
             n.run({
