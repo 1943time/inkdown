@@ -43,17 +43,18 @@ export const Heading = observer(({note}: {
               continue
             }
             const title = Node.string(s)
+            const id = slugify(title)
             if (title) {
               cache.set(s, {
                 title,
                 level: s.level,
-                id: slugify(title),
+                id,
                 key: nanoid(),
                 schema: s
               })
               headings.push(cache.get(s)!)
               setTimeout(() => {
-                cache.get(s)!.dom = store.container?.querySelector(`[data-head="${title}"]`) as HTMLElement
+                cache.get(s)!.dom = store.container?.querySelector(`[data-head="${id}"]`) as HTMLElement
               }, 200)
             }
           }
