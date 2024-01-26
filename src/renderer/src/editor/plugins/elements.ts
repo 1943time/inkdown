@@ -75,9 +75,9 @@ export const MdElements: Record<string, MdNode> = {
       })
       Transforms.insertNodes(editor, {
         type: 'inline-katex',
-        children: [{text: match[1].trim()}],
-        select: true
+        children: [{text: match[1].trim()}]
       })
+      EditorUtils.moveAfterSpace(editor, Path.next(sel.anchor.path))
       return true
     }
   },

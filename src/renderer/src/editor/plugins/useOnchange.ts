@@ -20,6 +20,14 @@ export function useOnchange(editor: Editor, store: EditorStore) {
         match: n => Element.isElement(n),
         mode: 'lowest'
       })
+      setTimeout(() => {
+        selChange$.next({
+          sel, node
+        })
+      })
+
+      runInAction(() => store.sel = sel)
+      if (!node) return
       if (configStore.config.detectionMarkdown) {
         const [text] = Editor.nodes(editor, {
           match: n => Text.isText(n),
@@ -63,9 +71,6 @@ export function useOnchange(editor: Editor, store: EditorStore) {
           sel, node
         })
       })
-
-      runInAction(() => store.sel = sel)
-      if (!node) return
       if (currentType.current !== node[0].type) {
         currentType.current = node[0].type
         MainApi.setEditorContext(node[0].type, EditorUtils.isTop(editor, node[1]))
