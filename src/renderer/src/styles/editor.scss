@@ -13,6 +13,9 @@
   --shadow: rgba(0, 0, 0, .3);
   --md-high-line: rgba(11, 18, 24, .5);
 }
+html.dark{
+  color-scheme: dark;
+}
 body{
   font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
   text-rendering: optimizeLegibility;
