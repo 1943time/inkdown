@@ -53,7 +53,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
         const [node] = Editor.nodes(editor, {
-          match: n => n.type === 'media'
+          match: n => n.type === 'media' || n.type === 'inline-katex'
         })
         if (node) {
           EditorUtils.moveAfterSpace(editor, node[1])

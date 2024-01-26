@@ -477,10 +477,20 @@ ol.m-list {
   }
 }
 .inline-code-input{
-  background: var(--md-code-bg);
   font-size: 0.9em;
   line-height: 1.3em;
-  @apply mx-[1px] rounded-sm caret-sky-500 break-all text-gray-400;
+  @apply rounded-sm caret-sky-500 text-gray-400;
+  &:before, &:after{
+    content: '$';
+    font-size: 1em;
+    @apply dark:text-gray-500 text-gray-400;
+  }
+  &:before{
+    margin-right: 2px;
+  }
+  &:after{
+    margin-left: 2px;
+  }
 }
 
 .katex-display{

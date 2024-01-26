@@ -14,6 +14,7 @@ import {createReadStream} from 'fs'
 const isWindows = process.platform === 'win32'
 const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
 let highlighter:Highlighter | null = null
+let highlighterFormula:Highlighter | null = null
 let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
@@ -65,6 +66,9 @@ const api = {
   highlightCode(code: string, lang: string) {
     return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
   },
+  highlightInlineFormula(code: string) {
+    return highlighterFormula?.codeToThemedTokens(code, 'tex', 'vitesse-light', {includeExplanation: false}) || []
+  },
   toUnix(path: string, force = false) {
     return electronAPI.process.platform === 'win32' || force ? toUnix(path) : path
   },
@@ -96,17 +100,19 @@ const api = {
   },
   async ready() {
     const config = await ipcRenderer.invoke('getConfig')
-    return new Promise(resolve => {
+    return new Promise(async resolve => {
       if (ready) {
         resolve(true)
       } else {
-        getHighlighter({
+        highlighter = await getHighlighter({
           theme: config.codeTheme
-        }).then(res => {
-          highlighter = res
-          resolve(true)
-          ready = true
         })
+        highlighterFormula = await getHighlighter({
+          theme: 'vitesse-light',
+          langs: ['tex']
+        })
+        resolve(true)
+        ready = true
       }
     })
   },

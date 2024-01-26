@@ -32,6 +32,7 @@ declare global {
       // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string
       highlightCode(code: string, lang: string): IThemedToken[][]
+      highlightInlineFormula(code: string): IThemedToken[][]
       highlightCodeToString(code: string, lang: string): string
       langSet: Set<string>
       preloadUrl: string

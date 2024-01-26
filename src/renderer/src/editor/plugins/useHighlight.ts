@@ -8,6 +8,7 @@ import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
 import {codeLangMap} from '../output/html/transform'
+import {configStore} from '../../store/config'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
@@ -46,7 +47,7 @@ export function useHighlight(store?: EditorStore) {
           const code = Node.string(node)
           if (code) {
             let textRanges: any[] = []
-            const tokens = window.api.highlightCode(code, 'latex')
+            const tokens = configStore.config.dark ? window.api.highlightCode(code, 'tex') : window.api.highlightInlineFormula(code)
             let start = 0
             const lineToken = tokens[0]
             for (let t of lineToken) {

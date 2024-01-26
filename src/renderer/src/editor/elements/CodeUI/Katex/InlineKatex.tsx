@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {ElementProps, InlineKatexNode} from '../../../../el'
-import React, {useEffect, useMemo, useRef} from 'react'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {InlineChromiumBugfix} from '../../../utils/InlineChromiumBugfix'
 import {useSelStatus} from '../../../../hooks/editor'
 import katex from 'katex'
@@ -17,7 +17,7 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
         output: 'html',
         throwOnError: false,
         macros: {
-          "\\f": "#1f(#2)"
+          '\\f': '#1f(#2)'
         }
       })
     }
@@ -26,9 +26,9 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
       <span
         {...attributes}
         data-be={'inline-katex'}
-        className={'inline-block relative'}
+        className={`relative`}
       >
-        <span className={`inline-code-input inline-block ${selected ? 'px-2 py-1.5' : 'invisible h-0 overflow-hidden absolute'}`}>
+        <span className={`inline-code-input ${selected ? 'px-1' : 'invisible h-0 overflow-hidden absolute'}`}>
           <InlineChromiumBugfix/>
           {children}
           <InlineChromiumBugfix/>
