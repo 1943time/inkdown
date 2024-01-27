@@ -237,7 +237,6 @@ export const Overview = observer(() => {
           {configStore.zh ? '大纲宽度' : 'Outline width'}
         </div>
         <div>
-          {configStore.config.leadingWidth}
           <Slider
             className={'w-64'}
             value={configStore.config.leadingWidth} min={220} max={500} marks={{220: '220', 500: '500'}}
