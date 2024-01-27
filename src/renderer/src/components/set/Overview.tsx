@@ -12,6 +12,9 @@ import {useLocalState} from '../../hooks/useLocalState'
 import {useEffect} from 'react'
 import {TextHelp} from './Help'
 import {InterfaceFont} from './Font'
+import {clearInlineKatex} from '../../editor/plugins/useHighlight'
+import {rules} from '@typescript-eslint/eslint-plugin'
+import {runInAction} from 'mobx'
 
 export const Overview = observer(() => {
   const [state, setState] = useLocalState({
@@ -74,6 +77,12 @@ export const Overview = observer(() => {
             value={configStore.config.theme}
             onChange={e => {
               configStore.setTheme(e.target.value)
+              treeStore.tabs.map(t => clearInlineKatex(t.store.editor))
+              setTimeout(() => {
+                runInAction(() => {
+                  treeStore.currentTab.store.refreshHighlight = !treeStore.currentTab.store.refreshHighlight
+                })
+              }, 100)
             }}
           >
             <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>

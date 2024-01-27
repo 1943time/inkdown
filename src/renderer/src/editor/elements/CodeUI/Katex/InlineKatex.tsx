@@ -28,7 +28,7 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
         data-be={'inline-katex'}
         className={`relative`}
       >
-        <span className={`inline-code-input ${selected ? 'px-1' : 'invisible h-0 overflow-hidden absolute'}`}>
+        <span className={`inline-code-input ${selected ? 'px-1' : 'hidden h-0 overflow-hidden absolute'}`}>
           <InlineChromiumBugfix/>
           {children}
           <InlineChromiumBugfix/>
@@ -39,7 +39,7 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
           onClick={() => {
             Transforms.select(store.editor, Editor.end(store.editor, path))
           }}
-          className={`mx-1 select-none ${selected ? 'invisible h-0 overflow-hidden absolute' : ''}`}
+          className={`mx-1 select-none ${selected ? 'hidden h-0 overflow-hidden absolute' : ''}`}
         />
       </span>
     ),

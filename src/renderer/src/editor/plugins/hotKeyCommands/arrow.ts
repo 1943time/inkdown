@@ -1,4 +1,4 @@
-import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
+import {Editor, Element, Node, Path, Range, Text, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
 import {isMod} from '../../../utils/keyboard'
@@ -31,8 +31,8 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       const leaf = Node.leaf(editor, sel.focus.path)
       const dirt = EditorUtils.isDirtLeaf(leaf)
       const pre = Editor.previous<any>(editor, {at: sel.focus.path})
-      const [node] = Editor.nodes(editor, {
-        match: n => n.type === 'media'
+      const [node] = Editor.nodes<any>(editor, {
+        match: n => n.type === 'media' || n.type === 'inline-katex'
       })
       if (node) {
         EditorUtils.moveBeforeSpace(editor, node[1])
@@ -52,7 +52,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
-        const [node] = Editor.nodes(editor, {
+        const [node] = Editor.nodes<any>(editor, {
           match: n => n.type === 'media' || n.type === 'inline-katex'
         })
         if (node) {
