@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {configStore} from '../../store/config'
-import {Button, Checkbox, Input, Modal, Radio, Space} from 'antd'
+import {Button, Checkbox, Input, Modal, Radio, Slider, Space} from 'antd'
 import {LinkOutlined} from '@ant-design/icons'
 import {message$} from '../../utils'
 import {treeStore} from '../../store/tree'
@@ -219,6 +219,22 @@ export const Overview = observer(() => {
             checked={configStore.config.showLeading}
             onChange={e => {
               configStore.toggleShowLeading()
+            }}
+          />
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>
+          {configStore.zh ? '大纲宽度' : 'Outline width'}
+        </div>
+        <div>
+          {configStore.config.leadingWidth}
+          <Slider
+            className={'w-64'}
+            value={configStore.config.leadingWidth} min={220} max={500} marks={{220: '220', 500: '500'}}
+            step={20}
+            onChange={e => {
+              configStore.setConfig('leadingWidth', e)
             }}
           />
         </div>

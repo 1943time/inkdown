@@ -1,8 +1,7 @@
 import {observer} from 'mobx-react-lite'
-import {Modal, Tooltip} from 'antd'
-import {CloseOutlined, QuestionCircleOutlined} from '@ant-design/icons'
+import {CloseOutlined} from '@ant-design/icons'
 import {configStore} from '../../store/config'
-import {ReactNode, useCallback, useEffect} from 'react'
+import {useCallback, useEffect} from 'react'
 import {action} from 'mobx'
 import {treeStore} from '../../store/tree'
 import {ReactEditor} from 'slate-react'
@@ -48,11 +47,9 @@ export const Set = observer(() => {
     }
   }, [configStore.visible])
 
-  const [modal, context] = Modal.useModal()
   if (!configStore.visible) return null
   return (
     <div className={`fixed inset-0 z-[300] dark:bg-black/30 bg-black/10`}>
-      {context}
       <div
         className={'w-full h-full flex items-center justify-center overflow-auto py-10 flex-wrap'}
         onClick={close}

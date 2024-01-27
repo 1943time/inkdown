@@ -101,6 +101,7 @@ export const registerApi = () => {
       codeTheme: config.codeTheme || 'material-theme-palenight',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
+      leadingWidth: config.leadingWidth || 220,
       showCharactersCount: getBoolean(config.showCharactersCount, true),
       mas: getBoolean(process.mas, false),
       dragToSort: getBoolean(config.dragToSort, true),

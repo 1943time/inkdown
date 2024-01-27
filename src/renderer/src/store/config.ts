@@ -12,6 +12,7 @@ class ConfigStore {
     showLeading: true,
     autoDownload: false,
     theme: 'system' as 'system' | 'dark' | 'light',
+    leadingWidth: 220,
     dark: false,
     locale: 'en' as 'en' | 'zh',
     codeLineNumber: false,
