@@ -1,4 +1,4 @@
-import {app, BrowserWindow, dialog, ipcMain, screen, shell, globalShortcut} from 'electron'
+import {app, BrowserWindow, dialog, globalShortcut, ipcMain, screen, shell} from 'electron'
 import {existsSync, lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
@@ -7,6 +7,7 @@ import {registerMenus} from './menus'
 import {store} from './store'
 import {AppUpdate} from './update'
 import {isAbsolute, join} from 'path'
+
 const isWindows = process.platform === 'win32'
 type WinOptions = {
   openFolder?: string
@@ -31,14 +32,14 @@ function createWindow(initial?: WinOptions): void {
       callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
     },
   )
-  // window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-  //   callback({
-  //     responseHeaders: {
-  //       'Access-Control-Allow-Origin': ['*'],
-  //       ...details.responseHeaders,
-  //     },
-  //   })
-  // })
+  window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        'Access-Control-Allow-Origin': ['*'],
+        ...details.responseHeaders,
+      },
+    })
+  })
   window.on('enter-full-screen', () => {
     window.webContents?.send('enter-full-screen')
   })
@@ -46,7 +47,6 @@ function createWindow(initial?: WinOptions): void {
   window.on('leave-full-screen', () => {
     window.webContents?.send('leave-full-screen')
   })
-
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
   })

@@ -25,6 +25,7 @@ import {RenamePasteFile} from './RenamePasteFile'
 import {isAbsolute} from 'path'
 import {stat} from '../utils'
 import {existsSync} from 'fs'
+import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
@@ -313,37 +314,41 @@ export const MEditor = observer(({note}: {
   }, [])
 
   return (
-    <Slate
-      editor={editor}
-      initialValue={[EditorUtils.p]}
-      onChange={change}
+    <ErrorBoundary
+      fallback={e => <ErrorFallback error={e}/>}
     >
-      <SetNodeToDecorations/>
-      <Placeholder/>
-      <Editable
-        onError={onError}
-        decorate={high}
-        spellCheck={configStore.config.spellCheck}
-        readOnly={store.readonly}
-        className={`edit-area heading-line font-${configStore.config.editorFont}`}
-        style={{fontSize: configStore.config.editorTextSize || 16}}
-        onMouseDown={checkEnd}
-        onDrop={drop}
-        onFocus={focus}
-        onBlur={blur}
-        onPaste={paste}
-        onCompositionStart={compositionStart}
-        onCompositionEnd={compositionEnd}
-        renderElement={renderElement}
-        onKeyDown={keydown}
-        renderLeaf={renderLeaf}
-      />
-      <RenamePasteFile
-        file={saveFile.current!}
-        onClose={() => setState({openRenameModal: false})}
-        open={state.openRenameModal}
-        store={store}
-      />
-    </Slate>
+      <Slate
+        editor={editor}
+        initialValue={[EditorUtils.p]}
+        onChange={change}
+      >
+        <SetNodeToDecorations/>
+        <Placeholder/>
+        <Editable
+          onError={onError}
+          decorate={high}
+          spellCheck={configStore.config.spellCheck}
+          readOnly={store.readonly}
+          className={`edit-area heading-line font-${configStore.config.editorFont}`}
+          style={{fontSize: configStore.config.editorTextSize || 16}}
+          onMouseDown={checkEnd}
+          onDrop={drop}
+          onFocus={focus}
+          onBlur={blur}
+          onPaste={paste}
+          onCompositionStart={compositionStart}
+          onCompositionEnd={compositionEnd}
+          renderElement={renderElement}
+          onKeyDown={keydown}
+          renderLeaf={renderLeaf}
+        />
+        <RenamePasteFile
+          file={saveFile.current!}
+          onClose={() => setState({openRenameModal: false})}
+          open={state.openRenameModal}
+          store={store}
+        />
+      </Slate>
+    </ErrorBoundary>
   )
 })
