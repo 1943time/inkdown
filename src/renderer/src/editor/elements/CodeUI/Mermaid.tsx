@@ -27,6 +27,8 @@ export const Mermaid = observer((props: {
       mermaid.parse(state().code).catch(e => {
         setState({error: e.toString(), code: ''})
       })
+    }).finally(() => {
+      document.querySelector('#d' + id)?.classList.add('hidden')
     })
   }, [])
 
