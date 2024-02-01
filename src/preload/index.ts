@@ -1,7 +1,7 @@
 import {contextBridge, ipcRenderer, clipboard, ipcMain} from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import {getHighlighter, Highlighter } from 'shiki'
-import {BUNDLED_LANGUAGES} from 'shiki'
+import {BUNDLED_LANGUAGES, BUNDLED_THEMES} from 'shiki'
 import * as fs from 'fs/promises'
 import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
@@ -19,6 +19,7 @@ let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
   langSet,
+  themes: BUNDLED_THEMES.filter(c => c !== 'css-variables'),
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
@@ -32,11 +33,15 @@ const api = {
     }
     return clipboard.read('public.file-url')?.replace('file://', '')
   },
+  getThemeBg(theme: string) {
+    return highlighter?.getBackgroundColor(theme)
+  },
   loadCodeTheme(theme: string) {
     return getHighlighter({
       theme
     }).then(res => {
       highlighter = res
+      return res.getBackgroundColor(theme)
     })
   },
   got,

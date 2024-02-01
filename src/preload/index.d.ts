@@ -17,7 +17,9 @@ declare global {
       got: Got
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
-      loadCodeTheme: (theme: string) => Promise<any>
+      getThemeBg: (theme: string) => string
+      themes: string[]
+      loadCodeTheme: (theme: string) => Promise<string>
       uploadFile<T = any>(options: {
         url: string
         data: Record<string, string | number | {path: string}>

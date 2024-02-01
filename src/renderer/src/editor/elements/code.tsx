@@ -76,6 +76,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       <div
         {...props.attributes}
         data-be={'code'}
+        style={{background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#f4f4f5' : configStore.config.codeBackground}}
         onDragStart={store.dragStart}
         className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <DragHandle top={0.9}/>

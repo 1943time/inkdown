@@ -328,6 +328,7 @@ ol.m-list {
 }
 
 .code-highlight {
+  @apply border border-black/10 dark:border-gray-200/10;
   background: var(--md-code-bg);
   border-radius: 4px;
   &.tab-2{

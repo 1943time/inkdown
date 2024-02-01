@@ -5,6 +5,7 @@ import {treeStore} from '../../store/tree'
 import {clearAllCodeCache} from '../../editor/plugins/useHighlight'
 import {TextHelp} from './Help'
 import {EditorFont} from './Font'
+import {runInAction} from 'mobx'
 
 export const SetEditor = observer(() => {
   return (
@@ -114,7 +115,10 @@ export const SetEditor = observer(() => {
             onChange={e => {
               configStore.setConfig('codeTheme', e)
               setTimeout(async () => {
-                await window.api.loadCodeTheme(e)
+                const bg = await window.api.loadCodeTheme(e)
+                runInAction(() => {
+                  configStore.config.codeBackground = bg
+                })
                 for (const t of treeStore.tabs) {
                   clearAllCodeCache(t.store.editor)
                   t.store.setState(state => state.pauseCodeHighlight = true)
@@ -127,21 +131,7 @@ export const SetEditor = observer(() => {
                 }
               }, 300)
             }}
-            options={[
-              {label: 'dracula', value: 'dracula'},
-              {label: 'css-variables', value: 'css-variables'},
-              {label: 'dark-plus', value: 'dark-plus'},
-              {label: 'github-dark', value: 'github-dark'},
-              {label: 'github-dark-dimmed', value: 'github-dark-dimmed'},
-              {label: 'material-theme', value: 'material-theme'},
-              {label: 'material-theme-darker', value: 'material-theme-darker'},
-              {label: 'material-theme-ocean', value: 'material-theme-ocean'},
-              {label: 'material-theme-palenight', value: 'material-theme-palenight'},
-              {label: 'min-dark', value: 'min-dark'},
-              {label: 'monokai', value: 'monokai'},
-              {label: 'one-dark-pro', value: 'one-dark-pro'},
-              {label: 'vitesse-dark', value: 'vitesse-dark'},
-            ]}
+            options={window.api.themes.map(t => ({label: t, value: t}))}
           />
         </div>
       </div>

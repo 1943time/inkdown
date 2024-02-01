@@ -6,6 +6,7 @@ import { configStore } from './store/config'
 import {message$, modal$} from './utils'
 import { Home } from './components/Home'
 import zhCN from 'antd/locale/zh_CN';
+import {runInAction} from 'mobx'
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()
@@ -23,9 +24,15 @@ const App = observer(() => {
     Promise.allSettled([
       window.api.ready(),
       configStore.initial()
-    ]).then(() => {
+    ]).then(async () => {
       setLocale(configStore.zh ? 'zh' : 'en')
-      setReady(true)
+      try {
+        runInAction(() => {
+          configStore.config.codeBackground = window.api.getThemeBg(configStore.config.codeTheme)
+        })
+      } finally {
+        setReady(true)
+      }
     })
   }, [])
   const themeObject = useMemo(() => {

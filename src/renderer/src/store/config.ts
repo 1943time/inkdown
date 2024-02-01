@@ -37,7 +37,8 @@ class ConfigStore {
     interfaceFont: 'System',
     editorFont: 'System',
     isLinux: false,
-    detectionMarkdown: false
+    detectionMarkdown: false,
+    codeBackground: ''
   }
   timer = 0
   homePath = ''
@@ -127,7 +128,6 @@ class ConfigStore {
         document.body.classList.remove(key)
       }
     }
-
     document.body.classList.add('font-' + value!)
     this.setConfig('interfaceFont', value)
   }
