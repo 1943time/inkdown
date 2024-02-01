@@ -131,7 +131,7 @@ export const SetEditor = observer(() => {
                 }
               }, 300)
             }}
-            options={window.api.themes.map(t => ({label: t, value: t}))}
+            options={Array.from(window.api.themes).map(t => ({label: t, value: t}))}
           />
         </div>
       </div>

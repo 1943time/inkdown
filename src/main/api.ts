@@ -98,7 +98,7 @@ export const registerApi = () => {
       imagesFolder: config.imagesFolder || '.images',
       codeLineNumber: !!config.codeLineNumber,
       codeTabSize: config.codeTabSize || 4,
-      codeTheme: config.codeTheme || 'material-theme-palenight',
+      codeTheme: config.codeTheme || 'one-dark-pro',
       editorTextSize: config.editorTextSize || 16,
       leadingLevel: config.leadingLevel || 4,
       leadingWidth: config.leadingWidth || 220,

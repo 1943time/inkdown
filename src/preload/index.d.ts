@@ -18,7 +18,7 @@ declare global {
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
       getThemeBg: (theme: string) => string
-      themes: string[]
+      themes: Set<string>
       loadCodeTheme: (theme: string) => Promise<string>
       uploadFile<T = any>(options: {
         url: string

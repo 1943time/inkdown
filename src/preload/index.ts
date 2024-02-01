@@ -19,7 +19,7 @@ let watchers = new Map<string, Watcher>()
 let ready:any = null
 const api = {
   langSet,
-  themes: BUNDLED_THEMES.filter(c => c !== 'css-variables'),
+  themes: new Set(BUNDLED_THEMES.filter(c => c !== 'css-variables')),
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
@@ -38,7 +38,7 @@ const api = {
   },
   loadCodeTheme(theme: string) {
     return getHighlighter({
-      theme
+      theme: this.themes.has(theme as any) ? theme : 'one-dark-pro'
     }).then(res => {
       highlighter = res
       return res.getBackgroundColor(theme)
@@ -98,7 +98,7 @@ const api = {
   async resetHighlighter() {
     const config = await ipcRenderer.invoke('getConfig')
     return getHighlighter({
-      theme: config.codeTheme
+      theme: this.themes.has(config.codeTheme as any) ? config.codeTheme : 'one-dark-pro'
     }).then(res => {
       highlighter = res
     })
@@ -110,7 +110,7 @@ const api = {
         resolve(true)
       } else {
         highlighter = await getHighlighter({
-          theme: config.codeTheme
+          theme: this.themes.has(config.codeTheme as any) ? config.codeTheme : 'one-dark-pro'
         })
         highlighterFormula = await getHighlighter({
           theme: 'vitesse-light',
