@@ -18,6 +18,12 @@ import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
 import {codeLangMap} from '../output/html/transform'
 
+const lightTheme = new Set(['rose-pine-dawn', 'slack-ochin'])
+const isDarkTheme = (theme: string = '') => {
+  if (theme === 'auto') return configStore.config.dark
+  return !/light/i.test(theme) && !lightTheme.has(theme)
+}
+
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = Array.from(window.api.langSet).map(l => {
   return {value: l}
@@ -131,7 +137,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }
         </div>
         {configStore.config.codeLineNumber && !store.webview &&
-          <div className={'code-line-list'} contentEditable={false}>
+          <div className={`code-line-list ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : 'light'}`} contentEditable={false}>
             {(props.children || []).map((c, i) =>
               <div key={i}/>
             )}

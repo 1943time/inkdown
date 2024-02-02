@@ -402,23 +402,23 @@ ol.m-list {
     hyphens: none;
   }
   .code-line-list{
-    background: var(--md-code-bg);
     counter-reset: step;
-    border-radius: 4px;
     counter-increment: step 0;
-    height: 100%;
-    position: absolute;
     z-index: 10;
-    left: 0;
     padding-top: 10px;
     width:32px;
-    top: 0;
-    border-right: 1px solid rgba(0,0,0,.5);
+    @apply border-r top-0 left-0 absolute h-full;
+    &.light{
+      border-color: rgba(0,0,0,.1);
+    }
+    &.dark{
+      border-color: rgba(229, 231, 235, 0.15);
+    }
     > div{
       &:before{
         content: counter(step);
         counter-increment: step;
-        color: rgba(255, 255, 255, .5);
+        @apply dark:text-gray-400 text-gray-500;
       }
       font-size: .93em;
       left: 0;
