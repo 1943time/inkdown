@@ -65,7 +65,7 @@ export const registerMenus = () => {
         type: 'separator'
       },
       {
-        label: zh ? '在Finder中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
+        label: zh ? isMac ? '在Finder中显示' : '在File Explorer中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
         enabled: !!filePath,
         click: () => shell.showItemInFolder(filePath!)
       },
@@ -186,7 +186,7 @@ export const registerMenus = () => {
         type: 'separator'
       })
       temp.add({
-        label: zh ? '在Finder中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
+        label: zh ? isMac ? '在Finder中显示' : '在File Explorer中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
         click: () => shell.showItemInFolder(params.filePath!)
       })
       if (params.type === 'file') {
@@ -210,7 +210,7 @@ export const registerMenus = () => {
     }
     if (params.type === 'rootFolder') {
       temp.add({
-        label: zh ? '在Finder中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
+        label: zh ? isMac ? '在Finder中显示' : '在File Explorer中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
         click: () => shell.showItemInFolder(params.filePath!)
       })
     }
