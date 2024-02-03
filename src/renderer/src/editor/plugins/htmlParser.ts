@@ -193,6 +193,39 @@ export const htmlParser = (editor: Editor, html: string) => {
     })
     if (n) node = n
     if (node) {
+      if (n[0].type ==='list-item' && fragment[0].type === 'list') {
+        const children = fragment[0].children || []
+        if (!children.length) return false
+        const [p] = Editor.nodes<Element>(editor, {
+          match: n => Element.isElement(n) && n.type === 'paragraph',
+          at: Range.isCollapsed(sel) ? sel.anchor.path : Range.start(sel).path
+        })
+        if (n && !Path.hasPrevious(p[1])) {
+          if (!Node.string(p[0])) {
+            Transforms.insertNodes(editor, children, {at: Path.next(n[1])})
+            const parent = Node.parent(editor, p[1])
+            const nextPath = [...n[1].slice(0, -1), n[1][n[1].length - 1] + children.length]
+            if (parent.children.length > 1) {
+              Transforms.moveNodes(editor, {
+                at: {
+                  anchor: {path: Path.next(p[1]), offset: 0},
+                  focus: {path: [...p[1].slice(0, -1), parent.children.length - 1], offset: 0}
+                },
+                to: [...nextPath, 1]
+              })
+            }
+            Transforms.delete(editor, {at: n[1]})
+            Transforms.select(editor, Editor.end(editor, [...nextPath.slice(0, -1), nextPath.pop() - 1]))
+          } else {
+            Transforms.insertNodes(editor, children, {at: Path.next(n[1])})
+            Transforms.select(editor, Editor.end(editor, [...n[1].slice(0, -1), n[1].pop()! + children.length]))
+          }
+          if (fragment.length > 1) {
+            Transforms.insertNodes(editor, fragment.slice(1), {at: Path.next(Path.parent(n[1]))})
+          }
+          return true
+        }
+      }
       if (node[0].type === 'inline-katex') {
         let text = parsed.innerText
         if (text) {
