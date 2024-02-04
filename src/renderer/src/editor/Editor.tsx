@@ -152,12 +152,12 @@ export const MEditor = observer(({note}: {
       } catch (e) {
         EditorUtils.deleteAll(editor)
       }
-      setTimeout(() => {
+      requestIdleCallback(() => {
         store.setState(state => state.pauseCodeHighlight = false)
         requestIdleCallback(() => {
           store.setState(state => state.refreshHighlight = !state.refreshHighlight)
         })
-      }, 100)
+      })
     } else {
       nodeRef.current = undefined
     }

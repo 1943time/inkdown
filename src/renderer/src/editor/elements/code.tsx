@@ -84,7 +84,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         data-be={'code'}
         style={{background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground}}
         onDragStart={store.dragStart}
-        className={`drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <DragHandle top={0.9}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
@@ -137,11 +137,11 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }
         </div>
         {configStore.config.codeLineNumber && !store.webview &&
-          <div className={`code-line-list ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : 'light'}`} contentEditable={false}>
+          <pre className={`code-line-list`} contentEditable={false}>
             {(props.children || []).map((c, i) =>
               <div key={i}/>
             )}
-          </div>
+          </pre>
         }
         {store.webview && !store.history ?
           <pre

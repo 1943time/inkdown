@@ -402,25 +402,27 @@ ol.m-list {
     hyphens: none;
   }
   .code-line-list{
+    border-color: rgba(0,0,0,.1);
+    @apply text-black/50;
+  }
+  &.dark .code-line-list{
+    border-color: rgba(229, 231, 235, 0.15);
+    @apply text-gray-100/50;
+  }
+  .code-line-list{
     counter-reset: step;
     counter-increment: step 0;
     z-index: 10;
     padding-top: 10px;
     width:32px;
     @apply border-r top-0 left-0 absolute h-full;
-    &.light{
-      border-color: rgba(0,0,0,.1);
-    }
-    &.dark{
-      border-color: rgba(229, 231, 235, 0.15);
-    }
     > div{
       &:before{
         content: counter(step);
         counter-increment: step;
         @apply dark:text-gray-400 text-gray-500;
       }
-      font-size: .93em;
+      font-size: 1em;
       left: 0;
       top: 0;
       height: 22px;

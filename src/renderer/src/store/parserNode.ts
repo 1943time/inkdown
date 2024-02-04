@@ -3,7 +3,6 @@ import {readdirSync, statSync} from 'fs'
 import {basename, extname, join, parse, sep} from 'path'
 import {observable} from 'mobx'
 import {nanoid} from 'nanoid'
-import {configStore} from './config'
 
 export const defineParent = (node: IFileItem, parent: IFileItem) => {
   Object.defineProperty(node, 'parent', {
