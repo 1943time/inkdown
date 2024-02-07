@@ -342,7 +342,7 @@ ol.m-list {
   line-height: 1.62em;
   direction: ltr;
   &.katex-container{
-    pre{
+    .code-content{
       position: relative;
       padding: 1.8em 0;
       &:before,&:after{

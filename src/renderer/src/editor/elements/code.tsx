@@ -146,7 +146,6 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         {store.webview && !store.history ?
           <pre
             data-bl-type={'code'}
-            className={`text-gray-200`}
             style={{
               paddingLeft: configStore.config.codeLineNumber && !store.webview ? 44 : 20,
               paddingRight: 20
@@ -157,7 +156,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           </pre> : (
             <pre
               data-bl-type={'code'}
-              className={'text-gray-200'}
+              className={'code-content'}
               data-bl-lang={state().lang}
             >
               {child}
