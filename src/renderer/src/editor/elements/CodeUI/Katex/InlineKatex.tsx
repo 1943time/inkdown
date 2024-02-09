@@ -28,7 +28,7 @@ export const InlineKatex = observer(({children, element, attributes}: ElementPro
         data-be={'inline-katex'}
         className={`relative`}
       >
-        <span className={`inline-code-input ${selected ? 'px-1' : 'invisible w-0 h-0 overflow-hidden absolute'}`}>
+        <span className={`inline-code-input ${selected ? 'px-1' : 'inline-flex invisible w-0 h-0 overflow-hidden absolute'}`}>
           <InlineChromiumBugfix/>
           {children}
           <InlineChromiumBugfix/>

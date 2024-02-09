@@ -41,7 +41,13 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       } else if (sel.focus.offset === 0 && dirt) {
         EditorUtils.moveBeforeSpace(editor, sel.focus.path)
       } else {
-        Transforms.move(editor, {unit: 'offset', reverse: true})
+        if (sel.focus.offset === 0 && Path.hasPrevious(sel.focus.path) && Editor.isVoid(editor, Node.get(editor, Path.previous(sel.focus.path)))) {
+          if (Path.hasPrevious(Path.previous(sel.focus.path))) {
+            Transforms.select(editor, Editor.end(editor, Path.previous(Path.previous(sel.focus.path))))
+          }
+        } else {
+          Transforms.move(editor, { unit: 'offset', reverse: true })
+        }
       }
       return
     }
@@ -62,7 +68,14 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         } else if (sel.focus.offset === leaf.text?.length && dirt && !Editor.next(editor, {at: sel.focus.path})) {
           EditorUtils.moveAfterSpace(editor, sel.focus.path)
         } else {
-          Transforms.move(editor, {unit: 'offset'})
+          const leaf = Node.leaf(editor, sel.focus.path)
+          if (sel.focus.offset === leaf.text?.length && Editor.hasPath(editor, Path.next(sel.focus.path)) && Editor.isVoid(editor, Node.get(editor, Path.next(sel.focus.path)))) {
+            if (Editor.hasPath(editor, Path.next(Path.next(sel.focus.path)))) {
+              Transforms.select(editor, Editor.start(editor, Path.next(Path.next(sel.focus.path))))
+            }
+          } else {
+            Transforms.move(editor, { unit: 'offset'})
+          }
         }
       } else {
         Transforms.select(editor, Editor.end(editor, Path.parent(sel.focus.path)))
@@ -85,7 +98,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
           })
         }
       }
-      if (el.type === 'table-cell') {
+      if (el.type === 'table-cell' && !Path.hasPrevious(sel.focus.path)) {
         const row = Path.parent(path)
         const table = Path.parent(row)
         if (!Path.hasPrevious(row) && !Path.hasPrevious(Path.parent(row))) {
@@ -112,7 +125,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         mode: 'lowest'
       })
       const [el, path] = node
-      if (el.type === 'table-cell') {
+      if (el.type === 'table-cell' && !Editor.hasPath(editor, Path.next(sel.focus.path))) {
         const row = Path.parent(path)
         const table = Path.parent(row)
         if (!Editor.hasPath(editor, Path.next(row))) {
@@ -123,7 +136,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
           }
         } else {
           e.preventDefault()
-          Transforms.select(editor, Editor.end(editor, [...Path.next(row), path[path.length - 1]]))
+          Transforms.select(editor, Editor.end(editor, [...Path.next(row), path[path.length - 1], 0]))
         }
       }
 

@@ -368,6 +368,10 @@ export class TreeStore {
 
   openNote(file: string | IFileItem, scroll = true) {
     const filePath = typeof file === 'string' ? file : file.filePath
+    const index = this.tabs.findIndex(t => t.current?.filePath === filePath)
+    if (index !== -1) {
+      return this.selectTab(index)
+    }
     if (this.currentTab.current?.filePath === filePath) return
     this.checkOtherTabsShouldUpdate()
     if (this.root && filePath.startsWith(this.root.filePath)) {
