@@ -65,6 +65,7 @@
     "framer-motion": "^10.10.0",
     "is-hotkey": "^0.2.0",
     "katex": "^0.16.9",
+    "ky": "^1.2.0",
     "mermaid": "^10.0.2",
     "mobx": "^6.8.0",
     "mobx-react-lite": "^4.0.4",

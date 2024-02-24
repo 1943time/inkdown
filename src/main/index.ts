@@ -32,18 +32,21 @@ function createWindow(initial?: WinOptions): void {
       callback({requestHeaders: {Origin: '*', ...details.requestHeaders}})
     },
   )
-  window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        'Access-Control-Allow-Origin': ['*'],
-        ...details.responseHeaders,
-      },
-    })
-  })
   window.on('enter-full-screen', () => {
     window.webContents?.send('enter-full-screen')
   })
-
+  window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    if (details.responseHeaders?.['access-control-allow-origin'] || details.responseHeaders?.['Access-Control-Allow-Origin']) {
+      callback({responseHeaders: details.responseHeaders})
+    } else {
+      callback({
+        responseHeaders: {
+          'Access-Control-Allow-Origin': ['*'],
+          ...details.responseHeaders,
+        },
+      })
+    }
+  })
   window.on('leave-full-screen', () => {
     window.webContents?.send('leave-full-screen')
   })

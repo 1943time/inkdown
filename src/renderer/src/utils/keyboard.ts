@@ -9,9 +9,11 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {isAbsolute, join, relative} from 'path'
 import {configStore} from '../store/config'
 import {EditorStore} from '../editor/store'
-import {existsSync} from 'fs'
+import {existsSync, readFileSync} from 'fs'
 import {message$} from './index'
 import {selChange$} from '../editor/plugins/useOnchange'
+import {imageBed} from './imageBed'
+import {mediaType} from '../editor/utils/dom'
 
 const openFloatBar = (store: EditorStore) => {
   setTimeout(() => {
@@ -149,7 +151,11 @@ export class MenuKey {
           other = relative(join(treeStore.openedNote.filePath, '..'), other)
         }
         if (other) {
-          this.state.insertInlineNode(other)
+          if (mediaType(other) === 'image' && existsSync(other) && imageBed.route) {
+            this.state.insertFile(new File([readFileSync(other).buffer], other))
+          } else {
+            this.state.insertInlineNode(other)
+          }
         } else {
           let node = {
             type: 'media',

@@ -124,6 +124,9 @@ devDependencies:
   katex:
     specifier: ^0.16.9
     version: 0.16.9
+  ky:
+    specifier: ^1.2.0
+    version: 1.2.0
   mermaid:
     specifier: ^10.0.2
     version: 10.0.2
@@ -3741,6 +3744,11 @@ packages:
   /kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+    dev: true
+
+  /ky@1.2.0:
+    resolution: {integrity: sha512-dnPW+T78MuJ9tLAiF/apJV7bP7RRRCARXQxsCmsWiKLXqGtMBOgDVOFRYzCAfNe/OrRyFyor5ESgvvC+QWEqOA==}
+    engines: {node: '>=18'}
     dev: true
 
   /layout-base@1.0.2:

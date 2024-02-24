@@ -8,6 +8,7 @@ import {ReactEditor} from 'slate-react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {Overview} from './Overview'
 import {SetEditor} from './Editor'
+import {ImageBed} from './ImageBed'
 
 export const Set = observer(() => {
   const close = useCallback(action(() => {
@@ -16,7 +17,7 @@ export const Set = observer(() => {
 
   const [state, setState] = useLocalState({
     imagesFolder: '',
-    tab: 'Overview' as 'Overview' | 'Editor',
+    tab: 'Overview' as 'Overview' | 'Editor' | 'ImageBed',
     editorMaxWidth: configStore.config.editorMaxWidth as number | null,
     version: ''
   })
@@ -67,20 +68,28 @@ export const Set = observer(() => {
           <div className={'flex'}>
             <div className={'py-4 px-2 w-[230px] border-r b1 tree-bg rounded-tl-lg rounded-bl-lg'}>
               <div className={'mb-4 px-2 text-gray-500'}>{'Preferences'}</div>
-              <div
-                onClick={() => setState({tab: 'Overview'})}
-                className={`py-1 cursor-default px-3 text-sm mb-1 rounded  ${state.tab === 'Overview' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
-              >
-                Overview
-              </div>
-              <div
-                onClick={() => setState({tab: 'Editor'})}
-                className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
-                Editor
+              <div className={'space-y-1'}>
+                <div
+                  onClick={() => setState({tab: 'Overview'})}
+                  className={`py-1 cursor-default px-3 text-sm rounded  ${state.tab === 'Overview' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
+                >
+                  Overview
+                </div>
+                <div
+                  onClick={() => setState({tab: 'Editor'})}
+                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                  Editor
+                </div>
+                <div
+                  onClick={() => setState({tab: 'ImageBed'})}
+                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'ImageBed' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                  ImageBed
+                </div>
               </div>
             </div>
             <div className={'flex-1 dark:bg-zinc-900 bg-white'}>
-              <div className={'border-b text-base font-medium h-12 items-center flex dark:text-gray-200 text-gray-700 b1 relative px-4'}>
+              <div
+                className={'border-b text-base font-medium h-12 items-center flex dark:text-gray-200 text-gray-700 b1 relative px-4'}>
                 <div>
                   {state.tab}
                 </div>
@@ -90,6 +99,9 @@ export const Set = observer(() => {
               }
               {state.tab === 'Editor' &&
                 <SetEditor/>
+              }
+              {state.tab === 'ImageBed' &&
+                <ImageBed/>
               }
             </div>
           </div>

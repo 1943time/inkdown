@@ -16,6 +16,8 @@ import {withHistory} from 'slate-history'
 import {configStore} from '../store/config'
 import {selChange$} from './plugins/useOnchange'
 import {withErrorReporting} from './plugins/catchError'
+import {imageBed} from '../utils/imageBed'
+import {nid} from '../utils'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -41,7 +43,7 @@ export class EditorStore {
   focus = false
   readonly = false
   private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list'])
-  dragEl:null | HTMLElement = null
+  dragEl: null | HTMLElement = null
   openSearch = false
   focusSearch = false
   docChanged = false
@@ -64,13 +66,16 @@ export class EditorStore {
   openFilePath: string | null = null
   webviewFilePath: string | null = null
   saveDoc$ = new Subject<any[] | null>()
+
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
+
   doManual() {
     this.manual = true
     setTimeout(() => this.manual = false, 30)
   }
+
   constructor(webview = false, history = false) {
     this.webview = webview
     this.history = history
@@ -88,6 +93,7 @@ export class EditorStore {
       manual: false
     })
   }
+
   hideRanges() {
     if (this.highlightCache.size) {
       setTimeout(() => {
@@ -118,11 +124,13 @@ export class EditorStore {
     }
     return left
   }
+
   doRefreshHighlight() {
     setTimeout(action(() => {
       this.refreshHighlight = !this.refreshHighlight
     }), 60)
   }
+
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
     this.searchRanges = []
@@ -243,9 +251,10 @@ export class EditorStore {
       }
     }
   }
+
   async insertMultipleFiles(files: FileList) {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
-    const paths:string[] = []
+    const paths: string[] = []
     for (let f of imageFiles) {
       paths.push(await this.saveFile(f))
     }
@@ -264,6 +273,7 @@ export class EditorStore {
       }), {at: path, select: true})
     }
   }
+
   async insertFile(file: File) {
     if (file.path && mediaType(file.path) !== 'image') {
       return this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
@@ -271,6 +281,7 @@ export class EditorStore {
     const mediaPath = await this.saveFile(file)
     this.insertInlineNode(mediaPath)
   }
+
   private async createDir(path: string) {
     try {
       let rootPath = treeStore.root.filePath
@@ -288,28 +299,40 @@ export class EditorStore {
       console.error('create dir', e)
     }
   }
-  async saveFile(file: File | {name: string, buffer: ArrayBuffer}) {
-    let targetPath = ''
-    let mediaUrl = ''
-    const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
-    const p = parse(file.name)
-    const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
-    if (treeStore.root) {
-      const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
-      if (!existsSync(imageDir)) await this.createDir(imageDir)
-      targetPath = join(imageDir, base)
-      mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
+
+  async saveFile(file: File | { name: string, buffer: ArrayBuffer }) {
+    if (imageBed.route) {
+      const p = parse(file.name)
+      const name = nid() + p.ext
+      const res = await imageBed.uploadFile([{name, data: file instanceof File ? await file.arrayBuffer() : file.buffer }])
+      if (res) {
+        return res[0].imgUrl
+      }
+      return ''
     } else {
-      const path = await MainApi.getCachePath()
-      const imageDir = join(path, configStore.config.imagesFolder)
-      if (!existsSync(imageDir)) mkdirSync(imageDir)
-      targetPath = join(imageDir, base)
-      mediaUrl = targetPath
+      let targetPath = ''
+      let mediaUrl = ''
+      const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
+      const p = parse(file.name)
+      const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
+      if (treeStore.root) {
+        const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
+        if (!existsSync(imageDir)) await this.createDir(imageDir)
+        targetPath = join(imageDir, base)
+        mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
+      } else {
+        const path = await MainApi.getCachePath()
+        const imageDir = join(path, configStore.config.imagesFolder)
+        if (!existsSync(imageDir)) mkdirSync(imageDir)
+        targetPath = join(imageDir, base)
+        mediaUrl = targetPath
+      }
+      writeFileSync(targetPath, new DataView(buffer))
+      if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
+      return window.api.toUnix(mediaUrl)
     }
-    writeFileSync(targetPath, new DataView(buffer))
-    if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
-    return window.api.toUnix(mediaUrl)
   }
+
   insertDragFile(dragNode: IFileItem) {
     const note = treeStore.currentTab.current
     if (!note || !dragNode) return
@@ -320,7 +343,7 @@ export class EditorStore {
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
     const type = mediaType(filePath)
-    const url = isAbsolute(filePath) ? filePath: window.api.toUnix(filePath)
+    const url = isAbsolute(filePath) ? filePath : window.api.toUnix(filePath)
     let node = ['image', 'audio', 'video', 'document'].includes(type) ? {
       type: 'media',
       url,
@@ -374,20 +397,23 @@ export class EditorStore {
       console.error('toPoint', e)
     }
   }
+
   private toPath(el: HTMLElement) {
     const node = ReactEditor.toSlateNode(this.editor, el)
     const path = ReactEditor.findPath(this.editor, node)
     return [path, node] as [Path, Node]
   }
+
   private isListItem(el: HTMLElement) {
     return el.dataset.be === 'list-item'
   }
+
   dragStart(e: React.DragEvent, type?: string) {
     e.stopPropagation()
     this.readonly = true
     type MovePoint = {
       el: HTMLDivElement,
-        direction: 'top' | 'bottom',
+      direction: 'top' | 'bottom',
       top: number
       left: number
     }
@@ -409,12 +435,12 @@ export class EditorStore {
       }
       points.push({
         el: el,
-        left: this.isListItem(el) ? left - 20: left,
+        left: this.isListItem(el) ? left - 20 : left,
         direction: 'bottom',
         top: top + el.clientHeight + 2
       })
     }
-    let last:MovePoint | null = null
+    let last: MovePoint | null = null
     const dragover = (e: DragEvent) => {
       e.preventDefault()
       const target = e.target as HTMLElement
@@ -430,7 +456,7 @@ export class EditorStore {
       }
       if (cur) {
         last = cur
-        const width = this.isListItem(last.el) ? last.el.clientWidth + 20 + 'px': last.el.clientWidth + 'px'
+        const width = this.isListItem(last.el) ? last.el.clientWidth + 20 + 'px' : last.el.clientWidth + 'px'
         if (!mark) {
           mark = document.createElement('div')
           mark.classList.add('move-mark')
