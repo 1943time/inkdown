@@ -36,11 +36,19 @@ function createWindow(initial?: WinOptions): void {
     window.webContents?.send('enter-full-screen')
   })
   window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const allowTimeHeader = {
+      ['Access-control-allow-headers']: 'time,authorization,device-id,version,content-type',
+      ['Access-Control-Allow-Methods']: 'POST,PUT,GET,DELETE'
+    }
     if (details.responseHeaders?.['access-control-allow-origin'] || details.responseHeaders?.['Access-Control-Allow-Origin']) {
-      callback({responseHeaders: details.responseHeaders})
+      callback({responseHeaders: {
+        ...allowTimeHeader,
+        ...details.responseHeaders
+      }})
     } else {
       callback({
         responseHeaders: {
+          ...allowTimeHeader,
           'Access-Control-Allow-Origin': ['*'],
           ...details.responseHeaders,
         },

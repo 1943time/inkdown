@@ -2,23 +2,25 @@ import {createHmac} from 'crypto'
 import {IBook, IDevice, IDoc, IFile} from '../model'
 import {ShareStore} from '../store'
 import {message$} from '../../utils'
+import ky from 'ky'
+import {readFileSync} from 'fs'
+import {basename} from 'path'
 
 export class ShareApi {
   constructor(
     private readonly store: ShareStore
   ) {}
-  private http = window.api.createHttp({
-    timeout: 30000,
-    responseType: 'json',
+  private http = ky.create({
     hooks: {
       beforeRequest: [req => {
         if (this.store.serviceConfig) {
           const time = Date.now()
+          const sp = new URL(req.url)
           const config = this.config
-          req.headers.authorization = this.sign(time, req.url.pathname)
-          req.headers.time = String(time)
-          req.headers['device-id'] = config.deviceId
-          req.headers['version'] = this.store.minVersion
+          req.headers.set('authorization', this.sign(time, sp.pathname))
+          req.headers.set('time', String(time))
+          req.headers.set('device-id', config.deviceId)
+          req.headers.set('version', this.store.minVersion)
         }
       }],
       afterResponse: [async response => {
@@ -27,7 +29,6 @@ export class ShareApi {
         if (body?.message) {
           throw new Error(body.message)
         }
-        return response
       }],
       beforeError: [async res => {
         message$.next({
@@ -161,13 +162,15 @@ export class ShareApi {
     bookId?: string
     docId?: string
   }) {
-    return window.api.uploadFile<{name: string}>({
-      url: `${this.config.domain}/api/file`,
-      data: {
-        ...data,
-        file: {path: data.filePath}
-      }
-    }, this.http)
+    const file = new File([readFileSync(data.filePath).buffer], basename(data.filePath))
+    const form = new FormData()
+    form.append('file', file)
+    form.append('filePath', data.filePath)
+    form.append('bookId', data.bookId || '')
+    form.append('docId', data.docId || '')
+    return this.http.post(`${this.config.domain}/api/file`, {
+      body: form
+    }).json<{name: string}>()
   }
   prefetchBook(data: {
     id?: string

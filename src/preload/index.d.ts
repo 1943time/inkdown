@@ -17,10 +17,6 @@ declare global {
       got: Got
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
-      uploadFile<T = any>(options: {
-        url: string
-        data: Record<string, string | number | {path: string}>
-      }, gotInstance?: Got): Promise<T>
       toUnix: (path: string) => string
       md5: (str: string | Buffer) => string
       createHttp: (options: ExtendOptions) => Got

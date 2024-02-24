@@ -27,23 +27,6 @@ const api = {
     return clipboard.read('public.file-url')?.replace('file://', '')
   },
   got,
-  uploadFile(options: {
-    url: string
-    domain: string
-    data: Record<string, string | number | {path: string}>
-  }, gotInstance?: Got) {
-    const form = new FormData()
-    Object.entries(options.data).forEach(item => {
-      if (typeof item[1] === 'object' && item[1].path) {
-        form.append(item[0], createReadStream(item[1].path))
-      } else {
-        form.append(item[0], item[1])
-      }
-    })
-    return (gotInstance || got).post(options.url, {
-      body: form
-    }).json()
-  },
   writeClipboardText(str: string) {
     return clipboard.writeText(str, 'clipboard')
   },
