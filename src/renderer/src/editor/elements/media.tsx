@@ -8,6 +8,7 @@ import {Transforms} from 'slate'
 import {getImageData, toArrayBuffer} from '../../utils'
 import {mediaType} from '../utils/dom'
 import {useSelStatus} from '../../hooks/editor'
+import ky from 'ky'
 
 const startMoving = (options: {
   dom: HTMLImageElement
@@ -80,12 +81,10 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       const url = decodeURIComponent(element.downloadUrl)
       const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
       if (image) {
-        window.api.got.get(element.downloadUrl, {
-          responseType: 'buffer'
-        }).then(res => {
+        ky.get(element.downloadUrl).arrayBuffer().then(res => {
           store.saveFile({
             name: Date.now().toString(16) + '.' + image[1].toLowerCase(),
-            buffer: toArrayBuffer(res.rawBody)
+            buffer: res
           }).then(res => {
             Transforms.setNodes(store.editor, {
               url: res, downloadUrl: undefined, alt: ''

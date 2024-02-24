@@ -11,6 +11,7 @@ import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {configStore} from '../store/config'
 import {IFileItem} from '../index'
+import ky from 'ky'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g
 
@@ -223,12 +224,10 @@ export const useSystemMenus = () => {
                   if (ext) {
                     try {
                       change = true
-                      const res = await window.api.got.get(item.url, {
-                        responseType: 'buffer'
-                      })
+                      const res = await ky.get(item.url).arrayBuffer()
                       const path = await store.saveFile({
                         name: Date.now().toString(16) + '.' + ext[1].toLowerCase(),
-                        buffer: toArrayBuffer(res.rawBody)
+                        buffer: res
                       })
                       Transforms.setNodes(store.editor, {
                         url: path

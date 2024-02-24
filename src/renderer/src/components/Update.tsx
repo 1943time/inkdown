@@ -6,6 +6,7 @@ import {message$} from '../utils'
 import {configStore} from '../store/config'
 import {openConfirmDialog$} from './ConfirmDialog'
 import {action, runInAction} from 'mobx'
+import ky from 'ky'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
   const [state, setState] = useLocalState({
@@ -30,10 +31,10 @@ export const Update = observer(() => {
     const v = await window.electron.ipcRenderer.invoke('get-version')
     // https://www.bluemd.me/api/version
     try {
-      const res = await window.api.got.get('https://www.bluemd.me/api/version', {
+      const res = await ky.get('https://www.bluemd.me/api/version', {
         searchParams: {
           version: v,
-          mas: configStore.mas ? 'true' : undefined
+          mas: configStore.mas ? 'true' : ''
         }
       }).json<{
         masVersion: string

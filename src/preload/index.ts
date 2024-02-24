@@ -3,12 +3,8 @@ import {electronAPI} from '@electron-toolkit/preload'
 import * as fs from 'fs/promises'
 import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
-import got, {Got} from 'got'
-import {ExtendOptions} from 'got/dist/source/types'
 import {toUnix} from 'upath'
 import mime from 'mime-types'
-import FormData from 'form-data'
-import {createReadStream} from 'fs'
 
 const isWindows = process.platform === 'win32'
 let watchers = new Map<string, Watcher>()
@@ -26,12 +22,8 @@ const api = {
     }
     return clipboard.read('public.file-url')?.replace('file://', '')
   },
-  got,
   writeClipboardText(str: string) {
     return clipboard.writeText(str, 'clipboard')
-  },
-  createHttp(options: ExtendOptions) {
-    return got.extend(options)
   },
   toUnix(path: string, force = false) {
     return electronAPI.process.platform === 'win32' || force ? toUnix(path) : path

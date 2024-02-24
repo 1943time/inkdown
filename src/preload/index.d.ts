@@ -4,9 +4,6 @@ import {dialog} from 'electron'
 import * as fs from 'fs/promises'
 import {AliApi} from './sdk/ali'
 import {Sdk} from './sdk'
-import {Got} from 'got'
-import {ExtendOptions} from 'got/dist/source/types'
-
 
 declare global {
   interface Window {
@@ -14,12 +11,10 @@ declare global {
     api: {
       sdk: typeof Sdk,
       dev: boolean
-      got: Got
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
       toUnix: (path: string) => string
       md5: (str: string | Buffer) => string
-      createHttp: (options: ExtendOptions) => Got
       getClipboardText: () => string
       getClipboardFile: () => string
       writeClipboardText: (str: string) => void

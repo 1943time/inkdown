@@ -96,7 +96,7 @@ export class ShareApi {
     }
   }) {
     const time = Date.now()
-    return window.api.got.post(`${data.domain}/api/bluestone`, {
+    return ky.post(`${data.domain}/api/bluestone`, {
       json: {
         name: data.name,
         machineId: data.machineId,
