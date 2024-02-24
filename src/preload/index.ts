@@ -1,7 +1,5 @@
-import {contextBridge, ipcRenderer, clipboard, ipcMain} from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
-import {getHighlighter, Highlighter } from 'shiki'
-import {BUNDLED_LANGUAGES, BUNDLED_THEMES} from 'shiki'
+import {clipboard, contextBridge} from 'electron'
+import {electronAPI} from '@electron-toolkit/preload'
 import * as fs from 'fs/promises'
 import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
@@ -11,15 +9,10 @@ import {toUnix} from 'upath'
 import mime from 'mime-types'
 import FormData from 'form-data'
 import {createReadStream} from 'fs'
+
 const isWindows = process.platform === 'win32'
-const langSet = new Set(BUNDLED_LANGUAGES.map(l => [l.id, ...(l.aliases || [])]).flat(2))
-let highlighter:Highlighter | null = null
-let highlighterFormula:Highlighter | null = null
 let watchers = new Map<string, Watcher>()
-let ready:any = null
 const api = {
-  langSet,
-  themes: new Set(BUNDLED_THEMES.filter(c => c !== 'css-variables')),
   copyToClipboard(str: string) {
     clipboard.writeText(str)
   },
@@ -32,17 +25,6 @@ const api = {
       return rawFilePath?.replace(new RegExp(String.fromCharCode(0), 'g'), '')
     }
     return clipboard.read('public.file-url')?.replace('file://', '')
-  },
-  getThemeBg(theme: string) {
-    return highlighter?.getBackgroundColor(theme)
-  },
-  loadCodeTheme(theme: string) {
-    return getHighlighter({
-      theme: this.themes.has(theme as any) ? theme : 'one-dark-pro'
-    }).then(res => {
-      highlighter = res
-      return res.getBackgroundColor(theme)
-    })
   },
   got,
   uploadFile(options: {
@@ -68,12 +50,6 @@ const api = {
   createHttp(options: ExtendOptions) {
     return got.extend(options)
   },
-  highlightCode(code: string, lang: string) {
-    return highlighter?.codeToThemedTokens(code, lang, undefined, {includeExplanation: false}) || []
-  },
-  highlightInlineFormula(code: string) {
-    return highlighterFormula?.codeToThemedTokens(code, 'tex', 'vitesse-light', {includeExplanation: false}) || []
-  },
   toUnix(path: string, force = false) {
     return electronAPI.process.platform === 'win32' || force ? toUnix(path) : path
   },
@@ -89,37 +65,8 @@ const api = {
     watcher!.on('change', cb)
     watchers.set(path, watcher)
   },
-  highlightCodeToString(code: string, lang: string) {
-    return langSet.has(lang) ? highlighter?.codeToHtml(code, {lang}) : code
-  },
   md5(str: string | Buffer) {
     return createHash('md5').update(str).digest('hex')
-  },
-  async resetHighlighter() {
-    const config = await ipcRenderer.invoke('getConfig')
-    return getHighlighter({
-      theme: this.themes.has(config.codeTheme as any) ? config.codeTheme : 'one-dark-pro'
-    }).then(res => {
-      highlighter = res
-    })
-  },
-  async ready() {
-    const config = await ipcRenderer.invoke('getConfig')
-    return new Promise(async resolve => {
-      if (ready) {
-        resolve(true)
-      } else {
-        highlighter = await getHighlighter({
-          theme: this.themes.has(config.codeTheme as any) ? config.codeTheme : 'one-dark-pro'
-        })
-        highlighterFormula = await getHighlighter({
-          theme: 'vitesse-light',
-          langs: ['tex']
-        })
-        resolve(true)
-        ready = true
-      }
-    })
   },
   offWatcher(path: string) {
     const watcher = watchers.get(path)

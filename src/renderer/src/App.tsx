@@ -7,6 +7,7 @@ import {message$, modal$} from './utils'
 import { Home } from './components/Home'
 import zhCN from 'antd/locale/zh_CN';
 import {runInAction} from 'mobx'
+import {codeReady, highlighter} from './editor/utils/highlight'
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()
@@ -21,18 +22,12 @@ const App = observer(() => {
 
   const [ready, setReady] = useState(false)
   useEffect(() => {
-    Promise.allSettled([
-      window.api.ready(),
-      configStore.initial()
+    Promise.all([
+      configStore.initial(),
     ]).then(async () => {
+      await codeReady()
       setLocale(configStore.zh ? 'zh' : 'en')
-      try {
-        runInAction(() => {
-          configStore.config.codeBackground = window.api.getThemeBg(configStore.config.codeTheme)
-        })
-      } finally {
-        setReady(true)
-      }
+      setReady(true)
     })
   }, [])
   const themeObject = useMemo(() => {

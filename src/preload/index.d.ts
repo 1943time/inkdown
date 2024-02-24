@@ -17,9 +17,6 @@ declare global {
       got: Got
       createFormData(data: Record<string, string | number | {path: string}>): FormData
       resetHighlighter: () => Promise<any>
-      getThemeBg: (theme: string) => string
-      themes: Set<string>
-      loadCodeTheme: (theme: string) => Promise<string>
       uploadFile<T = any>(options: {
         url: string
         data: Record<string, string | number | {path: string}>
@@ -33,10 +30,6 @@ declare global {
       mimeType: (file: string) => string
       // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string
-      highlightCode(code: string, lang: string): IThemedToken[][]
-      highlightInlineFormula(code: string): IThemedToken[][]
-      highlightCodeToString(code: string, lang: string): string
-      langSet: Set<string>
       preloadUrl: string
       baseUrl: string
       fs: typeof fs

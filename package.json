@@ -36,7 +36,6 @@
     "mkdirp": "^3.0.0",
     "node-machine-id": "^1.1.12",
     "node-watch": "^0.7.4",
-    "shiki": "0.14.7",
     "upath": "^2.0.1"
   },
   "devDependencies": {
@@ -82,6 +81,7 @@
     "remark-parse": "^10.0.1",
     "rxjs": "^7.8.0",
     "sass": "^1.58.3",
+    "shiki": "1.1.7",
     "slate": "^0.94.1",
     "slate-history": "^0.93.0",
     "slate-hyperscript": "^0.77.0",

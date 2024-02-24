@@ -17,6 +17,7 @@ import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
 import {codeLangMap} from '../output/html/transform'
+import {allLanguages, highlighter} from '../utils/highlight'
 
 const lightTheme = new Set(['rose-pine-dawn', 'slack-ochin'])
 const isDarkTheme = (theme: string = '') => {
@@ -25,7 +26,7 @@ const isDarkTheme = (theme: string = '') => {
 }
 
 export const CodeCtx = createContext({lang: '', code: false})
-const langOptions = Array.from(window.api.langSet).map(l => {
+const langOptions = Array.from(allLanguages).map(l => {
   return {value: l}
 })
 
@@ -41,7 +42,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   const html = useMemo(() => {
     if (store.webview && !store.history) {
-      let html = window.api.highlightCodeToString(props.element.children.map(n => Node.string(n)).join('\n'), codeLangMap(state().lang) || '')
+      let html = highlighter.codeToHtml(props.element.children.map(n => Node.string(n)).join('\n'), {lang: codeLangMap(state().lang) as any, theme: configStore.config.codeTheme})
       html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
       return html
     }
@@ -84,7 +85,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         data-be={'code'}
         style={{background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground}}
         onDragStart={store.dragStart}
-        className={`drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
         <DragHandle top={0.9}/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}

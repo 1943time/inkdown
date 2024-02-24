@@ -7,6 +7,7 @@ import {EditorUtils} from '../../utils/editorUtils'
 import {extname, isAbsolute, join} from 'path'
 import {existsSync, readFileSync} from 'fs'
 import {mediaType} from '../../utils/dom'
+import {highlighter, langSet} from '../../utils/highlight'
 const langMap = new Map([
   ['c++', 'cpp']
 ])
@@ -106,8 +107,11 @@ export const transformSchema = async (schema: any[], filePath: string) => {
         } else {
           item.code = code
           const lang = codeLangMap(item.language)
-          if (window.api.langSet.has(lang)) {
-            item.html = window.api.highlightCodeToString(item.code, lang).replace(/<\/?pre[^>]*>/g, '')
+          if (langSet.has(lang)) {
+            item.html = highlighter.codeToHtml(item.code, {
+              lang: lang as any,
+              theme: configStore.config.codeTheme
+            }).replace(/<\/?pre[^>]*>/g, '')
           }
         }
       } catch (e) {}

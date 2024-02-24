@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef} from 'react'
+import {useCallback, useMemo} from 'react'
 import {Editor, Element, Node, NodeEntry, Range} from 'slate'
 import {useSlate} from 'slate-react'
 import {CodeNode} from '../../el'
@@ -7,8 +7,8 @@ import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
-import {codeLangMap} from '../output/html/transform'
 import {configStore} from '../../store/config'
+import {highlighter, langSet, loadedLanguage} from '../utils/highlight'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 export const codeCache = new WeakMap<object, Range[]>()
@@ -41,6 +41,40 @@ export const clearCodeCache = (node: any) => {
     })
   }, 60)
 }
+
+const run = (node: NodeEntry, code: string, lang: any) => {
+  try {
+    const el = node[0]
+    const ranges: Range[] = []
+    const tokens = highlighter.codeToTokensBase(code, {
+      lang: lang,
+      theme: configStore.config.codeTheme as any,
+      includeExplanation: false
+    })
+    for (let i = 0; i < tokens.length; i++) {
+      const lineToken = tokens[i]
+      let start = 0
+      for (let t of lineToken) {
+        const length = t.content.length
+        if (!length) {
+          continue
+        }
+        const end = start + length
+        const path = [...node[1], i, 0]
+        ranges.push({
+          anchor: {path, offset: start},
+          focus: {path, offset: end},
+          color: t.color
+        })
+        start = end
+      }
+    }
+    codeCache.set(el, ranges)
+  } catch (e) {
+  }
+}
+let stack: { run: Function, lang: string }[] = []
+
 export function useHighlight(store?: EditorStore) {
   return useCallback(([node, path]: NodeEntry):Range[] => {
     if (Element.isElement(node) && highlightNodes.has(node.type)) {
@@ -55,7 +89,11 @@ export function useHighlight(store?: EditorStore) {
           const code = Node.string(node)
           if (code) {
             let textRanges: any[] = []
-            const tokens = configStore.config.dark ? window.api.highlightCode(code, 'tex') : window.api.highlightInlineFormula(code)
+            const tokens = highlighter.codeToTokensBase(code, {
+              lang: 'tex',
+              theme: configStore.config.codeTheme as any,
+              includeExplanation: false
+            })
             let start = 0
             const lineToken = tokens[0]
             for (let t of lineToken) {
@@ -166,34 +204,30 @@ export const SetNodeToDecorations = observer(() => {
       }
     })
     for (let c of codes) {
-      if (c.code.length > 20000) continue
-      const lang = codeLangMap(c.node[0].language?.toLowerCase() || '')
-      if (!window.api.langSet.has(lang)) continue
+      if (c.code.length > 10000) continue
+      const lang = c.node[0].language?.toLowerCase() || ''
+      if (!langSet.has(lang)) continue
       const el = c.node[0]
       let handle = codeCache.get(el)
       if (!handle) {
-        const ranges: Range[] = []
-        const tokens = window.api.highlightCode(c.code, lang)
-        for (let i = 0; i < tokens.length; i++) {
-          const lineToken = tokens[i]
-          let start = 0
-          for (let t of lineToken) {
-            const length = t.content.length
-            if (!length) {
-              continue
-            }
-            const end = start + length
-            const path = [...c.node[1], i, 0]
-            ranges.push({
-              anchor: { path, offset: start },
-              focus: { path, offset: end },
-              color: t.color
-            })
-            start = end
-          }
+        if (!loadedLanguage.has(lang)) {
+          stack.push({
+            run: () => run(c.node, c.code, lang),
+            lang: lang
+          })
+        } else {
+          run(c.node, c.code, lang)
         }
-        codeCache.set(el, ranges)
       }
+    }
+    if (stack.length) {
+      const loadLang = stack.map(s => s.lang as any)
+      highlighter.loadLanguage(...loadLang).then(() => {
+        stack.map(s => loadedLanguage.add(s.lang))
+        stack.forEach(s => s.run())
+        stack = []
+        runInAction(() => store.refreshHighlight = !store.refreshHighlight)
+      })
     }
   }, [])
   useMemo(() => {

@@ -3,11 +3,13 @@ import {MainApi} from '../api/main'
 import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
 import {shareStore} from '../server/store'
+import {codeReady} from '../editor/utils/highlight'
 
 class ConfigStore {
   visible = false
   enableUpgrade = false
   openUpdateDialog = false
+  codeDark = false
   config = {
     showLeading: true,
     autoDownload: false,
@@ -18,7 +20,7 @@ class ConfigStore {
     codeLineNumber: false,
     codeTabSize: 4,
     editorTextSize: 16,
-    codeTheme: 'material-theme-palenight',
+    codeTheme: 'one-dark-pro',
     leadingLevel: 4,
     mas: false,
     showCharactersCount: true,
