@@ -9,6 +9,11 @@ export let highlighter:Highlighter
 export const loadedLanguage = new Set<string>(['tex'])
 
 export const codeReady = async () => {
+  if (!codeThemes.has(configStore.config.codeTheme)) {
+    runInAction(() => {
+      configStore.config.codeTheme = 'one-dark-pro'
+    })
+  }
   highlighter = await getHighlighter({
     themes: [
       configStore.config.codeTheme

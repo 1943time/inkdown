@@ -425,7 +425,7 @@ ol.m-list {
     z-index: 10;
     padding-top: 10px;
     width:32px;
-    @apply border-r top-0 left-0 absolute h-full;
+    @apply border-r top-0 left-0 absolute h-full overflow-hidden;
     > div{
       &:before{
         content: counter(step);
