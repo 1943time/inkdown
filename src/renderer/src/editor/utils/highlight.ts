@@ -11,7 +11,7 @@ export const loadedLanguage = new Set<string>(['tex'])
 export const codeReady = async (allLanguage = false) => {
   if (!codeThemes.has(configStore.config.codeTheme)) {
     runInAction(() => {
-      configStore.config.codeTheme = 'one-dark-pro'
+      configStore.config.codeTheme = codeThemes.has('one-dark-pro') ? 'one-dark-pro' : Array.from(codeThemes)[0]
     })
   }
   highlighter = await getHighlighter({
