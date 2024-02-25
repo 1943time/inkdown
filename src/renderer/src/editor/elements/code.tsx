@@ -26,7 +26,7 @@ const isDarkTheme = (theme: string = '') => {
 }
 
 export const CodeCtx = createContext({lang: '', code: false})
-const langOptions = Array.from(allLanguages).map(l => {
+const langOptions = allLanguages.map(l => {
   return {value: l}
 })
 

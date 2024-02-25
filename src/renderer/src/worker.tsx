@@ -4,17 +4,17 @@ import 'antd/dist/reset.css'
 import {observer} from 'mobx-react-lite'
 import React, {useEffect, useState} from 'react'
 import {configStore} from './store/config'
-import zhCN from 'antd/locale/zh_CN';
 import {Webview} from './components/Webview'
 import ReactDOM from 'react-dom/client'
+import {codeReady} from './editor/utils/highlight'
 
 const App = observer(() => {
   const [ready, setReady] = useState(false)
   useEffect(() => {
     Promise.allSettled([
-      window.api.ready(),
       configStore.initial()
-    ]).then(() => {
+    ]).then(async () => {
+      await codeReady(true)
       setReady(true)
     })
   }, [])

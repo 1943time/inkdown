@@ -8,7 +8,7 @@ export const langSet = new Set(allLanguages)
 export let highlighter:Highlighter
 export const loadedLanguage = new Set<string>(['tex'])
 
-export const codeReady = async () => {
+export const codeReady = async (allLanguage = false) => {
   if (!codeThemes.has(configStore.config.codeTheme)) {
     runInAction(() => {
       configStore.config.codeTheme = 'one-dark-pro'
@@ -18,7 +18,7 @@ export const codeReady = async () => {
     themes: [
       configStore.config.codeTheme
     ],
-    langs: ['tex']
+    langs: allLanguage ? allLanguages : ['tex']
   }).then((res) => {
     try {
       const theme = res.getTheme(configStore.config.codeTheme as any)

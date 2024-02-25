@@ -25,8 +25,7 @@ declare global {
       baseUrl: string
       fs: typeof fs
       watch: (path: string, cb: (event: 'update' | 'remove', path: string) => void) => Promise<void>,
-      offWatcher: (path: string) => Promise<void> | undefined,
-      ready: () => Promise<boolean>
+      offWatcher: (path: string) => Promise<void> | undefined
     }
   }
 }
