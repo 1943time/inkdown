@@ -2,27 +2,34 @@
 import {EditorStore} from './editor/store'
 import {BaseRange, BaseSelection} from 'slate'
 
-export interface IFileItem {
-  id: string
+export type ISpaceNode = {
+  cid: string
+  root: true
   filePath: string
-  ext?: string
+  name: string
+  children?: IFileItem[]
+}
+export type IFileItem = {
+  cid: string
+  filePath: string
+  ext: string
   filename: string
+  spaceId?: string
   folder: boolean
   parent?: IFileItem
   children?: IFileItem[]
   expand?: boolean
-  root?: boolean
   editName?: string
   independent?: boolean
-  mode?: 'edit' | 'create' | 'copy'
-  copyItem?: IFileItem
   changed?: boolean
   refresh?: boolean
+  sort: number
   schema?: any[]
   history?: any
   sel?: BaseSelection
   hidden?: boolean
 }
+// export type IFileItem = ISpaceNode | IFileNode
 
 export interface Tab {
   get current(): IFileItem | undefined

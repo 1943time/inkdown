@@ -9,31 +9,32 @@ import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
 import {configStore} from '../store/config'
+import {Icon} from '@iconify/react'
 
 export const Empty = observer(() => {
   const [state, setState] = useLocalState({
     records: [] as {name: string, filePath: string, dir: string}[]
   })
   useLayoutEffect(() => {
-    MainApi.getPath('home').then(home => {
-      db.recent.limit(5).toArray().then(res => {
-        setState({records: res.sort((a, b) => a.time > b.time ? -1 : 1).
-          filter(r => {
-          try {
-            return existsSync(r.filePath)
-          } catch (e) {
-            db.recent.where('id').equals(r.id!).delete()
-            return false
-          }
-          }).sort((a, b) => a.time > b.time ? -1 : 1).map(r => {
-            return {
-              name: basename(r.filePath),
-              filePath: r.filePath,
-              dir: r.filePath.startsWith(home)  ? '~' + dirname(r.filePath).replace(home, '') : dirname(r.filePath)
-            }
-          })})
-      })
-    })
+    // MainApi.getPath('home').then(home => {
+    //   db.recent.limit(5).toArray().then(res => {
+    //     setState({records: res.sort((a, b) => a.time > b.time ? -1 : 1).
+    //       filter(r => {
+    //       try {
+    //         return existsSync(r.filePath)
+    //       } catch (e) {
+    //         db.recent.where('id').equals(r.id!).delete()
+    //         return false
+    //       }
+    //       }).sort((a, b) => a.time > b.time ? -1 : 1).map(r => {
+    //         return {
+    //           name: basename(r.filePath),
+    //           filePath: r.filePath,
+    //           dir: r.filePath.startsWith(home)  ? '~' + dirname(r.filePath).replace(home, '') : dirname(r.filePath)
+    //         }
+    //       })})
+    //   })
+    // })
     const clearRecent = () => {
       setState({records: []})
     }
@@ -54,12 +55,12 @@ export const Empty = observer(() => {
             {configStore.zh ? '没有打开的文件' : 'No open files'}
           </div>
           <div
-            className={'cursor-default hover:text-sky-400 duration-200'}
+            className={'cursor-default hover:text-sky-400 duration-200 flex items-center'}
             onClick={() => {
               MainApi.sendToSelf('create')
             }}
           >
-            <FileAddOutlined/>
+            <Icon icon={'mingcute:file-new-line'} className={'text-lg'} />
             <span className={'ml-2'}>
               {configStore.zh ? '新建笔记' : 'New Note'}
             </span>
@@ -95,15 +96,15 @@ export const Empty = observer(() => {
           {!treeStore.root &&
             <>
               <div
-                className={'cursor-default hover:text-sky-400 duration-200'}
+                className={'cursor-default hover:text-sky-400 duration-200 flex items-center'}
                 onClick={() => {
                   MainApi.sendToSelf('open')
                 }}
               >
-                <FolderOpenOutlined/>
+                <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'}/>
                 <span
                   className={'ml-2'}>
-                  {configStore.zh ? '打开文件或文件夹' : 'Open file or folder'}
+                  {configStore.zh ? '创建工作空间' : 'Create a workspace'}
                 </span>
               </div>
             </>

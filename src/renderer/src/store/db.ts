@@ -36,15 +36,42 @@ export interface ITagFile {
   tagId: string
 }
 
+export interface ISpace {
+  cid: string
+  name: string
+  filePath: string
+  cloud: 0 | 1
+  created?: string
+  sort: number
+  lastOpenTime: number
+}
+export interface IFile {
+  cid: string
+  filePath: string
+  spaceId?: string
+  folder: boolean
+  schema?: object
+  synced?: 0 | 1
+  updated?: number
+  created: number
+  sort: number
+  lastOpenTime?: number
+  children?: IFile[]
+}
+
 class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public quickOpen!: Table<IQuickOpen, number>
   public history!: Table<IHistory, string>
   public tag!: Table<ITag, string>
   public tagFile!: Table<ITagFile, string>
+  public file!: Table<IFile, string>
+  public space!: Table<ISpace, string>
   public constructor() {
     super('db')
-    this.version(6).stores({
+    this.version(7).stores({
+      space: '&cid,name,filePath,cloud,sort',
+      file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,&filePath',
       quickOpen: '&id,filePath,dirPath',
       history: '&id,filePath,schema,updated',

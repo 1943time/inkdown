@@ -291,7 +291,11 @@ onmessage = e => {
   const files:string[] = e.data.files
   share = e.data.share
   postMessage(files.map(str => {
-    const root = parser.parse(str || '')
-    return parserBlock(root.children as any[], true)
+    try {
+      const root = parser.parse(str || '')
+      return parserBlock(root.children as any[], true)
+    } catch (e) {
+      return [{type: 'paragraph', children: [{text: ''}]}]
+    }
   }))
 }
