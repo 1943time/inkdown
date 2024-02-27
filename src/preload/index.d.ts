@@ -4,6 +4,7 @@ import {dialog} from 'electron'
 import * as fs from 'fs/promises'
 import {AliApi} from './sdk/ali'
 import {Sdk} from './sdk'
+import nodeFetch, {RequestInit, Response} from 'node-fetch'
 
 declare global {
   interface Window {
@@ -19,6 +20,7 @@ declare global {
       getClipboardFile: () => string
       writeClipboardText: (str: string) => void
       mimeType: (file: string) => string
+      fetch(url: string, init?: RequestInit):Promise<Response>
       // checkedLatest: () => Promise<any>
       copyToClipboard: (str: string) => string
       preloadUrl: string

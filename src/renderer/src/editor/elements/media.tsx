@@ -53,7 +53,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     if (element.downloadUrl) {
       return
     }
-    if (!['image'].includes(type) || element.url?.startsWith('data:')) {
+    if (!['image', 'other'].includes(type) || element.url?.startsWith('data:')) {
       setState({loadSuccess: true, url: element.url})
       return
     }
@@ -67,31 +67,40 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }
     }
     setState({url: realUrl})
-    if (type === 'image') {
+    if (type === 'image' || type === 'other') {
       const img = document.createElement('img')
       img.referrerPolicy = 'no-referrer'
       img.crossOrigin = 'anonymous'
       img.src = realUrl
-      img.onerror = () => setState({loadSuccess: false})
+      img.onerror = (e) => {
+        setState({loadSuccess: false})
+      }
+      img.onload = () => setState({loadSuccess: true})
     }
   }, [element.url, element.downloadUrl, store.webviewFilePath])
   useEffect(() => {
     if (!store.editor.selection) return
     if (element.downloadUrl) {
       const url = decodeURIComponent(element.downloadUrl)
-      const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
-      if (image) {
-        ky.get(element.downloadUrl).arrayBuffer().then(res => {
-          store.saveFile({
-            name: Date.now().toString(16) + '.' + image[1].toLowerCase(),
-            buffer: res
-          }).then(res => {
-            Transforms.setNodes(store.editor, {
-              url: res, downloadUrl: undefined, alt: ''
-            }, {at: path})
+      window.api.fetch(url).then(res => {
+        const type = res.headers.get('content-type') || ''
+        const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
+        if (type.startsWith('image/') || image) {
+          window.api.fetch(url).then(async res => {
+            const buffer = await res.buffer()
+            store.saveFile({
+              name: Date.now().toString(16) + '.' + (image ? image[1].toLowerCase() : type.split('/')[1]),
+              buffer: buffer.buffer
+            }).then(res => {
+              Transforms.setNodes(store.editor, {
+                url: res, downloadUrl: undefined, alt: ''
+              }, {at: path})
+            }).catch(e => {
+              console.log('err', e)
+            })
           })
-        })
-      }
+        }
+      })
     }
   }, [])
   return (
@@ -113,7 +122,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }}
     >
       {children}
-      {state().loadSuccess && (type !== 'other' || state().url.startsWith('data:')) ?
+      {(state().loadSuccess || state().url.startsWith('data:')) ?
         <span className={'inline-block top-1'}>
           <span
             className={`media-frame ${selected ? 'active' : ''}`}
@@ -124,7 +133,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
             {type === 'document' &&
               <object data={element.url} className={'w-full h-auto'}/>
             }
-            {(type === 'image' || state().url.startsWith('data:')) &&
+            {(type === 'image' || state().url.startsWith('data:') || type === 'other') &&
               <>
                 <img
                   src={state().url} alt={element.alt}

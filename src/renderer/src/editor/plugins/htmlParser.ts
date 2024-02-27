@@ -161,6 +161,7 @@ const processFragment = (fragment: any[], parentType = '') => {
     }
     if (f.children && f.type && f.type !== 'code') {
       f.children = processFragment(f.children, f.type)
+      if (!f.children?.length) continue
     }
     trans.push(f)
   }
@@ -193,7 +194,7 @@ export const htmlParser = (editor: Editor, html: string) => {
     })
     if (n) node = n
     if (node) {
-      if (n[0].type ==='list-item' && fragment[0].type === 'list') {
+      if (node[0].type ==='list-item' && fragment[0].type === 'list') {
         const children = fragment[0].children || []
         if (!children.length) return false
         const [p] = Editor.nodes<Element>(editor, {

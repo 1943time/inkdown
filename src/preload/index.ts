@@ -5,7 +5,7 @@ import watch, {Watcher} from 'node-watch'
 import {createHash} from 'crypto'
 import {toUnix} from 'upath'
 import mime from 'mime-types'
-
+import nodeFetch, {RequestInit} from 'node-fetch'
 const isWindows = process.platform === 'win32'
 let watchers = new Map<string, Watcher>()
 const api = {
@@ -27,6 +27,9 @@ const api = {
   },
   toUnix(path: string, force = false) {
     return electronAPI.process.platform === 'win32' || force ? toUnix(path) : path
+  },
+  fetch(url: string, init?: RequestInit) {
+    return nodeFetch(url, init)
   },
   mimeType(file: string) {
     return mime.lookup(file) || ''
