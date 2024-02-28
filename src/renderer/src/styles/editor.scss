@@ -22,6 +22,11 @@ body{
   direction: ltr;
 }
 
+.page-title{
+  font-size: 2em;
+  @apply w-full h-14 bg-transparent outline-none font-bold placeholder-gray-400 dark:placeholder-gray-300/30 border-b dark:border-gray-200/10 border-gray-200 mb-4;
+}
+
 .font-system {
   font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
 }
@@ -64,7 +69,6 @@ a {
 .edit-area{
   padding-bottom: 180px;
   min-height: calc(100vh - 220px);
-  padding-top: 40px;
 }
 .pure-modal{
   .ant-modal-content{
@@ -168,31 +172,31 @@ a {
   }
   h1 {
     font-size: 2em;
-    margin-bottom: .6em;
+    line-height: 1.5em;
+    margin: 0.6em 0;
     font-weight: 700;
+    padding-bottom: 0.15em;
+    &:first-child{
+      margin-top: 0;
+    }
   }
 
   h2 {
     font-weight: 600;
     font-size: 1.6em;
-    margin: .6em 0;
+    margin: 0.6em 0;
   }
   h3 {
     font-weight: 600;
     font-size: 1.3em;
-    margin: .6em 0;
+    margin: 0.5em 0;
   }
 
   h4 {
     font-weight: 500;
     font-size: 1.2em;
-    margin-bottom: .8em;
+    margin: 0.5em 0;
     line-height: 1.2;
-  }
-  h5{
-    font-weight: 500;
-    font-size: 1em;
-    margin-bottom: .75em;
   }
   a {
     font-weight: 500;

@@ -1,15 +1,15 @@
 import {observer} from 'mobx-react-lite'
 import {AppstoreOutlined, LeftOutlined, RightOutlined} from '@ant-design/icons'
-import {treeStore} from '../store/tree'
+import {treeStore} from '../../store/tree'
 import {Fragment, useMemo} from 'react'
-import {MainApi} from '../api/main'
-import {Update} from './Update'
-import {isMac} from '../utils'
-import {Share} from '../server/Share'
-import IUpgrade from '../icons/IUpgrade'
-import {configStore} from '../store/config'
+import {MainApi} from '../../api/main'
+import {Update} from '../Update'
+import {isMac} from '../../utils'
+import {Share} from '../../server/Share'
+import IUpgrade from '../../icons/IUpgrade'
+import {configStore} from '../../store/config'
 import {action} from 'mobx'
-import {tagStore} from '../store/tag'
+import {tagStore} from '../../store/tag'
 
 export const Nav = observer(() => {
   const paths = useMemo(() => {

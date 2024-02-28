@@ -3,7 +3,7 @@ import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import commonjsExternals from 'vite-plugin-commonjs-externals';
 
-const externals = ['path', /^electron(\/.+)?$/, 'fs', 'crypto']
+const externals = ['path', /^electron(\/.+)?$/, 'fs', 'crypto', 'fs/promises']
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],

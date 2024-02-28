@@ -40,8 +40,8 @@ export interface ISpace {
   cid: string
   name: string
   filePath: string
-  cloud: 0 | 1
-  created?: string
+  cloud?: 0 | 1
+  created?: number
   sort: number
   lastOpenTime: number
 }

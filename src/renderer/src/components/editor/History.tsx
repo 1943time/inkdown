@@ -1,15 +1,15 @@
 import {observer} from 'mobx-react-lite'
 import {Button, Modal, Tooltip} from 'antd'
 import {useEffect, useMemo} from 'react'
-import {useLocalState} from '../hooks/useLocalState'
-import {treeStore} from '../store/tree'
+import {useLocalState} from '../../hooks/useLocalState'
+import {treeStore} from '../../store/tree'
 import {basename} from 'path'
 import {HistoryOutlined, QuestionCircleOutlined} from '@ant-design/icons'
-import {Webview} from './Webview'
-import {db, IHistory} from '../store/db'
+import {Webview} from '../Webview'
+import {db, IHistory} from '../../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
-import {configStore} from '../store/config'
+import {configStore} from '../../store/config'
 
 function Help(props: {
   text: string

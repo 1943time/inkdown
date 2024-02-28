@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {ReactNode, useCallback, useEffect, useState} from 'react'
-import {useLocalState} from '../hooks/useLocalState'
+import {useLocalState} from '../../hooks/useLocalState'
 import {CloseOutlined} from '@ant-design/icons'
 import isHotkey from 'is-hotkey'
 

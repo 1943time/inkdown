@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../store/tree'
+import {treeStore} from '../../store/tree'
 import {action, runInAction} from 'mobx'
-import IClose from '../icons/IClose'
-import {useLocalState} from '../hooks/useLocalState'
+import IClose from '../../icons/IClose'
+import {useLocalState} from '../../hooks/useLocalState'
 import {useCallback, useRef} from 'react'
 
 export const Tabs = observer(() => {

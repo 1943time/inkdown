@@ -94,6 +94,12 @@ export const MainApi = {
       filters: [{name: 'f', extensions: ['md', 'markdown']}]
     })
   },
+  openFolder() {
+    return openDialog({
+      title: 'Open Folder',
+      properties: ['openDirectory']
+    })
+  },
   openTreeContextMenu(params: {
     type: 'rootFolder' | 'file' | 'folder'
     filePath?: string

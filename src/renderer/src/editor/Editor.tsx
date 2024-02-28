@@ -26,6 +26,8 @@ import {isAbsolute} from 'path'
 import {stat} from '../utils'
 import {existsSync} from 'fs'
 import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
+import {Title} from './tools/Title'
+import {updateNode} from './utils/updateNode'
 
 const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
@@ -57,10 +59,8 @@ export const MEditor = observer(({note}: {
         store.docChanged = false
       })
       if (node.schema) {
-        const path = node.filePath
-        const res = await toMarkdown(node.schema)
-        saveRecord(path, node.schema)
-        await window.api.fs.writeFile(path, res, {encoding: 'utf-8'})
+        updateNode(node)
+        // saveRecord(path, node.schema)
       }
     }
   }, [note])
@@ -317,13 +317,14 @@ export const MEditor = observer(({note}: {
         onChange={change}
       >
         <SetNodeToDecorations/>
-        <Placeholder/>
+        {/*<Placeholder/>*/}
+        <Title node={note}/>
         <Editable
           onError={onError}
           decorate={high}
           spellCheck={configStore.config.spellCheck}
           readOnly={store.readonly}
-          className={`edit-area heading-line font-${configStore.config.editorFont}`}
+          className={`edit-area font-${configStore.config.editorFont}`}
           style={{fontSize: configStore.config.editorTextSize || 16}}
           onMouseDown={checkEnd}
           onDrop={drop}

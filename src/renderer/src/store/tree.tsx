@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {createFileNode, defineParent, sortFiles} from './parserNode'
+import {createFileNode, defineParent, ReadSpace, sortFiles} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join, parse, sep} from 'path'
 import {appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
@@ -18,11 +18,12 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {shareStore} from '../server/store'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
-import {openConfirmDialog$} from '../components/ConfirmDialog'
+import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
+  nodeMap = new Map<string, IFileItem>()
   root!: ISpaceNode
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
@@ -143,7 +144,7 @@ export class TreeStore {
           if (path !== treeStore.root?.filePath) this.openFolder(path)
         } else {
           if (!treeStore.tabs.some(t => t.current?.filePath === path)) {
-            this.appendTab(path)
+            // this.appendTab(path)
           }
         }
       }
@@ -225,7 +226,7 @@ export class TreeStore {
         // }
         break
       case 'openInNewTab':
-        if (this.ctxNode?.filePath) this.appendTab(this.ctxNode.filePath)
+        if (this.ctxNode?.filePath) this.appendTab(this.ctxNode)
         break
       case 'newCopy':
         // if (this.ctxNode && !this.ctxNode.folder) {
@@ -359,14 +360,22 @@ export class TreeStore {
   //   return node
   // }
 
-  openNote(file: string | IFileItem, scroll = true) {
-    // const filePath = typeof file === 'string' ? file : file.filePath
-    // const index = this.tabs.findIndex(t => t.current?.filePath === filePath)
-    // if (index !== -1) {
-    //   return this.selectTab(index)
-    // }
-    // if (this.currentTab.current?.filePath === filePath) return
-    // this.checkOtherTabsShouldUpdate()
+  openNote(file: IFileItem, scroll = true) {
+    if (this.currentTab.current?.filePath === file.filePath) return
+    const index = this.tabs.findIndex(t => t.current?.filePath === file.filePath)
+    if (index !== -1) {
+      return this.selectTab(index)
+    }
+    if (file.ext === 'md') {
+      const now = Date.now()
+      db.file.update(file.cid, {lastOpenTime: now})
+      file.lastOpenTime = now
+    }
+    this.currentTab.history = this.currentTab.history.filter(t => t.filePath !== file.filePath)
+    this.currentTab.history.push(file)
+    this.openParentDir(file)
+    this.currentTab.index = this.currentTab.history.length - 1
+    this.recordTabs()
     // if (this.root && filePath.startsWith(this.root.filePath)) {
     //   let item = typeof file === 'string' ? undefined : file
     //   if (!item) {
@@ -650,7 +659,17 @@ export class TreeStore {
     //   this.externalChange$.next(f.filePath)
     // })
   }
-
+  async initial(spaceId: string) {
+    const read = new ReadSpace(spaceId)
+    const res = await read.getTree()
+    if (res) {
+      runInAction(() => {
+        this.root = res.space
+        this.fold = false
+        this.nodeMap = res.nodeMap
+      })
+    }
+  }
   getAbsolutePath(file: IFileItem) {
     if (this.root && file.filePath.startsWith(this.root.filePath)) {
       return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
@@ -681,11 +700,9 @@ export class TreeStore {
     } as Tab, {range: false, id: false})
   }
 
-  appendTab(file?: string | IFileItem) {
+  appendTab(file?: IFileItem) {
     const index = this.tabs.findIndex(t => {
-      if (typeof file === 'string') return t.current?.filePath === file
-      if (typeof file === 'object') return t.current === file
-      return false
+      return t.current === file
     })
     if (index !== -1) {
       this.currentIndex = index

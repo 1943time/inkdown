@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../store/tree'
-import {configStore} from '../store/config'
+import {treeStore} from '../../store/tree'
+import {configStore} from '../../store/config'
 
 export const Characters = observer(() => {
   if (!treeStore.openedNote || !['md', 'markdown'].includes(treeStore.openedNote.ext || '') || !configStore.config.showCharactersCount) return null

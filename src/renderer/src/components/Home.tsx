@@ -1,19 +1,20 @@
 import {observer} from 'mobx-react-lite'
 import {Tree} from './tree/Tree'
-import {Nav} from './Nav'
+import {Nav} from './editor/Nav'
 import {treeStore} from '../store/tree'
 import {EditorFrame} from '../editor/EditorFrame'
 import {useCallback, useEffect} from 'react'
 import {Set} from './set/Set'
 import {About} from '../About'
-import {Characters} from './Characters'
+import {Characters} from './editor/Characters'
 import {QuickOpen} from './QuickOpen'
 import {action} from 'mobx'
-import {History} from './History'
+import {History} from './editor/History'
 import {useSystemMenus} from '../hooks/menu'
-import {Tabs} from './Tabs'
+import {Tabs} from './editor/Tabs'
 import {isWindows} from '../utils'
-import {ConfirmDialog} from './ConfirmDialog'
+import {ConfirmDialog} from './Dialog/ConfirmDialog'
+import {EditSpace} from './space/EditSpace'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -65,6 +66,7 @@ export const Home = observer(() => {
       <QuickOpen/>
       <History/>
       <ConfirmDialog/>
+      <EditSpace/>
     </div>
   )
 })

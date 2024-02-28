@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Dialog} from '../Dialog'
+import {Dialog} from '../Dialog/Dialog'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useCallback, useEffect} from 'react'
 import {tagStore} from '../../store/tag'

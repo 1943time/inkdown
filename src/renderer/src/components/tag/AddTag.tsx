@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Dialog} from '../Dialog'
+import {Dialog} from '../Dialog/Dialog'
 import {Button, Input, message} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useCallback} from 'react'

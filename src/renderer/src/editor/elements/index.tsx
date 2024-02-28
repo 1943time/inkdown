@@ -128,15 +128,15 @@ export const MLeaf = (props: RenderLeafProps) => {
                 if (!parseRes.path && parseRes.hash) {
                   return toHash(parseRes.hash)
                 }
-                const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
-                if (existsSync(path)) {
-                  e.altKey ? treeStore.appendTab(path) : treeStore.openNote(path)
-                  if (parseRes.hash) {
-                    setTimeout(() => {
-                      toHash(parseRes.hash)
-                    }, 200)
-                  }
-                }
+                // const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                // if (existsSync(path)) {
+                //   e.altKey ? treeStore.appendTab(path) : treeStore.openNote(path)
+                //   if (parseRes.hash) {
+                //     setTimeout(() => {
+                //       toHash(parseRes.hash)
+                //     }, 200)
+                //   }
+                // }
               }
             } else if (e.detail === 2) {
               selectFormat()

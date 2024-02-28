@@ -11,7 +11,7 @@ import {configStore} from '../../store/config'
 import {basename, join} from 'path'
 
 const getClass = (c: IFileItem) => {
-  if (c.mode) return ''
+  // if (c.mode) return ''
   if (treeStore.dropNode === c) return 'bg-sky-500/10'
   if (treeStore.selectItem === c) return 'dark:bg-sky-500/10 bg-sky-500/20'
   if (treeStore.openedNote === c) return 'dark:bg-gray-400/10 bg-gray-300/50'
@@ -29,15 +29,15 @@ export const TreeRender = observer(() => {
       onDrop={e => e.stopPropagation()}
       onDragOver={e => {
         e.stopPropagation()
-        if (treeStore.dropNode === treeStore.root) {
-          treeStore.setState({dropNode: null})
-        }
+        // if (treeStore.dropNode === treeStore.root) {
+        //   treeStore.setState({dropNode: null})
+        // }
       }}
     >
       <div
         className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
       >
-        <span className={'font-bold text-[15px]'}>{treeStore.root.filename}</span>
+        <span className={'font-bold text-[15px]'}>{treeStore.root.name}</span>
         <div
           onClick={context}
         >
@@ -61,19 +61,10 @@ const Item = observer((
     onSave: (item: IFileItem) => void
   }
 ) => {
-  useEffect(() => {
-    if (item.mode) {
-      try {
-        const input = document.querySelector(`[data-eid="${item.id}"] input`) as HTMLInputElement
-        if (input) input.select()
-      } catch (e) {
-      }
-    }
-  }, [item.mode])
   return (
     <Fragment>
       <div
-        data-eid={item.id}
+        data-eid={item.cid}
         style={{
           paddingLeft: level * 15,
         }}
@@ -84,11 +75,11 @@ const Item = observer((
           className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-700 font-semibold' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
               flex items-center text-sm space-x-1 cursor-default select-none h-7 px-2 mb-0.5
               `}
-          draggable={!item.mode}
+          draggable={true}
           onDragOver={e => {
             if (item.folder) {
               e.preventDefault()
-              if (!item.mode && treeStore.dragNode) {
+              if (treeStore.dragNode) {
                 treeStore.setState({dropNode: item})
               }
             }
@@ -97,7 +88,7 @@ const Item = observer((
             if (treeStore.dragNode) {
               treeStore.moveNode(item)
             } else if (e.dataTransfer.files?.length) {
-              treeStore.insertFiles(e.dataTransfer.files, item)
+              // treeStore.insertFiles(e.dataTransfer.files, item)
             }
           }}
           onDragEnd={e => {
@@ -111,13 +102,13 @@ const Item = observer((
           }}
           onContextMenu={(e) => {
             e.stopPropagation()
-            if (!item.mode) {
-              treeStore.setState({ctxNode: item})
-              MainApi.openTreeContextMenu({
-                type: item.folder ? 'folder' : 'file',
-                filePath: item.filePath
-              })
-            }
+            // if (!item.mode) {
+            //   treeStore.setState({ctxNode: item})
+            //   MainApi.openTreeContextMenu({
+            //     type: item.folder ? 'folder' : 'file',
+            //     filePath: item.filePath
+            //   })
+            // }
           }}
           onClick={action((e) => {
             e.stopPropagation()
@@ -133,32 +124,15 @@ const Item = observer((
             }
           })}
         >
-          {!!item.mode ?
-            <Input
-              size={'small'}
-              autoFocus={true}
-              value={item.editName}
-              onClick={e => e.stopPropagation()}
-              onChange={action(e => item.editName = e.target.value)}
-              onBlur={() => onSave(item)}
-              onKeyDown={e => {
-                e.stopPropagation()
-                if (e.key === 'Enter') onSave(item)
-              }}
-              placeholder={`${item.folder ? 'enter a folder name' : 'enter a doc name'}`}
-            /> :
-            <>
-              {item.folder &&
-                <ArrowRight
-                  className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}/>
-              }
-              <span style={{paddingLeft: item.folder ? 0 : 4}} className={'truncate w-[100%_-_10px]'}>
-                    {item.filename}
-                  </span>
-              {!item.folder && !['md', 'markdown'].includes(item.ext!) &&
-                <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{item.ext}</sup>
-              }
-            </>
+          {item.folder &&
+            <ArrowRight
+              className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}/>
+          }
+          <span style={{paddingLeft: item.folder ? 0 : 4}} className={'truncate w-[100%_-_10px]'}>
+                {item.filename}
+              </span>
+          {!item.folder && !['md', 'markdown'].includes(item.ext!) &&
+            <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{item.ext}</sup>
           }
         </div>
       </div>
@@ -191,7 +165,7 @@ const RenderItem = observer(({items, level}: { items: IFileItem[], level: number
     <>
       {filter(items).map(c =>
         <Item
-          key={c.id}
+          key={c.cid}
           item={c}
           level={level}
           onSave={saveNote}

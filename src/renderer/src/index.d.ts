@@ -26,6 +26,7 @@ export type IFileItem = {
   sort: number
   schema?: any[]
   history?: any
+  lastOpenTime?: number
   sel?: BaseSelection
   hidden?: boolean
 }

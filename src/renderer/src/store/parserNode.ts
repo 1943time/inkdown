@@ -21,7 +21,7 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => 
   const name = file.folder ? file.filePath.split(sep).pop() : parse(file.filePath).name
   const node = {
     cid: file.cid,
-    filename: basename(file.filePath),
+    filename: name,
     folder: file.folder,
     sort: file.sort,
     children: file.folder ? [] : undefined,
@@ -30,6 +30,7 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => 
     history: undefined,
     sel: undefined,
     hidden: name?.startsWith('.'),
+    lastOpenTime: file.lastOpenTime,
     ext: file.folder ? undefined : extname(file.filePath).replace(/^\./, ''),
   } as IFileItem
   if (parent) {
@@ -49,8 +50,9 @@ export const sortFiles = <T extends IFileItem | IFile>(files: T[]):T[] => {
   })
 }
 
-class ReadSpace {
+export class ReadSpace {
   private fileMap = new Map<string, IFile>()
+  private nodeMap = new Map<string, IFileItem>()
   private existSet = new Set<string>()
   private readonly spaceId!: string
   private newNote: IFile[] = []
@@ -80,7 +82,7 @@ class ReadSpace {
           }
           db.file.add(addData)
           this.fileMap.set(filePath, addData)
-          addData.children = this.read(dir)
+          addData.children = this.read(filePath)
           tree.push(addData)
         } else {
           const addData: IFile = {
@@ -124,11 +126,11 @@ class ReadSpace {
       if (node.folder) {
         node.children = this.toNodeTree(f.children || [], node)
       }
+      this.nodeMap.set(node.cid, node)
       tree.push(node)
     }
     return observable(tree)
   }
-  parseFolder() {}
   async getTree() {
     const space = await db.space.get(this.spaceId)
     if (!space) return null
@@ -145,18 +147,20 @@ class ReadSpace {
       const contents:string[] = []
       for (let n of this.newNote) {
         contents.push(readFileSync(n.filePath, {encoding: 'utf-8'}))
-        const schemas = await parserMdToSchema(contents)
-        schemas.map((s, i) => {
-          try {
-            this.newNote[i].schema = s
-          } catch (e) {
-            this.newNote[i].schema = EditorUtils.p
-          }
-        })
       }
+      const schemas = await parserMdToSchema(contents)
+      this.newNote.map((s, i) => {
+        try {
+          this.newNote[i].schema = schemas[i]
+          db.file.update(s.cid, {schema: schemas[i]})
+        } catch (e) {
+          this.newNote[i].schema = EditorUtils.p
+        }
+      })
     }
+    console.log('new', this.newNote.length)
     const nodeTree = this.toNodeTree(filesTree)
     runInAction(() => this.spaceNode.children = nodeTree)
-    return this.spaceNode
+    return {space: this.spaceNode, nodeMap: this.nodeMap}
   }
 }
