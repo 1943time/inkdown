@@ -64,13 +64,27 @@ html{
   }
 }
 
+.panel-bg{
+  @apply dark:bg-[rgba(35,35,35,0.95)] bg-white/95 backdrop-blur;
+}
 .modal-panel{
-  @extend .modal-border;
-  @apply dark:bg-zinc-900 bg-white rounded-lg border shadow-lg shadow-gray-400/30 dark:shadow-gray-600/5;
+  @extend .modal-border, .panel-bg;
+  @apply border rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
+}
+
+.tools-panel{
+  @apply rounded-lg dark:bg-[rgba(35,35,35,.95)] dark:text-gray-200 overflow-y-auto bg-white/95 text-gray-600 select-none
+  backdrop-blur-lg shadow-lg shadow-gray-200/70 dark:shadow-gray-600/10 border dark:border-gray-200/10 border-gray-200;
+  max-height: calc(100vh - 100px);
+}
+.context-menu {
+  @extend .panel-bg;
+  @apply absolute p-1 rounded-lg
+  border border-gray-200 dark:border-gray-200/20 text-[13px];
 }
 
 .modal-border{
-  @apply dark:border-gray-200/20 border-gray-300;
+  @apply dark:border-gray-200/20 border-transparent;
 }
 
 .float-bar-icon{

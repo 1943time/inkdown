@@ -52,7 +52,7 @@
     "@typescript-eslint/parser": "^5.48.0",
     "@vitejs/plugin-react": "^4.0.4",
     "alfaaz": "^1.1.0",
-    "antd": "^5.14.2",
+    "antd": "^5.13.2",
     "compare-versions": "^6.1.0",
     "dayjs": "^1.11.7",
     "dexie": "^3.2.4",

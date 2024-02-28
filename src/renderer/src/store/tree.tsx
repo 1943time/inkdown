@@ -27,7 +27,7 @@ export class TreeStore {
   root!: ISpaceNode
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
-  dropNode: IFileItem | null = null
+  dropNode: IFileItem | ISpaceNode | null = null
   tabs: Tab[] = []
   selectItem: IFileItem | null = null
   openQuickly = false
@@ -375,6 +375,11 @@ export class TreeStore {
     this.currentTab.history.push(file)
     this.openParentDir(file)
     this.currentTab.index = this.currentTab.history.length - 1
+    const now = Date.now()
+    db.file.update(file.cid, {
+      lastOpenTime: now
+    })
+    file.lastOpenTime = now
     this.recordTabs()
     // if (this.root && filePath.startsWith(this.root.filePath)) {
     //   let item = typeof file === 'string' ? undefined : file
@@ -718,6 +723,11 @@ export class TreeStore {
       this.currentIndex = this.tabs.length - 1
       if (file) {
         this.openNote(file)
+        const now = Date.now()
+        db.file.update(file.cid, {
+          lastOpenTime: now
+        })
+        file.lastOpenTime = now
         this.recordTabs()
       }
       requestIdleCallback(() => {
@@ -753,11 +763,22 @@ export class TreeStore {
         }
       }
     }
-    if (node.parent?.children) {
+    if (node.parent) {
       node.parent!.children = node.parent!.children!.filter(c => c !== node)
     }
     if (!this.openedNote || this.openedNote.ext !== '.md') {
       this.currentTab.store.editor.selection = null
+    }
+    this.nodeMap.delete(node.cid)
+    if (node.folder) {
+      const stack = node.children!.slice()
+      while (stack.length) {
+        const item = stack.pop()!
+        if (item.folder) {
+          stack.push(...item.children!)
+        }
+        this.nodeMap.delete(item.cid)
+      }
     }
   }
 }

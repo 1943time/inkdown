@@ -4,20 +4,15 @@ import {TreeTop} from './TreeTop'
 import {TreeEmpty} from './TreeEmpty'
 import {TreeRender} from './TreeRender'
 import {FullSearch} from '../FullSearch'
-import {useCallback} from 'react'
-import {MainApi} from '../../api/main'
 import {EBook} from '../../server/ui/Ebook'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useSubject} from '../../hooks/subscribe'
 import {action} from 'mobx'
 import {Tag} from '../tag/Tag'
 import {AddTagToFile} from '../tag/AddTagToFile'
+import {openContextMenu} from './openContextMenu'
 
 export const Tree = observer(() => {
-  const context = useCallback(() => {
-    treeStore.setState({ctxNode: null})
-    MainApi.openTreeContextMenu({type: 'rootFolder', filePath: treeStore.root?.filePath})
-  }, [])
   const [state, setState] = useLocalState({
     openShareFolder: false,
     defaultSharePath: ''
@@ -35,22 +30,24 @@ export const Tree = observer(() => {
         <div style={{width: treeStore.width}} className={'h-full border-t b1 relative'}>
           <div
             className={`h-full overflow-y-auto ${treeStore.treeTab === 'folder' ? '' : 'hidden'} pb-10 ${treeStore.dropNode === treeStore.root ? 'bg-sky-500/10' : ''}`}
-            onContextMenu={context}
+            onContextMenu={e => {
+              openContextMenu(e, treeStore.root)
+            }}
             onClick={action((e) => {
               e.stopPropagation()
-              treeStore.selectItem = treeStore.root
+              // treeStore.selectItem = treeStore.root
             })}
             onDragOver={e => {
               e.preventDefault()
               if (treeStore.dragNode) {
-                treeStore.setState({dropNode: treeStore.root})
+                // treeStore.setState({dropNode: treeStore.root})
               }
             }}
             onDrop={e => {
               if (treeStore.dragNode) {
-                treeStore.moveNode(treeStore.root)
+                // treeStore.moveNode(treeStore.root)
               } else if (e.dataTransfer.files?.length) {
-                treeStore.insertFiles(e.dataTransfer.files, treeStore.root)
+                // treeStore.insertFiles(e.dataTransfer.files, treeStore.root)
               }
             }}
           >

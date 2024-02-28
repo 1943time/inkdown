@@ -2,7 +2,7 @@ import {IFileItem} from '../../index'
 import {toMarkdown} from './toMarkdown'
 import {stat, writeFile} from 'fs/promises'
 import {db} from '../../store/db'
-import {parse} from 'path'
+import {basename, join, parse} from 'path'
 import {renameSync} from 'fs'
 import {runInAction} from 'mobx'
 
@@ -23,6 +23,21 @@ export const updateNode = async (node: IFileItem) => {
   }
 }
 
+const renameFiles = (nodes: IFileItem[], dir: string) => {
+  for (let n of nodes) {
+    const path = join(dir, basename(n.filePath))
+    db.file.update(n.cid, {
+      filePath: path
+    })
+    runInAction(() => {
+      n.filePath = path
+    })
+    if (n.folder && n.children?.length) {
+      renameFiles(n.children, path)
+    }
+  }
+}
+
 export const updateFilePath = async (node: IFileItem, targetPath: string) => {
   try {
     renameSync(node.filePath, targetPath)
@@ -35,6 +50,9 @@ export const updateFilePath = async (node: IFileItem, targetPath: string) => {
       filePath: targetPath,
       updated: s.mtime.valueOf()
     })
+    if (node.folder) {
+      renameFiles(node.children || [], targetPath)
+    }
   } catch (e) {
     console.error('update filePath', e)
   }

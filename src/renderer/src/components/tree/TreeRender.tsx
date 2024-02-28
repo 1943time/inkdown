@@ -9,6 +9,7 @@ import {Input} from 'antd'
 import ArrowRight from '../../icons/ArrowRight'
 import {configStore} from '../../store/config'
 import {basename, join} from 'path'
+import {openContextMenu} from './openContextMenu'
 
 const getClass = (c: IFileItem) => {
   // if (c.mode) return ''
@@ -102,13 +103,7 @@ const Item = observer((
           }}
           onContextMenu={(e) => {
             e.stopPropagation()
-            // if (!item.mode) {
-            //   treeStore.setState({ctxNode: item})
-            //   MainApi.openTreeContextMenu({
-            //     type: item.folder ? 'folder' : 'file',
-            //     filePath: item.filePath
-            //   })
-            // }
+            openContextMenu(e, item)
           }}
           onClick={action((e) => {
             e.stopPropagation()

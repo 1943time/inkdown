@@ -163,7 +163,7 @@ const Entry = observer((props: {
   const [show, setShow] = useState(true)
   return (
     <div
-      className={`inset-0 drag-none z-[2000] fixed ${show ? '' : 'animate-hide'}`}
+      className={`inset-0 leading-5 drag-none z-[2000] fixed ${show ? '' : 'animate-hide'}`}
       onClick={(e) => {
         e.stopPropagation()
         setShow(false)

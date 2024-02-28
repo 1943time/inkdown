@@ -12,6 +12,7 @@ export type ISpaceNode = {
 export type IFileItem = {
   cid: string
   filePath: string
+  root?: boolean
   ext: string
   filename: string
   spaceId?: string

@@ -15,6 +15,7 @@ import {Tabs} from './editor/Tabs'
 import {isWindows} from '../utils'
 import {ConfirmDialog} from './Dialog/ConfirmDialog'
 import {EditSpace} from './space/EditSpace'
+import {EditFolderDialog} from './tree/EditFolderDialog'
 
 export const Home = observer(() => {
   useSystemMenus()
@@ -67,6 +68,7 @@ export const Home = observer(() => {
       <History/>
       <ConfirmDialog/>
       <EditSpace/>
+      <EditFolderDialog/>
     </div>
   )
 })

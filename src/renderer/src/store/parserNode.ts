@@ -31,6 +31,7 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => 
     sel: undefined,
     hidden: name?.startsWith('.'),
     lastOpenTime: file.lastOpenTime,
+    spaceId: file.spaceId,
     ext: file.folder ? undefined : extname(file.filePath).replace(/^\./, ''),
   } as IFileItem
   if (parent) {
@@ -39,13 +40,13 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => 
   return observable(node, {
     schema: false,
     sel: false,
-    history: false
+    history: false,
+    sort: false
   })
 }
 
 export const sortFiles = <T extends IFileItem | IFile>(files: T[]):T[] => {
   return files.sort((a, b) => {
-    if (a.folder !== b.folder) return a.folder ? -1 : 1
     return a.sort > b.sort ? 1 : -1
   })
 }
@@ -61,10 +62,18 @@ export class ReadSpace {
     this.spaceId = spaceId
   }
   private read(dir: string, ) {
-    const fileList = readdirSync(dir)
+    let fileList = readdirSync(dir).map(f => {
+      const path = join(dir, f)
+      const s = statSync(path)
+      return {path: join(dir, f), update: s.mtime.valueOf(), folder: s.isDirectory(), name: basename(path)}
+    }).sort((a, b) => {
+      if (a.folder !== b.folder) return a.folder ? -1 : 1
+      else return a.name > b.name ? - 1 : 1
+    })
     let tree: IFile[] = []
-    for (let f of fileList) {
-      const filePath = join(dir, f)
+    for (let i = 0; i < fileList.length; i++) {
+      const f = fileList[i]
+      const filePath = f.path
       this.existSet.add(filePath)
       const s = statSync(filePath)
       const mtime = s.mtime.valueOf()
@@ -93,11 +102,11 @@ export class ReadSpace {
             created: Date.now(),
             synced: 0,
             folder: false,
-            sort: 0
+            sort: i
           }
           db.file.add(addData)
           this.fileMap.set(filePath, addData)
-          if (mediaType(f) === 'markdown') {
+          if (mediaType(f.name) === 'markdown') {
             this.newNote.push(addData)
           }
           tree.push(addData)
@@ -107,7 +116,7 @@ export class ReadSpace {
         if (s.isDirectory()) {
           fd.children = this.read(filePath)
         } else {
-          if (fd.updated !== s.mtime.valueOf() && mediaType(f) === 'markdown') {
+          if (fd.updated !== s.mtime.valueOf() && mediaType(f.name) === 'markdown') {
             this.newNote.push(fd)
             db.file.update(fd.cid,  {updated: mtime})
           }
@@ -157,6 +166,11 @@ export class ReadSpace {
           this.newNote[i].schema = EditorUtils.p
         }
       })
+    }
+    for (let f of this.fileMap.values()) {
+      if (!this.existSet.has(f.filePath)) {
+        db.file.delete(f.cid)
+      }
     }
     console.log('new', this.newNote.length)
     const nodeTree = this.toNodeTree(filesTree)

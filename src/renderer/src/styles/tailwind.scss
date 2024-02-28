@@ -58,6 +58,9 @@
 .animate-show{
   animation: show .1s .3s forwards;
 }
+.animate-hide{
+  animation: hide .2s forwards ease;
+}
 .pdf .code-highlight pre{
   white-space: pre-wrap;
   word-break: break-all;
@@ -68,5 +71,14 @@
   }
   to{
     opacity: 1;
+  }
+}
+
+@keyframes hide {
+  from{
+    opacity: 1;
+  }
+  to{
+    opacity: 0;
   }
 }
