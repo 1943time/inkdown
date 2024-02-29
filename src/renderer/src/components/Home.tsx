@@ -65,7 +65,6 @@ export const Home = observer(() => {
       <About/>
       <Set/>
       <QuickOpen/>
-      <History/>
       <ConfirmDialog/>
       <EditSpace/>
       <EditFolderDialog/>

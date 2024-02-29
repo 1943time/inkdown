@@ -40,7 +40,7 @@ const App = observer(() => {
       theme={{
         algorithm: themeObject,
         token: {
-          colorPrimary: '#0ea5e9'
+          colorPrimary: '#6366f1'
         }
       }}
     >

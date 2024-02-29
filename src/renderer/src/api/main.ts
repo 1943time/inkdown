@@ -100,12 +100,6 @@ export const MainApi = {
       properties: ['openDirectory']
     })
   },
-  openTreeContextMenu(params: {
-    type: 'rootFolder' | 'file' | 'folder'
-    filePath?: string
-  }) {
-    ipcRenderer.send('tree-context-menu', params)
-  },
   moveToTrash(path: string) {
     ipcRenderer.invoke('move-to-trash', path)
     removeFileRecord(path)
@@ -116,9 +110,6 @@ export const MainApi = {
     window.electron.ipcRenderer.send('error-log', {
       message, ...other
     })
-  },
-  openToolMenu(filePath?: string) {
-    ipcRenderer.send('tool-menu', filePath)
   },
   maxSize() {
     ipcRenderer.send('max-size')

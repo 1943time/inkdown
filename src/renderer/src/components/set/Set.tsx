@@ -18,7 +18,6 @@ export const Set = observer(() => {
   const [state, setState] = useLocalState({
     imagesFolder: '',
     tab: 'Overview' as 'Overview' | 'Editor' | 'ImageBed',
-    editorMaxWidth: configStore.config.editorMaxWidth as number | null,
     version: ''
   })
 
@@ -35,7 +34,7 @@ export const Set = observer(() => {
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
-    setState({imagesFolder: configStore.config.imagesFolder, editorMaxWidth: configStore.config.editorMaxWidth})
+    setState({imagesFolder: configStore.config.imagesFolder})
     const esc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         close()
@@ -71,18 +70,18 @@ export const Set = observer(() => {
               <div className={'space-y-1'}>
                 <div
                   onClick={() => setState({tab: 'Overview'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded  ${state.tab === 'Overview' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
+                  className={`py-1 cursor-default px-3 text-sm rounded  ${state.tab === 'Overview' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
                 >
                   Overview
                 </div>
                 <div
                   onClick={() => setState({tab: 'Editor'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
                   Editor
                 </div>
                 <div
                   onClick={() => setState({tab: 'ImageBed'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'ImageBed' ? 'bg-sky-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'ImageBed' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
                   ImageBed
                 </div>
               </div>
