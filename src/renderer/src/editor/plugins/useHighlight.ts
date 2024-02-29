@@ -49,7 +49,8 @@ const run = (node: NodeEntry, code: string, lang: any) => {
     const tokens = highlighter.codeToTokensBase(code, {
       lang: lang,
       theme: configStore.config.codeTheme as any,
-      includeExplanation: false
+      includeExplanation: false,
+      tokenizeMaxLineLength: 5000
     })
     for (let i = 0; i < tokens.length; i++) {
       const lineToken = tokens[i]
@@ -92,7 +93,8 @@ export function useHighlight(store?: EditorStore) {
             const tokens = highlighter.codeToTokensBase(code, {
               lang: 'tex',
               theme: configStore.config.codeTheme as any,
-              includeExplanation: false
+              includeExplanation: false,
+              tokenizeMaxLineLength: 5000
             })
             let start = 0
             const lineToken = tokens[0]

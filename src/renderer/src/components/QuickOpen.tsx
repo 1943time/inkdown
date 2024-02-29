@@ -44,7 +44,7 @@ export const QuickOpen = observer(() => {
     }
     if (e.key === 'Enter' && state.filterRecords.length) {
       close()
-      treeStore.openNote(state.filterRecords[state.activeIndex].filePath)
+      // treeStore.openNote(state.filterRecords[state.activeIndex].filePath)
     }
     if (e.key === 'Escape') {
       close()
@@ -117,7 +117,7 @@ export const QuickOpen = observer(() => {
               }}
               onClick={() => {
                 close()
-                treeStore.openNote(r.filePath)
+                // treeStore.openNote(r.filePath)
               }}
               className={`cursor-default px-3 py-1 rounded dark:text-gray-300 text-gray-600 text-sm ${state.activeIndex === i ? 'dark:bg-gray-200/10 bg-gray-200/60' : ''}`}
               key={r.id}>

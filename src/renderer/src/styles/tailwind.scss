@@ -1,21 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-
 .hide-scrollbar{
   &::-webkit-scrollbar {
     display: none;
   }
 }
-
+.drag-nav{
+  app-region: drag;
+}
+.drag-none{
+  app-region: no-drag;
+}
+.tree-tab{
+  @apply text-gray-600 dark:text-gray-300 flex justify-center items-center flex-1 relative z-10 cursor-pointer;
+}
+.tabs-nav{
+  background-color: var(--bg);
+  @apply h-8 border-gray-200 dark:border-gray-200/10 border-b border-t text-[13px] overflow-x-auto hide-scrollbar w-full z-50 relative flex-shrink-0;
+}
 .high-el{
   background-color: rgba(6,182,212,.3);
   border-radius: 4px;
-}
-
-.drag-nav{
-  -webkit-app-region: drag;
 }
 
 .ant-btn > .anticon{
@@ -38,14 +44,11 @@
 }
 
 .link{
-  @apply text-sky-500 duration-300 hover:text-sky-600;
+  @apply text-indigo-500 duration-300 hover:text-indigo-600;
 }
 
 .ant-popover-inner, .ant-dropdown-menu{
   @apply border border-gray-200/20;
-}
-.ant-btn-primary {
-  background-color: #0ea5e9;
 }
 
 .ellipsis-10{
@@ -56,15 +59,18 @@
   -webkit-box-orient: vertical;
 }
 .animate-show{
-  animation: show .1s .3s forwards;
+  animation: show .1s .2s forwards;
 }
-.animate-hide{
-  animation: hide .2s forwards ease;
+.pdf .code-highlight {
+  pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .code-line{
+    height: auto;
+  }
 }
-.pdf .code-highlight pre{
-  white-space: pre-wrap;
-  word-break: break-all;
-}
+
 @keyframes show {
   from{
     opacity: 0;
@@ -80,5 +86,54 @@
   }
   to{
     opacity: 0;
+  }
+}
+.animate-hide{
+  animation: hide .2s forwards ease;
+}
+
+@page {
+  size: auto;
+  margin: 0;
+}
+
+.ant-dropdown-menu-item{
+  padding: 3px 8px !important;
+}
+
+.start1-in{
+  opacity: 0;
+  transform: translateX(-200px);
+  animation: start1-in .2s ease forwards;
+}
+@keyframes start1-in {
+  from{
+    opacity: 0;
+    transform: translateX(-200px);
+  }
+  to{
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.start2-in{
+  opacity: 0;
+  transform: translateX(200px);
+  animation: start2-in .2s ease forwards;
+}
+@keyframes start2-in {
+  from{
+    opacity: 0;
+    transform: translateX(200px);
+  }
+  to{
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.tree-empty{
+  .ant-empty-description {
+    @apply text-gray-400;
   }
 }

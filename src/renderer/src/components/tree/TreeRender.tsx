@@ -1,46 +1,36 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../store/tree'
-import {PlusCircleOutlined} from '@ant-design/icons'
-import {IFileItem} from '../../index'
-import {Fragment, useCallback, useEffect, useRef} from 'react'
+import {MoreOutlined, PlusCircleOutlined} from '@ant-design/icons'
+import React, {Fragment, useRef} from 'react'
 import {action} from 'mobx'
-import {MainApi} from '../../api/main'
-import {Input} from 'antd'
+import INote from '../../icons/INote'
 import ArrowRight from '../../icons/ArrowRight'
-import {configStore} from '../../store/config'
-import {basename, join} from 'path'
+import IFolder from '../../icons/IFolder'
+import {treeStore} from '../../store/tree'
+import {IFileItem} from '../../index'
 import {openContextMenu} from './openContextMenu'
 
 const getClass = (c: IFileItem) => {
-  // if (c.mode) return ''
-  if (treeStore.dropNode === c) return 'bg-sky-500/10'
-  if (treeStore.selectItem === c) return 'dark:bg-sky-500/10 bg-sky-500/20'
-  if (treeStore.openedNote === c) return 'dark:bg-gray-400/10 bg-gray-300/50'
-  return 'dark:hover:bg-gray-600/10 hover:bg-gray-300/30'
+  if (treeStore.selectItem === c) return 'dark:bg-indigo-500/15 bg-indigo-500/15'
+  if (treeStore.openedNote === c) return 'dark:bg-gray-300/10 bg-gray-500/10'
+  if (treeStore.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
+  return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/10'
 }
 
 export const TreeRender = observer(() => {
-  const context = useCallback(() => {
-    treeStore.setState({ctxNode: null})
-    MainApi.openTreeContextMenu({type: 'rootFolder', filePath: treeStore.root?.filePath})
-  }, [])
   return (
-    <div
-      className={'pt-5'}
-      onDrop={e => e.stopPropagation()}
-      onDragOver={e => {
-        e.stopPropagation()
-        // if (treeStore.dropNode === treeStore.root) {
-        //   treeStore.setState({dropNode: null})
-        // }
-      }}
-    >
+    <>
       <div
-        className={`py-1 mb-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
+        className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
       >
-        <span className={'font-bold text-[15px]'}>{treeStore.root.name}</span>
+        <span className={'font-medium text-[15px] flex items-center'}>
+          <span>
+            Folders
+          </span>
+        </span>
         <div
-          onClick={context}
+          onClick={e =>{
+            openContextMenu(e, treeStore.root)
+          }}
         >
           <PlusCircleOutlined className={'cursor-pointer'}/>
         </div>
@@ -49,89 +39,138 @@ export const TreeRender = observer(() => {
         className={'px-3'}
         onContextMenu={e => e.stopPropagation()}
       >
-        <RenderItem items={treeStore.root.children!} level={0}/>
+        {!!treeStore.root &&
+          <RenderItem items={treeStore.root.children || []} level={0}/>
+        }
+        {!treeStore.root &&
+          <div className={'mt-20'}>
+            <div className={'text-gray-400 text-center text-sm'}>
+              No space document yet
+            </div>
+            <div
+              className={'mt-2 flex justify-center items-center link cursor-pointer'}
+              onClick={() => {
+                // $tree.createNote()
+              }}
+            >
+              <INote/>
+              <span className={'ml-1'}>New doc</span>
+            </div>
+          </div>
+        }
       </div>
-    </div>
+    </>
   )
 })
 
 const Item = observer((
-  {item, level, onSave}: {
+  {item, level}: {
     item: IFileItem,
     level: number
-    onSave: (item: IFileItem) => void
   }
 ) => {
+  const el = useRef<HTMLDivElement>(null)
   return (
     <Fragment>
       <div
-        data-eid={item.cid}
-        style={{
-          paddingLeft: level * 15,
-        }}
-        data-el={'file-item'}
-        className={`rounded ${getClass(item)}`}
+        ref={el}
+        data-fid={item.cid}
+        className={'py-[1px]'}
+        onDragLeave={e => e.stopPropagation()}
+        onDragOver={action(e => {
+          e.stopPropagation()
+          e.preventDefault()
+          const scrollTop = document.querySelector('#tree-content')?.scrollTop || 0
+          const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
+          const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
+          // if (mode === 'enter' && !item.folder && $tree.dragStatus) {
+          //   $tree.dragStatus = null
+          // } else {
+          //   const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
+          //   if ($tree.dragStatus?.dropNode !== item || $tree.dragStatus.mode !== mode) {
+          //     $tree.dragStatus = {
+          //       dropNode: item,
+          //       mode
+          //     }
+          //   }
+          // }
+        })}
       >
         <div
-          className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-700 font-semibold' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
-              flex items-center text-sm space-x-1 cursor-default select-none h-7 px-2 mb-0.5
-              `}
-          draggable={true}
-          onDragOver={e => {
-            if (item.folder) {
-              e.preventDefault()
-              if (treeStore.dragNode) {
-                treeStore.setState({dropNode: item})
-              }
-            }
+          style={{
+            paddingLeft: level * 15,
           }}
-          onDrop={e => {
-            if (treeStore.dragNode) {
-              treeStore.moveNode(item)
-            } else if (e.dataTransfer.files?.length) {
-              // treeStore.insertFiles(e.dataTransfer.files, item)
-            }
-          }}
-          onDragEnd={e => {
-            treeStore.setState({dragNode: null, dropNode: null})
-          }}
-          onDragStart={e => {
-            treeStore.setState({dragNode: item})
-            if (!item.folder) {
-              e.dataTransfer.setData('text/html', '<span></span>')
-            }
-          }}
-          onContextMenu={(e) => {
-            e.stopPropagation()
-            openContextMenu(e, item)
-          }}
-          onClick={action((e) => {
-            e.stopPropagation()
-            treeStore.selectItem = item
-            if (!item.folder) {
-              if (e.metaKey || e.ctrlKey) {
-                treeStore.appendTab(item)
-              } else {
-                treeStore.openNote(item)
-              }
-            } else {
-              item.expand = !item.expand
-            }
-          })}
+          className={`rounded group relative ${getClass(item)}`}
         >
-          {item.folder &&
-            <ArrowRight
-              className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}/>
-          }
-          <span style={{paddingLeft: item.folder ? 0 : 4}} className={'truncate w-[100%_-_10px]'}>
-                {item.filename}
-              </span>
-          {!item.folder && !['md', 'markdown'].includes(item.ext!) &&
-            <sup className={'text-sky-500 ml-0.5 text-[80%]'}>{item.ext}</sup>
+          <div
+            className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-900' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+           text-sm cursor-default select-none h-7 pr-2 group`}
+            style={{paddingLeft: item.folder ? 6 : 21}}
+            onDragEnd={() => {
+              // treeStore.moveNode()
+              el.current!.style.opacity = ''
+            }}
+            draggable={'true'}
+            onDragStart={action(e => {
+              treeStore.dragNode = item
+              el.current!.style.opacity = '0.5'
+            })}
+            onContextMenu={(e) => {
+              e.preventDefault()
+              openContextMenu(e, item)
+            }}
+            onClick={action((e) => {
+              e.stopPropagation()
+              treeStore.selectItem = item
+              if (!item.folder) {
+                if (e.metaKey || e.ctrlKey) {
+                  treeStore.appendTab(item)
+                } else {
+                  treeStore.openNote(item)
+                }
+              } else {
+                item.expand = !item.expand
+              }
+            })}
+          >
+            {/*${item.folder && treeStore.dragNode !== item && treeStore.dragStatus?.dropNode === item && treeStore.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}*/}
+            <div className={`
+            flex items-center h-full rounded pr-2
+            `}>
+              {item.folder &&
+                <div className={'w-4 h-full flex items-center justify-center'}>
+                  <ArrowRight
+                    className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}
+                  />
+                </div>
+              }
+              <div
+                className={`flex items-center flex-1 h-full relative max-w-full ${treeStore.openedNote === item ? 'text-indigo-600 dark:text-indigo-400' : ''}`}
+                data-entity={'true'}>
+                {item.folder ? <IFolder className={'w-4 h-4'}/> : <INote/>}
+                <div className={'truncate w-full ml-1'}>{item.filename || 'Untitled'}</div>
+                {/*{treeStore.dragStatus?.dropNode === item && $tree.dragNode !== item && $tree.dragStatus.mode !== 'enter' &&*/}
+                {/*  <div*/}
+                {/*    className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${$tree.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}*/}
+                {/*  />*/}
+                {/*}*/}
+              </div>
+            </div>
+          </div>
+          {treeStore.dragNode !== item &&
+            <div
+              onClick={e => {
+                openContextMenu(e, item)
+              }}
+              className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${treeStore.ctxNode === item ? 'flex' : 'hidden group-hover:flex'}
+            absolute right-1 w-[14px] justify-center items-center dark:text-gray-200 text-lg`}
+            >
+              <MoreOutlined/>
+            </div>
           }
         </div>
       </div>
-      {item.folder && !!item.children?.length && item.expand &&
+      {item.folder && !!item.children?.length && !!item.expand &&
         <RenderItem items={item.children} level={level + 1}/>
       }
     </Fragment>
@@ -139,31 +178,13 @@ const Item = observer((
 })
 
 const RenderItem = observer(({items, level}: { items: IFileItem[], level: number }) => {
-  const timer = useRef(0)
-  const saveNote = useCallback((item: IFileItem) => {
-    clearTimeout(timer.current)
-    timer.current = window.setTimeout(() => {
-      treeStore.saveNote(item)
-    }, 30)
-  }, [])
-  const filter = useCallback((items: IFileItem[]) => {
-    const imgDir = join(treeStore.root.filePath, configStore.config.imagesFolder)
-    const base = basename(imgDir)
-    return items.filter(c => {
-      return configStore.config.showHiddenFiles ||
-        c.filename === base ||
-        !c.hidden ||
-        (!configStore.config.relativePathForImageStore && c.filePath === imgDir)
-    })
-  }, [configStore.config.showHiddenFiles, configStore.config.imagesFolder])
   return (
     <>
-      {filter(items).map(c =>
+      {items.map(c =>
         <Item
           key={c.cid}
           item={c}
           level={level}
-          onSave={saveNote}
         />
       )}
     </>

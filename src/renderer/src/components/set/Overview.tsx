@@ -13,13 +13,11 @@ import {useEffect} from 'react'
 import {TextHelp} from './Help'
 import {InterfaceFont} from './Font'
 import {clearInlineKatex} from '../../editor/plugins/useHighlight'
-import {rules} from '@typescript-eslint/eslint-plugin'
 import {runInAction} from 'mobx'
 
 export const Overview = observer(() => {
   const [state, setState] = useLocalState({
     imagesFolder: '',
-    editorMaxWidth: configStore.config.editorMaxWidth as number | null,
     version: ''
   })
   const [modal, context] = Modal.useModal()
@@ -27,7 +25,7 @@ export const Overview = observer(() => {
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
-    setState({imagesFolder: configStore.config.imagesFolder, editorMaxWidth: configStore.config.editorMaxWidth})
+    setState({imagesFolder: configStore.config.imagesFolder})
   }, [configStore.visible])
   return (
     <div
@@ -191,31 +189,14 @@ export const Overview = observer(() => {
         </div>
         <div className={'flex items-center'}>
           <Space.Compact>
-            <Input
-              placeholder={'Unit pixel >= 800'}
-              value={state.editorMaxWidth || ''}
-              onKeyDown={e => {
-                if (e.key.length === 1 && !/^\d$/.test(e.key)) {
-                  e.preventDefault()
-                }
-                if (isHotkey('enter', e)) {
-                  let width = Number(state.editorMaxWidth)
-                  width = width < 800 ? 800 : width
-                  width = width > 5000 ? 5000 : width
-                  configStore.setConfig('editorMaxWidth', width)
-                  setState({editorMaxWidth: width})
-                }
+            <Slider
+              className={'w-64'}
+              value={configStore.config.editorWidth} min={720} max={1000} marks={{720: 'Recommend', 1000: 'Max'}}
+              step={20}
+              onChange={e => {
+                configStore.setConfig('editorWidth', e)
               }}
-              onChange={e => setState({editorMaxWidth: (+e.target.value) || null})}
             />
-            <Button
-              onClick={() => {
-                configStore.setConfig('editorMaxWidth', 900)
-                setState({editorMaxWidth: 900})
-              }}
-            >
-              {configStore.zh ? '重置' : 'Reset'}
-            </Button>
           </Space.Compact>
         </div>
       </div>
@@ -239,7 +220,7 @@ export const Overview = observer(() => {
         <div>
           <Slider
             className={'w-64'}
-            value={configStore.config.leadingWidth} min={220} max={500} marks={{220: '220', 500: '500'}}
+            value={configStore.config.leadingWidth} min={220} max={400} marks={{220: '220', 400: '400'}}
             step={20}
             onChange={e => {
               configStore.setConfig('leadingWidth', e)

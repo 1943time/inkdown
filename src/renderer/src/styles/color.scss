@@ -1,24 +1,30 @@
 :root{
   --bg: #fff;
-  --nav: #F9FBFE;
+  --nav: #fff;
   --b1: rgb(229 231 235 / 0.8);
   --md-text: rgba(60,60,60,.95);
-  --tree-bg: #f4f5f6;
+  --tree-bg: #fafafa;
   --md-code-bg: #2a2929;
   --md-bg-mute: rgba(0, 0, 0, .07);
   --md-high: rgba(141, 141, 141, 0.5);
   --md-border: #b9b9b9;
+  --card-bg: #fff;
 }
 .dark{
-  --bg: #222222;
-  --nav: #222222;
+  --bg: #191919;
+  --nav: #191919;
   --b1: rgb(229 231 235 / 0.1);
   --md-text: rgba(255, 255, 255, 0.9);
   --tree-bg: #1E1E1E;
+  --card-bg: #1E1E1E;
   --md-code-bg: #1c1c1c;
   --md-bg-mute: rgba(255, 255, 255, .1);
   --md-high: #6b7280;
   --md-border: #3f3f46;
+}
+
+html.dark{
+  color-scheme: dark;
 }
 
 .code-bg{
@@ -26,6 +32,9 @@
 }
 .def-bg{
   background: var(--bg);
+}
+.card-bg{
+  background: var(--card-bg);
 }
 .tree-bg{
   background: var(--tree-bg);
@@ -39,6 +48,7 @@
 .b2{
   @apply border-gray-200 dark:border-gray-200/10;
 }
+
 .md-text{
   color: var(--md-text);
 }
@@ -48,11 +58,12 @@ html{
 
 .input{
   @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-zinc-900 bg-white
-  h-7 rounded px-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
+  h-7 rounded pr-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
 }
 
 .high-block{
   animation: high .3s .1s forwards;
+  @apply rounded-sm;
 }
 
 @keyframes high {
@@ -63,7 +74,6 @@ html{
     background: rgba(6,182,212, .5);
   }
 }
-
 .panel-bg{
   @apply dark:bg-[rgba(35,35,35,0.95)] bg-white/95 backdrop-blur;
 }
@@ -80,7 +90,7 @@ html{
 .context-menu {
   @extend .panel-bg;
   @apply absolute p-1 rounded-lg
-  border border-gray-200 dark:border-gray-200/20 text-[13px];
+   border border-gray-200 dark:border-gray-200/20 text-[13px];
 }
 
 .modal-border{
@@ -93,4 +103,12 @@ html{
 
 .float-color-icon{
   @apply w-5 h-5 rounded border border-white/10 hover:border-white/50;
+}
+.ant-btn-primary {
+  &:not([disabled],.ant-btn-dangerous) {
+    background-color: #6366f1 !important;
+    &:hover{
+      background-color: #6d6fec !important;
+    }
+  }
 }

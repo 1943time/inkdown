@@ -9,7 +9,6 @@ import {Share} from '../../server/Share'
 import IUpgrade from '../../icons/IUpgrade'
 import {configStore} from '../../store/config'
 import {action} from 'mobx'
-import {tagStore} from '../../store/tag'
 
 export const Nav = observer(() => {
   const paths = useMemo(() => {
@@ -18,7 +17,7 @@ export const Nav = observer(() => {
   }, [treeStore.openedNote?.filePath])
   return (
     <div
-      className={'fixed left-0 top-0 h-10 w-full b1 border-b nav z-50 duration-200 drag-nav select-none width-duration'}
+      className={'fixed left-0 top-0 h-10 w-full z-50 duration-200 drag-nav select-none width-duration'}
       style={{paddingLeft: treeStore.fold ? !isMac ? 42 : 114 : treeStore.width}}
       onClick={e => {
         if (e.detail === 2) {

@@ -116,9 +116,9 @@ export const Tag = observer(() => {
                         e.stopPropagation()
                         tagStore.selectedItem = item
                         if (e.metaKey || e.ctrlKey) {
-                          treeStore.appendTab(item.filePath)
+                          // treeStore.appendTab(item.filePath)
                         } else {
-                          treeStore.openNote(item.filePath)
+                          // treeStore.openNote(item.filePath)
                         }
                       })}
                     >

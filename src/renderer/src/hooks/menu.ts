@@ -37,7 +37,7 @@ export const useSystemMenus = () => {
             openTabs = treeStore.firstNote ? [treeStore.firstNote.filePath] : []
           }
           if (openTabs.length) {
-            treeStore.restoreTabs(openTabs)
+            // treeStore.restoreTabs(openTabs)
           }
           if (typeof index === 'number' && treeStore.tabs[index]) {
             treeStore.selectTab(index)
@@ -65,7 +65,7 @@ export const useSystemMenus = () => {
               treeStore.openFolder(filePath)
               treeStore.openFirst()
             } else {
-              treeStore.openNote(filePath)
+              // treeStore.openNote(filePath)
             }
           }
           window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
@@ -75,8 +75,8 @@ export const useSystemMenus = () => {
     const openFile = (e: any) => {
       MainApi.openFile().then(res => {
         if (res.filePaths.length) {
-          treeStore.openNote(res.filePaths[0])
-          window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
+          // treeStore.openNote(res.filePaths[0])
+          // window.electron.ipcRenderer.send('add-recent-path', res.filePaths[0])
         }
       })
     }
@@ -86,7 +86,7 @@ export const useSystemMenus = () => {
         defaultPath: treeStore.root?.filePath
       }).then(res => {
         if (res.filePath) {
-          treeStore.openNote(res.filePath)
+          // treeStore.openNote(res.filePath)
         }
       })
     }

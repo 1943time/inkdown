@@ -58,6 +58,7 @@ export const getCreateName = (parent: IFileItem | ISpaceNode, name = 'Untitled')
   return cur
 }
 export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNode) => {
+  runInAction(() => treeStore.selectItem = node.root ? null : node)
   if (!node.root && !node.folder) {
     const isMd = node.ext === 'md'
     const menus: IMenu[] = [
@@ -81,7 +82,6 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         {
           text: configStore.zh ? '复制Markdown代码' : 'Copy Markdown Source Code',
           click: () => {
-            treeStore.appendTab(node)
             const md = toMarkdown(node.schema || [])
             window.api.copyToClipboard(md)
             message$.next({

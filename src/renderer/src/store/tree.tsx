@@ -49,17 +49,7 @@ export class TreeStore {
   }>()
 
   get nodes() {
-    // if (!this.root) return []
-    // let files: IFileItem[] = [this.root]
-    // const stack: IFileItem[] = this.root.children!.slice()
-    // while (stack.length) {
-    //   const node = stack.shift()!
-    //   files.push(node)
-    //   if (node.folder) {
-    //     stack.push(...node.children!)
-    //   }
-    // }
-    return []
+    return Array.from(this.nodeMap.values())
   }
 
   get currentTab() {

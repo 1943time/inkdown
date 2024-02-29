@@ -101,7 +101,7 @@ export const Heading = observer(({note}: {
         top: pt - 40,
         height: `calc(100vh - ${pt}px)`
       }}
-      className={`${configStore.config.showLeading ? 'lg:block' : ''} hidden sticky pl-4 border-l b1 flex-shrink-0`}
+      className={`${configStore.config.showLeading ? 'lg:block' : ''} hidden sticky flex-shrink-0`}
       ref={e => {
         box.current = e?.parentElement?.parentElement?.parentElement || undefined
       }}

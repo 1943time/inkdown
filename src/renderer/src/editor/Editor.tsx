@@ -60,7 +60,6 @@ export const MEditor = observer(({note}: {
       })
       if (node.schema) {
         updateNode(node)
-        // saveRecord(path, node.schema)
       }
     }
   }, [note])
@@ -111,8 +110,7 @@ export const MEditor = observer(({note}: {
       try {
         runInAction(() => store.openLangCompletion = false)
         treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
       if (!changedMark.current) {
@@ -317,7 +315,6 @@ export const MEditor = observer(({note}: {
         onChange={change}
       >
         <SetNodeToDecorations/>
-        {/*<Placeholder/>*/}
         <Title node={note}/>
         <Editable
           onError={onError}
@@ -325,7 +322,9 @@ export const MEditor = observer(({note}: {
           spellCheck={configStore.config.spellCheck}
           readOnly={store.readonly}
           className={`edit-area font-${configStore.config.editorFont}`}
-          style={{fontSize: configStore.config.editorTextSize || 16}}
+          style={{
+            fontSize: configStore.config.editorTextSize || 16
+          }}
           onMouseDown={checkEnd}
           onDrop={drop}
           onFocus={focus}

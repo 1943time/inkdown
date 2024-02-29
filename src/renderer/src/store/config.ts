@@ -27,7 +27,7 @@ class ConfigStore {
     imagesFolder: '.images',
     dragToSort: true,
     spellCheck: false,
-    editorMaxWidth: 900,
+    editorWidth: 720,
     autoRebuild: true,
     renameFileWhenSaving: false,
     showFloatBar: true,

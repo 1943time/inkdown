@@ -58,9 +58,9 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       return
     }
     let realUrl = element.url
-    if (!element.url.startsWith('http') && !element.url.startsWith('file:')) {
+    if (realUrl && !realUrl?.startsWith('http') && !realUrl.startsWith('file:')) {
       const currentFilePath = store.webview ? store.webviewFilePath : store.openFilePath
-      const file = isAbsolute(element.url) ? element.url : join(currentFilePath || '', '..', element.url)
+      const file = isAbsolute(realUrl) ? element.url : join(currentFilePath || '', '..', realUrl)
       const data = getImageData(file)
       if (data) {
         realUrl = data
@@ -71,7 +71,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       const img = document.createElement('img')
       img.referrerPolicy = 'no-referrer'
       img.crossOrigin = 'anonymous'
-      img.src = realUrl
+      img.src = realUrl!
       img.onerror = (e) => {
         setState({loadSuccess: false})
       }
