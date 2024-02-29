@@ -1,9 +1,9 @@
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../store/tree'
 import {action, runInAction} from 'mobx'
-import IClose from '../../icons/IClose'
-import {useLocalState} from '../../hooks/useLocalState'
 import {useCallback, useRef} from 'react'
+import IClose from '../../icons/IClose'
+import {treeStore} from '../../store/tree'
+import {useLocalState} from '../../hooks/useLocalState'
 
 export const Tabs = observer(() => {
   const [state, setState] = useLocalState({
@@ -29,11 +29,11 @@ export const Tabs = observer(() => {
         e.preventDefault()
         findIndex(e.clientX)
       }}
-      className={`h-8 bg-gray-50 dark:bg-[#222222] border-gray-200/80 dark:border-gray-200/10 border-b text-[13px] overflow-x-auto hide-scrollbar w-full absolute top-10 z-50`}
+      className={`tabs-nav`}
     >
       <div className={'flex h-full relative'}>
         {/*<div*/}
-        {/*  className={`absolute z-50 w-0.5 bg-sky-500 top-0 h-full ${state.dragging && state.dragIndex !== state.targetIndex ? '' : 'hidden'}`}*/}
+        {/*  className={`absolute z-50 w-0.5 bg-indigo-500 top-0 h-full ${state.dragging && state.dragIndex !== state.targetIndex ? '' : 'hidden'}`}*/}
         {/*  style={{*/}
         {/*    transform: `translateX(${state.markLeft}px)`*/}
         {/*  }}*/}
@@ -59,13 +59,12 @@ export const Tabs = observer(() => {
             onDragEnd={e => setState({dragging: false, targetIndex: -1})}
             onContextMenu={action(() => {
               treeStore.tabContextIndex = i
-              window.electron.ipcRenderer.send('tab-context-menu')
             })}
-            title={t.current?.filePath}
+            title={t.current?.filename}
             onClick={() => {
               treeStore.selectTab(i)
             }}
-            className={`${i === treeStore.currentIndex ? 'dark:bg-white/5 bg-white text-gray-600 dark:text-gray-200' : 'dark:text-gray-300 text-gray-500  hover:text-gray-600 dark:hover:text-gray-200'}
+            className={`${i === treeStore.currentIndex ? 'dark:bg-white/5 bg-white text-gray-600 dark:text-gray-200' : 'dark:text-gray-300 text-gray-500 hover:text-gray-600 dark:hover:text-gray-200'}
               ${i !== 0 ? 'border-l dark:border-gray-200/10 border-gray-200' : ''}
               relative flex-1 min-w-[200px] h-full flex items-center group px-8 cursor-default tab
               `}
@@ -84,7 +83,7 @@ export const Tabs = observer(() => {
               />
             </div>
             <div className={'w-full truncate text-center select-none'}>
-              {t.current? t.current.filename : 'New Tab'}
+              {t.current? (t.current.filename || 'Untitled') : 'New Tab'}
             </div>
           </div>
         )}

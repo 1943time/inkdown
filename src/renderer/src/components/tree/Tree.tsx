@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
 import {action} from 'mobx'
 import {Icon} from '@iconify/react'
-import { Button, Popover, Skeleton } from 'antd'
-import React, { useCallback, useEffect } from 'react'
+import {Popover} from 'antd'
+import React, {useCallback} from 'react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {db, ISpace} from '../../store/db'
 import {treeStore} from '../../store/tree'
@@ -71,7 +71,6 @@ export const Tree = observer(() => {
                     }}
                   />
                 )}
-                {/*<SpaceItem/>*/}
                 <div className={'dark:bg-gray-200/10 h-[1px] my-2'}></div>
                 <div className={'px-2 text-gray-400 text-sm'}>
                   <div

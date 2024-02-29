@@ -25,6 +25,7 @@ import {action, runInAction} from 'mobx'
 import {ServiceSet} from './ui/ServiceSet'
 import {shareSuccessfully$, Successfully} from './ui/Successfully'
 import {configStore} from '../store/config'
+import {Icon} from '@iconify/react'
 
 export const Share = observer(() => {
   const [state, setState] = useLocalState({
@@ -218,9 +219,11 @@ export const Share = observer(() => {
         }}
         arrow={false}
       >
-        <div className={'flex items-center justify-center p-1 group'}>
-          <SendOutlined
-            className={'text-lg duration-200 dark:group-hover:text-gray-300 group-hover:text-gray-700'}
+        <div
+          className={'flex drag-none items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200'}>
+          <Icon
+            icon={'majesticons:share-circle-line'}
+            className={'text-xl'}
           />
         </div>
       </Popover>

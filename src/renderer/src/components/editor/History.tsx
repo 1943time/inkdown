@@ -21,32 +21,31 @@ function Help(props: {
   )
 }
 
-export const History = observer(() => {
+export const History = observer((props: {
+  open: boolean
+  onClose: () => void
+}) => {
   const [state, setState] = useLocalState({
-    open: false,
     fileName: '',
     selectIndex: 0,
     records: [] as IHistory[],
     show: false
   })
   useEffect(() => {
-    const open = async (e: any) => {
-      if (treeStore.openedNote?.ext === 'md') {
-        const records = await db.history.where('filePath').equals(treeStore.openedNote.filePath).toArray()
-        setState({
-          open: true,
-          fileName: basename(treeStore.openedNote.filePath),
-          selectIndex: 0,
-          records: records.sort((a, b) => a.updated > b.updated ? -1 : 1),
-          show: true
+    if (props.open) {
+      const note = treeStore.openedNote
+      if (note?.ext === 'md') {
+        db.history.where('filePath').equals(note.filePath).toArray().then(records => {
+          setState({
+            fileName: basename(note.filePath),
+            selectIndex: 0,
+            records: records.sort((a, b) => a.updated > b.updated ? -1 : 1),
+            show: true
+          })
         })
       }
     }
-    window.electron.ipcRenderer.on('open-file-history', open)
-    return () => {
-      window.electron.ipcRenderer.removeListener('open-file-history', open)
-    }
-  }, [])
+  }, [props.open])
   const schema = useMemo(() => {
     if (state.records[state.selectIndex]) return toJS(state.records[state.selectIndex]!.schema)
     return []
@@ -54,11 +53,11 @@ export const History = observer(() => {
   return (
     <Modal
       title={null}
-      open={state.open}
+      open={props.open}
       footer={null}
       width={900}
       className={'pure-modal'}
-      onCancel={() => setState({open: false})}
+      onCancel={props.onClose}
     >
       <div className={'h-12 border-b b2 px-5 text-base font-semibold'}>
         <div className={'flex items-center h-full'}>
@@ -105,7 +104,7 @@ export const History = observer(() => {
       </div>
       <div className={'flex h-12 items-center justify-end border-t b2 px-4'}>
         <Button
-          onClick={() => setState({open: false})}
+          onClick={props.onClose}
         >
           {configStore.zh ? '取消' : 'Cancel'}
         </Button>
@@ -117,7 +116,7 @@ export const History = observer(() => {
             if (schema.length) {
               treeStore.currentTab.store.saveDoc$.next(schema)
             }
-            setState({open: false})
+            props.onClose()
           }}
         >
           {configStore.zh ? '重置到此记录' : 'Reset to this record'}

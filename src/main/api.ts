@@ -180,7 +180,9 @@ export const registerApi = () => {
   ipcMain.on('close-window', (e) => {
     BrowserWindow.fromWebContents(e.sender)?.close()
   })
-
+  ipcMain.on('open-in-default-app', (e, filePath: string) => {
+    shell.openPath(filePath)
+  })
   ipcMain.on('task-result', (e, ...args) => {
     BrowserWindow.fromWebContents(e.sender)?.webContents.send('task-result', ...args)
   })

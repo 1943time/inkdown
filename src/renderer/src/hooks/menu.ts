@@ -96,10 +96,6 @@ export const useSystemMenus = () => {
         window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote!.filePath, treeStore.root?.filePath)
       }
     }
-    const printHtml = () => {
-      MainApi.sendToSelf('window-blur')
-      if (treeStore.openedNote && treeStore.openedNote.ext === 'md') exportHtml(treeStore.openedNote)
-    }
     const clearRecent = () => {
       db.recent.clear()
     }
@@ -206,60 +202,6 @@ export const useSystemMenus = () => {
       })
     }
 
-    const convertRemoteImages = async () => {
-      if (treeStore.openedNote?.ext === 'md') {
-        const schema = treeStore.openedNote.schema
-        if (schema) {
-          const stack = schema.slice()
-          const store = treeStore.currentTab.store
-          let change = false
-          while (stack.length) {
-            const item = stack.pop()!
-            if (!item.text && item.type !== 'media' && item.children?.length) {
-              stack.push(...item.children!.slice())
-            } else {
-              if (item.type === 'media') {
-                if (item.url?.startsWith('http')) {
-                  const ext = item.url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif)/i)
-                  if (ext) {
-                    try {
-                      change = true
-                      const res = await ky.get(item.url).arrayBuffer()
-                      const path = await store.saveFile({
-                        name: Date.now().toString(16) + '.' + ext[1].toLowerCase(),
-                        buffer: res
-                      })
-                      Transforms.setNodes(store.editor, {
-                        url: path
-                      }, {at: ReactEditor.findPath(store.editor, item)})
-                    } catch (e) {}
-                  }
-                } else if (item.url?.startsWith('data:')) {
-                  const m = item.url.match(/data:image\/(\w+);base64,(.*)/)
-                  if (m) {
-                    try {
-                      change = true
-                      const path = await store.saveFile({
-                        name: Date.now().toString(16) + '.' + m[1].toLowerCase(),
-                        buffer: base64ToArrayBuffer(m[2])
-                      })
-                      Transforms.setNodes(store.editor, {
-                        url: path
-                      }, {at: ReactEditor.findPath(store.editor, item)})
-                    } catch (e) {}
-                  }
-                }
-              }
-            }
-          }
-          message$.next({
-            type: 'info',
-            content: change ? configStore.zh ? '转换成功' : 'Conversion successful' : configStore.zh ? '当前文档未引入网络图片' : 'The current note does not include network images'
-          })
-        }
-      }
-    }
-
     initial()
     setTimeout(() => {
       clearExpiredRecord()
@@ -273,10 +215,8 @@ export const useSystemMenus = () => {
     window.electron.ipcRenderer.on('open-file', openFile)
     window.electron.ipcRenderer.on('create', create)
     window.electron.ipcRenderer.on('call-print-pdf', printPdf)
-    window.electron.ipcRenderer.on('call-print-html', printHtml)
     window.electron.ipcRenderer.on('clear-recent', clearRecent)
     window.electron.ipcRenderer.on('clear-unused-images', clearUnusedImages)
-    window.electron.ipcRenderer.on('convert-remote-images', convertRemoteImages)
     return () => {
       window.electron.ipcRenderer.removeListener('open', open)
       window.electron.ipcRenderer.removeListener('close-other-tabs', closeOtherTabs)
@@ -286,10 +226,8 @@ export const useSystemMenus = () => {
       window.electron.ipcRenderer.removeListener('open-file', openFile)
       window.electron.ipcRenderer.removeListener('create', create)
       window.electron.ipcRenderer.removeListener('call-print-pdf', printPdf)
-      window.electron.ipcRenderer.removeListener('call-print-html', printHtml)
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
       window.electron.ipcRenderer.removeListener('clear-unused-images', clearUnusedImages)
-      window.electron.ipcRenderer.removeListener('convert-remote-images', convertRemoteImages)
     }
   }, [])
 }
