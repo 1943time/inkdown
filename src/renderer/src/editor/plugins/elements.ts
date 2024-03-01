@@ -157,27 +157,43 @@ export const MdElements: Record<string, MdNode> = {
   task: {
     reg: /^\s*\[(x|\s)]\s+/,
     matchKey: ' ',
-    checkAllow: ctx => ctx.node[0].type === 'paragraph' && Editor.parent(ctx.editor, ctx.node[1])[0].type === 'list-item',
+    checkAllow: ctx => {
+      if (ctx.node[0].type === 'paragraph') {
+        const list = Editor.parent(ctx.editor, ctx.node[1])[0].type === 'list-item'
+        return !(list && !Path.hasPrevious(ctx.node[1]))
+      }
+      return false
+    },
     run: ctx => {
-      const children = Array.from(Node.children(ctx.editor, Path.parent(Path.parent(ctx.path))))
-      for (let c of children) {
-        Transforms.setNodes(ctx.editor, {checked: Path.equals(c[1], ctx.path) ? ctx.match[1] === 'x' : false}, {at: c[1]})
+      const removeLength = ctx.match[0].match(/\s*\[x|\s]\s+/)?.[0].length || 0
+      let texts:any[] = [{text: ''}]
+      if (!Point.equals(ctx.sel.anchor, Editor.end(ctx.editor, ctx.path))) {
+        texts = EditorUtils.cutText(ctx.editor, ctx.sel.anchor)
       }
       Transforms.delete(ctx.editor, {
-        at: {
-          anchor: {
-            path: ctx.sel.anchor.path,
-            offset: ctx.sel.anchor.offset - 3
-          },
-          focus: ctx.sel.focus
-        }
+        at: ctx.path
+      })
+      Transforms.insertNodes(ctx.editor, {
+        type: 'list',
+        task: true,
+        children: [
+          {
+            type: 'list-item',
+            checked: ctx.match[1] === 'x',
+            children: [{type: 'paragraph', children: texts}]
+          }
+        ]
+      } as ListNode, {at: ctx.path})
+      Transforms.select(ctx.editor, {
+        path: Editor.start(ctx.editor, ctx.path).path,
+        offset: ctx.sel.anchor.offset - removeLength
       })
       return true
     }
   },
   list: {
     matchKey: ' ',
-    reg: /^\s*(\d+\.|-|\*|\+)\s+(\[[\sx]])?([^\n]+)?/,
+    reg: /^\s*(\d+\.|-|\*|\+)\s+?/,
     checkAllow: ctx => {
       if (Editor.parent(ctx.editor, ctx.node[1])[0].type === 'list-item') {
         return Path.hasPrevious(ctx.node[1])
@@ -185,7 +201,7 @@ export const MdElements: Record<string, MdNode> = {
       return ['paragraph'].includes(ctx.node[0].type) && !Path.hasPrevious(ctx.sel.anchor.path)
     },
     run: ({editor, match, sel, path}) => {
-      const removeLength = match[0].match(/\s*(\d+\.|-|\*|\+)\s+(\[[\sx]])?/)?.[0].length || 0
+      const removeLength = match[0].match(/\s*(\d+\.|-|\*|\+)\s+/)?.[0].length || 0
       let texts:any[] = [{text: ''}]
       if (!Point.equals(sel.anchor, Editor.end(editor, path))) {
         texts = EditorUtils.cutText(editor, sel.anchor)
@@ -201,8 +217,7 @@ export const MdElements: Record<string, MdNode> = {
         children: [
           {
             type: 'list-item',
-            children: [{type: 'paragraph', children: texts}],
-            checked: match[2] ? match[2].includes('x') : undefined
+            children: [{type: 'paragraph', children: texts}]
           }
         ]
       } as ListNode, {at: path})

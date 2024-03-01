@@ -54,7 +54,7 @@ const tools = [
   {type: 'strikethrough', icon: <StrikethroughOutlined/>, tooltip: (
       <div
         className={'text-xs flex items-center space-x-1'}>
-        <Mod/><Option className={'w-3 h-3'}/><span>S</span>
+        <Mod/><Shift/><span>S</span>
       </div>
     )
   },

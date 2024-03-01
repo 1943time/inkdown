@@ -602,6 +602,7 @@ export class TreeStore {
     this.checkOtherTabsShouldUpdate()
     this.currentTab.store.saveDoc$.next(null)
     this.currentIndex = i
+    this.selectItem = null
     setTimeout(() => {
       const backRange = this.currentTab.range
       if (backRange) {

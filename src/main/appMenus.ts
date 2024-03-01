@@ -148,9 +148,9 @@ const getSystemMenus = () => {
         id: 'create',
         label: zh ? '新建笔记' : 'New Note',
         accelerator: `${cmd}+n`,
-        click: (menu, win) => {
-          win?.webContents.send('create')
-        }
+        // click: (menu, win) => {
+        //   win?.webContents.send('create')
+        // }
       },
       {
         label: zh ? '新建窗口' : 'New Window',
@@ -292,209 +292,195 @@ const getSystemMenus = () => {
       }
     ]
   })
-  menus.push(
-    {
-      label: zh ? '段落' : 'Paragraph',
-      id: 'paragraph',
-      submenu: [
-        ...titles,
-        {type: 'separator'},
-        {
-          label: zh ? '段落' : 'Paragraph',
-          id: 'paragraph',
-          accelerator: `${cmd}+0`,
-          enabled: false,
-          click: task('paragraph')
-        },
-        {type: 'separator'},
-        {
-          label: zh ? '提升标题等级' : 'Increase Heading Level',
-          id: 'titleIncrease',
-          accelerator: `${cmd}+]`,
-          enabled: false,
-          click: task('head+')
-        },
-        {
-          label: zh ? '降低标题等级' : 'Decrease Heading Level',
-          id: 'titleDecrement',
-          enabled: false,
-          accelerator: `${cmd}+[`,
-          click: task('head-')
-        },
-        {
-          label: zh ? '引用' : 'Quote',
-          id: 'quote',
-          accelerator: `${cmd}+Alt+q`,
-          click: task('quote'),
-          enabled: false
-        },
-        {
-          label: zh ? '表格' : 'Table',
-          id: 'insertTable',
-          accelerator: `${cmd}+Alt+t`,
-          click: task('insertTable'),
-          enabled: false
-        },
-        {
-          label: zh ? '代码栏' : 'Code Fences',
-          id: 'insertCode',
-          accelerator: `${cmd}+Alt+c`,
-          click: task('insertCode'),
-          enabled: false
-        },
-        {
-          label: zh ? '公式' : 'Formula',
-          id: 'formula',
-          submenu: [
-            {
-              label: zh ? '块级公式' : 'Formula Block',
-              id: 'insertKatex',
-              accelerator: `${cmd}+k`,
-              click: task('insertKatex'),
-              enabled: false
-            },
-            {
-              label: zh ? '行内公式' : 'Formula Inline',
-              id: 'insertInlineKatex',
-              accelerator: `${cmd}+Alt+k`,
-              click: task('insertInlineKatex'),
-              enabled: false
-            }
-          ]
-        },
-        {
-          label: 'Front Matter',
-          id: 'frontmatter',
-          click: task('insertFrontmatter'),
-          enabled: false
-        },
-        {type: 'separator'},
-        {
-          label: zh ? '有序列表' : 'Ordered List',
-          id: 'insertOrderedList',
-          accelerator: `${cmd}+Alt+o`,
-          click: task('insertOrderedList'),
-          enabled: false
-        },
-        {
-          label: zh ? '无序列表' : 'Unordered List',
-          id: 'insertUnorderedList',
-          accelerator: `${cmd}+Alt+u`,
-          click: task('insertUnorderedList'),
-          enabled: false
-        },
-        {
-          label: zh ? '有序任务列表' : 'Ordered Task List',
-          id: 'insertTaskOrderedList',
-          accelerator: `${cmd}+Shift+o`,
-          click: task('insertTaskOrderedList'),
-          enabled: false
-        },
-        {
-          label: zh ? '无序任务列表' : 'Unordered Task List',
-          id: 'insertTaskUnorderedList',
-          accelerator: `${cmd}+Shift+u`,
-          click: task('insertTaskUnorderedList'),
-          enabled: false
-        },
-        {type: 'separator'},
-        {
-          label: zh ? '水平线' : 'Horizontal Line',
-          id: 'insertHorizontalRule',
-          accelerator: `${cmd}+Alt+/`,
-          click: task('insertHorizontalRule'),
-          enabled: false
-        }
-      ]
-    }
-  )
-  menus.push(
-    {
-      label: zh ? '格式' : 'Format',
-      id: 'format',
-      submenu: [
-        {
-          label: zh ? '加粗' : 'Bold',
-          accelerator: `${cmd}+b`,
-          click: task('bold')
-        },
-        {
-          label: zh ? '斜体' : 'Italic',
-          accelerator: `${cmd}+i`,
-          click: task('italic')
-        },
-        {
-          label: zh ? '删除线' : 'Strikethrough',
-          accelerator: `${cmd}+Alt+s`,
-          click: task('strikethrough')
-        },
-        {
-          label: 'Inline Code',
-          accelerator: `${cmd}+\``,
-          click: task('code')
-        },
-        {
-          label: zh ? '图片' : 'Image',
-          accelerator: `${cmd}+p`,
-          submenu: [
-            {
-              accelerator: `${cmd}+p`,
-              label: zh ? '插入图片' : 'Insert Image',
-              click: (e, win) => {
-                win?.webContents.send('key-task', 'insertNetworkImage')
-              }
-            },
-            {
-              label: zh ? '插入本机图片' : 'Insert Local Image',
-              accelerator: `${cmd}+shift+p`,
-              click: (e, win) => {
-                dialog.showOpenDialog({
-                  properties: ['openFile', 'showHiddenFiles'],
-                  filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
-                  securityScopedBookmarks: true
-                }).then(res => {
-                  if (res.filePaths.length) {
-                    win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
-                  }
-                })
-              }
-            }
-          ]
-        },
-        {type: 'separator'},
-        {
-          label: zh ? '清除' : 'Clear',
-          accelerator: `${cmd}+\\`,
-          click: task('clear')
-        },
-        {type: 'separator'},
-        {
-          label: zh ? '链接' : 'Link',
-          accelerator: `${cmd}+l`,
-          click: task('link')
-        },
-        {
-          label: zh ? '高亮' : 'Highlight',
-          accelerator: `${cmd}+shift+h`,
-          click: task('highlight')
-        }
-      ]
-    }
-  )
-  const winMenus:MenuOptions[number]['submenu']  = isMac ? [] : [
-    {
-      label: zh ? '显示菜单栏' : 'Show Menu Bar',
-      type: 'checkbox',
-      checked: !!store.get('showMenuBar'),
-      accelerator: 'Alt+1',
-      click: e => {
-        store.set('showMenuBar', e.checked)
-        BrowserWindow.getAllWindows().forEach(w => {
-          w.menuBarVisible = e.checked
-        })
-      }
-    }
-  ]
+  // menus.push(
+  //   {
+  //     label: zh ? '段落' : 'Paragraph',
+  //     id: 'paragraph',
+  //     submenu: [
+  //       ...titles,
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '段落' : 'Paragraph',
+  //         id: 'paragraph',
+  //         accelerator: `${cmd}+0`,
+  //         enabled: false,
+  //         click: task('paragraph')
+  //       },
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '提升标题等级' : 'Increase Heading Level',
+  //         id: 'titleIncrease',
+  //         accelerator: `${cmd}+]`,
+  //         enabled: false,
+  //         click: task('head+')
+  //       },
+  //       {
+  //         label: zh ? '降低标题等级' : 'Decrease Heading Level',
+  //         id: 'titleDecrement',
+  //         enabled: false,
+  //         accelerator: `${cmd}+[`,
+  //         click: task('head-')
+  //       },
+  //       {
+  //         label: zh ? '引用' : 'Quote',
+  //         id: 'quote',
+  //         accelerator: `${cmd}+Alt+q`,
+  //         click: task('quote'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '表格' : 'Table',
+  //         id: 'insertTable',
+  //         accelerator: `${cmd}+Alt+t`,
+  //         click: task('insertTable'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '代码栏' : 'Code Fences',
+  //         id: 'insertCode',
+  //         accelerator: `${cmd}+Alt+c`,
+  //         click: task('insertCode'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '公式' : 'Formula',
+  //         id: 'formula',
+  //         submenu: [
+  //           {
+  //             label: zh ? '块级公式' : 'Formula Block',
+  //             id: 'insertKatex',
+  //             accelerator: `${cmd}+k`,
+  //             click: task('insertKatex'),
+  //             enabled: false
+  //           },
+  //           {
+  //             label: zh ? '行内公式' : 'Formula Inline',
+  //             id: 'insertInlineKatex',
+  //             accelerator: `${cmd}+Alt+k`,
+  //             click: task('insertInlineKatex'),
+  //             enabled: false
+  //           }
+  //         ]
+  //       },
+  //       {
+  //         label: 'Front Matter',
+  //         id: 'frontmatter',
+  //         click: task('insertFrontmatter'),
+  //         enabled: false
+  //       },
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '有序列表' : 'Ordered List',
+  //         id: 'insertOrderedList',
+  //         accelerator: `${cmd}+Alt+o`,
+  //         click: task('insertOrderedList'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '无序列表' : 'Unordered List',
+  //         id: 'insertUnorderedList',
+  //         accelerator: `${cmd}+Alt+u`,
+  //         click: task('insertUnorderedList'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '有序任务列表' : 'Ordered Task List',
+  //         id: 'insertTaskOrderedList',
+  //         accelerator: `${cmd}+Shift+o`,
+  //         click: task('insertTaskOrderedList'),
+  //         enabled: false
+  //       },
+  //       {
+  //         label: zh ? '无序任务列表' : 'Unordered Task List',
+  //         id: 'insertTaskUnorderedList',
+  //         accelerator: `${cmd}+Shift+u`,
+  //         click: task('insertTaskUnorderedList'),
+  //         enabled: false
+  //       },
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '水平线' : 'Horizontal Line',
+  //         id: 'insertHorizontalRule',
+  //         accelerator: `${cmd}+Alt+/`,
+  //         click: task('insertHorizontalRule'),
+  //         enabled: false
+  //       }
+  //     ]
+  //   }
+  // )
+  // menus.push(
+  //   {
+  //     label: zh ? '格式' : 'Format',
+  //     id: 'format',
+  //     submenu: [
+  //       {
+  //         label: zh ? '加粗' : 'Bold',
+  //         accelerator: `${cmd}+b`,
+  //         click: task('bold')
+  //       },
+  //       {
+  //         label: zh ? '斜体' : 'Italic',
+  //         accelerator: `${cmd}+i`,
+  //         click: task('italic')
+  //       },
+  //       {
+  //         label: zh ? '删除线' : 'Strikethrough',
+  //         accelerator: `${cmd}+Alt+s`,
+  //         click: task('strikethrough')
+  //       },
+  //       {
+  //         label: 'Inline Code',
+  //         accelerator: `${cmd}+\``,
+  //         click: task('code')
+  //       },
+  //       {
+  //         label: zh ? '图片' : 'Image',
+  //         accelerator: `${cmd}+p`,
+  //         submenu: [
+  //           {
+  //             accelerator: `${cmd}+p`,
+  //             label: zh ? '插入图片' : 'Insert Image',
+  //             click: (e, win) => {
+  //               win?.webContents.send('key-task', 'insertNetworkImage')
+  //             }
+  //           },
+  //           {
+  //             label: zh ? '插入本机图片' : 'Insert Local Image',
+  //             accelerator: `${cmd}+shift+p`,
+  //             click: (e, win) => {
+  //               dialog.showOpenDialog({
+  //                 properties: ['openFile', 'showHiddenFiles'],
+  //                 filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
+  //                 securityScopedBookmarks: true
+  //               }).then(res => {
+  //                 if (res.filePaths.length) {
+  //                   win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
+  //                 }
+  //               })
+  //             }
+  //           }
+  //         ]
+  //       },
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '清除' : 'Clear',
+  //         accelerator: `${cmd}+\\`,
+  //         click: task('clear')
+  //       },
+  //       {type: 'separator'},
+  //       {
+  //         label: zh ? '链接' : 'Link',
+  //         accelerator: `${cmd}+l`,
+  //         click: task('link')
+  //       },
+  //       {
+  //         label: zh ? '高亮' : 'Highlight',
+  //         accelerator: `${cmd}+shift+h`,
+  //         click: task('highlight')
+  //       }
+  //     ]
+  //   }
+  // )
   const devTools:MenuOptions[number]['submenu'] = is.dev || true ? [
     {role: 'toggleDevTools'}
   ] : []
@@ -506,7 +492,6 @@ const getSystemMenus = () => {
         {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: 'Zoom In'},
         {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: 'Zoom Out'},
         {type: 'separator'},
-        ...winMenus,
         {
           label: zh ? '大纲' : 'Outline',
           type: 'checkbox',
@@ -612,41 +597,41 @@ export const createAppMenus = () => {
     }
   })
   ipcMain.on('changeContext', (e, ctx: string, isTop: boolean) => {
-    const katex = instance.getMenuItemById('insertKatex')!
-    const inlineKatex = instance.getMenuItemById('insertInlineKatex')!
-    katex.enabled = ctx === 'paragraph'
-    instance.getMenuItemById('break-line')!.enabled = ctx === 'paragraph'
-    inlineKatex.enabled = ['table-cell', 'paragraph'].includes(ctx)
-    switch (ctx) {
-      case 'table-cell':
-        setParagraph(false)
-        setFormat(true)
-        break
-      case 'code-line':
-        setParagraph(false)
-        setFormat(false)
-        break
-      case 'paragraph':
-        setParagraph(true, isTop ? undefined : ['title'])
-        setFormat(true)
-        break
-      case 'head':
-        setParagraph(true)
-        setFormat(true)
-        break
-      default:
-        setParagraph(false)
-        setFormat(false)
-        break
-    }
-  })
-  ipcMain.on('open-file', (e, isMarkdown: boolean) => {
-    instance.getMenuItemById('print-pdf')!.enabled = isMarkdown
-    instance.getMenuItemById('print-html')!.enabled = isMarkdown
-  })
-  ipcMain.on('set-locale', (e, lc: string) => {
-    const menus = getSystemMenus()
-    instance = Menu.buildFromTemplate(menus)
-    Menu.setApplicationMenu(instance)
+  //   const katex = instance.getMenuItemById('insertKatex')!
+  //   const inlineKatex = instance.getMenuItemById('insertInlineKatex')!
+  //   katex.enabled = ctx === 'paragraph'
+  //   instance.getMenuItemById('break-line')!.enabled = ctx === 'paragraph'
+  //   inlineKatex.enabled = ['table-cell', 'paragraph'].includes(ctx)
+  //   switch (ctx) {
+  //     case 'table-cell':
+  //       setParagraph(false)
+  //       setFormat(true)
+  //       break
+  //     case 'code-line':
+  //       setParagraph(false)
+  //       setFormat(false)
+  //       break
+  //     case 'paragraph':
+  //       setParagraph(true, isTop ? undefined : ['title'])
+  //       setFormat(true)
+  //       break
+  //     case 'head':
+  //       setParagraph(true)
+  //       setFormat(true)
+  //       break
+  //     default:
+  //       setParagraph(false)
+  //       setFormat(false)
+  //       break
+  //   }
+  // })
+  // ipcMain.on('open-file', (e, isMarkdown: boolean) => {
+  //   instance.getMenuItemById('print-pdf')!.enabled = isMarkdown
+  //   instance.getMenuItemById('print-html')!.enabled = isMarkdown
+  // })
+  // ipcMain.on('set-locale', (e, lc: string) => {
+  //   const menus = getSystemMenus()
+  //   instance = Menu.buildFromTemplate(menus)
+  //   Menu.setApplicationMenu(instance)
   })
 }

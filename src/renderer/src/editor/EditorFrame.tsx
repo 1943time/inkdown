@@ -38,27 +38,7 @@ export const EditorFrame = observer(({tab}: {
     }
   }, [])
 
-  useEffect(() => {
-    const keydown = (e: KeyboardEvent) => {
-      if (isHotkey('esc', e) && tab.store.openSearch && treeStore.currentTab === tab) {
-        tab.store.setOpenSearch(false)
-      }
-    }
-    const open = () => {
-      if (treeStore.currentTab === tab) {
-        tab.store.setOpenSearch(true)
-      }
-    }
-    window.addEventListener('keydown', keydown)
-    window.electron.ipcRenderer.on('open-search', open)
-    return () => {
-      window.removeEventListener('keydown', keydown)
-      window.electron.ipcRenderer.removeListener('open-search', open)
-    }
-  }, [])
-
   const mt = useMemo(() => mediaType(tab.current?.filePath || ''), [tab.current])
-
   useLayoutEffect(() => {
     tab.store.openFilePath = tab.current?.filePath || null
   }, [tab.current?.filePath])
@@ -72,14 +52,13 @@ export const EditorFrame = observer(({tab}: {
   const pt = useMemo(() => {
     let pt = 0
     if (tab.store.openSearch) pt += 46
-    if (treeStore.tabs.length > 1) pt += 32
     return pt
   }, [tab.store.openSearch, treeStore.tabs.length])
   return (
     <EditorStoreContext.Provider value={tab.store}>
       <Search/>
       <div
-        className={'flex-1 h-full overflow-y-auto items-start relative'}
+        className={'flex-1 h-full overflow-y-auto items-start relative pr-7'}
         ref={dom => {
           tab.store.setState(state => state.container = dom)
         }}

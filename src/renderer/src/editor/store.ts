@@ -341,6 +341,30 @@ export class EditorStore {
     this.insertInlineNode(path)
   }
 
+  insertFiles(files: string[]) {
+    const [cur] = Editor.nodes<any>(this.editor, {
+      match: n => Element.isElement(n),
+      mode: 'lowest'
+    })
+    if (!cur) return
+    let path = cur[1]
+    if (cur[0].type === 'table-cell') {
+      path = Path.next(Path.parent(Path.parent(cur[1])))
+    }
+    if (cur[0].type === 'head') {
+      path = Path.next(path)
+    }
+    if (cur[0].type === 'code-line') {
+      path = Path.next(Path.parent(cur[1]))
+    }
+    if (cur[0].type === 'paragraph' && !Node.string(cur[0])) {
+      Transforms.delete(this.editor, {at: path})
+    }
+    Transforms.insertNodes(this.editor, files.map(p => {
+      return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
+    }), {at: path, select: true})
+  }
+
   insertInlineNode(filePath: string) {
     const p = parse(filePath)
     const type = mediaType(filePath)

@@ -28,6 +28,9 @@ export const MainApi = {
   setWin(data: {openFolder?: string, openTabs?: string[], index?: number}) {
     ipcRenderer.send('set-win', data)
   },
+  openDialog(options: Parameters<typeof dialog['showOpenDialog']>[0]) {
+    return openDialog(options)
+  },
   getServerConfig() {
     return ipcRenderer.invoke('getServerConfig')
   },

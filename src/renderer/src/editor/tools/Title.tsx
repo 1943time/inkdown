@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import React, {useCallback, useEffect} from 'react'
+import React, {useCallback, useEffect, useRef} from 'react'
 import {Tooltip} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {IFileItem} from '../../index'
@@ -18,6 +18,7 @@ export const Title = observer(({node} : {node: IFileItem}) => {
     name: '',
     tip: false
   })
+
   useEffect(() => {
     setState({name: node?.filename || ''})
   }, [node])
@@ -55,7 +56,7 @@ export const Title = observer(({node} : {node: IFileItem}) => {
   return (
     <Tooltip
       title={configStore.zh ? '已经有一个同名的文件' : `There's already a file with the same name`}
-      color={'gold'}
+      color={'magenta'}
       open={state.tip}
       placement={'bottom'}
     >
@@ -67,8 +68,8 @@ export const Title = observer(({node} : {node: IFileItem}) => {
             detectRename()
           }}
           onKeyDown={e => {
-            e.preventDefault()
             if (isHotkey('enter', e) || isHotkey('down', e)) {
+              e.preventDefault()
               try {
                 ReactEditor.focus(store.editor)
                 Transforms.select(store.editor, Editor.start(store.editor, []))

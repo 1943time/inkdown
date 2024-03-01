@@ -79,7 +79,7 @@ export const Search = observer(() => {
   }, [store.refreshHighlight])
   return (
     <div
-      className={`absolute w-full duration-200 left-0 items-center z-30 def-bg overflow-hidden border-b b1 ${store.openSearch ? '' : 'hidden'}`}
+      className={`absolute w-full duration-200 left-0 items-center z-30 def-bg overflow-hidden ${store.openSearch ? '' : 'hidden'}`}
       style={{top}}
     >
       <div className={`mx-auto ${state.openReplace ? 'max-w-[900px]' : 'max-w-[700px]'} overflow-x-auto`}>
@@ -101,7 +101,7 @@ export const Search = observer(() => {
                     store.nextSearch()
                   }
                 }}
-                className={'w-full input pr-8'}
+                className={'w-full input pr-8 pl-2'}
                 onChange={e => store.setSearchText(e.target.value)}
               />
               <div
@@ -117,7 +117,7 @@ export const Search = observer(() => {
                 <input
                   value={state.replaceText}
                   placeholder={configStore.zh ? '替换' : 'Replace'}
-                  className={'w-full input'}
+                  className={'w-full input px-2'}
                   onChange={e => setState({replaceText: e.target.value})}
                 />
               </div>

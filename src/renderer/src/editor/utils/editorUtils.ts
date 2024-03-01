@@ -8,7 +8,20 @@ export class EditorUtils {
   static get p() {
     return {type: 'paragraph', children: [{text: ''}]}
   }
-
+  static focus(editor: Editor) {
+    try {
+      ReactEditor.focus(editor)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  static blur(editor: Editor) {
+    try {
+      ReactEditor.blur(editor)
+    } catch (e) {
+      console.error(e)
+    }
+  }
   static isDirtLeaf(leaf: CustomLeaf) {
     return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html || leaf.highColor
   }

@@ -100,9 +100,6 @@ export class MenuKey {
     private readonly store: TreeStore,
   ) {
     window.addEventListener('keydown', e => {
-      if (isHotkey('mod+b', e)) this.run('bold')
-      if (isHotkey('mod+i', e)) this.run('italic')
-      if (isHotkey('mod+0', e)) this.run('paragraph')
       if ((isHotkey('mod+x', e) || isHotkey('mod+c', e)) && this.state && this.state.editor.selection) {
         const [node] = Editor.nodes<any>(this.state.editor, {
           match: n => n.type === 'media'
@@ -131,9 +128,9 @@ export class MenuKey {
         }
       }
     }, false)
-    window.electron.ipcRenderer.on('key-task', (e, task: string, other: any) => {
-      this.run(task, other)
-    })
+    // window.electron.ipcRenderer.on('key-task', (e, task: string, other: any) => {
+    //   this.run(task, other)
+    // })
   }
 
   run(task: string, other?: string) {

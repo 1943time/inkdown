@@ -14,11 +14,11 @@ import {runInAction} from 'mobx'
 import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
 
-const createDoc = async (parent: IFileItem | ISpaceNode, newName = 'Untitled', copyItem?: IFileItem) => {
+export const createDoc = async (parent?: IFileItem | ISpaceNode, newName = 'Untitled', copyItem?: IFileItem) => {
   const name = getCreateName(parent, newName)
   const id = nid()
   const now = Date.now()
-  let target = join(parent.filePath, name + '.md')
+  let target = parent ? join(parent.filePath, name + '.md') : ''
   const md = toMarkdown(copyItem?.schema || [EditorUtils.p])
   writeFileSync(target, md , {encoding: 'utf-8'})
   const s = statSync(target)
@@ -31,22 +31,28 @@ const createDoc = async (parent: IFileItem | ISpaceNode, newName = 'Untitled', c
     schema: JSON.parse(JSON.stringify(copyItem?.schema || [EditorUtils.p])),
     sort: 0,
     lastOpenTime: now,
-    spaceId: parent.root ? parent.cid : parent.spaceId
+    spaceId: parent ? parent.root ? parent.cid : parent.spaceId : undefined
   }
   await db.file.add(data)
   const newNode = createFileNode(data, parent)
-  const index = copyItem ? parent!.children!.findIndex(n => n === copyItem) : parent.children!.length - 1
-  runInAction(() => {
-    parent!.children!.splice(index + 1, 0, newNode)
-  })
+  if (parent) {
+    const index = copyItem ? parent!.children!.findIndex(n => n === copyItem) : parent.children!.length - 1
+    runInAction(() => {
+      parent!.children!.splice(index + 1, 0, newNode)
+    })
+    parent.children!.map((n, i) => {
+      db.file.update(n.cid, {sort: i})
+      n.sort = i
+    })
+  }
   treeStore.openNote(newNode)
-  parent.children!.map((n, i) => {
-    db.file.update(n.cid, {sort: i})
-    n.sort = i
-  })
+  setTimeout(() => {
+    treeStore.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')?.focus()
+  }, 30)
 }
 
-export const getCreateName = (parent: IFileItem | ISpaceNode, name = 'Untitled') => {
+export const getCreateName = (parent?: IFileItem | ISpaceNode, name = 'Untitled') => {
+  if (!parent) return name
   const start = name.match(/\s(\d+)$/)
   let index = start ? +start[1] : 0
   let cur = name

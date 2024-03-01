@@ -16,9 +16,12 @@ import {isWindows} from '../utils'
 import {ConfirmDialog} from './Dialog/ConfirmDialog'
 import {EditSpace} from './space/EditSpace'
 import {EditFolderDialog} from './tree/EditFolderDialog'
+import {Tools} from './tools/Tools'
+import {useSystemKeyboard} from '../hooks/keyboard'
 
 export const Home = observer(() => {
   useSystemMenus()
+  useSystemKeyboard()
   const moveStart = useCallback((e: React.MouseEvent) => {
     const left = e.clientX
     const startWidth = treeStore.width
@@ -60,6 +63,7 @@ export const Home = observer(() => {
             <EditorFrame tab={t}/>
           </div>
         )}
+        <Tools/>
         <Characters/>
       </div>
       <About/>

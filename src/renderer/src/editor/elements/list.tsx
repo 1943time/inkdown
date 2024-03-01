@@ -37,7 +37,7 @@ export const List = observer(({element, attributes, children}: ElementProps<List
             />
           </span>
         }
-        {createElement(tag, {className: 'm-list', start: element.start}, children)}
+        {createElement(tag, {className: 'm-list', start: element.start, ['data-task']: element.task ? 'true' : undefined}, children)}
       </div>
     )
   }, [element, element.children, configStore.config.dragToSort])

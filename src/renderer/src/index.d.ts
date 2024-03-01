@@ -47,3 +47,7 @@ export interface Tab {
 export type GetFields<T extends object> = {
   [P in keyof T]: T[P] extends Function ? never : P
 }[keyof T]
+
+export type Methods<T> = {
+  [P in keyof T]: T[P] extends Function ? P : never
+}[keyof T]
