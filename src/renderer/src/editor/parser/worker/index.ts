@@ -145,6 +145,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       case 'list':
         el = {type: 'list', order: n.ordered, start: n.start, children: parserBlock(n.children, false, n)}
+        el.task = el.children?.some((s: any) => typeof s.checked === 'boolean')
         break
       case 'footnoteReference':
         if (share) {
