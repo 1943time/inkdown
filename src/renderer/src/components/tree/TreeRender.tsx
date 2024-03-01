@@ -8,6 +8,7 @@ import IFolder from '../../icons/IFolder'
 import {treeStore} from '../../store/tree'
 import {IFileItem} from '../../index'
 import {openContextMenu} from './openContextMenu'
+import {Icon} from '@iconify/react'
 
 const getClass = (c: IFileItem) => {
   if (treeStore.selectItem === c) return 'dark:bg-indigo-500/15 bg-indigo-500/15'
@@ -20,7 +21,7 @@ export const TreeRender = observer(() => {
   return (
     <>
       <div
-        className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500 duration-200 dark:hover:text-gray-300 hover:text-gray-600`}
+        className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-medium text-[15px] flex items-center'}>
           <span>
@@ -28,11 +29,12 @@ export const TreeRender = observer(() => {
           </span>
         </span>
         <div
+          className={'duration-200 dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer'}
           onClick={e =>{
             openContextMenu(e, treeStore.root)
           }}
         >
-          <PlusCircleOutlined className={'cursor-pointer'}/>
+          <PlusCircleOutlined/>
         </div>
       </div>
       <div
@@ -147,8 +149,21 @@ const Item = observer((
               <div
                 className={`flex items-center flex-1 h-full relative max-w-full ${treeStore.openedNote === item ? 'text-indigo-600 dark:text-indigo-400' : ''}`}
                 data-entity={'true'}>
-                {item.folder ? <IFolder className={'w-4 h-4'}/> : <INote/>}
-                <div className={'truncate w-full ml-1'}>{item.filename || 'Untitled'}</div>
+                {!!item.folder &&
+                  <IFolder className={'flex-shrink-0'}/>
+                }
+                {item.ext === 'md' &&
+                  <INote className={'flex-shrink-0'}/>
+                }
+                {!item.folder && item.ext !== 'md' &&
+                  <Icon icon={'uil:file'} className={'text-base flex-shrink-0'}/>
+                }
+                <div className={'truncate max-w-full ml-1'}>
+                  {item.filename || 'Untitled'}
+                </div>
+                {!item.folder && item.ext !== 'md' &&
+                  <sup className={'ml-1 text-indigo-600 mr-1'}>{item.ext}</sup>
+                }
                 {treeStore.dragStatus?.dropNode === item && treeStore.dragNode !== item && treeStore.dragStatus.mode !== 'enter' &&
                   <div
                     className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${treeStore.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}

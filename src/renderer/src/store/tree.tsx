@@ -99,29 +99,6 @@ export class TreeStore {
         })
       }
     })
-    window.addEventListener('keydown', e => {
-      // if (this.selectItem && !this.selectItem.root && isHotkey('enter', e)) {
-      //   const item = this.selectItem
-      //   runInAction(() => {
-      //     item.mode = 'edit'
-      //     item.editName = item.filename
-      //     this.selectItem = null
-      //   })
-      // }
-      // if (this.selectItem && isHotkey('mod+backspace', e) && !configStore.visible && !this.openQuickly) {
-      //   this.moveToTrash(this.selectItem)
-      // }
-      // if (isHotkey('mod+v', e) && this.selectItem && this.selectItem.folder) {
-      //   try {
-      //     const path = window.api.getClipboardFile()
-      //     if (path && existsSync(path)) {
-      //       this.insertFiles([path], this.selectItem, 'copy')
-      //     }
-      //   } catch (e) {
-      //     console.error('paste file', e)
-      //   }
-      // }
-    })
     this.tabs.push(this.createTab())
     new MenuKey(this)
     window.electron.ipcRenderer.on('copy-source-code', (e, filePath?: string) => {

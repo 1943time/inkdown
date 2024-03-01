@@ -16,7 +16,7 @@
   @apply text-gray-600 dark:text-gray-300 flex justify-center items-center flex-1 relative z-10 cursor-pointer;
 }
 .tabs-nav{
-  background-color: var(--bg);
+  background-color: var(--tab);
   @apply h-8 border-gray-200 dark:border-gray-200/10 border-b border-t text-[13px] overflow-x-auto hide-scrollbar w-full z-50 relative flex-shrink-0;
 }
 .high-el{
