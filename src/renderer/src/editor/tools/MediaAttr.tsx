@@ -228,7 +228,7 @@ export const MediaAttr = observer(() => {
       <AutoComplete
         size={'small'} placeholder={'url or filepath'}
         value={state().url}
-        bordered={false}
+        variant={'borderless'}
         className={'flex-1 mpath'}
         onKeyDown={keydown}
         autoFocus={true}

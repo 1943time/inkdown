@@ -7,16 +7,14 @@ import {DragHandle} from '../tools/DragHandle'
 
 export function TableCell(props: RenderElementProps) {
   const store = useEditorStore()
-  const context = useCallback((head?: boolean) => {
-    return () => {
-      MainApi.tableMenu(head)
-    }
+  const context = useCallback((e: React.MouseEvent, head?: boolean) => {
+    store.openTableMenus(e, head)
   }, [])
   return useMemo(() => {
     return props.element.title ? (
       <th
         {...props.attributes} style={{textAlign: props.element.align}} data-be={'th'}
-        onContextMenu={context(true)}
+        onContextMenu={e => context(e, true)}
       >
         {props.children}
       </th>
@@ -24,7 +22,7 @@ export function TableCell(props: RenderElementProps) {
       <td
         {...props.attributes} style={{textAlign: props.element.align}} data-be={'td'}
         className={'group'}
-        onContextMenu={context()}
+        onContextMenu={e => context(e)}
       >
         {props.children}
       </td>

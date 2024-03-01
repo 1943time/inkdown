@@ -18,6 +18,7 @@ import {selChange$} from './plugins/useOnchange'
 import {withErrorReporting} from './plugins/catchError'
 import {imageBed} from '../utils/imageBed'
 import {nid} from '../utils'
+import {openMenus} from '../components/Menu'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -66,7 +67,7 @@ export class EditorStore {
   openFilePath: string | null = null
   webviewFilePath: string | null = null
   saveDoc$ = new Subject<any[] | null>()
-
+  tableTask$ = new Subject<string>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
@@ -379,7 +380,67 @@ export class EditorStore {
       }, 16)
     }
   }
-
+  openTableMenus(e: MouseEvent | React.MouseEvent, head?: boolean) {
+    openMenus(e, [
+      {
+        text: 'Add Row Above',
+        click: () => this.tableTask$.next('insertRowBefore')
+      },
+      {
+        text: 'Add Row Below',
+        key: 'cmd+enter',
+        click: () => this.tableTask$.next('insertRowAfter')
+      },
+      {hr: true},
+      {
+        text: 'Add Column Before',
+        click: () => this.tableTask$.next('insertColBefore')
+      },
+      {
+        text: 'Add Column After',
+        click: () => this.tableTask$.next('insertColAfter')
+      },
+      {hr: true},
+      {
+        text: 'Line break within table-cell',
+        key: 'cmd+shift+enter',
+        click: () => this.tableTask$.next('insertTableCellBreak')
+      },
+      {
+        text: 'Move',
+        children: [
+          {
+            text: 'Move Up One Row',
+            disabled: head,
+            click: () => this.tableTask$.next('moveUpOneRow')
+          },
+          {
+            text: 'Move Down One Row',
+            disabled: head,
+            click: () => this.tableTask$.next('moveDownOneRow')
+          },
+          {
+            text: 'Move Left One Col',
+            click: () => this.tableTask$.next('moveLeftOneCol')
+          },
+          {
+            text: 'Move Right One Col',
+            click: () => this.tableTask$.next('moveRightOneCol')
+          }
+        ]
+      },
+      {hr: true},
+      {
+        text: 'Delete Col',
+        click: () => this.tableTask$.next('removeCol')
+      },
+      {
+        text: 'Delete Row',
+        key: 'cmd+shift+backspace',
+        click: () => this.tableTask$.next('removeRow')
+      }
+    ])
+  }
   private toPoint() {
     try {
       const cur = this.searchRanges[this.search.currentIndex]

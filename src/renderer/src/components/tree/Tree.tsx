@@ -10,6 +10,7 @@ import {SpaceItem} from '../space/SpaceItem'
 import Folder from '../../icons/Folder'
 import {FullSearch} from '../FullSearch'
 import {TreeRender} from './TreeRender'
+import {openContextMenu} from './openContextMenu'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -144,11 +145,11 @@ export const Tree = observer(() => {
                 id={'tree-content'}
                 onDragOver={e => e.preventDefault()}
                 onDragLeave={action(e => {
-                  // treeStore.dragStatus = null
+                  treeStore.dragStatus = null
                 })}
                 onContextMenu={e => {
                   if (treeStore.treeTab === 'folder') {
-                    // treeStore.openMenus(e)
+                    openContextMenu(e, treeStore.root)
                   }
                 }}
               >

@@ -20,6 +20,7 @@ import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
+import {updateFilePath, updateNode} from '../editor/utils/updateNode'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -29,6 +30,10 @@ export class TreeStore {
   dragNode: IFileItem | null = null
   dropNode: IFileItem | ISpaceNode | null = null
   tabs: Tab[] = []
+  dragStatus: null | {
+    mode: 'enter' | 'top' | 'bottom'
+    dropNode: IFileItem,
+  } = null
   selectItem: IFileItem | null = null
   openQuickly = false
   searchKeyWord = ''
@@ -475,50 +480,43 @@ export class TreeStore {
       index: this.currentIndex
     })
   }
-
-  moveNode(to: IFileItem) {
-    if (this.dragNode && this.dragNode !== to && to.children!.every(c => c !== this.dropNode)) {
-      if (to.children?.some(c => {
-        return c.filename === this.dragNode!.filename && String(c.ext) === String(this.dragNode!.ext)
-      })) {
-        message$.next({
-          type: 'warning',
-          content: configStore.zh ? '文件名已存在' : 'filename already exists'
-        })
-        return
-      }
-      const fromPath = this.dragNode.filePath
-      const toPath = to.filePath!
+  async moveNode() {
+    if (this.dragNode && this.dragStatus && this.dragStatus.dropNode !== this.dragNode) {
+      if (!this.dragNode.parent) return
+      const {dropNode, mode} = this.dragStatus
+      if (!dropNode) return
       const dragNode = this.dragNode
-      this.dragNode.parent!.children = this.dragNode.parent!.children!.filter(c => c !== this.dragNode)
-      this.dropNode = null
-      const targetPath = join(toPath, basename(fromPath))
-      renameSync(fromPath, targetPath)
-      // Synchronize remote mapping
-      if (dragNode.folder || dragNode.ext === 'md') shareStore.renameFilePath(fromPath, targetPath)
-      to.children!.push(this.dragNode)
-      to.children = sortFiles(to.children!)
-
-      this.moveFile$.next({
-        from: fromPath,
-        to: targetPath
-      })
-
-      this.dragNode.filePath = targetPath
-      defineParent(this.dragNode, to)
-      if (this.dragNode.ext === 'md') {
-        removeFileRecord(fromPath, targetPath)
-        db.tagFile.where('filePath').equals(fromPath).modify({filePath: targetPath})
+      let targetList = dropNode.parent?.children!
+      let index = targetList.findIndex(l => l === dropNode)
+      this.dragNode = null
+      this.dragStatus = null
+      if (mode === 'top' && targetList[index - 1] === dragNode) return
+      if (mode === 'bottom' && targetList[index + 1] === dragNode) return
+      dragNode.parent!.children = dragNode.parent!.children!.filter(c => c !== dragNode)
+      if (dragNode.parent === dropNode.parent) {
+        targetList = targetList.filter(c => c !== dragNode)
+        index = targetList.findIndex(l => l === dropNode)
       }
-      if (this.dragNode.folder) {
-        renameAllFiles(this.dragNode.filePath, this.dragNode.children || [])
-        db.checkRenameFolder(fromPath, targetPath)
+      if (mode === 'bottom' || mode === 'top') {
+        targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
+        dropNode.parent!.children = targetList
+        if (dragNode.parent !== dropNode.parent) {
+          const newPath = join(dropNode.parent!.filePath, basename(dragNode.filePath))
+          await updateFilePath(dragNode, newPath)
+          defineParent(dragNode, dropNode.parent!)
+        }
+        targetList.map((n, i) => db.file.update(n.cid, {sort: i}))
       }
-      this.checkDepends(fromPath, targetPath)
-
-      if (this.dragNode === this.currentTab.current) {
-        this.recordTabs()
+      if (mode === 'enter' && dropNode.folder) {
+        dropNode.children!.unshift(dragNode)
+        const newPath = join(dropNode.filePath, basename(dragNode.filePath))
+        defineParent(dragNode, dropNode)
+        await updateFilePath(dragNode, newPath)
+        dropNode.children!.map((n, i) => db.file.update(n.cid, {sort: i}))
       }
+    } else {
+      this.dragNode = null
+      this.dragStatus = null
     }
   }
 

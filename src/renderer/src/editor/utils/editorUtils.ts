@@ -232,4 +232,12 @@ export class EditorUtils {
     }
     return end
   }
+  static findPath(editor: Editor, el: any) {
+    try {
+      return ReactEditor.findPath(editor, el)
+    } catch (e) {
+      console.error('find path error', e)
+      return Editor.start(editor, []).path
+    }
+  }
 }

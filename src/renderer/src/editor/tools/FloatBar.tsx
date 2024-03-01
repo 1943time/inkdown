@@ -284,7 +284,7 @@ export const FloatBar = observer(() => {
           <AutoComplete
             size={'small'} placeholder={'url, filepath or #hash'}
             value={state.url}
-            bordered={false}
+            variant={'borderless'}
             className={'w-full'}
             ref={inputRef}
             autoFocus={true}

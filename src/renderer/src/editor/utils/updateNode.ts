@@ -40,6 +40,7 @@ const renameFiles = (nodes: IFileItem[], dir: string) => {
 
 export const updateFilePath = async (node: IFileItem, targetPath: string) => {
   try {
+    if (node.filePath === targetPath) return
     renameSync(node.filePath, targetPath)
     const s = await stat(targetPath)
     runInAction(() => {

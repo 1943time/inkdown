@@ -1,16 +1,19 @@
-import { observer } from 'mobx-react-lite'
-import React, {useCallback, useEffect, useRef} from 'react'
-import { Tooltip } from 'antd'
-import { runInAction } from 'mobx'
+import {observer} from 'mobx-react-lite'
+import React, {useCallback, useEffect} from 'react'
+import {Tooltip} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {IFileItem} from '../../index'
-import {treeStore} from '../../store/tree'
 import {readdirSync} from 'fs'
 import {join} from 'path'
 import {configStore} from '../../store/config'
 import {updateFilePath} from '../utils/updateNode'
+import isHotkey from 'is-hotkey'
+import {ReactEditor} from 'slate-react'
+import {useEditorStore} from '../store'
+import {Editor, Transforms} from 'slate'
 
 export const Title = observer(({node} : {node: IFileItem}) => {
+  const store = useEditorStore()
   const [state, setState] = useLocalState({
     name: '',
     tip: false
@@ -62,6 +65,17 @@ export const Title = observer(({node} : {node: IFileItem}) => {
           onChange={e => {
             setState({name: e.target.value})
             detectRename()
+          }}
+          onKeyDown={e => {
+            e.preventDefault()
+            if (isHotkey('enter', e) || isHotkey('down', e)) {
+              try {
+                ReactEditor.focus(store.editor)
+                Transforms.select(store.editor, Editor.start(store.editor, []))
+              } catch (e) {
+                console.error(e)
+              }
+            }
           }}
           onBlur={save}
           placeholder={'Untitled'}

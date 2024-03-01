@@ -83,17 +83,17 @@ const Item = observer((
           const scrollTop = document.querySelector('#tree-content')?.scrollTop || 0
           const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
           const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
-          // if (mode === 'enter' && !item.folder && $tree.dragStatus) {
-          //   $tree.dragStatus = null
-          // } else {
-          //   const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
-          //   if ($tree.dragStatus?.dropNode !== item || $tree.dragStatus.mode !== mode) {
-          //     $tree.dragStatus = {
-          //       dropNode: item,
-          //       mode
-          //     }
-          //   }
-          // }
+          if (mode === 'enter' && !item.folder && treeStore.dragStatus) {
+            treeStore.dragStatus = null
+          } else {
+            const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
+            if (treeStore.dragStatus?.dropNode !== item || treeStore.dragStatus.mode !== mode) {
+              treeStore.dragStatus = {
+                dropNode: item,
+                mode
+              }
+            }
+          }
         })}
       >
         <div
@@ -107,7 +107,7 @@ const Item = observer((
            text-sm cursor-default select-none h-7 pr-2 group`}
             style={{paddingLeft: item.folder ? 6 : 21}}
             onDragEnd={() => {
-              // treeStore.moveNode()
+              treeStore.moveNode()
               el.current!.style.opacity = ''
             }}
             draggable={'true'}
@@ -133,9 +133,9 @@ const Item = observer((
               }
             })}
           >
-            {/*${item.folder && treeStore.dragNode !== item && treeStore.dragStatus?.dropNode === item && treeStore.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}*/}
             <div className={`
-            flex items-center h-full rounded pr-2
+            ${item.folder && treeStore.dragNode !== item && treeStore.dragStatus?.dropNode === item && treeStore.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
+            flex items-center h-full rounded pr-2 border
             `}>
               {item.folder &&
                 <div className={'w-4 h-full flex items-center justify-center'}>
@@ -149,11 +149,11 @@ const Item = observer((
                 data-entity={'true'}>
                 {item.folder ? <IFolder className={'w-4 h-4'}/> : <INote/>}
                 <div className={'truncate w-full ml-1'}>{item.filename || 'Untitled'}</div>
-                {/*{treeStore.dragStatus?.dropNode === item && $tree.dragNode !== item && $tree.dragStatus.mode !== 'enter' &&*/}
-                {/*  <div*/}
-                {/*    className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${$tree.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}*/}
-                {/*  />*/}
-                {/*}*/}
+                {treeStore.dragStatus?.dropNode === item && treeStore.dragNode !== item && treeStore.dragStatus.mode !== 'enter' &&
+                  <div
+                    className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${treeStore.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}
+                  />
+                }
               </div>
             </div>
           </div>

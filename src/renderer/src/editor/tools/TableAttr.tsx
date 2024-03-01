@@ -1,6 +1,5 @@
 import {ReactEditor, useSlate} from 'slate-react'
 import {Editor, NodeEntry, Path, Transforms} from 'slate'
-import {TableCellNode, TableNode, TableRowNode} from '../../el'
 import {useGetSetState} from 'react-use'
 import {Popover, Tooltip} from 'antd'
 import {
@@ -14,10 +13,11 @@ import React, {useCallback, useEffect, useRef} from 'react'
 import {getOffsetLeft} from '../utils/dom'
 import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
-import {treeStore} from '../../store/tree'
-import {MainApi} from '../../api/main'
 import isHotkey from 'is-hotkey'
-import IpcRendererEvent = Electron.IpcRendererEvent
+import {TableCellNode, TableNode, TableRowNode} from '../../el'
+import {treeStore} from '../../store/tree'
+import {EditorUtils} from '../utils/editorUtils'
+import {useSubject} from '../../hooks/subscribe'
 
 export const TableAttr = observer(() => {
   const store = useEditorStore()
@@ -53,11 +53,12 @@ export const TableAttr = observer(() => {
             rows: table[0].children.length,
             cols: table[0].children[0].children.length,
             top: top - 24, left,
-            width: dom.clientWidth
+            width: dom.clientWidth,
+            visible: true
           })
         }
-      } catch (e) {console.log('err', e)}
-    }, 30)
+      } catch (e) {}
+    }, 16)
   }, [])
 
   useEffect(() => {
@@ -70,7 +71,6 @@ export const TableAttr = observer(() => {
         tableRef.current = table
         resize()
       }
-      setState({visible: true})
     } else {
       tableCellRef.current = undefined
       tableRef.current = undefined
@@ -100,7 +100,7 @@ export const TableAttr = observer(() => {
         const row: TableRowNode = {
           type: 'table-row',
           children: Array.from(new Array(col)).map((_, j) => {
-            return {type: 'table-cell', children: [{text: ''}], align: heads[j]?.align} as TableCellNode
+            return {type: 'table-cell', children: [], align: heads[j]?.align} as TableCellNode
           })
         }
         Transforms.insertNodes(editor, row, {
@@ -121,7 +121,7 @@ export const TableAttr = observer(() => {
               editor,
               {
                 type: 'table-cell',
-                children: [{text: ''}],
+                children: [],
                 title: i === 0,
                 align: heads[j + state().cols]?.align
               } as TableCellNode,
@@ -161,7 +161,7 @@ export const TableAttr = observer(() => {
       table[0].children.forEach((el) => {
         el.children?.forEach((cell, i) => {
           if (i === index) {
-            Transforms.setNodes(editor, {align: type}, {at: ReactEditor.findPath(editor, cell)})
+            Transforms.setNodes(editor, {align: type}, {at: EditorUtils.findPath(editor, cell)})
           }
         })
       })
@@ -192,7 +192,7 @@ export const TableAttr = observer(() => {
       at: path
     })
     Transforms.select(editor, Editor.start(editor, path))
-  }, [editor])
+  }, [])
 
   const insertCol = useCallback((tablePath: Path, rows: number, index: number) => {
     Array.from(new Array(rows)).map((_, i) => {
@@ -203,7 +203,7 @@ export const TableAttr = observer(() => {
       })
     })
     Transforms.select(editor, [...tablePath, 0, index, 0])
-  }, [editor])
+  }, [])
 
   const removeRow = useCallback((path: Path, index: number, columns: number) => {
     if (Path.hasPrevious(path)) {
@@ -223,116 +223,112 @@ export const TableAttr = observer(() => {
     }
   }, [editor])
 
+  const task = useCallback((task: string) => {
+    if (!tableCellRef.current || !tableRef.current) return
+    const columns = tableRef.current[0].children[0].children.length
+    const rows = tableRef.current[0].children.length
+    const path = tableCellRef.current[1]
+    const index = path[path.length - 1]
+    const row = path[path.length - 2]
+    const rowPath = Path.parent(path)
+    store.doManual()
+    switch (task) {
+      case 'insertRowBefore':
+        insertRow(row === 0 ? Path.next(Path.parent(path)) : Path.parent(path), columns)
+        break
+      case 'insertRowAfter':
+        insertRow(Path.next(Path.parent(path)), columns)
+        break
+      case 'insertColBefore':
+        insertCol(tableRef.current[1], rows, index)
+        break
+      case 'insertColAfter':
+        insertCol(tableRef.current[1], rows, index + 1)
+        break
+      case 'insertTableCellBreak':
+        Transforms.insertNodes(editor, [{type: 'break', children: [{text: ''}]}, {text: ''}], {select: true})
+        break
+      case 'moveUpOneRow':
+        if (row > 1) {
+          Transforms.moveNodes(editor, {
+            at: rowPath,
+            to: Path.previous(rowPath)
+          })
+        } else {
+          Transforms.moveNodes(editor, {
+            at: rowPath,
+            to: [...tableRef.current[1], rows - 1]
+          })
+        }
+        break
+      case 'moveDownOneRow':
+        if (row < rows - 1) {
+          Transforms.moveNodes(editor, {
+            at: rowPath,
+            to: Path.next(rowPath)
+          })
+        } else {
+          Transforms.moveNodes(editor, {
+            at: rowPath,
+            to: [...tableRef.current[1], 1]
+          })
+        }
+        break
+      case 'moveLeftOneCol':
+        Array.from(new Array(rows)).map((_, i) => {
+          Transforms.moveNodes(editor, {
+            at: [...tableRef.current![1], i, index],
+            to: [...tableRef.current![1], i, index > 0 ? index - 1 : columns - 1]
+          })
+        })
+        break
+      case 'moveRightOneCol':
+        Array.from(new Array(rows)).map((_, i) => {
+          Transforms.moveNodes(editor, {
+            at: [...tableRef.current![1], i, index],
+            to: [...tableRef.current![1], i, index === columns - 1 ? 0 : index + 1]
+          })
+        })
+        break
+      case 'removeCol':
+        if (columns < 2) {
+          remove()
+          return
+        }
+        if (index < columns - 1) {
+          Transforms.select(editor, Editor.start(editor, [...tableRef.current[1], row, index + 1]))
+        } else {
+          Transforms.select(editor, Editor.start(editor, [...tableRef.current[1], row, index - 1]))
+        }
+        Array.from(new Array(rows)).map((_, i) => {
+          Transforms.delete(editor, {
+            at: [...tableRef.current![1], rows - i - 1, index]
+          })
+        })
+        break
+      case 'removeRow':
+        if (rows < 2) {
+          remove()
+        } else {
+          removeRow(Path.parent(path), index, columns)
+        }
+        break
+    }
+    ReactEditor.focus(editor)
+  },[])
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (isHotkey('mod+shift+backspace', e)) {
-        if (!tableCellRef.current || !tableRef.current) return
         e.preventDefault()
-        task(null, 'removeRow')
+        task('removeRow')
       }
     }
-
     window.addEventListener('keydown', keydown)
-    const task = (e: IpcRendererEvent | null, task: string) => {
-      if (!tableCellRef.current || !tableRef.current) return
-      const columns = tableRef.current[0].children[0].children.length
-      const rows = tableRef.current[0].children.length
-      const path = tableCellRef.current[1]
-      const index = path[path.length - 1]
-      const row = path[path.length - 2]
-      const rowPath = Path.parent(path)
-      store.doManual()
-      switch (task) {
-        case 'insertRowBefore':
-          insertRow(row === 0 ? Path.next(Path.parent(path)) : Path.parent(path), columns)
-          break
-        case 'insertRowAfter':
-          insertRow(Path.next(Path.parent(path)), columns)
-          break
-        case 'insertColBefore':
-          insertCol(tableRef.current[1], rows, index)
-          break
-        case 'insertColAfter':
-          insertCol(tableRef.current[1], rows, index + 1)
-          break
-        case 'insertTableCellBreak':
-          Transforms.insertNodes(editor, [{type: 'break', children: [{text: ''}]}, {text: ''}], {select: true})
-          break
-        case 'moveUpOneRow':
-          if (row > 1) {
-            Transforms.moveNodes(editor, {
-              at: rowPath,
-              to: Path.previous(rowPath)
-            })
-          } else {
-            Transforms.moveNodes(editor, {
-              at: rowPath,
-              to: [...tableRef.current[1], rows - 1]
-            })
-          }
-          break
-        case 'moveDownOneRow':
-          if (row < rows - 1) {
-            Transforms.moveNodes(editor, {
-              at: rowPath,
-              to: Path.next(rowPath)
-            })
-          } else {
-            Transforms.moveNodes(editor, {
-              at: rowPath,
-              to: [...tableRef.current[1], 1]
-            })
-          }
-          break
-        case 'moveLeftOneCol':
-          Array.from(new Array(rows)).map((_, i) => {
-            Transforms.moveNodes(editor, {
-              at: [...tableRef.current![1], i, index],
-              to: [...tableRef.current![1], i, index > 0 ? index - 1 : columns - 1]
-            })
-          })
-          break
-        case 'moveRightOneCol':
-          Array.from(new Array(rows)).map((_, i) => {
-            Transforms.moveNodes(editor, {
-              at: [...tableRef.current![1], i, index],
-              to: [...tableRef.current![1], i, index === columns - 1 ? 0 : index + 1]
-            })
-          })
-          break
-        case 'removeCol':
-          if (columns < 2) {
-            remove()
-            return
-          }
-          if (index < columns - 1) {
-            Transforms.select(editor, Editor.start(editor, [...tableRef.current[1], row, index + 1]))
-          } else {
-            Transforms.select(editor, Editor.start(editor, [...tableRef.current[1], row, index - 1]))
-          }
-          Array.from(new Array(rows)).map((_, i) => {
-            Transforms.delete(editor, {
-              at: [...tableRef.current![1], rows - i - 1, index]
-            })
-          })
-          break
-        case 'removeRow':
-          if (rows < 2) {
-            remove()
-          } else {
-            removeRow(Path.parent(path), index, columns)
-          }
-          break
-      }
-      ReactEditor.focus(editor)
-    }
-    // @ts-ignore
-    window.electron.ipcRenderer.on('table-task', task)
     return () => {
-      window.electron.ipcRenderer.removeListener('table-task', task)
       window.removeEventListener('keydown', keydown)
     }
   }, [])
+  useSubject(store.tableTask$, task)
   return (
     <div
       style={{
@@ -340,10 +336,8 @@ export const TableAttr = observer(() => {
         top: state().top,
         width: state().width
       }}
-      onMouseDown={e => {
-        e.preventDefault()
-      }}
-      className={`${state().visible ? '' : 'hidden'} dark:bg-zinc-900/70 bg-white/70 border-t border-l border-r border-gray-100 dark:border-gray-100/10
+      onMouseDown={e => e.preventDefault()}
+      className={`${state().visible ? '' : 'hidden'} dark:bg-black/90 bg-white/90 backdrop-blur border-t border-l border-r border-gray-200 dark:border-gray-100/20
         text-sm absolute z-10 items-center flex justify-between dark:text-gray-300 text-gray-500 h-[24px] w-full px-2 rounded-tr rounded-tl select-none
       `}
     >
@@ -389,11 +383,9 @@ export const TableAttr = observer(() => {
             </div>
           )}
           trigger="click">
-          <Tooltip placement={'top'} title={'Scale ranks'} mouseEnterDelay={.5}>
-            <div className={'t-handle'}>
-              <AppstoreAddOutlined/>
-            </div>
-          </Tooltip>
+          <div className={'t-handle'}>
+            <AppstoreAddOutlined/>
+          </div>
         </Popover>
         <Tooltip placement={'top'} title={'align left'} mouseEnterDelay={.5}>
           <div
@@ -420,7 +412,9 @@ export const TableAttr = observer(() => {
           </div>
         </Tooltip>
         <div
-          onClick={() => MainApi.tableMenu(isHead())}
+          onClick={(e) => {
+            store.openTableMenus(e, isHead())
+          }}
           className={`t-handle`}
         >
           <EllipsisOutlined/>

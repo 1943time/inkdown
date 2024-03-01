@@ -22,15 +22,15 @@ export const Set = observer(() => {
   })
 
   useEffect(() => {
-    if (configStore.visible) {
-      for (let t of treeStore.tabs) {
-        try {
-          ReactEditor.blur(t.store.editor)
-        } catch (e) {
-          console.error(e)
-        }
-      }
-    }
+    // if (configStore.visible) {
+    //   for (let t of treeStore.tabs) {
+    //     try {
+    //       ReactEditor.blur(t.store.editor)
+    //     } catch (e) {
+    //       console.error(e)
+    //     }
+    //   }
+    // }
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
