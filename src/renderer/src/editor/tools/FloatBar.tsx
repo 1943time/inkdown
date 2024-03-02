@@ -213,10 +213,6 @@ export const FloatBar = observer(() => {
   }, [])
 
   useEffect(() => {
-    if (!configStore.config.showFloatBar) {
-      if (state.open) setState({open: false})
-      return
-    }
     if (state.link && store.domRect) return
     if (store.domRect) {
       resize(true)
@@ -421,13 +417,8 @@ export const FloatBar = observer(() => {
                 className={'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'}
                 onClick={() => {
                   EditorUtils.highColor(store.editor)
-                  if (configStore.config.showFloatBar) {
-                    setState({openSelectColor: false})
-                    resize()
-                  } else {
-                    store.highlightCache.delete(el.current?.[0])
-                    setState({openSelectColor: false, open: false})
-                  }
+                  setState({openSelectColor: false})
+                  resize()
                 }}
               >
                 /
@@ -440,12 +431,8 @@ export const FloatBar = observer(() => {
                   onClick={() => {
                     localStorage.setItem('high-color', c.color)
                     EditorUtils.highColor(store.editor, c.color)
-                    if (configStore.config.showFloatBar) {
-                      setState({openSelectColor: false})
-                      resize()
-                    } else {
-                      setState({openSelectColor: false, open: false})
-                    }
+                    setState({openSelectColor: false})
+                    resize()
                   }}
                 />
               )}

@@ -9,6 +9,7 @@ import {treeStore} from '../../store/tree'
 import {IFileItem} from '../../index'
 import {openContextMenu} from './openContextMenu'
 import {Icon} from '@iconify/react'
+import {configStore} from '../../store/config'
 
 const getClass = (c: IFileItem) => {
   if (treeStore.selectItem === c) return 'dark:bg-indigo-500/15 bg-indigo-500/15'
@@ -195,7 +196,7 @@ const Item = observer((
 const RenderItem = observer(({items, level}: { items: IFileItem[], level: number }) => {
   return (
     <>
-      {items.map(c =>
+      {items.filter(c => configStore.config.showHiddenFiles || !c.hidden).map(c =>
         <Item
           key={c.cid}
           item={c}

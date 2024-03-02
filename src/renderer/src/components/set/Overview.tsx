@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {configStore} from '../../store/config'
-import {Button, Checkbox, Input, Modal, Radio, Slider, Space} from 'antd'
+import {Button, Checkbox, Input, Modal, Radio, Select, Slider, Space} from 'antd'
 import {LinkOutlined} from '@ant-design/icons'
 import {message$} from '../../utils'
 import {treeStore} from '../../store/tree'
@@ -51,19 +51,22 @@ export const Overview = observer(() => {
           {'Language'}
         </div>
         <div>
-          <Radio.Group
+          <Select
             value={configStore.config.locale}
+            className={'w-36'}
+            options={[
+              {label: 'English', value: 'en'},
+              {label: '简体中文', value: 'zh'}
+            ]}
             onChange={e => {
-              configStore.setConfig('locale', e.target.value)
+              configStore.setConfig('locale', e)
               modal.info({
                 title: configStore.zh ? '提示' : 'Note',
                 content: configStore.zh ? '语言切换将在应用重启后完全生效。' : 'The language switch will take full effect after the application restarts.'
               })
             }}
           >
-            <Radio.Button value={'en'}>{'English'}</Radio.Button>
-            <Radio.Button value={'zh'}>{'简体中文'}</Radio.Button>
-          </Radio.Group>
+          </Select>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
@@ -90,19 +93,6 @@ export const Overview = observer(() => {
         </div>
       </div>
       <InterfaceFont/>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '文件变更检测' : 'File change detection'}</span>
-          <TextHelp text={
-            configStore.zh ? '当编辑器失去焦点，如果其他程序改变了markdown文件，编辑器会自动更新该文档' :
-              'When the editor loses focus, if other programs change the markdown file, the editor will automatically update the document'
-          }/>
-        </div>
-        <div>
-          <Checkbox checked={configStore.config.fileWatcher}
-                    onChange={e => configStore.setConfig('fileWatcher', e.target.checked)}/>
-        </div>
-      </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
           {configStore.zh ? '显示隐藏文件' : 'Show hidden files'}
@@ -226,23 +216,6 @@ export const Overview = observer(() => {
               configStore.setConfig('leadingWidth', e)
             }}
           />
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          {configStore.zh ? '大纲提取级别' : 'Outline extraction level'}
-        </div>
-        <div>
-          <Radio.Group
-            value={configStore.config.leadingLevel}
-            onChange={e => {
-              configStore.setConfig('leadingLevel', e.target.value)
-            }}
-          >
-            <Radio value={2}>{'Level 2'}</Radio>
-            <Radio value={3}>{'Level 3'}</Radio>
-            <Radio value={4}>{'Level 4'}</Radio>
-          </Radio.Group>
         </div>
       </div>
     </div>

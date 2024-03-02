@@ -3,12 +3,9 @@ import {CloseOutlined} from '@ant-design/icons'
 import {configStore} from '../../store/config'
 import {useCallback, useEffect} from 'react'
 import {action} from 'mobx'
-import {treeStore} from '../../store/tree'
-import {ReactEditor} from 'slate-react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {Overview} from './Overview'
 import {SetEditor} from './Editor'
-import {ImageBed} from './ImageBed'
 
 export const Set = observer(() => {
   const close = useCallback(action(() => {
@@ -17,20 +14,11 @@ export const Set = observer(() => {
 
   const [state, setState] = useLocalState({
     imagesFolder: '',
-    tab: 'Overview' as 'Overview' | 'Editor' | 'ImageBed',
+    tab: 'Overview' as 'Overview' | 'Editor',
     version: ''
   })
 
   useEffect(() => {
-    // if (configStore.visible) {
-    //   for (let t of treeStore.tabs) {
-    //     try {
-    //       ReactEditor.blur(t.store.editor)
-    //     } catch (e) {
-    //       console.error(e)
-    //     }
-    //   }
-    // }
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
@@ -79,11 +67,6 @@ export const Set = observer(() => {
                   className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
                   Editor
                 </div>
-                <div
-                  onClick={() => setState({tab: 'ImageBed'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'ImageBed' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
-                  ImageBed
-                </div>
               </div>
             </div>
             <div className={'flex-1 dark:bg-zinc-900 bg-white'}>
@@ -98,9 +81,6 @@ export const Set = observer(() => {
               }
               {state.tab === 'Editor' &&
                 <SetEditor/>
-              }
-              {state.tab === 'ImageBed' &&
-                <ImageBed/>
               }
             </div>
           </div>

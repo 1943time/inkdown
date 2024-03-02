@@ -18,7 +18,6 @@ export class Watcher {
   ) {
     // this.onChange = this.onChange.bind(this)
     // window.electron.ipcRenderer.on('window-blur', () => {
-    //   if (configStore.config.fileWatcher) {
     //     setTimeout(() => {
     //       if (this.store.root?.filePath) {
     //         window.api.watch(this.store.root.filePath, this.onChange)
@@ -29,7 +28,6 @@ export class Watcher {
     //         }
     //       }
     //     }, 100)
-    //   }
     // })
     // window.electron.ipcRenderer.on('window-focus', async () => {
     //   if (this.store.root?.filePath) {

@@ -100,7 +100,6 @@ export const registerApi = () => {
       codeTabSize: config.codeTabSize || 4,
       codeTheme: config.codeTheme || 'one-dark-pro',
       editorTextSize: config.editorTextSize || 16,
-      leadingLevel: config.leadingLevel || 4,
       leadingWidth: config.leadingWidth || 220,
       showCharactersCount: getBoolean(config.showCharactersCount, true),
       mas: getBoolean(process.mas, false),
@@ -108,16 +107,14 @@ export const registerApi = () => {
       autoRebuild: getBoolean(config.autoRebuild, true),
       locale: getLocale(),
       renameFileWhenSaving: !!config.renameFileWhenSaving,
-      showFloatBar: getBoolean(config.showFloatBar, true),
       showRemoveFileDialog: getBoolean(config.showRemoveFileDialog, true),
-      fileWatcher: getBoolean(config.fileWatcher, true),
       relativePathForImageStore: getBoolean(config.relativePathForImageStore, false),
       showHiddenFiles: getBoolean(config.showHiddenFiles, false),
       editorLineHeight: config.editorLineHeight || 'default',
       interfaceFont: config.interfaceFont || 'System',
       editorFont: config.editorFont || 'System',
       isLinux: process.platform === 'linux',
-      detectionMarkdown: getBoolean(config.detectionMarkdown, false)
+      turnOnImageBed: getBoolean(config.turnOnImageBed, false)
     }
   })
 

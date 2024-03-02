@@ -5,7 +5,7 @@ import {GetFields, IFileItem} from '../index'
 import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {Subject} from 'rxjs'
-import {existsSync, mkdirSync, writeFileSync} from 'fs'
+import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'fs'
 import {isAbsolute, join, parse, relative, sep} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
@@ -341,7 +341,7 @@ export class EditorStore {
     this.insertInlineNode(path)
   }
 
-  insertFiles(files: string[]) {
+  async insertFiles(files: string[]) {
     const [cur] = Editor.nodes<any>(this.editor, {
       match: n => Element.isElement(n),
       mode: 'lowest'
@@ -360,9 +360,22 @@ export class EditorStore {
     if (cur[0].type === 'paragraph' && !Node.string(cur[0])) {
       Transforms.delete(this.editor, {at: path})
     }
-    Transforms.insertNodes(this.editor, files.map(p => {
-      return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
-    }), {at: path, select: true})
+    if (imageBed.route) {
+      const urls = await imageBed.uploadFile(files.map(f => {
+        const p = parse(f)
+        const name = nid() + p.ext
+        return {data: readFileSync(f).buffer, name}
+      }))
+      if (urls) {
+        Transforms.insertNodes(this.editor, urls.map(p => {
+          return {type: 'paragraph', children: [{type: 'media', url: p.imgUrl, children: [{text: ''}]}]}
+        }), {at: path, select: true})
+      }
+    } else {
+      Transforms.insertNodes(this.editor, files.map(p => {
+        return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
+      }), {at: path, select: true})
+    }
   }
 
   insertInlineNode(filePath: string) {

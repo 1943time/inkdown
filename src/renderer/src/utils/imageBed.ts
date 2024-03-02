@@ -1,13 +1,13 @@
 import {message$} from './index'
 import ky from 'ky'
+import {configStore} from '../store/config'
 
 class ImageBed {
   route = ''
-  constructor() {
-    this.initial()
-  }
   initial() {
-    this.route = localStorage.getItem('pick-route') || ''
+    if (configStore.config.turnOnImageBed) {
+      this.route = localStorage.getItem('pick-route') || ''
+    }
   }
   async uploadFile(files: {name: string, data: ArrayBuffer}[]) {
     message$.next({

@@ -1,14 +1,26 @@
 import {observer} from 'mobx-react-lite'
 import {configStore} from '../../store/config'
-import {Checkbox, Radio, Select, Slider} from 'antd'
+import {Button, Checkbox, Input, Radio, Select, Slider, Space} from 'antd'
 import {treeStore} from '../../store/tree'
 import {clearAllCodeCache} from '../../editor/plugins/useHighlight'
 import {TextHelp} from './Help'
 import {EditorFont} from './Font'
 import {runInAction} from 'mobx'
 import {codeThemes, highlighter} from '../../editor/utils/highlight'
+import {useEffect} from 'react'
+import {useLocalState} from '../../hooks/useLocalState'
+import {message$} from '../../utils'
+import {imageBed} from '../../utils/imageBed'
 
 export const SetEditor = observer(() => {
+  const [state, setState] = useLocalState({
+    imgBedRoute: ''
+  })
+  useEffect(() => {
+    setState({
+      imgBedRoute: localStorage.getItem('pick-route') || ''
+    })
+  }, [])
   return (
     <div
       className={'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'}>
@@ -37,20 +49,6 @@ export const SetEditor = observer(() => {
         <div>
           <Checkbox checked={configStore.config.autoDownload}
                     onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-                      <span
-                        className={'mr-1'}>{configStore.zh ? '失焦检测Markdown' : 'Out of focus detection Markdown'}</span>
-          <TextHelp text={
-            configStore.zh ? '当光标离开当前段落，自动检测未被转换的markdown文字格式并转换' :
-              'When the cursor leaves the current paragraph, automatically detect unconverted markdown text formats and convert them'
-          }/>
-        </div>
-        <div>
-          <Checkbox checked={configStore.config.detectionMarkdown}
-                    onChange={e => configStore.setConfig('detectionMarkdown', e.target.checked)}/>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
@@ -145,26 +143,77 @@ export const SetEditor = observer(() => {
           />
         </div>
       </div>
+      <div className={'py-3'}>
+        <div className={'flex justify-between items-center'}>
+          <div className={'text-sm'}>
+            {configStore.zh ? '图床工具' : 'Image bed tool'}
+          </div>
+          <div>
+            <Checkbox
+              checked={configStore.config.turnOnImageBed}
+              onChange={e => {
+                configStore.setConfig('turnOnImageBed', e.target.checked)
+                if (!e.target.checked) {
+                  setState({imgBedRoute: ''})
+                  localStorage.removeItem('pick-route')
+                  imageBed.route = ''
+                }
+              }}>
+              </Checkbox>
+          </div>
+        </div>
+        {configStore.config.turnOnImageBed &&
+          <div className={'flex items-center mt-3 text-sm'}>
+            <div>
+              <span className={'mr-1'}>
+                PickGo(PicList)
+              </span>
+              <TextHelp text={(
+                <>
+                  <span>An image upload and manage tool</span>
+                  <a className={'link mx-1'} href={'https://github.com/Kuingsmile/PicList'} target={'_blank'}>Details.</a>
+                  <span>When enabled, adding images will automatically upload and use the network address.</span>
+                </>
+              )}/>
+            </div>
+            <Space.Compact className={'flex-1 ml-4'}>
+              <Input
+                value={state.imgBedRoute}
+                onChange={e => {
+                  setState({imgBedRoute: e.target.value})
+                }}
+                placeholder={'Upload Route: http://127.0.0.1:36677/upload?key=[optional]'}
+              />
+              <Button
+                onClick={() => {
+                  if (!state.imgBedRoute || !/^https?:\/\//i.test(state.imgBedRoute)) {
+                    message$.next({
+                      type: 'warning',
+                      content: configStore.zh ? '请输入正确http地址' : 'Please enter the correct HTTP address'
+                    })
+                  } else {
+                    localStorage.setItem('pick-route', state.imgBedRoute)
+                    message$.next({
+                      type: 'success',
+                      content: configStore.zh ? '保存成功' : 'Successfully saved'
+                    })
+                    imageBed.initial()
+                  }
+                }}
+              >
+                {configStore.zh ? '保存' : 'Save'}
+              </Button>
+            </Space.Compact>
+          </div>
+        }
+      </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
+      <div className={'text-sm'}>
           {configStore.zh ? '拼写检查' : 'Spell check'}
         </div>
         <div>
           <Checkbox checked={configStore.config.spellCheck}
                     onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '显示浮动栏' : 'Show floating bar'}</span>
-          <TextHelp text={
-            configStore.zh ? '选中文字不再显示浮动栏，仍然可以可以使用"格式"菜单中的快捷键操作文字格式，或使用Markdown语法转换' :
-              'Selecting text will no longer display a floating bar, and you can still use the shortcut keys in the "Format" menu to manipulate text formatting or use Markdown syntax conversion'
-          }/>
-        </div>
-        <div>
-          <Checkbox checked={configStore.config.showFloatBar}
-                    onChange={e => configStore.setConfig('showFloatBar', e.target.checked)}/>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>

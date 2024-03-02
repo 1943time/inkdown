@@ -12,7 +12,6 @@ const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   const currentType = useRef('')
-  const curText = useRef<NodeEntry>()
   return useMemo(() => {
     return (value: any, operations: BaseOperation[]) => {
       const sel = editor.selection
@@ -28,44 +27,6 @@ export function useOnchange(editor: Editor, store: EditorStore) {
 
       runInAction(() => store.sel = sel)
       if (!node) return
-      if (configStore.config.detectionMarkdown) {
-        const [text] = Editor.nodes(editor, {
-          match: n => Text.isText(n),
-          mode: 'lowest'
-        })
-
-        if (operations?.length === 1 && operations[0].type === 'set_selection' && text && curText.current && !Path.equals(text[1], curText.current[1]) && !EditorUtils.isDirtLeaf(curText.current[0])) {
-          const text = Node.string(curText.current[0])
-          const node = curText.current
-          if (text) {
-            parserMdToSchema([text]).then(res => {
-              try {
-                if (!Editor.hasPath(editor, node[1])) return
-                const [el] = Editor.nodes<Element>(editor, {
-                  match: n => Element.isElement(n),
-                  mode: 'lowest',
-                  at: node[1]
-                })
-                if (el && ['paragraph', 'table-cell'].includes(el[0].type)) {
-                  const frame = res[0]?.[0]?.children || []
-                  if (frame.length > 1 || (frame.length === 1 && (EditorUtils.isDirtLeaf(frame[0]) || frame[0].type))) {
-                    Transforms.insertFragment(editor, frame, {
-                      at: {
-                        anchor: {path: node[1], offset: 0},
-                        focus: {path: node[1], offset: text.length}
-                      }
-                    })
-                  }
-                }
-              } catch (e) {
-                console.error('detection markdown', e)
-              }
-            })
-          }
-        }
-        if (text && ['paragraph', 'table-cell'].includes(node[0].type)) curText.current = text
-      }
-
       setTimeout(() => {
         selChange$.next({
           sel, node

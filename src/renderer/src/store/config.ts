@@ -4,6 +4,7 @@ import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
 import {shareStore} from '../server/store'
 import {codeReady} from '../editor/utils/highlight'
+import {imageBed} from '../utils/imageBed'
 
 class ConfigStore {
   visible = false
@@ -21,7 +22,6 @@ class ConfigStore {
     codeTabSize: 4,
     editorTextSize: 16,
     codeTheme: 'one-dark-pro',
-    leadingLevel: 4,
     mas: false,
     showCharactersCount: true,
     imagesFolder: '.images',
@@ -30,17 +30,15 @@ class ConfigStore {
     editorWidth: 720,
     autoRebuild: true,
     renameFileWhenSaving: false,
-    showFloatBar: true,
     showRemoveFileDialog: true,
-    fileWatcher: true,
     relativePathForImageStore: false,
     showHiddenFiles: false,
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
     interfaceFont: 'System',
     editorFont: 'System',
     isLinux: false,
-    detectionMarkdown: false,
-    codeBackground: ''
+    codeBackground: '',
+    turnOnImageBed: false
   }
   timer = 0
   homePath = ''
@@ -135,6 +133,9 @@ class ConfigStore {
   }
   async initial() {
     return new Promise(resolve => {
+      if (localStorage.getItem('pick-route')) {
+        this.setConfig('turnOnImageBed', true)
+      }
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
         if (res.dark) document.documentElement.classList.add('dark')
         this.config = {
@@ -147,6 +148,7 @@ class ConfigStore {
             theme: 'dark'
           })
         }
+        imageBed.initial()
         document.body.classList.add('font-' + this.config.interfaceFont)
         MainApi.getPath('home').then(res => {
           this.homePath = res

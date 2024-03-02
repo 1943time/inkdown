@@ -37,7 +37,7 @@ export const Heading = observer(({note}: {
       if (schema?.length) {
         const headings: Leading[] = []
         for (let s of schema) {
-          if (s.type === 'head' && s.level > 1 && s.level <= configStore.config.leadingLevel) {
+          if (s.type === 'head' && s.level > 1 && s.level <= 4) {
             if (cache.get(s)) {
               headings.push(cache.get(s)!)
               continue
@@ -68,7 +68,7 @@ export const Heading = observer(({note}: {
     }
   }, [note])
 
-  useDebounce(getHeading, 100, [note, note?.refresh, configStore.config.leadingLevel])
+  useDebounce(getHeading, 100, [note, note?.refresh])
 
   useEffect(() => {
     const div = box.current
