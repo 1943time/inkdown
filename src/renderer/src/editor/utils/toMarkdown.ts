@@ -3,7 +3,7 @@ import {TableNode} from '../../el'
 import stringWidth from 'string-width'
 import {mediaType} from '../utils/dom'
 const space = '  '
-const inlineNode = new Set(['media', 'inline-katex', 'break'])
+const inlineNode = new Set(['inline-katex', 'break'])
 export const isMix = (t: Text) => {
   return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
 }
