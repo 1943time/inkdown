@@ -10,7 +10,7 @@ import {isAbsolute, join, parse, relative, sep} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
-import {clearCodeCache} from './plugins/useHighlight'
+import {clearAllCodeCache, clearCodeCache} from './plugins/useHighlight'
 import {withMarkdown} from './plugins'
 import {withHistory} from 'slate-history'
 import {configStore} from '../store/config'
@@ -19,6 +19,7 @@ import {withErrorReporting} from './plugins/catchError'
 import {imageBed} from '../utils/imageBed'
 import {nid} from '../utils'
 import {openMenus} from '../components/Menu'
+import {EditorUtils} from './utils/editorUtils'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -502,11 +503,7 @@ export class EditorStore {
     return [path, node] as [Path, Node]
   }
 
-  private isListItem(el: HTMLElement) {
-    return el.dataset.be === 'list-item'
-  }
-
-  dragStart(e: React.DragEvent, type?: string) {
+  dragStart(e: React.DragEvent) {
     e.stopPropagation()
     this.readonly = true
     type MovePoint = {
@@ -515,25 +512,29 @@ export class EditorStore {
       top: number
       left: number
     }
-    const ableToEnter = type === 'list-item' ? new Set(['list-item']) : this.ableToEnter
+    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item']) : this.ableToEnter
     let mark: null | HTMLDivElement = null
     const els = document.querySelectorAll<HTMLDivElement>('[data-be]')
     const points: MovePoint[] = []
     for (let el of els) {
       if (!ableToEnter.has(el.dataset.be!)) continue
+      const pre = el.previousSibling as HTMLElement
+      if (el.dataset.be === 'paragraph' && this.dragEl?.dataset.be === 'list-item' && (!pre || pre.classList.contains('check-item'))) {
+        continue
+      }
+      if (!el.previousSibling && el.parentElement?.classList.contains('edit-area')) continue
+      if (el === this.dragEl) continue
       const top = getOffsetTop(el, this.container!)
       const left = getOffsetLeft(el, this.container!)
-      if (!el.previousSibling && el.parentElement?.dataset.be !== 'list-item') {
-        points.push({
-          el: el,
-          direction: 'top',
-          left: left,
-          top: top - 2
-        })
-      }
       points.push({
         el: el,
-        left: this.isListItem(el) ? left - 20 : left,
+        direction: 'top',
+        left: el.dataset.be === 'list-item' ? left - 16 : left,
+        top: top - 2
+      })
+      points.push({
+        el: el,
+        left: el.dataset.be === 'list-item' ? left - 16 : left,
         direction: 'bottom',
         top: top + el.clientHeight + 2
       })
@@ -554,7 +555,7 @@ export class EditorStore {
       }
       if (cur) {
         last = cur
-        const width = this.isListItem(last.el) ? last.el.clientWidth + 20 + 'px' : last.el.clientWidth + 'px'
+        const width = last.el.dataset.be === 'list-item' ? last.el.clientWidth + 20 + 'px' : last.el.clientWidth + 'px'
         if (!mark) {
           mark = document.createElement('div')
           mark.classList.add('move-mark')
@@ -574,17 +575,11 @@ export class EditorStore {
       if (mark) this.container!.removeChild(mark)
       if (last && this.dragEl) {
         let [dragPath, dragNode] = this.toPath(this.dragEl)
-        const [targetPath] = this.toPath(last.el)
+        let [targetPath] = this.toPath(last.el)
         let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
         if (!Path.equals(targetPath, dragPath)) {
           const parent = Node.parent(this.editor, dragPath)
-          if (dragNode.type === 'code') {
-            const codes = Array.from(Editor.nodes(this.editor, {
-              match: n => Element.isElement(n) && n.type === 'code',
-              at: []
-            }))
-            codes.map(c => clearCodeCache(c[0]))
-          }
+          if (dragNode.type === 'code') clearAllCodeCache(this.editor)
           if (dragNode.type === 'table') {
             setTimeout(action(() => {
               treeStore.size = JSON.parse(JSON.stringify(treeStore.size))
@@ -593,16 +588,43 @@ export class EditorStore {
           if (Path.equals(Path.parent(targetPath), Path.parent(dragPath)) && Path.compare(dragPath, targetPath) === -1) {
             toPath = Path.previous(toPath)
           }
-          Transforms.moveNodes(this.editor, {
-            at: dragPath,
-            to: toPath
-          })
+          let delPath = Path.parent(dragPath)
+          const targetNode = Node.get(this.editor, targetPath)
+          if (dragNode.type === 'list-item') {
+            if (targetNode.type !== 'list-item') {
+              Transforms.delete(this.editor, {at: dragPath})
+              Transforms.insertNodes(this.editor, {
+                ...parent,
+                children: [EditorUtils.copy(dragNode)]
+              }, {at: toPath, select: true})
+              if (parent.children?.length === 1) {
+                if (EditorUtils.isNextPath(Path.parent(dragPath), targetPath)) {
+                  delPath = Path.next(Path.parent(dragPath))
+                } else {
+                  delPath = Path.parent(dragPath)
+                }
+              }
+            } else {
+              Transforms.moveNodes(this.editor, {
+                at: dragPath,
+                to: toPath
+              })
+            }
+          } else {
+            Transforms.moveNodes(this.editor, {
+              at: dragPath,
+              to: toPath
+            })
+          }
           if (parent.children?.length === 1) {
-            Transforms.delete(this.editor, {at: Path.parent(dragPath)})
+            if (Path.equals(Path.parent(toPath), Path.parent(delPath)) && Path.compare(toPath, delPath) !== 1) {
+              delPath = Path.next(delPath)
+            }
+            Transforms.delete(this.editor, {at: delPath})
           }
         }
+        if (dragNode?.type !== 'media') this.dragEl!.draggable = false
       }
-      this.dragEl!.draggable = false
       this.dragEl = null
     }), {once: true})
   }

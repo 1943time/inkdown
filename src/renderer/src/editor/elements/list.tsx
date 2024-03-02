@@ -32,7 +32,7 @@ export const ListItem = observer(({element, children, attributes}: ElementProps<
     <li
       className={`m-list-item ${isTask ? 'task' : ''}`}
       data-be={'list-item'}
-      onDragStart={e => store.dragStart(e, 'list-item')}
+      onDragStart={e => store.dragStart(e)}
       {...attributes}>
       {isTask &&
         <span contentEditable={false} className={'check-item'}>

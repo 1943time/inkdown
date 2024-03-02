@@ -22,6 +22,14 @@ export class EditorUtils {
       console.error(e)
     }
   }
+
+  static isPrevious(firstPath: Path, nextPath: Path) {
+    return (Path.equals(Path.parent(firstPath), Path.parent(nextPath)) && Path.compare(firstPath, nextPath) === -1)
+  }
+  static isNextPath(firstPath: Path, nextPath: Path) {
+    return (Path.equals(Path.parent(firstPath), Path.parent(nextPath)) && Path.compare(firstPath, nextPath) === 1)
+  }
+
   static isDirtLeaf(leaf: CustomLeaf) {
     return leaf.bold || leaf.code || leaf.italic || leaf.strikethrough || !!leaf.url || leaf.fnd || leaf.fnc || leaf.html || leaf.highColor
   }
