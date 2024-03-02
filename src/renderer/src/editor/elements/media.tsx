@@ -1,54 +1,50 @@
-import {ElementProps, MediaNode} from '../../el'
-import {isAbsolute, join} from 'path'
 import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
-import Img from '../../icons/Img'
-import {useEffect, useLayoutEffect, useMemo, useRef} from 'react'
-import {Transforms} from 'slate'
-import {getImageData, toArrayBuffer} from '../../utils'
+import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {mediaType} from '../utils/dom'
 import {useSelStatus} from '../../hooks/editor'
-import ky from 'ky'
+import {Transforms} from 'slate'
+import {getImageData} from '../../utils'
+import {ElementProps, MediaNode} from '../../el'
+import {isAbsolute, join} from 'path'
+import {EditorUtils} from '../utils/editorUtils'
 
-const startMoving = (options: {
-  dom: HTMLImageElement
-  startX: number
-  maxWidth: number
-  direction: 'left' | 'right',
-  onEnd: (width: number) => void
+const resize = (ctx: {
+  e: React.MouseEvent,
+  dom: HTMLElement,
+  height?: number,
+  cb: Function
 }) => {
-  const startWidth = options.dom.clientWidth
-  let width = startWidth
+  const height = ctx.height || ctx.dom.clientHeight
+  const startY = ctx.e.clientY
+  let resizeHeight = height
   const move = (e: MouseEvent) => {
-    if (options.direction === 'right') {
-      width = startWidth + e.clientX - options.startX
-      options.dom.width = width
-    } else {
-      width = startWidth - (e.clientX - options.startX)
-      options.dom.width = width
-    }
-    if (width < 20) {
-      width = 20
-      options.dom.width = width
-    }
+    resizeHeight = height + e.clientY - startY
+    ctx.dom.parentElement!.style.height = resizeHeight + 'px'
   }
   window.addEventListener('mousemove', move)
-  window.addEventListener('mouseup', e => {
+  window.addEventListener('mouseup', (e) => {
     window.removeEventListener('mousemove', move)
-    options.onEnd(width)
+    e.stopPropagation()
+    ctx.cb(resizeHeight)
   }, {once: true})
 }
+
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const [selected, path, store] = useSelStatus(element)
-  const imgRef = useRef<HTMLImageElement>(null)
+  const ref = useRef<HTMLElement>(null)
   const [state, setState] = useGetSetState({
+    height: element.height,
+    dragging: false,
     loadSuccess: true,
     url: '',
     selected: false
   })
+
   const type = useMemo(() => {
     return mediaType(element.url)
   }, [element.url])
+
   useLayoutEffect(() => {
     if (element.downloadUrl) {
       return
@@ -104,80 +100,93 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     }
   }, [])
   return (
-    <span
+    <div
       {...attributes}
-      className={`cursor-pointer mx-1 inline-block select-none`}
+      className={`drag-el group cursor-pointer relative flex justify-center mb-4 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
       data-be={'media'}
-      contentEditable={false}
+      draggable={true}
+      onDragStart={e => {
+        try {
+          store.dragStart(e)
+          store.dragEl = ReactEditor.toDOMNode(store.editor, element)
+        } catch (e) {
+        }
+      }}
       onClick={(e) => {
-        const path = ReactEditor.findPath(store.editor, element)
-        ReactEditor.blur(store.editor)
-        store.editor.apply({
-          type: 'set_selection',
-          properties: {},
-          newProperties: {
-            anchor: {path: [...path, 0], offset: 0}, focus: {path: [...path, 0], offset: 0}
-          }
-        })
+        e.preventDefault()
+        if (e.detail === 2) {
+          Transforms.setNodes(store.editor, {height: undefined}, {at: path})
+          setState({height: undefined})
+        }
+        EditorUtils.selectMedia(store, path)
       }}
     >
-      {children}
-      {(state().loadSuccess || state().url.startsWith('data:')) ?
-        <span className={'inline-block top-1'}>
-          <span
-            className={`media-frame ${selected ? 'active' : ''}`}
-          >
-            {type === 'video' &&
-              <video src={element.url} controls={true}/>
-            }
-            {type === 'document' &&
-              <object data={element.url} className={'w-full h-auto'}/>
-            }
-            {(type === 'image' || state().url.startsWith('data:') || type === 'other') &&
-              <>
-                <img
-                  src={state().url} alt={element.alt}
-                  referrerPolicy={'no-referrer'}
-                  draggable={false}
-                  width={element.width}
-                  ref={imgRef}
-                  className={'align-text-bottom border-2 border-red-500'}
-                />
-                <span
-                  className={'img-drag-handle t1'}
-                  onMouseDown={e => startMoving({
-                    startX: e.clientX,
-                    dom: imgRef.current!,
-                    direction: 'left',
-                    maxWidth: (store.container!.querySelector('.edit-area') as HTMLElement).clientWidth - 12,
-                    onEnd: width => {
-                      Transforms.setNodes(store.editor, {width}, {at: path})
-                    }
-                  })}
-                />
-                <span
-                  className={'img-drag-handle t2'}
-                  onMouseDown={e => startMoving({
-                    startX: e.clientX,
-                    dom: imgRef.current!,
-                    direction: 'right',
-                    maxWidth: (store.container!.querySelector('.edit-area') as HTMLElement).clientWidth - 12,
-                    onEnd: width => {
-                      Transforms.setNodes(store.editor, {width}, {at: path})
-                    }
-                  })}
-                />
-              </>
-            }
-          </span>
-        </span>
-        :
-        (
-          <span className={`inline-block align-text-top border rounded ${selected ? ' border-blue-500/60' : 'border-transparent'}`}>
-            <Img className={'fill-gray-300 align-middle text-xl'}/>
-          </span>
-        )
-      }
-    </span>
+      <div
+        contentEditable={false}
+        className={'w-full h-full flex justify-center'}
+        style={{height: state().height}}
+      >
+        {type === 'video' &&
+          <video
+            src={element.url} controls={true} className={'rounded h-full'}
+            // @ts-ignore
+            ref={ref}
+          />
+        }
+        {type === 'audio' &&
+          <audio
+            controls={true} src={element.url}
+            // @ts-ignore
+            ref={ref}
+          />
+        }
+        {type === 'document' &&
+          <object
+            data={element.url}
+            className={'w-full h-full rounded'}
+            // @ts-ignore
+            ref={ref}
+          />
+        }
+        {type === 'other' &&
+          <iframe
+            src={element.url}
+            className={'w-full h-full rounded'}
+            // @ts-ignore
+            ref={ref}
+          />
+        }
+        {type === 'image' &&
+          <img
+            src={state().url} alt={'image'}
+            referrerPolicy={'no-referrer'}
+            draggable={false}
+            // @ts-ignore
+            ref={ref}
+            onContextMenu={e => e.stopPropagation()}
+            className={'align-text-bottom h-full rounded border border-transparent min-w-[20px] min-h-[20px] block object-contain'}
+          />
+        }
+        {selected &&
+          <div
+            draggable={false}
+            className={'w-20 h-[6px] rounded-lg bg-zinc-400 dark:bg-zinc-500 absolute z-50 left-1/2 -ml-10 -bottom-[3px] cursor-row-resize'}
+            onMouseDown={e => {
+              e.preventDefault()
+              resize({
+                e,
+                height: state().height,
+                dom: ref.current!,
+                cb: (height: number) => {
+                  setState({height})
+                  Transforms.setNodes(store.editor, {height}, {at: path})
+                }
+              })
+            }}
+          />
+        }
+      </div>
+      <span contentEditable={false}>{children}</span>
+    </div>
   )
 }

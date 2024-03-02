@@ -145,8 +145,8 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += toMarkdown(node.children, preString, newParent)
       break
     case 'media':
-      if (mediaType(node.url) === 'image' && node.width) {
-        str += `<img src="${encodeURI(node.url)}" alt="" width="${node.width || ''}"/>`
+      if (node.height) {
+        str += `<img src="${encodeURI(node.url)}" alt="" height="${node.height || ''}"/>`
       } else {
         str += `![${node.alt || ''}](${encodeURI(node.url)})`
       }

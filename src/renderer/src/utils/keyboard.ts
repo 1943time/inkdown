@@ -151,7 +151,7 @@ export class MenuKey {
           if (mediaType(other) === 'image' && existsSync(other) && imageBed.route) {
             this.state.insertFile(new File([readFileSync(other).buffer], other))
           } else {
-            this.state.insertInlineNode(other)
+            this.state.insertLink(other)
           }
         } else {
           let node = {

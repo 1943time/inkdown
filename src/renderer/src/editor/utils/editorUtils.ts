@@ -3,6 +3,8 @@ import {CustomLeaf} from '../../el'
 import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
 import {clearCodeCache} from '../plugins/useHighlight'
+import {getOffsetTop} from './dom'
+import {EditorStore} from '../store'
 
 export class EditorUtils {
   static get p() {
@@ -22,7 +24,19 @@ export class EditorUtils {
       console.error(e)
     }
   }
-
+  static selectMedia(store: EditorStore, path: Path) {
+    Transforms.select(store.editor, path)
+    try {
+      const top = store.container!.scrollTop
+      const dom = ReactEditor.toDOMNode(store.editor, Node.get(store.editor, path))
+      const offsetTop = getOffsetTop(dom, store.container!)
+      if (top > offsetTop) {
+        store.container!.scroll({
+          top: offsetTop - 10
+        })
+      }
+    } catch (e) {}
+  }
   static isPrevious(firstPath: Path, nextPath: Path) {
     return (Path.equals(Path.parent(firstPath), Path.parent(nextPath)) && Path.compare(firstPath, nextPath) === -1)
   }

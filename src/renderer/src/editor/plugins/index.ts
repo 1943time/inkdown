@@ -1,7 +1,7 @@
 import {Editor, Node, Transforms} from 'slate'
 import {EditorStore} from '../store'
 
-export const inlineNode = new Set(['media', 'inline-katex', 'break'])
+export const inlineNode = new Set(['inline-katex', 'break'])
 const voidNode = new Set(['hr', 'break'])
 export const withMarkdown = (editor: Editor, store: EditorStore) => {
   const {isInline, isVoid, apply} = editor

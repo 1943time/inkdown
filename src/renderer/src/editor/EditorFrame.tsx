@@ -124,7 +124,7 @@ export const EditorFrame = observer(({tab}: {
         }
         <FloatBar/>
         <TableAttr/>
-        <MediaAttr/>
+        {/*<MediaAttr/>*/}
         <InsertNetworkImage/>
         <LangAutocomplete/>
       </div>

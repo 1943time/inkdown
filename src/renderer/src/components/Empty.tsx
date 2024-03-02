@@ -106,7 +106,7 @@ export const Empty = observer(() => {
             </div>
             <div className={'mt-2'}>
               {state.spaces.map(r =>
-                <div className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-base'} key={r.cid}>
+                <div className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-lg'} key={r.cid}>
                   <span
                     className={'cursor-pointer hover:text-indigo-500 duration-200 flex items-center'}
                     onClick={() => {

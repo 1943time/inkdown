@@ -1,19 +1,19 @@
-import {Editor, Element, Node, Path, Point, Range, Transforms} from 'slate'
+import {BasePoint, BaseRange, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
-import {Elements} from '../../../el'
 import {configStore} from '../../../store/config'
+import {Elements} from '../../../el'
+
 export class BackspaceKey {
   constructor(
     private readonly editor: Editor
   ) {}
-
   range() {
     const sel = this.editor.selection
     if (!sel) return
     let [start, end] = Range.edges(sel)
-    if (Point.equals(start, Editor.start(this.editor, [])) && Point.equals(end, Editor.end(this.editor, []))) {
+    if (Point.equals(start, Editor.start(this.editor, [1])) && Point.equals(end, Editor.end(this.editor, []))) {
       EditorUtils.deleteAll(this.editor)
-      Transforms.select(this.editor, Editor.start(this.editor, []))
+      Transforms.select(this.editor, Editor.end(this.editor, []))
       return true
     }
     return false
@@ -97,23 +97,33 @@ export class BackspaceKey {
      */
     if (sel.anchor.offset === 0) {
       const preInline = Editor.previous<any>(this.editor, {at: sel.focus.path})
-      if (preInline && preInline[0].type === 'media') {
+      if (preInline && preInline[0].type === 'break') {
         Transforms.delete(this.editor, {at: preInline[1]})
         return true
       }
       if (el.type === 'paragraph') {
         const pre = Editor.previous<any>(this.editor, {at: path})
-        if (pre && ['table', 'code'].includes(pre[0].type)) {
-          const end = Editor.end(this.editor, pre[1])
-          if (!Node.string(Node.get(this.editor, end.path))) {
-            Transforms.delete(this.editor, {at: path})
-            const text = Node.string(el)
-            if (text) {
-              Transforms.insertNodes(this.editor, pre[0].type === 'code' ? [{text}] : el.children, {
-                at: end
-              })
+        if (pre) {
+          if (['table', 'code'].includes(pre[0].type)) {
+            const end = Editor.end(this.editor, pre[1])
+            if (!Node.string(Node.get(this.editor, end.path))) {
+              Transforms.delete(this.editor, {at: path})
+              const text = Node.string(el)
+              if (text) {
+                Transforms.insertNodes(this.editor, pre[0].type === 'code' ? [{text}] : el.children, {
+                  at: end
+                })
+              }
+              Transforms.select(this.editor, end)
+              return true
             }
-            Transforms.select(this.editor, end)
+          }
+          if (pre[0].type === 'media') {
+            Transforms.select(this.editor, pre[1])
+            // if (!Node.string(el)) {
+            //   Transforms.delete(this.editor, {at: path})
+            // }
+            console.log('del')
             return true
           }
         }
@@ -144,16 +154,17 @@ export class BackspaceKey {
               })
               Transforms.select(this.editor, Editor.start(this.editor, listPath))
             } else {
-
               let cur = Path.next(path)
               const moveIndex = preListItem[0].children.length
               if (Editor.hasPath(this.editor, cur)) {
                 EditorUtils.moveNodes(this.editor, cur, preListItem[1], moveIndex)
               }
+              const movePath = [...preListItem[1], moveIndex]
               Transforms.moveNodes(this.editor, {
                 at: path,
-                to: [...preListItem[1], moveIndex]
+                to: movePath
               })
+              // 删除list-item
               Transforms.delete(this.editor, {at: parent[1]})
             }
             return true

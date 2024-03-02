@@ -10,8 +10,8 @@ const findImageElement = (str: string) => {
     const match = str.match(/^<img+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?$/)
     if (match) {
       const url = match[0].match(/src="([^"\n]+)"/)
-      const width = match[0].match(/width="(\d+)"/)
-      return {url: url?.[1], width: width?.[1]}
+      const height = match[0].match(/height="(\d+)"/)
+      return {url: url?.[1], height: height ? +height[1] : undefined}
     }
     return null
   } catch (e) {
@@ -68,7 +68,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
           const img = findImageElement(n.value)
           if (img) {
-            el = {type: 'paragraph', children: [{type: 'media',width: img?.width, url: img?.url, children: [{text: ''}]}]}
+            el = {type: 'media', height: img?.height, url: img?.url, children: [{text: ''}]}
           } else {
             if (n.value === '<br/>') {
               el = {type: 'paragraph', children: [{text: ''}]}
@@ -127,7 +127,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             } else {
               const img = findImageElement(n.value)
               if (img) {
-                el = {type: 'media', width: img?.width, url: img?.url, children: [{text: ''}]}
+                el = {type: 'media', height: img?.height, url: img?.url, children: [{text: ''}]}
               } else {
                 el = {text: n.value}
               }
@@ -181,7 +181,37 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {type: 'list-item', checked: n.checked, children: children}
         break
       case 'paragraph':
-        el = {type: 'paragraph', children: parserBlock(n.children?.length ? n.children : [{value: '', type: 'text'}], false, n)}
+        el = []
+        let textNodes:any[] = []
+        for (let c of (n.children || [])) {
+          if (c.type === 'image') {
+            if (textNodes.length) {
+              el.push({
+                type: 'paragraph', children: parserBlock(textNodes, false, n)
+              })
+              textNodes = []
+            }
+            el.push({
+              type: 'media', children: [{text: ''}], url: decodeURIComponent(c.url)
+            })
+          } else if (c.type === 'html') {
+            const img = findImageElement(c.value)
+            if (img) {
+              el.push({
+                type: 'media', children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
+              })
+            } else {
+              textNodes.push({text: c.value})
+            }
+          } else {
+            textNodes.push(c)
+          }
+        }
+        if (textNodes.length) {
+          el.push({
+            type: 'paragraph', children: parserBlock(textNodes, false, n)
+          })
+        }
         break
       case 'inlineCode':
         el = {text:n.value, code: true}

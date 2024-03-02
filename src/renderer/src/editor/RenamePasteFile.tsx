@@ -58,7 +58,7 @@ export const RenamePasteFile = observer(({open, file, onClose, store}: {
       })
       onClose()
       ReactEditor.focus(store.editor)
-      store.insertInlineNode(mediaPath)
+      store.insertLink(mediaPath)
     } else {
       message$.next({
         type: 'warning',

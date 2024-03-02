@@ -10,14 +10,12 @@ import {observer} from 'mobx-react-lite'
 import {IFileItem} from '../index'
 import {treeStore} from '../store/tree'
 import {EditorUtils} from './utils/editorUtils'
-import {Placeholder} from './tools/Placeholder'
 import {useEditorStore} from './store'
 import {action, runInAction} from 'mobx'
 import {useSubject} from '../hooks/subscribe'
 import {configStore} from '../store/config'
 import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
-import {saveRecord} from '../store/db'
 import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
 import {useLocalState} from '../hooks/useLocalState'
@@ -201,19 +199,14 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    const dragNode = treeStore.dragNode
     if (!e.dataTransfer?.files?.length) return
     if (e.dataTransfer?.files?.length > 1) {
        store.insertMultipleFiles(e.dataTransfer.files)
     } else {
       const file = e.dataTransfer.files[0]
-      if ((dragNode && !dragNode.folder) || file) {
+      if (file) {
         setTimeout(() => {
-          if (dragNode) {
-            store.insertDragFile(dragNode)
-          } else {
-            store.insertFile(file)
-          }
+          store.insertFile(file)
         }, 100)
       }
     }
@@ -246,7 +239,7 @@ export const MEditor = observer(({note}: {
         if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
           e.preventDefault()
           e.stopPropagation()
-          store.insertInlineNode(text)
+          store.insertLink(text)
         }
       } catch (e) {
         console.log('paste text error', text, e)

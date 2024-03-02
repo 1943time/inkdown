@@ -256,32 +256,30 @@ export class EditorStore {
 
   async insertMultipleFiles(files: FileList) {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
-    const paths: string[] = []
-    for (let f of imageFiles) {
-      paths.push(await this.saveFile(f))
-    }
     const [node] = Editor.nodes<any>(this.editor, {
       mode: 'highest',
       match: node => Element.isElement(node)
     })
     if (node) {
+      const paths: string[] = []
+      for (let f of imageFiles) {
+        paths.push(await this.saveFile(f))
+      }
       let path = Path.next(node[1])
       if (node[0].type === 'paragraph' && !Node.string(node[0])) {
         path = node[1]
         Transforms.delete(this.editor, {at: path})
       }
-      Transforms.insertNodes(this.editor, paths.map(p => {
-        return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
-      }), {at: path, select: true})
+      await this.insertFiles(paths)
     }
   }
 
   async insertFile(file: File) {
     if (file.path && mediaType(file.path) !== 'image') {
-      return this.insertInlineNode(file.path.replace(/^file:\/\//, ''))
+      return this.insertLink(file.path.replace(/^file:\/\//, ''))
     }
     const mediaPath = await this.saveFile(file)
-    this.insertInlineNode(mediaPath)
+    await this.insertFiles([mediaPath])
   }
 
   private async createDir(path: string) {
@@ -339,7 +337,7 @@ export class EditorStore {
     const note = treeStore.currentTab.current
     if (!note || !dragNode) return
     const path = relative(join(note.filePath, '..'), dragNode.filePath)
-    this.insertInlineNode(path)
+    this.insertLink(path)
   }
 
   async insertFiles(files: string[]) {
@@ -358,8 +356,12 @@ export class EditorStore {
     if (cur[0].type === 'code-line') {
       path = Path.next(Path.parent(cur[1]))
     }
-    if (cur[0].type === 'paragraph' && !Node.string(cur[0])) {
-      Transforms.delete(this.editor, {at: path})
+    if (cur[0].type === 'paragraph') {
+      if (!Node.string(cur[0])) {
+        Transforms.delete(this.editor, {at: path})
+      } else {
+        path = Path.next(cur[1])
+      }
     }
     if (imageBed.route) {
       const urls = await imageBed.uploadFile(files.map(f => {
@@ -369,33 +371,28 @@ export class EditorStore {
       }))
       if (urls) {
         Transforms.insertNodes(this.editor, urls.map(p => {
-          return {type: 'paragraph', children: [{type: 'media', url: p.imgUrl, children: [{text: ''}]}]}
+          return {type: 'media', url: p.imgUrl, children: [{text: ''}]}
         }), {at: path, select: true})
       }
     } else {
+      console.log('path', path)
       Transforms.insertNodes(this.editor, files.map(p => {
-        return {type: 'paragraph', children: [{type: 'media', url: p, children: [{text: ''}]}]}
+        return {type: 'media', url: p, children: [{text: ''}]}
       }), {at: path, select: true})
     }
   }
 
-  insertInlineNode(filePath: string) {
+  insertLink(filePath: string) {
     const p = parse(filePath)
-    const type = mediaType(filePath)
     const url = isAbsolute(filePath) ? filePath : window.api.toUnix(filePath)
-    let node = ['image', 'audio', 'video', 'document'].includes(type) ? {
-      type: 'media',
-      url,
-      alt: '',
-      children: [{text: ''}]
-    } : {text: filePath.startsWith('http') ? filePath : p.name, url}
+    let node = {text: filePath.startsWith('http') ? filePath : p.name, url}
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     const [cur] = Editor.nodes<any>(this.editor, {
       match: n => Element.isElement(n),
       mode: 'lowest'
     })
-    if ((node.type === 'media' && cur[0].type === 'paragraph') || (node.text && ['table-cell', 'paragraph'].includes(cur[0].type))) {
+    if (node.text && ['table-cell', 'paragraph'].includes(cur[0].type)) {
       Transforms.insertNodes(this.editor, node, {select: true})
     } else {
       const [par] = Editor.nodes<any>(this.editor, {
@@ -405,17 +402,6 @@ export class EditorStore {
         type: 'paragraph',
         children: [node]
       }, {select: true, at: Path.next(par[1])})
-    }
-    const [media] = Editor.nodes(this.editor, {
-      match: el => el.type === 'media'
-    })
-    if (media && this.editor.selection) {
-      setTimeout(() => {
-        selChange$.next({
-          sel: this.editor.selection!,
-          node: media
-        })
-      }, 16)
     }
   }
   openTableMenus(e: MouseEvent | React.MouseEvent, head?: boolean) {
@@ -522,19 +508,18 @@ export class EditorStore {
       if (el.dataset.be === 'paragraph' && this.dragEl?.dataset.be === 'list-item' && (!pre || pre.classList.contains('check-item'))) {
         continue
       }
-      if (!el.previousSibling && el.parentElement?.classList.contains('edit-area')) continue
       if (el === this.dragEl) continue
       const top = getOffsetTop(el, this.container!)
       const left = getOffsetLeft(el, this.container!)
       points.push({
         el: el,
         direction: 'top',
-        left: el.dataset.be === 'list-item' ? left - 16 : left,
+        left: el.dataset.be === 'list-item' && !el.classList.contains('task') ? left - 16 : left,
         top: top - 2
       })
       points.push({
         el: el,
-        left: el.dataset.be === 'list-item' ? left - 16 : left,
+        left: el.dataset.be === 'list-item' && !el.classList.contains('task') ? left - 16 : left,
         direction: 'bottom',
         top: top + el.clientHeight + 2
       })
@@ -542,7 +527,6 @@ export class EditorStore {
     let last: MovePoint | null = null
     const dragover = (e: DragEvent) => {
       e.preventDefault()
-      const target = e.target as HTMLElement
       const top = e.clientY - 40 + this.container!.scrollTop
       let distance = 1000000
       let cur: MovePoint | null = null
@@ -629,9 +613,3 @@ export class EditorStore {
     }), {once: true})
   }
 }
-
-
-
-
-
-

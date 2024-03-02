@@ -18,7 +18,7 @@ export const InsertNetworkImage = observer(() => {
     })
     ReactEditor.focus(store.editor)
     setTimeout(() => {
-      store.insertInlineNode(state.url)
+      store.insertLink(state.url)
       setState({url: ''})
     })
   }, [])

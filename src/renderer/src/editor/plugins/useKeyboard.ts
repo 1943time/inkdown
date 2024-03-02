@@ -46,7 +46,10 @@ export const useKeyboard = (store: EditorStore) => {
       }
       if (isHotkey('backspace', e) && store.editor.selection) {
         if (Range.isCollapsed(store.editor.selection)) {
-          if (backspace.run()) e.preventDefault()
+          if (backspace.run()) {
+            e.stopPropagation()
+            e.preventDefault()
+          }
         } else {
           if (backspace.range()) e.preventDefault()
         }

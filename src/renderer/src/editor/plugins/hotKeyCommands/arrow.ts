@@ -88,6 +88,13 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         mode: 'lowest'
       })
       const [el, path] = node
+      const pre = Editor.node(editor, EditorUtils.findPrev(editor, path))
+      if (pre?.[0].type === 'media') {
+        e.preventDefault()
+        e.stopPropagation()
+        Transforms.select(editor, pre[1])
+        return
+      }
       if (el.type === 'code-line') {
         const code = Path.parent(path)
         if (!Path.hasPrevious(path) && !Path.hasPrevious(code)) {
@@ -115,8 +122,8 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       }
       if (el.type === 'media') {
         e.preventDefault()
-        const pre = EditorUtils.findPrev(editor, Path.parent(path))
-        Transforms.select(editor, Editor.start(editor, pre))
+        const pre = EditorUtils.findPrev(editor, path)
+        Transforms.select(editor, Editor.end(editor, pre))
       }
     }
     if (isHotkey('down', e)) {
@@ -125,6 +132,13 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
         mode: 'lowest'
       })
       const [el, path] = node
+      const next = Editor.node(editor, EditorUtils.findNext(editor, path))
+      if (next?.[0].type === 'media') {
+        e.preventDefault()
+        e.stopPropagation()
+        Transforms.select(editor, next[1])
+        return
+      }
       if (el.type === 'table-cell' && !Editor.hasPath(editor, Path.next(sel.focus.path))) {
         const row = Path.parent(path)
         const table = Path.parent(row)
@@ -152,7 +166,7 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       if (el.type === 'media') {
         const next = EditorUtils.findNext(editor, path)
         e.preventDefault()
-        Transforms.select(editor, Editor.end(editor, next))
+        Transforms.select(editor, Editor.start(editor, next))
       }
       if (el.type === 'paragraph') {
         if (path[0] === 0 && !Node.string(el) && Editor.isEditor(Node.get(editor, Path.parent(path))) && Editor.hasPath(editor, Path.next(path))) {
