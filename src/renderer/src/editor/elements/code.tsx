@@ -83,10 +83,13 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
       <div
         {...props.attributes}
         data-be={'code'}
-        style={{background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground}}
+        style={{
+          background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground,
+          marginBottom: (props.element.katex || props.element.render || state().lang === 'mermaid') ? 12 : ''
+      }}
         onDragStart={store.dragStart}
-        className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? 'mb-4' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
-        <DragHandle top={0.9}/>
+        className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+        <DragHandle/>
         <div
           className={`absolute z-10 right-2 top-1 flex items-center select-none`}
           contentEditable={false}>

@@ -120,7 +120,7 @@ export const Heading = observer(({note}: {
                   })
                 }
               }}
-              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-sky-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
+              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-indigo-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
               {h.title}
             </div>
           )}

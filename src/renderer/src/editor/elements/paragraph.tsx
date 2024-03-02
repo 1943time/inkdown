@@ -11,7 +11,7 @@ export const Paragraph = observer((props: ElementProps<CodeLineNode>) => {
         {...props.attributes} data-be={'paragraph'} className={'drag-el'}
         onDragStart={store.dragStart}
       >
-        <DragHandle style={{left: -20}} top={0.3125}/>
+        <DragHandle style={{left: -20}}/>
         {props.children}
       </p>
     ),

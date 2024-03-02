@@ -18,25 +18,6 @@ export const List = observer(({element, attributes, children}: ElementProps<List
         {...attributes}
         onDragStart={store.dragStart}
       >
-        {configStore.config.dragToSort &&
-          <span
-            className={'block absolute top-[5px] w-5 group hover:border-r dark:border-gray-200/10 border-gray-200 h-[calc(100%_-_10px)]'}
-            style={{
-              paddingTop: '.3em',
-              left: -36
-            }}
-          >
-            <Drag
-              onMouseDown={e => {
-                const target = e.target as HTMLElement
-                const ul = target.parentElement!.parentElement!
-                ul.draggable = true
-                store.dragEl = ul
-              }}
-              className={'drag-icon opacity-0 group-hover:opacity-100'}
-            />
-          </span>
-        }
         {createElement(tag, {className: 'm-list', start: element.start, ['data-task']: element.task ? 'true' : undefined}, children)}
       </div>
     )
