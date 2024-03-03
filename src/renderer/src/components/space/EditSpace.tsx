@@ -27,10 +27,10 @@ export const EditSpace = observer(() => {
 
   const [form] = Form.useForm()
   useSubject(editSpace$, (spaceId) => {
-    form.resetFields()
     if (spaceId) {
       db.space.get(spaceId).then(res => {
         if (res) {
+          form.resetFields()
           form.setFieldsValue({
             name: res.name,
             filePath: res.filePath
@@ -40,6 +40,7 @@ export const EditSpace = observer(() => {
       })
     } else {
       setState({open: true, spaceId: '', spaceName: ''})
+      form.resetFields()
     }
   })
 

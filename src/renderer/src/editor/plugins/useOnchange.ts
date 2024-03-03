@@ -11,7 +11,6 @@ export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>}
 const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
-  const currentType = useRef('')
   return useMemo(() => {
     return (value: any, operations: BaseOperation[]) => {
       const sel = editor.selection
@@ -32,10 +31,6 @@ export function useOnchange(editor: Editor, store: EditorStore) {
           sel, node
         })
       })
-      if (currentType.current !== node[0].type) {
-        currentType.current = node[0].type
-        MainApi.setEditorContext(node[0].type, EditorUtils.isTop(editor, node[1]))
-      }
       if (sel && !floatBarIgnoreNode.has(node[0].type) &&
         !Range.isCollapsed(sel) &&
         Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path))

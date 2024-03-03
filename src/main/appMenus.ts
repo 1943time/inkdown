@@ -7,7 +7,6 @@ import {is} from '@electron-toolkit/utils'
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 const isMas = process.mas || false
 const isMac = process.platform === 'darwin'
-const isLinux = process.platform === 'linux'
 const cmd = 'CmdOrCtrl'
 const task = (task: string, parameter?: any) => {
   return (e: MenuItem, win?: BrowserWindow) => {
@@ -16,16 +15,6 @@ const task = (task: string, parameter?: any) => {
 }
 const getSystemMenus = () => {
   const zh = getLocale() === 'zh'
-  const titles = Array.from(new Array(4)).map((_, i) => {
-    const n = i + 1
-    return {
-      label: `${zh ? '标题' : 'Heading'} ${n}`,
-      id: `title-${n}`,
-      accelerator: `${cmd}+${n}`,
-      click: task('head', n),
-      enabled: false
-    }
-  })
   const update: MenuOptions[number]['submenu'] = !isMas ? [
     {
       label: zh ? '检查更新' : 'Check for Updates',
@@ -192,23 +181,6 @@ const getSystemMenus = () => {
         click: (e, win) => {
           win?.webContents.send('clear-unused-images')
         }
-      },
-      {type: 'separator'},
-      {
-        label: zh ? '导出PDF' : 'Export To PDF',
-        id: 'print-pdf',
-        enabled: false,
-        click: (e, win) => {
-          win?.webContents.send('call-print-pdf')
-        }
-      },
-      {
-        label: zh ? '导出HTML' : 'Export To HTML',
-        id: 'print-html',
-        enabled: false,
-        click: (e, win) => {
-          win?.webContents.send('call-print-html')
-        }
       }
     ]
   })
@@ -292,198 +264,7 @@ const getSystemMenus = () => {
       }
     ]
   })
-  // menus.push(
-  //   {
-  //     label: zh ? '段落' : 'Paragraph',
-  //     id: 'paragraph',
-  //     submenu: [
-  //       ...titles,
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '段落' : 'Paragraph',
-  //         id: 'paragraph',
-  //         accelerator: `${cmd}+0`,
-  //         enabled: false,
-  //         click: task('paragraph')
-  //       },
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '提升标题等级' : 'Increase Heading Level',
-  //         id: 'titleIncrease',
-  //         accelerator: `${cmd}+]`,
-  //         enabled: false,
-  //         click: task('head+')
-  //       },
-  //       {
-  //         label: zh ? '降低标题等级' : 'Decrease Heading Level',
-  //         id: 'titleDecrement',
-  //         enabled: false,
-  //         accelerator: `${cmd}+[`,
-  //         click: task('head-')
-  //       },
-  //       {
-  //         label: zh ? '引用' : 'Quote',
-  //         id: 'quote',
-  //         accelerator: `${cmd}+Alt+q`,
-  //         click: task('quote'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '表格' : 'Table',
-  //         id: 'insertTable',
-  //         accelerator: `${cmd}+Alt+t`,
-  //         click: task('insertTable'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '代码栏' : 'Code Fences',
-  //         id: 'insertCode',
-  //         accelerator: `${cmd}+Alt+c`,
-  //         click: task('insertCode'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '公式' : 'Formula',
-  //         id: 'formula',
-  //         submenu: [
-  //           {
-  //             label: zh ? '块级公式' : 'Formula Block',
-  //             id: 'insertKatex',
-  //             accelerator: `${cmd}+k`,
-  //             click: task('insertKatex'),
-  //             enabled: false
-  //           },
-  //           {
-  //             label: zh ? '行内公式' : 'Formula Inline',
-  //             id: 'insertInlineKatex',
-  //             accelerator: `${cmd}+Alt+k`,
-  //             click: task('insertInlineKatex'),
-  //             enabled: false
-  //           }
-  //         ]
-  //       },
-  //       {
-  //         label: 'Front Matter',
-  //         id: 'frontmatter',
-  //         click: task('insertFrontmatter'),
-  //         enabled: false
-  //       },
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '有序列表' : 'Ordered List',
-  //         id: 'insertOrderedList',
-  //         accelerator: `${cmd}+Alt+o`,
-  //         click: task('insertOrderedList'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '无序列表' : 'Unordered List',
-  //         id: 'insertUnorderedList',
-  //         accelerator: `${cmd}+Alt+u`,
-  //         click: task('insertUnorderedList'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '有序任务列表' : 'Ordered Task List',
-  //         id: 'insertTaskOrderedList',
-  //         accelerator: `${cmd}+Shift+o`,
-  //         click: task('insertTaskOrderedList'),
-  //         enabled: false
-  //       },
-  //       {
-  //         label: zh ? '无序任务列表' : 'Unordered Task List',
-  //         id: 'insertTaskUnorderedList',
-  //         accelerator: `${cmd}+Shift+u`,
-  //         click: task('insertTaskUnorderedList'),
-  //         enabled: false
-  //       },
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '水平线' : 'Horizontal Line',
-  //         id: 'insertHorizontalRule',
-  //         accelerator: `${cmd}+Alt+/`,
-  //         click: task('insertHorizontalRule'),
-  //         enabled: false
-  //       }
-  //     ]
-  //   }
-  // )
-  // menus.push(
-  //   {
-  //     label: zh ? '格式' : 'Format',
-  //     id: 'format',
-  //     submenu: [
-  //       {
-  //         label: zh ? '加粗' : 'Bold',
-  //         accelerator: `${cmd}+b`,
-  //         click: task('bold')
-  //       },
-  //       {
-  //         label: zh ? '斜体' : 'Italic',
-  //         accelerator: `${cmd}+i`,
-  //         click: task('italic')
-  //       },
-  //       {
-  //         label: zh ? '删除线' : 'Strikethrough',
-  //         accelerator: `${cmd}+Alt+s`,
-  //         click: task('strikethrough')
-  //       },
-  //       {
-  //         label: 'Inline Code',
-  //         accelerator: `${cmd}+\``,
-  //         click: task('code')
-  //       },
-  //       {
-  //         label: zh ? '图片' : 'Image',
-  //         accelerator: `${cmd}+p`,
-  //         submenu: [
-  //           {
-  //             accelerator: `${cmd}+p`,
-  //             label: zh ? '插入图片' : 'Insert Image',
-  //             click: (e, win) => {
-  //               win?.webContents.send('key-task', 'insertNetworkImage')
-  //             }
-  //           },
-  //           {
-  //             label: zh ? '插入本机图片' : 'Insert Local Image',
-  //             accelerator: `${cmd}+shift+p`,
-  //             click: (e, win) => {
-  //               dialog.showOpenDialog({
-  //                 properties: ['openFile', 'showHiddenFiles'],
-  //                 filters: [{extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp'], name: 'Image'}],
-  //                 securityScopedBookmarks: true
-  //               }).then(res => {
-  //                 if (res.filePaths.length) {
-  //                   win?.webContents.send('key-task', 'insertImage', res.filePaths[0])
-  //                 }
-  //               })
-  //             }
-  //           }
-  //         ]
-  //       },
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '清除' : 'Clear',
-  //         accelerator: `${cmd}+\\`,
-  //         click: task('clear')
-  //       },
-  //       {type: 'separator'},
-  //       {
-  //         label: zh ? '链接' : 'Link',
-  //         accelerator: `${cmd}+l`,
-  //         click: task('link')
-  //       },
-  //       {
-  //         label: zh ? '高亮' : 'Highlight',
-  //         accelerator: `${cmd}+shift+h`,
-  //         click: task('highlight')
-  //       }
-  //     ]
-  //   }
-  // )
-  const devTools:MenuOptions[number]['submenu'] = is.dev || true ? [
-    {role: 'toggleDevTools'}
-  ] : []
+
   menus.push(
     {
       label: zh ? '视图' : 'View',
@@ -515,7 +296,7 @@ const getSystemMenus = () => {
         {type: 'separator'},
         {role: 'togglefullscreen'},
         {role: 'reload'},
-        ...devTools
+        {role: 'toggleDevTools'}
       ],
     }
   )
@@ -570,68 +351,5 @@ const getSystemMenus = () => {
 export const createAppMenus = () => {
   const menus = getSystemMenus()
   let instance = Menu.buildFromTemplate(menus)
-  const setParagraph = (enable: boolean, exclude?: ['title']) => {
-    const menu = instance.getMenuItemById('paragraph')
-    menu?.submenu?.items.forEach(m => {
-      if (exclude && exclude.some(t => m.id?.startsWith(t))) {
-        m.enabled = false
-      } else if (m.id) {
-        m.enabled = enable
-      }
-    })
-  }
-  const setFormat = (enable: boolean) => {
-    const menu = instance.getMenuItemById('format')
-    menu?.submenu?.items.forEach(m => {
-      m.enabled = enable
-    })
-  }
-
   Menu.setApplicationMenu(instance)
-  ipcMain.on('refresh-recent', () => {
-    if (!isMac) {
-      setTimeout(() => {
-        instance = Menu.buildFromTemplate(getSystemMenus())
-        Menu.setApplicationMenu(instance)
-      }, 300)
-    }
-  })
-  ipcMain.on('changeContext', (e, ctx: string, isTop: boolean) => {
-  //   const katex = instance.getMenuItemById('insertKatex')!
-  //   const inlineKatex = instance.getMenuItemById('insertInlineKatex')!
-  //   katex.enabled = ctx === 'paragraph'
-  //   instance.getMenuItemById('break-line')!.enabled = ctx === 'paragraph'
-  //   inlineKatex.enabled = ['table-cell', 'paragraph'].includes(ctx)
-  //   switch (ctx) {
-  //     case 'table-cell':
-  //       setParagraph(false)
-  //       setFormat(true)
-  //       break
-  //     case 'code-line':
-  //       setParagraph(false)
-  //       setFormat(false)
-  //       break
-  //     case 'paragraph':
-  //       setParagraph(true, isTop ? undefined : ['title'])
-  //       setFormat(true)
-  //       break
-  //     case 'head':
-  //       setParagraph(true)
-  //       setFormat(true)
-  //       break
-  //     default:
-  //       setParagraph(false)
-  //       setFormat(false)
-  //       break
-  //   }
-  // })
-  // ipcMain.on('open-file', (e, isMarkdown: boolean) => {
-  //   instance.getMenuItemById('print-pdf')!.enabled = isMarkdown
-  //   instance.getMenuItemById('print-html')!.enabled = isMarkdown
-  // })
-  // ipcMain.on('set-locale', (e, lc: string) => {
-  //   const menus = getSystemMenus()
-  //   instance = Menu.buildFromTemplate(menus)
-  //   Menu.setApplicationMenu(instance)
-  })
 }

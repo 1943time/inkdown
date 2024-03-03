@@ -22,7 +22,7 @@ const getAssets = async () => {
     css: await fs.readFile(join(env.webPath, cssPath!), {encoding:'utf-8'})
   }
 }
-export const exportToHtmlString = async (node: IFileItem, web = false) => {
+const exportToHtmlString = async (node: IFileItem, web = false) => {
   const tree = node.schema || []
   const title = parse(node.filePath).name
   const {script, css} = await getAssets()

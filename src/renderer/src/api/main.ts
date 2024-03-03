@@ -123,13 +123,7 @@ export const MainApi = {
   openInFolder(path: string) {
     ipcRenderer.send('openInFolder', path)
   },
-  tableMenu(head = false) {
-    ipcRenderer.send('table-menu', head)
-  },
   mkdirp(path: string) {
     return ipcRenderer.invoke('mkdirp', path)
-  },
-  setEditorContext(ctx: string = '', isTop = true) {
-    ipcRenderer.send('changeContext', ctx, isTop)
   }
 }

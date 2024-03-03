@@ -13,7 +13,6 @@ import {useLocalState} from '../../hooks/useLocalState'
 import {sep} from 'path'
 import {Share} from '../../server/Share'
 import {configStore} from '../../store/config'
-import {exportHtml} from '../../editor/output/html'
 import {toMarkdown} from '../../editor/utils/toMarkdown'
 import {convertRemoteImages} from '../../editor/utils/media'
 
@@ -134,16 +133,16 @@ export const Nav = observer(() => {
                     window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
                   }
                 },
-                {
-                  text: 'Export To HTML',
-                  disabled: treeStore.openedNote?.ext !== 'md',
-                  click: async () => {
-                    if (checkOpenedNote()) {
-                      treeStore.currentTab.store.saveDoc$.next(null)
-                      exportHtml(treeStore.openedNote!)
-                    }
-                  }
-                },
+                // {
+                //   text: 'Export To HTML',
+                //   disabled: treeStore.openedNote?.ext !== 'md',
+                //   click: async () => {
+                //     if (checkOpenedNote()) {
+                //       treeStore.currentTab.store.saveDoc$.next(null)
+                //       exportHtml(treeStore.openedNote!)
+                //     }
+                //   }
+                // },
                 {
                   text: 'Copy markdown source code',
                   disabled: treeStore.openedNote?.ext !== 'md',

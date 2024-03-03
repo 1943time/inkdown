@@ -229,6 +229,7 @@ export const registerApi = () => {
             const buffer = await view.webContents.printToPDF({
               printBackground: true,
               displayHeaderFooter: true,
+              generateDocumentOutline: true,
               margins: {
                 marginType: 'custom',
                 bottom: 0,

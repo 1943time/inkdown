@@ -229,6 +229,7 @@ export class TabKey {
         Transforms.insertNodes(this.editor, {
           type: 'list',
           order: list[0].order,
+          task: list[0].task,
           children: [{
             type: 'list-item',
             checked: Node.get(this.editor, pre).checked,

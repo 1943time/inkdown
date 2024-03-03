@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {SetNodeToDecorations, useHighlight} from '../editor/plugins/useHighlight'
 import {Placeholder} from '../editor/tools/Placeholder'
-import {Editable, Slate, withReact} from 'slate-react'
+import {Editable, ReactEditor, Slate, withReact} from 'slate-react'
 import {MElement, MLeaf} from '../editor/elements'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, EditorStoreContext} from '../editor/store'
@@ -9,20 +9,28 @@ import {observer} from 'mobx-react-lite'
 import {configStore} from '../store/config'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {readFileSync} from 'fs'
+import {useLocalState} from '../hooks/useLocalState'
+import {Title} from '../editor/tools/Title'
+import isHotkey from 'is-hotkey'
+import {Editor, Transforms} from 'slate'
+import {parse} from 'path'
 
 export const Webview = observer((props: {
   value?: any[]
   history?: boolean
   filePath?: string
 }) => {
-  const [ready, setReady] = useState(!!props.history)
+  const [state, setState] = useLocalState({
+    ready: !!props.history,
+    name: ''
+  })
   const store = useMemo(() => new EditorStore(true, props.history), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
   const high = useHighlight(store)
   const print = async (filePath: string) => {
     store.webviewFilePath = filePath
-    setReady(true)
+    setState({ready: true, name: parse(filePath).name})
     const schema = await parserMdToSchema([readFileSync(filePath, {encoding: 'utf-8'})])
     EditorUtils.reset(store.editor, schema[0] || [])
     setTimeout(() => {
@@ -38,9 +46,9 @@ export const Webview = observer((props: {
     store.webviewFilePath = props.filePath || null
   }, [props.value, props.filePath])
 
-  if (!ready) return null
+  if (!state.ready) return null
   return (
-    <div className={`view w-full ${props.history ? '' : 'h-full'} content p-5 heading-line ${props.history ? '' : 'pdf'}`}>
+    <div className={`view w-full ${props.history ? '' : 'h-full'} content py-5 px-8 heading-line ${props.history ? '' : 'pdf'}`}>
       <EditorStoreContext.Provider value={store}>
         <Slate
           editor={store.editor}
@@ -48,6 +56,7 @@ export const Webview = observer((props: {
         >
           <SetNodeToDecorations/>
           <Placeholder/>
+          <input value={state.name} className={'page-title'}/>
           <Editable
             decorate={props.history ? high : undefined}
             spellCheck={false}
