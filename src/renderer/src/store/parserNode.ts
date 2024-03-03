@@ -3,11 +3,11 @@ import {readdirSync, readFileSync, statSync} from 'fs'
 import {basename, extname, join, parse, sep} from 'path'
 import {observable, runInAction} from 'mobx'
 import {db, IFile} from './db'
-import {nid} from '../utils'
-import {parserMdToSchema} from '../editor/parser/parser'
+import {message$, nid} from '../utils'
+import {openMdParserHandle} from '../editor/parser/parser'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {mediaType} from '../editor/utils/dom'
-
+import {readFile} from 'fs/promises'
 export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) => {
   Object.defineProperty(node, 'parent', {
     configurable: true,
@@ -154,19 +154,33 @@ export class ReadSpace {
     this.fileMap = new Map(docs.map(d => [d.filePath, d]))
     const filesTree = this.read(space.filePath)
     if (this.newNote.length) {
-      const contents:string[] = []
-      for (let n of this.newNote) {
-        contents.push(readFileSync(n.filePath, {encoding: 'utf-8'}))
-      }
-      const schemas = await parserMdToSchema(contents)
-      this.newNote.map((s, i) => {
-        try {
-          this.newNote[i].schema = schemas[i]
-          db.file.update(s.cid, {schema: schemas[i]})
-        } catch (e) {
-          this.newNote[i].schema = EditorUtils.p
+      const {parser, terminate} = openMdParserHandle()
+      try {
+        for (let i = 0 ; i <= this.newNote.length; i += 30) {
+          const stack = this.newNote.slice(i, i + 30)
+          const contents:string[] = []
+          for (let n of stack) {
+            contents.push(await readFile(n.filePath, {encoding: 'utf-8'}))
+          }
+          const schemas = await parser(contents)
+          stack.map((s, i) => {
+            try {
+              stack[i].schema = schemas[i]
+              db.file.update(s.cid, {schema: schemas[i]})
+            } catch (e) {
+              stack[i].schema = EditorUtils.p
+            }
+          })
         }
-      })
+      } catch (e) {
+        console.error(e)
+        message$.next({
+          type: 'error',
+          content: 'Parsing failed'
+        })
+      } finally {
+        terminate()
+      }
     }
     for (let f of this.fileMap.values()) {
       if (!this.existSet.has(f.filePath)) {

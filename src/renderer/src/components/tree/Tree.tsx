@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import {action} from 'mobx'
 import {Icon} from '@iconify/react'
-import {Popover} from 'antd'
+import {Popover, Skeleton} from 'antd'
 import React, {useCallback} from 'react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {db, ISpace} from '../../store/db'
@@ -31,10 +31,10 @@ export const Tree = observer(() => {
   return (
     <div
       className={'flex-shrink-0 b1 tree-bg h-full width-duration border-r pt-[40px] overflow-hidden duration-200'}
-      style={{ width: treeStore.fold ? 0 : treeStore.width }}
+      style={{width: treeStore.fold ? 0 : treeStore.width}}
     >
       <div
-        style={{ width: treeStore.width }}
+        style={{width: treeStore.width}}
         className={`h-full`}
       >
         <div className={'h-9 px-4'}>
@@ -47,9 +47,9 @@ export const Tree = observer(() => {
               if (v) {
                 getSpace()
               }
-              setState({ openMenu: v })
+              setState({openMenu: v})
             }}
-            overlayInnerStyle={{ padding: 0 }}
+            overlayInnerStyle={{padding: 0}}
             content={(
               <div className={'w-80 pb-2 pt-2'}>
                 {/*<div className={'flex justify-between items-center text-xs h-8 dark:text-gray-500'}>*/}
@@ -77,7 +77,7 @@ export const Tree = observer(() => {
                   <div
                     className={'px-2 py-1 dark:hover:bg-gray-200/10 duration-200 rounded cursor-pointer'}
                     onClick={() => {
-                      setState({ openMenu: false })
+                      setState({openMenu: false})
                       // openCreateSpace$.next(null)
                     }}
                   >
@@ -97,7 +97,7 @@ export const Tree = observer(() => {
                 </div>
                 <div className={'ml-2 max-w-full truncate'}>{treeStore.root.name}</div>
                 <div>
-                  <Icon icon={'ic:round-unfold-more'} className={'text-base ml-1 flex-shrink-0 text-gray-500'} />
+                  <Icon icon={'ic:round-unfold-more'} className={'text-base ml-1 flex-shrink-0 text-gray-500'}/>
                 </div>
               </div>
             }
@@ -107,16 +107,34 @@ export const Tree = observer(() => {
               >
                 <div
                   className={`dark:text-white text-gray-700 flex-shrink-0 w-6 h-6 rounded bg-gray-300  dark:bg-gray-200/20 flex items-center justify-center  font-medium`}>
-                  <Icon icon={'ph:calendar-blank'} />
+                  <Icon icon={'ph:calendar-blank'}/>
                 </div>
                 <div className={'ml-2 max-w-full truncate'}>Select doc space</div>
                 <div>
-                  <Icon icon={'ic:round-unfold-more'} className={'text-base ml-1 flex-shrink-0 text-gray-500'} />
+                  <Icon icon={'ic:round-unfold-more'} className={'text-base ml-1 flex-shrink-0 text-gray-500'}/>
                 </div>
               </div>
             }
           </Popover>
         </div>
+        {!treeStore.root && treeStore.loading &&
+          <div
+            className={'p-4 w-full'}
+          >
+            <Skeleton
+              active={true}
+              paragraph={{
+                rows: 5,
+                width: [
+                  '100%',
+                  '80%',
+                  '100%',
+                  '80%'
+                ]
+              }}
+            />
+          </div>
+        }
         {!!treeStore.root &&
           <>
             <div className={'h-[calc(100vh_-_76px)] flex flex-col'}>
@@ -126,17 +144,17 @@ export const Tree = observer(() => {
                     className={'tree-tab'}
                     onClick={action(() => treeStore.treeTab = 'folder')}
                   >
-                    <Folder className={'text-[17px]'} />
+                    <Folder className={'text-[17px]'}/>
                   </div>
                   <div
                     className={'tree-tab'}
                     onClick={action(() => treeStore.treeTab = 'search')}
                   >
-                    <Icon icon={'tdesign:search'} className={'text-[17px]'} />
+                    <Icon icon={'tdesign:search'} className={'text-[17px]'}/>
                   </div>
                   <div
                     className={'absolute w-[calc(50%_-_4px)] h-[22px] top-[3px] left-1 dark:bg-black/30 bg-white/90 rounded duration-150 dark:shadow-gray-200/10 shadow-sm shadow-gray-300'}
-                    style={{ transform: `translateX(${(tabIndex.get(treeStore.treeTab)! - 1) * 100 + '%'})` }}
+                    style={{transform: `translateX(${(tabIndex.get(treeStore.treeTab)! - 1) * 100 + '%'})`}}
                   />
                 </div>
               </div>
@@ -161,12 +179,12 @@ export const Tree = observer(() => {
                   }}
                 >
                   <div>
-                    <TreeRender />
+                    <TreeRender/>
                   </div>
                 </div>
                 <div
                   className={`${treeStore.treeTab === 'search' ? '' : 'hidden'}`}>
-                  <FullSearch />
+                  <FullSearch/>
                 </div>
               </div>
             </div>

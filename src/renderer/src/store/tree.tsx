@@ -40,6 +40,7 @@ export class TreeStore {
   currentIndex = 0
   width = 280
   tabContextIndex = 0
+  loading = false
   size = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -631,12 +632,15 @@ export class TreeStore {
     // })
   }
   async initial(spaceId: string) {
+    this.fold = false
     const read = new ReadSpace(spaceId)
+    const timer = setTimeout(action(() => this.loading = true), 100)
     const res = await read.getTree()
+    clearTimeout(timer)
     if (res) {
       runInAction(() => {
+        this.loading = false
         this.root = res.space
-        this.fold = false
         this.nodeMap = res.nodeMap
       })
     }

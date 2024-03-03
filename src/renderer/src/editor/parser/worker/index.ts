@@ -4,7 +4,6 @@ import {Element, Node} from 'slate'
 import {Content, Table} from 'mdast'
 import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../../el'
 
-let share = false
 const findImageElement = (str: string) => {
   try {
     const match = str.match(/^<img+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?$/)
@@ -148,23 +147,12 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el.task = el.children?.some((s: any) => typeof s.checked === 'boolean')
         break
       case 'footnoteReference':
-        if (share) {
-          el = {type: 'footnoteReference', identifier: n.identifier, children: [{text: n.identifier}]}
-        } else {
-          el = {text: `[^${n.identifier}]`}
-        }
+        el = {text: `[^${n.identifier}]`}
         break
       case 'footnoteDefinition':
-        if (share) {
-          el = {
-            type: 'footnoteDefinition', identifier: n.identifier,
-            children: parserBlock(n.children, false, n)
-          }
-        } else {
-          el = {
-            type: 'paragraph',
-            children: [{text: `[^${n.identifier}]:`}, ...(parserBlock(n.children, false, n)[0] as any)?.children]
-          }
+        el = {
+          type: 'paragraph',
+          children: [{text: `[^${n.identifier}]:`}, ...(parserBlock(n.children, false, n)[0] as any)?.children]
         }
         break
       case 'listItem':
@@ -320,13 +308,12 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
 
 onmessage = e => {
   const files:string[] = e.data.files
-  share = e.data.share
   postMessage(files.map(str => {
     try {
       const root = parser.parse(str || '')
       return parserBlock(root.children as any[], true)
     } catch (e) {
-      return [{type: 'paragraph', children: [{text: ''}]}]
+      return [{type: 'paragraph', children: [{text: str}]}]
     }
   }))
 }

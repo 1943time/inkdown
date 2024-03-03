@@ -7,6 +7,7 @@ export class BackspaceKey {
   constructor(
     private readonly editor: Editor
   ) {}
+
   range() {
     const sel = this.editor.selection
     if (!sel) return
@@ -120,10 +121,6 @@ export class BackspaceKey {
           }
           if (pre[0].type === 'media') {
             Transforms.select(this.editor, pre[1])
-            // if (!Node.string(el)) {
-            //   Transforms.delete(this.editor, {at: path})
-            // }
-            console.log('del')
             return true
           }
         }
