@@ -21,6 +21,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
 import {updateFilePath, updateNode} from '../editor/utils/updateNode'
+import {editSpace$} from '../components/space/EditSpace'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -633,6 +634,16 @@ export class TreeStore {
   }
   async initial(spaceId: string) {
     this.fold = false
+    const space = await db.space.get(spaceId)
+    if (space && !existsSync(space.filePath)) {
+      return openConfirmDialog$.next({
+        title: 'Space folder has been removed!',
+        okText: 'Change file path',
+        onConfirm: () => {
+          editSpace$.next(spaceId)
+        }
+      })
+    }
     const read = new ReadSpace(spaceId)
     const timer = setTimeout(action(() => this.loading = true), 100)
     const res = await read.getTree()
@@ -642,6 +653,9 @@ export class TreeStore {
         this.loading = false
         this.root = res.space
         this.nodeMap = res.nodeMap
+      })
+      db.space.update(spaceId, {
+        lastOpenTime: Date.now()
       })
     }
   }

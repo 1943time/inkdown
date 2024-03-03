@@ -21,7 +21,7 @@ export const Empty = observer(() => {
   useLayoutEffect(() => {
     db.space.toArray().then(res => {
       setState({
-        spaces: res.sort((a, b) => a.lastOpenTime > b.lastOpenTime ? -1 : 1)
+        spaces: res.sort((a, b) => a.lastOpenTime > b.lastOpenTime ? -1 : 1).slice(0, 5)
       })
     })
     const clearRecent = () => {

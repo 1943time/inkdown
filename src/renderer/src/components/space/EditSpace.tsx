@@ -70,6 +70,9 @@ export const EditSpace = observer(() => {
               treeStore.root!.name = v.name
             })
           }
+          if (!treeStore.root) {
+            treeStore.initial(state.spaceId)
+          }
           setState({open: false})
         }
       } else {

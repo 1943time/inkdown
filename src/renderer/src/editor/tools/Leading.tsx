@@ -32,7 +32,7 @@ export const Heading = observer(({note}: {
   }, [note, treeStore.currentTab])
 
   const getHeading = useCallback(() => {
-    if (note) {
+    if (note && configStore.config.showLeading) {
       const schema = note.schema
       if (schema?.length) {
         const headings: Leading[] = []
@@ -54,7 +54,9 @@ export const Heading = observer(({note}: {
               })
               headings.push(cache.get(s)!)
               setTimeout(() => {
-                cache.get(s)!.dom = store.container?.querySelector(`[data-head="${id}"]`) as HTMLElement
+                if (cache.get(s)) {
+                  cache.get(s)!.dom = store.container?.querySelector(`[data-head="${id}"]`) as HTMLElement
+                }
               }, 200)
             }
           }
@@ -68,7 +70,7 @@ export const Heading = observer(({note}: {
     }
   }, [note])
 
-  useDebounce(getHeading, 100, [note, note?.refresh])
+  useDebounce(getHeading, 100, [note, note?.refresh, configStore.config.showLeading])
 
   useEffect(() => {
     const div = box.current
