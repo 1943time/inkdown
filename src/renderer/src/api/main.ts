@@ -1,6 +1,5 @@
 import * as Electron from 'electron'
 import {app, dialog} from 'electron'
-import {removeFileRecord} from '../store/db'
 
 const ipcRenderer = window.electron.ipcRenderer
 
@@ -97,15 +96,15 @@ export const MainApi = {
       filters: [{name: 'f', extensions: ['md', 'markdown']}]
     })
   },
-  openFolder() {
+  openFolder(filePath?: string) {
     return openDialog({
       title: 'Open Folder',
+      defaultPath: filePath,
       properties: ['openDirectory']
     })
   },
   moveToTrash(path: string) {
     ipcRenderer.invoke('move-to-trash', path)
-    removeFileRecord(path)
   },
   errorLog(e: any, other: Record<string, any> = {}) {
     console.error(e, other)

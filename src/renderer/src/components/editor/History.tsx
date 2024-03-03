@@ -10,6 +10,7 @@ import {db, IHistory} from '../../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
 import {configStore} from '../../store/config'
+import {IFileItem} from '../../index'
 
 function Help(props: {
   text: string
@@ -23,6 +24,7 @@ function Help(props: {
 
 export const History = observer((props: {
   open: boolean
+  node?: IFileItem
   onClose: () => void
 }) => {
   const [state, setState] = useLocalState({
@@ -33,11 +35,11 @@ export const History = observer((props: {
   })
   useEffect(() => {
     if (props.open) {
-      const note = treeStore.openedNote
-      if (note?.ext === 'md') {
-        db.history.where('filePath').equals(note.filePath).toArray().then(records => {
+      const node = treeStore.openedNote
+      if (node?.ext === 'md') {
+        db.history.where('fileId').equals(node.cid).toArray().then(records => {
           setState({
-            fileName: basename(note.filePath),
+            fileName: basename(node.filePath),
             selectIndex: 0,
             records: records.sort((a, b) => a.updated > b.updated ? -1 : 1),
             show: true
@@ -50,6 +52,7 @@ export const History = observer((props: {
     if (state.records[state.selectIndex]) return toJS(state.records[state.selectIndex]!.schema)
     return []
   }, [state.selectIndex, state.records])
+  if (!props.node) return null
   return (
     <Modal
       title={null}
@@ -59,12 +62,12 @@ export const History = observer((props: {
       className={'pure-modal'}
       onCancel={props.onClose}
     >
-      <div className={'h-12 border-b b2 px-5 text-base font-semibold'}>
+      <div className={'h-12 border-b b2 px-5 text-sm font-semibold'}>
         <div className={'flex items-center h-full'}>
           <Help
             text={configStore.zh ? '最后15条记录将被记录。如果文件更改间隔超过10分钟，将添加新记录，青石将定期清理缓存。' : 'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added, bluestone will clean cache periodically.'}/>
           <span className={'ml-1'}>
-            {configStore.zh ? '文件历史' : 'File history for'} <span className={'text-sky-500 ml-1'}>{state.fileName}</span>
+            {configStore.zh ? '文件历史' : 'File history for'} <span className={'text-indigo-500 ml-1'}>{state.fileName}</span>
           </span>
         </div>
       </div>
@@ -78,7 +81,7 @@ export const History = observer((props: {
               <>
                 {state.records.map((r, i) =>
                   <div
-                    className={`py-1.5 text-center cursor-default duration-200 ${state.selectIndex === i ? 'text-sky-500' : 'hover:text-gray-800 dark:hover:text-gray-100'}`}
+                    className={`py-1.5 text-center cursor-pointer duration-200 ${state.selectIndex === i ? 'text-indigo-500' : 'hover:text-gray-800 dark:hover:text-gray-100'}`}
                     key={r.id}
                     onClick={() => {
                       setState({show: false, selectIndex: i})
@@ -97,7 +100,7 @@ export const History = observer((props: {
         <div className={'flex-1 flex-shrink-0 overflow-y-auto'}>
           {state.show &&
             <div className={'opacity-0 animate-show'}>
-              <Webview value={schema} history={true} filePath={state.records[state.selectIndex]?.filePath}/>
+              <Webview value={schema} history={true} filePath={props.node.filePath}/>
             </div>
           }
         </div>

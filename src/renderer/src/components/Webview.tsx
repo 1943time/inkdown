@@ -14,6 +14,7 @@ import {Title} from '../editor/tools/Title'
 import isHotkey from 'is-hotkey'
 import {Editor, Transforms} from 'slate'
 import {parse} from 'path'
+import {action, runInAction} from 'mobx'
 
 export const Webview = observer((props: {
   value?: any[]
@@ -42,8 +43,18 @@ export const Webview = observer((props: {
   }, [])
 
   useEffect(() => {
+    runInAction(() => store.pauseCodeHighlight = true)
     EditorUtils.reset(store.editor, props.value)
     store.webviewFilePath = props.filePath || null
+    setState({name: parse(props.filePath || '').name})
+    requestIdleCallback(() => {
+      runInAction(() => {
+        store.pauseCodeHighlight = false
+        setTimeout(action(() => {
+          store.refreshHighlight = !store.refreshHighlight
+        }))
+      })
+    })
   }, [props.value, props.filePath])
 
   if (!state.ready) return null
@@ -55,8 +66,7 @@ export const Webview = observer((props: {
           initialValue={[]}
         >
           <SetNodeToDecorations/>
-          <Placeholder/>
-          <input value={state.name} className={'page-title'}/>
+          <input defaultValue={state.name} className={'page-title'}/>
           <Editable
             decorate={props.history ? high : undefined}
             spellCheck={false}

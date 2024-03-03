@@ -102,7 +102,7 @@ export const MEditor = observer(({note}: {
       note.history = editor.history
       note.sel = editor.selection
     }
-    if (editor.operations[0].type === 'set_selection') {
+    if (editor.operations[0]?.type === 'set_selection') {
       try {
         runInAction(() => store.openLangCompletion = false)
         treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)

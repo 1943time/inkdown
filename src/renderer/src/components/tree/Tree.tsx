@@ -109,7 +109,7 @@ export const Tree = observer(() => {
                 <div className={'flex justify-between items-center text-sm h-7 dark:text-gray-400 text-gray-500'}>
                   <span className={'pl-3'}>Space</span>
                   <div
-                    className={'rounded duration-200 hover:bg-gray-200/10 p-1 cursor-pointer mr-2'}
+                    className={'rounded duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 p-1 cursor-pointer mr-2'}
                     onClick={() => {
                       setState({openMenu: false})
                       editSpace$.next(null)

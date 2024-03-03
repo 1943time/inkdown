@@ -2,7 +2,7 @@ import {useCallback, useEffect} from 'react'
 import {MainApi} from '../api/main'
 import {treeStore} from '../store/tree'
 import {base64ToArrayBuffer, message$, modal$, stat, toArrayBuffer} from '../utils'
-import {clearExpiredRecord, db} from '../store/db'
+import {db} from '../store/db'
 import {runInAction} from 'mobx'
 import {basename, isAbsolute, join} from 'path'
 import {existsSync, readFileSync} from 'fs'
@@ -202,9 +202,6 @@ export const useSystemMenus = () => {
     }
 
     initial()
-    setTimeout(() => {
-      clearExpiredRecord()
-    }, 10000)
 
     window.electron.ipcRenderer.on('open', open)
     window.electron.ipcRenderer.on('new-tab', newTab)

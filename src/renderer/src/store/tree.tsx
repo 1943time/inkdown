@@ -11,7 +11,7 @@ import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {appendRecentDir, appendRecentNote, db, ISpace, removeFileRecord} from './db'
+import {db, ISpace, removeFileRecord} from './db'
 import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
@@ -123,13 +123,6 @@ export class TreeStore {
         }
       }
     })
-    window.electron.ipcRenderer.on('tree-command', (e, params: {
-      type: 'rootFolder' | 'file' | 'folder'
-      filePath: string
-      command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder' | 'newCopy'
-    }) => {
-      this.command(params)
-    })
   }
   // insertFiles(files: FileList | string[], item: IFileItem, mode: 'cut' | 'copy' = 'cut') {
   //   if (item?.folder) {
@@ -158,76 +151,6 @@ export class TreeStore {
   //     }
   //   }
   // }
-  command(params: {
-    type?: 'rootFolder' | 'file' | 'folder'
-    filePath: string
-    command: 'createNote' | 'createFolder' | 'delete' | 'rename' | 'openInNewTab' | 'shareFolder' | 'newCopy'
-  }) {
-    const {filePath} = params
-    switch (params.command) {
-      case 'createNote':
-        // let addNote = createFileNode({
-        //   folder: false,
-        //   editName: 'untitled',
-        //   parent: this.ctxNode || this.root,
-        //   mode: 'create',
-        //   filePath: ''
-        // })
-        // if (!this.ctxNode) {
-        //   this.root.children!.unshift(addNote)
-        // } else {
-        //   this.ctxNode.children!.unshift(addNote)
-        // }
-        // addNote.parent!.expand = true
-        break
-      case 'createFolder':
-        // const addFolder = createFileNode({
-        //   folder: true,
-        //   parent: this.ctxNode || this.root,
-        //   mode: 'create',
-        //   filePath: ''
-        // })
-        // if (!this.ctxNode) {
-        //   this.root.children!.unshift(addFolder)
-        // } else {
-        //   this.ctxNode.children!.unshift(addFolder)
-        // }
-        break
-      case 'rename':
-        // if (this.ctxNode) {
-        //   this.ctxNode.mode = 'edit'
-        //   this.ctxNode.editName = this.ctxNode.filename
-        // }
-        break
-      case 'openInNewTab':
-        if (this.ctxNode?.filePath) this.appendTab(this.ctxNode)
-        break
-      case 'newCopy':
-        // if (this.ctxNode && !this.ctxNode.folder) {
-        //   let addNote = createFileNode({
-        //     folder: false,
-        //     editName: `${this.ctxNode.filename}_copy`,
-        //     parent: this.ctxNode.parent,
-        //     mode: 'copy',
-        //     copyItem: this.ctxNode,
-        //     filePath: ''
-        //   })
-        //   this.ctxNode.parent?.children!.unshift(addNote)
-        //   addNote.parent!.expand = true
-        // }
-        break
-      case 'shareFolder':
-        if (this.ctxNode?.filePath || params.type === 'rootFolder') {
-          // this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
-        }
-        break
-      case 'delete':
-        if (filePath && this.ctxNode) {
-          this.moveToTrash(this.ctxNode)
-        }
-        break
-    }
-  }
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
@@ -636,13 +559,30 @@ export class TreeStore {
     this.fold = false
     const space = await db.space.get(spaceId)
     if (space && !existsSync(space.filePath)) {
-      return openConfirmDialog$.next({
-        title: 'Space folder has been removed!',
-        okText: 'Change file path',
-        onConfirm: () => {
-          editSpace$.next(spaceId)
+      try {
+        if (!existsSync(space.filePath)) {
+          return openConfirmDialog$.next({
+            title: 'Space folder has been removed!',
+            okText: 'Change file path',
+            onConfirm: () => {
+              editSpace$.next(spaceId)
+            }
+          })
         }
-      })
+        readdirSync(space.filePath)
+      } catch (e) {
+        const res = await MainApi.openFolder(space.filePath)
+        if (!res.filePaths.length) return
+        if (res.filePaths[0] !== space.filePath) {
+          return openConfirmDialog$.next({
+            title: 'Space folder has been removed!',
+            okText: 'Change file path',
+            onConfirm: () => {
+              editSpace$.next(spaceId)
+            }
+          })
+        }
+      }
     }
     const read = new ReadSpace(spaceId)
     const timer = setTimeout(action(() => this.loading = true), 100)

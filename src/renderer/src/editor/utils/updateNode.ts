@@ -17,6 +17,7 @@ export const updateNode = async (node: IFileItem) => {
         updated: s.mtime.valueOf(),
         schema: node.schema
       })
+      db.saveRecord(node)
     } catch (e) {
       console.error('save fail', e)
     }

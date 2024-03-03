@@ -201,6 +201,7 @@ export const Nav = observer(() => {
         </div>
       </div>
       <History
+        node={treeStore.openedNote}
         open={state.openHistory}
         onClose={() => setState({ openHistory: false })}
       />
