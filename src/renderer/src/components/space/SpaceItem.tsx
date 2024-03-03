@@ -7,12 +7,13 @@ import {editSpace$} from './EditSpace'
 
 export const SpaceItem = observer((props: {
   item: ISpace
+  dragging: boolean
   onClick: () => void
   onEdit: () => void
 }) => {
   return (
     <div
-      className={'cursor-pointer dark:hover:bg-gray-200/10 duration-200 py-1.5 px-5 flex items-center relative group'}
+      className={`cursor-pointer ${props.dragging ? '' : 'dark:hover:bg-gray-200/10 duration-200 group'} py-1.5 px-5 flex items-center relative`}
       onClick={props.onClick}
     >
       <div className={'flex flex-1 items-center'}>

@@ -1,8 +1,8 @@
 import {observer} from 'mobx-react-lite'
-import {action} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {Icon} from '@iconify/react'
 import {Popover, Skeleton} from 'antd'
-import React, {useCallback} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {db, ISpace} from '../../store/db'
 import {treeStore} from '../../store/tree'
@@ -11,26 +11,77 @@ import Folder from '../../icons/Folder'
 import {FullSearch} from '../FullSearch'
 import {TreeRender} from './TreeRender'
 import {openContextMenu} from './openContextMenu'
-import {editSpace$} from '../space/EditSpace'
+import {editSpace$, spaceChange$} from '../space/EditSpace'
 import {TreeEmpty} from './TreeEmpty'
+import {useSubject} from '../../hooks/subscribe'
+import {SortableContainer, SortableElement} from 'react-sortable-hoc'
+import {arrayMoveImmutable} from 'array-move'
+import {Subject} from 'rxjs'
 
 const tabIndex = new Map([
   ['folder', 1],
   ['search', 2]
 ])
+const closeMenu$ = new Subject()
 
+const SortSpaceItem = SortableElement<{s: ISpace, dragging: boolean}>(({s, dragging}) => {
+  return (
+    <SpaceItem
+      key={s.cid} item={s}
+      dragging={dragging}
+      onClick={() => {
+        if (treeStore.root?.cid !== s.cid) {
+          treeStore.initial(s.cid)
+        }
+        closeMenu$.next(null)
+      }}
+      onEdit={() => {
+        closeMenu$.next(null)
+      }}
+    />
+  )
+})
+const SortSpaceContainer = SortableContainer<{items: ISpace[], dragging: boolean}>((props: {items: ISpace[], dragging: boolean}) => {
+  return (
+    <div className={'overflow-y-auto max-h-[400px]'}>
+      {props.items.map((item, index) => <SortSpaceItem s={item} index={index} key={item.cid} dragging={props.dragging}/>)}
+    </div>
+  )
+})
 export const Tree = observer(() => {
   const [state, setState] = useLocalState({
     openMenu: false,
-    spaces: [] as ISpace[]
+    spaces: [] as ISpace[],
+    dragging: false
   })
 
   const getSpace = useCallback(() => {
-    db.space.toArray().then(res => {
+    db.space.orderBy('sort').toArray().then(res => {
       setState({spaces: res})
     })
   }, [])
 
+  useEffect(() => {
+    getSpace()
+  }, [])
+
+  useSubject(closeMenu$, () => {
+    setState({openMenu: false})
+  })
+
+  useSubject(spaceChange$, getSpace)
+
+  const move = useCallback(({oldIndex, newIndex}: {oldIndex: number, newIndex: number}) => {
+    if (oldIndex !== newIndex) {
+      setState({
+        spaces: arrayMoveImmutable(state.spaces, oldIndex, newIndex)
+      })
+      state.spaces.map((s, i) => db.space.update(s.cid, {sort: i}))
+    }
+    setTimeout(() => {
+      setState({dragging: false})
+    }, 200)
+  }, [])
   return (
     <div
       className={'flex-shrink-0 b1 tree-bg h-full width-duration border-r pt-[40px] overflow-hidden duration-200'}
@@ -67,27 +118,21 @@ export const Tree = observer(() => {
                     <Icon icon={'mingcute:add-line'} className={'text-base'}/>
                   </div>
                 </div>
-                <div className={'overflow-y-auto max-h-[400px]'}>
-                  {!state.spaces.length &&
-                    <div className={'text-center py-2 text-[13px] dark:text-gray-400 text-gray-500'}>
-                      No document space has been created yet
-                    </div>
-                  }
-                  {state.spaces.map(s =>
-                    <SpaceItem
-                      key={s.cid} item={s}
-                      onClick={() => {
-                        if (treeStore.root?.cid !== s.cid) {
-                          treeStore.initial(s.cid)
-                        }
-                        setState({openMenu: false})
-                      }}
-                      onEdit={() => {
-                        setState({openMenu: false})
-                      }}
-                    />
-                  )}
-                </div>
+                {!!state.spaces.length &&
+                  <SortSpaceContainer
+                    items={state.spaces}
+                    pressDelay={100}
+                    helperClass={'z-[1500] duration-0 dark:bg-gray-200/10 text-sm dark:text-gray-400 text-gray-500'}
+                    dragging={state.dragging}
+                    onSortStart={() => setState({dragging: true})}
+                    onSortEnd={move}
+                  />
+                }
+                {!state.spaces.length &&
+                  <div className={'text-center py-2 text-[13px] dark:text-gray-400 text-gray-500'}>
+                    No document space has been created yet
+                  </div>
+                }
               </div>
             )}
           >
@@ -140,7 +185,7 @@ export const Tree = observer(() => {
           </div>
         }
         {!treeStore.loading && !treeStore.root &&
-          <TreeEmpty/>
+          <TreeEmpty spaces={state.spaces}/>
         }
         {!!treeStore.root && !treeStore.loading &&
           <>

@@ -55,6 +55,9 @@ devDependencies:
   '@iconify/react':
     specifier: ^4.1.1
     version: 4.1.1(react@18.2.0)
+  '@types/array-move':
+    specifier: ^2.0.0
+    version: 2.0.0
   '@types/mime-types':
     specifier: ^2.1.1
     version: 2.1.1
@@ -88,6 +91,9 @@ devDependencies:
   antd:
     specifier: ^5.13.2
     version: 5.14.2(react-dom@18.2.0)(react@18.2.0)
+  array-move:
+    specifier: ^4.0.0
+    version: 4.0.0
   compare-versions:
     specifier: ^6.1.0
     version: 6.1.0
@@ -151,6 +157,9 @@ devDependencies:
   react-dom:
     specifier: ^18.2.0
     version: 18.2.0(react@18.2.0)
+  react-sortable-hoc:
+    specifier: ^2.0.0
+    version: 2.0.0(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0)
   react-use:
     specifier: ^17.4.0
     version: 17.4.0(react-dom@18.2.0)(react@18.2.0)
@@ -1454,6 +1463,13 @@ packages:
     engines: {node: '>= 10'}
     dev: true
 
+  /@types/array-move@2.0.0:
+    resolution: {integrity: sha512-M1Sb7db3XP65S2j5CWvzce2z0ORRfT/Bhd6mYu++nP6ZhRsntMixavFyxgf9NkQa37bveuIfpb0RKYRA8XVcGQ==}
+    deprecated: This is a stub types definition. array-move provides its own type definitions, so you do not need this installed.
+    dependencies:
+      array-move: 4.0.0
+    dev: true
+
   /@types/cacheable-request@6.0.3:
     resolution: {integrity: sha512-IQ3EbTzGxIigb1I3qPZc1rWJnH0BmSKv5QYTalEwweFvyBDLSAe24zP0le/hyi7ecGfZVlIVAg4BZqb8WBwKqw==}
     dependencies:
@@ -2114,6 +2130,11 @@ packages:
 
   /argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
+
+  /array-move@4.0.0:
+    resolution: {integrity: sha512-+RY54S8OuVvg94THpneQvFRmqWdAHeqtMzgMW6JNurHxe8rsS07cHQdfGkXnTUXiBcyZ0j3SiDIxxj0RPiqCkQ==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    dev: true
 
   /array-tree-filter@2.1.0:
     resolution: {integrity: sha512-4ROwICNlNw/Hqa9v+rk5h22KjmzB1JGTMVKP2AKJBOCgb0yL0ASf0+YvCcLNNwquOHNX48jkeZIJ3a+oOQqKcw==}
@@ -3904,6 +3925,12 @@ packages:
   /internmap@2.0.3:
     resolution: {integrity: sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==}
     engines: {node: '>=12'}
+    dev: true
+
+  /invariant@2.2.4:
+    resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
+    dependencies:
+      loose-envify: 1.4.0
     dev: true
 
   /is-binary-path@2.1.0:
@@ -5962,7 +5989,7 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
     dependencies:
-      '@babel/runtime': 7.22.11
+      '@babel/runtime': 7.23.9
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-is: 16.13.1
@@ -6031,6 +6058,20 @@ packages:
   /react-refresh@0.14.0:
     resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
     engines: {node: '>=0.10.0'}
+    dev: true
+
+  /react-sortable-hoc@2.0.0(prop-types@15.8.1)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-JZUw7hBsAHXK7PTyErJyI7SopSBFRcFHDjWW5SWjcugY0i6iH7f+eJkY8cJmGMlZ1C9xz1J3Vjz0plFpavVeRg==}
+    peerDependencies:
+      prop-types: ^15.5.7
+      react: ^16.3.0 || ^17.0.0
+      react-dom: ^16.3.0 || ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.23.9
+      invariant: 2.2.4
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: true
 
   /react-universal-interface@0.6.2(react@18.2.0)(tslib@2.6.2):
@@ -6256,7 +6297,7 @@ packages:
   /rtl-css-js@1.16.1:
     resolution: {integrity: sha512-lRQgou1mu19e+Ya0LsTvKrVJ5TYUbqCVPAiImX3UfLTenarvPUl1QFdvu5Z3PYmHT9RCcwIfbjRQBntExyj3Zg==}
     dependencies:
-      '@babel/runtime': 7.22.11
+      '@babel/runtime': 7.23.9
     dev: true
 
   /run-parallel@1.2.0:

@@ -16,6 +16,8 @@ import {runInAction} from 'mobx'
 
 export const editSpace$ = new Subject<string | null>()
 
+export const spaceChange$ = new Subject()
+
 export const EditSpace = observer(() => {
   const [state, setState] = useLocalState({
     open: false,
@@ -62,6 +64,12 @@ export const EditSpace = observer(() => {
             name: v.name,
             filePath: v.filePath
           })
+          if (state.spaceId === treeStore.root?.cid) {
+            runInAction(() => {
+              treeStore.root!.filePath = v.filePath
+              treeStore.root!.name = v.name
+            })
+          }
           setState({open: false})
         }
       } else {
@@ -88,6 +96,7 @@ export const EditSpace = observer(() => {
           })
           setState({open: false})
           treeStore.initial(id)
+          spaceChange$.next(null)
         }
       }
     })
@@ -167,6 +176,7 @@ export const EditSpace = observer(() => {
                         treeStore.tabs = [treeStore.createTab()]
                       })
                     }
+                    spaceChange$.next(null)
                     setState({open: false})
                   }
                 })
