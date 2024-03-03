@@ -24,7 +24,7 @@ const tabIndex = new Map([
 ])
 const closeMenu$ = new Subject()
 
-const SortSpaceItem = SortableElement<{s: ISpace, dragging: boolean}>(({s, dragging}) => {
+const SortSpaceItem = SortableElement<{s: ISpace, dragging: string}>(({s, dragging}) => {
   return (
     <SpaceItem
       key={s.cid} item={s}
@@ -41,7 +41,7 @@ const SortSpaceItem = SortableElement<{s: ISpace, dragging: boolean}>(({s, dragg
     />
   )
 })
-const SortSpaceContainer = SortableContainer<{items: ISpace[], dragging: boolean}>((props: {items: ISpace[], dragging: boolean}) => {
+const SortSpaceContainer = SortableContainer<{items: ISpace[], dragging: string}>((props: {items: ISpace[], dragging: string}) => {
   return (
     <div className={'overflow-y-auto max-h-[400px]'}>
       {props.items.map((item, index) => <SortSpaceItem s={item} index={index} key={item.cid} dragging={props.dragging}/>)}
@@ -52,7 +52,7 @@ export const Tree = observer(() => {
   const [state, setState] = useLocalState({
     openMenu: false,
     spaces: [] as ISpace[],
-    dragging: false
+    dragging: ''
   })
 
   const getSpace = useCallback(() => {
@@ -79,7 +79,7 @@ export const Tree = observer(() => {
       state.spaces.map((s, i) => db.space.update(s.cid, {sort: i}))
     }
     setTimeout(() => {
-      setState({dragging: false})
+      setState({dragging: ''})
     }, 200)
   }, [])
   return (
@@ -122,9 +122,11 @@ export const Tree = observer(() => {
                   <SortSpaceContainer
                     items={state.spaces}
                     pressDelay={100}
-                    helperClass={'z-[1500] duration-0 dark:bg-gray-200/10 text-sm dark:text-gray-400 text-gray-500'}
+                    helperClass={'z-[1500] duration-0 dark:bg-gray-200/10 bg-gray-200/80 text-sm dark:text-gray-400 text-gray-500'}
                     dragging={state.dragging}
-                    onSortStart={() => setState({dragging: true})}
+                    onSortStart={(item) => {
+                      setState({dragging: state.spaces[item.index].cid})
+                    }}
                     onSortEnd={move}
                   />
                 }

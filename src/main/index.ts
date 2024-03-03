@@ -1,4 +1,4 @@
-import {app, BrowserWindow, dialog, globalShortcut, ipcMain, screen, shell} from 'electron'
+import {app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, screen, shell} from 'electron'
 import {existsSync, lstatSync} from 'fs'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, isDark, registerApi, windowOptions} from './api'
@@ -16,15 +16,16 @@ type WinOptions = {
 }
 const windows = new Map<number, WinOptions>()
 app.setAsDefaultProtocolClient('bluestone-markdown')
+
 let fileChangedWindow: BrowserWindow | null = null
-function createWindow(initial?: WinOptions): void {
-  const dark = isDark()
+function createWindow(initial?: WinOptions, ready?: (win: BrowserWindow) => void) {
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
     width,
     height,
     titleBarStyle: 'hiddenInset',
-    backgroundColor: dark ? '#222222' : '#ffffff',
+    autoHideMenuBar: true,
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#191919' : '#ffffff',
     ...windowOptions
   })
   window.webContents.session.webRequest.onBeforeSendHeaders(
@@ -60,6 +61,7 @@ function createWindow(initial?: WinOptions): void {
   })
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
+    ready?.(window)
   })
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -101,53 +103,14 @@ app.on('will-finish-launching', () => {
     if (app.isReady() === false) {
       waitOpenFile = file
     } else {
-      openFiles(file)
+      // openFiles(file)
     }
   })
   app.on('open-url', (event, url) => {
     BrowserWindow.getFocusedWindow()?.webContents.send('open-schema', url)
   })
 })
-ipcMain.on('open-history-path', (e, path: string) => {
-  openFiles(path)
-})
 
-const openFiles = (filePath: string) => {
-  try {
-    const win = Array.from(windows).find(w => {
-      return (w[1].openTabs?.includes(filePath) || w[1]?.openFolder === filePath) || (w[1].openFolder && filePath.startsWith(w[1].openFolder))
-    })
-    if (win && (win[1].openTabs?.includes(filePath) || win[1]?.openFolder === filePath)) {
-      BrowserWindow.fromId(win[0])?.focus()
-    } else {
-      try {
-        if (existsSync(filePath)) {
-          const isDir = lstatSync(filePath).isDirectory()
-          const curWin = BrowserWindow.getFocusedWindow()
-          if (!isDir) {
-            curWin?.webContents.send('open-path', filePath, true)
-          } else {
-            createWindow({
-              openFolder: filePath
-            })
-          }
-        }
-      } catch (e) {
-        if (process.mas) {
-          dialog.showOpenDialog({
-            defaultPath: filePath,
-            properties: ['openFile', 'openDirectory']
-          }).then(res => {
-            if (res.filePaths.length) {
-              openFiles(res.filePaths[0])
-            }
-          })
-        }
-      }
-    }
-  } catch (e) {
-  }
-}
 app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
@@ -166,7 +129,7 @@ app.whenReady().then(() => {
   new AppUpdate()
   ipcMain.on('create-window', (e, filePath?: string) => {
     if (filePath) {
-      openFiles(filePath)
+      // openFiles(filePath)
     } else {
       createWindow()
     }
@@ -243,16 +206,12 @@ app.whenReady().then(() => {
     }
   }
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
     }
   })
 })
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()

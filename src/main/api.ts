@@ -21,9 +21,9 @@ export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
 import log from 'electron-log'
+
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
-  // autoHideMenuBar: true,
   ...(process.platform === 'linux' ? {icon} : {}),
   minWidth: 700,
   minHeight: 400,

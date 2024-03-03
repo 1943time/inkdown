@@ -74,8 +74,8 @@ const MenuRender = observer((props: {
                 onMouseLeave={e => {
                   setState({visibleIndex:  - 1})
                 }}
-                className={`whitespace-nowrap relative group py-0.5 px-2 cursor-pointer
-                ${m.disabled ? 'cursor-not-allowed dark:cursor-not-allowed text-gray-300 dark:text-gray-500' : 'dark:hover:bg-blue-600 hover:bg-blue-500 hover:text-gray-100 dark:hover:text-gray-100 text-gray-700 dark:text-gray-300'}
+                className={`whitespace-nowrap relative group py-0.5 px-2
+                ${m.disabled ? 'cursor-not-allowed text-gray-400 dark:text-gray-400' : 'cursor-pointer dark:hover:bg-blue-600 hover:bg-blue-500 hover:text-gray-100 dark:hover:text-gray-100 text-gray-700 dark:text-gray-200'}
                 rounded flex items-center justify-between select-none`}
                 onClick={(e) => {
                   if (m.disabled) {
