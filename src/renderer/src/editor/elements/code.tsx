@@ -33,6 +33,7 @@ const langOptions = allLanguages.map(l => {
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
+
   const [state, setState] = useGetSetState({
     lang: props.element.language?.toLowerCase() || '',
     editable: false,
@@ -80,13 +81,18 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   }, [props.element])
   return (
     <CodeCtx.Provider value={{lang: state().lang || '', code: true}}>
-      <div className={'code-container'}>
+      <div
+        className={'code-container'}
+        style={{
+          padding: state().hide ? 1 : undefined,
+          marginBottom: state().hide ? 0 : undefined
+        }}
+      >
         <div
           {...props.attributes}
           data-be={'code'}
           style={{
-            background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground,
-            marginBottom: (props.element.katex || props.element.render || state().lang === 'mermaid') ? 12 : ''
+            background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground
           }}
           onDragStart={store.dragStart}
           className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>

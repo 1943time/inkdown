@@ -8,6 +8,7 @@ import {openMdParserHandle} from '../editor/parser/parser'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {mediaType} from '../editor/utils/dom'
 import {readFile} from 'fs/promises'
+import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) => {
   Object.defineProperty(node, 'parent', {
     configurable: true,
@@ -141,18 +142,7 @@ export class ReadSpace {
     }
     return observable(tree)
   }
-  async getTree() {
-    const space = await db.space.get(this.spaceId)
-    if (!space) return null
-    this.spaceNode = observable({
-      cid: space.cid,
-      root: true,
-      filePath: space.filePath,
-      name: space.name
-    } as ISpaceNode)
-    const docs = await db.file.where('spaceId').equals(space.cid).toArray()
-    this.fileMap = new Map(docs.map(d => [d.filePath, d]))
-    const filesTree = this.read(space.filePath)
+  private async parser(files: IFile[]) {
     if (this.newNote.length) {
       const {parser, terminate} = openMdParserHandle()
       try {
@@ -188,8 +178,40 @@ export class ReadSpace {
       }
     }
     console.log('new', this.newNote.length)
-    const nodeTree = this.toNodeTree(filesTree)
+    const nodeTree = this.toNodeTree(files)
     runInAction(() => this.spaceNode.children = nodeTree)
     return {space: this.spaceNode, nodeMap: this.nodeMap}
+  }
+  async getTree():Promise<{space: ISpaceNode, nodeMap: Map<string, IFileItem>} | null> {
+    const space = await db.space.get(this.spaceId)
+    if (!space) return null
+    this.spaceNode = observable({
+      cid: space.cid,
+      root: true,
+      filePath: space.filePath,
+      name: space.name
+    } as ISpaceNode)
+    const docs = await db.file.where('spaceId').equals(space.cid).toArray()
+    this.fileMap = new Map(docs.map(d => [d.filePath, d]))
+    const filesTree = this.read(space.filePath)
+    if (!docs.length && this.fileMap.size > 5000) {
+      return new Promise((resolve, reject) => {
+        openConfirmDialog$.next({
+          title: 'Folder has too many contents',
+          description: 'This folder contains a large number of files, which may affect the application speed. Do you want to still open it?',
+          okText: 'Open',
+          cancelText: 'Delete Space',
+          onConfirm: async () => {
+            resolve(await this.parser(filesTree))
+          },
+          onClose: () => {
+            db.space.delete(this.spaceId)
+            resolve(null)
+          }
+        })
+      })
+    } else {
+      return this.parser(filesTree)
+    }
   }
 }

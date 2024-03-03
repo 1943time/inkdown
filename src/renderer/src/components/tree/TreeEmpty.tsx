@@ -3,26 +3,24 @@ import {MainApi} from '../../api/main'
 import {treeStore} from '../../store/tree'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {configStore} from '../../store/config'
+import {Icon} from '@iconify/react'
+import {editSpace$} from '../space/EditSpace'
 export const TreeEmpty = observer(() => {
   return (
     <div className={'h-full flex justify-center items-center text-gray-400'}>
-      <div className={'text-center text-sm space-y-2'}>
-        <div>
-          {configStore.zh ? '目录为空' : 'The directory is empty'}
+      <div className={'text-center space-y-2 px-4'}>
+        <div className={'text-pretty leading-5 text-[13px]'}>
+          {configStore.zh ? '暂未创建文档空间' : 'No document space has been created yet'}
         </div>
         <div
-          className={'cursor-pointer text-sky-500 hover:text-sky-600 duration-200'}
+          className={'cursor-pointer link flex justify-center items-center text-sm'}
           onClick={() => {
-            MainApi.selectFolder().then(res => {
-              if (!res.canceled && res.filePaths[0]) {
-                treeStore.openFolder(res.filePaths[0])
-              }
-            })
+            editSpace$.next(null)
           }}
         >
-          <FolderOpenOutlined/>
+          <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'}/>
           <span className={'ml-1'}>
-            {configStore.zh ? '打开文件夹' : 'Open folder'}
+            {configStore.zh ? '创建文档空间' : 'Create doc space'}
         </span>
         </div>
       </div>

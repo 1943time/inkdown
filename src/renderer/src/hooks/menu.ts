@@ -83,7 +83,7 @@ export const useSystemMenus = () => {
 
     const create = (e: any) => {
       MainApi.createNewFile({
-        defaultPath: treeStore.root?.filePath
+        defaultPath: treeStore.root?.filePath || ''
       }).then(res => {
         if (res.filePath) {
           // treeStore.openNote(res.filePath)
@@ -139,7 +139,7 @@ export const useSystemMenus = () => {
           onOk: async () => {
             let imgDirs: IFileItem[] = []
             if (configStore.config.relativePathForImageStore) {
-              const stack = treeStore.root.children!.slice()
+              const stack = treeStore.root?.children!.slice() || []
               const base = basename(configStore.config.imagesFolder)
               while (stack.length) {
                 const item = stack.shift()!
@@ -151,12 +151,12 @@ export const useSystemMenus = () => {
                 }
               }
             } else {
-              const item = treeStore.root.children?.find(item => item.filePath === join(treeStore.root.filePath, configStore.config.imagesFolder))
+              const item = treeStore.root?.children?.find(item => item.filePath === join(treeStore.root?.filePath || '', configStore.config.imagesFolder))
               if (item) imgDirs.push(item)
             }
             if (imgDirs.length) {
               const usedImages = new Set<string>()
-              const stack = treeStore.root.children!.slice()
+              const stack = treeStore.root?.children!.slice() || []
               while (stack.length) {
                 const item = stack.pop()!
                 if (item.folder) {

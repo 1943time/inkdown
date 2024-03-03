@@ -4,9 +4,10 @@ import {readdirSync, statSync} from 'fs'
 import {join} from 'path'
 
 export interface IRecent {
-  id?: string
+  id: string
   filePath: string
-  time: number
+  spaceId?: string
+  current?: boolean
 }
 
 export interface IQuickOpen {
@@ -20,6 +21,7 @@ export interface IHistory {
   id?: string
   filePath: string
   schema: any[]
+  spaceId?: string
   updated: number
 }
 
@@ -72,9 +74,9 @@ class Db extends Dexie {
     this.version(7).stores({
       space: '&cid,name,filePath,cloud,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId',
-      recent: '&id,&filePath',
+      recent: '&id,filePath,spaceId',
       quickOpen: '&id,filePath,dirPath',
-      history: '&id,filePath,schema,updated',
+      history: '&id,filePath,schema,spaceId,updated',
       tag: '&id,title',
       tagFile: '&id,filePath,tagId'
     })
@@ -153,41 +155,41 @@ export const saveRecord = async (filePath: string, schema: any[]) => {
   } catch (e) {console.error(e)}
 }
 export const appendRecentDir = async (filePath: string) => {
-  const item = await db.recent.where('filePath').equals(filePath).first()
-  if (item) {
-    await db.recent.where('id').equals(item.id!).modify({
-      time: Date.now()
-    })
-  } else {
-    await db.recent.add({
-      filePath, id: nanoid(), time: Date.now()
-    })
-    if (await db.recent.count() > 5) {
-      const records = await db.recent.toArray()
-      const old = records.sort((a, b) => a.time < b.time ? -1 : 1)[0]
-      await db.recent.where('id').equals(old.id!).delete()
-    }
-  }
+  // const item = await db.recent.where('filePath').equals(filePath).first()
+  // if (item) {
+  //   await db.recent.where('id').equals(item.id!).modify({
+  //     time: Date.now()
+  //   })
+  // } else {
+  //   await db.recent.add({
+  //     filePath, id: nanoid(), time: Date.now()
+  //   })
+  //   if (await db.recent.count() > 5) {
+  //     const records = await db.recent.toArray()
+  //     const old = records.sort((a, b) => a.time < b.time ? -1 : 1)[0]
+  //     await db.recent.where('id').equals(old.id!).delete()
+  //   }
+  // }
 }
 
-let timer = 0
+// let timer = 0
 export const appendRecentNote = async (filePath: string, dirPath: string) => {
-  clearTimeout(timer)
-  timer = window.setTimeout(async () => {
-    const item = await db.quickOpen.filter(obj => obj.dirPath === dirPath && obj.filePath === filePath).first()
-    if (item) {
-      await db.quickOpen.where('id').equals(item.id!).modify({
-        time: Date.now()
-      })
-    } else {
-      await db.quickOpen.add({
-        filePath, dirPath, id: nanoid(), time: Date.now()
-      })
-      if (await db.quickOpen.where('dirPath').equals(dirPath).count() > 100) {
-        const records = await db.quickOpen.toArray()
-        const old = records.sort((a, b) => a.time < b.time ? -1 : 1)[0]
-        await db.quickOpen.where('id').equals(old.id!).delete()
-      }
-    }
-  }, 100)
+  // clearTimeout(timer)
+  // timer = window.setTimeout(async () => {
+  //   const item = await db.quickOpen.filter(obj => obj.dirPath === dirPath && obj.filePath === filePath).first()
+  //   if (item) {
+  //     await db.quickOpen.where('id').equals(item.id!).modify({
+  //       time: Date.now()
+  //     })
+  //   } else {
+  //     await db.quickOpen.add({
+  //       filePath, dirPath, id: nanoid(), time: Date.now()
+  //     })
+  //     if (await db.quickOpen.where('dirPath').equals(dirPath).count() > 100) {
+  //       const records = await db.quickOpen.toArray()
+  //       const old = records.sort((a, b) => a.time < b.time ? -1 : 1)[0]
+  //       await db.quickOpen.where('id').equals(old.id!).delete()
+  //     }
+  //   }
+  // }, 100)
 }

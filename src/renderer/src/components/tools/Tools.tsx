@@ -55,34 +55,29 @@ export const Tools = observer(() => {
           transitionProperty: 'opacity,border'
         }}
         className={`system-tools select-none absolute right-5 p-1 space-y-2 ${state.open ? 'text-zinc-600 dark:text-zinc-300' : 'dark:text-zinc-500 dark:hover:text-zinc-300 text-zinc-400 hover:text-zinc-600'}
-      z-50 w-10 flex flex-col justify-between rounded `}
+      z-50 w-10 flex flex-col justify-between rounded *:w-full *:py-2 *:flex *:justify-center *:items-center *:rounded *:duration-200 *:cursor-pointer`}
       >
         <div
           onClick={() => openTab('insert')}
-          className={`${state.tab === 'insert' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}
-            w-full py-2 flex justify-center items-center rounded duration-200 cursor-pointer
-          `}>
+          className={`${state.tab === 'insert' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}`}>
           <Icon icon={'mingcute:add-line'} className={'text-lg'}/>
         </div>
         <div
           onClick={() => {
             openTab('style')
           }}
-          className={`${state.tab === 'style' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}
-            w-full py-2 flex justify-center items-center rounded duration-200 cursor-pointer`}>
+          className={`${state.tab === 'style' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}`}>
           <IFormat className={'text-lg'}/>
         </div>
         <div
           onClick={() => {
             openTab('actions')
           }}
-          className={`${state.tab === 'actions' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}
-            w-full py-2 flex justify-center items-center rounded duration-200 cursor-pointer`}>
+          className={`${state.tab === 'actions' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}`}>
           <Command className={'text-lg'}/>
         </div>
         <div
-          className={`dark:hover:bg-gray-200/5 hover:bg-gray-200/60
-            w-full py-2 flex justify-center items-center rounded duration-200 cursor-pointer`}>
+          className={`dark:hover:bg-gray-200/5 hover:bg-gray-200/60`}>
           <QuestionCircleOutlined className={'text-base leading-7'}/>
         </div>
       </div>

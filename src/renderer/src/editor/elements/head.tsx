@@ -23,7 +23,7 @@ export function Head({element, attributes, children}: ElementProps<HeadNode>) {
       onDragStart: store.dragStart
     }, (
       <>
-        <DragHandle style={{left: -28, paddingRight: 10}} top={levelDragHandleTop.get(element.level)!}/>
+        <DragHandle style={{left: -28, paddingRight: 10}}/>
         {children}
       </>
     ))

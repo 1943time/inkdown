@@ -93,7 +93,7 @@ export const Empty = observer(() => {
                 <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'}/>
                 <span
                   className={'ml-2'}>
-                  {configStore.zh ? '创建工作空间' : 'Create a workspace'}
+                  {configStore.zh ? '创建文档空间' : 'Create doc space'}
                 </span>
               </div>
             </>

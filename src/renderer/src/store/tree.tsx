@@ -25,7 +25,7 @@ import {updateFilePath, updateNode} from '../editor/utils/updateNode'
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   nodeMap = new Map<string, IFileItem>()
-  root!: ISpaceNode
+  root: ISpaceNode | null = null
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
   dropNode: IFileItem | ISpaceNode | null = null
@@ -68,7 +68,7 @@ export class TreeStore {
 
   get firstNote() {
     let firstNote: IFileItem | null = null
-    let stack = this.root.children?.slice() || []
+    let stack = this.root?.children?.slice() || []
     while (stack.length) {
       const item = stack.shift()!
       if (!item.folder && ['md', 'markdown'].includes(item.ext!)) {
@@ -217,7 +217,7 @@ export class TreeStore {
         break
       case 'shareFolder':
         if (this.ctxNode?.filePath || params.type === 'rootFolder') {
-          this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
+          // this.shareFolder$.next(params.type === 'rootFolder' ? treeStore.root?.filePath : this.ctxNode?.filePath!)
         }
         break
       case 'delete':

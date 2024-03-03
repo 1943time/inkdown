@@ -116,7 +116,7 @@ export class Book {
     let addChapter: SpaceDocMap[] = []
     for (let m of map) {
       if (!m.folder) {
-        const [schema] = await parserMdToSchema([m.md!], true)
+        const [schema] = await parserMdToSchema([m.md!])
         addChapter.push({
           path: m.path,
           hash: m.hash!,

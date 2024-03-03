@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react'
 import { ISpace } from '../../store/db'
 import { MoreOutlined } from '@ant-design/icons'
 import {treeStore} from '../../store/tree'
+import {editSpace$} from './EditSpace'
 
 export const SpaceItem = observer((props: {
   item: ISpace
@@ -28,9 +29,9 @@ export const SpaceItem = observer((props: {
       }
       <div
         onClick={(e) => {
-          // e.stopPropagation()
-          // props.onEdit()
-          // openCreateSpace$.next(props.item.id!)
+          e.stopPropagation()
+          props.onEdit()
+          editSpace$.next(props.item.cid!)
         }}
         className={'absolute right-1 top-1/2 dark:text-gray-400 hover:dark:bg-gray-100/10 rounded py-0.5 -translate-y-1/2 group-hover:visible invisible flex items-center'}>
         <MoreOutlined className={'text-lg'}/>

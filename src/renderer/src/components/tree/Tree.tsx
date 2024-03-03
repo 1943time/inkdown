@@ -11,6 +11,8 @@ import Folder from '../../icons/Folder'
 import {FullSearch} from '../FullSearch'
 import {TreeRender} from './TreeRender'
 import {openContextMenu} from './openContextMenu'
+import {editSpace$} from '../space/EditSpace'
+import {TreeEmpty} from './TreeEmpty'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -28,6 +30,7 @@ export const Tree = observer(() => {
       setState({spaces: res})
     })
   }, [])
+
   return (
     <div
       className={'flex-shrink-0 b1 tree-bg h-full width-duration border-r pt-[40px] overflow-hidden duration-200'}
@@ -51,38 +54,39 @@ export const Tree = observer(() => {
             }}
             overlayInnerStyle={{padding: 0}}
             content={(
-              <div className={'w-80 pb-2 pt-2'}>
-                {/*<div className={'flex justify-between items-center text-xs h-8 dark:text-gray-500'}>*/}
-                {/*  <span className={'pl-3'}>1943dejavu@gmail.com</span>*/}
-                {/*  <div className={'rounded duration-200 hover:bg-gray-200/10 p-1 cursor-pointer mr-2'}>*/}
-                {/*    <Icon icon={'ic:outline-account-circle'} className={'text-base'} />*/}
-                {/*  </div>*/}
-                {/*</div>*/}
-                {state.spaces.map(s =>
-                  <SpaceItem
-                    key={s.cid} item={s}
-                    onClick={() => {
-                      if (treeStore.root?.cid !== s.cid) {
-                        treeStore.initial(s.cid)
-                      }
-                      setState({openMenu: false})
-                    }}
-                    onEdit={() => {
-                      setState({openMenu: false})
-                    }}
-                  />
-                )}
-                <div className={'dark:bg-gray-200/10 h-[1px] my-2'}></div>
-                <div className={'px-2 text-gray-400 text-sm'}>
+              <div className={'w-80 pt-1 pb-2'}>
+                <div className={'flex justify-between items-center text-sm h-7 dark:text-gray-400 text-gray-500'}>
+                  <span className={'pl-3'}>Space</span>
                   <div
-                    className={'px-2 py-1 dark:hover:bg-gray-200/10 duration-200 rounded cursor-pointer'}
+                    className={'rounded duration-200 hover:bg-gray-200/10 p-1 cursor-pointer mr-2'}
                     onClick={() => {
                       setState({openMenu: false})
-                      // openCreateSpace$.next(null)
+                      editSpace$.next(null)
                     }}
                   >
-                    Create doc space
+                    <Icon icon={'mingcute:add-line'} className={'text-base'}/>
                   </div>
+                </div>
+                <div className={'overflow-y-auto max-h-[400px]'}>
+                  {!state.spaces.length &&
+                    <div className={'text-center py-2 text-[13px] dark:text-gray-400 text-gray-500'}>
+                      No document space has been created yet
+                    </div>
+                  }
+                  {state.spaces.map(s =>
+                    <SpaceItem
+                      key={s.cid} item={s}
+                      onClick={() => {
+                        if (treeStore.root?.cid !== s.cid) {
+                          treeStore.initial(s.cid)
+                        }
+                        setState({openMenu: false})
+                      }}
+                      onEdit={() => {
+                        setState({openMenu: false})
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -117,7 +121,7 @@ export const Tree = observer(() => {
             }
           </Popover>
         </div>
-        {!treeStore.root && treeStore.loading &&
+        {treeStore.loading &&
           <div
             className={'p-4 w-full'}
           >
@@ -135,7 +139,10 @@ export const Tree = observer(() => {
             />
           </div>
         }
-        {!!treeStore.root &&
+        {!treeStore.loading && !treeStore.root &&
+          <TreeEmpty/>
+        }
+        {!!treeStore.root && !treeStore.loading &&
           <>
             <div className={'h-[calc(100vh_-_76px)] flex flex-col'}>
               <div className={'h-7 mb-3 mt-3 px-4 flex-shrink-0'}>
@@ -167,7 +174,7 @@ export const Tree = observer(() => {
                 })}
                 onContextMenu={e => {
                   if (treeStore.treeTab === 'folder') {
-                    openContextMenu(e, treeStore.root)
+                    openContextMenu(e, treeStore.root!)
                   }
                 }}
               >

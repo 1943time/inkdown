@@ -10,18 +10,46 @@ import {useCallback} from 'react'
 import {db} from '../../store/db'
 import {nid} from '../../utils'
 import {treeStore} from '../../store/tree'
+import {Icon} from '@iconify/react'
+import {openConfirmDialog$} from '../Dialog/ConfirmDialog'
+import {runInAction} from 'mobx'
 
 export const editSpace$ = new Subject<string | null>()
+
 export const EditSpace = observer(() => {
   const [state, setState] = useLocalState({
     open: false,
-    spaceId: ''
+    spaceId: '',
+    spaceName: ''
   })
+
   const [form] = Form.useForm()
   useSubject(editSpace$, (spaceId) => {
     form.resetFields()
-    setState({open: true, spaceId: spaceId || ''})
+    if (spaceId) {
+      db.space.get(spaceId).then(res => {
+        if (res) {
+          form.setFieldsValue({
+            name: res.name,
+            filePath: res.filePath
+          })
+          setState({spaceName: res.name, spaceId, open: true})
+        }
+      })
+    } else {
+      setState({open: true, spaceId: '', spaceName: ''})
+    }
   })
+
+  const validate = useCallback(async (filePath: string, spaceId?: string) => {
+    const includeSpace = await db.space.filter(s => filePath.startsWith(s.filePath)).first()
+    if (includeSpace && (!spaceId || includeSpace.cid !== spaceId)) {
+      form.setFields([{name: 'filePath', errors: ['The folder is already included in another space'], validated: false}])
+      return false
+    }
+    return true
+  }, [])
+
   const save = useCallback(() => {
     form.validateFields().then(async v => {
       if (state.spaceId) {
@@ -29,10 +57,12 @@ export const EditSpace = observer(() => {
         if (record?.name === v.name && record?.filePath === v.filePath) {
           setState({open: false})
         } else {
+          if (!await validate(v.filePath, state.spaceId)) return
           await db.space.update(state.spaceId, {
             name: v.name,
             filePath: v.filePath
           })
+          setState({open: false})
         }
       } else {
         const exist = await db.space.filter(s => s.name === v.name || s.filePath === v.filePath).first()
@@ -44,6 +74,7 @@ export const EditSpace = observer(() => {
             form.setFields([{name: 'filePath', errors: ['The folder is already used by another space'], validated: false}])
           }
         } else {
+          if (!await validate(v.filePath)) return
           const count = await db.space.count()
           const now = Date.now()
           const id = nid()
@@ -56,7 +87,6 @@ export const EditSpace = observer(() => {
             created: now
           })
           setState({open: false})
-          console.log('start')
           treeStore.initial(id)
         }
       }
@@ -66,12 +96,18 @@ export const EditSpace = observer(() => {
     <Modal
       width={420}
       open={state.open}
-      title={configStore.zh ? '创建文档空间' : 'Create doc space'}
-      closable={false}
+      title={(
+        <div className={'flex items-center'}>
+          <Icon icon={'material-symbols:workspaces-outline'} className={'mr-1'}/>
+          {state.spaceId ? state.spaceName : configStore.zh ? '创建文档空间' : 'Create doc space'}
+        </div>
+      )}
+      onCancel={() => setState({open: false})}
       footer={null}
     >
       <Form
         layout={'vertical'}
+        className={'pt-2'}
         form={form}
       >
         <Form.Item
@@ -106,9 +142,39 @@ export const EditSpace = observer(() => {
             </Button>
           </Space.Compact>
         </Form.Item>
-        <div className={'flex'}>
-          <Button className={'flex-1'} onClick={() => setState({open: false})}>Cancel</Button>
-          <Button type={'primary'} className={'flex-1 ml-4'} onClick={save}>Save</Button>
+        <div className={'space-y-3'}>
+          <Button block={true} type={'primary'} onClick={save}>{state.spaceId ? configStore.zh ? '保存' : 'Save' : configStore.zh ? '创建' : 'Create'}</Button>
+          {!!state.spaceId &&
+            <Button
+              block={true} danger={true}
+              onClick={() => {
+                openConfirmDialog$.next({
+                  title: 'Do you want to delete this space?',
+                  description: 'Deleting space does not delete real files.',
+                  okText: 'Delete',
+                  onConfirm: async () => {
+                    await db.file.where('spaceId').equals(state.spaceId).delete()
+                    await db.recent.where('spaceId').equals(state.spaceId).delete()
+                    await db.history.where('spaceId').equals(state.spaceId).delete()
+                    await db.space.delete(state.spaceId)
+                    const space = await db.space.reverse().first()
+                    if (space) {
+                      treeStore.initial(space.cid)
+                    } else {
+                      runInAction(() => {
+                        treeStore.root = null
+                        treeStore.nodeMap.clear()
+                        treeStore.tabs = [treeStore.createTab()]
+                      })
+                    }
+                    setState({open: false})
+                  }
+                })
+              }}
+            >
+              Delete
+            </Button>
+          }
         </div>
       </Form>
     </Modal>

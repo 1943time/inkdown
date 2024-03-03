@@ -284,6 +284,7 @@ export class EditorStore {
 
   private async createDir(path: string) {
     try {
+      if (!treeStore.root) return
       let rootPath = treeStore.root.filePath
       const stack = path.replace(rootPath, '').split(sep).slice(1)
       while (stack.length) {

@@ -144,7 +144,7 @@ export class ShareStore {
     const md = readFileSync(filePath, {encoding: 'utf-8'})
     const hash = window.api.md5(md)
     if (hash !== remote.doc.hash) {
-      const [schema] = await parserMdToSchema([md], true)
+      const [schema] = await parserMdToSchema([md])
       const filesSet = await this.file.docFile({
         schema, docId: remote.doc.id, files: remote.deps, filePath, root
       })

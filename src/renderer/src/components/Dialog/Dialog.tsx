@@ -46,7 +46,7 @@ export const Dialog = observer((props: {
   }, [props.open])
   if (!state.open) return null
   return (
-    <div className={`fixed inset-0 z-[300] dark:bg-black/30 bg-black/20 duration-200 ${state.visible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`fixed inset-0 z-[2100] dark:bg-black/30 bg-black/20 duration-200 ${state.visible ? 'opacity-100' : 'opacity-0'}`}>
       <div
         className={`w-full h-full flex items-center justify-center overflow-auto py-10 flex-wrap`}
         onClick={close}

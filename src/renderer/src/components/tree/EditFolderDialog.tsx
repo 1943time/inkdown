@@ -34,7 +34,7 @@ export const EditFolderDialog = observer(() => {
     const name = state.name.trim()
     if (name) {
       if (state.mode === 'create') {
-        const stack = state.ctxNode? state.ctxNode.children! : treeStore.root.children!
+        const stack = state.ctxNode? state.ctxNode.children! : treeStore.root!.children!
         if (stack.some(s => s.filename === name && s.folder)) {
           return setState({message: 'The folder already exists'})
         }
@@ -42,8 +42,8 @@ export const EditFolderDialog = observer(() => {
         const now = Date.now()
         const data:IFile = {
           cid: id,
-          filePath: state.ctxNode ? join(state.ctxNode.filePath, name) : join(treeStore.root.filePath, name),
-          spaceId: treeStore.root.cid,
+          filePath: state.ctxNode ? join(state.ctxNode.filePath, name) : join(treeStore.root!.filePath, name),
+          spaceId: treeStore.root!.cid,
           updated: now,
           sort: 0,
           folder: true,
@@ -52,7 +52,7 @@ export const EditFolderDialog = observer(() => {
         await db.file.add(data)
         mkdirSync(data.filePath)
         runInAction(() => {
-          const node = createFileNode(data, state.ctxNode || treeStore.root)
+          const node = createFileNode(data, state.ctxNode || treeStore.root!)
           stack.unshift(node)
           stack.map((s, i) => {
             db.file.update(s.cid, {sort: i})
@@ -60,7 +60,7 @@ export const EditFolderDialog = observer(() => {
         })
       } else if (state.ctxNode) {
         const ctx = state.ctxNode
-        const stack = ctx.parent? ctx.parent.children! : treeStore.root.children!
+        const stack = ctx.parent? ctx.parent.children! : treeStore.root!.children!
         if (stack.some(s => s.filename === name && s.folder && s.cid !== ctx.cid)) {
           return setState({message: 'The folder already exists'})
         }

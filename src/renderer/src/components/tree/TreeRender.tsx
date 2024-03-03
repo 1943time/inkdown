@@ -32,7 +32,7 @@ export const TreeRender = observer(() => {
         <div
           className={'duration-200 dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer'}
           onClick={e =>{
-            openContextMenu(e, treeStore.root)
+            openContextMenu(e, treeStore.root!)
           }}
         >
           <PlusCircleOutlined/>
