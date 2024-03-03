@@ -4,7 +4,7 @@ import {action, runInAction} from 'mobx'
 import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {Subject} from 'rxjs'
 import {ReactEditor} from 'slate-react'
-import {message$} from '../utils'
+import {message$, nid} from '../utils'
 import {configStore} from '../store/config'
 import {treeStore} from '../store/tree'
 import {parserMdToSchema} from '../editor/parser/parser'
@@ -13,6 +13,7 @@ import {MainApi} from '../api/main'
 import {IFileItem, ISpaceNode, Methods} from '../index'
 import {useSubject} from './subscribe'
 import {createDoc} from '../components/tree/openContextMenu'
+import {db} from '../store/db'
 
 export class KeyboardTask {
   get store() {
@@ -407,15 +408,31 @@ export class KeyboardTask {
   save() {
     if (treeStore.openedNote) {
       const node = treeStore.openedNote
-      if (!node.filePath) {
-        // if (configStore.desktop) {
-        //   window.api.saveMarkdownDialog().then(res => {
-        //     if (res.filePath) {
-        //       node.filePath = res.filePath
-        //       treeStore.currentTab.store.saveDoc$.next(null)
-        //     }
-        //   })
-        // }
+      if (node.ghost) {
+        MainApi.createNewFile({
+          defaultPath: node.filename
+        }).then(res => {
+          if (res.filePath) {
+            const id = nid()
+            runInAction(() => {
+              node.ghost = false
+              node.filePath = res.filePath!
+              node.cid = id
+            })
+            const now = Date.now()
+            db.file.add({
+              filePath: res.filePath,
+              created: now,
+              folder: false,
+              sort: 0,
+              schema: node.schema,
+              cid: id,
+              lastOpenTime: now
+            }).then(() => {
+              treeStore.currentTab.store.saveDoc$.next(null)
+            })
+          }
+        })
       } else {
         treeStore.currentTab.store.saveDoc$.next(null)
       }
@@ -456,14 +473,17 @@ export class KeyboardTask {
     } catch (e) {
     }
   }
+
   newNote() {
     if (treeStore.root) {
       let parent: ISpaceNode | IFileItem = treeStore.root
       if (treeStore.selectItem) parent = treeStore.selectItem.folder ? treeStore.selectItem : treeStore.selectItem.parent!
       else if (treeStore.openedNote) parent = treeStore.openedNote.parent!
-      createDoc(parent)
+      createDoc({parent})
     } else {
-      createDoc()
+      createDoc({
+        ghost: true
+      })
     }
   }
 }

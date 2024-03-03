@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, ReactEditor, Slate} from 'slate-react'
-import {Editor, Element, Node, Range, Transforms} from 'slate'
+import {Editor, Element, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {clearAllCodeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -52,13 +52,11 @@ export const MEditor = observer(({note}: {
     ipcRenderer.send('file-saved')
     const node = nodeRef.current
     changedMark.current = false
-    if (node && store.docChanged) {
+    if (node?.schema && store.docChanged && !node.ghost) {
       runInAction(() => {
         store.docChanged = false
       })
-      if (node.schema) {
-        updateNode(node)
-      }
+      updateNode(node)
     }
   }, [note])
 
@@ -108,7 +106,8 @@ export const MEditor = observer(({note}: {
       try {
         runInAction(() => store.openLangCompletion = false)
         treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
-      } catch (e) {}
+      } catch (e) {
+      }
     }
     if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
       if (!changedMark.current) {
@@ -175,7 +174,8 @@ export const MEditor = observer(({note}: {
         first.current = true
         ReactEditor.blur(editor)
         EditorUtils.deleteAll(editor, note.schema)
-      } catch (e) {}
+      } catch (e) {
+      }
     }
   }, [note])
 
@@ -201,7 +201,7 @@ export const MEditor = observer(({note}: {
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer?.files?.length) return
     if (e.dataTransfer?.files?.length > 1) {
-       store.insertMultipleFiles(e.dataTransfer.files)
+      store.insertMultipleFiles(e.dataTransfer.files)
     } else {
       const file = e.dataTransfer.files[0]
       if (file) {

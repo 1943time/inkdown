@@ -80,93 +80,95 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   }, [props.element])
   return (
     <CodeCtx.Provider value={{lang: state().lang || '', code: true}}>
-      <div
-        {...props.attributes}
-        data-be={'code'}
-        style={{
-          background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground,
-          marginBottom: (props.element.katex || props.element.render || state().lang === 'mermaid') ? 12 : ''
-      }}
-        onDragStart={store.dragStart}
-        className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
-        <DragHandle/>
+      <div className={'code-container'}>
         <div
-          className={`absolute z-10 right-2 top-1 flex items-center select-none`}
-          contentEditable={false}>
-          {state().editable &&
-            <AutoComplete
-              size={'small'}
-              value={state().lang}
-              autoFocus={true}
-              options={langOptions}
-              style={{width: 130}}
-              filterOption={(text, item) => {
-                return item?.value.includes(text) || false
-              }}
-              onChange={e => {
-                setState({lang: e})
-              }}
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setLanguage()
-                }
-              }}
-              onBlur={setLanguage}
-              className={'lang-select'}
-            />
-          }
-          {!state().editable &&
-            <>
-              {props.element.language === 'html' && props.element.render &&
-                <Tooltip mouseEnterDelay={1} title={'render html'}>
-                  <EyeOutlined className={`mr-2 text-sky-500 hover:text-sky-600 duration-200`}/>
-                </Tooltip>
-              }
-              {!props.element.frontmatter &&
-                <div
-                  className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
-                  onClick={() => {
-                    if (!props.element.katex && !props.element.render) setState({editable: true})
-                  }}
-                >
-                  {props.element.language ?
-                    <span>{props.element.katex ? 'Formula' : props.element.language}</span> :
-                    <span>{'plain text'}</span>
+          {...props.attributes}
+          data-be={'code'}
+          style={{
+            background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground,
+            marginBottom: (props.element.katex || props.element.render || state().lang === 'mermaid') ? 12 : ''
+          }}
+          onDragStart={store.dragStart}
+          className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+          <DragHandle/>
+          <div
+            className={`absolute z-10 right-2 top-1 flex items-center select-none`}
+            contentEditable={false}>
+            {state().editable &&
+              <AutoComplete
+                size={'small'}
+                value={state().lang}
+                autoFocus={true}
+                options={langOptions}
+                style={{width: 130}}
+                filterOption={(text, item) => {
+                  return item?.value.includes(text) || false
+                }}
+                onChange={e => {
+                  setState({lang: e})
+                }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setLanguage()
                   }
-                </div>
-              }
-            </>
-          }
-        </div>
-        {configStore.config.codeLineNumber && !store.webview &&
-          <pre className={`code-line-list`} contentEditable={false}>
+                }}
+                onBlur={setLanguage}
+                className={'lang-select'}
+              />
+            }
+            {!state().editable &&
+              <>
+                {props.element.language === 'html' && props.element.render &&
+                  <Tooltip mouseEnterDelay={1} title={'render html'}>
+                    <EyeOutlined className={`mr-2 text-sky-500 hover:text-sky-600 duration-200`}/>
+                  </Tooltip>
+                }
+                {!props.element.frontmatter &&
+                  <div
+                    className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
+                    onClick={() => {
+                      if (!props.element.katex && !props.element.render) setState({editable: true})
+                    }}
+                  >
+                    {props.element.language ?
+                      <span>{props.element.katex ? 'Formula' : props.element.language}</span> :
+                      <span>{'plain text'}</span>
+                    }
+                  </div>
+                }
+              </>
+            }
+          </div>
+          {configStore.config.codeLineNumber && !store.webview &&
+            <pre className={`code-line-list`} contentEditable={false}>
             {(props.children || []).map((c, i) =>
               <div key={i}/>
             )}
           </pre>
-        }
-        {store.webview && !store.history ?
-          <pre
-            data-bl-type={'code'}
-            style={{
-              paddingLeft: configStore.config.codeLineNumber && !store.webview ? 44 : 20,
-              paddingRight: 20
-            }}
-            data-bl-lang={state().lang}
-            dangerouslySetInnerHTML={{__html: html}}
-          >
-          </pre> : (
+          }
+          {store.webview && !store.history ?
             <pre
               data-bl-type={'code'}
-              className={'code-content'}
+              style={{
+                paddingLeft: configStore.config.codeLineNumber && !store.webview ? 44 : 20,
+                paddingRight: 20
+              }}
               data-bl-lang={state().lang}
+              dangerouslySetInnerHTML={{__html: html}}
             >
+          </pre> : (
+              <pre
+                data-bl-type={'code'}
+                className={'code-content'}
+                data-bl-lang={state().lang}
+              >
               {child}
             </pre>
-          )
-        }
+            )
+          }
+        </div>
       </div>
       {props.element.language === 'mermaid' &&
         <Mermaid lines={props.element.children} el={props.element}/>

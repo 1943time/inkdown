@@ -14,27 +14,36 @@ import {runInAction} from 'mobx'
 import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
 
-export const createDoc = async (parent?: IFileItem | ISpaceNode, newName = 'Untitled', copyItem?: IFileItem) => {
+export const createDoc = async ({parent, newName, copyItem, ghost}: {
+  parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean
+}) => {
+  newName = newName || 'Untitled'
   const name = getCreateName(parent, newName)
   const id = nid()
   const now = Date.now()
-  let target = parent ? join(parent.filePath, name + '.md') : ''
+  let target = parent ? join(parent.filePath, name + '.md') : newName + '.md'
   const md = toMarkdown(copyItem?.schema || [EditorUtils.p])
-  writeFileSync(target, md , {encoding: 'utf-8'})
-  const s = statSync(target)
+  let updated = 0
+  if (target && !ghost) {
+    writeFileSync(target, md , {encoding: 'utf-8'})
+    const s = statSync(target)
+    updated = s.mtime.valueOf()
+  }
   const data:IFile = {
     cid: id,
     filePath: target,
     created: now,
     folder: false,
-    updated: s.mtime.valueOf(),
+    updated: updated,
     schema: JSON.parse(JSON.stringify(copyItem?.schema || [EditorUtils.p])),
     sort: 0,
     lastOpenTime: now,
     spaceId: parent ? parent.root ? parent.cid : parent.spaceId : undefined
   }
-  await db.file.add(data)
-  const newNode = createFileNode(data, parent)
+  if (!ghost) {
+    await db.file.add(data)
+  }
+  const newNode = createFileNode(data, parent, ghost)
   if (parent) {
     const index = copyItem ? parent!.children!.findIndex(n => n === copyItem) : parent.children!.length - 1
     runInAction(() => {
@@ -81,7 +90,11 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         {
           text: configStore.zh ? '新副本' : 'New Copy',
           click: async () => {
-            createDoc(node.parent!, node.filename, node)
+            createDoc({
+              parent: node.parent,
+              newName: node.filename,
+              copyItem: node
+            })
           }
         },
         {hr: true},
@@ -116,7 +129,9 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       {
         text: configStore.zh ? '新建文档' : 'New Doc',
         click: () => {
-          createDoc(node)
+          createDoc({
+            parent: node
+          })
         }
       },
       {

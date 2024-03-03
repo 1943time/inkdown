@@ -32,6 +32,10 @@ export const Nav = observer(() => {
         setState({
           path: treeStore.openedNote.filePath.replace(treeStore.root?.filePath! + '/', '').split(sep)
         })
+      } else {
+        setState({
+          path: treeStore.openedNote.filePath.replace(configStore.homePath, '~').split(sep)
+        })
       }
     } else {
       setState({path: []})

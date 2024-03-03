@@ -408,7 +408,10 @@ ol.m-list {
   margin: 2em 0;
   border: none;
 }
-
+.code-container{
+  padding:4px 0;
+  margin-bottom: .5em;
+}
 .code-highlight {
   @apply border border-black/10 dark:border-gray-200/10 dark:text-gray-400 text-gray-500;
   background: var(--md-code-bg);
@@ -423,7 +426,6 @@ ol.m-list {
   position: relative;
   line-height: 1.62em;
   direction: ltr;
-  margin-bottom: 0.5em;
   &.frontmatter{
     &:before{
       top:2px;

@@ -17,7 +17,7 @@ export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) =>
   })
 }
 
-export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => {
+export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode, ghost = false) => {
   const name = file.folder ? file.filePath.split(sep).pop() : parse(file.filePath).name
   const node = {
     cid: file.cid,
@@ -27,6 +27,7 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode) => 
     children: file.folder ? [] : undefined,
     filePath: file.filePath,
     schema: file.schema,
+    ghost,
     history: undefined,
     sel: undefined,
     hidden: name?.startsWith('.'),

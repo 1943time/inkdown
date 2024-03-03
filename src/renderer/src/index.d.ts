@@ -21,9 +21,9 @@ export type IFileItem = {
   children?: IFileItem[]
   expand?: boolean
   editName?: string
-  independent?: boolean
   changed?: boolean
   refresh?: boolean
+  ghost?: boolean
   sort: number
   schema?: any[]
   history?: any

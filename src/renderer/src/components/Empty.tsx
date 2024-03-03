@@ -35,7 +35,7 @@ export const Empty = observer(() => {
   return (
     <div className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}>
       <div className={'relative -top-12'}>
-        <div className={'flex-col space-y-5 text-indigo-600 '}>
+        <div className={'flex-col space-y-5 text-indigo-500 '}>
           <div className={'dark:text-gray-400 text-gray-600 flex items-center'}>
             <img src={logo} alt="" className={'w-5 h-5 mr-2 dark:shadow-none shadow shadow-gray-300 rounded'}/>
             Bluestone
@@ -44,20 +44,20 @@ export const Empty = observer(() => {
             {configStore.zh ? '没有打开的文件' : 'No open files'}
           </div>
           <div
-            className={'hover:text-indigo-500 cursor-pointer duration-200 flex items-center'}
+            className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
             onClick={() => {
               keyTask$.next({key: 'newNote'})
             }}
           >
             <Icon icon={'mingcute:file-new-line'} className={'text-lg'} />
             <span className={'ml-2'}>
-              {configStore.zh ? '新建笔记' : 'New Note'}
+              {configStore.zh ? '新建文档' : 'New Doc'}
             </span>
           </div>
           {!!treeStore.root &&
             <>
               <div
-                className={'cursor-pointer hover:text-indigo-500 duration-200'}
+                className={'cursor-pointer hover:text-indigo-600 duration-200'}
                 onClick={() => {
                   MainApi.sendToSelf('open-quickly')
                 }}
@@ -85,7 +85,7 @@ export const Empty = observer(() => {
           {!treeStore.root &&
             <>
               <div
-                className={'cursor-pointer hover:text-indigo-500 duration-200 flex items-center'}
+                className={'cursor-pointer hover:text-indigo-600 duration-200 flex items-center'}
                 onClick={() => {
                   editSpace$.next(null)
                 }}
@@ -106,15 +106,17 @@ export const Empty = observer(() => {
             </div>
             <div className={'mt-2'}>
               {state.spaces.map(r =>
-                <div className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-lg'} key={r.cid}>
+                <div
+                  className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-base'} key={r.cid}
+                  onClick={() => {
+                    treeStore.initial(r.cid)
+                  }}
+                >
                   <span
                     className={'cursor-pointer hover:text-indigo-500 duration-200 flex items-center'}
-                    onClick={() => {
-                      treeStore.initial(r.cid)
-                    }}
                   >
                     <Icon icon={'material-symbols:workspaces-outline'}/>
-                    <span className={'ml-1'}>{r.name}</span>
+                    <span className={'ml-2'}>{r.name}</span>
                   </span>
                 </div>
               )}
