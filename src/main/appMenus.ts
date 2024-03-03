@@ -52,82 +52,7 @@ const getSystemMenus = () => {
       ]
     }
   ]
-  const getOpenPaths = () => {
-    const openPaths:string[] = store.get('recent-open-paths') as string[] || []
-    let openPathMenus:MenuOptions[number]['submenu'] = []
-    if (openPaths.length) {
-      const home = app.getPath('home')
-      openPathMenus.push(...openPaths.map(p => {
-        return {
-          label: p.replace(home, '~'),
-          click: e => {
-            ipcMain.emit('open-history-path', e, p)
-          }
-        }
-      }))
-      openPathMenus.push({
-        type: 'separator'
-      })
-    }
-    openPathMenus.push({
-      label: zh ? '清除记录' : 'Clear Recent',
-      id: 'clear-recent',
-      click: () => {
-        app.clearRecentDocuments()
-        BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
-        store.delete('recent-open-paths')
-        ipcMain.emit('refresh-recent')
-      }
-    })
-    return openPathMenus
-  }
-  const systemFileMenus: MenuOptions[number]['submenu'] = isMac ? [
-    {type: 'separator'},
-    {
-      id: 'open',
-      label: zh ? '打开' : 'Open',
-      accelerator: `${cmd}+alt+f`,
-      click: (menu, win) => {
-        win?.webContents.send('open')
-      }
-    },
-    {
-      label: zh ? '最近打开' : 'Open Recent',
-      id: 'open-recent',
-      role: 'recentDocuments',
-      submenu: [
-        {
-          label: zh ? '清除记录' : 'Clear Recent',
-          click: () => {
-            app.clearRecentDocuments()
-            BrowserWindow.getFocusedWindow()?.webContents.send('clear-recent')
-          }
-        }
-      ]
-    },
-  ] : [
-    {type: 'separator'},
-    {
-      id: 'open-file',
-      label: zh ? '打开文件' : 'Open File',
-      click: (menu, win) => {
-        win?.webContents.send('open-file')
-      }
-    },
-    {
-      id: 'open-folder',
-      label: zh ? '打开文件夹' : 'Open Folder',
-      click: (menu, win) => {
-        win?.webContents.send('open')
-      }
-    },
-    {type: 'separator'},
-    {
-      id: 'recent-open-paths',
-      label: zh ? '最近打开' : 'Open Recent',
-      submenu: getOpenPaths()
-    }
-  ]
+
   menus.push({
     label: zh ? '文件' : 'File',
     id: 'file',
@@ -135,11 +60,16 @@ const getSystemMenus = () => {
     submenu: [
       {
         id: 'create',
-        label: zh ? '新建笔记' : 'New Note',
-        accelerator: `${cmd}+n`,
-        // click: (menu, win) => {
-        //   win?.webContents.send('create')
-        // }
+        label: zh ? '新建文档' : 'New Doc',
+        accelerator: `${cmd}+n`
+      },
+      {
+        id: 'create',
+        label: zh ? '打开文档' : 'Open Doc',
+        accelerator: `${cmd}+shift+n`,
+        click: () => {
+
+        }
       },
       {
         label: zh ? '新建窗口' : 'New Window',
@@ -166,24 +96,14 @@ const getSystemMenus = () => {
           BrowserWindow.getFocusedWindow()?.webContents.send('close-current-tab')
         }
       },
-      ...systemFileMenus,
       {
         label: zh ? '快速打开' : 'Open Quickly',
         id: 'open-quickly',
-        accelerator: `${cmd}+o`,
-        click: () => {
-          BrowserWindow.getFocusedWindow()?.webContents.send('open-quickly')
-        }
-      },
-      {
-        label: zh ? '清除未使用的图片' : 'Clear Unused Images',
-        id: 'clear-unused-images',
-        click: (e, win) => {
-          win?.webContents.send('clear-unused-images')
-        }
+        accelerator: `${cmd}+o`
       }
     ]
   })
+
   const delRange = isMac ? [
     {
       label: zh ? '删除范围' : 'Delete Range',
@@ -200,6 +120,7 @@ const getSystemMenus = () => {
       ]
     }
   ] : []
+
   menus.push({
     label: zh ? '编辑' : 'Edit',
     id: 'edit',
@@ -243,24 +164,6 @@ const getSystemMenus = () => {
             label: zh ? '选择词' : 'Select Word'
           }
         ]
-      },
-      {type: 'separator'},
-      {
-        id: 'break-line',
-        accelerator: `${cmd}+Enter`,
-        label: zh ? '段落内换行' :'Line Break Within Paragraph',
-        click: task('key-break')
-      },
-      {type: 'separator'},
-      {
-        accelerator: `${cmd}+shift+v`,
-        label: zh ? '黏贴为纯文本' : 'Paste as Plain Text',
-        click: task('paste-plain-text')
-      },
-      {
-        accelerator: `${cmd}+alt+v`,
-        label: zh ? '黏贴为Markdown代码' : 'Paste Markdown Code',
-        click: task('paste-markdown-code')
       }
     ]
   })
@@ -319,12 +222,12 @@ const getSystemMenus = () => {
             }
           }
         },
-        {
-          label: 'Bluestone Website',
-          click: () => {
-            shell.openExternal('https://www.bluemd.me')
-          }
-        },
+        // {
+        //   label: 'Bluestone Website',
+        //   click: () => {
+        //     shell.openExternal('https://www.bluemd.me')
+        //   }
+        // },
         {
           label: 'Github',
           click: () => {

@@ -115,6 +115,7 @@ app.whenReady().then(() => {
   createAppMenus()
   registerMenus()
   registerApi()
+  app.clearRecentDocuments()
   if (isWindows) {
     app.on('browser-window-focus', () => {
       globalShortcut.register("CommandOrControl+W", () => {

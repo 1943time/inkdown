@@ -15,6 +15,7 @@ import {Share} from '../../server/Share'
 import {configStore} from '../../store/config'
 import {toMarkdown} from '../../editor/utils/toMarkdown'
 import {convertRemoteImages} from '../../editor/utils/media'
+import {clearUnusedImages} from '../../editor/utils/clearUnusedImages'
 
 export const Nav = observer(() => {
   const [state, setState] = useLocalState({
@@ -133,16 +134,6 @@ export const Nav = observer(() => {
                     window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
                   }
                 },
-                // {
-                //   text: 'Export To HTML',
-                //   disabled: treeStore.openedNote?.ext !== 'md',
-                //   click: async () => {
-                //     if (checkOpenedNote()) {
-                //       treeStore.currentTab.store.saveDoc$.next(null)
-                //       exportHtml(treeStore.openedNote!)
-                //     }
-                //   }
-                // },
                 {
                   text: 'Copy markdown source code',
                   disabled: treeStore.openedNote?.ext !== 'md',
@@ -168,6 +159,13 @@ export const Nav = observer(() => {
                   disabled: treeStore.openedNote?.ext !== 'md',
                   click: () => {
                     convertRemoteImages(treeStore.openedNote!)
+                  }
+                },
+                {
+                  text: configStore.zh ? '清除未使用的图片' : 'Clear Unused Images',
+                  disabled: !treeStore.root,
+                  click: () => {
+                    clearUnusedImages()
                   }
                 },
                 { hr: true },

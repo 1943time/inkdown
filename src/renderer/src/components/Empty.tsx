@@ -59,7 +59,7 @@ export const Empty = observer(() => {
               <div
                 className={'cursor-pointer hover:text-indigo-600 duration-200'}
                 onClick={() => {
-                  MainApi.sendToSelf('open-quickly')
+                  // MainApi.sendToSelf('open-quickly')
                 }}
               >
                 <HistoryOutlined />

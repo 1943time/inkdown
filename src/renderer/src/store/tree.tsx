@@ -11,7 +11,7 @@ import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {db, ISpace, removeFileRecord} from './db'
+import {db, ISpace} from './db'
 import {refactor, renameAllFiles} from './refactor'
 import {EditorStore} from '../editor/store'
 import {parserMdToSchema} from '../editor/parser/parser'
@@ -113,44 +113,12 @@ export class TreeStore {
 
     window.electron.ipcRenderer.on('open-path', (e, path: string) => {
       const s = stat(path)
-      if (s) {
-        if (s.isDirectory()) {
-          if (path !== treeStore.root?.filePath) this.openFolder(path)
-        } else {
-          if (!treeStore.tabs.some(t => t.current?.filePath === path)) {
-            // this.appendTab(path)
-          }
-        }
+      if (s && !s.isDirectory()) {
+        // this.appendTab(path)
       }
     })
   }
-  // insertFiles(files: FileList | string[], item: IFileItem, mode: 'cut' | 'copy' = 'cut') {
-  //   if (item?.folder) {
-  //     try {
-  //       const folder = item.folder
-  //       if (folder) {
-  //         for (let f of files) {
-  //           const path = typeof f === 'string' ? f : f.path
-  //           if (path && path !== item.filePath && !path.startsWith(this.root.filePath)) {
-  //             const target = join(item.filePath, basename(path))
-  //             if (mode === 'cut') {
-  //               renameSync(path, target)
-  //             } else {
-  //               cpSync(path, target, {recursive: true})
-  //             }
-  //             this.watcher.onChange('update', target)
-  //           }
-  //         }
-  //       }
-  //       this.parseFolder()
-  //     } catch (e: any) {
-  //       message$.next({
-  //         type: 'warning',
-  //         content: e?.message || 'Failed to insert file'
-  //       })
-  //     }
-  //   }
-  // }
+
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
@@ -179,7 +147,7 @@ export class TreeStore {
         } else {
           this.removeSelf(item)
           MainApi.moveToTrash(item.filePath)
-          if (!item.folder) db.history.where('filePath').equals(item.filePath).delete()
+          if (!item.folder) db.history.where('fileId').equals(item.cid).delete()
           if (this.selectItem) this.selectItem = null
           if (this.ctxNode) this.ctxNode = null
         }
@@ -200,7 +168,17 @@ export class TreeStore {
       this.currentTab.index++
     }
   }
-
+  updateTitle() {
+    if (this.openedNote) {
+      if (this.root) {
+        document.title = `${this.root.name}-${this.openedNote.filename}`
+      } else {
+        document.title = this.openedNote.filename
+      }
+    } else {
+      document.title = 'Bluestone'
+    }
+  }
   // async restoreTabs(tabs: string[]) {
   //   const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
   //   let first = true
@@ -227,35 +205,12 @@ export class TreeStore {
     }
   }
 
-  // async getSchema(file: IFileItem, force = false) {
-  //   if (file?.ext !== 'md' && file?.ext !== 'markdown') return
-  //   if (file.schema && !force) return file
-  //   const [schema] = await parserMdToSchema([readFileSync(file.filePath, {encoding: 'utf-8'})])
-  //   file.schema = schema?.length ? schema : [EditorUtils.p]
-  //   if (force && file === this.openedNote) {
-  //     this.externalChange$.next(file.filePath)
-  //   }
-  //   return file
-  // }
-
   openParentDir(item: IFileItem) {
     while (item.parent) {
       item.parent.expand = true
       item = item.parent
     }
   }
-
-  // createSingleNode(filePath: string) {
-  //   const node = createFileNode({
-  //     filePath: filePath,
-  //     folder: false
-  //   })
-  //   const media = mediaType(filePath)
-  //   if (media === 'markdown' && (!this.root || !filePath.startsWith(this.root.filePath))) {
-  //     this.watcher.watchNote(filePath)
-  //   }
-  //   return node
-  // }
 
   openNote(file: IFileItem, scroll = true) {
     if (this.currentTab.current?.filePath === file.filePath) return
@@ -278,6 +233,7 @@ export class TreeStore {
     })
     file.lastOpenTime = now
     this.recordTabs()
+    this.updateTitle()
     // if (this.root && filePath.startsWith(this.root.filePath)) {
     //   let item = typeof file === 'string' ? undefined : file
     //   if (!item) {
@@ -323,28 +279,6 @@ export class TreeStore {
     // this.recordTabs()
   }
 
-  openFolder(dirPath: string) {
-    // this.watcher.destroy()
-    // MainApi.setWin({openFolder: dirPath})
-    // const {root} = parserNode(dirPath)
-    // this.root = root
-    // const pathMap = new Map(this.nodes.map(f => [f.filePath, f]))
-    // for (let t of this.tabs) {
-    //   for (let f of t.history) {
-    //     if (f.filePath.startsWith(this.root.filePath)) {
-    //       const parentPath = join(f.filePath, '..')
-    //       if (pathMap.get(parentPath)) {
-    //         defineParent(f, pathMap.get(parentPath)!)
-    //       }
-    //     }
-    //   }
-    // }
-    // appendRecentDir(dirPath)
-    // setTimeout(action(() => this.fold = false), 100)
-    // this.watcher.openDirCheck()
-    // this.parseFolder()
-  }
-
   openFirst() {
     if (!treeStore.currentTab.current || this.tabs.length === 1) {
       const first = this.firstNote
@@ -353,27 +287,6 @@ export class TreeStore {
         this.openParentDir(first)
       }
     }
-  }
-
-  async parseFolder() {
-    // const queue: IFileItem[] = []
-    // const stack: IFileItem[] = this.root.children!.slice()
-    // while (stack.length) {
-    //   const item = stack.shift()!
-    //   if (item.folder) {
-    //     stack.unshift(...item.children?.slice() || [])
-    //   } else if (['md', 'markdown'].includes(item.ext!) && !item.schema?.length) {
-    //     queue.push(item)
-    //   }
-    // }
-    // const files: string[] = []
-    // for (let f of queue) {
-    //   files.push(await window.api.fs.readFile(f.filePath, {encoding: 'utf-8'}))
-    // }
-    // const schemas = await parserMdToSchema(files)
-    // queue.map((f, i) => {
-    //   if (!f.schema) f.schema = schemas[i]
-    // })
   }
 
   recordTabs() {
@@ -422,73 +335,6 @@ export class TreeStore {
     }
   }
 
-  saveNote(file: IFileItem) {
-    // const parent = file.parent!
-    // if (file.mode === 'create' || file.mode === 'copy') {
-    //   if (!file.editName) {
-    //     parent.children = parent.children!.filter(c => c !== file)
-    //   } else {
-    //     let path = join(parent.filePath, file.editName)
-    //     if (!file.folder && !path.endsWith('.md')) path += '.md'
-    //     if (parent.children?.find(c => c.filePath === path) || existsSync(path)) return message$.next({
-    //       type: 'warning',
-    //       content: configStore.zh ? '文件名已存在' : 'The name already exists'
-    //     })
-    //     if (file.folder) {
-    //       mkdirSync(path)
-    //     } else {
-    //       if (file.mode === 'copy') {
-    //         appendFileSync(path, readFileSync(file.copyItem!.filePath, {encoding: 'utf-8'}), {encoding: 'utf-8'})
-    //         file.schema = file.copyItem?.schema || [EditorUtils.p]
-    //       } else {
-    //         appendFileSync(path, '', {encoding: 'utf-8'})
-    //       }
-    //     }
-    //     file.ext = 'md'
-    //     file.mode = undefined
-    //     file.children = file.folder ? [] : undefined
-    //     file.filePath = path
-    //     file.filename = file.editName
-    //     file.editName = undefined
-    //     file.copyItem = undefined
-    //     if (!file.folder) this.openNote(file)
-    //   }
-    //   parent.children = sortFiles(parent.children!)
-    // }
-    // if (file.mode === 'edit') {
-    //   if (!file.editName || file.editName === file.filename) {
-    //     file.editName = ''
-    //     file.mode = undefined
-    //   } else {
-    //     const p = parse(file.editName)
-    //     const path = file.filePath
-    //     file.filename = file.folder ? file.editName : p.name
-    //     let newPath = join(path, '..', file.filename)
-    //     if (!file.folder && file.ext) newPath += `.${file.ext}`
-    //     file.filePath = newPath
-    //     renameSync(path, newPath)
-    //     if (file.folder) {
-    //       renameAllFiles(file.filePath, file.children || [])
-    //       console.log('check', path, newPath)
-    //       db.checkRenameFolder(path, newPath)
-    //     }
-    //     this.checkDepends(path, newPath)
-    //     this.moveFile$.next({
-    //       from: path,
-    //       to: newPath
-    //     })
-    //     file.mode = undefined
-    //     if (file.ext === 'md') {
-    //       removeFileRecord(path, newPath)
-    //       db.tagFile.where('filePath').equals(path).modify({
-    //         filePath: newPath
-    //       })
-    //     }
-    //     if (file.ext === 'md' || file.folder) shareStore.renameFilePath(path, newPath)
-    //   }
-    // }
-  }
-
   checkOtherTabsShouldUpdate() {
     if (this.currentTab.current?.ext === 'md' && this.tabs.length > 1) {
       const path = this.currentTab.current?.filePath
@@ -512,9 +358,7 @@ export class TreeStore {
         selection.removeAllRanges()
         selection.addRange(backRange)
       }
-      if (this.openedNote) {
-        document.title = this.root ? `${basename(this.root.filePath)}-${basename(this.openedNote.filePath)}` : basename(this.openedNote.filePath)
-      }
+      this.updateTitle()
     })
     this.recordTabs()
   }
@@ -535,26 +379,6 @@ export class TreeStore {
     return changeFiles
   }
 
-  async checkDepends(oldPath: string, targetPath: string) {
-    // if (!configStore.config.autoRebuild) return
-    // const stat = statSync(targetPath)
-    // let updateFiles: IFileItem[] = []
-    // if (stat.isDirectory()) {
-    //   const changeFiles = this.refactorFolder(oldPath, targetPath)
-    //   updateFiles = await refactor(changeFiles, this.root?.children || [])
-    // } else {
-    //   updateFiles = await refactor([[oldPath, targetPath]], this.root?.children || [])
-    // }
-    // const filesStr: string[] = []
-    // for (let f of updateFiles) {
-    //   filesStr.push(await window.api.fs.readFile(f.filePath, {encoding: 'utf-8'}))
-    // }
-    // const schemas = await parserMdToSchema(filesStr)
-    // updateFiles.map((f, i) => {
-    //   f.schema = schemas[i]
-    //   this.externalChange$.next(f.filePath)
-    // })
-  }
   async initial(spaceId: string) {
     this.fold = false
     const space = await db.space.get(spaceId)
@@ -599,17 +423,6 @@ export class TreeStore {
       })
     }
   }
-  getAbsolutePath(file: IFileItem) {
-    if (this.root && file.filePath.startsWith(this.root.filePath)) {
-      return file.filePath.replace(this.root.filePath, '').split(sep).slice(1)
-    } else {
-      if (file.filePath.startsWith(configStore.homePath)) {
-        return ['~', ...file.filePath.replace(configStore.homePath, '').split(sep).slice(1)]
-      } else {
-        return file.filePath.split(sep).slice(1)
-      }
-    }
-  }
 
   createTab() {
     return observable({
@@ -631,7 +444,7 @@ export class TreeStore {
 
   appendTab(file?: IFileItem) {
     const index = this.tabs.findIndex(t => {
-      return t.current === file
+      return file && t.current === file
     })
     if (index !== -1) {
       this.currentIndex = index

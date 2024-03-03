@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
-import {db, IQuickOpen} from '../store/db'
+// import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
 import {existsSync} from 'fs'
 import {configStore} from '../store/config'
@@ -52,28 +52,28 @@ export const QuickOpen = observer(() => {
   }, [])
 
   const initial = useCallback(async () => {
-    if (!treeStore.root) return
-    const res = await db.quickOpen.where('dirPath').equals(treeStore.root.filePath).toArray()
-    const data = res.filter(r => {
-      try {
-        return existsSync(r.filePath)
-      } catch (e) {
-        db.quickOpen.where('id').equals(r.id!).delete()
-        return false
-      }
-    })
-      .sort((a, b) => a.time > b.time ? -1 : 1)
-      .map(d => {
-        return {id: d.id!, filePath: d.filePath, name: d.filePath.replace(d.dirPath + sep, '').replace(/\.\w+$/, '')}
-      })
-    setState({
-      records: data,
-      filterRecords: data.filter(q => !state.query || q.name.includes(state.query)),
-      open: true,
-      activeIndex: 0
-    })
-    runInAction(() => treeStore.openQuickly = true)
-    window.addEventListener('keydown', keydown)
+    // if (!treeStore.root) return
+    // const res = await db.quickOpen.where('dirPath').equals(treeStore.root.filePath).toArray()
+    // const data = res.filter(r => {
+    //   try {
+    //     return existsSync(r.filePath)
+    //   } catch (e) {
+    //     db.quickOpen.where('id').equals(r.id!).delete()
+    //     return false
+    //   }
+    // })
+    //   .sort((a, b) => a.time > b.time ? -1 : 1)
+    //   .map(d => {
+    //     return {id: d.id!, filePath: d.filePath, name: d.filePath.replace(d.dirPath + sep, '').replace(/\.\w+$/, '')}
+    //   })
+    // setState({
+    //   records: data,
+    //   filterRecords: data.filter(q => !state.query || q.name.includes(state.query)),
+    //   open: true,
+    //   activeIndex: 0
+    // })
+    // runInAction(() => treeStore.openQuickly = true)
+    // window.addEventListener('keydown', keydown)
   }, [])
 
   const close = useCallback(() => {
