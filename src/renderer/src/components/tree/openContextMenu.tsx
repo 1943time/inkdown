@@ -54,6 +54,9 @@ export const createDoc = async ({parent, newName, copyItem, ghost}: {
       n.sort = i
     })
   }
+  if (treeStore.selectItem) {
+    runInAction(() => treeStore.selectItem = null)
+  }
   treeStore.openNote(newNode)
   setTimeout(() => {
     treeStore.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')?.focus()

@@ -52,7 +52,7 @@ export const TableAttr = observer(() => {
           setState({
             rows: table[0].children.length,
             cols: table[0].children[0].children.length,
-            top: top - 24, left,
+            top: top - 24 + 3, left,
             width: dom.clientWidth,
             visible: true
           })

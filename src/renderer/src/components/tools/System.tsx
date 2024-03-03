@@ -273,7 +273,7 @@ export const SystemPanel = observer((props: {
           }}
           animate={{
             opacity: 1,
-            x: -16,
+            x: -18,
           }}
           exit={{
             opacity: 0,

@@ -170,7 +170,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
         {selected &&
           <div
             draggable={false}
-            className={'w-20 h-[6px] rounded-lg bg-zinc-400 dark:bg-zinc-500 absolute z-50 left-1/2 -ml-10 -bottom-[3px] cursor-row-resize'}
+            className={'w-20 h-[6px] rounded-lg bg-zinc-500 dark:bg-zinc-400 absolute z-50 left-1/2 -ml-10 -bottom-[3px] cursor-row-resize'}
             onMouseDown={e => {
               e.preventDefault()
               resize({
