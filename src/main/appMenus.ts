@@ -2,7 +2,6 @@
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog, ipcRenderer} from 'electron'
 import MenuItem = Electron.MenuItem
 import {getLocale, store} from './store'
-import {is} from '@electron-toolkit/utils'
 
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 const isMas = process.mas || false

@@ -9,6 +9,7 @@ export interface IRecent {
   fileId: string
   spaceId?: string
   current?: boolean
+  sort: number
 }
 
 export interface IHistory {
@@ -67,7 +68,7 @@ class Db extends Dexie {
     this.version(7).stores({
       space: '&cid,name,filePath,cloud,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId,lastOpenTime',
-      recent: '&id,filePath,spaceId',
+      recent: '&id,filePath,spaceId,sort',
       history: '&id,fileId,schema,spaceId,updated',
       // tag: '&id,title',
       // tagFile: '&id,filePath,tagId'

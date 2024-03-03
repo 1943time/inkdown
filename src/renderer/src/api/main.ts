@@ -24,9 +24,6 @@ export const MainApi = {
   getSystemDark() {
     return ipcRenderer.invoke('get-system-dark')
   },
-  setWin(data: {openFolder?: string, openTabs?: string[], index?: number}) {
-    ipcRenderer.send('set-win', data)
-  },
   openDialog(options: Parameters<typeof dialog['showOpenDialog']>[0]) {
     return openDialog(options)
   },
@@ -35,14 +32,6 @@ export const MainApi = {
   },
   saveServerConfig(config: any) {
     return ipcRenderer.invoke('saveServerConfig', config)
-  },
-  relaunch() {
-    ipcRenderer.send('relaunch')
-  },
-  selectFolder() {
-    return openDialog({
-      properties: ['openDirectory']
-    })
   },
   getMachineId():Promise<string> {
     return ipcRenderer.invoke('get-machine-id')

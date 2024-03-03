@@ -136,19 +136,6 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.on('set-win', (e, data: WinOptions) => {
-    const window = BrowserWindow.fromWebContents(e.sender)!
-    if (!windows.get(window.id)) return
-    if (data.openFolder) windows.get(window.id)!.openFolder = data.openFolder
-    if (data.openTabs) windows.get(window.id)!.openTabs = data.openTabs
-    if (typeof data.index !== 'undefined') windows.get(window.id)!.index = data.index
-  })
-  ipcMain.on('add-recent-path', (e, path) => {
-    store.set('recent-open-paths', Array.from(new Set([...(store.get('recent-open-paths') as any[] || []), path])))
-    app.addRecentDocument(path)
-    ipcMain.emit('refresh-recent')
-  })
-
   ipcMain.on('file-changed', (e) => {
     fileChangedWindow = BrowserWindow.fromWebContents(e.sender)
   })

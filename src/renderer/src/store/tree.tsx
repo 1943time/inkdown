@@ -1,26 +1,20 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {createFileNode, defineParent, ReadSpace, sortFiles} from './parserNode'
+import {defineParent, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
-import {basename, join, parse, sep} from 'path'
-import {appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync} from 'fs'
+import {basename, join} from 'path'
+import {existsSync, readdirSync, readFileSync, statSync} from 'fs'
 import {MainApi} from '../api/main'
 import {MenuKey} from '../utils/keyboard'
-import {message$, stat} from '../utils'
+import {message$, nid, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
-import {mediaType} from '../editor/utils/dom'
 import {configStore} from './config'
-import {db, ISpace} from './db'
-import {refactor, renameAllFiles} from './refactor'
+import {db} from './db'
 import {EditorStore} from '../editor/store'
-import {parserMdToSchema} from '../editor/parser/parser'
-import {shareStore} from '../server/store'
-import isHotkey from 'is-hotkey'
-import {EditorUtils} from '../editor/utils/editorUtils'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
-import {updateFilePath, updateNode} from '../editor/utils/updateNode'
+import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
 
 export class TreeStore {
@@ -48,6 +42,7 @@ export class TreeStore {
   }
   fold = true
   watcher: Watcher
+  recordTimer = 0
   externalChange$ = new Subject<string>()
   shareFolder$ = new Subject<string>()
   moveFile$ = new Subject<{
@@ -86,7 +81,8 @@ export class TreeStore {
   constructor() {
     this.watcher = new Watcher(this)
     makeAutoObservable(this, {
-      watcher: false
+      watcher: false,
+      recordTimer: false
     })
     window.addEventListener('resize', action(() => {
       this.size = {
@@ -147,7 +143,7 @@ export class TreeStore {
         } else {
           this.removeSelf(item)
           MainApi.moveToTrash(item.filePath)
-          if (!item.folder) db.history.where('fileId').equals(item.cid).delete()
+          this.removeDirData(item)
           if (this.selectItem) this.selectItem = null
           if (this.ctxNode) this.ctxNode = null
         }
@@ -156,7 +152,21 @@ export class TreeStore {
       MainApi.errorLog(e, {name: 'moveToTrash'})
     }
   }
-
+  removeDirData(item: IFileItem) {
+    const stack = [item]
+    const removeHistory:string[] = []
+    while (stack.length) {
+      if (item.folder && item.children) {
+        stack.push(...item.children)
+      }
+      if (item.ext === 'md') {
+        removeHistory.push(item.cid)
+      }
+    }
+    if (removeHistory.length) {
+      db.history.where('fileId').anyOf(removeHistory).delete()
+    }
+  }
   navigatePrev() {
     if (this.currentTab.hasPrev) {
       this.currentTab.index--
@@ -179,25 +189,28 @@ export class TreeStore {
       document.title = 'Bluestone'
     }
   }
-  // async restoreTabs(tabs: string[]) {
-  //   const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
-  //   let first = true
-  //   for (let t of tabs) {
-  //     const tab = this.createTab()
-  //     if (nodeMap.get(t)) {
-  //       tab.history.push(nodeMap.get(t)!)
-  //     } else {
-  //       const st = stat(t)
-  //       if (st && !st.isDirectory()) {
-  //         const node = this.createSingleNode(t)
-  //         tab.history.push(node)
-  //       }
-  //     }
-  //     first ? this.tabs[0] = tab : this.tabs.push(tab)
-  //     first = false
-  //   }
-  //   if (this.currentTab.current?.filePath) this.openParentDir(this.currentTab.current)
-  // }
+  async restoreTabs() {
+    if (!this.root) return
+    const files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
+    if (files.length) {
+      runInAction(() => {
+        this.tabs = []
+        let index = 0
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i]
+          this.appendTab(this.nodeMap.get(f.fileId))
+          if (f.current) index = i
+        }
+        this.currentIndex = index
+      })
+    } else {
+      const first = this.firstNote
+      if (first) this.openNote(first)
+    }
+    if (this.openedNote) {
+      this.openParentDir(this.openedNote)
+    }
+  }
 
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
     for (let key of Object.keys(value)) {
@@ -279,21 +292,25 @@ export class TreeStore {
     // this.recordTabs()
   }
 
-  openFirst() {
-    if (!treeStore.currentTab.current || this.tabs.length === 1) {
-      const first = this.firstNote
-      if (first) {
-        this.openNote(first)
-        this.openParentDir(first)
+  async recordTabs() {
+    clearTimeout(this.recordTimer)
+    this.recordTimer = window.setTimeout(async () => {
+      if (this.root) {
+        await db.recent.where('spaceId').equals(this.root.cid).delete()
       }
-    }
-  }
-
-  recordTabs() {
-    MainApi.setWin({
-      openTabs: this.tabs.filter(t => !!t.current).map(t => t.current!.filePath),
-      index: this.currentIndex
-    })
+      let i = 0
+      for (let t of this.tabs) {
+        if (!t.current) continue
+        await db.recent.add({
+          id: nid(),
+          spaceId: t.current.spaceId,
+          current: t.current === this.openedNote,
+          fileId: t.current.cid,
+          sort: i
+        })
+        i++
+      }
+    }, 300)
   }
   async moveNode() {
     if (this.dragNode && this.dragStatus && this.dragStatus.dropNode !== this.dragNode) {
@@ -421,6 +438,9 @@ export class TreeStore {
       db.space.update(spaceId, {
         lastOpenTime: Date.now()
       })
+      setTimeout(() => {
+        this.restoreTabs()
+      }, 200)
     }
   }
 
