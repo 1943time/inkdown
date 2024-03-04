@@ -10,6 +10,7 @@ import Click from '../icons/keyboard/Click'
 import ArrowRight from '../icons/ArrowRight'
 import {useLocalState} from '../hooks/useLocalState'
 import {getOffsetLeft, getOffsetTop} from '../editor/utils/dom'
+import {isMac} from '../utils'
 
 export type IMenu = {
   text?: string | ReactNode
@@ -22,7 +23,6 @@ export type IMenu = {
   role?: string[]
 }
 const keyIconClass = 'w-[13px] h-[13px]'
-const isMac = /macintosh|mac os x/i.test(navigator.userAgent)
 const transformKey = (key: string) => {
   if (key === 'cmd') return !isMac ? 'Ctrl' : <Command className={keyIconClass}/>
   if (key === 'option') return <Option className={keyIconClass}/>

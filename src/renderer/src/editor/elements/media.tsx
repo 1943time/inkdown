@@ -101,92 +101,103 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   }, [])
   return (
     <div
-      {...attributes}
-      className={`drag-el group cursor-pointer relative flex justify-center mb-2 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
-      data-be={'media'}
-      draggable={true}
-      onDragStart={e => {
-        try {
-          store.dragStart(e)
-          store.dragEl = ReactEditor.toDOMNode(store.editor, element)
-        } catch (e) {
-        }
-      }}
-      onClick={(e) => {
-        e.preventDefault()
-        if (e.detail === 2) {
-          Transforms.setNodes(store.editor, {height: undefined}, {at: path})
-          setState({height: undefined})
-        }
-        EditorUtils.selectMedia(store, path)
-      }}
+      className={'py-2 relative'}
+      contentEditable={false}
     >
+      {selected &&
+        <div className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
+          {state().url}
+        </div>
+      }
       <div
-        contentEditable={false}
-        className={'w-full h-full flex justify-center'}
-        style={{height: state().height}}
+        {...attributes}
+        className={`drag-el group cursor-pointer relative flex justify-center mb-2 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
+        data-be={'media'}
+        draggable={true}
+        onContextMenu={e => {
+          e.stopPropagation()
+        }}
+        onDragStart={e => {
+          try {
+            store.dragStart(e)
+            store.dragEl = ReactEditor.toDOMNode(store.editor, element)
+          } catch (e) {
+          }
+        }}
+        onClick={(e) => {
+          e.preventDefault()
+          if (e.detail === 2) {
+            Transforms.setNodes(store.editor, {height: undefined}, {at: path})
+            setState({height: undefined})
+          }
+          EditorUtils.selectMedia(store, path)
+        }}
       >
-        {type === 'video' &&
-          <video
-            src={element.url} controls={true} className={'rounded h-full'}
-            // @ts-ignore
-            ref={ref}
-          />
-        }
-        {type === 'audio' &&
-          <audio
-            controls={true} src={element.url}
-            // @ts-ignore
-            ref={ref}
-          />
-        }
-        {type === 'document' &&
-          <object
-            data={element.url}
-            className={'w-full h-full rounded'}
-            // @ts-ignore
-            ref={ref}
-          />
-        }
-        {type === 'other' &&
-          <iframe
-            src={element.url}
-            className={'w-full h-full rounded'}
-            // @ts-ignore
-            ref={ref}
-          />
-        }
-        {type === 'image' &&
-          <img
-            src={state().url} alt={'image'}
-            referrerPolicy={'no-referrer'}
-            draggable={false}
-            // @ts-ignore
-            ref={ref}
-            onContextMenu={e => e.stopPropagation()}
-            className={'align-text-bottom h-full rounded border border-transparent min-w-[20px] min-h-[20px] block object-contain'}
-          />
-        }
-        {selected &&
-          <div
-            draggable={false}
-            className={'w-20 h-[6px] rounded-lg bg-zinc-500 dark:bg-zinc-400 absolute z-50 left-1/2 -ml-10 -bottom-[3px] cursor-row-resize'}
-            onMouseDown={e => {
-              e.preventDefault()
-              resize({
-                e,
-                height: state().height,
-                dom: ref.current!,
-                cb: (height: number) => {
-                  setState({height})
-                  Transforms.setNodes(store.editor, {height}, {at: path})
-                }
-              })
-            }}
-          />
-        }
+        <div
+          className={'w-full h-full flex justify-center'}
+          style={{height: state().height}}
+        >
+          {type === 'video' &&
+            <video
+              src={element.url} controls={true} className={'rounded h-full'}
+              // @ts-ignore
+              ref={ref}
+            />
+          }
+          {type === 'audio' &&
+            <audio
+              controls={true} src={element.url}
+              // @ts-ignore
+              ref={ref}
+            />
+          }
+          {type === 'document' &&
+            <object
+              data={element.url}
+              className={'w-full h-full rounded'}
+              // @ts-ignore
+              ref={ref}
+            />
+          }
+          {type === 'other' &&
+            <iframe
+              src={element.url}
+              className={'w-full h-full rounded'}
+              // @ts-ignore
+              ref={ref}
+            />
+          }
+          {type === 'image' &&
+            <img
+              src={state().url} alt={'image'}
+              referrerPolicy={'no-referrer'}
+              draggable={false}
+              // @ts-ignore
+              ref={ref}
+              className={'align-text-bottom h-full rounded border border-transparent min-w-[20px] min-h-[20px] block object-contain'}
+            />
+          }
+          {selected &&
+            <div
+              draggable={false}
+              className={'w-20 h-[6px] rounded-lg bg-zinc-500 dark:bg-zinc-400 absolute z-50 left-1/2 -ml-10 -bottom-[3px] cursor-row-resize'}
+              onMouseDown={e => {
+                e.preventDefault()
+                resize({
+                  e,
+                  height: state().height,
+                  dom: ref.current!,
+                  cb: (height: number) => {
+                    setState({height})
+                    Transforms.setNodes(store.editor, {height}, {at: path})
+                  }
+                })
+              }}
+            />
+          }
+        </div>
+        <span contentEditable={false}>{children}</span>
       </div>
-      <span contentEditable={false}>{children}</span>
     </div>
   )
 }
