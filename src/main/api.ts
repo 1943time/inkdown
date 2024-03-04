@@ -106,7 +106,6 @@ export const registerApi = () => {
       dragToSort: getBoolean(config.dragToSort, true),
       autoRebuild: getBoolean(config.autoRebuild, true),
       locale: getLocale(),
-      renameFileWhenSaving: !!config.renameFileWhenSaving,
       showRemoveFileDialog: getBoolean(config.showRemoveFileDialog, true),
       relativePathForImageStore: getBoolean(config.relativePathForImageStore, false),
       showHiddenFiles: getBoolean(config.showHiddenFiles, false),

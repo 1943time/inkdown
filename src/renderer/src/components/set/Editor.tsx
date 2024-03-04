@@ -218,19 +218,6 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '黏贴文件重命名' : 'Paste file to rename'}</span>
-          <TextHelp text={
-            configStore.zh ? '黏贴图片至编辑区，显示保存文件重命名弹窗' :
-              'Paste the image into the editing area and display the save file rename pop-up window'
-          }/>
-        </div>
-        <div>
-          <Checkbox checked={configStore.config.renameFileWhenSaving}
-                    onChange={e => configStore.setConfig('renameFileWhenSaving', e.target.checked)}/>
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
           {configStore.zh ? '编辑区文字大小' : 'Edit area text size'}
         </div>
         <div className={'w-32'}>

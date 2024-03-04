@@ -29,7 +29,6 @@ class ConfigStore {
     spellCheck: false,
     editorWidth: 720,
     autoRebuild: true,
-    renameFileWhenSaving: false,
     showRemoveFileDialog: true,
     relativePathForImageStore: false,
     showHiddenFiles: false,

@@ -315,7 +315,7 @@ export class EditorStore {
       let mediaUrl = ''
       const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
       const p = parse(file.name)
-      const base = file instanceof File ? Date.now().toString(16) + p.ext : file.name
+      const base = file instanceof File ? nid() + p.ext : file.name
       if (treeStore.root) {
         const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
         if (!existsSync(imageDir)) await this.createDir(imageDir)

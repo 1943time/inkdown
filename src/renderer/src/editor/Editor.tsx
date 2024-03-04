@@ -18,8 +18,6 @@ import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
-import {useLocalState} from '../hooks/useLocalState'
-import {RenamePasteFile} from './RenamePasteFile'
 import {isAbsolute} from 'path'
 import {stat} from '../utils'
 import {existsSync} from 'fs'
@@ -31,10 +29,6 @@ const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
-  const [state, setState] = useLocalState({
-    openRenameModal: false
-  })
-  const saveFile = useRef<File>()
   const store = useEditorStore()
   const changedMark = useRef(false)
   const editor = store.editor
@@ -257,12 +251,7 @@ export const MEditor = observer(({note}: {
     } else if (files?.length === 1) {
       const file = files[0]
       if (file.path && stat(file.path)?.isDirectory()) return
-      if (configStore.config.renameFileWhenSaving) {
-        saveFile.current = file
-        setState({openRenameModal: true})
-      } else {
-        store.insertFile(file)
-      }
+      store.insertFile(file)
       return
     }
     if (text) {
@@ -334,12 +323,6 @@ export const MEditor = observer(({note}: {
           renderElement={renderElement}
           onKeyDown={keydown}
           renderLeaf={renderLeaf}
-        />
-        <RenamePasteFile
-          file={saveFile.current!}
-          onClose={() => setState({openRenameModal: false})}
-          open={state.openRenameModal}
-          store={store}
         />
       </Slate>
     </ErrorBoundary>
