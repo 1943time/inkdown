@@ -129,7 +129,6 @@ export const MEditor = observer(({note}: {
 
   const initialNote = useCallback(async () => {
     clearTimeout(saveTimer.current)
-    save()
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
@@ -153,8 +152,11 @@ export const MEditor = observer(({note}: {
   }, [note])
 
   useEffect(() => {
-    initialNote()
-  }, [note, editor])
+    save()
+    if (note === treeStore.openedNote && nodeRef.current !== note) {
+      initialNote()
+    }
+  }, [note, editor, treeStore.openedNote])
 
   useEffect(() => {
     const blur = async () => {
