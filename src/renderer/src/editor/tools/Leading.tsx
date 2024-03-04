@@ -4,7 +4,7 @@ import {IFileItem} from '../../index'
 import {treeStore} from '../../store/tree'
 import {useDebounce, useGetSetState} from 'react-use'
 import {Node} from 'slate'
-import {slugify} from '../utils/dom'
+import {getOffsetTop, slugify} from '../utils/dom'
 import {nanoid} from 'nanoid'
 import {useEditorStore} from '../store'
 import {configStore} from '../../store/config'
@@ -77,9 +77,11 @@ export const Heading = observer(({note}: {
     if (div) {
       const scroll = (e: Event) => {
         const top = (e.target as HTMLElement).scrollTop
+        const container = store.container
+        if (!container) return
         const heads = state().headings.slice().reverse()
         for (let h of heads) {
-          if (h.dom && top > h.dom.offsetTop - 20) {
+          if (h.dom && top > getOffsetTop(h.dom, container) - 20) {
             setState({active: h.id})
             return
           }
@@ -115,9 +117,9 @@ export const Heading = observer(({note}: {
             <div
               key={h.key}
               onClick={() => {
-                if (h.dom && box.current) {
+                if (h.dom && box.current && store.container) {
                   box.current.scroll({
-                    top: h.dom.offsetTop - 10,
+                    top: getOffsetTop(h.dom, store.container) - 10,
                     behavior: 'smooth'
                   })
                 }

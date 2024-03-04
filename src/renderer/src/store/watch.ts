@@ -1,174 +1,100 @@
 import {TreeStore} from './tree'
-import {join, sep} from 'path'
-import {runInAction} from 'mobx'
-import {createFileNode, defineParent, sortFiles} from './parserNode'
+import {join} from 'path'
+import {IFileItem, ISpaceNode} from '../index'
+import {openMdParserHandle} from '../editor/parser/parser'
+import {readFile} from 'fs/promises'
+import {statSync} from 'fs'
+import {db, IFile} from './db'
+import {nid} from '../utils'
 import {mediaType} from '../editor/utils/dom'
-import {IFileItem} from '../index'
-import {lstatSync, readFileSync} from 'fs'
-// import {removeFileRecord} from './db'
-import {parserMdToSchema} from '../editor/parser/parser'
-import {configStore} from './config'
+import {createFileNode} from './parserNode'
+import {runInAction} from 'mobx'
 
 export class Watcher {
-  private changeHistory = new Set<string>()
-  private watchNoteSet = new Set<string>()
-
+  private fileMap = new Map<string, IFileItem>()
+  private ops:{e: 'remove' | 'update', path: string}[] = []
   constructor(
     private readonly store: TreeStore
   ) {
-    // this.onChange = this.onChange.bind(this)
-    // window.electron.ipcRenderer.on('window-blur', () => {
-    //     setTimeout(() => {
-    //       if (this.store.root?.filePath) {
-    //         window.api.watch(this.store.root.filePath, this.onChange)
-    //       }
-    //       if (this.watchNoteSet.size) {
-    //         for (let f of this.watchNoteSet) {
-    //           window.api.watch(f, this.onChange)
-    //         }
-    //       }
-    //     }, 100)
-    // })
-    // window.electron.ipcRenderer.on('window-focus', async () => {
-    //   if (this.store.root?.filePath) {
-    //     window.api.offWatcher(this.store.root.filePath)
-    //   }
-    //
-    //   if (this.watchNoteSet.size) {
-    //     for (let f of this.watchNoteSet) {
-    //       window.api.offWatcher(f)
-    //     }
-    //   }
-    //
-    //   if (!this.changeHistory.size) return
-    //   const filesMap = new Map(this.store.nodes.map(f => [f.filePath, f]))
-    //   for (let path of this.changeHistory) {
-    //     if (mediaType(path) !== 'markdown') continue
-    //     const node = filesMap.get(path)
-    //     if (node) {
-    //       const [schema] = await parserMdToSchema([readFileSync(node.filePath, {encoding: 'utf-8'})])
-    //       node.schema = schema
-    //     } else {
-    //       for (let t of this.store.tabs) {
-    //         for (let f of t.history) {
-    //           if (f.independent && f.filePath === path) {
-    //             const [schema] = await parserMdToSchema([readFileSync(f.filePath, {encoding: 'utf-8'})])
-    //             f.schema = schema
-    //           }
-    //         }
-    //       }
-    //     }
-    //     this.store.externalChange$.next(path)
-    //   }
-    //   this.changeHistory.clear()
-    // })
+    this.onChange = this.onChange.bind(this)
+    window.electron.ipcRenderer.on('window-blur', () => {
+      if (this.store.root) {
+        window.api.watch(this.store.root.filePath, this.onChange)
+        for (const node of this.store.nodeMap.values()) {
+          this.fileMap.set(node.filePath, node)
+        }
+      }
+    })
+    window.electron.ipcRenderer.on('window-focus', async () => {
+      if (this.store.root) {
+        window.api.offWatcher(this.store.root.filePath)
+        if (this.ops.length) {
+          this.perform().finally(() => this.ops = [])
+        }
+      }
+    })
   }
-
-  public onChange(e: 'remove' | 'update', path: string, node?: IFileItem) {
-    if (path.split(sep).some(p => p.startsWith('.') && p !== configStore.config.imagesFolder)) return
-    // const nodesMap = this.store.getFileMap(true)
-    // const target = nodesMap.get(path)
-    // const parent = nodesMap.get(join(path, '..'))!
-    // if (target && e === 'remove') {
-    //   if (target.folder) {
-    //     runInAction(() => {
-    //       parent?.children!.splice(parent.children!.findIndex(n => n.filePath === path), 1)
-    //       this.store.tabs.forEach(t => {
-    //         t.history  = t.history.filter(f => !f.filePath.startsWith(path))
-    //         if (t.index > 0 && t.index > t.history.length - 1) {
-    //           t.index = t.history.length - 1
-    //         }
-    //       })
-    //     })
-    //   } else {
-    //     runInAction(() => {
-    //       const index = parent.children!.findIndex(n => n.filePath === path)
-    //       if (index !== -1) {
-    //         parent?.children!.splice(index, 1)
-    //         this.store.tabs.forEach(t => {
-    //           t.history = t.history.filter(h => h.filePath !== path)
-    //           if (t.index > t.history.length - 1) {
-    //             t.index = t.history.length - 1
-    //           }
-    //         })
-    //       }
-    //       if (target.ext === 'md') {
-    //         removeFileRecord(target.filePath)
-    //       }
-    //     })
-    //   }
-    // }
-    // if (e === 'update') {
-    //   if (target || !path.startsWith(this.store.root?.filePath)) {
-    //     this.changeHistory.add(path)
-    //   } else {
-    //     const stat = lstatSync(path)
-    //     if (stat.isDirectory()) {
-    //       if (parent.children && !parent.children.find(c => c.filePath === path)) {
-    //         if (!node) {
-    //           const {root} = parserNode(path)
-    //           root.root = false
-    //           defineParent(root, parent)
-    //           runInAction(() => {
-    //             parent.children!.push(root)
-    //           })
-    //         } else {
-    //           runInAction(() => {
-    //             parent.children!.push(node!)
-    //           })
-    //         }
-    //       }
-    //     } else {
-    //       if (parent.children && !parent.children.find(c => c.filePath === path)) {
-    //         runInAction(() => {
-    //           if (!node) node = createFileNode({
-    //             folder: false,
-    //             parent: parent,
-    //             filePath: path
-    //           })
-    //           parent.children!.push(node)
-    //         })
-    //       }
-    //     }
-    //   }
-    // }
-    // if (parent) {
-    //   runInAction(() => {
-    //     parent.children = sortFiles(parent.children!)
-    //   })
-    // }
+  private async perform() {
+    const {parser, terminate} = openMdParserHandle()
+    for (const op of this.ops) {
+      const {e, path} = op
+      const node = this.fileMap.get(path)
+      if (e === 'remove' && node) {
+        this.store.moveToTrash(node, true)
+      }
+      if (e === 'update') {
+        if (node && node.ext === 'md') {
+          const [schema] = await parser([await readFile(path, {encoding: 'utf-8'})])
+          node.schema = schema
+          this.store.tabs.forEach(t => {
+            if (t.current === node) {
+              t.store.saveDoc$.next(schema)
+            }
+          })
+        }
+        if (!node) {
+          const parentPath = join(path, '..')
+          let parent: IFileItem | ISpaceNode | undefined = this.fileMap.get(join(path, '..'))
+          if (!parent) parent = this.store.root?.filePath === parentPath ? this.store.root :undefined
+          if (!parent) return
+          try {
+            const s = statSync(path)
+            const id = nid()
+            const now = Date.now()
+            const data:IFile = {
+              cid: id,
+              lastOpenTime: now,
+              folder: s.isDirectory(),
+              sort: s.isDirectory() ? 0 : parent.children!.length,
+              filePath: path,
+              created: now,
+              spaceId: this.store.root?.cid,
+              updated: s.mtime.valueOf()
+            }
+            if (mediaType(path) === 'markdown') {
+              const [schema] = await parser([await readFile(path, {encoding: 'utf-8'})])
+              data.schema = schema
+            }
+            db.file.add(data)
+            const node = createFileNode(data, parent)
+            runInAction(() => {
+              if (s.isDirectory()) {
+                parent!.children!.unshift(node)
+              } else {
+                parent!.children!.push(node)
+              }
+            })
+            this.store.nodeMap.set(node.cid, node)
+            this.fileMap.set(path, node)
+          } catch (e) {
+            console.error('external change', e)
+          }
+        }
+      }
+    }
+    terminate()
   }
-
-  watchNote(filePath: string) {
-    this.watchNoteSet.add(filePath)
-  }
-
-  off(path: string) {
-    return window.api.offWatcher(path)
-  }
-
-  async openDirCheck() {
-    // const nodesMap = this.store.getFileMap(true)
-    // for (let t of this.store.tabs) {
-    //   for (let h of t.history) {
-    //     if (h.independent) {
-    //       await this.off(h.filePath)
-    //       this.watchNoteSet.delete(h.filePath)
-    //       if (h.filePath.startsWith(this.store.root.filePath)) {
-    //         runInAction(() => {
-    //           const node = nodesMap.get(h.filePath)
-    //           if (node) {
-    //             t.history.splice(t.history.indexOf(h), 1, node)
-    //           }
-    //         })
-    //       }
-    //     }
-    //   }
-    // }
-  }
-
-  destroy() {
-    if (!this.store.root) return
-    window.api.offWatcher(this.store.root.filePath)
+  public async onChange(e: 'remove' | 'update', path: string) {
+    this.ops.push({e, path})
   }
 }

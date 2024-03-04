@@ -458,8 +458,7 @@ export class TreeStore {
     }
     this.recordTabs()
   }
-
-  private removeSelf(node: IFileItem) {
+  private removeNodeFromHistory(node: IFileItem) {
     for (let t of this.tabs) {
       if (t.history?.length) {
         t.history = t.history.filter(h => h !== node)
@@ -470,6 +469,9 @@ export class TreeStore {
         }
       }
     }
+  }
+  private removeSelf(node: IFileItem) {
+    if (!node.folder) this.removeNodeFromHistory(node)
     if (node.parent) {
       node.parent!.children = node.parent!.children!.filter(c => c !== node)
     }
@@ -483,6 +485,8 @@ export class TreeStore {
         const item = stack.pop()!
         if (item.folder) {
           stack.push(...item.children!)
+        } else {
+          this.removeNodeFromHistory(item)
         }
         this.nodeMap.delete(item.cid)
       }

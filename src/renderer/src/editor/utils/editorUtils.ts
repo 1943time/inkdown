@@ -147,20 +147,12 @@ export class EditorUtils {
     if (!insertNodes) insertNodes = [EditorUtils.p]
     Transforms.insertNodes(editor, insertNodes, {at: [0]})
   }
+
   static reset(editor: Editor, insertNodes?: any[], force?: boolean | History, sel?: BaseSelection) {
     if (!insertNodes) insertNodes = [EditorUtils.p]
     editor.children = insertNodes
     if (force) {
       editor.history = typeof force === 'boolean' ? {redos: [], undos: []} : force
-    }
-    if (sel) {
-      editor.selection = sel
-    } else {
-      const start = Editor.start(editor, [])
-      editor.selection = {
-        anchor: start,
-        focus: start
-      }
     }
     editor.onChange()
   }

@@ -62,6 +62,7 @@ export const MEditor = observer(({note}: {
 
   useSubject(store.saveDoc$, data => {
     if (data && nodeRef.current) {
+      editor.selection = null
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
       requestIdleCallback(() => {
@@ -138,7 +139,7 @@ export const MEditor = observer(({note}: {
       first.current = true
       count(note.schema || [])
       try {
-        EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true, note.sel)
+        EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true)
         clearAllCodeCache(editor)
       } catch (e) {
         EditorUtils.deleteAll(editor)
