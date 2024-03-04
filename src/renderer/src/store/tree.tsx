@@ -157,11 +157,12 @@ export class TreeStore {
     const stack = [item]
     const removeHistory:string[] = []
     while (stack.length) {
-      if (item.folder && item.children) {
-        stack.push(...item.children)
+      const cur = stack.pop()!
+      if (cur.folder && cur.children) {
+        stack.push(...cur.children)
       }
-      if (item.ext === 'md') {
-        removeHistory.push(item.cid)
+      if (cur.ext === 'md') {
+        removeHistory.push(cur.cid)
       }
     }
     if (removeHistory.length) {

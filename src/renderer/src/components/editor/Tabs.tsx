@@ -57,9 +57,6 @@ export const Tabs = observer(() => {
               }
             }}
             onDragEnd={e => setState({dragging: false, targetIndex: -1})}
-            onContextMenu={action(() => {
-              treeStore.tabContextIndex = i
-            })}
             title={t.current?.filename}
             onClick={() => {
               treeStore.selectTab(i)

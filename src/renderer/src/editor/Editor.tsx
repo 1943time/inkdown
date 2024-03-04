@@ -64,6 +64,9 @@ export const MEditor = observer(({note}: {
     if (data && nodeRef.current) {
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
+      requestIdleCallback(() => {
+        save()
+      })
     } else {
       save()
     }

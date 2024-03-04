@@ -113,7 +113,6 @@ app.on('will-finish-launching', () => {
 
 app.whenReady().then(() => {
   createAppMenus()
-  registerMenus()
   registerApi()
   app.clearRecentDocuments()
   if (isWindows) {

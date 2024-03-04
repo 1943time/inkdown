@@ -4,7 +4,7 @@ import {useCallback} from 'react'
 import {Subject} from 'rxjs'
 import isHotkey from 'is-hotkey'
 import {Dialog} from '../Dialog/Dialog'
-import {IFileItem, ISpaceNode} from '../../index'
+import {IFileItem} from '../../index'
 import {useLocalState} from '../../hooks/useLocalState'
 import {treeStore} from '../../store/tree'
 import {useSubject} from '../../hooks/subscribe'
@@ -15,6 +15,7 @@ import {join} from 'path'
 import {runInAction} from 'mobx'
 import {mkdirSync, renameSync} from 'fs'
 import {updateFilePath} from '../../editor/utils/updateNode'
+import {getLinkMap, refactorDepOnLink} from '../../utils/refactor'
 
 export const openEditFolderDialog$ = new Subject<{
   ctxNode?: IFileItem
@@ -64,11 +65,14 @@ export const EditFolderDialog = observer(() => {
         if (stack.some(s => s.filename === name && s.folder && s.cid !== ctx.cid)) {
           return setState({message: 'The folder already exists'})
         }
+        const oldPath = ctx.filePath
+        const linkMap = getLinkMap(treeStore)
         const target = join(state.ctxNode.filePath, '..', name)
         await db.file.update(state.ctxNode.cid, {
           filePath: join(state.ctxNode.filePath, '..', name)
         })
         await updateFilePath(ctx, target)
+        refactorDepOnLink(linkMap, ctx, oldPath)
       }
       close()
     }
