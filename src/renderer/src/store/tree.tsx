@@ -460,6 +460,9 @@ export class TreeStore {
   }
   private removeNodeFromHistory(node: IFileItem) {
     for (let t of this.tabs) {
+      if (t.current === node) {
+        t.store.editor.selection = null
+      }
       if (t.history?.length) {
         t.history = t.history.filter(h => h !== node)
         if (t.history.length > 0 && t.index > t.history.length - 1) {
@@ -474,9 +477,6 @@ export class TreeStore {
     if (!node.folder) this.removeNodeFromHistory(node)
     if (node.parent) {
       node.parent!.children = node.parent!.children!.filter(c => c !== node)
-    }
-    if (!this.openedNote || this.openedNote.ext !== '.md') {
-      this.currentTab.store.editor.selection = null
     }
     this.nodeMap.delete(node.cid)
     if (node.folder) {

@@ -65,7 +65,7 @@ class Db extends Dexie {
   public space!: Table<ISpace, string>
   public constructor() {
     super('db')
-    this.version(7).stores({
+    this.version(8).stores({
       space: '&cid,name,filePath,cloud,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId,lastOpenTime',
       recent: '&id,filePath,spaceId,sort',

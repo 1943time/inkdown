@@ -1,5 +1,4 @@
 import {observer} from 'mobx-react-lite'
-import {QuestionCircleOutlined} from '@ant-design/icons'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Command from '../../icons/keyboard/Command'
 import { SystemPanel } from './System'
@@ -7,7 +6,6 @@ import { Icon } from '@iconify/react'
 import {useLocalState} from '../../hooks/useLocalState'
 import {treeStore} from '../../store/tree'
 import IFormat from '../../icons/IFormat'
-import IAdd from '../../icons/IAdd'
 
 export const Tools = observer(() => {
   const [state, setState] = useLocalState({
@@ -75,10 +73,6 @@ export const Tools = observer(() => {
           }}
           className={`${state.tab === 'actions' ? 'dark:bg-gray-200/10 bg-gray-200/80' : 'dark:hover:bg-gray-200/5 hover:bg-gray-200/60'}`}>
           <Command className={'text-lg'}/>
-        </div>
-        <div
-          className={`dark:hover:bg-gray-200/5 hover:bg-gray-200/60`}>
-          <QuestionCircleOutlined className={'text-base leading-7'}/>
         </div>
       </div>
       <SystemPanel open={state.open} tab={state.tab} onClose={() => {
