@@ -196,7 +196,7 @@ const Item = observer((
 const RenderItem = observer(({items, level}: { items: IFileItem[], level: number }) => {
   return (
     <>
-      {items.filter(c => configStore.config.showHiddenFiles || !c.hidden).map(c =>
+      {items.filter(c => configStore.config.showHiddenFiles || !c.hidden || c.filename === configStore.config.imagesFolder).map(c =>
         <Item
           key={c.cid}
           item={c}

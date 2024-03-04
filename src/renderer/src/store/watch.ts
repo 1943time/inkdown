@@ -5,7 +5,7 @@ import {createFileNode, defineParent, sortFiles} from './parserNode'
 import {mediaType} from '../editor/utils/dom'
 import {IFileItem} from '../index'
 import {lstatSync, readFileSync} from 'fs'
-import {removeFileRecord} from './db'
+// import {removeFileRecord} from './db'
 import {parserMdToSchema} from '../editor/parser/parser'
 import {configStore} from './config'
 

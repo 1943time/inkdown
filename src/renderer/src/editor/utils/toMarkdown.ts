@@ -36,12 +36,11 @@ const textStyle = (t: Text) => {
 const composeText = (t: Text, parent: any[]) => {
   if (!t.text) return ''
   if (t.highColor || (t.strikethrough && (t.bold || t.italic || t.code))) return textHtml(t)
-
   const siblings = parent[parent.length -1]?.children
   const index = siblings?.findIndex(n => n === t)
   let str = textStyle(t)!
   if (t.url) {
-    str = `[${str}](${encodeURI(t.url)})`
+    str = `[${t.text}](${encodeURI(t.url)})`
   } else if (isMix(t) && index !== -1) {
     const next = siblings[index + 1]
     if (!str.endsWith(' ') && next && !Node.string(next).startsWith(' ')) {

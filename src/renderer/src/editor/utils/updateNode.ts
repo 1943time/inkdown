@@ -5,6 +5,8 @@ import {db} from '../../store/db'
 import {basename, join, parse} from 'path'
 import {renameSync} from 'fs'
 import {runInAction} from 'mobx'
+import {refactorDepLink} from '../../utils/refactor'
+import {treeStore} from '../../store/tree'
 
 export const updateNode = async (node: IFileItem) => {
   if (node.filePath && node.ext === 'md') {

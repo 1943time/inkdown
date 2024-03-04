@@ -53,6 +53,7 @@ export const createDoc = async ({parent, newName, copyItem, ghost}: {
       db.file.update(n.cid, {sort: i})
       n.sort = i
     })
+    treeStore.nodeMap.set(data.cid, newNode)
   }
   if (treeStore.selectItem) {
     runInAction(() => treeStore.selectItem = null)

@@ -15,7 +15,7 @@ import {Share} from '../../server/Share'
 import {configStore} from '../../store/config'
 import {toMarkdown} from '../../editor/utils/toMarkdown'
 import {convertRemoteImages} from '../../editor/utils/media'
-import {clearUnusedImages} from '../../editor/utils/clearUnusedImages'
+import {clearUnusedImages} from '../../utils/clearUnusedImages'
 
 export const Nav = observer(() => {
   const [state, setState] = useLocalState({

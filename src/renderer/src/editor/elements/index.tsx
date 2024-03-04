@@ -10,13 +10,15 @@ import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
 import {Media} from './media'
 import {useEditorStore} from '../store'
 import {Editor, Point, Transforms} from 'slate'
-import {isAbsolute, join} from 'path'
 import {treeStore} from '../../store/tree'
 import {InlineKatex} from './CodeUI/Katex/InlineKatex'
-import {existsSync} from 'fs'
 import {parsePath} from '../../utils'
 import {ReactEditor} from 'slate-react'
 import {EditorUtils} from '../utils/editorUtils'
+import {isAbsolute, join} from 'path'
+import {existsSync} from 'fs'
+import {db} from '../../store/db'
+
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
@@ -128,15 +130,21 @@ export const MLeaf = (props: RenderLeafProps) => {
                 if (!parseRes.path && parseRes.hash) {
                   return toHash(parseRes.hash)
                 }
-                // const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
-                // if (existsSync(path)) {
-                //   e.altKey ? treeStore.appendTab(path) : treeStore.openNote(path)
-                //   if (parseRes.hash) {
-                //     setTimeout(() => {
-                //       toHash(parseRes.hash)
-                //     }, 200)
-                //   }
-                // }
+                const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                db.file.where('filePath').equals(path).toArray().then(res => {
+                  for (let f of res) {
+                    const node = treeStore.nodeMap.get(f.cid)
+                    if (node) {
+                      e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                      if (parseRes.hash) {
+                        setTimeout(() => {
+                          toHash(parseRes.hash)
+                        }, 200)
+                      }
+                      break
+                    }
+                  }
+                })
               }
             } else if (e.detail === 2) {
               selectFormat()

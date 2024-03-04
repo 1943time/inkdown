@@ -11,6 +11,8 @@ import isHotkey from 'is-hotkey'
 import {ReactEditor} from 'slate-react'
 import {useEditorStore} from '../store'
 import {Editor, Transforms} from 'slate'
+import {treeStore} from '../../store/tree'
+import {getLinkMap, refactorDepOnLink} from '../../utils/refactor'
 
 export const Title = observer(({node} : {node: IFileItem}) => {
   const store = useEditorStore()
@@ -40,13 +42,18 @@ export const Title = observer(({node} : {node: IFileItem}) => {
     return true
   }, [node])
 
-  const save = useCallback(() => {
+  const save = useCallback(async () => {
     const name = state.name.trim()
     if (!name) {
       setState({name: node.filename || ''})
     } else if (node) {
       if (detectRename()) {
-        updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
+        if (node.spaceId && treeStore.root) {
+          const map = getLinkMap(treeStore)
+          const oldPath = node.filePath
+          await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
+          refactorDepOnLink(map, node, oldPath)
+        }
       } else {
         setState({name: node.filename})
       }
@@ -68,6 +75,9 @@ export const Title = observer(({node} : {node: IFileItem}) => {
             detectRename()
           }}
           onKeyDown={e => {
+            if (isHotkey('mod+s', e)) {
+              save()
+            }
             if (isHotkey('enter', e) || isHotkey('down', e)) {
               e.preventDefault()
               try {

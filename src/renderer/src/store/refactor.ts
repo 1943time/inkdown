@@ -1,8 +1,7 @@
 import {IFileItem} from '../index'
 import {basename, isAbsolute, join, relative} from 'path'
-import {mediaType} from '../editor/utils/dom'
 import {db} from './db'
-import {isExist, parsePath} from '../utils'
+import {parsePath} from '../utils'
 import {existsSync} from 'fs'
 
 const urlRegexp = /\[([^\]\n]*)]\(([^)\n]+)\)/g

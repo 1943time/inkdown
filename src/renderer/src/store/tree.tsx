@@ -16,6 +16,7 @@ import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
+import {getLinkMap, refactorDepLink, refactorDepOnLink} from '../utils/refactor'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -247,49 +248,6 @@ export class TreeStore {
     file.lastOpenTime = now
     this.recordTabs()
     this.updateTitle()
-    // if (this.root && filePath.startsWith(this.root.filePath)) {
-    //   let item = typeof file === 'string' ? undefined : file
-    //   if (!item) {
-    //     const nodeMap = new Map(this.nodes.map(n => [n.filePath, n]))
-    //     item = nodeMap.get(filePath)
-    //     if (!item) {
-    //       if (!existsSync(filePath)) appendFileSync(filePath, '', {encoding: 'utf-8'})
-    //       const parent = nodeMap.get(join(filePath, '..'))
-    //       item = createFileNode({
-    //         filePath: filePath,
-    //         folder: false,
-    //         parent: parent
-    //       })
-    //       if (parent) parent.children = sortFiles([...parent.children!, item])
-    //     }
-    //   }
-    //   if (item.ext === 'md' && this.root) appendRecentNote(item.filePath, this.root.filePath)
-    //   this.currentTab.history = this.currentTab.history.slice(0, this.currentTab.index + 1)
-    //   this.currentTab.history.push(item)
-    //   this.openParentDir(item)
-    //   document.title = this.root.filename + '-' + item.filename
-    //   this.currentTab.index = this.currentTab.history.length - 1
-    //   if (this.currentTab.store?.openSearch) this.currentTab.store.setSearchText(this.currentTab.store.search.text)
-    //   if (scroll) {
-    //     this.currentTab.store!.container?.scroll({
-    //       top: 0
-    //     })
-    //   }
-    // } else {
-    //   const index = this.currentTab.history.findIndex(f => f.filePath === filePath)
-    //   if (index !== -1) {
-    //     this.currentTab.index = index
-    //   } else {
-    //     if (!existsSync(filePath)) {
-    //       appendFileSync(filePath, '', {encoding: 'utf-8'})
-    //     }
-    //     const node = this.createSingleNode(filePath)
-    //     document.title = node.filename
-    //     this.currentTab.history.push(node)
-    //     this.currentTab.index = this.currentTab.history.length - 1
-    //   }
-    // }
-    // this.recordTabs()
   }
 
   async recordTabs() {
@@ -324,6 +282,7 @@ export class TreeStore {
       this.dragStatus = null
       if (mode === 'top' && targetList[index - 1] === dragNode) return
       if (mode === 'bottom' && targetList[index + 1] === dragNode) return
+      const oldPath = dragNode.filePath
       dragNode.parent!.children = dragNode.parent!.children!.filter(c => c !== dragNode)
       if (dragNode.parent === dropNode.parent) {
         targetList = targetList.filter(c => c !== dragNode)
@@ -333,18 +292,24 @@ export class TreeStore {
         targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
         dropNode.parent!.children = targetList
         if (dragNode.parent !== dropNode.parent) {
+          const linkMap = getLinkMap(this)
           const newPath = join(dropNode.parent!.filePath, basename(dragNode.filePath))
           await updateFilePath(dragNode, newPath)
           defineParent(dragNode, dropNode.parent!)
+          refactorDepLink(linkMap, dragNode)
+          refactorDepOnLink(linkMap, dragNode, oldPath)
         }
         targetList.map((n, i) => db.file.update(n.cid, {sort: i}))
       }
       if (mode === 'enter' && dropNode.folder) {
+        const linkMap = getLinkMap(this)
         dropNode.children!.unshift(dragNode)
         const newPath = join(dropNode.filePath, basename(dragNode.filePath))
         defineParent(dragNode, dropNode)
         await updateFilePath(dragNode, newPath)
         dropNode.children!.map((n, i) => db.file.update(n.cid, {sort: i}))
+        refactorDepLink(linkMap, dragNode)
+        refactorDepOnLink(linkMap, dragNode, oldPath)
       }
     } else {
       this.dragNode = null
@@ -378,22 +343,6 @@ export class TreeStore {
       this.updateTitle()
     })
     this.recordTabs()
-  }
-
-  refactorFolder(oldPath: string, targetPath: string) {
-    const files = readdirSync(targetPath)
-    let changeFiles: [string, string][] = []
-    for (let f of files) {
-      if (f.startsWith('.')) continue
-      const path = join(targetPath, f)
-      const stat = statSync(path)
-      if (stat.isDirectory()) {
-        changeFiles.push(...this.refactorFolder(join(oldPath, f), path))
-      } else {
-        changeFiles.push([join(oldPath, f), path])
-      }
-    }
-    return changeFiles
   }
 
   async initial(spaceId: string) {
