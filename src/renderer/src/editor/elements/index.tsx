@@ -25,7 +25,7 @@ const dragStart = (e: React.DragEvent) => {
 }
 
 const toHash = (hash: string) => {
-  const dom = treeStore.currentTab.store.container?.querySelector(`[data-head="${hash}"]`) as HTMLElement
+  const dom = treeStore.currentTab.store.container?.querySelector(`[data-head="${hash.toLowerCase()}"]`) as HTMLElement
   if (dom) {
     treeStore.currentTab.store.container?.scroll({
       top: dom.offsetTop - 10,

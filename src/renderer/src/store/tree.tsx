@@ -24,7 +24,6 @@ export class TreeStore {
   root: ISpaceNode | null = null
   ctxNode: IFileItem | null = null
   dragNode: IFileItem | null = null
-  dropNode: IFileItem | ISpaceNode | null = null
   tabs: Tab[] = []
   dragStatus: null | {
     mode: 'enter' | 'top' | 'bottom'
@@ -35,7 +34,6 @@ export class TreeStore {
   searchKeyWord = ''
   currentIndex = 0
   width = 280
-  tabContextIndex = 0
   loading = false
   size = {
     width: window.innerWidth,
@@ -44,12 +42,8 @@ export class TreeStore {
   fold = true
   watcher: Watcher
   recordTimer = 0
-  externalChange$ = new Subject<string>()
+  externalChange$ = new Subject<IFileItem>()
   shareFolder$ = new Subject<string>()
-  moveFile$ = new Subject<{
-    from: string
-    to: string
-  }>()
 
   get nodes() {
     return Array.from(this.nodeMap.values())
@@ -324,7 +318,7 @@ export class TreeStore {
       const path = this.currentTab.current?.filePath
       this.tabs.forEach((t) => {
         if (this.currentTab !== t && t.current?.filePath === path) {
-          this.externalChange$.next(t.current?.filePath)
+          this.externalChange$.next(t.current)
         }
       })
     }

@@ -172,12 +172,12 @@ export const MEditor = observer(({note}: {
     }
   }, [editor])
 
-  useSubject(treeStore.externalChange$, path => {
-    if (path === note?.filePath) {
+  useSubject(treeStore.externalChange$, changeNote => {
+    if (changeNote === note) {
       try {
         first.current = true
         ReactEditor.blur(editor)
-        EditorUtils.deleteAll(editor, note.schema)
+        EditorUtils.deleteAll(editor, changeNote.schema)
       } catch (e) {
       }
     }

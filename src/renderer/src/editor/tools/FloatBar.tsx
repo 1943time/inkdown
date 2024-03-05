@@ -20,7 +20,6 @@ import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
 import {isAbsolute, join, relative} from 'path'
 import {isMac, isWindows, parsePath} from '../../utils'
-import {configStore} from '../../store/config'
 import {useSubject} from '../../hooks/subscribe'
 import {ReactEditor} from 'slate-react'
 import {getSelRect} from '../utils/dom'
@@ -61,17 +60,11 @@ const tools = [
   {type: 'code', icon: <ICode className={'w-5 h-5'}/>, tooltip: (
       <div
         className={'text-xs flex items-center space-x-0.5'}>
-        <Mod/><span>`</span>
+        <Option/><span>`</span>
       </div>
     )
   },
-  {type: 'url', icon: <LinkOutlined/>, tooltip: (
-      <div
-        className={'text-xs flex items-center space-x-0.5'}>
-        <Mod/><span>L</span>
-      </div>
-    )
-  }
+  {type: 'url', icon: <LinkOutlined/>}
 ]
 
 const colors = [
