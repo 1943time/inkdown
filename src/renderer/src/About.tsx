@@ -38,7 +38,7 @@ export function About() {
           <div className={'flex items-center text-xs mr-3'}>
             <GithubOutlined className={'text-base'} />
             <a
-              className={'text-sky-500 duration-200 hover:text-sky-600 ml-1'}
+              className={'text-indigo-500 duration-200 hover:text-indigo-600 ml-1'}
               target={'_blank'}
               href={'https://github.com/1943time/bluestone'}
             >

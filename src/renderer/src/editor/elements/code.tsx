@@ -18,12 +18,6 @@ import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
 import {allLanguages, highlighter} from '../utils/highlight'
 
-const lightTheme = new Set(['rose-pine-dawn', 'slack-ochin'])
-const isDarkTheme = (theme: string = '') => {
-  if (theme === 'auto') return configStore.config.dark
-  return !/light/i.test(theme) && !lightTheme.has(theme)
-}
-
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = allLanguages.map(l => {
   return {value: l}
@@ -94,7 +88,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground
           }}
           onDragStart={store.dragStart}
-          className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${isDarkTheme(configStore.config.codeTheme) ? 'dark' : ''} ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
+          className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
           <DragHandle/>
           <div
             className={`absolute z-10 right-2 top-1 flex items-center select-none`}

@@ -85,7 +85,7 @@ export const FullSearch = observer(() => {
                 if (!res) res = {file: f, results: []}
                 res.results.push({
                   el: node,
-                  text: str.replaceAll(matchText, '<span class="text-sky-500 dark:group-hover:text-sky-300 group-hover:text-sky-600">$&</span>')
+                  text: str.replaceAll(matchText, '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>')
                 })
               }
             }

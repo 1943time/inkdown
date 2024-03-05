@@ -331,7 +331,7 @@ export const FloatBar = observer(() => {
               )
               closeLink()
             }}
-            className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-sky-500 ml-2'}
+            className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-indigo-500 ml-2'}
           />
         </div> :
         <div className={`${state.openSelectColor ? 'w-[206px]' : 'w-[250px]'} h-full space-x-0.5`}>
@@ -349,7 +349,7 @@ export const FloatBar = observer(() => {
                         openLink()
                       }
                     }}
-                    className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-sky-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
+                    className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-indigo-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
               cursor-default py-0.5 px-2 rounded
               `}
                   >
@@ -361,7 +361,7 @@ export const FloatBar = observer(() => {
                 className={`flex items-center`}
               >
                 <div
-                  className={`${EditorUtils.isFormatActive(store.editor, 'highColor') ? 'bg-sky-500/80 dark:text-gray-200 text-white' : state.hoverSelectColor ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600' : 'float-bar-icon'} py-0.5 px-2 rounded-tl rounded-bl`}
+                  className={`${EditorUtils.isFormatActive(store.editor, 'highColor') ? 'bg-indigo-500/80 dark:text-gray-200 text-white' : state.hoverSelectColor ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600' : 'float-bar-icon'} py-0.5 px-2 rounded-tl rounded-bl`}
                   onMouseEnter={e => e.stopPropagation()}
                   onClick={() => {
                     if (EditorUtils.isFormatActive(store.editor, 'highColor')) {
