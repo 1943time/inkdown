@@ -12,9 +12,10 @@ type Leading = {title: string, level: number, id: string, key: string, dom?: HTM
 
 const cache = new Map<object, Leading>
 const levelClass = new Map([
-  [2, ''],
-  [3, 'pl-4'],
-  [4, 'pl-8']
+  [1, ''],
+  [2, 'pl-3'],
+  [3, 'pl-6'],
+  [4, 'pl-9']
 ])
 export const Heading = observer(({note}: {
   note: IFileItem
@@ -37,7 +38,7 @@ export const Heading = observer(({note}: {
       if (schema?.length) {
         const headings: Leading[] = []
         for (let s of schema) {
-          if (s.type === 'head' && s.level > 1 && s.level <= 4) {
+          if (s.type === 'head' && s.level <= 4) {
             if (cache.get(s)) {
               headings.push(cache.get(s)!)
               continue
@@ -113,12 +114,24 @@ export const Heading = observer(({note}: {
       <div className={`h-full pt-10 pb-10 pr-4 overflow-y-auto`} style={{width: configStore.config.leadingWidth}}>
         <div className={'text-gray-500 text-sm mb-4'}>{configStore.zh ? '大纲' : 'Outline'}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm'}>
+          {!!note &&
+            <div
+              onClick={() => {
+                store.container?.scroll({
+                  top: 0,
+                  behavior: 'smooth'
+                })
+              }}
+              className={`cursor-default dark:hover:text-gray-200 hover:text-gray-800`}>
+              {note.filename}
+            </div>
+          }
           {state().headings.map(h =>
             <div
               key={h.key}
               onClick={() => {
-                if (h.dom && box.current && store.container) {
-                  box.current.scroll({
+                if (h.dom && store.container) {
+                  store.container.scroll({
                     top: getOffsetTop(h.dom, store.container) - 10,
                     behavior: 'smooth'
                   })
