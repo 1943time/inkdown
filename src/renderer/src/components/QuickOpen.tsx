@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite'
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {useCallback, useRef} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
-// import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
 import {configStore} from '../store/config'
 import {runInAction} from 'mobx'

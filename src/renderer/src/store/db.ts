@@ -56,6 +56,11 @@ export interface IFile {
   children?: IFile[]
 }
 
+export interface IConfig {
+  key: string
+  value: any
+}
+
 class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public history!: Table<IHistory, string>
@@ -63,6 +68,7 @@ class Db extends Dexie {
   // public tagFile!: Table<ITagFile, string>
   public file!: Table<IFile, string>
   public space!: Table<ISpace, string>
+  public config!: Table<IConfig, string>
   public constructor() {
     super('db')
     this.version(8).stores({
@@ -70,6 +76,7 @@ class Db extends Dexie {
       file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,filePath,spaceId,sort',
       history: '&id,fileId,schema,spaceId,updated',
+      config: '&key'
       // tag: '&id,title',
       // tagFile: '&id,filePath,tagId'
     })

@@ -237,26 +237,19 @@ export class TreeStore {
   async restoreTabs() {
     if (!this.root) return
     const files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
-    runInAction(() => {
-      this.tabs = this.tabs.filter(t => t.current && (!t.current?.spaceId || t.current?.filePath.startsWith(this.root?.filePath || '')))
-    })
     if (files.length) {
       runInAction(() => {
-        let curId = ''
         for (let i = 0; i < files.length; i++) {
           const f = files[i]
           const node = this.nodeMap.get(f.fileId)
-          if (node) {
+          if (!this.currentTab.current) {
+            if (node) this.openNote(node)
+          } else {
             this.appendTab(node)
-            if (f.current) curId = node.cid
           }
-        }
-        this.currentIndex = this.tabs.findIndex(t => t.current?.cid === curId)
-        if (this.currentIndex < 0) this.currentIndex = 0
-        if (!this.tabs.length) {
-          const first = this.firstNote
-          this.appendTab(first)
-          if (first) this.openParentDir(first)
+          if (f.current) {
+            this.currentIndex = i
+          }
         }
       })
     } else {

@@ -5,6 +5,7 @@ import mermaid from 'mermaid'
 import {shareStore} from '../server/store'
 import {codeReady} from '../editor/utils/highlight'
 import {imageBed} from '../utils/imageBed'
+import {db} from './db'
 
 class ConfigStore {
   visible = false
@@ -104,7 +105,7 @@ class ConfigStore {
         this.config.dark = false
       }
       localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
-      window.electron.ipcRenderer.send('setStore', 'config.theme', theme)
+      this.setConfig('theme', theme)
     })
   }
 
@@ -112,9 +113,14 @@ class ConfigStore {
     window.electron.ipcRenderer.send('toggleShowLeading')
   }
 
-  setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
+  async setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
     this.config[key] = value
-    ipcRenderer.send('setStore', `config.${key}`, value)
+    const record = await db.config.where('key').equals(key).first()
+    if (record) {
+      await db.config.update(record.key, {value})
+    } else {
+      await db.config.add({key, value})
+    }
     if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && shareStore.serviceConfig) {
       shareStore.api.setPreferences({
         [key]: value
@@ -131,6 +137,7 @@ class ConfigStore {
     this.setConfig('interfaceFont', value)
   }
   async initial() {
+    const config = await db.config.toArray()
     return new Promise(resolve => {
       if (localStorage.getItem('pick-route')) {
         this.setConfig('turnOnImageBed', true)
@@ -139,7 +146,8 @@ class ConfigStore {
         if (res.dark) document.documentElement.classList.add('dark')
         this.config = {
           ...this.config,
-          ...res
+          ...res,
+          ...Object.fromEntries(config.map(c => [c.key, c.value]))
         }
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         if (this.config.dark) {
