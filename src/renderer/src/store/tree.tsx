@@ -236,14 +236,15 @@ export class TreeStore {
   }
   async restoreTabs() {
     if (!this.root) return
-    const files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
+    let files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
+    files = files.filter(f => !!this.nodeMap.get(f.fileId))
     if (files.length) {
       runInAction(() => {
         for (let i = 0; i < files.length; i++) {
           const f = files[i]
           const node = this.nodeMap.get(f.fileId)
           if (!this.currentTab.current) {
-            if (node) this.openNote(node)
+            this.openNote(node!)
           } else {
             this.appendTab(node)
           }

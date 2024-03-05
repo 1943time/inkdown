@@ -1,11 +1,15 @@
 import Worker from './worker?worker'
+import {nid} from '../../utils'
 export const parserMdToSchema = (codes: string[]):Promise<any[]> => {
   return new Promise((resolve, reject) => {
     const w = new Worker()
-    w.postMessage({files: codes})
+    const id = nid()
+    w.postMessage({files: codes, id})
     w.onmessage = e => {
-      w.terminate()
-      resolve(e.data)
+      if (e.data.id === id) {
+        w.terminate()
+        resolve(e.data)
+      }
     }
     const error = () => {
       w.terminate()
@@ -20,9 +24,12 @@ export const openMdParserHandle = () => {
   const w = new Worker()
   const parser = (codes: string[]): Promise<any[]> => {
     return new Promise((resolve, reject) => {
-      w.postMessage({files: codes})
+      const id = nid()
+      w.postMessage({files: codes, id})
       w.onmessage = e => {
-        resolve(e.data)
+        if (e.data.id === id) {
+          resolve(e.data.results)
+        }
       }
       w.addEventListener('error', reject)
     })

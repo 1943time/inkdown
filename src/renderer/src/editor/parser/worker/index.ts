@@ -308,12 +308,15 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
 
 onmessage = e => {
   const files:string[] = e.data.files
-  postMessage(files.map(str => {
-    try {
-      const root = parser.parse(str || '')
-      return parserBlock(root.children as any[], true)
-    } catch (e) {
-      return [{type: 'paragraph', children: [{text: str}]}]
-    }
-  }))
+  postMessage({
+    results: files.map(str => {
+      try {
+        const root = parser.parse(str || '')
+        return parserBlock(root.children as any[], true)
+      } catch (e) {
+        return [{type: 'paragraph', children: [{text: str}]}]
+      }
+    }),
+    id: e.data.id
+  })
 }
