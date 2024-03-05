@@ -7,11 +7,12 @@ import {useLocalState} from '../hooks/useLocalState'
 import {db, ISpace} from '../store/db'
 import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
-import {existsSync} from 'fs'
+import {existsSync, readFileSync} from 'fs'
 import {configStore} from '../store/config'
 import {Icon} from '@iconify/react'
 import {editSpace$} from './space/EditSpace'
 import {keyTask$} from '../hooks/keyboard'
+import {parserMdToSchema} from '../editor/parser/parser'
 
 export const Empty = observer(() => {
   const [state, setState] = useLocalState({
@@ -49,9 +50,29 @@ export const Empty = observer(() => {
               keyTask$.next({key: 'newNote'})
             }}
           >
-            <Icon icon={'mingcute:file-new-line'} className={'text-lg'} />
+            <Icon icon={'mingcute:file-new-line'} className={'text-lg'}/>
             <span className={'ml-2'}>
               {configStore.zh ? '新建文档' : 'New Doc'}
+            </span>
+          </div>
+          <div
+            className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
+            onClick={() => {
+              MainApi.openDialog({
+                filters: [{name: 'md', extensions: ['md']}],
+                properties: ['openFile']
+              }).then(async res => {
+                if (res.filePaths.length) {
+                  const data = await parserMdToSchema([{filePath: res.filePaths[0]}])
+                  console.log('data', data)
+                  // parse([readFileSync(res.filePaths[0], {encoding: 'utf-8'})])
+                }
+              })
+            }}
+          >
+            <Icon icon={'tabler:file-text'} className={'text-lg'}/>
+            <span className={'ml-2'}>
+              {configStore.zh ? '打开文档' : 'Open Doc'}
             </span>
           </div>
           {!!treeStore.root &&
@@ -59,12 +80,12 @@ export const Empty = observer(() => {
               <div
                 className={'cursor-pointer hover:text-indigo-600 duration-200'}
                 onClick={() => {
-                  // MainApi.sendToSelf('open-quickly')
+                  keyTask$.next({key: 'quickOpen'})
                 }}
               >
-                <HistoryOutlined />
+                <HistoryOutlined/>
                 <span className={'ml-2'}>
-                  {configStore.zh ? '最近打开的笔记' : 'Recently opened notes'}
+                  {configStore.zh ? '最近打开的文档' : 'Recently opened docs'}
                 </span>
               </div>
               {treeStore.tabs.length > 1 &&
@@ -74,7 +95,7 @@ export const Empty = observer(() => {
                     treeStore.removeTab(treeStore.currentIndex)
                   }}
                 >
-                  <CloseOutlined />
+                  <CloseOutlined/>
                   <span className={'ml-2'}>
                   {configStore.zh ? '关闭' : 'Close'}
                 </span>

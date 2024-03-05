@@ -359,46 +359,46 @@ export class MenuKey {
         case 'paste-markdown-code':
           const markdownCode = window.api.getClipboardText()
           if (markdownCode) {
-            parserMdToSchema([markdownCode]).then(([schema]) => {
-              if (!schema.length) return
-              if (configStore.config.autoDownload) {
-                const stack = schema.slice()
-                while (stack.length) {
-                  const item = stack.pop()!
-                  if (item.type === 'media' && item.url?.startsWith('http')) {
-                    item.downloadUrl = item.url
-                  }
-                  if (item.children?.length) {
-                    stack.push(...item.children)
-                  }
-                }
-              }
-              if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
-                Transforms.delete(editor, {at: node[1]})
-                Transforms.insertNodes(editor, schema, {at: node[1]})
-                return
-              } else if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
-                const first = schema.shift()
-                Editor.insertNode(editor, first.children)
-              }
-              if (schema.length) {
-                if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
-                  const [block] = Editor.nodes<any>(editor, {
-                    match: n => ['table', 'code', 'paragraph'].includes(n.type),
-                    mode: 'lowest'
-                  })
-                  Transforms.insertNodes(editor, schema, {
-                    at: Path.next(block[1]),
-                    select: true
-                  })
-                } else {
-                  Transforms.insertNodes(editor, schema, {
-                    at: Path.next(node[1]),
-                    select: true
-                  })
-                }
-              }
-            })
+            // parserMdToSchema([markdownCode]).then(([schema]) => {
+            //   if (!schema.length) return
+            //   if (configStore.config.autoDownload) {
+            //     const stack = schema.slice()
+            //     while (stack.length) {
+            //       const item = stack.pop()!
+            //       if (item.type === 'media' && item.url?.startsWith('http')) {
+            //         item.downloadUrl = item.url
+            //       }
+            //       if (item.children?.length) {
+            //         stack.push(...item.children)
+            //       }
+            //     }
+            //   }
+            //   if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
+            //     Transforms.delete(editor, {at: node[1]})
+            //     Transforms.insertNodes(editor, schema, {at: node[1]})
+            //     return
+            //   } else if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+            //     const first = schema.shift()
+            //     Editor.insertNode(editor, first.children)
+            //   }
+            //   if (schema.length) {
+            //     if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
+            //       const [block] = Editor.nodes<any>(editor, {
+            //         match: n => ['table', 'code', 'paragraph'].includes(n.type),
+            //         mode: 'lowest'
+            //       })
+            //       Transforms.insertNodes(editor, schema, {
+            //         at: Path.next(block[1]),
+            //         select: true
+            //       })
+            //     } else {
+            //       Transforms.insertNodes(editor, schema, {
+            //         at: Path.next(node[1]),
+            //         select: true
+            //       })
+            //     }
+            //   }
+            // })
           }
           setTimeout(() => {
             runInAction(() => this.state!.refreshHighlight = !this.state!.refreshHighlight)

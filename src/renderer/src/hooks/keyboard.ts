@@ -144,9 +144,9 @@ export class KeyboardTask {
     const markdownCode = window.api.getClipboardText()
     if (markdownCode) {
       const [node] = this.curNodes
-      const [schema] = await parserMdToSchema([markdownCode])
+      const [res] = await parserMdToSchema([{code: markdownCode, filePath: ''}])
       if (configStore.config.autoDownload) {
-        const stack = schema.slice()
+        const stack = res.schema.slice()
         while (stack.length) {
           const item = stack.pop()! as Element
           if (item.type === 'media' && item.url?.startsWith('http')) {
@@ -159,26 +159,26 @@ export class KeyboardTask {
       }
       if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
         Transforms.delete(this.editor, { at: node[1] })
-        Transforms.insertNodes(this.editor, schema, { at: node[1], select: true})
+        Transforms.insertNodes(this.editor, res.schema, { at: node[1], select: true})
         return
       }
-      if ((schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
-        const first = schema.shift()
+      if ((res.schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
+        const first = res.schema.shift()
         Editor.insertNode(this.editor, first.children)
       }
-      if (schema.length) {
+      if (res.schema.length) {
         if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
           const [block] = Editor.nodes<any>(this.editor, {
             match: n => ['table', 'code', 'paragraph'].includes(n.type),
             mode: 'lowest'
           })
-          Transforms.insertNodes(this.editor, schema, {
+          Transforms.insertNodes(this.editor, res.schema, {
             at: Path.next(block[1]),
             select: true
           })
         } else {
-          console.log('insert', schema)
-          Transforms.insertNodes(this.editor, schema, {
+          console.log('insert', res.schema)
+          Transforms.insertNodes(this.editor, res.schema, {
             at: Path.next(node[1]),
             select: true
           })

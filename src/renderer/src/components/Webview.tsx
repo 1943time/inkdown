@@ -32,8 +32,8 @@ export const Webview = observer((props: {
   const print = async (filePath: string) => {
     store.webviewFilePath = filePath
     setState({ready: true, name: parse(filePath).name})
-    const schema = await parserMdToSchema([readFileSync(filePath, {encoding: 'utf-8'})])
-    EditorUtils.reset(store.editor, schema[0] || [])
+    const [res] = await parserMdToSchema([{filePath}])
+    EditorUtils.reset(store.editor, res.schema || [])
     setTimeout(() => {
       window.electron.ipcRenderer.send('print-pdf-ready', filePath)
     }, 300)

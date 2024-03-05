@@ -24,6 +24,7 @@ import {existsSync} from 'fs'
 import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
 import {Title} from './tools/Title'
 import {updateNode} from './utils/updateNode'
+import {CustomLeaf} from '../el'
 
 export const MEditor = observer(({note}: {
   note: IFileItem

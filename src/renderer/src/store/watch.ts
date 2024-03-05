@@ -2,7 +2,6 @@ import {TreeStore} from './tree'
 import {join} from 'path'
 import {IFileItem, ISpaceNode} from '../index'
 import {openMdParserHandle} from '../editor/parser/parser'
-import {readFile} from 'fs/promises'
 import {statSync} from 'fs'
 import {db, IFile} from './db'
 import {nid} from '../utils'
@@ -49,13 +48,21 @@ export class Watcher {
       }
       if (e === 'update') {
         if (node && node.ext === 'md') {
-          const [schema] = await parser([await readFile(path, {encoding: 'utf-8'})])
-          node.schema = schema
+          const [res] = await parser([{filePath: path}])
+          node.schema = res.schema
+          let changed = false
           this.store.tabs.forEach(t => {
             if (t.current === node) {
-              t.store.saveDoc$.next(schema)
+              t.store.saveDoc$.next(node.schema!)
+              changed = true
             }
           })
+          if (!changed) {
+            db.file.update(node.cid, {
+              schema: node.schema,
+              links: res.links
+            })
+          }
         }
         if (!node) {
           const parentPath = join(path, '..')
@@ -77,8 +84,9 @@ export class Watcher {
               updated: s.mtime.valueOf()
             }
             if (mediaType(path) === 'markdown') {
-              const [schema] = await parser([await readFile(path, {encoding: 'utf-8'})])
-              data.schema = schema
+              const [res] = await parser([{filePath: path}])
+              data.schema = res.schema
+              data.links = res.links
             }
             db.file.add(data)
             const node = createFileNode(data, parent)

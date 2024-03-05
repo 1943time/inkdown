@@ -1,15 +1,30 @@
 import {IFileItem, ISpaceNode} from '../index'
-import {readdirSync, readFileSync, statSync} from 'fs'
-import {basename, extname, join, parse, sep} from 'path'
+import {readdirSync, statSync} from 'fs'
+import {basename, extname, isAbsolute, join, parse, sep} from 'path'
 import {observable, runInAction} from 'mobx'
 import {db, IFile} from './db'
 import {message$, nid} from '../utils'
 import {openMdParserHandle, parserMdToSchema} from '../editor/parser/parser'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {mediaType} from '../editor/utils/dom'
-import {readFile} from 'fs/promises'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {TreeStore} from './tree'
+
+export const findAbsoluteLinks = (schema: any[], filePath: string, prePath: number[] = [], links: {path: number[], target: string}[] = []) => {
+  for (let i = 0; i < schema.length; i++) {
+    const n = schema[i]
+    const curPath = [...prePath, i]
+    if (n.url && !n.url.startsWith('http') && !n.url.startsWith('data:')) {
+      const path = isAbsolute(n.url) ? n.url : join(filePath, '..', n.url)
+      links.push({path: curPath, target: path.replace(/#[^\n]+$/, '')})
+    }
+    if (n.children) {
+      findAbsoluteLinks(n.children, filePath, curPath, links)
+    }
+  }
+  return links
+}
+
 export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) => {
   Object.defineProperty(node, 'parent', {
     configurable: true,
@@ -41,8 +56,9 @@ export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' |
       ...data
     }
     if (mediaType(data.filePath) === 'markdown') {
-      const [schema] = await parserMdToSchema([await readFile(data.filePath, {encoding: 'utf-8'})])
-      insertData.schema = schema
+      const [res] = await parserMdToSchema([{filePath: data.filePath}])
+      insertData.schema = res.schema
+      insertData.links = res.links
     }
     await db.file.add(insertData)
     const node = createFileNode(insertData, parent)
@@ -77,6 +93,7 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode, gho
     hidden: name?.startsWith('.'),
     lastOpenTime: file.lastOpenTime,
     spaceId: file.spaceId,
+    links: file.links,
     ext: file.folder ? undefined : extname(file.filePath).replace(/^\./, ''),
   } as IFileItem
   if (parent) {
@@ -86,7 +103,8 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode, gho
     schema: false,
     sel: false,
     history: false,
-    sort: false
+    sort: false,
+    links: false
   })
 }
 
@@ -191,15 +209,13 @@ export class ReadSpace {
       try {
         for (let i = 0 ; i <= this.newNote.length; i += 30) {
           const stack = this.newNote.slice(i, i + 30)
-          const contents:string[] = []
-          for (let n of stack) {
-            contents.push(await readFile(n.filePath, {encoding: 'utf-8'}))
-          }
-          const schemas = await parser(contents)
+          const schemas = await parser(stack.map(s => {
+            return {filePath: s.filePath}
+          }))
           stack.map((s, i) => {
             try {
-              stack[i].schema = schemas[i]
-              db.file.update(s.cid, {schema: schemas[i]})
+              const res = schemas[i]
+              db.file.update(s.cid, {schema: res.schema, links: res.links})
             } catch (e) {
               stack[i].schema = EditorUtils.p
             }

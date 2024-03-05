@@ -1,14 +1,40 @@
 import Worker from './worker?worker'
 import {nid} from '../../utils'
-export const parserMdToSchema = (codes: string[]):Promise<any[]> => {
+import {isAbsolute, join} from 'path'
+import {readFileSync} from 'fs'
+type ParserResult = {
+  schema:any[], links: {path: number[], target: string}[]
+}
+
+const filterSchemaLinks = (links: ParserResult['links'], filePath: string) => {
+  if (!filePath) return []
+  const filterLinks: ParserResult['links'] = []
+  for (let l of links) {
+    if (!l.target || l.target.startsWith('http') || l.target.startsWith('data:')) continue
+    const path = isAbsolute(l.target) ? l.target : join(filePath, '..', l.target)
+    filterLinks.push({path: l.path, target: path.replace(/#[^\n]+$/, '')})
+  }
+  return filterLinks
+}
+
+const transformResult = (codes: {filePath: string}[], results: ParserResult[]) => {
+  return results.map((r, i) => {
+    return {schema: r.schema, links: filterSchemaLinks(r.links, codes[i].filePath)}
+  })
+}
+
+export const parserMdToSchema = (codes: {filePath: string, code?: string}[]):Promise<ParserResult[]> => {
   return new Promise((resolve, reject) => {
     const w = new Worker()
     const id = nid()
-    w.postMessage({files: codes, id})
+    w.postMessage({files: codes.map(c => {
+      if (c.code) return c.code
+      return readFileSync(c.filePath, {encoding: 'utf-8'})
+    }), id})
     w.onmessage = e => {
       if (e.data.id === id) {
         w.terminate()
-        resolve(e.data)
+        resolve(transformResult(codes, e.data.results))
       }
     }
     const error = () => {
@@ -22,13 +48,16 @@ export const parserMdToSchema = (codes: string[]):Promise<any[]> => {
 
 export const openMdParserHandle = () => {
   const w = new Worker()
-  const parser = (codes: string[]): Promise<any[]> => {
+  const parser = (codes: {filePath: string, code?: string}[]): Promise<ParserResult[]> => {
     return new Promise((resolve, reject) => {
       const id = nid()
-      w.postMessage({files: codes, id})
+      w.postMessage({files: codes.map(c => {
+          if (c.code) return c.code
+          return readFileSync(c.filePath, {encoding: 'utf-8'})
+        }), id})
       w.onmessage = e => {
         if (e.data.id === id) {
-          resolve(e.data.results)
+          resolve(transformResult(codes, e.data.results))
         }
       }
       w.addEventListener('error', reject)

@@ -44,7 +44,7 @@ const parseTable = (table: Table) => {
             align: aligns?.[i] || undefined,
             title: l === 0,
             // @ts-ignore
-            children: c.children?.length ? parserBlock(c.children, false, c) : [{text: ''}]
+            children: c.children?.length ? parserBlock(c.children, false, c, [...prePath, l, i], links) : [{text: ''}]
           }
         })
       }
@@ -58,7 +58,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   let el:Element | null | Element[] = null
   let preNode:null | Content = null
   let htmlTag:{tag: string, color?: string, url?: string}[] = []
-  for (let n of nodes) {
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]
     switch (n.type) {
       case 'heading':
         el = {type: 'head', level: n.depth, children: n.children?.length ? parserBlock(n.children, false, n) : [{text: ''}]}
@@ -67,7 +68,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
           const img = findImageElement(n.value)
           if (img) {
-            el = {type: 'media', height: img?.height, url: img?.url, children: [{text: ''}]}
+            el = {type: 'media', height: img?.height, url: decodeURIComponent(img?.url || ''), children: [{text: ''}]}
           } else {
             if (n.value === '<br/>') {
               el = {type: 'paragraph', children: [{text: ''}]}
@@ -88,7 +89,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           if (breakMatch) {
             el = {type: 'break', children: [{text: ''}]}
           } else {
-            const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n\/]*?>/)
+            const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n>]*?>/)
             if (htmlMatch) {
               const [str, tag] = htmlMatch
               if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {
@@ -189,7 +190,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
                 type: 'media', children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
               })
             } else {
-              textNodes.push({text: c.value})
+              textNodes.push(c)
             }
           } else {
             textNodes.push(c)
@@ -258,7 +259,9 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
               if (t.tag === 'b' || t.tag === 'strong') el.bold = true
               if (t.tag === 'del') el.strikethrough = true
               if (t.tag === 'span' && t.color) el.highColor = t.color
-              if (t.tag === 'a' && t.url) el.url = t.url
+              if (t.tag === 'a' && t.url) {
+                el.url = t.url
+              }
             }
           }
           break
@@ -270,7 +273,9 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             if (n.type === 'strong') leaf.bold = true
             if (n.type === 'emphasis') leaf.italic = true
             if (n.type === 'delete') leaf.strikethrough = true
-            if (n.type === 'link') leaf.url = decodeURIComponent(n.url)
+            if (n.type === 'link') {
+              leaf.url = decodeURIComponent(n.url)
+            }
             // @ts-ignore
             el = parseText(n.children?.length ? n.children : [{value: leaf.url || ''}], leaf)
           }
@@ -301,9 +306,24 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
   return els
 }
 
+const findLinks = (schema: any[], prePath: number[] = [], links: {path: number[], target: string}[] = []) => {
+  for (let i = 0; i < schema.length; i++) {
+    const n = schema[i]
+    const curPath = [...prePath, i]
+    if (n.url) {
+      links.push({path: curPath, target: n.url})
+    }
+    if (n.children) {
+      findLinks(n.children, curPath, links)
+    }
+  }
+  return links
+}
+
 // export const parse = (files: string[]) => {
 //   const root = parser.parse(files[0] || '')
-//   return parserBlock(root.children as any[], true)
+//   const schema = parserBlock(root.children as any[], true)
+//   const links = findLinks(schema)
 // }
 
 onmessage = e => {
@@ -312,7 +332,9 @@ onmessage = e => {
     results: files.map(str => {
       try {
         const root = parser.parse(str || '')
-        return parserBlock(root.children as any[], true)
+        const schema= parserBlock(root.children as any[], true)
+        const links = findLinks(schema)
+        return {schema, links}
       } catch (e) {
         return [{type: 'paragraph', children: [{text: str}]}]
       }

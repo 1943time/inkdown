@@ -1,12 +1,9 @@
-import {Editor, Element, Path, Range, NodeEntry, BaseSelection, Text, Node, Transforms, BaseOperation} from 'slate'
+import {BaseOperation, BaseSelection, Editor, Element, NodeEntry, Path, Range} from 'slate'
 import {useMemo, useRef} from 'react'
-import {EditorStore, useEditorStore} from '../store'
-import {MainApi} from '../../api/main'
-import {EditorUtils} from '../utils/editorUtils'
+import {EditorStore} from '../store'
 import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
-import {parserMdToSchema} from '../parser/parser'
-import {configStore} from '../../store/config'
+
 export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>}>()
 const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {

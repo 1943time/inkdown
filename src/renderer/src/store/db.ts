@@ -54,6 +54,7 @@ export interface IFile {
   sort: number
   lastOpenTime?: number
   children?: IFile[]
+  links?: {path: number[], target: string}[]
 }
 
 export interface IConfig {

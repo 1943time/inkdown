@@ -96,7 +96,7 @@ export class TreeStore {
       }
     })
     this.tabs.push(this.createTab())
-    new MenuKey(this)
+    // new MenuKey(this)
     window.electron.ipcRenderer.on('open-path', async (e, path: string) => {
       if (existsSync(path)) {
         const s = stat(path)
@@ -115,12 +115,13 @@ export class TreeStore {
                 this.openExternalNode(createFileNode(record))
               } else {
                 if (mediaType(record.filePath) === 'markdown') {
-                  const [schema] = await parserMdToSchema([await readFile(record.filePath, {encoding: 'utf-8'})])
+                  const [res] = await parserMdToSchema([{filePath: record.filePath}])
                   db.file.update(record.cid, {
-                    schema: schema,
-                    updated: s.mtime.valueOf()
+                    schema: res.schema,
+                    updated: s.mtime.valueOf(),
+                    links: res.links
                   })
-                  record.schema = schema
+                  record.schema = res.schema
                   this.openExternalNode(createFileNode(record))
                 }
               }
@@ -136,8 +137,9 @@ export class TreeStore {
                 updated: s.mtime.valueOf()
               }
               if (mediaType(path) === 'markdown') {
-                const [schema] = await parserMdToSchema([await readFile(path, {encoding: 'utf-8'})])
-                data.schema = schema
+                const [res] = await parserMdToSchema([{filePath: path}])
+                data.schema = res.schema
+                data.links = res.links
               }
               db.file.add(data)
               this.openExternalNode(createFileNode(data))

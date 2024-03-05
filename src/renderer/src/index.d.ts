@@ -30,6 +30,7 @@ export type IFileItem = {
   lastOpenTime?: number
   sel?: BaseSelection
   hidden?: boolean
+  links?: {path: number[], target: string}[]
 }
 // export type IFileItem = ISpaceNode | IFileNode
 
