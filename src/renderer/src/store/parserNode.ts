@@ -19,15 +19,16 @@ export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) =>
   })
 }
 
-export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'schema' | 'spaceId' | 'folder'>) => {
+export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'spaceId' | 'folder'>): Promise<IFileItem | null> => {
   const parentPath = join(data.filePath, '..')
   const fileMap = new Map<string, IFileItem>()
   for (const node of tree.nodeMap.values()) {
     fileMap.set(node.filePath, node)
   }
+  if (fileMap.get(data.filePath)) return fileMap.get(data.filePath)!
   let parent: IFileItem | ISpaceNode | undefined = fileMap.get(parentPath)
   if (!parent) parent = tree.root?.filePath === parentPath ? tree.root :undefined
-  if (!parent) return
+  if (!parent) return null
   try {
     const id = nid()
     const now = Date.now()
@@ -41,7 +42,7 @@ export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' |
     }
     if (mediaType(data.filePath) === 'markdown') {
       const [schema] = await parserMdToSchema([await readFile(data.filePath, {encoding: 'utf-8'})])
-      data.schema = schema
+      insertData.schema = schema
     }
     await db.file.add(insertData)
     const node = createFileNode(insertData, parent)
@@ -53,8 +54,10 @@ export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' |
       }
     })
     tree.nodeMap.set(node.cid, node)
+    return node
   } catch (e) {
     console.error('external change', e)
+    return null
   }
 }
 

@@ -2,21 +2,13 @@ import {app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, screen
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
-import {store} from './store'
 import {AppUpdate} from './update'
 import {isAbsolute, join} from 'path'
-
 const isWindows = process.platform === 'win32'
-type WinOptions = {
-  openFolder?: string
-  openTabs?: string[]
-  index?: number
-}
-const windows = new Map<number, WinOptions>()
-app.setAsDefaultProtocolClient('bluestone-markdown')
+app.setAsDefaultProtocolClient('bluestone')
 
 let fileChangedWindow: BrowserWindow | null = null
-function createWindow(initial?: WinOptions, ready?: (win: BrowserWindow) => void) {
+function createWindow(openFile = '') {
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
     width,
@@ -59,7 +51,11 @@ function createWindow(initial?: WinOptions, ready?: (win: BrowserWindow) => void
   })
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
-    ready?.(window)
+    if (openFile) {
+      setTimeout(() => {
+        window.webContents.send('open-path', openFile)
+      }, 100)
+    }
   })
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -84,12 +80,7 @@ function createWindow(initial?: WinOptions, ready?: (win: BrowserWindow) => void
         return
       }
     }
-    const id = window.id
-    setTimeout(() => {
-      windows.delete(id)
-    }, 500)
   })
-  windows.set(window.id, initial || {})
   window.show()
 }
 
@@ -101,7 +92,13 @@ app.on('will-finish-launching', () => {
     if (app.isReady() === false) {
       waitOpenFile = file
     } else {
-      // openFiles(file)
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length) {
+        const last = wins[wins.length - 1]
+        last.webContents.send('open-path', file)
+      } else {
+        createWindow(file)
+      }
     }
   })
   app.on('open-url', (event, url) => {
@@ -137,23 +134,7 @@ app.whenReady().then(() => {
     fileChangedWindow = null
   })
 
-  ipcMain.handle('get-win-set', (e) => {
-    const window = BrowserWindow.fromWebContents(e.sender)!
-    const w = windows.get(window.id)
-    if (w) {
-      return {
-        openFolder: w.openFolder,
-        index: w.index,
-        openTabs: w.openTabs
-      }
-    }
-    return null
-  })
-  app.on('before-quit', e => {
-    store.set('windows', Array.from(windows).map(w => w[1]))
-  })
   if (isWindows) electronApp.setAppUserModelId('me.bluemd')
-
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -162,33 +143,15 @@ app.whenReady().then(() => {
   })
   if (process.argv[1]) waitOpenFile = process.argv[1] || ''
   if (waitOpenFile === '.') waitOpenFile = ''
-  if (waitOpenFile) {
-    try {
-      if (!isAbsolute(waitOpenFile)) {
-        waitOpenFile = join(process.cwd(), waitOpenFile)
-      }
-      createWindow({
-        openTabs: [waitOpenFile]
-      })
-      waitOpenFile = ''
-    } catch (e) {}
-  } else {
-    try {
-      const data = store.get('windows') as WinOptions[] || []
-      if (data?.length) {
-        for (let d of data) {
-          createWindow(typeof d === 'object' ? d : undefined)
-        }
-      } else if (!waitOpenFile) {
-        createWindow()
-      }
-    } catch (e) {
-      // log.error('create error', e)
-    }
+  if (waitOpenFile && !isAbsolute(waitOpenFile)) {
+    waitOpenFile = join(process.cwd(), waitOpenFile)
   }
+  createWindow(waitOpenFile)
+  waitOpenFile = ''
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow(waitOpenFile)
+      waitOpenFile = ''
     }
   })
 })

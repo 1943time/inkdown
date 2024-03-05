@@ -40,9 +40,6 @@ export const Home = observer(() => {
     }, {once: true})
   }, [])
 
-  useEffect(() => {
-    window.electron.ipcRenderer.send('open-file', treeStore.openedNote && treeStore.openedNote.ext === 'md')
-  }, [treeStore.openedNote])
   return (
     <div className={`flex h-screen overflow-hidden ${isWindows ? 'win' : ''}`}>
       <Tree/>

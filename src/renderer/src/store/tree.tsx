@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {defineParent, ReadSpace} from './parserNode'
+import {createFileNode, defineParent, insertFile, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync, readFileSync, statSync} from 'fs'
@@ -10,13 +10,16 @@ import {message$, nid, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {configStore} from './config'
-import {db} from './db'
+import {db, IFile} from './db'
 import {EditorStore} from '../editor/store'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
 import {getLinkMap, refactorDepLink, refactorDepOnLink} from '../utils/refactor'
+import {mediaType} from '../editor/utils/dom'
+import {parserMdToSchema} from '../editor/parser/parser'
+import {readFile} from 'fs/promises'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -94,22 +97,68 @@ export class TreeStore {
     })
     this.tabs.push(this.createTab())
     new MenuKey(this)
-    window.electron.ipcRenderer.on('copy-source-code', (e, filePath?: string) => {
-      if (this.openedNote?.filePath.endsWith('.md') || filePath) {
-        const content = readFileSync(filePath || this.currentTab!.current!.filePath, {encoding: 'utf-8'})
-        window.api.copyToClipboard(content)
-        message$.next({type: 'success', content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'})
-      }
-    })
-
-    window.electron.ipcRenderer.on('open-path', (e, path: string) => {
-      const s = stat(path)
-      if (s && !s.isDirectory()) {
-        // this.appendTab(path)
+    window.electron.ipcRenderer.on('open-path', async (e, path: string) => {
+      if (existsSync(path)) {
+        const s = stat(path)
+        if (s && !s.isDirectory()) {
+          if (this.root && path.startsWith(this.root.filePath)) {
+            const node = await insertFile(this, {
+              spaceId: this.root.cid,
+              folder: false,
+              filePath: path
+            })
+            if (node) this.openExternalNode(node)
+          } else {
+            const record = await db.file.where('filePath').equals(path).first()
+            if (record) {
+              if (record.updated === s.mtime.valueOf()) {
+                this.openExternalNode(createFileNode(record))
+              } else {
+                if (mediaType(record.filePath) === 'markdown') {
+                  const [schema] = await parserMdToSchema([await readFile(record.filePath, {encoding: 'utf-8'})])
+                  db.file.update(record.cid, {
+                    schema: schema,
+                    updated: s.mtime.valueOf()
+                  })
+                  record.schema = schema
+                  this.openExternalNode(createFileNode(record))
+                }
+              }
+            } else {
+              const id = nid()
+              const now = Date.now()
+              const data:IFile = {
+                cid: id,
+                filePath: path,
+                folder: s.isDirectory(),
+                sort: 0,
+                created: now,
+                updated: s.mtime.valueOf()
+              }
+              if (mediaType(path) === 'markdown') {
+                const [schema] = await parserMdToSchema([await readFile(path, {encoding: 'utf-8'})])
+                data.schema = schema
+              }
+              db.file.add(data)
+              this.openExternalNode(createFileNode(data))
+            }
+          }
+        }
       }
     })
   }
-
+  openExternalNode(node: IFileItem) {
+    if (!this.tabs.some((t, i) => {
+      if (!t.current) {
+        this.currentIndex = i
+        this.openNote(node)
+        return true
+      }
+      return false
+    })) {
+      this.appendTab(node)
+    }
+  }
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
