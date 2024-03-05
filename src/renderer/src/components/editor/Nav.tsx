@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import {LeftOutlined, RightOutlined} from '@ant-design/icons'
 import {Fragment, useCallback, useEffect} from 'react'
-import {action} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {treeStore} from '../../store/tree'
 import {isMac, message$} from '../../utils'
 import {IMenu, openMenus} from '../Menu'
@@ -16,6 +16,8 @@ import {configStore} from '../../store/config'
 import {toMarkdown} from '../../editor/utils/toMarkdown'
 import {convertRemoteImages} from '../../editor/utils/media'
 import {clearUnusedImages} from '../../utils/clearUnusedImages'
+import {Badge} from 'antd'
+import {Update} from '../Update'
 
 export const Nav = observer(() => {
   const [state, setState] = useLocalState({
@@ -122,6 +124,7 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-300/90 space-x-1.5 text-gray-500'}>
+          <Update/>
           <Share />
           <div
             className={'flex items-center justify-center h-[26px] w-[26px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'}
@@ -188,13 +191,25 @@ export const Nav = observer(() => {
                   click: action(() => configStore.visible = true)
                 }
               ]
+              if (configStore.enableUpgrade) {
+                menus.unshift({
+                  text: 'Update Bluestone',
+                  click: () => {
+                    runInAction(() => {
+                      configStore.openUpdateDialog = true
+                    })
+                  }
+                })
+              }
               openMenus(e, menus)
             }}
           >
-            <Icon
-              icon={'uiw:more'}
-              className={'text-lg'}
-            />
+            <Badge offset={[4, 1]} status={'warning'} dot={configStore.enableUpgrade}>
+              <Icon
+                icon={'uiw:more'}
+                className={'text-lg'}
+              />
+            </Badge>
           </div>
         </div>
       </div>

@@ -35,7 +35,6 @@ export const MEditor = observer(({note}: {
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(store)
   const saveTimer = useRef(0)
-  const changedTimer = useRef(0)
   const nodeRef = useRef<IFileItem>()
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
@@ -50,6 +49,7 @@ export const MEditor = observer(({note}: {
       runInAction(() => {
         store.docChanged = false
       })
+      window.electron.ipcRenderer.send('file-saved')
       updateNode(node)
     }
   }, [note])
@@ -120,7 +120,6 @@ export const MEditor = observer(({note}: {
         store.docChanged = true
       })
       clearTimeout(saveTimer.current)
-      clearTimeout(changedTimer.current)
       saveTimer.current = window.setTimeout(() => {
         save()
       }, 3000)

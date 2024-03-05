@@ -126,11 +126,7 @@ app.whenReady().then(() => {
   }
   new AppUpdate()
   ipcMain.on('create-window', (e, filePath?: string) => {
-    if (filePath) {
-      // openFiles(filePath)
-    } else {
-      createWindow()
-    }
+    createWindow()
   })
 
   ipcMain.on('file-changed', (e) => {
