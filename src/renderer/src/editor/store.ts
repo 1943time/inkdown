@@ -73,6 +73,7 @@ export class EditorStore {
   webviewFilePath: string | null = null
   saveDoc$ = new Subject<any[] | null>()
   tableTask$ = new Subject<string>()
+  docChanged$ = new Subject<boolean>()
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }

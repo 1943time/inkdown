@@ -1,9 +1,49 @@
 import {observer} from 'mobx-react-lite'
+import {useCallback, useEffect} from 'react'
+import {countWords} from 'alfaaz'
+import {Editor} from 'slate'
 import {treeStore} from '../../store/tree'
-import {configStore} from '../../store/config'
+import {CustomLeaf} from '../../el'
+import {useLocalState} from '../../hooks/useLocalState'
 
 export const Characters = observer(() => {
-  if (!treeStore.openedNote || !['md', 'markdown'].includes(treeStore.openedNote.ext || '') || !configStore.config.showCharactersCount) return null
+  const [state, setState] = useLocalState({
+    words: 0,
+    characters: 0
+  })
+  const count = useCallback(() => {
+    if (treeStore.openedNote) {
+      try {
+        const texts = Editor.nodes<CustomLeaf>(treeStore.currentTab.store.editor, {
+          at: [],
+          match: n => n.text
+        })
+        let words = 0
+        let characters = 0
+        for (let t of texts) {
+          words += countWords(t[0].text || '')
+          characters += (t[0].text || '').length
+        }
+        setState({
+          words, characters
+        })
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    count()
+    let timer = 0
+    const sub = treeStore.currentTab.store.docChanged$.subscribe(() => {
+      clearTimeout(timer)
+      timer = window.setTimeout(count, 300)
+    })
+    return () => {
+      sub.unsubscribe()
+    }
+  }, [treeStore.openedNote])
   return (
     <div className={`
       px-2 absolute text-center z-10 bg-gray-200 text-gray-500 panel-bg
@@ -11,16 +51,16 @@ export const Characters = observer(() => {
       <span
         className={`w-20`}
         style={{
-          width: String(treeStore.currentTab?.store?.count.words).length * 10 + 38
+          width: String(state.words).length * 10 + 38
         }}
       >
-        {treeStore.currentTab?.store?.count.words} words
+        {state.words} words
       </span>
       <span
         style={{
-          width: String(treeStore.currentTab?.store!.count.characters || 0).length * 10 + 72
+          width: String(state.characters).length * 10 + 72
         }}
-      >{treeStore.currentTab.store?.count.characters || 0} characters</span>
+      >{state.characters} characters</span>
     </div>
   )
 })

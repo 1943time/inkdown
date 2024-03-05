@@ -25,7 +25,6 @@ import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
 import {Title} from './tools/Title'
 import {updateNode} from './utils/updateNode'
 
-const countThrottle$ = new Subject<any>()
 export const MEditor = observer(({note}: {
   note: IFileItem
 }) => {
@@ -60,6 +59,7 @@ export const MEditor = observer(({note}: {
       editor.selection = null
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
+      store.docChanged$.next(true)
       requestIdleCallback(() => {
         save()
         store.initializing = false
@@ -68,26 +68,7 @@ export const MEditor = observer(({note}: {
       save()
     }
   })
-  const count = useCallback(async (nodes: any[]) => {
-    if (!configStore.config.showCharactersCount || !nodeRef.current) return
-    const res = await toMarkdown(nodes)
-    const texts = Editor.nodes(editor, {
-      at: [],
-      match: n => n.text
-    })
-    runInAction(() => {
-      store.count.words = Array.from<any>(texts).reduce((a, b) => a + countWords(b[0].text), 0)
-      store.count.characters = res.length
-    })
-  }, [editor])
 
-  useSubject(countThrottle$.pipe<any>(debounceTime(300)), count)
-
-  useEffect(() => {
-    if (treeStore.currentTab.store === store) {
-      if (note) count(note.schema || [])
-    }
-  }, [treeStore.currentTab, note])
   const change = useCallback((v: any[]) => {
     if (first.current) {
       setTimeout(() => {
@@ -114,7 +95,7 @@ export const MEditor = observer(({note}: {
         changedMark.current = true
         ipcRenderer.send('file-changed')
       }
-      countThrottle$.next(v)
+      store.docChanged$.next(true)
       runInAction(() => {
         note.refresh = !note.refresh
         store.docChanged = true
@@ -132,11 +113,11 @@ export const MEditor = observer(({note}: {
       nodeRef.current = note
       store.setState(state => state.pauseCodeHighlight = true)
       first.current = true
-      count(note.schema || [])
       store.initializing = true
       try {
         EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true)
         clearAllCodeCache(editor)
+        store.docChanged$.next(true)
       } catch (e) {
         EditorUtils.deleteAll(editor)
       }
