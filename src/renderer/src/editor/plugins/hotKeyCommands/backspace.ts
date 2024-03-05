@@ -120,6 +120,9 @@ export class BackspaceKey {
             }
           }
           if (pre[0].type === 'media') {
+            if (!Node.string(el)) {
+              Transforms.delete(this.editor, {at: path})
+            }
             Transforms.select(this.editor, pre[1])
             return true
           }
