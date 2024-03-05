@@ -4,11 +4,12 @@ import {basename, extname, join, parse, sep} from 'path'
 import {observable, runInAction} from 'mobx'
 import {db, IFile} from './db'
 import {message$, nid} from '../utils'
-import {openMdParserHandle} from '../editor/parser/parser'
+import {openMdParserHandle, parserMdToSchema} from '../editor/parser/parser'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {mediaType} from '../editor/utils/dom'
 import {readFile} from 'fs/promises'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
+import {TreeStore} from './tree'
 export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) => {
   Object.defineProperty(node, 'parent', {
     configurable: true,
@@ -16,6 +17,45 @@ export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) =>
       return parent
     }
   })
+}
+
+export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'schema' | 'spaceId' | 'folder'>) => {
+  const parentPath = join(data.filePath, '..')
+  const fileMap = new Map<string, IFileItem>()
+  for (const node of tree.nodeMap.values()) {
+    fileMap.set(node.filePath, node)
+  }
+  let parent: IFileItem | ISpaceNode | undefined = fileMap.get(parentPath)
+  if (!parent) parent = tree.root?.filePath === parentPath ? tree.root :undefined
+  if (!parent) return
+  try {
+    const id = nid()
+    const now = Date.now()
+    const s = statSync(data.filePath)
+    const insertData:IFile = {
+      cid: id,
+      created: now,
+      sort: s.isDirectory() ? 0 : parent.children!.length,
+      updated: s.mtime.valueOf(),
+      ...data
+    }
+    if (mediaType(data.filePath) === 'markdown') {
+      const [schema] = await parserMdToSchema([await readFile(data.filePath, {encoding: 'utf-8'})])
+      data.schema = schema
+    }
+    await db.file.add(insertData)
+    const node = createFileNode(insertData, parent)
+    runInAction(() => {
+      if (s.isDirectory()) {
+        parent!.children!.unshift(node)
+      } else {
+        parent!.children!.push(node)
+      }
+    })
+    tree.nodeMap.set(node.cid, node)
+  } catch (e) {
+    console.error('external change', e)
+  }
 }
 
 export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode, ghost = false) => {

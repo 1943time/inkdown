@@ -20,6 +20,7 @@ import {imageBed} from '../utils/imageBed'
 import {nid} from '../utils'
 import {openMenus} from '../components/Menu'
 import {EditorUtils} from './utils/editorUtils'
+import {insertFile} from '../store/parserNode'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -321,8 +322,15 @@ export class EditorStore {
       const p = parse(file.name)
       const base = file instanceof File ? nid() + p.ext : file.name
       if (treeStore.root) {
-        const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root!.filePath, configStore.config.imagesFolder)
-        if (!existsSync(imageDir)) await this.createDir(imageDir)
+        const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root.filePath, configStore.config.imagesFolder)
+        if (!existsSync(imageDir)) {
+          await this.createDir(imageDir)
+          await insertFile(treeStore, {
+            filePath: imageDir,
+            folder: true,
+            spaceId: treeStore.root.cid
+          })
+        }
         targetPath = join(imageDir, base)
         mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
       } else {
@@ -333,7 +341,13 @@ export class EditorStore {
         mediaUrl = targetPath
       }
       writeFileSync(targetPath, new DataView(buffer))
-      if (treeStore.root) treeStore.watcher.onChange('update', targetPath)
+      if (treeStore.root && targetPath.startsWith(treeStore.root.filePath)) {
+        await insertFile(treeStore, {
+          filePath: targetPath,
+          folder: false,
+          spaceId: treeStore.root?.cid
+        })
+      }
       return window.api.toUnix(mediaUrl)
     }
   }

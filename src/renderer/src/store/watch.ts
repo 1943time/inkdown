@@ -20,9 +20,7 @@ export class Watcher {
     window.electron.ipcRenderer.on('window-blur', () => {
       if (this.store.root) {
         window.api.watch(this.store.root.filePath, this.onChange)
-        for (const node of this.store.nodeMap.values()) {
-          this.fileMap.set(node.filePath, node)
-        }
+        this.getFileMap()
       }
     })
     window.electron.ipcRenderer.on('window-focus', async () => {
@@ -34,6 +32,13 @@ export class Watcher {
       }
     })
   }
+  private getFileMap() {
+    this.fileMap.clear()
+    for (const node of this.store.nodeMap.values()) {
+      this.fileMap.set(node.filePath, node)
+    }
+  }
+
   private async perform() {
     const {parser, terminate} = openMdParserHandle()
     for (const op of this.ops) {
