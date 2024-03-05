@@ -242,6 +242,7 @@ export class TreeStore {
     this.currentTab.history.push(file)
     this.openParentDir(file)
     this.currentTab.index = this.currentTab.history.length - 1
+    this.currentTab.store.editor.selection = null
     const now = Date.now()
     db.file.update(file.cid, {
       lastOpenTime: now

@@ -4,6 +4,7 @@ import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'
 import {Node} from 'slate'
 import {slugify} from '../utils/dom'
+import {useSelStatus} from '../../hooks/editor'
 
 const levelDragHandleTop = new Map([
   [1, 0.52],
@@ -14,18 +15,22 @@ const levelDragHandleTop = new Map([
 ])
 export function Head({element, attributes, children}: ElementProps<HeadNode>) {
   const store = useEditorStore()
+  const [selected, path] = useSelStatus(element)
   return useMemo(() => {
+    const str = Node.string(element)
     return createElement(`h${element.level}`, {
       ...attributes,
       ['data-be']: 'head',
       className: 'drag-el',
       ['data-head']: slugify(Node.string(element) || ''),
-      onDragStart: store.dragStart
+      ['data-title']: path?.[0] === 0,
+      onDragStart: store.dragStart,
+      ['data-empty']: !str && selected ? 'true' : undefined
     }, (
       <>
         <DragHandle style={{left: -28, paddingRight: 10}}/>
         {children}
       </>
     ))
-  }, [element, element.children, store.refreshHighlight])
+  }, [element, element.children, store.refreshHighlight, selected, path])
 }

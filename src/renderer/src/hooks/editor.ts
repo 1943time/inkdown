@@ -5,7 +5,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, useEditorStore} from '../editor/store'
 import {useSubject} from './subscribe'
 import {selChange$} from '../editor/plugins/useOnchange'
-import {useSetState} from 'react-use'
+import {useGetSetState, useSetState} from 'react-use'
 
 export const useMEditor = (el: BaseElement) => {
   const editor = useSlate()
@@ -33,19 +33,18 @@ export const useMEditor = (el: BaseElement) => {
 
 export const useSelStatus = (element: any) => {
   const store = useEditorStore()
-  const [state, setState] = useSetState({
-    selected: false,
-    path: ReactEditor.findPath(store.editor, element)
+  const [state, setState] = useGetSetState({
+    selected: !store.initializing && ReactEditor.isFocused(store.editor),
+    path: EditorUtils.findPath(store.editor, element)
   })
-  const path = useMemo(() => {
-    return ReactEditor.findPath(store.editor, element)
-  }, [element])
+
   useSubject(selChange$, ctx => {
-    const path = ReactEditor.findPath(store.editor, element)
+    if (!ctx.sel) return
+    const path = EditorUtils.findPath(store.editor, element)
     setState({
       path,
-      selected: Path.equals(ReactEditor.findPath(store.editor, element), ctx.node?.[1] || [])
+      selected: Path.equals(path, ctx.node?.[1] || [])
     })
-  }, [path, element])
-  return [state.selected, state.path, store] as [boolean, Path, EditorStore]
+  }, [element])
+  return [state().selected, state().path, store] as [boolean, Path, EditorStore]
 }

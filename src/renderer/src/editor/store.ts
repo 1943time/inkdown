@@ -41,6 +41,7 @@ export class EditorStore {
   manual = false
   openInsertNetworkImage = false
   webview = false
+  initializing = false
   sel: BaseSelection | undefined
   focus = false
   readonly = false
@@ -50,6 +51,8 @@ export class EditorStore {
   focusSearch = false
   docChanged = false
   searchRanges: Range[] = []
+  openInsertCompletion = false
+  insertCompletionText$ = new Subject<string>()
   highlightCache = new Map<object, Range[]>()
   private searchTimer = 0
   refreshFloatBar = false
@@ -92,7 +95,8 @@ export class EditorStore {
       container: false,
       highlightCache: false,
       dragEl: false,
-      manual: false
+      manual: false,
+      initializing: false
     })
   }
 

@@ -19,6 +19,7 @@ import {isMod} from '../utils/keyboard'
 import {InsertNetworkImage} from './tools/InsertNetworkImage'
 import {LangAutocomplete} from './tools/LangAutocomplete'
 import {configStore} from '../store/config'
+import {InsertAutocomplete} from './tools/InsertAutocomplete'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
@@ -124,9 +125,9 @@ export const EditorFrame = observer(({tab}: {
         }
         <FloatBar/>
         <TableAttr/>
-        {/*<MediaAttr/>*/}
         <InsertNetworkImage/>
         <LangAutocomplete/>
+        <InsertAutocomplete/>
       </div>
     </EditorStoreContext.Provider>
   )

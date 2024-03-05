@@ -56,11 +56,13 @@ export const MEditor = observer(({note}: {
 
   useSubject(store.saveDoc$, data => {
     if (data && nodeRef.current) {
+      store.initializing = true
       editor.selection = null
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
       requestIdleCallback(() => {
         save()
+        store.initializing = false
       })
     } else {
       save()
@@ -132,6 +134,7 @@ export const MEditor = observer(({note}: {
       store.setState(state => state.pauseCodeHighlight = true)
       first.current = true
       count(note.schema || [])
+      store.initializing = true
       try {
         EditorUtils.reset(editor, note.schema?.length ? note.schema : undefined, note.history || true)
         clearAllCodeCache(editor)
@@ -139,6 +142,7 @@ export const MEditor = observer(({note}: {
         EditorUtils.deleteAll(editor)
       }
       requestIdleCallback(() => {
+        store.initializing = false
         store.setState(state => state.pauseCodeHighlight = false)
         requestIdleCallback(() => {
           store.setState(state => state.refreshHighlight = !state.refreshHighlight)
@@ -309,7 +313,7 @@ export const MEditor = observer(({note}: {
           decorate={high}
           spellCheck={configStore.config.spellCheck}
           readOnly={store.readonly}
-          className={`edit-area font-${configStore.config.editorFont}`}
+          className={`edit-area font-${configStore.config.editorFont} ${store.focus ? 'focus' : ''}`}
           style={{
             fontSize: configStore.config.editorTextSize || 16
           }}

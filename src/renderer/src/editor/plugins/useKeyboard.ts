@@ -18,6 +18,10 @@ export const useKeyboard = (store: EditorStore) => {
     const enter = new EnterKey(store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
+      if (store.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {
+        e.preventDefault()
+        return
+      }
       if (isHotkey('mod+z', e) || isHotkey('mod+shift+z', e)) {
         store.doManual()
       }
@@ -115,17 +119,32 @@ export const useKeyboard = (store: EditorStore) => {
           }
           setTimeout(() => {
             const [node] = Editor.nodes<any>(store.editor, {
-              match: n => Element.isElement(n),
+              match: n => Element.isElement(n) && n.type === 'paragraph',
               mode: 'lowest'
             })
-            if (node && node[0].type === 'paragraph' && node[0].children.length === 1 && !EditorUtils.isDirtLeaf(node[0].children[0]) && (e.key === 'Backspace' || /^[\w+\-#]$/.test(e.key))) {
+            if (node && node[0].children.length === 1 && !EditorUtils.isDirtLeaf(node[0].children[0]) && (e.key === 'Backspace' || /^[\w+\-#\/]$/.test(e.key))) {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {
                 runInAction(() => store.openLangCompletion = true)
-                store.langCompletionText.next(codeMatch[1])
-              } else if (store.openLangCompletion) {
-                runInAction(() => store.openLangCompletion = false)
+                setTimeout(() => {
+                  store.langCompletionText.next(codeMatch[1])
+                })
+              } else {
+                const insertMatch = str.match(/^\/([\w\s]+)?$/i)
+                if (insertMatch && !(!Path.hasPrevious(node[1]) && Node.parent(store.editor, node[1]).type === 'list-item')) {
+                  runInAction(() => store.openInsertCompletion = true)
+                  setTimeout(() => {
+                    store.insertCompletionText$.next(insertMatch[1])
+                  })
+                } else {
+                  if (store.openInsertCompletion || store.openLangCompletion) {
+                    runInAction(() => {
+                      store.openLangCompletion = false
+                      store.openInsertCompletion = false
+                    })
+                  }
+                }
               }
             } else {
               runInAction(() => store.openLangCompletion = false)
