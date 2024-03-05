@@ -18,8 +18,8 @@ files:
 asarUnpack:
   - resources/*
 artifactName: "Bluestone-${os}-${arch}.${ext}"
-extraResources:
-  - web
+#extraResources:
+#  - web
 fileAssociations:
   ext: md
   role: Editor

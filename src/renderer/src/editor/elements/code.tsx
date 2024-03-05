@@ -16,7 +16,6 @@ import {useSubject} from '../../hooks/subscribe'
 import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
-import {codeLangMap} from '../output/html/transform'
 import {allLanguages, highlighter} from '../utils/highlight'
 
 const lightTheme = new Set(['rose-pine-dawn', 'slack-ochin'])
@@ -43,7 +42,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   const html = useMemo(() => {
     if (store.webview && !store.history) {
-      let html = highlighter.codeToHtml(props.element.children.map(n => Node.string(n)).join('\n'), {lang: codeLangMap(state().lang) as any, theme: configStore.config.codeTheme})
+      let html = highlighter.codeToHtml(props.element.children.map(n => Node.string(n)).join('\n'), {lang: state().lang as any, theme: configStore.config.codeTheme})
       html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
       return html
     }

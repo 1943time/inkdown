@@ -45,12 +45,6 @@ jobs:
           echo "CSC_LINK=${{ secrets.CERTIFICATE_OSX_APPLICATION }}" >> $GITHUB_ENV
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
-
-      - name: ls
-        run: |
-          wget https://pic.bluemd.me/web/web.zip
-          chmod 755 web.zip
-          unzip web.zip
       - name: Build
         run: |
           npm run build
