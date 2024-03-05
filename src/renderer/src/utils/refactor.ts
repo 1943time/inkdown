@@ -36,7 +36,7 @@ const checkSelf = async (node: IFileItem, linkMap: LinkMap) => {
     const {schema, links} = linkMap.get(node)!
     let changed = false
     for (const [url, leaf, hash] of links) {
-      const newPath = relative(join(node.filePath, '..'), url)
+      const newPath = window.api.toUnix(relative(join(node.filePath, '..'), url))
       leaf.url = `${newPath}${hash ? `#${hash}` : ''}`
       changed = true
     }
@@ -95,7 +95,7 @@ const checkDepOn = async (linkMap: LinkMap, target: IFileItem, oldPath: string) 
     let changed = false
     for (let l of ctx.links) {
       if (l[0] === oldPath) {
-        const newPath = relative(join(node.filePath, '..'), target.filePath)
+        const newPath = window.api.toUnix(relative(join(node.filePath, '..'), target.filePath))
         l[1].url = `${newPath}${l[2] ? `#${l[2]}` : ''}`
         changed = true
       }

@@ -32,7 +32,7 @@ export const Nav = observer(() => {
     if (treeStore.openedNote) {
       if (treeStore.openedNote.spaceId) {
         setState({
-          path: treeStore.openedNote.filePath.replace(treeStore.root?.filePath! + '/', '').split(sep)
+          path: treeStore.openedNote.filePath.replace(treeStore.root?.filePath! + sep, '').split(sep)
         })
       } else {
         setState({

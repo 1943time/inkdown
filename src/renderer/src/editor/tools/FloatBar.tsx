@@ -124,7 +124,7 @@ export const FloatBar = observer(() => {
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && node.ext === 'md') {
-          const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
+          const path = window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!))
           fileMap.set(node.filePath, node)
           files.push({
             label: path,

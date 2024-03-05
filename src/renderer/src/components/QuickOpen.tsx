@@ -7,6 +7,7 @@ import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
 import {IFileItem} from '../index'
+import {sep} from 'path'
 
 export const quickOpen$ = new Subject()
 export const QuickOpen = observer(() => {
@@ -62,7 +63,7 @@ export const QuickOpen = observer(() => {
       }).sort((a, b) => a.lastOpenTime! > b.lastOpenTime! ? -1 : 1).map(r => {
         return {
           ...r,
-          path: r.filePath.replace(treeStore.root!.filePath + '/', '')
+          path: r.filePath.replace(treeStore.root!.filePath + sep, '')
         }
       })
       setState({
