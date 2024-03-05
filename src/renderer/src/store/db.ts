@@ -67,7 +67,7 @@ class Db extends Dexie {
     super('db')
     this.version(8).stores({
       space: '&cid,name,filePath,cloud,sort',
-      file: '&cid,filePath,sort,folder,synced,spaceId,lastOpenTime',
+      file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,filePath,spaceId,sort',
       history: '&id,fileId,schema,spaceId,updated',
       // tag: '&id,title',

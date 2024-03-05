@@ -14,6 +14,7 @@ import {IFileItem, ISpaceNode, Methods} from '../index'
 import {useSubject} from './subscribe'
 import {createDoc} from '../components/tree/openContextMenu'
 import {db} from '../store/db'
+import {quickOpen$} from '../components/QuickOpen'
 
 export class KeyboardTask {
   get store() {
@@ -455,9 +456,7 @@ export class KeyboardTask {
   }
 
   quickOpen() {
-    runInAction(() => {
-      // treeStore.quickOpen = true
-    })
+    quickOpen$.next(null)
   }
 
   undo() {

@@ -7,7 +7,6 @@ export const useSystemMenus = () => {
     const newTab = () => {
       treeStore.appendTab()
     }
-
     const closeCurrentTab = () => {
       if ( treeStore.tabs.length > 1 ) {
         treeStore.removeTab(treeStore.currentIndex)

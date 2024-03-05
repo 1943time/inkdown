@@ -57,7 +57,7 @@ export class TreeStore {
   }
 
   get openedNote() {
-    return this.tabs[this.currentIndex].current
+    return this.tabs[this.currentIndex]?.current
   }
 
   get firstNote() {
@@ -237,23 +237,34 @@ export class TreeStore {
   async restoreTabs() {
     if (!this.root) return
     const files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
+    runInAction(() => {
+      this.tabs = this.tabs.filter(t => t.current && (!t.current?.spaceId || t.current?.filePath.startsWith(this.root?.filePath || '')))
+    })
     if (files.length) {
       runInAction(() => {
-        this.tabs = []
-        let index = 0
+        let curId = ''
         for (let i = 0; i < files.length; i++) {
           const f = files[i]
-          this.appendTab(this.nodeMap.get(f.fileId))
-          if (f.current) index = i
+          const node = this.nodeMap.get(f.fileId)
+          if (node) {
+            this.appendTab(node)
+            if (f.current) curId = node.cid
+          }
         }
-        this.currentIndex = index
+        this.currentIndex = this.tabs.findIndex(t => t.current?.cid === curId)
+        if (this.currentIndex < 0) this.currentIndex = 0
+        if (!this.tabs.length) {
+          const first = this.firstNote
+          this.appendTab(first)
+          if (first) this.openParentDir(first)
+        }
       })
     } else {
       const first = this.firstNote
-      if (first) this.openNote(first)
-    }
-    if (this.openedNote) {
-      this.openParentDir(this.openedNote)
+      if (first) {
+        this.openNote(first)
+        this.openParentDir(first)
+      }
     }
   }
 
@@ -270,8 +281,8 @@ export class TreeStore {
     }
   }
 
-  openNote(file: IFileItem, scroll = true) {
-    if (this.currentTab.current?.filePath === file.filePath) return
+  openNote(file: IFileItem) {
+    if (this.currentTab.current?.filePath === file.filePath || !file) return
     const index = this.tabs.findIndex(t => t.current?.filePath === file.filePath)
     if (index !== -1) {
       return this.selectTab(index)
@@ -456,7 +467,7 @@ export class TreeStore {
     } as Tab, {range: false, id: false})
   }
 
-  appendTab(file?: IFileItem) {
+  appendTab(file?: IFileItem | null) {
     const index = this.tabs.findIndex(t => {
       return file && t.current === file
     })

@@ -36,12 +36,12 @@ export const Characters = observer(() => {
   useEffect(() => {
     count()
     let timer = 0
-    const sub = treeStore.currentTab.store.docChanged$.subscribe(() => {
+    const sub = treeStore.currentTab?.store.docChanged$.subscribe(() => {
       clearTimeout(timer)
       timer = window.setTimeout(count, 300)
     })
     return () => {
-      sub.unsubscribe()
+      sub?.unsubscribe()
     }
   }, [treeStore.openedNote])
   return (

@@ -3,20 +3,23 @@ import React, {useCallback, useEffect, useRef} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
 // import {db, IQuickOpen} from '../store/db'
 import {treeStore} from '../store/tree'
-import {existsSync} from 'fs'
 import {configStore} from '../store/config'
-import {sep} from 'path'
 import {runInAction} from 'mobx'
+import {Subject} from 'rxjs'
+import {useSubject} from '../hooks/subscribe'
+import {IFileItem} from '../index'
 
+export const quickOpen$ = new Subject()
 export const QuickOpen = observer(() => {
   const [state, setState] = useLocalState({
-    records: [] as {id: string, filePath: string, name: string}[],
-    filterRecords: [] as {id: string, filePath: string, name: string}[],
+    records: [] as (IFileItem & {path: string})[],
+    filterRecords: [] as (IFileItem & {path: string})[],
     activeIndex: 0,
     open: false,
     query: ''
   })
   const scrollRef = useRef<HTMLDivElement>(null)
+
   const keydown = useCallback((e: KeyboardEvent | React.KeyboardEvent) => {
     e.stopPropagation()
     const scroll = state.filterRecords.length > 1
@@ -44,50 +47,42 @@ export const QuickOpen = observer(() => {
     }
     if (e.key === 'Enter' && state.filterRecords.length) {
       close()
-      // treeStore.openNote(state.filterRecords[state.activeIndex].filePath)
+      const node = treeStore.nodeMap.get(state.filterRecords[state.activeIndex]?.cid)
+      if (node) {
+        treeStore.openNote(node)
+      }
     }
     if (e.key === 'Escape') {
       close()
     }
   }, [])
-
-  const initial = useCallback(async () => {
-    // if (!treeStore.root) return
-    // const res = await db.quickOpen.where('dirPath').equals(treeStore.root.filePath).toArray()
-    // const data = res.filter(r => {
-    //   try {
-    //     return existsSync(r.filePath)
-    //   } catch (e) {
-    //     db.quickOpen.where('id').equals(r.id!).delete()
-    //     return false
-    //   }
-    // })
-    //   .sort((a, b) => a.time > b.time ? -1 : 1)
-    //   .map(d => {
-    //     return {id: d.id!, filePath: d.filePath, name: d.filePath.replace(d.dirPath + sep, '').replace(/\.\w+$/, '')}
-    //   })
-    // setState({
-    //   records: data,
-    //   filterRecords: data.filter(q => !state.query || q.name.includes(state.query)),
-    //   open: true,
-    //   activeIndex: 0
-    // })
-    // runInAction(() => treeStore.openQuickly = true)
-    // window.addEventListener('keydown', keydown)
-  }, [])
-
+  useSubject(quickOpen$, async () => {
+    if (treeStore.root) {
+      const data = Array.from(treeStore.nodeMap.values()).filter(r => {
+        return r.ext === 'md'
+      }).sort((a, b) => a.lastOpenTime! > b.lastOpenTime! ? -1 : 1).map(r => {
+        return {
+          ...r,
+          path: r.filePath.replace(treeStore.root!.filePath + '/', '')
+        }
+      })
+      setState({
+        records: data,
+        filterRecords: data.filter(q => !state.query || q.path.includes(state.query)),
+        open: true,
+        activeIndex: 0
+      })
+    } else {
+      setState({records: []})
+    }
+    window.addEventListener('keydown', keydown)
+  })
   const close = useCallback(() => {
     window.removeEventListener('keydown', keydown)
     setState({open: false})
     runInAction(() => treeStore.openQuickly = false)
   }, [])
 
-  useEffect(() => {
-    window.electron.ipcRenderer.on('open-quickly', initial)
-    return () => {
-      window.electron.ipcRenderer.removeListener('open-quickly', initial)
-    }
-  }, [])
   if (!state.open) return null
   return (
     <div className={'z-[1000] fixed inset-0 dark:bg-black/30 bg-black/10'} onClick={close}>
@@ -103,7 +98,7 @@ export const QuickOpen = observer(() => {
           onKeyDown={keydown}
           onChange={e => {
             const query = e.target.value
-            setState({query, filterRecords: state.records.filter(q => q.name.includes(query)), activeIndex: 0})
+            setState({query, filterRecords: state.records.filter(q => q.path.includes(query)), activeIndex: 0})
           }}
         />
         <div className={'h-[1px] bg-gray-200 dark:bg-gray-200/20'}/>
@@ -117,11 +112,11 @@ export const QuickOpen = observer(() => {
               }}
               onClick={() => {
                 close()
-                // treeStore.openNote(r.filePath)
+                treeStore.openNote(treeStore.nodeMap.get(r.cid)!)
               }}
               className={`cursor-default px-3 py-1 rounded dark:text-gray-300 text-gray-600 text-sm ${state.activeIndex === i ? 'dark:bg-gray-200/10 bg-gray-200/60' : ''}`}
-              key={r.id}>
-              {r.name}
+              key={r.cid}>
+              {r.path}
             </div>
           )}
         </div>

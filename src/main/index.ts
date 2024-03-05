@@ -54,6 +54,7 @@ function createWindow(openFile = '') {
     if (openFile) {
       setTimeout(() => {
         window.webContents.send('open-path', openFile)
+        openFile = ''
       }, 100)
     }
   })
