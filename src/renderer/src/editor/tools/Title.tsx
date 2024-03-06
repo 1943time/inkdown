@@ -12,7 +12,6 @@ import {ReactEditor} from 'slate-react'
 import {useEditorStore} from '../store'
 import {Editor, Transforms} from 'slate'
 import {treeStore} from '../../store/tree'
-import {getLinkMap, refactorDepOnLink} from '../../utils/refactor'
 
 export const Title = observer(({node} : {node: IFileItem}) => {
   const store = useEditorStore()
@@ -49,10 +48,11 @@ export const Title = observer(({node} : {node: IFileItem}) => {
     } else if (node) {
       if (detectRename()) {
         if (node.spaceId && treeStore.root) {
-          const map = getLinkMap(treeStore)
           const oldPath = node.filePath
           await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
-          refactorDepOnLink(map, node, oldPath)
+          if (node.spaceId) {
+            treeStore.refactor.refactorDepOnLink(node, oldPath)
+          }
         }
       } else {
         setState({name: node.filename})

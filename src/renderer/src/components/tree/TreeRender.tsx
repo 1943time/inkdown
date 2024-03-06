@@ -117,6 +117,9 @@ const Item = observer((
             onDragStart={action(e => {
               treeStore.dragNode = item
               el.current!.style.opacity = '0.5'
+              if (item === treeStore.openedNote && treeStore.currentTab.store.docChanged) {
+                treeStore.currentTab.store.saveDoc$.next(null)
+              }
             })}
             onContextMenu={(e) => {
               e.preventDefault()

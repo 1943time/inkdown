@@ -32,7 +32,6 @@ export type IFileItem = {
   hidden?: boolean
   links?: {path: number[], target: string}[]
 }
-// export type IFileItem = ISpaceNode | IFileNode
 
 export interface Tab {
   get current(): IFileItem | undefined

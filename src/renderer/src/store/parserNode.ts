@@ -216,6 +216,8 @@ export class ReadSpace {
             try {
               const res = schemas[i]
               db.file.update(s.cid, {schema: res.schema, links: res.links})
+              s.schema = res.schema
+              s.links = res.links
             } catch (e) {
               stack[i].schema = EditorUtils.p
             }

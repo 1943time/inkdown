@@ -44,7 +44,7 @@ const parseTable = (table: Table) => {
             align: aligns?.[i] || undefined,
             title: l === 0,
             // @ts-ignore
-            children: c.children?.length ? parserBlock(c.children, false, c, [...prePath, l, i], links) : [{text: ''}]
+            children: c.children?.length ? parserBlock(c.children, false, c) : [{text: ''}]
           }
         })
       }
@@ -336,7 +336,8 @@ onmessage = e => {
         const links = findLinks(schema)
         return {schema, links}
       } catch (e) {
-        return [{type: 'paragraph', children: [{text: str}]}]
+        console.error('parser error', e)
+        return {schema: [{type: 'paragraph', children: [{text: str}]}], links: []}
       }
     }),
     id: e.data.id

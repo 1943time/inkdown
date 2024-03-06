@@ -15,7 +15,6 @@ import {join} from 'path'
 import {runInAction} from 'mobx'
 import {mkdirSync, renameSync} from 'fs'
 import {updateFilePath} from '../../editor/utils/updateNode'
-import {getLinkMap, refactorDepOnLink} from '../../utils/refactor'
 
 export const openEditFolderDialog$ = new Subject<{
   ctxNode?: IFileItem
@@ -66,13 +65,12 @@ export const EditFolderDialog = observer(() => {
           return setState({message: 'The folder already exists'})
         }
         const oldPath = ctx.filePath
-        const linkMap = getLinkMap(treeStore)
         const target = join(state.ctxNode.filePath, '..', name)
-        await db.file.update(state.ctxNode.cid, {
-          filePath: join(state.ctxNode.filePath, '..', name)
+        await db.file.update(ctx.cid, {
+          filePath: join(ctx.filePath, '..', name)
         })
         await updateFilePath(ctx, target)
-        refactorDepOnLink(linkMap, ctx, oldPath)
+        treeStore.refactor.refactorDepOnLink(ctx, oldPath)
       }
       close()
     }

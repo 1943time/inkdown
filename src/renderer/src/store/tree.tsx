@@ -3,9 +3,8 @@ import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
 import {createFileNode, defineParent, insertFile, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
-import {existsSync, readdirSync, readFileSync, statSync} from 'fs'
+import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
-import {MenuKey} from '../utils/keyboard'
 import {message$, nid, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
@@ -16,10 +15,9 @@ import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Checkbox} from 'antd'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
-import {getLinkMap, refactorDepLink, refactorDepOnLink} from '../utils/refactor'
+import {Refactor} from '../utils/refactor'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
-import {readFile} from 'fs/promises'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -45,6 +43,7 @@ export class TreeStore {
   fold = true
   watcher: Watcher
   recordTimer = 0
+  refactor: Refactor
   externalChange$ = new Subject<IFileItem>()
   shareFolder$ = new Subject<string>()
 
@@ -78,6 +77,7 @@ export class TreeStore {
 
   constructor() {
     this.watcher = new Watcher(this)
+    this.refactor = new Refactor(this)
     makeAutoObservable(this, {
       watcher: false,
       recordTimer: false
@@ -107,7 +107,10 @@ export class TreeStore {
               folder: false,
               filePath: path
             })
-            if (node) this.openExternalNode(node)
+            if (node) {
+              this.openExternalNode(node)
+              this.nodeMap.set(node.cid, node)
+            }
           } else {
             const record = await db.file.where('filePath').equals(path).first()
             if (record) {
@@ -344,24 +347,22 @@ export class TreeStore {
         targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
         dropNode.parent!.children = targetList
         if (dragNode.parent !== dropNode.parent) {
-          const linkMap = getLinkMap(this)
           const newPath = join(dropNode.parent!.filePath, basename(dragNode.filePath))
           await updateFilePath(dragNode, newPath)
           defineParent(dragNode, dropNode.parent!)
-          refactorDepLink(linkMap, dragNode)
-          refactorDepOnLink(linkMap, dragNode, oldPath)
+          this.refactor.refactorDepLink(dragNode)
+          this.refactor.refactorDepOnLink(dragNode, oldPath)
         }
         targetList.map((n, i) => db.file.update(n.cid, {sort: i}))
       }
       if (mode === 'enter' && dropNode.folder) {
-        const linkMap = getLinkMap(this)
         dropNode.children!.unshift(dragNode)
         const newPath = join(dropNode.filePath, basename(dragNode.filePath))
         defineParent(dragNode, dropNode)
         await updateFilePath(dragNode, newPath)
         dropNode.children!.map((n, i) => db.file.update(n.cid, {sort: i}))
-        refactorDepLink(linkMap, dragNode)
-        refactorDepOnLink(linkMap, dragNode, oldPath)
+        this.refactor.refactorDepLink(dragNode)
+        this.refactor.refactorDepOnLink(dragNode, oldPath)
       }
     } else {
       this.dragNode = null

@@ -25,6 +25,7 @@ export const stat = (filePath: string) => {
   }
 }
 
+export const copy = <T = any>(data: T):T => JSON.parse(JSON.stringify(data))
 
 export function base64ToArrayBuffer(base64: string) {
   const binaryString = atob(base64)

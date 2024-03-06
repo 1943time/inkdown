@@ -2,7 +2,7 @@ import {TreeStore} from './tree'
 import {join} from 'path'
 import {IFileItem, ISpaceNode} from '../index'
 import {openMdParserHandle} from '../editor/parser/parser'
-import {statSync} from 'fs'
+import {existsSync, statSync} from 'fs'
 import {db, IFile} from './db'
 import {nid} from '../utils'
 import {mediaType} from '../editor/utils/dom'
@@ -41,6 +41,7 @@ export class Watcher {
   private async perform() {
     const {parser, terminate} = openMdParserHandle()
     for (const op of this.ops) {
+      if (!existsSync(op.path)) continue
       const {e, path} = op
       const node = this.fileMap.get(path)
       if (e === 'remove' && node) {
