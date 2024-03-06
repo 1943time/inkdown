@@ -46,7 +46,6 @@ export class TreeStore {
   refactor: Refactor
   blankMode = isMac
   externalChange$ = new Subject<IFileItem>()
-  shareFolder$ = new Subject<string>()
 
   get nodes() {
     return Array.from(this.nodeMap.values())

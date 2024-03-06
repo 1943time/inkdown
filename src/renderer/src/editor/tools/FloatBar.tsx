@@ -198,7 +198,8 @@ export const FloatBar = observer(() => {
       if (left < 4) left = 4
       const barWidth = state.link ? 304 : state.openSelectColor ? 210 : 254
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
-      const top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
+      let top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
+      if (treeStore.tabs.length > 1) top -= 30
       setState({
         open: true,
         left, top
@@ -266,7 +267,7 @@ export const FloatBar = observer(() => {
         e.stopPropagation()
       }}
       className={`absolute ${state.open ? state.link ? '' : 'duration-100' : 'hidden'} select-none
-        z-10 dark:text-gray-300 h-8 rounded text-sm dark:bg-zinc-800 bg-white text-gray-500  border dark:border-gray-200/10 border-gray-200
+        z-20 dark:text-gray-300 h-8 rounded text-sm dark:bg-zinc-800 bg-white text-gray-500  border dark:border-gray-200/10 border-gray-200
       `}
     >
       {state.link ?

@@ -87,7 +87,7 @@ export const Nav = observer(() => {
       <div
         className={`justify-between relative flex nav items-center h-full flex-1`}
       >
-        <div className={'flex items-center h-full flex-1'}>
+        <div className={'flex items-center h-full flex-1 max-w-[calc(100%_-_90px)]'}>
           <div className={`text-gray-300 flex items-center text-sm select-none ${treeStore.fold ? '' : 'ml-3'}`}>
             <div
               className={`duration-200 cursor-pointer drag-none py-[3px] px-1 rounded ${treeStore.currentTab?.hasPrev ? 'dark:text-gray-200 hover:bg-gray-400/10 text-gray-500' : 'dark:text-gray-500 text-gray-300'}`}
@@ -103,7 +103,7 @@ export const Nav = observer(() => {
             </div>
           </div>
           <div
-            className={'hide-scrollbar overflow-x-auto ml-3 dark:text-gray-400/80 text-gray-500 text-sm flex items-center h-full w-[calc(100%_130px)]'}
+            className={'hide-scrollbar overflow-x-auto ml-3 dark:text-gray-400/80 text-gray-500 text-sm flex items-center h-full'}
           >
             {!!state.path.length &&
               <>

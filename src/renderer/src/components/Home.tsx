@@ -48,13 +48,20 @@ export const Home = observer(() => {
         style={{left: treeStore.width}}
         onMouseDown={moveStart}
       />
-      <div className={'flex-1 flex flex-col relative z-[100]'}>
+      <div
+        className={'flex-1 flex flex-col relative z-[100]'}
+        style={{
+          maxWidth: treeStore.fold ? '100%' : `calc(100% - ${treeStore.width}px)`
+        }}
+      >
         <Nav/>
         <Tabs/>
         {treeStore.tabs.map((t) =>
           <div
             className={`flex-1 overflow-y-auto overflow-x-hidden items-start ${treeStore.currentTab === t ? 'h-full' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
-            style={{contentVisibility: treeStore.currentTab === t ? 'inherit' : 'hidden'}}
+            style={{
+              contentVisibility: treeStore.currentTab === t ? 'inherit' : 'hidden'
+            }}
             key={t.id}
           >
             <EditorFrame tab={t}/>

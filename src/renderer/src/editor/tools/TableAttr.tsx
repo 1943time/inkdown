@@ -46,7 +46,6 @@ export const TableAttr = observer(() => {
         const dom = ReactEditor.toDOMNode(editor, table[0]) as HTMLElement
         if (dom) {
           let top = store.offsetTop(dom)
-          if (treeStore.tabs.length > 1) top += 32
           let left = getOffsetLeft(dom)
           if (!treeStore.fold) left -= treeStore.width
           setState({
