@@ -34,10 +34,6 @@ export class EditorStore {
     currentIndex: 0,
     refresh: false,
   }
-  count = {
-    words: 0,
-    characters: 0
-  }
   // Manually perform editor operations
   manual = false
   openInsertNetworkImage = false

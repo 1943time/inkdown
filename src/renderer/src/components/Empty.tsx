@@ -7,12 +7,14 @@ import {useLocalState} from '../hooks/useLocalState'
 import {db, ISpace} from '../store/db'
 import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
-import {existsSync, readFileSync} from 'fs'
+import {existsSync, readFileSync, statSync} from 'fs'
 import {configStore} from '../store/config'
 import {Icon} from '@iconify/react'
 import {editSpace$} from './space/EditSpace'
 import {keyTask$} from '../hooks/keyboard'
 import {parserMdToSchema} from '../editor/parser/parser'
+import {createFileNode, insertFile} from '../store/parserNode'
+import {nid} from '../utils'
 
 export const Empty = observer(() => {
   const [state, setState] = useLocalState({
@@ -41,7 +43,7 @@ export const Empty = observer(() => {
             <img src={logo} alt="" className={'w-5 h-5 mr-2 dark:shadow-none shadow shadow-gray-300 rounded'}/>
             Bluestone
           </div>
-          <div className={'text-lg text-gray-500'}>
+          <div className={'text-base text-gray-500'}>
             {configStore.zh ? '没有打开的文件' : 'No open files'}
           </div>
           <div
@@ -55,26 +57,57 @@ export const Empty = observer(() => {
               {configStore.zh ? '新建文档' : 'New Doc'}
             </span>
           </div>
-          <div
-            className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
-            onClick={() => {
-              MainApi.openDialog({
-                filters: [{name: 'md', extensions: ['md']}],
-                properties: ['openFile']
-              }).then(async res => {
-                if (res.filePaths.length) {
-                  const data = await parserMdToSchema([{filePath: res.filePaths[0]}])
-                  console.log('data', data)
-                  // parse([readFileSync(res.filePaths[0], {encoding: 'utf-8'})])
-                }
-              })
-            }}
-          >
-            <Icon icon={'tabler:file-text'} className={'text-lg'}/>
-            <span className={'ml-2'}>
+          {!treeStore.root &&
+            <div
+              className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
+              onClick={() => {
+                MainApi.openDialog({
+                  filters: [{name: 'md', extensions: ['md']}],
+                  properties: ['openFile']
+                }).then(async res => {
+                  if (res.filePaths.length) {
+                    const path = res.filePaths[0]
+                    const file = await db.file.where('filePath').equals(path).first()
+                    const stat = statSync(path)
+                    if (file && !file.spaceId) {
+                      if (stat.mtime.valueOf() === file.updated) {
+                        treeStore.openNote(createFileNode(file))
+                      } else {
+                        const [res] = await parserMdToSchema([{filePath: path}])
+                        db.file.update(file.cid, {
+                          schema: res.schema,
+                          updated: stat.mtime.valueOf()
+                        })
+                        file.schema = res.schema
+                        file.updated = stat.mtime.valueOf()
+                        treeStore.openNote(createFileNode(file))
+                      }
+                    } else {
+                      const [res] = await parserMdToSchema([{filePath: path}])
+                      const now = Date.now()
+                      const id = nid()
+                      await db.file.add({
+                        cid: id,
+                        created: now,
+                        updated: stat.mtime.valueOf(),
+                        folder: false,
+                        schema: res.schema,
+                        sort: 0,
+                        filePath: path
+                      })
+                      const file = await db.file.get(id)
+                      if (file) treeStore.openNote(createFileNode(file))
+                    }
+                  }
+                })
+              }}
+            >
+              <Icon icon={'tabler:file-text'} className={'text-lg'}/>
+              <span className={'ml-2'}>
               {configStore.zh ? '打开文档' : 'Open Doc'}
             </span>
-          </div>
+            </div>
+          }
           {!!treeStore.root &&
             <>
               <div

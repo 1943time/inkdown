@@ -532,6 +532,10 @@ const keyMap: [string, Methods<KeyboardTask>, any[]?, boolean?][] = [
 ]
 export const useSystemKeyboard = () => {
   useSubject(keyTask$, ({ key, args }) => {
+    if (treeStore.root && key === 'quickOpen') {
+      task.quickOpen()
+      return
+    }
     if (!treeStore.currentTab?.current && key !== 'newNote') return
     if (!treeStore.currentTab?.store.focus && key !== 'newNote') {
       ReactEditor.focus(treeStore.currentTab.store.editor)
