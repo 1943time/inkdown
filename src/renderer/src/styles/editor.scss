@@ -91,7 +91,7 @@ a {
         content: "Enter content";
       }
     }
-    h1:not(:first-child)[data-empty]::before{
+    h1[data-empty]::before{
       cursor: text;
       content: "Heading 1";
     }

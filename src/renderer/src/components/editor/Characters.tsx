@@ -5,6 +5,7 @@ import {Editor} from 'slate'
 import {treeStore} from '../../store/tree'
 import {CustomLeaf} from '../../el'
 import {useLocalState} from '../../hooks/useLocalState'
+import {configStore} from '../../store/config'
 
 export const Characters = observer(() => {
   const [state, setState] = useLocalState({
@@ -12,7 +13,7 @@ export const Characters = observer(() => {
     characters: 0
   })
   const count = useCallback(() => {
-    if (treeStore.openedNote) {
+    if (treeStore.openedNote && configStore.config.showCharactersCount) {
       try {
         const texts = Editor.nodes<CustomLeaf>(treeStore.currentTab.store.editor, {
           at: [],
@@ -43,7 +44,8 @@ export const Characters = observer(() => {
     return () => {
       sub?.unsubscribe()
     }
-  }, [treeStore.openedNote])
+  }, [treeStore.openedNote, configStore.config.showCharactersCount])
+  if (!configStore.config.showCharactersCount) return null
   return (
     <div className={`
       px-2 absolute text-center z-10 bg-gray-200 text-gray-500 panel-bg
