@@ -37,8 +37,7 @@ export class KeyboardTask {
         if (rect) {
           this.store.setState(state => state.domRect = rect)
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     })
   }
 
@@ -177,7 +176,6 @@ export class KeyboardTask {
             select: true
           })
         } else {
-          console.log('insert', res.schema)
           Transforms.insertNodes(this.editor, res.schema, {
             at: Path.next(node[1]),
             select: true

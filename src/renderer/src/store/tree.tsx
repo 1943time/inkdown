@@ -400,7 +400,15 @@ export class TreeStore {
   }
 
   async initial(spaceId: string) {
-    this.fold = false
+    if (await window.electron.ipcRenderer.invoke('find-other-space', spaceId)) {
+      return message$.next({
+        type: 'info',
+        content: 'This space is already open in another window'
+      })
+    }
+    runInAction(() => {
+      this.fold = false
+    })
     const space = await db.space.get(spaceId)
     if (space && !existsSync(space.filePath)) {
       try {
@@ -441,6 +449,7 @@ export class TreeStore {
       db.space.update(spaceId, {
         lastOpenTime: Date.now()
       })
+      window.electron.ipcRenderer.send('open-space', res.space.cid)
       setTimeout(() => {
         this.restoreTabs()
       }, 200)

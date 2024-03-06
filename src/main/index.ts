@@ -8,6 +8,7 @@ const isWindows = process.platform === 'win32'
 app.setAsDefaultProtocolClient('bluestone')
 
 let fileChangedWindow: BrowserWindow | null = null
+const openSpaceMap = new Map<BrowserWindow, string>()
 function createWindow(openFile = '') {
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
@@ -70,6 +71,7 @@ function createWindow(openFile = '') {
     window.webContents.send('window-blur')
   })
   window.on('close', (e) => {
+    openSpaceMap.delete(window)
     if (fileChangedWindow === window) {
       const res = dialog.showMessageBoxSync(window, {
         type: 'info',
@@ -129,6 +131,22 @@ app.whenReady().then(() => {
 
   ipcMain.on('file-changed', (e) => {
     fileChangedWindow = BrowserWindow.fromWebContents(e.sender)
+  })
+
+  ipcMain.on('open-space', (e, id: string) => {
+    const win = BrowserWindow.fromWebContents(e.sender)
+    if (win) {
+      openSpaceMap.set(win, id)
+    }
+  })
+
+  ipcMain.handle('find-other-space', (e, id: string) => {
+    for (const item of openSpaceMap) {
+      if (item[1] === id) {
+        return true
+      }
+    }
+    return false
   })
 
   ipcMain.on('file-saved', () => {
