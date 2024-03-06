@@ -5,7 +5,7 @@ import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
-import {message$, nid, stat} from '../utils'
+import {isMac, message$, nid, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {configStore} from './config'
@@ -44,6 +44,7 @@ export class TreeStore {
   watcher: Watcher
   recordTimer = 0
   refactor: Refactor
+  blankMode = isMac
   externalChange$ = new Subject<IFileItem>()
   shareFolder$ = new Subject<string>()
 
@@ -95,8 +96,13 @@ export class TreeStore {
         })
       }
     })
+    window.electron.ipcRenderer.on('enter-full-screen', action(() => {
+      this.blankMode = false
+    }))
+    window.electron.ipcRenderer.on('leave-full-screen', action(() => {
+      this.blankMode = isMac
+    }))
     this.tabs.push(this.createTab())
-    // new MenuKey(this)
     window.electron.ipcRenderer.on('open-path', async (e, path: string) => {
       if (existsSync(path)) {
         const s = stat(path)

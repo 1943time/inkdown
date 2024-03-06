@@ -17,6 +17,7 @@ import {useSubject} from '../../hooks/subscribe'
 import {SortableContainer, SortableElement} from 'react-sortable-hoc'
 import {arrayMoveImmutable} from 'array-move'
 import {Subject} from 'rxjs'
+import Collapse from '../../icons/Collapse'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -52,7 +53,8 @@ export const Tree = observer(() => {
   const [state, setState] = useLocalState({
     openMenu: false,
     spaces: [] as ISpace[],
-    dragging: ''
+    dragging: '',
+    fullScreen: false
   })
 
   const getSpace = useCallback(() => {
@@ -70,7 +72,6 @@ export const Tree = observer(() => {
   })
 
   useSubject(spaceChange$, getSpace)
-
   const move = useCallback(({oldIndex, newIndex}: {oldIndex: number, newIndex: number}) => {
     if (oldIndex !== newIndex) {
       setState({
@@ -84,14 +85,17 @@ export const Tree = observer(() => {
   }, [])
   return (
     <div
-      className={'flex-shrink-0 b1 tree-bg h-full width-duration border-r pt-[40px] overflow-hidden duration-200'}
+      className={`flex-shrink-0 b1 tree-bg h-full width-duration ${!treeStore.blankMode ? 'pt-2' : 'pt-10'} border-r relative overflow-hidden duration-200`}
       style={{width: treeStore.fold ? 0 : treeStore.width}}
     >
+      {treeStore.blankMode &&
+        <div className={'h-10 left-0 top-0 w-[calc(100%_-_40px)] absolute drag-nav'}/>
+      }
       <div
         style={{width: treeStore.width}}
         className={`h-full`}
       >
-        <div className={'h-9 px-4'}>
+        <div className={`h-9 ${!treeStore.blankMode ? 'px-2' : 'px-4'}`}>
           <Popover
             trigger={['click']}
             placement={'bottomLeft'}

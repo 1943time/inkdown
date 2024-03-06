@@ -13,6 +13,7 @@ import {statSync, writeFileSync} from 'fs'
 import {runInAction} from 'mobx'
 import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
+import {openEbook$} from '../../server/ui/Ebook'
 
 export const createDoc = async ({parent, newName, copyItem, ghost}: {
   parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean
@@ -167,6 +168,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       },
       {
         text: configStore.zh ? '分享文件夹' : 'Share Folder',
+        click: () => openEbook$.next({folderPath: node.filePath})
       }
     ])
     if (!node.root) {
