@@ -3,9 +3,11 @@ import {MainApi} from '../api/main'
 import {ipcRenderer} from 'electron'
 import mermaid from 'mermaid'
 import {shareStore} from '../server/store'
-import {codeReady} from '../editor/utils/highlight'
+import {codeReady, highlighter} from '../editor/utils/highlight'
 import {imageBed} from '../utils/imageBed'
 import {db} from './db'
+import {treeStore} from './tree'
+import {clearAllCodeCache, clearInlineKatex} from '../editor/plugins/useHighlight'
 
 class ConfigStore {
   visible = false
@@ -22,7 +24,7 @@ class ConfigStore {
     codeLineNumber: false,
     codeTabSize: 4,
     editorTextSize: 16,
-    codeTheme: 'one-dark-pro',
+    codeTheme: 'auto',
     mas: false,
     showCharactersCount: true,
     imagesFolder: '.images',
@@ -49,8 +51,18 @@ class ConfigStore {
   get tab() {
     return ' '.repeat(this.config.codeTabSize)
   }
+  get systemDark() {
+    return window.matchMedia && window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  }
   get zh() {
     return this.config.locale === 'zh'
+  }
+  get defaultTheme() {
+    return this.config.dark ? 'slack-dark' : 'slack-ochin'
+  }
+
+  get curCodeTheme() {
+    return this.config.codeTheme === 'auto' ? this.defaultTheme : this.config.codeTheme
   }
   constructor() {
     makeAutoObservable(this, {
@@ -69,6 +81,34 @@ class ConfigStore {
       }
       this.config[key] = value
     }))
+  }
+  async reloadHighlighter(refresh = false) {
+    try {
+      await highlighter.loadTheme(this.curCodeTheme as any)
+      highlighter.setTheme(this.curCodeTheme)
+      if (refresh) {
+        requestIdleCallback(() => {
+          for (const t of treeStore.tabs) {
+            clearAllCodeCache(t.store.editor)
+            clearInlineKatex(t.store.editor)
+            t.store.setState(state => state.pauseCodeHighlight = true)
+            setTimeout(() => {
+              t.store.setState(state => {
+                state.pauseCodeHighlight = false
+                state.refreshHighlight = !state.refreshHighlight
+              })
+              runInAction(() => {
+                const theme = highlighter.getTheme(this.curCodeTheme)
+                configStore.config.codeBackground = theme.bg
+                configStore.codeDark = theme.type === 'dark'
+              })
+            }, 30)
+          }
+        })
+      }
+    } catch (e) {
+      console.error('reload highlighter', e)
+    }
   }
   async setTheme(theme: typeof this.config.theme, broadcast = true) {
     if (theme === this.config.theme) return
@@ -143,12 +183,12 @@ class ConfigStore {
         this.setConfig('turnOnImageBed', true)
       }
       window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
-        if (res.dark) document.documentElement.classList.add('dark')
         this.config = {
           ...this.config,
           ...res,
-          ...Object.fromEntries(config.map(c => [c.key, c.value]))
+          ...Object.fromEntries(config.map(c => [c.key, c.value])),
         }
+        this.config.dark = this.config.theme === 'system' ? this.systemDark : this.config.theme === 'dark'
         localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
         if (this.config.dark) {
           mermaid.initialize({

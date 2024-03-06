@@ -123,7 +123,7 @@ export const Nav = observer(() => {
             }
           </div>
         </div>
-        <div className={'flex items-center pr-3 dark:text-gray-300/90 space-x-1.5 text-gray-500'}>
+        <div className={'flex items-center pr-3 dark:text-gray-300 space-x-1.5 text-gray-500'}>
           <Update/>
           <Share />
           <div
@@ -207,7 +207,7 @@ export const Nav = observer(() => {
             <Badge offset={[4, 1]} status={'warning'} dot={configStore.enableUpgrade}>
               <Icon
                 icon={'uiw:more'}
-                className={'text-lg'}
+                className={'text-lg dark:text-gray-300 text-gray-500'}
               />
             </Badge>
           </div>

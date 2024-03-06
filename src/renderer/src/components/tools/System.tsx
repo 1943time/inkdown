@@ -83,7 +83,7 @@ const actionKeys = (ctx: string[]):IKeyItem[] => [
   },
   {
     name: 'Redo',
-    key: ['mod', 'shift', 'v'],
+    key: ['mod', 'shift', 'z'],
     disabled: !treeStore.openedNote,
     click: () => keyTask$.next({key: 'redo'})
   }

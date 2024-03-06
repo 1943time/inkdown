@@ -16,6 +16,7 @@ export const useSystemMenus = () => {
     }
     window.electron.ipcRenderer.on('new-tab', newTab)
     window.electron.ipcRenderer.on('close-current-tab', closeCurrentTab)
+    window.electron.ipcRenderer.send('open-space', '')
     return () => {
       window.electron.ipcRenderer.removeListener('new-tab', newTab)
       window.electron.ipcRenderer.removeListener('close-current-tab', closeCurrentTab)

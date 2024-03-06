@@ -113,33 +113,9 @@ export const SetEditor = observer(() => {
             className={'w-[220px]'}
             onChange={e => {
               configStore.setConfig('codeTheme', e)
-              setTimeout(async () => {
-                try {
-                  await highlighter.loadTheme(configStore.config.codeTheme as any)
-                  highlighter.setTheme(configStore.config.codeTheme)
-                  requestIdleCallback(() => {
-                    for (const t of treeStore.tabs) {
-                      clearAllCodeCache(t.store.editor)
-                      t.store.setState(state => state.pauseCodeHighlight = true)
-                      setTimeout(() => {
-                        t.store.setState(state => {
-                          state.pauseCodeHighlight = false
-                          state.refreshHighlight = !state.refreshHighlight
-                        })
-                        runInAction(() => {
-                          const theme = highlighter.getTheme(configStore.config.codeTheme)
-                          configStore.config.codeBackground = theme.bg
-                          configStore.codeDark = theme.type === 'dark'
-                        })
-                      }, 200)
-                    }
-                  })
-                } catch (e) {
-                  console.error('reload highlighter', e)
-                }
-              }, 200)
+              configStore.reloadHighlighter(true)
             }}
-            options={Array.from(codeThemes).map(t => ({label: t, value: t}))}
+            options={[{label: 'auto', value: 'auto'}, ...Array.from(codeThemes).map(v => ({label: v, value: v}))]}
           />
         </div>
       </div>

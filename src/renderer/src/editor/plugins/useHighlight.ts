@@ -48,7 +48,7 @@ const run = (node: NodeEntry, code: string, lang: any) => {
     const ranges: Range[] = []
     const tokens = highlighter.codeToTokensBase(code, {
       lang: lang,
-      theme: configStore.config.codeTheme as any,
+      theme: configStore.curCodeTheme as any,
       includeExplanation: false,
       tokenizeMaxLineLength: 5000
     })
@@ -92,7 +92,7 @@ export function useHighlight(store?: EditorStore) {
             let textRanges: any[] = []
             const tokens = highlighter.codeToTokensBase(code, {
               lang: 'tex',
-              theme: configStore.config.codeTheme as any,
+              theme: configStore.curCodeTheme as any,
               includeExplanation: false,
               tokenizeMaxLineLength: 5000
             })

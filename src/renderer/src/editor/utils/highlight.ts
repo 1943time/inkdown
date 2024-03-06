@@ -9,19 +9,19 @@ export let highlighter:Highlighter
 export const loadedLanguage = new Set<string>(['tex'])
 
 export const codeReady = async (allLanguage = false) => {
-  if (!codeThemes.has(configStore.config.codeTheme)) {
+  if (!codeThemes.has(configStore.config.codeTheme) && configStore.config.codeTheme !== 'auto') {
     runInAction(() => {
-      configStore.config.codeTheme = codeThemes.has('one-dark-pro') ? 'one-dark-pro' : Array.from(codeThemes)[0]
+      configStore.config.codeTheme = 'auto'
     })
   }
   highlighter = await getHighlighter({
     themes: [
-      configStore.config.codeTheme
+      configStore.curCodeTheme
     ],
     langs: allLanguage ? allLanguages : ['tex']
   }).then((res) => {
     try {
-      const theme = res.getTheme(configStore.config.codeTheme as any)
+      const theme = res.getTheme(configStore.curCodeTheme as any)
       runInAction(() => {
         configStore.config.codeBackground = theme.bg
         configStore.codeDark = theme.type === 'dark'

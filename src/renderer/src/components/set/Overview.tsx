@@ -76,14 +76,11 @@ export const Overview = observer(() => {
         <div>
           <Radio.Group
             value={configStore.config.theme}
-            onChange={e => {
-              configStore.setTheme(e.target.value)
-              treeStore.tabs.map(t => clearInlineKatex(t.store.editor))
-              setTimeout(() => {
-                runInAction(() => {
-                  treeStore.currentTab.store.refreshHighlight = !treeStore.currentTab.store.refreshHighlight
-                })
-              }, 100)
+            onChange={async e => {
+              await configStore.setTheme(e.target.value)
+              if (configStore.config.codeTheme === 'auto') {
+                configStore.reloadHighlighter(true)
+              }
             }}
           >
             <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>
