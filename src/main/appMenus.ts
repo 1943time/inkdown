@@ -59,15 +59,17 @@ const getSystemMenus = () => {
     submenu: [
       {
         id: 'create',
-        label: zh ? '新建文档' : 'New Doc',
-        accelerator: `${cmd}+n`
-      },
-      {
-        id: 'create',
         label: zh ? '打开文档' : 'Open Doc',
         accelerator: `${cmd}+shift+n`,
-        click: () => {
-
+        click: (e, win) => {
+          dialog.showOpenDialog({
+            filters: [{name: 'md', extensions: ['md']}],
+            properties: ['openFile']
+          }).then(res => {
+            if (res.filePaths?.length) {
+              win?.webContents.send('open-path', res.filePaths[0])
+            }
+          })
         }
       },
       {
