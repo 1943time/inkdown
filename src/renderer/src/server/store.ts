@@ -8,8 +8,11 @@ import {parserMdToSchema} from '../editor/parser/parser'
 import {MainApi} from '../api/main'
 import {compareVersions} from 'compare-versions'
 import {message$} from '../utils'
-import {join} from 'path'
+import {join, parse} from 'path'
 import {configStore} from '../store/config'
+import {IFileItem, ISpaceNode} from '../index'
+import {treeStore} from '../store/tree'
+import {db} from '../store/db'
 
 export class ShareStore {
   readonly minVersion = '0.2.3'
@@ -98,6 +101,7 @@ export class ShareStore {
     }
   }
   getBooks(filePath: string) {
+    if (!filePath) return []
     return Array.from(this.bookMap).filter(item => item[1].filePath.startsWith(filePath)).map(item => item[1])
   }
   initial() {
@@ -144,13 +148,18 @@ export class ShareStore {
     const md = readFileSync(filePath, {encoding: 'utf-8'})
     const hash = window.api.md5(md)
     if (hash !== remote.doc.hash) {
-      const [schema] = await parserMdToSchema([md])
+      const [res] = await parserMdToSchema([{filePath: '', code: md}])
       const filesSet = await this.file.docFile({
-        schema, docId: remote.doc.id, files: remote.deps, filePath, root
+        schema: res.schema, docId: remote.doc.id, files: remote.deps, filePath, root
       })
       const remove = remote.deps.filter(d => !filesSet.has(d.filePath)).map(d => d.id)
+      const name = parse(filePath).name
+      res.schema.unshift({
+        type: 'head', level: 1,
+        children: [{text: name}]
+      })
       await this.api.shareDoc({
-        id: remote.doc.id, schema: JSON.stringify(schema), remove, hash: hash
+        id: remote.doc.id, schema: JSON.stringify(res.schema), remove, hash: hash
       })
     }
     this.docMap.set(remote.doc.filePath, remote.doc)
@@ -158,15 +167,24 @@ export class ShareStore {
   }
 
   async shareBook(data: Partial<IBook>) {
-    return this.book.syncBook(data).then(res => {
-      this.bookMap.set(res.book.filePath, res.book)
-      return res
-    })
+    let node: ISpaceNode | IFileItem | null = data.filePath === treeStore.root!.filePath ? treeStore.root : null
+    if (!node) {
+      const file = await db.file.where('filePath').equals(data.filePath!).and(x => x.spaceId === treeStore.root!.cid).first()
+      node = treeStore.nodeMap.get(file?.cid!) || null
+    }
+    if (node) {
+      return this.book.syncBook(data, node).then(res => {
+        this.bookMap.set(res.book.filePath, res.book)
+        return res
+      })
+    }
+    return null
   }
 
   async delBook(book: IBook) {
     return this.api.delBook(book.id).then(() => this.bookMap.delete(book.filePath))
   }
+
   clear() {
     this.docMap.clear()
     this.bookMap.clear()

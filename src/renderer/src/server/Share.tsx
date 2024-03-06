@@ -26,6 +26,7 @@ import {ServiceSet} from './ui/ServiceSet'
 import {shareSuccessfully$, Successfully} from './ui/Successfully'
 import {configStore} from '../store/config'
 import {Icon} from '@iconify/react'
+import {EBook} from './ui/Ebook'
 
 export const Share = observer(() => {
   const [state, setState] = useLocalState({
@@ -84,6 +85,14 @@ export const Share = observer(() => {
   return (
     <>
       <Successfully/>
+      <EBook
+        onClose={() => {
+          closeMask()
+        }}
+        onSave={book => {
+          getBooks()
+        }}
+      />
       <Popover
         zIndex={100}
         content={(
@@ -119,7 +128,7 @@ export const Share = observer(() => {
                     <div className={'relative'}>
                       {!!shareStore.serviceConfig &&
                         <SettingOutlined
-                          className={'link absolute right-2 top-0'}
+                          className={'link absolute right-2 top-0 cursor-pointer'}
                           onClick={() => {
                             setState({mask: true, openSetting: true})
                           }}

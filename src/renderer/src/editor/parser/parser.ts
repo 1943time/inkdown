@@ -2,7 +2,7 @@ import Worker from './worker?worker'
 import {nid} from '../../utils'
 import {isAbsolute, join} from 'path'
 import {readFileSync} from 'fs'
-type ParserResult = {
+export type ParserResult = {
   schema:any[], links: {path: number[], target: string}[]
 }
 

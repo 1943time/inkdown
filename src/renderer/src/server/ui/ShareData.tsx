@@ -18,12 +18,12 @@ import {shareStore} from '../store'
 import {CloseShare} from './CloseShare'
 import {message$, sizeUnit} from '../../utils'
 import {ServiceSet} from './ServiceSet'
-import {EBook} from './Ebook'
 import {shareSuccessfully$} from './Successfully'
 import {existsSync} from 'fs'
 import {MainApi} from '../../api/main'
 import {treeStore} from '../../store/tree'
 import {configStore} from '../../store/config'
+import {openEbook$} from './Ebook'
 
 const Sync = observer((props: {
   doc?: IDoc
@@ -38,13 +38,6 @@ const Sync = observer((props: {
       if (props.doc) {
         const res = await shareStore.shareDoc(props.doc.filePath)
         shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
-      }
-      if (props.book) {
-        await shareStore.shareBook({
-          ...props.book,
-          name: ''
-        })
-        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${props.book.path}`)
       }
     } finally {
       setState({syncing: false})
@@ -160,14 +153,6 @@ export const ShareData = observer((props: {
         setState({openServiceSet: false})
         getDevices()
       }}/>
-      <EBook
-        open={state.openBookSetting}
-        onClose={() => setState({openBookSetting: false})}
-        onSave={data => {
-          getBooks()
-        }}
-        defaultRootPath={state.selectBookFilePath}
-      />
       <div className={'min-h-[260px] overflow-x-auto'}>
         <Tabs
           activeKey={state.activeKey}
@@ -200,7 +185,7 @@ export const ShareData = observer((props: {
           items={[
             {
               key: 'doc',
-              label: configStore.zh ? '分享笔记' : 'Share Note',
+              label: configStore.zh ? '分享文档' : 'Share Doc',
               children: (
                 <div>
                   <Table
@@ -246,7 +231,7 @@ export const ShareData = observer((props: {
                               onClick={() => {
                                 MainApi.openFile({
                                   title: 'Change mapping file',
-                                  defaultFilePath: treeStore.root?.filePath
+                                  defaultFilePath: v,
                                 }).then(res => {
                                   if (res.filePaths.length) {
                                     shareStore.api.updateFilePath({
@@ -364,15 +349,12 @@ export const ShareData = observer((props: {
                           <div className={'space-x-1'}>
                             <Button
                               type={'link'} size={'small'}
+                              disabled={!v.filePath.startsWith(treeStore.root?.filePath)}
                               onClick={() => {
-                                setState({
-                                  openBookSetting: true,
-                                  selectBookFilePath: v.filePath
-                                })
+                                openEbook$.next({folderPath: v.filePath})
                               }}
                               icon={<SettingOutlined/>}
                             />
-                            <Sync book={record}/>
                             <CloseShare book={record} onRemove={() => {
                               getBooks()
                             }}>

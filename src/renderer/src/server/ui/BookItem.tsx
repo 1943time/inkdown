@@ -18,7 +18,7 @@ import {useLocalState} from '../../hooks/useLocalState'
 import {action} from 'mobx'
 import {shareStore} from '../store'
 import {NotLogged} from './NotLogged'
-import {EBook} from './Ebook'
+import {EBook, openEbook$} from './Ebook'
 import {shareSuccessfully$} from './Successfully'
 import {configStore} from '../../store/config'
 
@@ -29,10 +29,6 @@ export const BookItem = observer((props: {
   onRefresh: () => void
   onOpenSetting: () => void
 }) => {
-  const [state, setState] = useLocalState({
-    ebookOpen: false,
-    currentRootPath: ''
-  })
   const [modal, context] = Modal.useModal()
   const closeMask = useCallback(() => {
     setTimeout(() => {
@@ -105,8 +101,10 @@ export const BookItem = observer((props: {
                         {
                           label: configStore.zh ? '设置' : 'Settings', key: 'setting', icon: <SettingOutlined/>,
                           onClick: () => {
-                            setState({ebookOpen: true, currentRootPath: b.filePath})
                             props.onMask(true)
+                            openEbook$.next({
+                              folderPath: b.filePath
+                            })
                           }
                         },
                         {type: 'divider'},
@@ -144,28 +142,17 @@ export const BookItem = observer((props: {
         <div className={'mt-3 flex space-x-5'}>
           <Button
             onClick={() => {
-              setState({ebookOpen: true, currentRootPath: treeStore.root?.filePath})
               props.onMask(true)
+              openEbook$.next({folderPath: treeStore.root!.filePath})
             }}
             icon={<BookOutlined/>}
-            disabled={!shareStore.serviceConfig}
+            disabled={!shareStore.serviceConfig || !treeStore.root}
             className={'flex-1'}
             block={true}>
             <span>{configStore.zh ? '分享文件夹' : 'Create Book'}</span>
           </Button>
         </div>
       }
-      <EBook
-        open={state.ebookOpen}
-        defaultRootPath={state.currentRootPath}
-        onClose={() => {
-          setState({ebookOpen: false})
-          closeMask()
-        }}
-        onSave={book => {
-          props.onRefresh()
-        }}
-      />
     </div>
   )
 })
