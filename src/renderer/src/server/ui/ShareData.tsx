@@ -10,7 +10,6 @@ import {
   StopOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import {basename} from 'path'
 import {default as BookIcon} from '../../icons/IBook'
 import {IBook, IDevice, IDoc, IFile} from '../model'
 import {useLocalState} from '../../hooks/useLocalState'

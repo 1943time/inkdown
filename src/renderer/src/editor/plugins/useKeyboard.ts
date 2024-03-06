@@ -87,7 +87,7 @@ export const useKeyboard = (store: EditorStore) => {
 
       if (e.key.toLowerCase().startsWith('arrow')) {
         if (store.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
-        keyArrow(store.editor, e)
+        keyArrow(store, e)
       } else {
         if (e.key === 'Tab') tab.run(e)
         if (e.key === 'Enter') {

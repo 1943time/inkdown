@@ -115,7 +115,7 @@ export const MediaAttr = observer(() => {
 
   const keyboard = useCallback((e: KeyboardEvent) => {
     if (state().focus && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-      keyArrow(store.editor, e)
+      keyArrow(store, e)
       ReactEditor.focus(store.editor)
     }
     if (e.key === 'Backspace' && nodeRef.current) {

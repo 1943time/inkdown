@@ -3,8 +3,10 @@ import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
 import {isMod} from '../../../utils/keyboard'
 import isHotkey from 'is-hotkey'
+import {EditorStore} from '../../store'
 
-export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent) => {
+export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEvent) => {
+  const editor = store.editor
   const sel = editor.selection
   if (sel && Range.isCollapsed(sel)) {
     if (isHotkey('mod+left', e)) {
@@ -89,6 +91,11 @@ export const keyArrow = (editor: Editor, e: React.KeyboardEvent | KeyboardEvent)
       })
       const [el, path] = node
       const pre = Editor.node(editor, EditorUtils.findPrev(editor, path))
+      if (!Path.hasPrevious(path) && EditorUtils.isTop(editor, path)) {
+        const input = store.container?.querySelector<HTMLInputElement>('.page-title')
+        input?.focus()
+        return
+      }
       if (pre?.[0].type === 'media') {
         e.preventDefault()
         e.stopPropagation()
