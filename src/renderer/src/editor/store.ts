@@ -395,8 +395,10 @@ export class EditorStore {
         }), {at: path, select: true})
       }
     } else {
-      console.log('path', path)
       Transforms.insertNodes(this.editor, files.map(p => {
+        if (treeStore.root && treeStore.openedNote && p.startsWith(treeStore.root.filePath)) {
+          return {type: 'media', url: window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), p)), children: [{text: ''}]}
+        }
         return {type: 'media', url: p, children: [{text: ''}]}
       }), {at: path, select: true})
     }

@@ -162,6 +162,7 @@ export const FloatBar = observer(() => {
     setState({link: true, url: EditorUtils.getUrl(store.editor), links: getFilePaths()})
     window.addEventListener('mousedown', closeLink)
   }, [])
+
   useSubject(store.floatBar$, type => {
     if (type === 'link') {
       const [text] = Editor.nodes(store.editor, {
