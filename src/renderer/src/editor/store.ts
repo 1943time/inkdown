@@ -329,7 +329,7 @@ export class EditorStore {
           })
         }
         targetPath = join(imageDir, base)
-        mediaUrl = relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base))
+        mediaUrl = window.api.toUnix(relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base)))
       } else {
         const path = await MainApi.getCachePath()
         const imageDir = join(path, configStore.config.imagesFolder)

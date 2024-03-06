@@ -4,9 +4,9 @@ import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../..
 import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
-import {isMod} from '../../../utils/keyboard'
 import {EditorStore} from '../../store'
 import {configStore} from '../../../store/config'
+import {isMod} from '../../../utils'
 export class EnterKey {
   bracketsMap = new Map([
     ['[', ']'],

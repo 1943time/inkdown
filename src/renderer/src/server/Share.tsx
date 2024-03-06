@@ -229,7 +229,7 @@ export const Share = observer(() => {
         arrow={false}
       >
         <div
-          className={'flex drag-none items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200'}>
+          className={'flex drag-none items-center justify-center w-[30px] h-[27px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200'}>
           <Icon
             icon={'majesticons:share-circle-line'}
             className={'text-xl'}

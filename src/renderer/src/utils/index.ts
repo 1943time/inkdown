@@ -5,6 +5,7 @@ import {Subject} from 'rxjs'
 import {ArgsProps} from 'antd/es/message'
 import {HookAPI} from 'antd/es/modal/useModal'
 import { customAlphabet } from 'nanoid'
+import React from 'react'
 export const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 13)
 
 const kb = 1024
@@ -26,6 +27,10 @@ export const stat = (filePath: string) => {
 }
 
 export const copy = <T = any>(data: T):T => JSON.parse(JSON.stringify(data))
+
+export const isMod = (e: MouseEvent | KeyboardEvent | React.KeyboardEvent | React.MouseEvent) => {
+  return e.metaKey || e.ctrlKey
+}
 
 export function base64ToArrayBuffer(base64: string) {
   const binaryString = atob(base64)

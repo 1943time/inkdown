@@ -40,7 +40,7 @@ export const MediaAttr = observer(() => {
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
-          const path = relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
+          const path = window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!))
           files.push({
             label: (
               <div className={'flex items-center'}>

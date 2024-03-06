@@ -1,9 +1,9 @@
 import {Editor, Element, Node, Path, Range, Text, Transforms} from 'slate'
 import {EditorUtils} from '../../utils/editorUtils'
 import React from 'react'
-import {isMod} from '../../../utils/keyboard'
 import isHotkey from 'is-hotkey'
 import {EditorStore} from '../../store'
+import {isMod} from '../../../utils'
 
 export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEvent) => {
   const editor = store.editor
