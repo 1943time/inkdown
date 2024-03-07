@@ -457,21 +457,33 @@ export class TreeStore {
     }
     const read = new ReadSpace(spaceId)
     const timer = setTimeout(action(() => this.loading = true), 100)
-    const res = await read.getTree()
-    clearTimeout(timer)
-    if (res) {
+    try {
+      const res = await read.getTree()
+      clearTimeout(timer)
+      if (res) {
+        runInAction(() => {
+          this.loading = false
+          this.root = res.space
+          this.nodeMap = res.nodeMap
+        })
+        db.space.update(spaceId, {
+          lastOpenTime: Date.now()
+        })
+        window.electron.ipcRenderer.send('open-space', res.space.cid)
+        setTimeout(() => {
+          this.restoreTabs()
+        }, 200)
+      }
+    } catch (e: any) {
+      message$.next({
+        type: 'warning',
+        content: e.message
+      })
+    } finally {
+      clearTimeout(timer)
       runInAction(() => {
         this.loading = false
-        this.root = res.space
-        this.nodeMap = res.nodeMap
       })
-      db.space.update(spaceId, {
-        lastOpenTime: Date.now()
-      })
-      window.electron.ipcRenderer.send('open-space', res.space.cid)
-      setTimeout(() => {
-        this.restoreTabs()
-      }, 200)
     }
   }
 

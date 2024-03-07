@@ -10,6 +10,8 @@ import {mediaType} from '../editor/utils/dom'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {TreeStore} from './tree'
 import {readdir, stat} from 'fs/promises'
+import {MainApi} from '../api/main'
+import {configStore} from './config'
 
 export const findAbsoluteLinks = (schema: any[], filePath: string, prePath: number[] = [], links: {path: number[], target: string}[] = []) => {
   for (let i = 0; i < schema.length; i++) {
@@ -298,6 +300,19 @@ export class ReadSpace {
   async getTree():Promise<{space: ISpaceNode, nodeMap: Map<string, IFileItem>} | null> {
     const space = await db.space.get(this.spaceId)
     if (!space) return null
+    try {
+      readdirSync(space.filePath)
+    } catch (e) {
+      return MainApi.openDialog({
+        defaultPath: space.filePath,
+        properties: ['openDirectory', 'createDirectory']
+      }).then(res => {
+        if (res.filePaths[0] === space.filePath) {
+          return this.getTree()
+        }
+        throw new Error(configStore.zh ? '该目录与空间目录不一致，请重新选择。' : 'This directory is inconsistent with the space directory, please select again.')
+      })
+    }
     this.spaceNode = observable({
       cid: space.cid,
       root: true,
