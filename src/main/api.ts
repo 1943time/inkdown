@@ -219,33 +219,32 @@ export const registerApi = () => {
         return filePath
       })
       await view.webContents.loadFile(workerPath)
-      view.webContents.openDevTools()
-      // const ready = async (e: any, filePath: string) => {
-      //   try {
-      //     const save = await dialog.showSaveDialog({
-      //       filters: [{name: 'pdf', extensions: ['pdf']}]
-      //     })
-      //     if (save.filePath) {
-      //       const buffer = await view.webContents.printToPDF({
-      //         printBackground: true,
-      //         displayHeaderFooter: true,
-      //         generateDocumentOutline: true,
-      //         margins: {
-      //           marginType: 'custom',
-      //           bottom: 0,
-      //           left: 0,
-      //           top: 0,
-      //           right: 0
-      //         },
-      //       })
-      //       writeFileSync(save.filePath, buffer)
-      //       shell.showItemInFolder(save.filePath)
-      //     }
-      //   } finally {
-      //     win.setBrowserView(null)
-      //   }
-      // }
-      // ipcMain.once('print-pdf-ready', ready)
+      const ready = async (e: any, filePath: string) => {
+        try {
+          const save = await dialog.showSaveDialog({
+            filters: [{name: 'pdf', extensions: ['pdf']}]
+          })
+          if (save.filePath) {
+            const buffer = await view.webContents.printToPDF({
+              printBackground: true,
+              displayHeaderFooter: true,
+              generateDocumentOutline: true,
+              margins: {
+                marginType: 'custom',
+                bottom: 0,
+                left: 0,
+                top: 0,
+                right: 0
+              },
+            })
+            writeFileSync(save.filePath, buffer)
+            shell.showItemInFolder(save.filePath)
+          }
+        } finally {
+          win.setBrowserView(null)
+        }
+      }
+      ipcMain.once('print-pdf-ready', ready)
     }
   })
 }
