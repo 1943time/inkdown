@@ -21,7 +21,6 @@ export const convertRemoteImages = async (node: IFileItem) => {
               try {
                 change = true
                 const res = await window.api.fetch(item.url).then(res => res.arrayBuffer())
-                console.log('res', res)
                 let path = await store.saveFile({
                   name: nid() + '.' + ext[1].toLowerCase(),
                   buffer: res
