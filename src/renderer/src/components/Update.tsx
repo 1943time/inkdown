@@ -84,7 +84,6 @@ export const Update = observer(() => {
 
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)
-      console.log('2')
       if (state.startUpdate || state.manual) {
         let msg = typeof err === 'string' ? err : err instanceof Error ? err.message : 'The network is abnormal, please try again later or download manually'
         api.error({
@@ -95,7 +94,6 @@ export const Update = observer(() => {
       setState({startUpdate: false, percent: 0, manual: false})
     })
     ipcRenderer.on('update-downloaded', e => {
-      console.log('1')
       setState({startUpdate: false, percent: 0})
       openConfirmDialog$.next({
         title: configStore.zh ? '下载更新已完成，是否立即重新启动？' : 'Download the update is complete, do you want to restart it now?',

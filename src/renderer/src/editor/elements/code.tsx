@@ -16,7 +16,7 @@ import {useSubject} from '../../hooks/subscribe'
 import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
-import {allLanguages, highlighter} from '../utils/highlight'
+import {allLanguages} from '../utils/highlight'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = allLanguages.map(l => {
@@ -33,15 +33,6 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     options: langOptions,
     hide: props.element.katex || props.element.render || props.element.language?.toLowerCase() === 'mermaid'
   })
-
-  const html = useMemo(() => {
-    if (store.webview && !store.history) {
-      let html = highlighter.codeToHtml(props.element.children.map(n => Node.string(n)).join('\n'), {lang: state().lang as any, theme: configStore.config.codeTheme})
-      html = html.replace(/<\/?pre[^>]*>/g, '').replace(/<\/?code>/, '')
-      return html
-    }
-    return ''
-  }, [store, state().lang])
 
   const setLanguage = useCallback(() => {
     setState({editable: false})
@@ -147,26 +138,13 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             )}
           </pre>
           }
-          {store.webview && !store.history ?
-            <pre
-              data-bl-type={'code'}
-              style={{
-                paddingLeft: configStore.config.codeLineNumber && !store.webview ? 44 : 20,
-                paddingRight: 20
-              }}
-              data-bl-lang={state().lang}
-              dangerouslySetInnerHTML={{__html: html}}
-            >
-          </pre> : (
-              <pre
-                data-bl-type={'code'}
-                className={'code-content'}
-                data-bl-lang={state().lang}
-              >
+          <pre
+            data-bl-type={'code'}
+            className={'code-content'}
+            data-bl-lang={state().lang}
+          >
               {child}
             </pre>
-            )
-          }
         </div>
       </div>
       {props.element.language === 'mermaid' &&

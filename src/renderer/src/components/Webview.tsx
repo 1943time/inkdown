@@ -68,7 +68,7 @@ export const Webview = observer((props: {
           <SetNodeToDecorations/>
           <input defaultValue={state.name} className={'page-title'}/>
           <Editable
-            decorate={props.history ? high : undefined}
+            decorate={high}
             spellCheck={false}
             readOnly={true}
             className={'w-full h-full'}

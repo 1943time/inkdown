@@ -290,7 +290,7 @@ export class ReadSpace {
         db.file.delete(f.cid)
       }
     }
-    console.log('new', this.newNote.length)
+    // console.log('new', this.newNote.length)
     const nodeTree = this.toNodeTree(files)
     runInAction(() => this.spaceNode.children = nodeTree)
     return {space: this.spaceNode, nodeMap: this.nodeMap}

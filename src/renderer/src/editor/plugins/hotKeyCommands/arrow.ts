@@ -64,7 +64,11 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
           match: n => n.type === 'media' || n.type === 'inline-katex'
         })
         if (node) {
-          EditorUtils.moveAfterSpace(editor, node[1])
+          if (node[0].type === 'media') {
+            Transforms.select(editor, Editor.start(editor, Path.next(node[1])))
+          } else {
+            EditorUtils.moveAfterSpace(editor, node[1])
+          }
         } else if (sel.focus.offset === leaf.text?.length && next && next[0].type === 'media') {
           Transforms.select(editor, next[1])
         } else if (sel.focus.offset === leaf.text?.length && dirt && !Editor.next(editor, {at: sel.focus.path})) {

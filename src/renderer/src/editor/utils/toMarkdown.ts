@@ -129,7 +129,7 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       const code = node.children.map(c => {
         return preString + c.children[0]?.text || ''
       }).join('\n')
-      if (node.katex && node.language === 'latex') {
+      if (node.katex && (node.language === 'latex' || node.language === 'tex')) {
         str += `${preString}$$\n${code}\n${preString}$$`
       } else if (node.language === 'html' && node.render) {
         str += `${preString}\n${code}\n${preString}`

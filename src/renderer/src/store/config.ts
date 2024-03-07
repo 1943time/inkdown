@@ -207,6 +207,8 @@ class ConfigStore {
         })
       }))
       shareStore.initial()
+    }).catch(e => {
+      console.log('catch', e)
     })
   }
 }

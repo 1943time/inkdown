@@ -43,6 +43,13 @@ export class EnterKey {
             e.preventDefault()
           }
           break
+        case 'media':
+          e.preventDefault()
+          Transforms.insertNodes(this.editor, EditorUtils.p, {
+            at: Path.next(path),
+            select: true
+          })
+          break
         case 'paragraph':
           const end = Range.end(sel)
           const leaf = Node.leaf(this.editor, end.path)

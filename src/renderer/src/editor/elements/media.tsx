@@ -106,7 +106,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     >
       {selected &&
         <div className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
-          {state().url}
+          {element.url}
         </div>
       }
       <div
