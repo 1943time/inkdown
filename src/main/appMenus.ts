@@ -24,7 +24,7 @@ const getSystemMenus = () => {
   ] : []
   const menus: MenuOptions = [
     {
-      label: zh ? '青石' : 'Bluestone',
+      label: 'Bluestone',
       role: 'appMenu',
       id: 'app',
       submenu: [

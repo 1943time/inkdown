@@ -65,7 +65,7 @@ export const History = observer((props: {
       <div className={'h-12 border-b b2 px-5 text-sm font-semibold'}>
         <div className={'flex items-center h-full'}>
           <Help
-            text={configStore.zh ? '最后15条记录将被记录。如果文件更改间隔超过10分钟，将添加新记录，青石将定期清理缓存。' : 'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added, bluestone will clean cache periodically.'}/>
+            text={configStore.zh ? '最后15条记录将被记录。如果文件更改间隔超过10分钟，将添加新记录，Bluestone将定期清理缓存。' : 'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added, bluestone will clean cache periodically.'}/>
           <span className={'ml-1'}>
             {configStore.zh ? '文件历史' : 'File history for'} <span className={'text-indigo-500 ml-1'}>{state.fileName}</span>
           </span>

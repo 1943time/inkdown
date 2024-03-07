@@ -243,7 +243,9 @@ export class TreeStore {
         }
       }
     }
-    this.dragStatus = null
+    setTimeout(action(() => {
+      this.dragStatus = null
+    }), 100)
   }
   updateTitle() {
     if (this.openedNote) {

@@ -33,7 +33,7 @@ export function About() {
           <CloseOutlined />
         </div>
         <img src={icon} alt="" className={'w-14 h-14'}/>
-        <div className={'mt-4 text-sm'}>{configStore.zh ? '青石' : 'bluestone'}</div>
+        <div className={'mt-4 text-sm'}>{'Bluestone'}</div>
         <div className={'flex items-center mt-3'}>
           <div className={'flex items-center text-xs mr-3'}>
             <GithubOutlined className={'text-base'} />

@@ -11,7 +11,7 @@ export const NotLogged = observer((props: {
       <div className={'text-center text-[13px] mt-3 text-gray-500'}>
         {configStore.zh ? (
           <span>
-            如果您有自己的服务器，可以通过安装青石的服务程序在<br/>5分钟内建立自己的web服务。<br/>
+            如果您有自己的服务器，可以通过安装Bluestone的服务程序在<br/>5分钟内建立自己的web服务。<br/>
             它可以帮助你一键分享Markdown文档或文件夹，并且完全自动管理相关依赖 如：图片等 <a className={'link mx-0.5'} href={'https://doc.bluemd.me/book/zh-docs/service'} target={'_blank'}>指南</a>。
           </span>
         ) : (
