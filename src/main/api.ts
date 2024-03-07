@@ -214,7 +214,7 @@ export const registerApi = () => {
         }
       })
       win.setBrowserView(view)
-      view.setBounds({ x: 0, y: 0, width: 1000, height: 500})
+      view.setBounds({ x: 0, y: 0, width: 0, height: 0})
       ipcMain.handleOnce('print-dom-ready', () => {
         return filePath
       })

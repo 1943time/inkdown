@@ -57,7 +57,7 @@ export const EditorFrame = observer(({tab}: {
     <EditorStoreContext.Provider value={tab.store}>
       <Search/>
       <div
-        className={'flex-1 h-full overflow-y-auto items-start relative pr-7'}
+        className={'flex-1 h-full overflow-y-auto items-start relative'}
         ref={dom => {
           tab.store.setState(state => state.container = dom)
         }}
@@ -69,7 +69,7 @@ export const EditorFrame = observer(({tab}: {
               onClick={click}
               style={{paddingTop: pt}}
             >
-              <div className={`flex-1 flex justify-center items-start h-full`}>
+              <div className={`flex-1 flex justify-center items-start h-full pr-7`}>
                 <div
                   style={{maxWidth: configStore.config.editorWidth + 96 || 816}}
                   className={`flex-1 content px-12 ${configStore.config.editorLineHeight === 'compact' ? 'line-height-compact' : configStore.config.editorLineHeight === 'loose' ? 'line-height-loose' : ''}`}
@@ -84,8 +84,8 @@ export const EditorFrame = observer(({tab}: {
             {mt !== 'other' && mt !== 'markdown' &&
               <>
                 {mt === 'image' ?
-                  <div className={'text-center px-14 pb-5'} style={{paddingTop: pt + 20}}>
-                    <img src={getImageData(tab.current?.filePath)} alt="" className={'inline'}/>
+                  <div className={'h-full overflow-y-auto flex items-center flex-wrap justify-center py-5'} style={{paddingTop: pt + 20}}>
+                    <img src={getImageData(tab.current?.filePath)} alt="" className={'block'}/>
                   </div> :
                   (
                     <div
@@ -96,7 +96,7 @@ export const EditorFrame = observer(({tab}: {
                       className={'px-10 pb-5'}
                     >
                       <iframe
-                        className={'w-full h-full rounded border b1'} src={tab.current.filePath}
+                        className={'w-full h-full overflow-y-auto rounded border b1'} src={tab.current.filePath}
                       />
                     </div>
                   )

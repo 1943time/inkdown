@@ -41,7 +41,7 @@ export const Tools = observer(() => {
       return window.removeEventListener('click', close)
     }
   }, [])
-  if (!treeStore.openedNote) return null
+  if (!treeStore.openedNote || treeStore.openedNote.ext !== 'md') return null
   return (
     <>
       <div

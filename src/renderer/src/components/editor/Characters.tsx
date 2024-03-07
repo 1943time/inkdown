@@ -46,6 +46,7 @@ export const Characters = observer(() => {
     }
   }, [treeStore.openedNote, configStore.config.showCharactersCount])
   if (!configStore.config.showCharactersCount) return null
+  if (!treeStore.openedNote || treeStore.openedNote.ext !== 'md') return null
   return (
     <div className={`
       px-2 absolute text-center z-10 bg-gray-200 text-gray-500 panel-bg
