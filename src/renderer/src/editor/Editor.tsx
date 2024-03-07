@@ -18,13 +18,14 @@ import {countWords} from 'alfaaz'
 import {debounceTime, Subject} from 'rxjs'
 import {ipcRenderer} from 'electron'
 import {toMarkdown} from './output/md'
-import {isAbsolute} from 'path'
+import {isAbsolute, join, relative} from 'path'
 import {stat} from '../utils'
 import {existsSync} from 'fs'
 import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
 import {Title} from './tools/Title'
 import {updateNode} from './utils/updateNode'
 import {CustomLeaf} from '../el'
+import {mediaType} from './utils/dom'
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -184,6 +185,26 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    if (treeStore.dragNode) {
+      const node = treeStore.dragNode
+      if (!node.folder) {
+        const type = mediaType(node.filePath)
+        if (node.ext === 'md' || type === 'other') {
+          Transforms.insertNodes(store.editor, {
+            text: node.filename, url: window.api.toUnix(relative(join(note.filePath, '..'), node.filePath))
+          })
+        } else {
+          EditorUtils.focus(store.editor)
+          const path = EditorUtils.findMediaInsertPath(store.editor)
+          if (path) {
+            Transforms.insertNodes(store.editor, {
+              type: 'media', url: window.api.toUnix(relative(join(note.filePath, '..'), node.filePath)), children: [{text: ''}]
+            }, {at: path, select: true})
+          }
+        }
+      }
+      return
+    }
     if (!e.dataTransfer?.files?.length) return
     if (e.dataTransfer?.files?.length > 1) {
       store.insertMultipleFiles(e.dataTransfer.files)
@@ -292,6 +313,7 @@ export const MEditor = observer(({note}: {
         <Editable
           onError={onError}
           decorate={high}
+          onDragOver={e => e.preventDefault()}
           spellCheck={configStore.config.spellCheck}
           readOnly={store.readonly}
           className={`edit-area font-${configStore.config.editorFont} ${store.focus ? 'focus' : ''}`}

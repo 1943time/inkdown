@@ -113,6 +113,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
         {...attributes}
         className={`drag-el group cursor-pointer relative flex justify-center mb-2 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
         data-be={'media'}
+        style={{padding: (type === 'document' || type === 'other') ? '10px 0' : undefined}}
         draggable={true}
         onContextMenu={e => {
           e.stopPropagation()
