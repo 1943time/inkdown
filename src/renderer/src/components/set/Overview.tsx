@@ -61,7 +61,7 @@ export const Overview = observer(() => {
             onChange={e => {
               configStore.setConfig('locale', e)
               modal.info({
-                title: configStore.zh ? '提示' : 'Note',
+                title: configStore.zh ? '提示' : 'Notice',
                 content: configStore.zh ? '语言切换将在应用重启后完全生效。' : 'The language switch will take full effect after the application restarts.'
               })
             }}

@@ -97,7 +97,7 @@ export const ServiceSet = observer((props: {
           <Button onClick={props.onClose}>{configStore.zh ? '取消' : 'Cancel'}</Button>
           {!!shareStore.serviceConfig &&
             <Popconfirm
-              title={configStore.zh ? '提示' : 'Note'}
+              title={configStore.zh ? '提示' : 'Notice'}
               description={configStore.zh ? '重置后将不可分享，已分享数据不会被清除' : 'After resetting, it will not be shareable and shared data will not be cleared'}
               placement={'bottom'}
               onConfirm={() => {

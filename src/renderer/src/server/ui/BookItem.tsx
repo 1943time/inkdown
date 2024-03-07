@@ -113,7 +113,7 @@ export const BookItem = observer((props: {
                           onClick: () =>  {
                             props.onMask(true)
                             modal.confirm({
-                              title: 'Note',
+                              title: 'Notice',
                               content: configStore.zh ? `确认删除已分享的文件夹 ${b.name}` : `Confirm to remove shared book ${b.name}`,
                               onOk: () => {
                                 return shareStore.delBook(b).then(props.onRefresh).finally(closeMask)

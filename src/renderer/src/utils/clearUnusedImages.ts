@@ -28,7 +28,7 @@ const findMedia = (filePath: string, schema: Elements[], usedImages: Set<string>
 export const clearUnusedImages = () => {
   if (!treeStore.root) return
   openConfirmDialog$.next({
-    title: configStore.zh ? '提示' : 'Note',
+    title: configStore.zh ? '提示' : 'Notice',
     description: configStore.zh ? '存储区中未被引用的图片将被删除' : 'Unreferenced images in the storage area will be deleted',
     onConfirm: async () => {
       let imgDirs: IFileItem[] = []

@@ -13,7 +13,7 @@ export const CloseShare = observer((props: {
 }) => {
   return (
     <Popconfirm
-      title={configStore.zh ? '提示' : 'Note'}
+      title={configStore.zh ? '提示' : 'Notice'}
       description={configStore.zh ? '删除后无法访问' : 'Network inaccessible after removal'}
       placement={'bottom'}
       onConfirm={() => {

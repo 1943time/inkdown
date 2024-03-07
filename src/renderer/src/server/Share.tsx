@@ -123,7 +123,7 @@ export const Share = observer(() => {
               items={[
                 {
                   key: 'doc',
-                  label: 'Note',
+                  label: 'Doc',
                   children: (
                     <div className={'relative'}>
                       {!!shareStore.serviceConfig &&
@@ -136,7 +136,7 @@ export const Share = observer(() => {
                       }
                       <div className={'flex text-sm items-center text-gray-500 justify-center'}>
                         <Net className={'w-5 h-5 fill-gray-500'}/>
-                        <span className={'ml-2'}>{configStore.zh ? '分享当前笔记' : 'Share the current note'}</span>
+                        <span className={'ml-2'}>{configStore.zh ? '分享当前文档' : 'Share the current doc'}</span>
                       </div>
                       {!shareStore.serviceConfig &&
                         <NotLogged onOpen={() => setState({mask: true, openSetting: true})}/>

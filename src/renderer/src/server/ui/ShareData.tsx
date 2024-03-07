@@ -522,7 +522,7 @@ export const ShareData = observer((props: {
                               type={'link'} size={'small'} danger={true}
                               onClick={() => {
                                 modal.confirm({
-                                  title: configStore.zh ? '提示' : 'Note',
+                                  title: configStore.zh ? '提示' : 'Notice',
                                   type: 'warning',
                                   content: configStore.zh ? '删除设备将清除设备下的所有共享数据，删除后无法访问。' : 'Deleting a device will clear all shared data under the device and will become inaccessible.',
                                   onOk: () => {
