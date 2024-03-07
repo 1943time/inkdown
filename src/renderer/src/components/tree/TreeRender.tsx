@@ -80,6 +80,12 @@ const Item = observer((
         data-fid={item.cid}
         className={'py-[1px]'}
         onDragLeave={e => e.stopPropagation()}
+        onDrop={e => {
+          if (item.folder) {
+            e.stopPropagation()
+            treeStore.moveDragFiles(e, item)
+          }
+        }}
         onDragOver={action(e => {
           e.stopPropagation()
           e.preventDefault()

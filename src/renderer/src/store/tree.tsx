@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {createFileNode, defineParent, insertFile, ReadSpace} from './parserNode'
+import {createFileNode, defineParent, insertFile, moveFileToSpace, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
@@ -18,6 +18,7 @@ import {editSpace$} from '../components/space/EditSpace'
 import {Refactor} from '../utils/refactor'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
+import React from 'react'
 
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
@@ -232,6 +233,17 @@ export class TreeStore {
     if (this.currentTab.hasNext) {
       this.currentTab.index++
     }
+  }
+  moveDragFiles(e: React.DragEvent<any>, parentNode?: IFileItem) {
+    const file = Array.from(e.dataTransfer.files)
+    if (file.length) {
+      for (let f of file) {
+        if (f.path && mediaType(f.path) !== 'markdown') {
+          moveFileToSpace(treeStore, f.path, parentNode)
+        }
+      }
+    }
+    this.dragStatus = null
   }
   updateTitle() {
     if (this.openedNote) {

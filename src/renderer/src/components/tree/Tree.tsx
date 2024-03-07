@@ -18,6 +18,8 @@ import {SortableContainer, SortableElement} from 'react-sortable-hoc'
 import {arrayMoveImmutable} from 'array-move'
 import {Subject} from 'rxjs'
 import Collapse from '../../icons/Collapse'
+import {mediaType} from '../../editor/utils/dom'
+import {moveFileToSpace} from '../../store/parserNode'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -223,6 +225,7 @@ export const Tree = observer(() => {
                 onDragLeave={action(e => {
                   treeStore.dragStatus = null
                 })}
+                onDrop={e => treeStore.moveDragFiles(e)}
                 onContextMenu={e => {
                   if (treeStore.treeTab === 'folder') {
                     openContextMenu(e, treeStore.root!)

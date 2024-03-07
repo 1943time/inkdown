@@ -12,6 +12,8 @@ import {runInAction} from 'mobx'
 export class Watcher {
   private fileMap = new Map<string, IFileItem>()
   private ops:{e: 'remove' | 'update', path: string}[] = []
+  pause = false
+  ignorePath = new Set<string>()
   constructor(
     private readonly store: TreeStore
   ) {
@@ -26,7 +28,10 @@ export class Watcher {
       if (this.store.root) {
         window.api.offWatcher(this.store.root.filePath)
         if (this.ops.length) {
-          this.perform().finally(() => this.ops = [])
+          this.perform().finally(() => {
+            this.ops = []
+            this.ignorePath.clear()
+          })
         }
       }
     })
@@ -41,13 +46,13 @@ export class Watcher {
   private async perform() {
     const {parser, terminate} = openMdParserHandle()
     for (const op of this.ops) {
-      if (!existsSync(op.path)) continue
       const {e, path} = op
       const node = this.fileMap.get(path)
       if (e === 'remove' && node) {
         this.store.moveToTrash(node, true)
       }
       if (e === 'update') {
+        if (!existsSync(op.path)) continue
         if (node && node.ext === 'md') {
           const [res] = await parser([{filePath: path}])
           node.schema = res.schema
@@ -109,6 +114,7 @@ export class Watcher {
     terminate()
   }
   public async onChange(e: 'remove' | 'update', path: string) {
+    if (this.pause || this.ignorePath.has(path)) return
     this.ops.push({e, path})
   }
 }

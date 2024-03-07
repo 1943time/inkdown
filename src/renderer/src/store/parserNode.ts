@@ -1,5 +1,5 @@
 import {IFileItem, ISpaceNode} from '../index'
-import {readdirSync, statSync} from 'fs'
+import {existsSync, readdirSync, renameSync, statSync} from 'fs'
 import {basename, extname, isAbsolute, join, parse, sep} from 'path'
 import {observable, runInAction} from 'mobx'
 import {db, IFile} from './db'
@@ -9,6 +9,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {mediaType} from '../editor/utils/dom'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {TreeStore} from './tree'
+import {readdir, stat} from 'fs/promises'
 
 export const findAbsoluteLinks = (schema: any[], filePath: string, prePath: number[] = [], links: {path: number[], target: string}[] = []) => {
   for (let i = 0; i < schema.length; i++) {
@@ -32,6 +33,57 @@ export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) =>
       return parent
     }
   })
+}
+
+export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentNode?: IFileItem) => {
+  const parent = parentNode || tree.root!
+  const fileMap = new Map(Array.from(tree.nodeMap.values()).map(v => [v.filePath, v]))
+  if (existsSync(filePath)) {
+    const {parser, terminate} = openMdParserHandle()
+    const appendFiles = async (files: string[], parent: IFileItem | ISpaceNode) => {
+      for (let f of files) {
+        const s = await stat(f)
+        const folder = s.isDirectory()
+        if (!fileMap.get(f)) {
+          tree.watcher.ignorePath.add(f)
+          const id = nid()
+          const now = Date.now()
+          const insertData:IFile = {
+            cid: id,
+            created: now,
+            sort: folder ? 0 : parent.children!.length,
+            updated: s.mtime.valueOf(),
+            spaceId: tree.root!.cid,
+            filePath: f,
+            folder,
+            synced: 0
+          }
+          if (mediaType(f) === 'markdown') {
+            const [res] = await parser([{filePath: f}])
+            insertData.schema = res.schema
+            insertData.links = res.links
+          }
+          await db.file.add(insertData)
+          const node = createFileNode(insertData)
+          runInAction(() => {
+            folder ? parent.children!.unshift(node) : parent.children!.push(node)
+          })
+          if (folder) {
+            const children = (await readdir(f)).map(s => join(f, s))
+            await appendFiles(children, node)
+          }
+        }
+      }
+    }
+    try {
+      const targetPath = join(parent.filePath, basename(filePath))
+      tree.watcher.ignorePath.add(targetPath)
+      renameSync(filePath, targetPath)
+      await appendFiles([targetPath], parent)
+    } finally {
+      terminate()
+    }
+  }
 }
 
 export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'spaceId' | 'folder'>): Promise<IFileItem | null> => {

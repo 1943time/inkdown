@@ -195,6 +195,7 @@ export class EditorStore {
 
   setOpenSearch(open: boolean) {
     this.openSearch = open
+    this.domRect = null
     if (!open) {
       this.highlightCache.clear()
       this.searchRanges = []
