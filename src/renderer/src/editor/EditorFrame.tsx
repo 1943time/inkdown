@@ -84,7 +84,7 @@ export const EditorFrame = observer(({tab}: {
             {mt !== 'other' && mt !== 'markdown' &&
               <>
                 {mt === 'image' ?
-                  <div className={'h-full overflow-y-auto flex items-center flex-wrap justify-center py-5'} style={{paddingTop: pt + 20}}>
+                  <div className={'h-full overflow-y-auto flex items-center flex-wrap justify-center py-5 px-10'} style={{paddingTop: pt + 20}}>
                     <img src={getImageData(tab.current?.filePath)} alt="" className={'block'}/>
                   </div> :
                   (

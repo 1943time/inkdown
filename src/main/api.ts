@@ -201,7 +201,9 @@ export const registerApi = () => {
   ipcMain.handle('move-to-trash', (e, path) => {
     return shell.trashItem(path)
   })
-
+  ipcMain.handle('get-country-code', () => {
+    return app.getLocaleCountryCode()
+  })
   ipcMain.on('print-pdf', async (e, filePath: string, rootPath?: string) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     if (win) {
