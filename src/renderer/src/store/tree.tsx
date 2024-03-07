@@ -420,10 +420,11 @@ export class TreeStore {
 
   async initial(spaceId: string) {
     if (await window.electron.ipcRenderer.invoke('find-other-space', spaceId)) {
-      return message$.next({
+      message$.next({
         type: 'info',
         content: 'This space is already open in another window'
       })
+      return false
     }
     runInAction(() => {
       this.fold = false

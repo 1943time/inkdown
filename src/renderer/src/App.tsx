@@ -6,8 +6,8 @@ import { configStore } from './store/config'
 import {message$, modal$} from './utils'
 import { Home } from './components/Home'
 import zhCN from 'antd/locale/zh_CN';
-import {runInAction} from 'mobx'
-import {codeReady, highlighter} from './editor/utils/highlight'
+
+import {codeReady} from './editor/utils/highlight'
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()

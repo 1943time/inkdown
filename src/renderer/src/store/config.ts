@@ -15,7 +15,7 @@ class ConfigStore {
   openUpdateDialog = false
   codeDark = false
   config = {
-    showLeading: true,
+    showLeading: false,
     autoDownload: false,
     theme: 'system' as 'system' | 'dark' | 'light',
     leadingWidth: 220,
