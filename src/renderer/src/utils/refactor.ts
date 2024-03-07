@@ -1,7 +1,7 @@
 import {treeStore, TreeStore} from '../store/tree'
 import {IFileItem} from '../index'
 import {basename, isAbsolute, join, relative} from 'path'
-import {copy} from './index'
+import {copy, parsePath} from './index'
 import {db} from '../store/db'
 import {configStore} from '../store/config'
 
@@ -31,8 +31,10 @@ export class Refactor {
       for (let l of node.links) {
         const el = this.findElByPath(schema!, l.path)
         if (el && el.url && !isAbsolute(el.url)) {
+          const ps = parsePath(el.url)
           el.url = window.api.toUnix(relative(join(node.filePath, '..'), l.target))
           l.target = join(node.filePath, '..', el.url)
+          if (ps.hash) el.url += `#${ps.hash}`
           changed = true
         }
       }
@@ -58,8 +60,10 @@ export class Refactor {
           for (const l of node.links) {
             const el = this.findElByPath(schema!, l.path)
             if (el && el.url && !isAbsolute(el.url)) {
+              const ps = parsePath(el.url)
               el.url = window.api.toUnix(relative(join(node.filePath, '..'), target.filePath))
               l.target = join(node.filePath, '..', el.url)
+              if (ps.hash) el.url += `#${ps.hash}`
               changed = true
             }
           }
