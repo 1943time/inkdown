@@ -18,6 +18,7 @@ import {TableCellNode, TableNode, TableRowNode} from '../../el'
 import {treeStore} from '../../store/tree'
 import {EditorUtils} from '../utils/editorUtils'
 import {useSubject} from '../../hooks/subscribe'
+import {configStore} from '../../store/config'
 
 export const TableAttr = observer(() => {
   const store = useEditorStore()
@@ -179,7 +180,7 @@ export const TableAttr = observer(() => {
 
   useEffect(() => {
     resize()
-  }, [treeStore.size, store.openSearch, treeStore.tabs.length])
+  }, [treeStore.size, store.openSearch, treeStore.tabs.length, configStore.config.showLeading])
 
   const insertRow = useCallback((path: Path, columns: number) => {
     Transforms.insertNodes(editor, {

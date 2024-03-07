@@ -75,12 +75,6 @@ class ConfigStore {
         this.visible = true
       })
     })
-    window.electron.ipcRenderer.on('changeConfig', action((e, key: any, value: any) => {
-      if (key === 'theme') {
-        this.setTheme(value, false)
-      }
-      this.config[key] = value
-    }))
   }
   async reloadHighlighter(refresh = false) {
     try {
@@ -150,7 +144,7 @@ class ConfigStore {
   }
 
   toggleShowLeading() {
-    window.electron.ipcRenderer.send('toggleShowLeading')
+    this.setConfig('showLeading', !this.config.showLeading)
   }
 
   async setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {

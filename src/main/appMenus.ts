@@ -175,14 +175,6 @@ const getSystemMenus = () => {
         {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: 'Zoom In'},
         {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: 'Zoom Out'},
         {type: 'separator'},
-        {
-          label: 'Search',
-          id: 'search',
-          accelerator: `${cmd}+f`,
-          click: e => {
-            BrowserWindow.getFocusedWindow()?.webContents.send('open-search')
-          }
-        },
         {type: 'separator'},
         {role: 'togglefullscreen'},
         {role: 'reload'},
