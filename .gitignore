@@ -11,6 +11,7 @@ dist
 web
 build/bluestone.provisionprofile
 build/masDev.provisionprofile
+build/bs.provisionprofile
 build/entitlements.mas.inherit.plist
 build/entitlements.mas.plist
 build/entitlements.mas.loginhelper.plist
