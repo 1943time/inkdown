@@ -6,6 +6,9 @@ import {useLocalState} from '../../hooks/useLocalState'
 import {ReactEditor} from 'slate-react'
 import isHotkey from 'is-hotkey'
 import {useCallback} from 'react'
+import {mediaType} from '../utils/dom'
+import {Editor, Element, Transforms} from 'slate'
+import {EditorUtils} from '../utils/editorUtils'
 
 export const InsertNetworkImage = observer(() => {
   const store = useEditorStore()
@@ -17,10 +20,19 @@ export const InsertNetworkImage = observer(() => {
       store.openInsertNetworkImage = false
     })
     ReactEditor.focus(store.editor)
-    setTimeout(() => {
-      store.insertLink(state.url)
-      setState({url: ''})
-    })
+    const type = mediaType(state.url)
+    if (['image', 'video', 'audio', 'document'].includes(type)) {
+      const path = EditorUtils.findMediaInsertPath(store.editor)
+      if (!path) return
+      Transforms.insertNodes(store.editor, {
+        type: 'media', url: state.url, children: [{text: ''}]
+      }, {at: path, select: true})
+    } else {
+      Transforms.insertNodes(store.editor, {
+        text: state.url, url: state.url
+      }, {select: true})
+    }
+    setState({url: ''})
   }, [])
   return (
     <Modal
@@ -31,7 +43,7 @@ export const InsertNetworkImage = observer(() => {
       onCancel={action(() => store.openInsertNetworkImage = false)}
     >
       <Input
-        placeholder={'Enter image url'}
+        placeholder={'Media url'}
         value={state.url}
         onKeyDown={e => {
           if (isHotkey('enter', e)) {

@@ -358,28 +358,8 @@ export class EditorStore {
   }
 
   async insertFiles(files: string[]) {
-    const [cur] = Editor.nodes<any>(this.editor, {
-      match: n => Element.isElement(n),
-      mode: 'lowest'
-    })
-    if (!cur) return
-    let path = cur[1]
-    if (cur[0].type === 'table-cell') {
-      path = Path.next(Path.parent(Path.parent(cur[1])))
-    }
-    if (cur[0].type === 'head') {
-      path = Path.next(path)
-    }
-    if (cur[0].type === 'code-line') {
-      path = Path.next(Path.parent(cur[1]))
-    }
-    if (cur[0].type === 'paragraph') {
-      if (!Node.string(cur[0])) {
-        Transforms.delete(this.editor, {at: path})
-      } else {
-        path = Path.next(cur[1])
-      }
-    }
+    const path = EditorUtils.findMediaInsertPath(this.editor)
+    if (!path) return
     if (imageBed.route) {
       const urls = await imageBed.uploadFile(files.map(f => {
         const p = parse(f)

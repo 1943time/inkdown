@@ -66,6 +66,31 @@ export class EditorUtils {
     }
     return []
   }
+  static findMediaInsertPath(editor: Editor) {
+    const [cur] = Editor.nodes<any>(editor, {
+      match: n => Element.isElement(n),
+      mode: 'lowest'
+    })
+    if (!cur) return null
+    let path = cur[1]
+    if (cur[0].type === 'table-cell') {
+      path = Path.next(Path.parent(Path.parent(cur[1])))
+    }
+    if (cur[0].type === 'head') {
+      path = Path.next(path)
+    }
+    if (cur[0].type === 'code-line') {
+      path = Path.next(Path.parent(cur[1]))
+    }
+    if (cur[0].type === 'paragraph') {
+      if (!Node.string(cur[0])) {
+        Transforms.delete(editor, {at: path})
+      } else {
+        path = Path.next(cur[1])
+      }
+    }
+    return path
+  }
   static findNext(editor: Editor, path: Path) {
     while (path.length) {
       if (Editor.hasPath(editor, Path.next(path))) {
