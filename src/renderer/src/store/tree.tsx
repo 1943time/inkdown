@@ -568,8 +568,9 @@ export class TreeStore {
   }
   private removeSelf(node: IFileItem) {
     if (!node.folder) this.removeNodeFromHistory(node)
-    if (node.parent) {
-      node.parent!.children = node.parent!.children!.filter(c => c !== node)
+    const parent = node.parent || treeStore.root
+    if (parent) {
+      parent.children = parent.children!.filter(c => c !== node)
     }
     this.nodeMap.delete(node.cid)
     if (node.folder) {
