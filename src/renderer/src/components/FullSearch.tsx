@@ -42,7 +42,7 @@ export const FullSearch = observer(() => {
 
   const toNode = useCallback((res: { el: any, file: IFileItem }) => {
     if (treeStore.openedNote !== res.file) {
-      treeStore.openNote(res.file, false)
+      treeStore.openNote(res.file)
       setTimeout(() => {
         requestIdleCallback(() => {
           try {
@@ -102,7 +102,7 @@ export const FullSearch = observer(() => {
     }
   }, [treeStore.treeTab])
   return (
-    <div className={'py-3 h-full'}>
+    <div className={'py-1 h-full'}>
       <div className={'px-4 relative'}>
         <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'}/>
         <input

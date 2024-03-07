@@ -4,7 +4,7 @@ import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {mediaType} from '../utils/dom'
 import {useSelStatus} from '../../hooks/editor'
 import {Transforms} from 'slate'
-import {getImageData} from '../../utils'
+import {getImageData, nid} from '../../utils'
 import {ElementProps, MediaNode} from '../../el'
 import {isAbsolute, join} from 'path'
 import {EditorUtils} from '../utils/editorUtils'
@@ -85,11 +85,11 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
           window.api.fetch(url).then(async res => {
             const buffer = await res.buffer()
             store.saveFile({
-              name: Date.now().toString(16) + '.' + (image ? image[1].toLowerCase() : type.split('/')[1]),
+              name: nid() + '.' + (image ? image[1].toLowerCase() : type.split('/')[1]),
               buffer: buffer.buffer
             }).then(res => {
               Transforms.setNodes(store.editor, {
-                url: res, downloadUrl: undefined, alt: ''
+                url: res, downloadUrl: null
               }, {at: path})
             }).catch(e => {
               console.log('err', e)
@@ -98,7 +98,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
         }
       })
     }
-  }, [])
+  }, [element])
   return (
     <div
       className={'py-2 relative'}

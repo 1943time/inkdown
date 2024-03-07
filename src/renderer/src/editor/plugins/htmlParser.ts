@@ -2,6 +2,7 @@ import {Editor, Element, Node, Path, Range, Transforms} from 'slate'
 import {jsx} from 'slate-hyperscript'
 import {BackspaceKey} from './hotKeyCommands/backspace'
 import {configStore} from '../../store/config'
+import {EditorUtils} from '../utils/editorUtils'
 
 const findElementByNode = (node: ChildNode) => {
   const index = Array.prototype.indexOf.call(node.parentNode!.childNodes, node)
@@ -260,7 +261,11 @@ export const htmlParser = (editor: Editor, html: string) => {
     }
   }
   if (inner && !['code', 'code-line', 'table-cell'].includes(node?.[0].type)) return false
-
-  Transforms.insertFragment(editor, fragment)
+  if (fragment[0].type === 'media') {
+    const path = EditorUtils.findMediaInsertPath(editor)
+    if (path) Transforms.insertFragment(editor, fragment, {at: path})
+  } else {
+    Transforms.insertFragment(editor, fragment)
+  }
   return true
 }
