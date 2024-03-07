@@ -1,7 +1,6 @@
 
 import {Menu, app, ipcMain, BrowserWindow, shell, dialog, ipcRenderer} from 'electron'
 import MenuItem = Electron.MenuItem
-import {getLocale, store} from './store'
 
 type MenuOptions = Parameters<typeof Menu.buildFromTemplate>[0]
 const isMas = process.mas || false
@@ -13,10 +12,9 @@ const task = (task: string, parameter?: any) => {
   }
 }
 const getSystemMenus = () => {
-  const zh = getLocale() === 'zh'
   const update: MenuOptions[number]['submenu'] = !isMas ? [
     {
-      label: zh ? '检查更新' : 'Check for Updates',
+      label: 'Check for Updates',
       click: () => {
         BrowserWindow.getFocusedWindow()?.webContents.send('check-updated')
       }
@@ -29,7 +27,7 @@ const getSystemMenus = () => {
       id: 'app',
       submenu: [
         {
-          label: zh ? '关于' : 'About',
+          label: 'About',
           id: 'about',
           click: (e, win) => {
             BrowserWindow.getFocusedWindow()?.webContents?.send('open-about')
@@ -38,7 +36,7 @@ const getSystemMenus = () => {
         ...update,
         {type: 'separator'},
         {
-          label: zh ? '设置' : 'Settings',
+          label: 'Settings',
           id: 'settings',
           accelerator: `${cmd}+,`,
           click: e => {
@@ -53,13 +51,13 @@ const getSystemMenus = () => {
   ]
 
   menus.push({
-    label: zh ? '文件' : 'File',
+    label: 'File',
     id: 'file',
     role: 'fileMenu',
     submenu: [
       {
         id: 'create',
-        label: zh ? '打开文档' : 'Open Doc',
+        label: 'Open Doc',
         accelerator: `${cmd}+shift+n`,
         click: (e, win) => {
           dialog.showOpenDialog({
@@ -73,7 +71,7 @@ const getSystemMenus = () => {
         }
       },
       {
-        label: zh ? '新建窗口' : 'New Window',
+        label: 'New Window',
         accelerator: `${cmd}+shift+n`,
         id: 'create-window',
         click: () => {
@@ -82,7 +80,7 @@ const getSystemMenus = () => {
       },
       {type: 'separator'},
       {
-        label: zh ? '新建标签' : 'New Tab',
+        label: 'New Tab',
         id: 'new-tab',
         accelerator: `${cmd}+t`,
         click: (menu, win) => {
@@ -90,7 +88,7 @@ const getSystemMenus = () => {
         }
       },
       {
-        label: zh ? '关闭当前标签' : 'Close Current Tab',
+        label: 'Close Current Tab',
         id: 'close-current-tab',
         accelerator: `${cmd}+w`,
         click: () => {
@@ -98,7 +96,7 @@ const getSystemMenus = () => {
         }
       },
       {
-        label: zh ? '快速打开' : 'Open Quickly',
+        label: 'Open Quickly',
         id: 'open-quickly',
         accelerator: `${cmd}+o`
       }
@@ -107,15 +105,15 @@ const getSystemMenus = () => {
 
   const delRange = isMac ? [
     {
-      label: zh ? '删除范围' : 'Delete Range',
+      label: 'Delete Range',
       id: 'delete-range',
       submenu: [
         {
-          label: zh ? '删除行' : 'Delete Line',
+          label: 'Delete Line',
           accelerator: `${cmd}+Backspace`
         },
         {
-          label: zh ? '删除词' : 'Delete Word',
+          label: 'Delete Word',
           accelerator: `Alt+Backspace`
         }
       ]
@@ -123,7 +121,7 @@ const getSystemMenus = () => {
   ] : []
 
   menus.push({
-    label: zh ? '编辑' : 'Edit',
+    label: 'Edit',
     id: 'edit',
     role: 'editMenu',
     submenu: [
@@ -131,7 +129,7 @@ const getSystemMenus = () => {
       {role: 'redo'},
       {type: 'separator'},
       {
-        label: zh ? '保存' : 'Save',
+        label: 'Save',
         accelerator: `${cmd}+s`,
         click: () => {
           BrowserWindow.getFocusedWindow()?.webContents.send('save-doc')
@@ -143,26 +141,26 @@ const getSystemMenus = () => {
       {role: 'delete'},
       ...delRange,
       {
-        label: zh ? '选择' : 'Selection',
+        label: 'Selection',
         submenu: [
           {
             role: 'selectAll',
-            label: zh ? '全选' : 'Select All'
+            label: 'Select All'
           },
           {
             accelerator: `${cmd}+shift+l`,
             click: task('select-line'),
-            label: zh ? '选择行' : 'Select Line'
+            label: 'Select Line'
           },
           {
             accelerator: `${cmd}+e`,
             click: task('select-format'),
-            label: zh ? '选择格式' : 'Select Format'
+            label: 'Select Format'
           },
           {
             accelerator: `${cmd}+d`,
             click: task('select-word'),
-            label: zh ? '选择词' : 'Select Word'
+            label: 'Select Word'
           }
         ]
       }
@@ -171,26 +169,14 @@ const getSystemMenus = () => {
 
   menus.push(
     {
-      label: zh ? '视图' : 'View',
+      label: 'View',
       role: 'viewMenu',
       submenu: [
         {role: 'zoomIn', accelerator: 'Alt+Shift+=', label: 'Zoom In'},
         {role: 'zoomOut', accelerator: 'Alt+Shift+-', label: 'Zoom Out'},
         {type: 'separator'},
         {
-          label: zh ? '大纲' : 'Outline',
-          type: 'checkbox',
-          id: 'showLeading',
-          checked: typeof store.get('config.showLeading') === 'boolean' ? store.get('config.showLeading') as boolean : true,
-          click: e => {
-            store.set('config.showLeading', typeof store.get('config.showLeading') === 'boolean' ? !store.get('config.showLeading') : false)
-            BrowserWindow.getAllWindows().forEach(w => {
-              w.webContents.send('changeConfig', 'showLeading', e.checked)
-            })
-          }
-        },
-        {
-          label: zh ? '搜索' : 'Search',
+          label: 'Search',
           id: 'search',
           accelerator: `${cmd}+f`,
           click: e => {
@@ -210,7 +196,7 @@ const getSystemMenus = () => {
 
   menus.push(
     {
-      label: zh ? '帮助' : 'Help',
+      label: 'Help',
       role: 'help',
       submenu: [
         {

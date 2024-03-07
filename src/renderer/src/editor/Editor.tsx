@@ -214,7 +214,7 @@ export const MEditor = observer(({note}: {
       }
     }
     return false
-  }, [])
+  }, [note])
 
   const focus = useCallback(() => {
     store.setState(state => state.focus = true)
