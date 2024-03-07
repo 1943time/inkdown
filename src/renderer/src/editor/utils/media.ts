@@ -4,6 +4,7 @@ import {ReactEditor} from 'slate-react'
 import {base64ToArrayBuffer, message$, nid} from '../../utils'
 import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
+import {EditorUtils} from './editorUtils'
 
 export const convertRemoteImages = async (node: IFileItem) => {
   if (node.ext === 'md') {
@@ -28,7 +29,9 @@ export const convertRemoteImages = async (node: IFileItem) => {
                 Transforms.setNodes(store.editor, {
                   url: path
                 }, {at: ReactEditor.findPath(store.editor, item)})
-              } catch (e) {}
+              } catch (e) {
+                console.error(e)
+              }
             }
           } else if (item.url?.startsWith('data:')) {
             const m = item.url.match(/data:image\/(\w+);base64,(.*)/)
