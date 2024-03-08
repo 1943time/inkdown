@@ -5,6 +5,23 @@ import {base64ToArrayBuffer, message$, nid} from '../../utils'
 import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
 import {EditorUtils} from './editorUtils'
+import ky from 'ky'
+
+export const getRemoteMediaType = async (url: string) => {
+  try {
+    const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
+    let ext = image?.[1].toLowerCase()
+    if (ext) return ext
+    const res = await window.api.fetch(url, {
+      method: 'HEAD',
+      timeout: 5000
+    })
+    const contentType = res.headers.get('content-type') || ''
+    return contentType.split('/')[1]
+  } catch (e) {
+    return null
+  }
+}
 
 export const convertRemoteImages = async (node: IFileItem) => {
   if (node.ext === 'md') {

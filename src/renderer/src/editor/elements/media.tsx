@@ -8,6 +8,7 @@ import {getImageData, nid} from '../../utils'
 import {ElementProps, MediaNode} from '../../el'
 import {isAbsolute, join} from 'path'
 import {EditorUtils} from '../utils/editorUtils'
+import {getRemoteMediaType} from '../utils/media'
 
 const resize = (ctx: {
   e: React.MouseEvent,
@@ -76,15 +77,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   }, [element.url, element.downloadUrl, store.webviewFilePath])
 
   const download = useCallback(async (url: string) => {
-    const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
-    let ext = image?.[1].toLowerCase()
-    if (!ext) {
-      const res = await window.api.fetch(url, {
-        method: 'HEAD'
-      })
-      const type = res.headers.get('content-type') || ''
-      ext = type.split('/')[1]
-    }
+    let ext = await getRemoteMediaType(url)
     if (ext) {
       window.api.fetch(url).then(async res => {
         const buffer = await res.buffer()
