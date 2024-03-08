@@ -1,6 +1,6 @@
 import {ReactEditor} from 'slate-react'
 import {useGetSetState} from 'react-use'
-import React, {useEffect, useLayoutEffect, useMemo, useRef} from 'react'
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {mediaType} from '../utils/dom'
 import {useSelStatus} from '../../hooks/editor'
 import {Transforms} from 'slate'
@@ -74,29 +74,37 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       img.onload = () => setState({loadSuccess: true})
     }
   }, [element.url, element.downloadUrl, store.webviewFilePath])
+
+  const download = useCallback(async (url: string) => {
+    const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
+    let ext = image?.[1].toLowerCase()
+    if (!ext) {
+      const res = await window.api.fetch(url, {
+        method: 'HEAD'
+      })
+      const type = res.headers.get('content-type') || ''
+      ext = type.split('/')[1]
+    }
+    if (ext) {
+      window.api.fetch(url).then(async res => {
+        const buffer = await res.buffer()
+        store.saveFile({
+          name: nid() + '.' + ext,
+          buffer: buffer.buffer
+        }).then(res => {
+          Transforms.setNodes(store.editor, {
+            url: res, downloadUrl: null
+          }, {at: path})
+        }).catch(e => {
+          console.log('err', e)
+        })
+      })
+    }
+  }, [path])
   useEffect(() => {
     if (!store.editor.selection) return
     if (element.downloadUrl) {
-      const url = decodeURIComponent(element.downloadUrl)
-      window.api.fetch(url).then(res => {
-        const type = res.headers.get('content-type') || ''
-        const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
-        if (type.startsWith('image/') || image) {
-          window.api.fetch(url).then(async res => {
-            const buffer = await res.buffer()
-            store.saveFile({
-              name: nid() + '.' + (image ? image[1].toLowerCase() : type.split('/')[1]),
-              buffer: buffer.buffer
-            }).then(res => {
-              Transforms.setNodes(store.editor, {
-                url: res, downloadUrl: null
-              }, {at: path})
-            }).catch(e => {
-              console.log('err', e)
-            })
-          })
-        }
-      })
+      download(decodeURIComponent(element.downloadUrl))
     }
   }, [element])
   return (
@@ -105,7 +113,8 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       contentEditable={false}
     >
       {selected &&
-        <div className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
+        <div
+          className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
           {element.url}
         </div>
       }
