@@ -95,7 +95,7 @@ export const InsertNetworkImage = observer(() => {
       />
       <div className={'mt-3 flex items-center space-x-1'}>
         <Checkbox checked={state.download} onChange={e => setState({download: e.target.checked})}>Download</Checkbox>
-        <TextHelp text={'Will download media files to the local machine and use the local path'}/>
+        <TextHelp text={'Download and use local path'}/>
       </div>
       <Button
         type={'primary'} className={'mt-4'} block={true}

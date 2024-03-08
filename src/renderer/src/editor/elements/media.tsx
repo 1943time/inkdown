@@ -162,15 +162,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
               ref={ref}
             />
           }
-          {type === 'other' &&
-            <iframe
-              src={element.url}
-              className={'w-full h-full rounded'}
-              // @ts-ignore
-              ref={ref}
-            />
-          }
-          {type === 'image' &&
+          {(type === 'image' || type === 'other') &&
             <img
               src={state().url} alt={'image'}
               referrerPolicy={'no-referrer'}
