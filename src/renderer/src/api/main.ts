@@ -51,6 +51,9 @@ export const MainApi = {
   sendToAll(task: string, ...args: any[]) {
     ipcRenderer.send('send-to-all', task, ...args)
   },
+  saveDialog(options: Parameters<typeof dialog['showSaveDialog']>[0]) {
+    return saveDialog(options)
+  },
   createNewFile(options?: {
     defaultPath: string
   }) {

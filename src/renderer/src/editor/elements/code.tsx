@@ -41,6 +41,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   const setLanguage = useCallback(() => {
     setState({editable: false})
+    if (props.element.language?.toLowerCase() === state().lang) return
     codeCache.delete(props.element)
     runInAction(() => store.pauseCodeHighlight = true)
     update({language: state().lang})

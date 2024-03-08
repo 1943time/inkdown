@@ -14,7 +14,7 @@ export const getRemoteMediaType = async (url: string) => {
     if (ext) return ext
     const res = await window.api.fetch(url, {
       method: 'HEAD',
-      timeout: 5000
+      timeout: 1000
     })
     const contentType = res.headers.get('content-type') || ''
     return contentType.split('/')[1]

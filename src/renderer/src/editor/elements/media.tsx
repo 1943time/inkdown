@@ -9,6 +9,9 @@ import {ElementProps, MediaNode} from '../../el'
 import {isAbsolute, join} from 'path'
 import {EditorUtils} from '../utils/editorUtils'
 import {getRemoteMediaType} from '../utils/media'
+import {Icon} from '@iconify/react'
+import {MainApi} from '../../api/main'
+import {writeFileSync} from 'fs'
 
 const resize = (ctx: {
   e: React.MouseEvent,
@@ -39,18 +42,21 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
     dragging: false,
     loadSuccess: true,
     url: '',
-    selected: false
+    selected: false,
+    type: mediaType(element.url)
   })
-
-  const type = useMemo(() => {
-    return mediaType(element.url)
-  }, [element.url])
 
   useLayoutEffect(() => {
     if (element.downloadUrl) {
       return
     }
-    if (!['image', 'other'].includes(type) || element.url?.startsWith('data:')) {
+    setState({type: mediaType(element.url)})
+    if (state().type === 'other' && element.url?.startsWith('http')) {
+      getRemoteMediaType(element.url).then(res => {
+        if (res) setState({type: res})
+      })
+    }
+    if (!['image', 'other'].includes(state().type) || element.url?.startsWith('data:')) {
       setState({loadSuccess: true, url: element.url})
       return
     }
@@ -64,7 +70,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
       }
     }
     setState({url: realUrl})
-    if (type === 'image' || type === 'other') {
+    if (state().type === 'image' || state().type === 'other') {
       const img = document.createElement('img')
       img.referrerPolicy = 'no-referrer'
       img.crossOrigin = 'anonymous'
@@ -102,20 +108,47 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   }, [element])
   return (
     <div
-      className={'py-2 relative'}
+      className={'py-2 relative group'}
       contentEditable={false}
     >
       {selected &&
-        <div
-          className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
-          {element.url}
-        </div>
+        <>
+          {state().url?.startsWith('http') && state().type === 'image' &&
+            <div
+              className={'z-10 rounded border dark:border-gray-300/10 border-gray-400 absolute dark:bg-gray-900/50 bg-gray-100/80 backdrop-blur right-3 top-4 px-1 py-0.5 cursor-pointer'}
+              onClick={(e) => {
+                window.api.fetch(state().url).then(async res => {
+                  const contentType = res.headers.get('content-type') || ''
+                  const ext = contentType.split('/')[1]
+                  if (ext) {
+                    const buffer = await res.buffer()
+                    MainApi.saveDialog({
+                      filters: [{name: 'img', extensions: [ext]}],
+                      properties: ['createDirectory']
+                    }).then(res => {
+                      if (res.filePath) {
+                        writeFileSync(res.filePath, buffer)
+                        MainApi.openInFolder(res.filePath)
+                      }
+                    })
+                  }
+                })
+              }}
+            >
+              <Icon icon={'ic:round-download'} className={'dark:text-gray-200'}/>
+            </div>
+          }
+          <div
+            className={'absolute text-center w-full truncate left-0 -top-2.5 text-xs h-5 leading-5 dark:text-gray-500 text-gray-400'}>
+            {element.url}
+          </div>
+        </>
       }
       <div
         {...attributes}
-        className={`drag-el group cursor-pointer relative flex justify-center mb-2 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
+        className={`drag-el group cursor-default relative flex justify-center mb-2 border-2 rounded ${selected ? 'border-gray-300 dark:border-gray-300/50' : 'border-transparent'}`}
         data-be={'media'}
-        style={{padding: (type === 'document' || type === 'other') ? '10px 0' : undefined}}
+        style={{padding: (state().type === 'document') ? '10px 0' : undefined}}
         draggable={true}
         onContextMenu={e => {
           e.stopPropagation()
@@ -140,21 +173,21 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
           className={'w-full h-full flex justify-center'}
           style={{height: state().height}}
         >
-          {type === 'video' &&
+          {state().type === 'video' &&
             <video
               src={element.url} controls={true} className={'rounded h-full'}
               // @ts-ignore
               ref={ref}
             />
           }
-          {type === 'audio' &&
+          {state().type === 'audio' &&
             <audio
               controls={true} src={element.url}
               // @ts-ignore
               ref={ref}
             />
           }
-          {type === 'document' &&
+          {state().type === 'document' &&
             <object
               data={element.url}
               className={'w-full h-full rounded'}
@@ -162,7 +195,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
               ref={ref}
             />
           }
-          {(type === 'image' || type === 'other') &&
+          {(state().type === 'image' || state().type === 'other') &&
             <img
               src={state().url} alt={'image'}
               referrerPolicy={'no-referrer'}
