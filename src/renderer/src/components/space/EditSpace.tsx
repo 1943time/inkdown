@@ -171,28 +171,16 @@ export const EditSpace = observer(() => {
                     await db.history.where('spaceId').equals(state.spaceId).delete()
                     await db.space.delete(state.spaceId)
                     if (treeStore.root?.cid === state.spaceId) {
-                      const space = await db.space.reverse().first()
-                      if (space) {
-                        treeStore.initial(space.cid).then(open => {
-                          if (!open) {
-                            runInAction(() => {
-                              treeStore.tabs = [treeStore.createTab()]
-                              treeStore.nodeMap.clear()
-                              treeStore.root = null
-                              treeStore.selectItem = null
-                            })
-                          }
-                        })
-                      } else {
-                        runInAction(() => {
-                          treeStore.root = null
-                          treeStore.nodeMap.clear()
-                          treeStore.tabs = [treeStore.createTab()]
-                        })
-                      }
-                      spaceChange$.next(null)
-                      setState({open: false})
+                      runInAction(() => {
+                        treeStore.tabs = [treeStore.createTab()]
+                        treeStore.nodeMap.clear()
+                        treeStore.root = null
+                        treeStore.selectItem = null
+                      })
+                      window.electron.ipcRenderer.send('open-space', '')
                     }
+                    spaceChange$.next(null)
+                    setState({open: false})
                   }
                 })
               }}
