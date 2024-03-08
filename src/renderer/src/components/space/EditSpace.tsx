@@ -144,7 +144,9 @@ export const EditSpace = observer(() => {
             <Button
               icon={<FolderOpenOutlined />}
               onClick={() => {
-                MainApi.openFolder().then(res => {
+                MainApi.openDialog({
+                  properties: ['createDirectory']
+                }).then(res => {
                   if (res.filePaths?.length) {
                     form.setFieldValue('filePath', res.filePaths[0])
                   }

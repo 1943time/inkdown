@@ -537,7 +537,7 @@ ol.m-list {
 }
 .inline-code-input{
   line-height: 1.3em;
-  @apply rounded-sm caret-sky-500 text-gray-400;
+  @apply rounded-sm text-gray-400;
   &:before, &:after{
     content: '$';
     font-size: 1em;

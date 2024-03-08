@@ -80,14 +80,6 @@ export const MainApi = {
       filters: [{name: 'f', extensions: data?.ext || ['md', 'markdown']}]
     })
   },
-  open(rootPath?: string) {
-    return openDialog({
-      title: 'Open File Or Folder',
-      properties: ['openFile', 'openDirectory'],
-      defaultPath: rootPath,
-      filters: [{name: 'f', extensions: ['md', 'markdown']}]
-    })
-  },
   openFolder(filePath?: string) {
     return openDialog({
       title: 'Open Folder',

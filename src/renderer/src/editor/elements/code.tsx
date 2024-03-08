@@ -117,7 +117,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
               <>
                 {props.element.language === 'html' && props.element.render &&
                   <Tooltip mouseEnterDelay={1} title={'render html'}>
-                    <EyeOutlined className={`mr-2 text-sky-500 hover:text-sky-600 duration-200`}/>
+                    <EyeOutlined className={`mr-2 text-indigo-500 hover:text-indigo-600 duration-200`}/>
                   </Tooltip>
                 }
                 {!props.element.frontmatter &&

@@ -120,7 +120,7 @@ export const FullSearch = observer(() => {
         {!state().searching && !state().searchResults.length && treeStore.searchKeyWord &&
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
-              {configStore.zh ? '未找到相关内容' : 'No content found for'} <span className={'text-sky-500 inline'}>{treeStore.searchKeyWord}</span>
+              {configStore.zh ? '未找到相关内容' : 'No content found for'} <span className={'text-indigo-500 inline'}>{treeStore.searchKeyWord}</span>
             </span>
           </div>
         }
