@@ -82,12 +82,8 @@ export class EditorUtils {
     if (cur[0].type === 'code-line') {
       path = Path.next(Path.parent(cur[1]))
     }
-    if (cur[0].type === 'paragraph') {
-      if (!Node.string(cur[0])) {
-        Transforms.delete(editor, {at: path})
-      } else {
-        path = Path.next(cur[1])
-      }
+    if (cur[0].type === 'paragraph' && Node.string(cur[0])) {
+      path = Path.next(cur[1])
     }
     return path
   }

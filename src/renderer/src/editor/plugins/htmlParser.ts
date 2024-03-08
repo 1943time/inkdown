@@ -136,7 +136,12 @@ const getTextsNode = (nodes: any[]) => {
 const processFragment = (fragment: any[], parentType = '') => {
   let trans:any[] = []
   let container: null | any = null
+  fragment = fragment.filter(f => !(!f.type && !f.text) || (f.type === 'media' && !f.url))
   for (let f of fragment) {
+    if (f.type === 'paragraph' && f.children?.every((s: any) => s.type === 'media')) {
+      trans.push(...f.children)
+      continue
+    }
     if (f.text) {
       f.text = f.text.replace(/^\n+|\n+$/g, '')
       if (!f.text) continue
@@ -263,7 +268,10 @@ export const htmlParser = (editor: Editor, html: string) => {
   if (inner && !['code', 'code-line', 'table-cell'].includes(node?.[0].type)) return false
   if (fragment[0].type === 'media') {
     const path = EditorUtils.findMediaInsertPath(editor)
-    if (path) Transforms.insertFragment(editor, fragment, {at: path})
+    if (path) {
+      Transforms.insertFragment(editor, fragment, {at: path})
+      Transforms.select(editor, Editor.start(editor, [...path.slice(0, -1), path[path.length -1] + fragment.length - 1]))
+    }
   } else {
     Transforms.insertFragment(editor, fragment)
   }
