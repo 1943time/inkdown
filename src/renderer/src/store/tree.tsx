@@ -287,7 +287,7 @@ export class TreeStore {
     }
     const tabs:Tab[] = []
     for (const t of this.tabs) {
-      if (!t.current || t.current.spaceId === this.root?.cid) {
+      if (!t.current || t.current.spaceId === this.root?.cid || t.current?.ghost) {
         tabs.push(t)
       }
     }
