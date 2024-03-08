@@ -262,6 +262,7 @@ export class TreeStore {
     if (!this.root) return
     let files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
     files = files.filter(f => !!this.nodeMap.get(f.fileId))
+    let curId = ''
     if (files.length) {
       runInAction(() => {
         for (let i = 0; i < files.length; i++) {
@@ -273,7 +274,7 @@ export class TreeStore {
             this.appendTab(node)
           }
           if (f.current) {
-            this.currentIndex = i
+            curId = f.fileId
           }
         }
       })
@@ -284,6 +285,18 @@ export class TreeStore {
         this.openParentDir(first)
       }
     }
+    const tabs:Tab[] = []
+    for (const t of this.tabs) {
+      if (!t.current || t.current.spaceId === this.root?.cid) {
+        tabs.push(t)
+      }
+    }
+    if (!tabs.length) tabs.push(this.createTab())
+    runInAction(() => {
+      let index = tabs.findIndex(t => t.current?.cid === curId)
+      this.currentIndex = index < 0 ? 0 : index
+      this.tabs = tabs
+    })
   }
 
   setState<T extends GetFields<TreeStore>>(value: { [P in T]: TreeStore[P] }) {
