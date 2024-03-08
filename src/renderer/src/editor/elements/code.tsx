@@ -17,6 +17,10 @@ import {selChange$} from '../plugins/useOnchange'
 import {DragHandle} from '../tools/DragHandle'
 import {runInAction} from 'mobx'
 import {allLanguages} from '../utils/highlight'
+import {IMenu, openMenus} from '../../components/Menu'
+import {Icon} from '@iconify/react'
+import {message$} from '../../utils'
+import {EditorUtils} from '../utils/editorUtils'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = allLanguages.map(l => {
@@ -31,6 +35,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     lang: props.element.language?.toLowerCase() || '',
     editable: false,
     options: langOptions,
+    openMenu: false,
     hide: props.element.katex || props.element.render || props.element.language?.toLowerCase() === 'mermaid'
   })
 
@@ -88,7 +93,6 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
               <AutoComplete
                 size={'small'}
                 value={state().lang}
-                autoFocus={true}
                 options={langOptions}
                 style={{width: 130}}
                 filterOption={(text, item) => {
@@ -117,9 +121,65 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                 }
                 {!props.element.frontmatter &&
                   <div
-                    className={'duration-200 hover:text-sky-500 text-gray-400 text-xs'}
-                    onClick={() => {
-                      if (!props.element.katex && !props.element.render) setState({editable: true})
+                    className={`${state().openMenu ? 'bg-gray-400/20' : 'group-hover:opacity-100 hover:bg-gray-400/20'} duration-200 hover:text-indigo-400 text-gray-400 rounded px-1 text-xs cursor-pointer`}
+
+                    onClick={(e) => {
+                      setState({openMenu: true})
+                      const menus: IMenu[] = [
+                        {
+                          text: (
+                            <div className={'flex items-center'}>
+                              <Icon icon={'fluent:copy-16-regular'} className={'mr-1.5 text-lg'}/>
+                              copy
+                            </div>
+                          ),
+                          click: () => {
+                            window.api.copyToClipboard(props.element.children?.map(c => Node.string(c)).join('\n'))
+                            message$.next({
+                              type: 'success',
+                              content: 'Copied to clipboard'
+                            })
+                          }
+                        },
+                        {hr: true},
+                        {
+                          text: (
+                            <div className={'flex items-center'}>
+                              <Icon icon={'material-symbols-light:delete-outline'} className={'mr-1.5 text-lg'}/>
+                              delete
+                            </div>
+                          ),
+                          click: () => {
+                            try {
+                              Transforms.delete(editor, {at: ReactEditor.findPath(editor, props.element)})
+                            } catch (e) {
+                              console.error('delete code node error', e)
+                            }
+                          }
+                        }
+                      ]
+                      if (!props.element.katex) {
+                        menus.unshift(
+                          {
+                            text: (
+                              <div className={'flex items-center'}>
+                                <Icon icon={'ic:sharp-code'} className={'mr-1.5 text-lg'}/>
+                                {props.element.katex ? 'Formula' : (props.element.language || 'plain text')}
+                              </div>
+                            ),
+                            click: () => {
+                              EditorUtils.blur(store.editor)
+                              setState({editable: true})
+                              setTimeout(() => {
+                                document.querySelector<HTMLInputElement>('.lang-select input')?.focus()
+                              }, 30)
+                            }
+                          }
+                        )
+                      }
+                      openMenus(e, menus, () => {
+                        setState({openMenu: false})
+                      })
                     }}
                   >
                     {props.element.language ?
