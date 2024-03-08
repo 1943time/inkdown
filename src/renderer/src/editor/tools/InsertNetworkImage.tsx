@@ -32,7 +32,9 @@ export const InsertNetworkImage = observer(() => {
         })
       }
       if (state.download) {
-        const res = await window.api.fetch(state.url)
+        const res = await window.api.fetch(state.url, {
+          timeout: 20 * 1000
+        })
         const buffer = await res.buffer()
         const filePath = await store.saveFile({
           name: nid() + '.' + ext,

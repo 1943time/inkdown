@@ -15,6 +15,7 @@ import {useSubject} from './subscribe'
 import {createDoc} from '../components/tree/openContextMenu'
 import {db} from '../store/db'
 import {quickOpen$} from '../components/QuickOpen'
+import {isAbsolute, join} from 'path'
 
 export class KeyboardTask {
   get store() {
@@ -567,9 +568,10 @@ export const useSystemKeyboard = () => {
     if (isHotkey('mod+c', e) || isHotkey('mod+x', e)) {
       const [node] = Editor.nodes<any>(store.editor, { mode: 'lowest', match: m => Element.isElement(m) })
       if (!node) return
-      const url = node[0].url as string
+      let url = node[0].url as string
       if (node && url && node[0].type === 'media') {
-        window.api.copyToClipboard(url)
+        url = !url.startsWith('http') && !isAbsolute(url) ? join(treeStore.openedNote!.filePath, '..', url) : url
+        window.api.copyToClipboard('media:' + url)
         if (isHotkey('mod+x', e)) {
           Transforms.delete(store.editor, { at: node[1] })
           ReactEditor.focus(store.editor)

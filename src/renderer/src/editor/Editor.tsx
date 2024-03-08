@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useRef} from 'react'
 import {Editable, ReactEditor, Slate} from 'slate-react'
-import {Editor, Element, Range, Transforms} from 'slate'
+import {Editor, Element, Node, Range, Transforms} from 'slate'
 import {MElement, MLeaf} from './elements'
 import {clearAllCodeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
 import {useKeyboard} from './plugins/useKeyboard'
@@ -239,7 +239,19 @@ export const MEditor = observer(({note}: {
     const text = window.api.getClipboardText()
     if (text) {
       try {
-        if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
+        if (text.startsWith('media:')) {
+          let url = text.split('media:')[1]
+          const path = EditorUtils.findMediaInsertPath(store.editor)
+          if (path && !note.ghost) {
+            e.preventDefault()
+            if (!url.startsWith('http') && treeStore.root && url.startsWith(treeStore.root.filePath)) {
+              url = window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), url))
+            }
+            Transforms.insertNodes(store.editor, {
+              type: 'media', url: url, children: [{text: ''}]
+            }, {select: true, at: path})
+          }
+        } else if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
           e.preventDefault()
           e.stopPropagation()
           store.insertLink(text)
@@ -275,7 +287,7 @@ export const MEditor = observer(({note}: {
       e.stopPropagation()
       e.preventDefault()
     }
-  }, [])
+  }, [note])
 
   const compositionStart = useCallback((e: React.CompositionEvent) => {
     store.inputComposition = true

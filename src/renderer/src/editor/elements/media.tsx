@@ -115,7 +115,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
         <>
           {state().url?.startsWith('http') && state().type === 'image' &&
             <div
-              className={'z-10 rounded border dark:border-gray-300/10 border-gray-400 absolute dark:bg-gray-900/50 bg-gray-100/80 backdrop-blur right-3 top-4 px-1 py-0.5 cursor-pointer'}
+              className={'z-10 rounded border dark:border-gray-300/10 border-gray-400 absolute dark:bg-gray-900/60 bg-gray-100/80 backdrop-blur right-3 top-4 px-1 py-0.5 cursor-pointer'}
               onClick={(e) => {
                 window.api.fetch(state().url).then(async res => {
                   const contentType = res.headers.get('content-type') || ''
