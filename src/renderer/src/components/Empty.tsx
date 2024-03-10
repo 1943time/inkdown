@@ -13,7 +13,7 @@ import {Icon} from '@iconify/react'
 import {editSpace$} from './space/EditSpace'
 import {keyTask$} from '../hooks/keyboard'
 import {parserMdToSchema} from '../editor/parser/parser'
-import {createFileNode, insertFile} from '../store/parserNode'
+import {createFileNode, insertFileNode} from '../store/parserNode'
 import {nid} from '../utils'
 
 export const Empty = observer(() => {

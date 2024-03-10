@@ -6,8 +6,8 @@ import { configStore } from './store/config'
 import {message$, modal$} from './utils'
 import { Home } from './components/Home'
 import zhCN from 'antd/locale/zh_CN';
-
 import {codeReady} from './editor/utils/highlight'
+
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modal, modalContext] = Modal.useModal()
@@ -19,7 +19,6 @@ const App = observer(() => {
   useSubject(modal$, args => {
     modal[args.type](args.params)
   })
-
   const [ready, setReady] = useState(false)
   useEffect(() => {
     Promise.all([

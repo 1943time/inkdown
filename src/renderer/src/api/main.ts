@@ -39,9 +39,6 @@ export const MainApi = {
   getPath(type: Parameters<typeof app.getPath>[0]) {
     return ipcRenderer.invoke('get-path', type)
   },
-  showMessageBox(options: Parameters<typeof dialog['showMessageBoxSync']>[0]) {
-    return ipcRenderer.invoke('message-dialog', options) as Promise<number>
-  },
   getLocal() {
     return ipcRenderer.invoke('get-local') as Promise<string>
   },

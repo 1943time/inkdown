@@ -202,18 +202,9 @@ export const MEditor = observer(({note}: {
       }
       return
     }
-    if (!e.dataTransfer?.files?.length) return
-    if (e.dataTransfer?.files?.length > 1) {
-      store.insertMultipleFiles(e.dataTransfer.files)
-    } else {
-      const file = e.dataTransfer.files[0]
-      if (file) {
-        setTimeout(() => {
-          store.insertFile(file)
-        }, 100)
-      }
+    if (e.dataTransfer?.files?.length > 0) {
+      store.insertMultipleFiles(Array.from(e.dataTransfer.files))
     }
-    return false
   }, [note])
 
   const focus = useCallback(() => {
@@ -261,12 +252,8 @@ export const MEditor = observer(({note}: {
       }
     }
     const files = e.clipboardData?.files
-    if (files?.length > 1) {
-      store.insertMultipleFiles(files)
-    } else if (files?.length === 1) {
-      const file = files[0]
-      if (file.path && stat(file.path)?.isDirectory()) return
-      store.insertFile(file)
+    if (files?.length > 0) {
+      store.insertMultipleFiles(Array.from(files))
       return
     }
     if (text) {

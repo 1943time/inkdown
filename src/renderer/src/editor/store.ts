@@ -5,7 +5,7 @@ import {GetFields, IFileItem} from '../index'
 import React, {createContext, useContext} from 'react'
 import {MediaNode, TableCellNode} from '../el'
 import {Subject} from 'rxjs'
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'fs'
+import {existsSync, mkdirSync, readFileSync, writeFileSync, cpSync} from 'fs'
 import {isAbsolute, join, parse, relative, sep} from 'path'
 import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
@@ -20,7 +20,7 @@ import {imageBed} from '../utils/imageBed'
 import {nid} from '../utils'
 import {openMenus} from '../components/Menu'
 import {EditorUtils} from './utils/editorUtils'
-import {insertFile} from '../store/parserNode'
+import {insertFileNode} from '../store/parserNode'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -257,32 +257,16 @@ export class EditorStore {
     }
   }
 
-  async insertMultipleFiles(files: FileList) {
+  async insertMultipleFiles(files: File[]) {
     const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
-    const [node] = Editor.nodes<any>(this.editor, {
-      mode: 'highest',
-      match: node => Element.isElement(node)
-    })
-    if (node) {
+    const path = EditorUtils.findMediaInsertPath(this.editor)
+    if (path && imageFiles.length) {
       const paths: string[] = []
       for (let f of imageFiles) {
         paths.push(await this.saveFile(f))
       }
-      let path = Path.next(node[1])
-      if (node[0].type === 'paragraph' && !Node.string(node[0])) {
-        path = node[1]
-        Transforms.delete(this.editor, {at: path})
-      }
       await this.insertFiles(paths)
     }
-  }
-
-  async insertFile(file: File) {
-    if (file.path && mediaType(file.path) !== 'image') {
-      return this.insertLink(file.path.replace(/^file:\/\//, ''))
-    }
-    const mediaPath = await this.saveFile(file)
-    await this.insertFiles([mediaPath])
   }
 
   private async createDir(path: string) {
@@ -303,7 +287,25 @@ export class EditorStore {
       console.error('create dir', e)
     }
   }
-
+  async getImageDir() {
+    if (treeStore.root) {
+      const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root.filePath, configStore.config.imagesFolder)
+      if (!existsSync(imageDir)) {
+        await this.createDir(imageDir)
+        await insertFileNode(treeStore, {
+          filePath: imageDir,
+          folder: true,
+          spaceId: treeStore.root.cid
+        })
+      }
+      return imageDir
+    } else {
+      const path = await MainApi.getCachePath()
+      const imageDir = join(path, 'assets')
+      if (!existsSync(imageDir)) mkdirSync(imageDir)
+      return imageDir
+    }
+  }
   async saveFile(file: File | { name: string, buffer: ArrayBuffer }) {
     if (imageBed.route) {
       const p = parse(file.name)
@@ -314,33 +316,22 @@ export class EditorStore {
       }
       return ''
     } else {
+      const imgDir = await this.getImageDir()
       let targetPath = ''
       let mediaUrl = ''
       const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
       const p = parse(file.name)
       const base = file instanceof File ? nid() + p.ext : file.name
       if (treeStore.root) {
-        const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root.filePath, configStore.config.imagesFolder)
-        if (!existsSync(imageDir)) {
-          await this.createDir(imageDir)
-          await insertFile(treeStore, {
-            filePath: imageDir,
-            folder: true,
-            spaceId: treeStore.root.cid
-          })
-        }
-        targetPath = join(imageDir, base)
-        mediaUrl = window.api.toUnix(relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imageDir, base)))
+        targetPath = join(imgDir, base)
+        mediaUrl = window.api.toUnix(relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imgDir, base)))
       } else {
-        const path = await MainApi.getCachePath()
-        const imageDir = join(path, configStore.config.imagesFolder)
-        if (!existsSync(imageDir)) mkdirSync(imageDir)
-        targetPath = join(imageDir, base)
+        targetPath = join(imgDir, base)
         mediaUrl = targetPath
       }
       writeFileSync(targetPath, new DataView(buffer))
       if (treeStore.root && targetPath.startsWith(treeStore.root.filePath)) {
-        await insertFile(treeStore, {
+        await insertFileNode(treeStore, {
           filePath: targetPath,
           folder: false,
           spaceId: treeStore.root?.cid
@@ -350,16 +341,10 @@ export class EditorStore {
     }
   }
 
-  insertDragFile(dragNode: IFileItem) {
-    const note = treeStore.currentTab.current
-    if (!note || !dragNode) return
-    const path = relative(join(note.filePath, '..'), dragNode.filePath)
-    this.insertLink(path)
-  }
-
   async insertFiles(files: string[]) {
     const path = EditorUtils.findMediaInsertPath(this.editor)
-    if (!path) return
+    files = files.filter(f => mediaType(f) === 'image')
+    if (!treeStore.openedNote || !path || !files.length) return
     if (imageBed.route) {
       const urls = await imageBed.uploadFile(files.map(f => {
         const p = parse(f)
@@ -372,10 +357,24 @@ export class EditorStore {
         }), {at: path, select: true})
       }
     } else {
-      Transforms.insertNodes(this.editor, files.map(p => {
-        if (treeStore.root && treeStore.openedNote && p.startsWith(treeStore.root.filePath)) {
-          return {type: 'media', url: window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), p)), children: [{text: ''}]}
+      const imgDir = await this.getImageDir()
+      const insertPaths:string[] = []
+      for (let f of files) {
+        const name = nid() + parse(f).ext
+        const copyPath = join(imgDir, name)
+        cpSync(f, copyPath)
+        if (treeStore.root) {
+          insertFileNode(treeStore, {
+            filePath: copyPath,
+            folder: false,
+            spaceId: treeStore.root.cid
+          })
+          insertPaths.push(window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
+        } else {
+          insertPaths.push(copyPath)
         }
+      }
+      Transforms.insertNodes(this.editor, insertPaths.map(p => {
         return {type: 'media', url: p, children: [{text: ''}]}
       }), {at: path, select: true})
     }

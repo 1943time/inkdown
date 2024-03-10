@@ -88,7 +88,7 @@ export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentN
   }
 }
 
-export const insertFile = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'spaceId' | 'folder'>): Promise<IFileItem | null> => {
+export const insertFileNode = async (tree: TreeStore, data: Pick<IFile, 'filePath' | 'spaceId' | 'folder'>): Promise<IFileItem | null> => {
   const parentPath = join(data.filePath, '..')
   const fileMap = new Map<string, IFileItem>()
   for (const node of tree.nodeMap.values()) {

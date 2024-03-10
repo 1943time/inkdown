@@ -1,6 +1,6 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {createFileNode, defineParent, insertFile, moveFileToSpace, ReadSpace} from './parserNode'
+import {createFileNode, defineParent, insertFileNode, moveFileToSpace, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
@@ -108,7 +108,7 @@ export class TreeStore {
         const s = stat(path)
         if (s && !s.isDirectory()) {
           if (this.root && path.startsWith(this.root.filePath)) {
-            const node = await insertFile(this, {
+            const node = await insertFileNode(this, {
               spaceId: this.root.cid,
               folder: false,
               filePath: path
