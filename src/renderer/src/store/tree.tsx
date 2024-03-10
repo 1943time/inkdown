@@ -336,6 +336,10 @@ export class TreeStore {
     file.lastOpenTime = now
     this.recordTabs()
     this.updateTitle()
+    this.currentTab.store.container?.scroll({
+      top: 0,
+      behavior: 'auto'
+    })
   }
 
   async recordTabs() {
