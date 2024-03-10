@@ -245,7 +245,19 @@ export const MEditor = observer(({note}: {
         } else if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
           e.preventDefault()
           e.stopPropagation()
-          store.insertLink(text)
+          if (['image', 'video', 'audio'].includes(mediaType(text))) {
+            if (text.startsWith('http')) {
+              const path = EditorUtils.findMediaInsertPath(store.editor)
+              if (!path) return
+              Transforms.insertNodes(store.editor, {
+                type: 'media', url: text, children: [{text: ''}]
+              }, {select: true, at: path})
+            } else {
+              store.insertFiles([text])
+            }
+          } else {
+            store.insertLink(text)
+          }
         }
       } catch (e) {
         console.log('paste text error', text, e)
