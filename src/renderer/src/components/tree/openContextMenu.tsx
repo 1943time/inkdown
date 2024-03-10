@@ -14,6 +14,7 @@ import {runInAction} from 'mobx'
 import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
 import {openEbook$} from '../../server/ui/Ebook'
+import {shareStore} from '../../server/store'
 
 export const createDoc = async ({parent, newName, copyItem, ghost}: {
   parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean
@@ -168,7 +169,15 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       },
       {
         text: configStore.zh ? '分享文件夹' : 'Share Folder',
-        click: () => openEbook$.next({folderPath: node.filePath})
+        click: () => {
+          if (!shareStore.serviceConfig) {
+            return message$.next({
+              type: 'info',
+              content: configStore.zh ? '请先配置分享服务.' : 'Please configure sharing service first.'
+            })
+          }
+          openEbook$.next({folderPath: node.filePath})
+        }
       }
     ])
     if (!node.root) {
