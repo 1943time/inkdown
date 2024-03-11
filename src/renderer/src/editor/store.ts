@@ -262,9 +262,23 @@ export class EditorStore {
     if (path && imageFiles.length) {
       const paths: string[] = []
       for (let f of imageFiles) {
-        paths.push(await this.saveFile(f))
+        if (f.path) {
+          const imgDir = await this.getImageDir()
+          const name = nid() + parse(f.path).ext
+          const copyPath = join(imgDir, name)
+          cpSync(f.path, copyPath)
+          if (treeStore.root && treeStore.openedNote) {
+            paths.push(window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
+          } else {
+            paths.push(copyPath)
+          }
+        } else {
+          paths.push(await this.saveFile(f))
+        }
       }
-      await this.insertFiles(paths)
+      Transforms.insertNodes(this.editor, paths.map(p => {
+        return {type: 'media', url: p, children: [{text: ''}]}
+      }), {select: true, at: path})
     }
   }
 

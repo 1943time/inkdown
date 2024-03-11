@@ -29,10 +29,9 @@ export class TreeStore {
   tabs: Tab[] = []
   dragStatus: null | {
     mode: 'enter' | 'top' | 'bottom'
-    dropNode: IFileItem,
+    dropNode: IFileItem
   } = null
   selectItem: IFileItem | null = null
-  openQuickly = false
   searchKeyWord = ''
   currentIndex = 0
   width = 280

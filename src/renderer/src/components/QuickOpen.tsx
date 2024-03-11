@@ -80,7 +80,6 @@ export const QuickOpen = observer(() => {
   const close = useCallback(() => {
     window.removeEventListener('keydown', keydown)
     setState({open: false})
-    runInAction(() => treeStore.openQuickly = false)
   }, [])
 
   if (!state.open) return null

@@ -21,6 +21,7 @@ const App = observer(() => {
   })
   const [ready, setReady] = useState(false)
   useEffect(() => {
+    window.electron.ipcRenderer.invoke('open-space', '')
     Promise.all([
       configStore.initial(),
     ]).then(async () => {
