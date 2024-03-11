@@ -168,7 +168,7 @@ export const Nav = observer(() => {
                   }
                 },
                 {
-                  text: configStore.zh ? '清除未使用的图片' : 'Clear Unused Images',
+                  text: configStore.zh ? '清除未使用的图片' : 'Clear unused images',
                   disabled: !treeStore.root,
                   click: () => {
                     clearUnusedImages()

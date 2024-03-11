@@ -133,7 +133,7 @@ app.whenReady().then(() => {
     fileChangedWindow = BrowserWindow.fromWebContents(e.sender)
   })
 
-  ipcMain.on('open-space', (e, id: string) => {
+  ipcMain.handle('open-space', (e, id: string) => {
     const win = BrowserWindow.fromWebContents(e.sender)
     if (win) {
       openSpaceMap.set(win, id)

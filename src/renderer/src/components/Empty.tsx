@@ -1,19 +1,18 @@
 import {observer} from 'mobx-react-lite'
-import {CloseOutlined, FileAddOutlined, FolderOpenOutlined, FolderOutlined, HistoryOutlined} from '@ant-design/icons'
+import {CloseOutlined, HistoryOutlined} from '@ant-design/icons'
 import {MainApi} from '../api/main'
 import logo from '../../../../resources/icon.png?asset'
 import {useLayoutEffect} from 'react'
 import {useLocalState} from '../hooks/useLocalState'
 import {db, ISpace} from '../store/db'
-import {basename, dirname} from 'path'
 import {treeStore} from '../store/tree'
-import {existsSync, readFileSync, statSync} from 'fs'
+import {statSync} from 'fs'
 import {configStore} from '../store/config'
 import {Icon} from '@iconify/react'
 import {editSpace$} from './space/EditSpace'
 import {keyTask$} from '../hooks/keyboard'
 import {parserMdToSchema} from '../editor/parser/parser'
-import {createFileNode, insertFileNode} from '../store/parserNode'
+import {createFileNode} from '../store/parserNode'
 import {nid} from '../utils'
 
 export const Empty = observer(() => {
@@ -35,6 +34,7 @@ export const Empty = observer(() => {
       window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
     }
   }, [])
+  if (treeStore.loading) return null
   return (
     <div className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}>
       <div className={'relative -top-12'}>

@@ -65,13 +65,15 @@ export const EditSpace = observer(() => {
             name: v.name,
             filePath: v.filePath
           })
+          const oldPath = treeStore.root?.filePath
           if (state.spaceId === treeStore.root?.cid) {
             runInAction(() => {
               treeStore.root!.filePath = v.filePath
               treeStore.root!.name = v.name
             })
           }
-          if (!treeStore.root) {
+          if (!treeStore.root || (oldPath && oldPath !== v.filePath)) {
+            await window.electron.ipcRenderer.invoke('open-space', '')
             treeStore.initial(state.spaceId)
           }
           setState({open: false})
@@ -179,7 +181,7 @@ export const EditSpace = observer(() => {
                         treeStore.root = null
                         treeStore.selectItem = null
                       })
-                      window.electron.ipcRenderer.send('open-space', '')
+                      await window.electron.ipcRenderer.invoke('open-space', '')
                     }
                     spaceChange$.next(null)
                     setState({open: false})

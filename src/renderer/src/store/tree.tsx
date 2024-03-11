@@ -487,7 +487,7 @@ export class TreeStore {
         db.space.update(spaceId, {
           lastOpenTime: Date.now()
         })
-        window.electron.ipcRenderer.send('open-space', res.space.cid)
+        await window.electron.ipcRenderer.invoke('open-space', res.space.cid)
         setTimeout(() => {
           this.restoreTabs()
         }, 200)
