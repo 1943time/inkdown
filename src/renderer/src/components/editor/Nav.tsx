@@ -18,6 +18,7 @@ import {convertRemoteImages} from '../../editor/utils/media'
 import {clearUnusedImages} from '../../utils/clearUnusedImages'
 import {Badge} from 'antd'
 import {Update} from '../Update'
+import {keyTask$} from '../../hooks/keyboard'
 
 export const Nav = observer(() => {
   const [state, setState] = useLocalState({
@@ -137,7 +138,13 @@ export const Nav = observer(() => {
                   text: 'Export To PDF',
                   disabled: treeStore.openedNote?.ext !== 'md',
                   click: () => {
-                    window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
+                    if (treeStore.openedNote?.ghost) {
+                      keyTask$.next({key: 'save', args: [
+                        () => window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
+                      ]})
+                    } else {
+                      window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
+                    }
                   }
                 },
                 {
@@ -177,7 +184,7 @@ export const Nav = observer(() => {
                 {hr: true},
                 {
                   text: isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
-                  disabled: !treeStore.openedNote,
+                  disabled: !treeStore.openedNote || treeStore.openedNote?.ghost,
                   click: () => {
                     MainApi.openInFolder(treeStore.openedNote!.filePath)
                   }
@@ -185,7 +192,7 @@ export const Nav = observer(() => {
                 {
                   text: configStore.zh ? '使用默认APP打开' : 'Open in default app',
                   click: () => window.electron.ipcRenderer.send('open-in-default-app', treeStore.openedNote?.filePath),
-                  disabled: !treeStore.openedNote
+                  disabled: !treeStore.openedNote || treeStore.openedNote?.ghost
                 },
                 {hr: true},
                 {

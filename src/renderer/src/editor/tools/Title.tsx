@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import React, {useCallback, useEffect, useRef} from 'react'
+import React, {useCallback, useEffect} from 'react'
 import {Tooltip} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {IFileItem} from '../../index'
@@ -12,8 +12,10 @@ import {ReactEditor} from 'slate-react'
 import {useEditorStore} from '../store'
 import {Editor, Transforms} from 'slate'
 import {treeStore} from '../../store/tree'
+import {runInAction} from 'mobx'
+import {MainApi} from '../../api/main'
 
-export const Title = observer(({node} : {node: IFileItem}) => {
+export const Title = observer(({node}: { node: IFileItem }) => {
   const store = useEditorStore()
   const [state, setState] = useLocalState({
     name: '',
@@ -46,16 +48,35 @@ export const Title = observer(({node} : {node: IFileItem}) => {
     if (!name) {
       setState({name: node.filename || ''})
     } else if (node) {
-      if (detectRename()) {
-        if (node.spaceId && treeStore.root) {
-          const oldPath = node.filePath
-          await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
-          if (node.spaceId) {
-            treeStore.refactor.refactorDepOnLink(node, oldPath)
-          }
+      if (node.ghost) {
+        runInAction(() => node.filename = name)
+      } else if (!node.parent && !node.spaceId) {
+        const oldPath = node.filePath
+        if (oldPath !== state.name) {
+          MainApi.saveDialog({
+            filters: [{name: 'md', extensions: ['md']}],
+            properties: ['createDirectory'],
+            defaultPath: state.name,
+          }).then(res => {
+            if (res.filePath && oldPath !== res.filePath) {
+              updateFilePath(node, res.filePath)
+            } else {
+              setState({name: node.filename})
+            }
+          })
         }
-      } else {
-        setState({name: node.filename})
+      } else if (treeStore.root && treeStore.nodeMap.get(node.cid)) {
+        if (detectRename()) {
+          if (node.spaceId && treeStore.root) {
+            const oldPath = node.filePath
+            await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
+            if (node.spaceId) {
+              treeStore.refactor.refactorDepOnLink(node, oldPath)
+            }
+          }
+        } else {
+          setState({name: node.filename})
+        }
       }
     }
     setState({tip: false})

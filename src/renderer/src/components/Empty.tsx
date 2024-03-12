@@ -61,45 +61,7 @@ export const Empty = observer(() => {
             <div
               className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
               onClick={() => {
-                MainApi.openDialog({
-                  filters: [{name: 'md', extensions: ['md']}],
-                  properties: ['openFile']
-                }).then(async res => {
-                  if (res.filePaths.length) {
-                    const path = res.filePaths[0]
-                    const file = await db.file.where('filePath').equals(path).first()
-                    const stat = statSync(path)
-                    if (file && !file.spaceId) {
-                      if (stat.mtime.valueOf() === file.updated) {
-                        treeStore.openNote(createFileNode(file))
-                      } else {
-                        const [res] = await parserMdToSchema([{filePath: path}])
-                        db.file.update(file.cid, {
-                          schema: res.schema,
-                          updated: stat.mtime.valueOf()
-                        })
-                        file.schema = res.schema
-                        file.updated = stat.mtime.valueOf()
-                        treeStore.openNote(createFileNode(file))
-                      }
-                    } else {
-                      const [res] = await parserMdToSchema([{filePath: path}])
-                      const now = Date.now()
-                      const id = nid()
-                      await db.file.add({
-                        cid: id,
-                        created: now,
-                        updated: stat.mtime.valueOf(),
-                        folder: false,
-                        schema: res.schema,
-                        sort: 0,
-                        filePath: path
-                      })
-                      const file = await db.file.get(id)
-                      if (file) treeStore.openNote(createFileNode(file))
-                    }
-                  }
-                })
+                keyTask$.next({key: 'openNote'})
               }}
             >
               <Icon icon={'tabler:file-text'} className={'text-lg'}/>

@@ -16,6 +16,8 @@ import {createDoc} from '../components/tree/openContextMenu'
 import {db} from '../store/db'
 import {quickOpen$} from '../components/QuickOpen'
 import {isAbsolute, join} from 'path'
+import {statSync, appendFileSync} from 'fs'
+import {createFileNode} from '../store/parserNode'
 
 export class KeyboardTask {
   get store() {
@@ -27,7 +29,7 @@ export class KeyboardTask {
   }
 
   get curNodes() {
-    return Editor.nodes<any>(this.editor, { mode: 'lowest', match: m => Element.isElement(m) })
+    return Editor.nodes<any>(this.editor, {mode: 'lowest', match: m => Element.isElement(m)})
   }
 
   private openFloatBar() {
@@ -38,8 +40,43 @@ export class KeyboardTask {
         if (rect) {
           this.store.setState(state => state.domRect = rect)
         }
-      } catch (e) {}
+      } catch (e) {
+      }
     })
+  }
+
+  private async openSingleMd(path: string) {
+    const file = await db.file.where('filePath').equals(path).first()
+    const stat = statSync(path)
+    if (file && !file.spaceId) {
+      if (stat.mtime.valueOf() === file.updated) {
+        treeStore.openNote(createFileNode(file))
+      } else {
+        const [res] = await parserMdToSchema([{filePath: path}])
+        db.file.update(file.cid, {
+          schema: res.schema,
+          updated: stat.mtime.valueOf()
+        })
+        file.schema = res.schema
+        file.updated = stat.mtime.valueOf()
+        treeStore.openNote(createFileNode(file))
+      }
+    } else {
+      const [res] = await parserMdToSchema([{filePath: path}])
+      const now = Date.now()
+      const id = nid()
+      await db.file.add({
+        cid: id,
+        created: now,
+        updated: stat.mtime.valueOf(),
+        folder: false,
+        schema: res.schema,
+        sort: 0,
+        filePath: path
+      })
+      const file = await db.file.get(id)
+      if (file) treeStore.openNote(createFileNode(file))
+    }
   }
 
   selectAll() {
@@ -58,7 +95,7 @@ export class KeyboardTask {
 
   selectLine() {
     if (this.editor.selection) {
-      const [node] = Editor.nodes<any>(this.editor, { mode: 'lowest', match: m => Element.isElement(m) })
+      const [node] = Editor.nodes<any>(this.editor, {mode: 'lowest', match: m => Element.isElement(m)})
       Transforms.select(this.editor, Path.parent(this.editor.selection.anchor.path))
       const text = Node.leaf(this.editor, this.editor.selection.anchor.path).text || ''
       if (text && node?.[0].type !== 'code-line') {
@@ -69,7 +106,7 @@ export class KeyboardTask {
 
   selectFormat() {
     if (this.editor.selection) {
-      const [node] = Editor.nodes<any>(this.editor, { mode: 'lowest', match: m => Element.isElement(m) })
+      const [node] = Editor.nodes<any>(this.editor, {mode: 'lowest', match: m => Element.isElement(m)})
       Transforms.select(this.editor, this.editor.selection.anchor.path)
       if (node?.[0].type !== 'code-line' && !Range.isCollapsed(this.editor.selection)) {
         this.openFloatBar()
@@ -106,8 +143,8 @@ export class KeyboardTask {
         end = start + 1
       }
       Transforms.select(this.editor, {
-        anchor: { path: sel.anchor.path, offset: start },
-        focus: { path: sel.anchor.path, offset: end }
+        anchor: {path: sel.anchor.path, offset: start},
+        focus: {path: sel.anchor.path, offset: end}
       })
       const [node] = this.curNodes
       if (node?.[0].type !== 'code-line' && !Range.isCollapsed(this.editor.selection!)) this.openFloatBar()
@@ -120,7 +157,7 @@ export class KeyboardTask {
       const [node] = this.curNodes
       if (node[0].type === 'code-line') {
         Transforms.insertFragment(this.editor, text.split('\n').map(c => {
-          return { type: 'code-line', children: [{ text: c }] }
+          return {type: 'code-line', children: [{text: c}]}
         }))
         setTimeout(() => {
           runInAction(() => {
@@ -153,8 +190,8 @@ export class KeyboardTask {
         }
       }
       if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
-        Transforms.delete(this.editor, { at: node[1] })
-        Transforms.insertNodes(this.editor, res.schema, { at: node[1], select: true})
+        Transforms.delete(this.editor, {at: node[1]})
+        Transforms.insertNodes(this.editor, res.schema, {at: node[1], select: true})
         return
       }
       if ((res.schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type))) {
@@ -187,14 +224,14 @@ export class KeyboardTask {
   head(level: number) {
     const [node] = this.curNodes
     if (node && ['paragraph', 'head'].includes(node[0].type) && EditorUtils.isTop(this.editor, node[1])) {
-      Transforms.setNodes(this.editor, { type: 'head', level }, { at: node[1] })
+      Transforms.setNodes(this.editor, {type: 'head', level}, {at: node[1]})
     }
   }
 
   paragraph() {
     const [node] = this.curNodes
     if (node && ['head'].includes(node[0].type)) {
-      Transforms.setNodes(this.editor, { type: 'paragraph' }, { at: node[1] })
+      Transforms.setNodes(this.editor, {type: 'paragraph'}, {at: node[1]})
     }
   }
 
@@ -202,11 +239,11 @@ export class KeyboardTask {
     const [node] = this.curNodes
     if (node && ['paragraph', 'head'].includes(node[0].type) && EditorUtils.isTop(this.editor, node[1])) {
       if (node[0].type === 'paragraph') {
-        Transforms.setNodes(this.editor, { type: 'head', level: 4 }, { at: node[1] })
+        Transforms.setNodes(this.editor, {type: 'head', level: 4}, {at: node[1]})
       } else if (node[0].level === 1) {
-        Transforms.setNodes(this.editor, { type: 'paragraph' }, { at: node[1] })
+        Transforms.setNodes(this.editor, {type: 'paragraph'}, {at: node[1]})
       } else {
-        Transforms.setNodes(this.editor, { level: node[0].level - 1 }, { at: node[1] })
+        Transforms.setNodes(this.editor, {level: node[0].level - 1}, {at: node[1]})
       }
     }
   }
@@ -215,11 +252,11 @@ export class KeyboardTask {
     const [node] = this.curNodes
     if (node && ['paragraph', 'head'].includes(node[0].type) && EditorUtils.isTop(this.editor, node[1])) {
       if (node[0].type === 'paragraph') {
-        Transforms.setNodes(this.editor, { type: 'head', level: 1 }, { at: node[1] })
+        Transforms.setNodes(this.editor, {type: 'head', level: 1}, {at: node[1]})
       } else if (node[0].level === 4) {
-        Transforms.setNodes(this.editor, { type: 'paragraph' }, { at: node[1] })
+        Transforms.setNodes(this.editor, {type: 'paragraph'}, {at: node[1]})
       } else {
-        Transforms.setNodes(this.editor, { level: node[0].level + 1 }, { at: node[1] })
+        Transforms.setNodes(this.editor, {level: node[0].level + 1}, {at: node[1]})
       }
     }
   }
@@ -228,13 +265,13 @@ export class KeyboardTask {
     const [node] = this.curNodes
     if (!['paragraph', 'head'].includes(node[0].type)) return
     if (Node.parent(this.editor, node[1]).type === 'blockquote') {
-      Transforms.unwrapNodes(this.editor, { at: Path.parent(node[1]) })
+      Transforms.unwrapNodes(this.editor, {at: Path.parent(node[1])})
       return
     }
     if (node[0].type === 'head') {
       Transforms.setNodes(this.editor, {
         type: 'paragraph'
-      }, { at: node[1] })
+      }, {at: node[1]})
     }
     Transforms.wrapNodes(this.editor, {
       type: 'blockquote',
@@ -251,30 +288,30 @@ export class KeyboardTask {
         children: [
           {
             type: 'table-row',
-            children: [{ type: 'table-cell', title: true, children: [{ text: '' }] }, {
+            children: [{type: 'table-cell', title: true, children: [{text: ''}]}, {
               type: 'table-cell',
               title: true,
-              children: [{ text: '' }]
-            }, { type: 'table-cell', title: true, children: [{ text: '' }] }]
+              children: [{text: ''}]
+            }, {type: 'table-cell', title: true, children: [{text: ''}]}]
           },
           {
             type: 'table-row',
-            children: [{ type: 'table-cell', children: [{ text: '' }] }, {
+            children: [{type: 'table-cell', children: [{text: ''}]}, {
               type: 'table-cell',
-              children: [{ text: '' }]
-            }, { type: 'table-cell', children: [{ text: '' }] }]
+              children: [{text: ''}]
+            }, {type: 'table-cell', children: [{text: ''}]}]
           },
           {
             type: 'table-row',
-            children: [{ type: 'table-cell', children: [{ text: '' }] }, {
+            children: [{type: 'table-cell', children: [{text: ''}]}, {
               type: 'table-cell',
-              children: [{ text: '' }]
-            }, { type: 'table-cell', children: [{ text: '' }] }]
+              children: [{text: ''}]
+            }, {type: 'table-cell', children: [{text: ''}]}]
           }
         ]
-      }, { at: path })
+      }, {at: path})
       if (node[0].type === 'paragraph' && !Node.string(node[0])) {
-        Transforms.delete(this.editor, { at: Path.next(path) })
+        Transforms.delete(this.editor, {at: Path.next(path)})
       }
       Transforms.select(this.editor, Editor.start(this.editor, path))
     }
@@ -284,22 +321,22 @@ export class KeyboardTask {
     const [node] = this.curNodes
     if (node && ['paragraph', 'head'].includes(node[0].type)) {
       const path = node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
-      let children = [{ type: 'code-line', children: [{ text: '' }] }]
+      let children = [{type: 'code-line', children: [{text: ''}]}]
       if (type === 'mermaid') {
         children = 'flowchart TD\n    Start --> Stop'.split('\n').map(c => ({
           type: 'code-line',
-          children: [{ text: c }]
+          children: [{text: c}]
         }))
       }
       if (type === 'katex') {
-        children = 'c = \\pm\\sqrt{a^2 + b^2}'.split('\n').map(c => ({ type: 'code-line', children: [{ text: c }] }))
+        children = 'c = \\pm\\sqrt{a^2 + b^2}'.split('\n').map(c => ({type: 'code-line', children: [{text: c}]}))
       }
       Transforms.insertNodes(this.editor, {
         type: 'code',
         language: type === 'katex' ? 'tex' : type === 'mermaid' ? 'mermaid' : undefined,
         children: children,
         katex: type === 'katex'
-      }, { at: path })
+      }, {at: path})
 
       Transforms.select(this.editor, Editor.end(this.editor, path))
     }
@@ -310,8 +347,8 @@ export class KeyboardTask {
     if (sel) {
       Transforms.insertNodes(this.editor, {
         type: 'inline-katex',
-        children: [{ text: '' }]
-      }, { select: true })
+        children: [{text: ''}]
+      }, {select: true})
     }
   }
 
@@ -321,15 +358,15 @@ export class KeyboardTask {
       const path = node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
       Transforms.insertNodes(this.editor, {
         type: 'hr',
-        children: [{ text: '' }]
-      }, { at: path })
+        children: [{text: ''}]
+      }, {at: path})
       if (Editor.hasPath(this.editor, Path.next(path))) {
         Transforms.select(this.editor, Editor.start(this.editor, Path.next(path)))
       } else {
         Transforms.insertNodes(this.editor, {
           type: 'paragraph',
-          children: [{ text: '' }]
-        }, { at: Path.next(path), select: true })
+          children: [{text: ''}]
+        }, {at: Path.next(path), select: true})
       }
     }
   }
@@ -342,28 +379,28 @@ export class KeyboardTask {
         Transforms.setNodes(this.editor, {
           order: mode === 'ordered',
           task: mode === 'task'
-        }, { at: Path.parent(parent[1]) })
+        }, {at: Path.parent(parent[1])})
         const listItems = Array.from<any>(Editor.nodes(this.editor, {
           match: n => n.type === 'list-item',
           at: Path.parent(parent[1]),
           reverse: true,
           mode: 'lowest'
         }))
-        Transforms.setNodes(this.editor, { start: undefined }, { at: Path.parent(parent[1]) })
+        Transforms.setNodes(this.editor, {start: undefined}, {at: Path.parent(parent[1])})
         for (let l of listItems) {
-          Transforms.setNodes(this.editor, { checked: mode === 'task' ? l[0].checked || false : undefined }, { at: l[1] })
+          Transforms.setNodes(this.editor, {checked: mode === 'task' ? l[0].checked || false : undefined}, {at: l[1]})
         }
       } else {
         const text = EditorUtils.cutText(this.editor, Editor.start(this.editor, node[1]))
-        Transforms.delete(this.editor, { at: node[1] })
+        Transforms.delete(this.editor, {at: node[1]})
         Transforms.insertNodes(this.editor, {
             type: 'list', order: mode === 'ordered', task: mode === 'task',
             children: [{
               type: 'list-item',
               checked: mode === 'task' ? false : undefined,
-              children: [{ type: 'paragraph', children: text }]
+              children: [{type: 'paragraph', children: text}]
             }]
-          }, { at: node[1], select: true }
+          }, {at: node[1], select: true}
         )
       }
     }
@@ -395,12 +432,13 @@ export class KeyboardTask {
       })
     }
   }
+
   insertMedia() {
     EditorUtils.blur(this.store.editor)
     this.store.openInsertNetworkImage = true
   }
 
-  save() {
+  save(callback?: () => void) {
     if (treeStore.openedNote) {
       const node = treeStore.openedNote
       if (node.ghost) {
@@ -409,11 +447,6 @@ export class KeyboardTask {
         }).then(res => {
           if (res.filePath) {
             const id = nid()
-            runInAction(() => {
-              node.ghost = false
-              node.filePath = res.filePath!
-              node.cid = id
-            })
             const now = Date.now()
             db.file.add({
               filePath: res.filePath,
@@ -426,6 +459,12 @@ export class KeyboardTask {
             }).then(() => {
               treeStore.currentTab.store.saveDoc$.next(null)
             })
+            runInAction(() => {
+              node.ghost = false
+              node.filePath = res.filePath!
+              node.cid = id
+            })
+            callback?.()
           }
         })
       } else {
@@ -441,10 +480,9 @@ export class KeyboardTask {
   newTab() {
     treeStore.appendTab()
   }
-  closeCurrentTab() {
-    if (treeStore.tabs.length === 1) {
 
-    } else {
+  closeCurrentTab() {
+    if (treeStore.tabs.length > 1) {
       treeStore.removeTab(treeStore.currentIndex)
     }
   }
@@ -466,7 +504,17 @@ export class KeyboardTask {
     } catch (e) {
     }
   }
-
+  openNote() {
+    MainApi.openDialog({
+      filters: [{name: 'md', extensions: ['md']}],
+      properties: ['openFile']
+    }).then(async res => {
+      if (res.filePaths.length) {
+        const path = res.filePaths[0]
+        this.openSingleMd(path)
+      }
+    })
+  }
   newNote() {
     if (treeStore.root) {
       let parent: ISpaceNode | IFileItem = treeStore.root
@@ -474,9 +522,7 @@ export class KeyboardTask {
       else if (treeStore.openedNote) parent = treeStore.openedNote.parent!
       createDoc({parent})
     } else {
-      createDoc({
-        ghost: true
-      })
+      createDoc({ghost: true})
     }
   }
 }
@@ -525,13 +571,13 @@ const keyMap: [string, Methods<KeyboardTask>, any[]?, boolean?][] = [
   ['mod+option+m', 'insertCode', ['mermaid']]
 ]
 export const useSystemKeyboard = () => {
-  useSubject(keyTask$, ({ key, args }) => {
+  useSubject(keyTask$, ({key, args}) => {
     if (treeStore.root && key === 'quickOpen') {
       task.quickOpen()
       return
     }
-    if (!treeStore.currentTab?.current && key !== 'newNote') return
-    if (!treeStore.currentTab?.store.focus && key !== 'newNote') {
+    if (!treeStore.currentTab?.current && !['newNote', 'openNote'].includes(key)) return
+    if (!treeStore.currentTab?.store.focus && !['newNote', 'openNote'].includes(key)) {
       ReactEditor.focus(treeStore.currentTab.store.editor)
     }
     // @ts-ignore
@@ -561,14 +607,14 @@ export const useSystemKeyboard = () => {
       }
     }
     if (isHotkey('mod+c', e) || isHotkey('mod+x', e)) {
-      const [node] = Editor.nodes<any>(store.editor, { mode: 'lowest', match: m => Element.isElement(m) })
+      const [node] = Editor.nodes<any>(store.editor, {mode: 'lowest', match: m => Element.isElement(m)})
       if (!node) return
       let url = node[0].url as string
       if (node && url && node[0].type === 'media') {
         url = !url.startsWith('http') && !isAbsolute(url) ? join(treeStore.openedNote!.filePath, '..', url) : url
         window.api.copyToClipboard('media:' + url)
         if (isHotkey('mod+x', e)) {
-          Transforms.delete(store.editor, { at: node[1] })
+          Transforms.delete(store.editor, {at: node[1]})
           ReactEditor.focus(store.editor)
         } else {
           message$.next({
@@ -591,7 +637,7 @@ export const useSystemKeyboard = () => {
       const [node] = task.curNodes
       if (node?.[0].type === 'media') {
         e.preventDefault()
-        Transforms.removeNodes(task.editor, { at: node[1] })
+        Transforms.removeNodes(task.editor, {at: node[1]})
         Transforms.insertNodes(task.editor, EditorUtils.p, {
           at: node[1],
           select: true
