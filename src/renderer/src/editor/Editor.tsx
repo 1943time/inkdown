@@ -23,6 +23,7 @@ import {Title} from './tools/Title'
 import {updateNode} from './utils/updateNode'
 import {CustomLeaf} from '../el'
 import {mediaType} from './utils/dom'
+import {db} from '../store/db'
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -230,6 +231,14 @@ export const MEditor = observer(({note}: {
     const text = window.api.getClipboardText()
     if (text) {
       try {
+        if (text.startsWith('bluestone://')) {
+          const url = new URL(text)
+          if (treeStore.root?.cid === url.searchParams.get('space')) {
+            store.insertLink(url.searchParams.get('path')!)
+            e.preventDefault()
+            return
+          }
+        }
         if (text.startsWith('media:')) {
           let url = text.split('media:')[1]
           const path = EditorUtils.findMediaInsertPath(store.editor)

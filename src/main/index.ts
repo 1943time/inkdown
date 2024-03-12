@@ -3,13 +3,14 @@ import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {AppUpdate} from './update'
+import log from 'electron-log'
 import {isAbsolute, join} from 'path'
 const isWindows = process.platform === 'win32'
 app.setAsDefaultProtocolClient('bluestone')
 
 let fileChangedWindow: BrowserWindow | null = null
 const openSpaceMap = new Map<BrowserWindow, string>()
-function createWindow(openFile = '') {
+function createWindow() {
   const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
     width,
@@ -52,12 +53,6 @@ function createWindow(openFile = '') {
   })
   window.on('ready-to-show', () => {
     is.dev && window.webContents.openDevTools()
-    if (openFile) {
-      setTimeout(() => {
-        window.webContents.send('open-path', openFile)
-        openFile = ''
-      }, 100)
-    }
   })
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -85,9 +80,11 @@ function createWindow(openFile = '') {
     }
   })
   window.show()
+  return window
 }
 
 let waitOpenFile = ''
+let waitOpenProtocol = ''
 app.on('will-finish-launching', () => {
   // Event fired When someone drags files onto the icon while your app is running
   app.on("open-file", (event, file) => {
@@ -100,15 +97,62 @@ app.on('will-finish-launching', () => {
         const last = wins[wins.length - 1]
         last.webContents.send('open-path', file)
       } else {
-        createWindow(file)
+        const win = createWindow()
+        win.on('ready-to-show', () => {
+          setTimeout(() => {
+            win.webContents.send('open-path', file)
+          }, 100)
+        })
       }
     }
   })
-  app.on('open-url', (event, url) => {
-    BrowserWindow.getFocusedWindow()?.webContents.send('open-schema', url)
+  app.on('open-url', (event, schema) => {
+    if (schema?.startsWith('bluestone://')) {
+      const url = new URL(schema)
+      if (url.searchParams.get('path')) {
+        const win = BrowserWindow.getAllWindows()?.find(w => !openSpaceMap.get(w) || openSpaceMap.get(w) === url.searchParams.get('space'))
+        if (win) {
+          win.focus()
+          win.webContents.send('open-protocol', {
+            space: url.searchParams.get('space'),
+            hash: url.searchParams.get('hash'),
+            path: url.searchParams.get('path')
+          })
+        } else {
+          waitOpenProtocol = schema
+          if (app.isReady()) {
+            preCreate()
+          }
+        }
+      }
+    }
   })
 })
 
+const preCreate = () => {
+  const win = createWindow()
+  if (waitOpenFile) {
+    win.on('ready-to-show', () => {
+      setTimeout(() => {
+        win.webContents.send('open-path', waitOpenFile)
+      }, 100)
+    })
+    waitOpenFile = ''
+  }
+  if (waitOpenProtocol) {
+    const url = new URL(waitOpenProtocol)
+    win.on('ready-to-show', () => {
+      setTimeout(() => {
+        win.webContents.send('open-protocol', {
+          space: url.searchParams.get('space'),
+          hash: url.searchParams.get('hash'),
+          path: url.searchParams.get('path')
+        })
+      }, 200)
+    })
+    waitOpenProtocol = ''
+  }
+}
 app.whenReady().then(() => {
   createAppMenus()
   registerApi()
@@ -165,12 +209,10 @@ app.whenReady().then(() => {
   if (waitOpenFile && !isAbsolute(waitOpenFile)) {
     waitOpenFile = join(process.cwd(), waitOpenFile)
   }
-  createWindow(waitOpenFile)
-  waitOpenFile = ''
+  preCreate()
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow(waitOpenFile)
-      waitOpenFile = ''
+      preCreate()
     }
   })
 })

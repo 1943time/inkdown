@@ -6,13 +6,6 @@ import {Node} from 'slate'
 import {slugify} from '../utils/dom'
 import {useSelStatus} from '../../hooks/editor'
 
-const levelDragHandleTop = new Map([
-  [1, 0.52],
-  [2, 0.45],
-  [3, 0.33],
-  [4, 0.25],
-  [5, 0.25]
-])
 export function Head({element, attributes, children}: ElementProps<HeadNode>) {
   const store = useEditorStore()
   const [selected, path] = useSelStatus(element)

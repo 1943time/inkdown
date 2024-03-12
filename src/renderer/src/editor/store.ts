@@ -395,8 +395,8 @@ export class EditorStore {
 
   insertLink(filePath: string) {
     const p = parse(filePath)
-    const url = isAbsolute(filePath) ? filePath : window.api.toUnix(filePath)
-    let node = {text: filePath.startsWith('http') ? filePath : p.name, url}
+    const insertPath = treeStore.root && isAbsolute(filePath) && filePath.startsWith(treeStore.root.filePath) ? window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), filePath)) : filePath
+    let node = {text: filePath.startsWith('http') ? filePath : p.name, url: insertPath}
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     const [cur] = Editor.nodes<any>(this.editor, {

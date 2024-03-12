@@ -15,6 +15,7 @@ import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
 import {openEbook$} from '../../server/ui/Ebook'
 import {shareStore} from '../../server/store'
+import {copyToClipboard} from '../../utils/copy'
 
 export const createDoc = async ({parent, newName, copyItem, ghost}: {
   parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean
@@ -100,6 +101,16 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
               parent: node.parent,
               newName: node.filename,
               copyItem: node
+            })
+          }
+        },
+        {
+          text: configStore.zh ? '复制Bluestone URL' : 'Copy Bluestone URL',
+          click: async () => {
+            copyToClipboard(`bluestone://open?space=${treeStore.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
+            message$.next({
+              type: 'success',
+              content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
             })
           }
         },

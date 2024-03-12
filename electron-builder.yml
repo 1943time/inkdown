@@ -4,6 +4,10 @@ copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
 afterSign: scripts/notarize.js
+protocols:
+  name: bluestone deeplink
+  schemes:
+    - bluestone
 files:
   - '!**/.vscode/*'
   - '!src/*'
