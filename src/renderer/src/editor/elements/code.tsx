@@ -21,6 +21,7 @@ import {IMenu, openMenus} from '../../components/Menu'
 import {Icon} from '@iconify/react'
 import {message$} from '../../utils'
 import {EditorUtils} from '../utils/editorUtils'
+import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 
 export const CodeCtx = createContext({lang: '', code: false})
 const langOptions = allLanguages.map(l => {
@@ -30,7 +31,7 @@ const langOptions = allLanguages.map(l => {
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
-
+  useMonitorHeight(store, props.element)
   const [state, setState] = useGetSetState({
     lang: props.element.language?.toLowerCase() || '',
     editable: false,
@@ -73,13 +74,14 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     <CodeCtx.Provider value={{lang: state().lang || '', code: true}}>
       <div
         className={'code-container'}
+        {...props.attributes}
         style={{
           padding: state().hide ? 1 : undefined,
-          marginBottom: state().hide ? 0 : undefined
+          marginBottom: state().hide ? 0 : undefined,
+          ...(state().hide ? {} : getVisibleStyle(props.element))
         }}
       >
         <div
-          {...props.attributes}
           data-be={'code'}
           style={{
             background: /#f{3,6}/i.test(configStore.config.codeBackground || '') ? '#fafafa' : configStore.config.codeBackground
