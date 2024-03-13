@@ -37,7 +37,6 @@ const resize = (ctx: {
 
 export function Media({element, attributes, children}: ElementProps<MediaNode>) {
   const [selected, path, store] = useSelStatus(element)
-  useMonitorHeight(store, element)
   const ref = useRef<HTMLElement>(null)
   const [state, setState] = useGetSetState({
     height: element.height,
@@ -110,9 +109,8 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
   }, [element])
   return (
     <div
-      className={'pb-2 pt-3 relative group'}
+      className={'py-2 relative group'}
       contentEditable={false}
-      style={{...getVisibleStyle(element)}}
       {...attributes}
     >
       {selected &&
@@ -143,7 +141,7 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
             </div>
           }
           <div
-            className={'absolute text-center w-full truncate left-0 -top-1 text-xs h-4 leading-4 dark:text-gray-500 text-gray-400'}>
+            className={'absolute text-center w-full truncate left-0 -top-2 text-xs h-4 leading-4 dark:text-gray-500 text-gray-400'}>
             {element.url}
           </div>
         </>
