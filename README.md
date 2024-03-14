@@ -26,18 +26,18 @@ and saves it in standard markdown format, which allows your notes to be used any
 
 ![](./docs/assets/d6.png)
 
-![](./docs/assets/syntax.gif)
+![](./docs/assets/d7.png)
+
 
 ## Features
 - The rich text editing mode is used, while also compatible with Markdown syntax conversion and editing habits. When using the search function, Markdown symbols will not be searched.
 - Automatically record and clear file history, can be viewed and rolled back at any time.
 - Using [shiki](https://github.com/shikijs/shiki) as a code shader to make code highlights more fine-grained and aesthetically pleasing.
-- Provides a powerful sharing program, Linux server required [doc](https://doc.bluemd.me/book/docs/service).
+- Provides a powerful sharing program, Linux server required [doc](https://doc.bluemd.me/book/docs/Network%20Service).
 - Enhanced table operations, allowing for easy adjustment of the order and quantity of rows and columns in the table, and the ability to wrap within the table.
 - Support the editing and display of block and inline [Katex](https://katex.org/) formulas
 - Supports [mermaid](https://mermaid.js.org/) graphic syntax.
 - The file path link can be automatically reconstructed, and when a file or folder is renamed or moved, the local path of the links or images that the document depends on will be automatically changed.
-- Support exporting HTML and PDF.
 - You can freely drag and adjust the order of document elements.
 - Supports multi tab editing mode
 - Support pasting HTML, plain text, and markdown code. When pasting HTML and markdown code, it can be configured to automatically download network images to the local machine and convert paths during pasting.

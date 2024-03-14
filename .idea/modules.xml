@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/bluestone.iml" filepath="$PROJECT_DIR$/.idea/bluestone.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../share/.idea/share.iml" filepath="$PROJECT_DIR$/../share/.idea/share.iml" />
     </modules>
   </component>
 </project>
