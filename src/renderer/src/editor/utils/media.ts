@@ -6,12 +6,13 @@ import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
 import {EditorUtils} from './editorUtils'
 import ky from 'ky'
+import {mediaType} from './dom'
 
 export const getRemoteMediaType = async (url: string) => {
   try {
-    const image = url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
-    let ext = image?.[1].toLowerCase()
-    if (ext) return ext
+    const image = mediaType(url)
+    const ext = url.match(/\.\w+$/)?.[0]
+    if (image !== 'other' && ext) return ext
     const res = await window.api.fetch(url, {
       method: 'HEAD',
       timeout: 1000

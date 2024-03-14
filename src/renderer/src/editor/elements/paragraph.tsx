@@ -1,5 +1,5 @@
-import {CodeLineNode, ElementProps, ParagraphNode} from '../../el'
-import {useLayoutEffect, useMemo} from 'react'
+import {ElementProps, ParagraphNode} from '../../el'
+import {useMemo} from 'react'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'

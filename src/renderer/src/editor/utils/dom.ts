@@ -40,7 +40,7 @@ export const slugify = (str: string): string => {
 export const mediaType = (name?: string) => {
   name = name || ''
   name = name.split('?')[0]
-  const ext = name.match(/\.\w+$/)?.[0]
+  const ext = name.toLowerCase().match(/\.\w+$/)?.[0]
   if (!ext) return 'other'
   if (['.md', '.markdown'].includes(ext)) return 'markdown'
   if (['.png', '.jpg', '.gif', '.svg', '.jpeg', '.webp'].includes(ext)) return 'image'
