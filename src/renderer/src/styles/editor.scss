@@ -292,7 +292,7 @@ a {
 }
 
 blockquote {
-  padding: 3px 14px 3px 20px;
+  padding: 3px 14px 3px 21px;
   position: relative;
   @apply dark:text-gray-300 text-gray-600;
   &:not(:last-child) {
@@ -305,10 +305,11 @@ blockquote {
   }
   &:before {
     content: '';
-    left: -1px;
+    left: 0;
     top: 5px;
     height: calc(100% - 10px);
-    @apply block absolute dark:bg-gray-400 bg-gray-500 w-1 rounded;
+    width: 4px;
+    @apply block absolute dark:bg-gray-400 bg-gray-500 rounded;
   }
 }
 [data-be]:last-child {

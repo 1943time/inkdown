@@ -10,6 +10,7 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 OR  <a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px;margin-left:10px"/></a>
 
 > The release time of mac store will be delayed by 1-3 days
+> 由于工信部要求APP备案原因，中国内地地区Mac App Store在下个版本会下架，请中国内地地区用户使用手动下载的版本。
 
 ***
 
