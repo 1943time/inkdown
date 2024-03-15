@@ -10,13 +10,11 @@ import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 
 export const List = observer(({element, attributes, children}: ElementProps<ListNode>) => {
   const store = useEditorStore()
-  useMonitorHeight(store, element)
   return useMemo(() => {
     const tag = element.order ? 'ol' : 'ul'
     return (
       <div
         className={'relative'}
-        style={{...getVisibleStyle(element)}}
         data-be={'list'}
         {...attributes}
         onDragStart={store.dragStart}

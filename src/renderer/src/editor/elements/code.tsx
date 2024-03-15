@@ -31,7 +31,6 @@ const langOptions = allLanguages.map(l => {
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
-  useMonitorHeight(store, props.element)
   const [state, setState] = useGetSetState({
     lang: props.element.language?.toLowerCase() || '',
     editable: false,
@@ -78,7 +77,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         style={{
           padding: state().hide ? 1 : undefined,
           marginBottom: state().hide ? 0 : undefined,
-          ...(state().hide ? {} : getVisibleStyle(props.element))
+          // ...(state().hide ? {} : getVisibleStyle(props.element))
         }}
       >
         <div

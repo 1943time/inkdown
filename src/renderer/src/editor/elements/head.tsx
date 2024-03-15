@@ -10,7 +10,6 @@ import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 export function Head({element, attributes, children}: ElementProps<HeadNode>) {
   const store = useEditorStore()
   const [selected, path] = useSelStatus(element)
-  useMonitorHeight(store, element)
   return useMemo(() => {
     const str = Node.string(element)
     return createElement(`h${element.level}`, {
@@ -20,8 +19,7 @@ export function Head({element, attributes, children}: ElementProps<HeadNode>) {
       ['data-head']: slugify(Node.string(element) || ''),
       ['data-title']: path?.[0] === 0,
       onDragStart: store.dragStart,
-      ['data-empty']: !str && selected ? 'true' : undefined,
-      style: getVisibleStyle(element)
+      ['data-empty']: !str && selected ? 'true' : undefined
     }, (
       <>
         <DragHandle style={{left: -28, paddingRight: 10}}/>

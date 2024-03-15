@@ -10,14 +10,12 @@ import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 export const Paragraph = observer((props: ElementProps<ParagraphNode>) => {
   const store = useEditorStore()
   const [selected] = useSelStatus(props.element)
-  useMonitorHeight(store, props.element)
   return useMemo(() => {
     const str = Node.string(props.element)
     return (
       <p
         {...props.attributes} data-be={'paragraph'} className={'drag-el'}
         onDragStart={store.dragStart}
-        style={{...getVisibleStyle(props.element)}}
         data-empty={!str && selected ? 'true' : undefined}
       >
         <DragHandle style={{left: -20}}/>

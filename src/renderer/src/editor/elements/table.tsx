@@ -32,13 +32,11 @@ export function TableCell(props: RenderElementProps) {
 
 export const Table = observer((props: RenderElementProps) => {
   const store = useEditorStore()
-  useMonitorHeight(store, props.element)
   return useMemo(() => {
     return (
       <div
         className={'m-table drag-el'} {...props.attributes} data-be={'table'}
         onDragStart={store.dragStart}
-        style={{...getVisibleStyle(props.element)}}
       >
         <DragHandle/>
         <table>
