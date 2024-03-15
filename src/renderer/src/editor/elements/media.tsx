@@ -161,13 +161,19 @@ export function Media({element, attributes, children}: ElementProps<MediaNode>) 
           } catch (e) {
           }
         }}
+        onMouseDown={e => {
+          e.stopPropagation()
+          if (!store.focus) {
+            EditorUtils.focus(store.editor)
+          }
+          EditorUtils.selectMedia(store, path)
+        }}
         onClick={(e) => {
           e.preventDefault()
           if (e.detail === 2) {
             Transforms.setNodes(store.editor, {height: undefined}, {at: path})
             setState({height: undefined})
           }
-          EditorUtils.selectMedia(store, path)
         }}
       >
         <div
