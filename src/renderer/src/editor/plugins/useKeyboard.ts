@@ -33,21 +33,6 @@ export const useKeyboard = (store: EditorStore) => {
         e.preventDefault()
         Transforms.select(store.editor, Editor.start(store.editor, []))
       }
-      if (isHotkey('mod+a', e)) {
-        e.preventDefault()
-        const [node] = Editor.nodes<any>(store.editor, {mode: 'lowest', match: m => Element.isElement(m)})
-        if (node[0]?.type === 'table-cell') {
-          Transforms.select(store.editor, Path.parent(Path.parent(node[1])))
-        } else if (node[0]?.type === 'code-line') {
-          Transforms.select(store.editor, Path.parent(node[1]))
-        } else {
-          Transforms.select(store.editor, {
-            anchor: Editor.start(store.editor, []),
-            focus: Editor.end(store.editor, [])
-          })
-        }
-        return
-      }
       if (isHotkey('backspace', e) && store.editor.selection) {
         if (Range.isCollapsed(store.editor.selection)) {
           if (backspace.run()) {

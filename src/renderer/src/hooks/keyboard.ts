@@ -86,6 +86,7 @@ export class KeyboardTask {
     } else if (node[0]?.type === 'code-line') {
       Transforms.select(this.editor, Path.parent(node[1]))
     } else if (Editor.hasPath(this.editor, [1])) {
+      console.log('1')
       Transforms.select(this.editor, {
         anchor: Editor.start(this.editor, []),
         focus: Editor.end(this.editor, [])
@@ -628,11 +629,6 @@ export const useSystemKeyboard = () => {
       e.preventDefault()
       task.quickOpen()
     }
-    // if (isHotkey('esc', e)) {
-    //   if (treeStore.quickOpen) runInAction(() => treeStore.quickOpen = false)
-    //   if (store.openSearch) store.setOpenSearch(false)
-    // }
-    if (!treeStore.currentTab.current) return
     if (isHotkey('backspace', e)) {
       const [node] = task.curNodes
       if (node?.[0].type === 'media') {
@@ -645,11 +641,11 @@ export const useSystemKeyboard = () => {
         ReactEditor.focus(task.editor)
       }
     }
+    if (!treeStore.currentTab.current || !treeStore.currentTab.store.focus) return
     if (isHotkey('arrowUp', e) || isHotkey('arrowDown', e)) {
       const [node] = task.curNodes
       if (node?.[0].type === 'media') {
         e.preventDefault()
-        const path = isHotkey('arrowUp', e) ? EditorUtils.findPrev(task.editor, node[1]) : EditorUtils.findNext(task.editor, node[1])
         if (isHotkey('arrowUp', e)) {
           Transforms.select(task.editor, Editor.end(task.editor, EditorUtils.findPrev(task.editor, node[1])))
         } else {
