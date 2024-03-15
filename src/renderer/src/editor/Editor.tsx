@@ -165,6 +165,9 @@ export const MEditor = observer(({note}: {
 
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
+    if (!store.focus) {
+      EditorUtils.focus(store.editor)
+    }
     if (target.dataset.slateEditor) {
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
       if (store.container && store.container.scrollTop + e.clientY - 60 > top) {
