@@ -391,6 +391,7 @@ ol.m-list {
   padding:4px 0;
   margin-bottom: .5em;
 }
+
 .code-highlight {
   @apply border border-black/10 dark:border-gray-200/10 dark:text-gray-400 text-gray-500;
   background: var(--md-code-bg);
@@ -412,13 +413,11 @@ ol.m-list {
       width: 100%;
       height: 22px;
       line-height: 21px;
-      color: rgba(255, 255, 255, .5);
       position: absolute;
       z-index: 10;
       left: 0;
       padding-left: 10px;
       font-size: 12px;
-      @apply border-b border-black/50;
     }
     .code-line-list{
       top: 24px;
@@ -452,6 +451,11 @@ ol.m-list {
       color: #e5e7eb !important;
       border-color: rgba(229,231,235,.3);
     }
+    &.frontmatter {
+      &:before{
+        @apply border-b border-gray-200/10 text-gray-400;
+      }
+    }
   }
   &.light {
     caret-color: rgba(0, 0, 0, .9);
@@ -461,6 +465,11 @@ ol.m-list {
     .ant-select-selector{
       color: #4b5563 !important;
       border-color: rgba(75,85,99,.3);
+    }
+    &.frontmatter {
+      &:before{
+        @apply border-b border-black/10 text-gray-500;
+      }
     }
   }
   .code-line-list{
