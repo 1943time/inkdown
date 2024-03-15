@@ -8,6 +8,7 @@ import {ShareApi} from './api'
 import {IBook} from '../model'
 import {openMdParserHandle, parserMdToSchema, ParserResult} from '../../editor/parser/parser'
 import {IFileItem, ISpaceNode} from '../../index'
+import {slugify} from '../../editor/utils/dom'
 
 export type SpaceDocMap = {
   name: string
@@ -106,6 +107,8 @@ export class Book {
         const name = parse(m.filePath).name
         res.schema.unshift({
           type: 'head', level: 1,
+          id: slugify(name),
+          title: name,
           children: [{text: name}]
         })
         addChapter.push({

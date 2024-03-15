@@ -13,6 +13,9 @@ import {configStore} from '../store/config'
 import {IFileItem, ISpaceNode} from '../index'
 import {treeStore} from '../store/tree'
 import {db} from '../store/db'
+import {getHeadId} from '../utils/sections'
+import {Node} from 'slate'
+import {slugify} from '../editor/utils/dom'
 
 export class ShareStore {
   readonly minVersion = '0.2.3'
@@ -156,6 +159,8 @@ export class ShareStore {
       const name = parse(filePath).name
       res.schema.unshift({
         type: 'head', level: 1,
+        id: slugify(name),
+        title: name,
         children: [{text: name}]
       })
       await this.api.shareDoc({
