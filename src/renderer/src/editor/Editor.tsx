@@ -91,7 +91,7 @@ export const MEditor = observer(({note}: {
       } catch (e) {
       }
     }
-    if (editor.operations.length !== 1 || editor.operations[0].type !== 'set_selection') {
+    if (!editor.operations?.every(o => o.type === 'set_selection')) {
       if (!changedMark.current) {
         changedMark.current = true
         ipcRenderer.send('file-changed')
