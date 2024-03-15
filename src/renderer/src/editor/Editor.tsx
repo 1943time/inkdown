@@ -40,6 +40,7 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(store)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
+  const firstFocus = useRef(true)
   const save = useCallback(async () => {
     ipcRenderer.send('file-saved')
     const node = nodeRef.current
@@ -111,7 +112,10 @@ export const MEditor = observer(({note}: {
     clearTimeout(saveTimer.current)
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
       nodeRef.current = note
-      store.setState(state => state.pauseCodeHighlight = true)
+      firstFocus.current = true
+      store.setState(state => {
+        state.pauseCodeHighlight = true
+      })
       first.current = true
       store.initializing = true
       try {
@@ -165,9 +169,10 @@ export const MEditor = observer(({note}: {
 
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
-    if (!store.focus) {
+    if (!store.focus && !firstFocus.current) {
       EditorUtils.focus(store.editor)
     }
+    firstFocus.current = false
     if (target.dataset.slateEditor) {
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
       if (store.container && store.container.scrollTop + e.clientY - 60 > top) {
@@ -176,7 +181,7 @@ export const MEditor = observer(({note}: {
         }
       }
     }
-  }, [])
+  }, [note])
 
   useEffect(() => {
     window.electron.ipcRenderer.on('save-doc', save)
