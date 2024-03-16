@@ -58,6 +58,7 @@ export const MEditor = observer(({note}: {
     if (data && nodeRef.current) {
       store.initializing = true
       editor.selection = null
+      firstFocus.current = true
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
       store.docChanged$.next(true)

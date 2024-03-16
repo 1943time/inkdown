@@ -29,7 +29,12 @@ export const getFileSize = (filePath: string) => {
 export const toPath = (root: string, filePath: string) => {
   return trimSlash(toUnix(filePath.replace(root, ''))
     .replace(/\.\w+$/, ''))
-    .split('/').map(item => slugify(item)).join('/')
+    .split('/').map(item => {
+      let [path, hash] = item.split('#')
+      path = slugify(path)
+      if (hash) path += `#${slugify(hash)}`
+      return path
+    }).join('/')
 }
 
 export const trimSlash = (str: string) => str.replace(/^\/|\/$/g, '')
