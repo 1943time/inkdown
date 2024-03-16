@@ -16,8 +16,8 @@ import {parsePath} from '../../utils'
 import {ReactEditor} from 'slate-react'
 import {EditorUtils} from '../utils/editorUtils'
 import {isAbsolute, join} from 'path'
-import {existsSync} from 'fs'
 import {db} from '../../store/db'
+import {slugify} from '../utils/dom'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -25,7 +25,7 @@ const dragStart = (e: React.DragEvent) => {
 }
 
 const toHash = (hash: string) => {
-  const dom = treeStore.currentTab.store.container?.querySelector(`[data-head="${hash.toLowerCase()}"]`) as HTMLElement
+  const dom = treeStore.currentTab.store.container?.querySelector(`[data-head="${slugify(hash.toLowerCase())}"]`) as HTMLElement
   if (dom) {
     treeStore.currentTab.store.container?.scroll({
       top: dom.offsetTop - 10,
