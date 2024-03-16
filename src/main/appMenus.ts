@@ -195,9 +195,9 @@ const getSystemMenus = () => {
           label: 'Documentation',
           click: () => {
             if (app.getLocale() === 'zh-CN') {
-              shell.openExternal(`https://doc.bluemd.me/book/zh-docs`)
+              shell.openExternal(`https://doc.bluemd.me/doc/Q1vCjNmL8Dnvz`)
             } else {
-              shell.openExternal(`https://doc.bluemd.me/book/docs`)
+              shell.openExternal(`https://doc.bluemd.me/doc/tAfxJPwODVe4i`)
             }
           }
         },
