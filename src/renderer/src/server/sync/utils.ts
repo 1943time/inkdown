@@ -1,6 +1,7 @@
 import {existsSync, statSync} from 'fs'
 import {toUnix} from 'upath'
 import {Node} from 'slate'
+import {slugify} from '../../utils/sections'
 export const isExist = (filePath: string) => {
   try {
     return existsSync(filePath)
@@ -26,7 +27,9 @@ export const getFileSize = (filePath: string) => {
 }
 
 export const toPath = (root: string, filePath: string) => {
-  return trimSlash(toUnix(filePath.replace(root, '')).replace(/\.\w+$/, ''))
+  return trimSlash(toUnix(filePath.replace(root, ''))
+    .replace(/\.\w+$/, ''))
+    .split('/').map(item => slugify(item)).join('/')
 }
 
 export const trimSlash = (str: string) => str.replace(/^\/|\/$/g, '')
