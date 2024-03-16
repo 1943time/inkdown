@@ -10,7 +10,7 @@ const filterSchemaLinks = (links: ParserResult['links'], filePath: string) => {
   if (!filePath) return []
   const filterLinks: ParserResult['links'] = []
   for (let l of links) {
-    if (!l.target || l.target.startsWith('http') || l.target.startsWith('data:')) continue
+    if (!l.target || l.target.startsWith('http') || l.target.startsWith('data:') && l.target.startsWith('#')) continue
     let path = l.target.replace(/#[^\n]+$/, '')
     path = isAbsolute(l.target) ? l.target : join(filePath, '..', l.target)
     filterLinks.push({path: l.path, target: path})

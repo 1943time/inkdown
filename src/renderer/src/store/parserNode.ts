@@ -17,7 +17,7 @@ export const findAbsoluteLinks = (schema: any[], filePath: string, prePath: numb
   for (let i = 0; i < schema.length; i++) {
     const n = schema[i]
     const curPath = [...prePath, i]
-    if (n.url && !n.url.startsWith('http') && !n.url.startsWith('data:')) {
+    if (n.url && !n.url.startsWith('http') && !n.url.startsWith('data:') && !n.url.startsWith('#')) {
       const path = isAbsolute(n.url) ? n.url : join(filePath, '..', n.url)
       links.push({path: curPath, target: path.replace(/#[^\n]+$/, '')})
     }
