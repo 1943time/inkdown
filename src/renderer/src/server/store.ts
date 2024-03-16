@@ -18,7 +18,7 @@ import {Node} from 'slate'
 import {slugify} from '../editor/utils/dom'
 
 export class ShareStore {
-  readonly minVersion = '0.3.0'
+  readonly minVersion = '0.3.1'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()
@@ -179,8 +179,11 @@ export class ShareStore {
     }
     if (node) {
       return this.book.syncBook(data, node).then(res => {
-        this.bookMap.set(res.book.filePath, res.book)
-        return res
+        if (res) {
+          this.bookMap.set(res.book.filePath, res.book)
+          return res
+        }
+        return null
       })
     }
     return null

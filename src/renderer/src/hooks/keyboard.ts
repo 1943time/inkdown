@@ -86,7 +86,6 @@ export class KeyboardTask {
     } else if (node[0]?.type === 'code-line') {
       Transforms.select(this.editor, Path.parent(node[1]))
     } else if (Editor.hasPath(this.editor, [1])) {
-      console.log('1')
       Transforms.select(this.editor, {
         anchor: Editor.start(this.editor, []),
         focus: Editor.end(this.editor, [])

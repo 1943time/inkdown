@@ -59,6 +59,16 @@ export class Book {
       const texts = add.map(c => {
         return {path: c.path, texts: c.texts}
       })
+      const exist = new Set<string>()
+      for (let a of add) {
+        if (exist.has(a.path)) {
+          return message$.next({
+            type: 'info',
+            content: `File path conflict: ${a.path}`
+          })
+        }
+        exist.add(a.path)
+      }
       const filesSet = await this.file.bookFile(add, res.book.id, this.root, res.files)
       const removeFiles = res.files.filter(d => !filesSet.has(d.filePath)).map(d => d.id)
       return await this.api.shareBook({
