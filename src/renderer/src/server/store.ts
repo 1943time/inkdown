@@ -18,7 +18,7 @@ import {Node} from 'slate'
 import {slugify} from '../editor/utils/dom'
 
 export class ShareStore {
-  readonly minVersion = '0.2.3'
+  readonly minVersion = '0.3.0'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()
