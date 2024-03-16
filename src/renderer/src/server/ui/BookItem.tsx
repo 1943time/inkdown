@@ -61,7 +61,7 @@ export const BookItem = observer((props: {
                 <div className={'flex items-center'}>
                   <IBook className={'w-4 h-4 dark:fill-gray-400 fill-gray-600'}/>
                   <a
-                    href={`${shareStore.serviceConfig!.domain}/book/${b.path}`}
+                    href={`${shareStore.serviceConfig?.domain}/book/${b.path}`}
                     target={'_blank'}
                     className={'ml-1 max-w-[330px] truncate link'}>
                     {b.name}
@@ -77,7 +77,7 @@ export const BookItem = observer((props: {
                           ...b,
                           name: ''
                         }).then(() => {
-                          shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
+                          shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/book/${b.path}`)
                         }).finally(action(() => b.updating = false))
                       })}
                     >
@@ -95,7 +95,7 @@ export const BookItem = observer((props: {
                         {
                           label: configStore.zh ? '复制链接' : 'Copy Link', key: 'copy', icon: <CopyOutlined/>,
                           onClick: () => {
-                            props.onCopy(`${shareStore.serviceConfig!.domain}/book/${b.path}`)
+                            props.onCopy(`${shareStore.serviceConfig?.domain}/book/${b.path}`)
                           }
                         },
                         {

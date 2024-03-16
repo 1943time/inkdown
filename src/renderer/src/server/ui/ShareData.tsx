@@ -36,7 +36,7 @@ const Sync = observer((props: {
     try {
       if (props.doc) {
         const res = await shareStore.shareDoc(props.doc.filePath)
-        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
+        shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/doc/${res.name}`)
       }
     } finally {
       setState({syncing: false})
@@ -210,7 +210,7 @@ export const ShareData = observer((props: {
                             <a
                               className={'link'}
                               target={'_blank'}
-                              href={`${shareStore.serviceConfig!.domain}/doc/${v}`}
+                              href={`${shareStore.serviceConfig?.domain}/doc/${v}`}
                             >{v}</a>
                           </>
                         )
@@ -313,7 +313,7 @@ export const ShareData = observer((props: {
                           <a
                             className={'link'}
                             target={'_blank'}
-                            href={`${shareStore.serviceConfig!.domain}/book/${record.path}`}
+                            href={`${shareStore.serviceConfig?.domain}/book/${record.path}`}
                           >{v}</a>
                         )
                       },
@@ -406,7 +406,7 @@ export const ShareData = observer((props: {
                           <a
                             className={'link'}
                             target={'_blank'}
-                            href={`${shareStore.serviceConfig!.domain}/stream/${v}`}
+                            href={`${shareStore.serviceConfig?.domain}/stream/${v}`}
                           >{record.filePath.includes('/') ? record.filePath.split('/').pop() : record.filePath.split('\\').pop()}</a>
                         )
                       },
@@ -439,7 +439,7 @@ export const ShareData = observer((props: {
                               {record.doc &&
                                 <span>
                                   <FileTextOutlined className={'mr-1 w-4'}/>
-                                  <a href={`${shareStore.serviceConfig!.domain}/doc/${record.doc.name}`}
+                                  <a href={`${shareStore.serviceConfig?.domain}/doc/${record.doc.name}`}
                                      className={'link'} target={'_blank'}>
                                     {record.doc.name}
                                   </a>
@@ -449,7 +449,7 @@ export const ShareData = observer((props: {
                                 <span className={'flex items-center'}>
                                   <BookIcon className={'w-4 h-4 mr-1 dark:fill-gray-300'}/>
                                   <a className={'link'}
-                                     href={`${shareStore.serviceConfig!.domain}/book/${record.book.path}`}
+                                     href={`${shareStore.serviceConfig?.domain}/book/${record.book.path}`}
                                      target={'_blank'}>
                                     {record.book.name}
                                   </a>

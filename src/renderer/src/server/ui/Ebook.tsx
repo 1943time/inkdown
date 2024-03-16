@@ -91,7 +91,7 @@ export const EBook = observer((props: {
             }
             if (res) {
               props.onSave(res.book)
-              shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/book/${res.book.path}`)
+              shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/book/${res.book.path}`)
               close()
             }
           } finally {

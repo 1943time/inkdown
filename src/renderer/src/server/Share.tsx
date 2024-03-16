@@ -77,7 +77,7 @@ export const Share = observer(() => {
       setState({syncing: true})
       shareStore.shareDoc(note.filePath, treeStore.root?.filePath).then(res => {
         setState({refresh: !state.refresh})
-        shareSuccessfully$.next(`${shareStore.serviceConfig!.domain}/doc/${res.name}`)
+        shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/doc/${res.name}`)
       }).finally(() => setState({syncing: false}))
     }
   }, [])
