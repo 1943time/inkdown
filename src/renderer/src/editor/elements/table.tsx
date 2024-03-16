@@ -3,7 +3,6 @@ import {useCallback, useMemo} from 'react'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'
-import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 
 export function TableCell(props: RenderElementProps) {
   const store = useEditorStore()
