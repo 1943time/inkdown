@@ -11,7 +11,7 @@ OR  <a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img
 
 > The release time of mac store will be delayed by 1-3 days
 >
-> 由于工信部要求APP备案原因，中国内地地区Mac App Store在下个版本会下架，请中国内地地区用户使用手动下载的版本。
+> 由于工信部要求APP备案原因，中国内地地区暂未上架Mac Store。
 
 ***
 
@@ -35,7 +35,7 @@ and saves it in standard markdown format, which allows your notes to be used any
 - The rich text editing mode is used, while also compatible with Markdown syntax conversion and editing habits. When using the search function, Markdown symbols will not be searched.
 - Automatically record and clear file history, can be viewed and rolled back at any time.
 - Using [shiki](https://github.com/shikijs/shiki) as a code shader to make code highlights more fine-grained and aesthetically pleasing.
-- Provides a powerful sharing program, Linux server required [doc](https://doc.bluemd.me/book/docs/Network%20Service).
+- Provides a powerful sharing program, Linux server required [doc](https://doc.bluemd.me/doc/tAfxJPwODVe4i#sharing-service).
 - Enhanced table operations, allowing for easy adjustment of the order and quantity of rows and columns in the table, and the ability to wrap within the table.
 - Support the editing and display of block and inline [Katex](https://katex.org/) formulas
 - Supports [mermaid](https://mermaid.js.org/) graphic syntax.

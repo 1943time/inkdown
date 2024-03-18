@@ -317,11 +317,7 @@ export class TreeStore {
     if (index !== -1) {
       return this.selectTab(index)
     }
-    if (file.ext === 'md') {
-      const now = Date.now()
-      db.file.update(file.cid, {lastOpenTime: now})
-      file.lastOpenTime = now
-    }
+
     this.currentTab.history = this.currentTab.history.filter(t => t.filePath !== file.filePath)
     this.currentTab.history.push(file)
     this.openParentDir(file)
