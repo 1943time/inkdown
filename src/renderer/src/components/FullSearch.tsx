@@ -42,7 +42,7 @@ export const FullSearch = observer(() => {
 
   const toNode = useCallback((res: { el: any, file: IFileItem }) => {
     if (treeStore.openedNote !== res.file) {
-      treeStore.openNote(res.file)
+      treeStore.openNote(res.file, false)
       setTimeout(() => {
         requestIdleCallback(() => {
           try {

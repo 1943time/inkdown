@@ -225,7 +225,10 @@ export const FloatBar = observer(() => {
           e.preventDefault()
           setState({open: false, anchors: []})
           fileMap.clear()
-          Transforms.select(store.editor, Range.end(sel.current!))
+          const end = Range.end(sel.current!).path
+          if (Editor.hasPath(store.editor, end)) {
+            Transforms.select(store.editor, Editor.end(store.editor, end))
+          }
         }
       }
       window.addEventListener('keydown', close)

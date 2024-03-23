@@ -311,7 +311,7 @@ export class TreeStore {
     }
   }
 
-  openNote(file: IFileItem) {
+  openNote(file: IFileItem, scroll = true) {
     if (this.currentTab.current?.filePath === file.filePath || !file) return
     const index = this.tabs.findIndex(t => t.current?.filePath === file.filePath)
     if (index !== -1) {
@@ -331,10 +331,12 @@ export class TreeStore {
     file.lastOpenTime = now
     this.recordTabs()
     this.updateTitle()
-    this.currentTab.store.container?.scroll({
-      top: 0,
-      behavior: 'auto'
-    })
+    if (scroll) {
+      this.currentTab.store.container?.scroll({
+        top: 0,
+        behavior: 'auto'
+      })
+    }
   }
 
   async recordTabs() {
@@ -414,6 +416,7 @@ export class TreeStore {
   }
 
   selectTab(i: number) {
+    if (i === this.currentIndex) return
     this.checkOtherTabsShouldUpdate()
     this.currentTab.store.saveDoc$.next(null)
     this.currentIndex = i
