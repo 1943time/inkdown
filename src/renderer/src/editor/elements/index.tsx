@@ -112,7 +112,7 @@ export const MLeaf = (props: RenderLeafProps) => {
     }
     if (leaf.url) {
       return (
-        <Tooltip title={`${leaf.url}`} mouseEnterDelay={1}>
+        <Tooltip title={`${leaf.url}`} mouseEnterDelay={0.5}>
           <span
             style={style}
             data-be={'link'}
@@ -135,18 +135,19 @@ export const MLeaf = (props: RenderLeafProps) => {
                   const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
                   db.file.where('filePath').equals(path).toArray().then(res => {
                     if (!res.length) {
-                      return window.open(leaf.url)
-                    }
-                    for (let f of res) {
-                      const node = treeStore.nodeMap.get(f.cid)
-                      if (node) {
-                        e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
-                        if (parseRes.hash) {
-                          setTimeout(() => {
-                            toHash(parseRes.hash)
-                          }, 200)
+                      window.open(leaf.url)
+                    } else {
+                      for (let f of res) {
+                        const node = treeStore.nodeMap.get(f.cid)
+                        if (node) {
+                          e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                          if (parseRes.hash) {
+                            setTimeout(() => {
+                              toHash(parseRes.hash)
+                            }, 200)
+                          }
+                          break
                         }
-                        break
                       }
                     }
                   })
