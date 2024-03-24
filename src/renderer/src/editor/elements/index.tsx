@@ -18,6 +18,7 @@ import {EditorUtils} from '../utils/editorUtils'
 import {isAbsolute, join} from 'path'
 import {db} from '../../store/db'
 import {slugify} from '../utils/dom'
+import { Tooltip } from 'antd'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -111,56 +112,61 @@ export const MLeaf = (props: RenderLeafProps) => {
     }
     if (leaf.url) {
       return (
-        <span
-          style={style}
-          data-be={'link'}
-          draggable={false}
-          title={'mod + click to open link, mod + alt + click to open file in new tab'}
-          onDragStart={dragStart}
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            if (e.metaKey || e.ctrlKey) {
-              const sel = store.editor.selection
-              if (!sel || !Point.equals(sel.focus, sel.anchor) || !leaf.url) return
-              if (/^https?/.test(leaf.url)) {
-                window.open(leaf.url)
-              } else {
-                const parseRes = parsePath(leaf.url)
-                if (!parseRes.path && parseRes.hash) {
-                  return toHash(parseRes.hash)
-                }
-                const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
-                db.file.where('filePath').equals(path).toArray().then(res => {
-                  for (let f of res) {
-                    const node = treeStore.nodeMap.get(f.cid)
-                    if (node) {
-                      e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
-                      if (parseRes.hash) {
-                        setTimeout(() => {
-                          toHash(parseRes.hash)
-                        }, 200)
-                      }
-                      break
-                    }
+        <Tooltip title={`${leaf.url}`} mouseEnterDelay={1}>
+          <span
+            style={style}
+            data-be={'link'}
+            draggable={false}
+            title={`mod + click to open link, mod + alt + click to open file in new tab`}
+            onDragStart={dragStart}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              if (e.metaKey || e.ctrlKey) {
+                const sel = store.editor.selection
+                if (!sel || !Point.equals(sel.focus, sel.anchor) || !leaf.url) return
+                if (/^https?/.test(leaf.url)) {
+                  window.open(leaf.url)
+                } else {
+                  const parseRes = parsePath(leaf.url)
+                  if (!parseRes.path && parseRes.hash) {
+                    return toHash(parseRes.hash)
                   }
-                })
+                  const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                  db.file.where('filePath').equals(path).toArray().then(res => {
+                    if (!res.length) {
+                      return window.open(leaf.url)
+                    }
+                    for (let f of res) {
+                      const node = treeStore.nodeMap.get(f.cid)
+                      if (node) {
+                        e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                        if (parseRes.hash) {
+                          setTimeout(() => {
+                            toHash(parseRes.hash)
+                          }, 200)
+                        }
+                        break
+                      }
+                    }
+                  })
+                }
+              } else if (e.detail === 2) {
+                selectFormat()
               }
-            } else if (e.detail === 2) {
-              selectFormat()
+            }}
+            data-slate-inline={true}
+            className={`mx-[1px] link cursor-default ${className}`}
+            {...props.attributes}>
+            {!!props.text?.text &&
+              <InlineChromiumBugfix />
             }
-          }}
-          data-slate-inline={true}
-          className={`mx-[1px] link cursor-default ${className}`}
-          {...props.attributes}>
-          {!!props.text?.text &&
-            <InlineChromiumBugfix/>
-          }
-          {children}
-          {!!props.text?.text &&
-            <InlineChromiumBugfix/>
-          }
-        </span>
+            {children}
+            {!!props.text?.text &&
+              <InlineChromiumBugfix />
+            }
+          </span>
+        </Tooltip>
       )
     }
     return (

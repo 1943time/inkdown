@@ -163,6 +163,9 @@ export const MEditor = observer(({note}: {
   }, [note])
 
   const checkEnd = useCallback((e: React.MouseEvent) => {
+    if (!store.focus) {
+      store.editor.selection = null
+    }
     const target = e.target as HTMLDivElement
     if (target.dataset.slateEditor) {
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
@@ -213,7 +216,6 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const blur = useCallback(() => {
-    store.editor.selection = null
     store.setState(state => {
       state.focus = false
       state.tableCellNode = null
