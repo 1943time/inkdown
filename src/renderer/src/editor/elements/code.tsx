@@ -124,7 +124,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                 }
                 {!props.element.frontmatter &&
                   <div
-                    className={`${state().openMenu ? 'bg-gray-400/20' : 'group-hover:opacity-100 hover:bg-gray-400/20'} duration-200 hover:text-indigo-400 text-gray-400 rounded px-1 text-xs cursor-pointer`}
+                    className={`${state().openMenu ? 'bg-gray-400/20' : 'group-hover:opacity-100 hover:bg-gray-400/20'} duration-200 hover:text-indigo-400 text-gray-400 rounded px-1.5 py-0.5 text-xs cursor-pointer`}
 
                     onClick={(e) => {
                       setState({openMenu: true})
