@@ -1,29 +1,26 @@
-import React, {useCallback, useEffect, useRef} from 'react'
-import {Editable, ReactEditor, Slate} from 'slate-react'
-import {Editor, Element, Node, Range, Transforms} from 'slate'
-import {MElement, MLeaf} from './elements'
-import {clearAllCodeCache, SetNodeToDecorations, useHighlight} from './plugins/useHighlight'
-import {useKeyboard} from './plugins/useKeyboard'
-import {useOnchange} from './plugins/useOnchange'
-import {htmlParser} from './plugins/htmlParser'
-import {observer} from 'mobx-react-lite'
-import {IFileItem} from '../index'
-import {treeStore} from '../store/tree'
-import {EditorUtils} from './utils/editorUtils'
-import {useEditorStore} from './store'
-import {action, runInAction} from 'mobx'
-import {useSubject} from '../hooks/subscribe'
-import {configStore} from '../store/config'
-import {ipcRenderer} from 'electron'
-import {isAbsolute, join, relative} from 'path'
-import {stat} from '../utils'
-import {existsSync} from 'fs'
-import {ErrorBoundary, ErrorFallback} from '../components/ErrorBoundary'
-import {Title} from './tools/Title'
-import {updateNode} from './utils/updateNode'
-import {CustomLeaf} from '../el'
-import {mediaType} from './utils/dom'
-import {db} from '../store/db'
+import React, { useCallback, useEffect, useRef } from 'react'
+import { Editable, ReactEditor, Slate } from 'slate-react'
+import { Editor, Element, Range, Transforms } from 'slate'
+import { MElement, MLeaf } from './elements'
+import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
+import { useKeyboard } from './plugins/useKeyboard'
+import { useOnchange } from './plugins/useOnchange'
+import { htmlParser } from './plugins/htmlParser'
+import { observer } from 'mobx-react-lite'
+import { IFileItem } from '../index'
+import { treeStore } from '../store/tree'
+import { EditorUtils } from './utils/editorUtils'
+import { useEditorStore } from './store'
+import { action, runInAction } from 'mobx'
+import { useSubject } from '../hooks/subscribe'
+import { configStore } from '../store/config'
+import { ipcRenderer } from 'electron'
+import { isAbsolute, join, relative } from 'path'
+import { existsSync } from 'fs'
+import { ErrorBoundary, ErrorFallback } from '../components/ErrorBoundary'
+import { Title } from './tools/Title'
+import { updateNode } from './utils/updateNode'
+import { mediaType } from './utils/dom'
 
 export const MEditor = observer(({note}: {
   note: IFileItem
@@ -40,7 +37,6 @@ export const MEditor = observer(({note}: {
   const keydown = useKeyboard(store)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
-  const firstFocus = useRef(true)
   const save = useCallback(async () => {
     ipcRenderer.send('file-saved')
     const node = nodeRef.current
@@ -58,7 +54,6 @@ export const MEditor = observer(({note}: {
     if (data && nodeRef.current) {
       store.initializing = true
       editor.selection = null
-      firstFocus.current = true
       EditorUtils.reset(editor, data, nodeRef.current.history)
       store.doRefreshHighlight()
       store.docChanged$.next(true)
@@ -113,7 +108,6 @@ export const MEditor = observer(({note}: {
     clearTimeout(saveTimer.current)
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
       nodeRef.current = note
-      firstFocus.current = true
       store.setState(state => {
         state.pauseCodeHighlight = true
       })
@@ -170,10 +164,6 @@ export const MEditor = observer(({note}: {
 
   const checkEnd = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement
-    if (!store.focus && !firstFocus.current) {
-      EditorUtils.focus(store.editor)
-    }
-    firstFocus.current = false
     if (target.dataset.slateEditor) {
       const top = (target.lastElementChild as HTMLElement)?.offsetTop
       if (store.container && store.container.scrollTop + e.clientY - 60 > top) {
@@ -223,6 +213,7 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const blur = useCallback(() => {
+    store.editor.selection = null
     store.setState(state => {
       state.focus = false
       state.tableCellNode = null

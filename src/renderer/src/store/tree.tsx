@@ -136,7 +136,7 @@ export class TreeStore {
             } else {
               const id = nid()
               const now = Date.now()
-              const data:IFile = {
+              const data: IFile = {
                 cid: id,
                 filePath: path,
                 folder: s.isDirectory(),
@@ -157,6 +157,7 @@ export class TreeStore {
       }
     })
   }
+
   openExternalNode(node: IFileItem) {
     if (!this.tabs.some((t, i) => {
       if (!t.current) {
@@ -169,6 +170,7 @@ export class TreeStore {
       this.appendTab(node)
     }
   }
+
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
@@ -206,9 +208,10 @@ export class TreeStore {
       MainApi.errorLog(e, {name: 'moveToTrash'})
     }
   }
+
   removeDirData(item: IFileItem) {
     const stack = [item]
-    const removeHistory:string[] = []
+    const removeHistory: string[] = []
     while (stack.length) {
       const cur = stack.pop()!
       if (cur.folder && cur.children) {
@@ -222,6 +225,7 @@ export class TreeStore {
       db.history.where('fileId').anyOf(removeHistory).delete()
     }
   }
+
   navigatePrev() {
     if (this.currentTab.hasPrev) {
       this.currentTab.index--
@@ -233,6 +237,7 @@ export class TreeStore {
       this.currentTab.index++
     }
   }
+
   moveDragFiles(e: React.DragEvent<any>, parentNode?: IFileItem) {
     const file = Array.from(e.dataTransfer.files)
     if (file.length) {
@@ -246,6 +251,7 @@ export class TreeStore {
       this.dragStatus = null
     }), 100)
   }
+
   updateTitle() {
     if (this.openedNote) {
       if (this.root) {
@@ -257,6 +263,7 @@ export class TreeStore {
       document.title = 'Bluestone'
     }
   }
+
   async restoreTabs() {
     if (!this.root) return
     let files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
@@ -284,7 +291,7 @@ export class TreeStore {
         this.openParentDir(first)
       }
     }
-    const tabs:Tab[] = []
+    const tabs: Tab[] = []
     for (const t of this.tabs) {
       if (!t.current || t.current.spaceId === this.root?.cid || t.current?.ghost) {
         tabs.push(t)
@@ -359,6 +366,7 @@ export class TreeStore {
       }
     }, 300)
   }
+
   async moveNode() {
     if (this.dragNode && this.dragStatus && this.dragStatus.dropNode !== this.dragNode) {
       if (!this.dragNode.parent) return
@@ -567,6 +575,7 @@ export class TreeStore {
     }
     this.recordTabs()
   }
+
   private removeNodeFromHistory(node: IFileItem) {
     for (let t of this.tabs) {
       if (t.current === node) {
@@ -582,6 +591,7 @@ export class TreeStore {
       }
     }
   }
+
   private removeSelf(node: IFileItem) {
     if (!node.folder) this.removeNodeFromHistory(node)
     const parent = node.parent || treeStore.root

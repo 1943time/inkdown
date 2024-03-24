@@ -1,8 +1,8 @@
 // pre-build to enable parse to run in the worker
 import parser from './bundle'
-import {Element, Node} from 'slate'
-import {Content, Table} from 'mdast'
-import {CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode} from '../../../el'
+import { Element } from 'slate'
+import { Content, Table } from 'mdast'
+import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../../../el'
 
 const findImageElement = (str: string) => {
   try {
