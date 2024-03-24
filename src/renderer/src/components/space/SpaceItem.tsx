@@ -13,7 +13,7 @@ export const SpaceItem = observer((props: {
 }) => {
   return (
     <div
-      className={`cursor-pointer ${props.dragging ? '' : 'dark:hover:bg-gray-200/10 hover:bg-gray-100 duration-200 group'} py-1.5 px-5 flex items-center relative`}
+      className={`cursor-pointer ${props.dragging ? '' : 'dark:hover:bg-gray-200/10 hover:bg-gray-100 group'} py-1.5 px-5 flex items-center relative`}
       onClick={props.onClick}
     >
       <div className={'flex flex-1 items-center'}>

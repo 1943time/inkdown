@@ -1,8 +1,6 @@
-import Dexie, {Table} from 'dexie'
-import {nanoid} from 'nanoid'
-import {readdirSync, statSync} from 'fs'
-import {join} from 'path'
-import {IFileItem} from '../index'
+import Dexie, { Table } from 'dexie'
+import { nanoid } from 'nanoid'
+import { IFileItem } from '../index'
 
 export interface IRecent {
   id: string
@@ -65,21 +63,17 @@ export interface IConfig {
 class Db extends Dexie {
   public recent!: Table<IRecent, number>
   public history!: Table<IHistory, string>
-  // public tag!: Table<ITag, string>
-  // public tagFile!: Table<ITagFile, string>
   public file!: Table<IFile, string>
   public space!: Table<ISpace, string>
   public config!: Table<IConfig, string>
   public constructor() {
     super('db')
-    this.version(8).stores({
+    this.version(9).stores({
       space: '&cid,name,filePath,cloud,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,filePath,spaceId,sort',
-      history: '&id,fileId,schema,spaceId,updated',
+      history: '&id,fileId,spaceId,updated',
       config: '&key'
-      // tag: '&id,title',
-      // tagFile: '&id,filePath,tagId'
     })
   }
   async saveRecord(node: IFileItem) {
