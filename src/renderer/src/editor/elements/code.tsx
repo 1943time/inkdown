@@ -76,8 +76,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         {...props.attributes}
         style={{
           padding: state().hide ? 1 : undefined,
-          marginBottom: state().hide ? 0 : undefined,
-          // ...(state().hide ? {} : getVisibleStyle(props.element))
+          marginBottom: state().hide ? 0 : undefined
         }}
       >
         <div
@@ -87,7 +86,9 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           }}
           onDragStart={store.dragStart}
           className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${props.element.frontmatter ? 'frontmatter' : ''} ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${configStore.config.codeTabSize} code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${!!props.element.katex ? 'katex-container' : ''}`}>
-          <DragHandle/>
+          {!props.element.frontmatter &&
+            <DragHandle />
+          }
           <div
             className={`absolute z-10 right-2 top-1 flex items-center select-none`}
             contentEditable={false}>

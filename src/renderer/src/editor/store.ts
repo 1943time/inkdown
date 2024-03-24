@@ -515,6 +515,7 @@ export class EditorStore {
     const points: MovePoint[] = []
     for (let el of els) {
       if (!ableToEnter.has(el.dataset.be!)) continue
+      if (el.classList.contains('frontmatter')) continue
       const pre = el.previousSibling as HTMLElement
       if (el.dataset.be === 'paragraph' && this.dragEl?.dataset.be === 'list-item' && (!pre || pre.classList.contains('check-item'))) {
         continue
