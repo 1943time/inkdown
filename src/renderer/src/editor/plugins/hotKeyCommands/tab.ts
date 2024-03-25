@@ -164,23 +164,16 @@ export class TabKey {
       } else if (Path.hasPrevious(Path.parent(nodePath))) {
         Transforms.select(this.editor, Editor.end(this.editor, Path.previous(Path.parent(nodePath))))
       }
+      return true
     } else {
       if (text.length === sel!.anchor.offset) {
-        const parentPath = Path.parent(nodePath)
-        const p = Node.get(this.editor, parentPath) as TableRowNode
-        const length = p.children.length
-        const index = nodePath[2] + 1
-        const path = nodePath.slice()
-        if (index + 1 > length) {
-          const next = Editor.next(this.editor, { at: parentPath })
-          if (next) {
-            const path = Editor.start(this.editor, next[1]).path
-            const offset = Editor.end(this.editor, path)
-            Transforms.select(this.editor, offset)
-          }
-        } else {
-          path[2] = path[2] + 1
-          Transforms.select(this.editor, Editor.end(this.editor, path))
+        if (Editor.hasPath(this.editor, Path.next(nodePath))) {
+          Transforms.select(this.editor, Editor.end(this.editor, Path.next(nodePath)))
+        } else if (Editor.hasPath(this.editor, Path.next(Path.parent(nodePath)))) {
+          Transforms.select(
+            this.editor,
+            Editor.end(this.editor, [...Path.next(Path.parent(nodePath)), 0])
+          )
         }
         return true
       }
