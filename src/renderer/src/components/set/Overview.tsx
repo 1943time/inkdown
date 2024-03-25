@@ -110,6 +110,20 @@ export const Overview = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
+          <span className={'mr-1'}>
+            {configStore.zh ? '自动打开空间' : 'Automatically open space'}
+          </span>
+          <TextHelp
+            text={configStore.zh ? '打开应用时，自动打开最后一次打开的空间。' : 'When opening bluestone, automatically open the last space opened.'}
+          />
+        </div>
+        <div>
+          <Checkbox checked={configStore.config.autoOpenSpace}
+            onChange={e => configStore.setConfig('autoOpenSpace', e.target.checked)} />
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>
           <span className={'mr-1'}>{configStore.zh ? '图片存储文件夹' : 'Image storage folder'}</span>
           <TextHelp text={
             configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径' :

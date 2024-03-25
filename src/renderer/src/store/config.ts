@@ -1,13 +1,13 @@
-import {action, makeAutoObservable, runInAction} from 'mobx'
-import {MainApi} from '../api/main'
-import {ipcRenderer} from 'electron'
+import { action, makeAutoObservable, runInAction } from 'mobx'
+import { MainApi } from '../api/main'
+import { ipcRenderer } from 'electron'
 import mermaid from 'mermaid'
-import {shareStore} from '../server/store'
-import {codeReady, highlighter} from '../editor/utils/highlight'
-import {imageBed} from '../utils/imageBed'
-import {db} from './db'
-import {treeStore} from './tree'
-import {clearAllCodeCache, clearInlineKatex} from '../editor/plugins/useHighlight'
+import { shareStore } from '../server/store'
+import { codeReady, highlighter } from '../editor/utils/highlight'
+import { imageBed } from '../utils/imageBed'
+import { db } from './db'
+import { treeStore } from './tree'
+import { clearAllCodeCache, clearInlineKatex } from '../editor/plugins/useHighlight'
 
 class ConfigStore {
   visible = false
@@ -17,6 +17,7 @@ class ConfigStore {
   config = {
     showLeading: false,
     autoDownload: false,
+    autoOpenSpace: false,
     theme: 'system' as 'system' | 'dark' | 'light',
     leadingWidth: 220,
     dark: false,
@@ -85,9 +86,9 @@ class ConfigStore {
           for (const t of treeStore.tabs) {
             clearAllCodeCache(t.store.editor)
             clearInlineKatex(t.store.editor)
-            t.store.setState(state => state.pauseCodeHighlight = true)
+            t.store.setState((state) => (state.pauseCodeHighlight = true))
             setTimeout(() => {
-              t.store.setState(state => {
+              t.store.setState((state) => {
                 state.pauseCodeHighlight = false
                 state.refreshHighlight = !state.refreshHighlight
               })
@@ -147,13 +148,13 @@ class ConfigStore {
     this.setConfig('showLeading', !this.config.showLeading)
   }
 
-  async setConfig<T extends keyof typeof this.config>(key: T, value: typeof this.config[T]) {
+  async setConfig<T extends keyof typeof this.config>(key: T, value: (typeof this.config)[T]) {
     this.config[key] = value
     const record = await db.config.where('key').equals(key).first()
     if (record) {
-      await db.config.update(record.key, {value})
+      await db.config.update(record.key, { value })
     } else {
-      await db.config.add({key, value})
+      await db.config.add({ key, value })
     }
     if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && shareStore.serviceConfig) {
       shareStore.api.setPreferences({
@@ -172,36 +173,36 @@ class ConfigStore {
   }
   async initial() {
     const config = await db.config.toArray()
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (localStorage.getItem('pick-route')) {
         this.setConfig('turnOnImageBed', true)
       }
-      window.electron.ipcRenderer.invoke('getConfig').then(action(res => {
+      runInAction(() => {
         this.config = {
           ...this.config,
-          ...res,
-          ...Object.fromEntries(config.map(c => [c.key, c.value])),
+          ...Object.fromEntries(config.map((c) => [c.key, c.value]))
         }
-        this.config.dark = this.config.theme === 'system' ? this.systemDark : this.config.theme === 'dark'
-        localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
-        if (this.config.dark) {
-          mermaid.initialize({
-            theme: 'dark'
-          })
-        }
-        imageBed.initial()
-        document.body.classList.add('font-' + this.config.interfaceFont)
-        MainApi.getPath('home').then(res => {
-          this.homePath = res
-          if (this.mas) {
-            const m = this.homePath.match(/\/Users\/[^\/]+/)
-            if (m) this.homePath = m[0]
-          }
-          resolve(true)
+        this.config.dark =
+          this.config.theme === 'system' ? this.systemDark : this.config.theme === 'dark'
+      })
+      localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
+      if (this.config.dark) {
+        mermaid.initialize({
+          theme: 'dark'
         })
-      }))
+      }
+      imageBed.initial()
+      document.body.classList.add('font-' + this.config.interfaceFont)
+      MainApi.getPath('home').then((res) => {
+        this.homePath = res
+        if (this.mas) {
+          const m = this.homePath.match(/\/Users\/[^\/]+/)
+          if (m) this.homePath = m[0]
+        }
+        resolve(true)
+      })
       shareStore.initial()
-    }).catch(e => {
+    }).catch((e) => {
       console.log('catch', e)
     })
   }
