@@ -24,7 +24,7 @@ export class TabKey {
           const [el, path] = node
           switch (node[0].type as NodeTypes) {
             case 'table-cell':
-              if (this.tableCell(el, path)) return
+              if (this.tableCell(el, path, e.shiftKey)) return
               break
             case 'paragraph':
               const parent = Editor.parent(this.editor, node[1])
@@ -155,27 +155,35 @@ export class TabKey {
     return true
   }
 
-  private tableCell(node: TableCellNode, nodePath: Path) {
+  private tableCell(node: TableCellNode, nodePath: Path, shift = false) {
     const sel = this.editor.selection!
     const text = Node.string(node)
-    if (text.length === sel!.anchor.offset) {
-      const parentPath = Path.parent(nodePath)
-      const p = Node.get(this.editor, parentPath) as TableRowNode
-      const length = p.children.length
-      const index = nodePath[2] + 1
-      const path = nodePath.slice()
-      if (index + 1 > length) {
-        const next = Editor.next(this.editor, {at: parentPath})
-        if (next) {
-          const path = Editor.start(this.editor, next[1]).path
-          const offset = Editor.end(this.editor, path)
-          Transforms.select(this.editor, offset)
-        }
-      } else {
-        path[2] = path[2] + 1
-        Transforms.select(this.editor, Editor.end(this.editor, path))
+    if (shift) {
+      if (Path.hasPrevious(nodePath)) {
+        Transforms.select(this.editor, Editor.end(this.editor, Path.previous(nodePath)))
+      } else if (Path.hasPrevious(Path.parent(nodePath))) {
+        Transforms.select(this.editor, Editor.end(this.editor, Path.previous(Path.parent(nodePath))))
       }
-      return true
+    } else {
+      if (text.length === sel!.anchor.offset) {
+        const parentPath = Path.parent(nodePath)
+        const p = Node.get(this.editor, parentPath) as TableRowNode
+        const length = p.children.length
+        const index = nodePath[2] + 1
+        const path = nodePath.slice()
+        if (index + 1 > length) {
+          const next = Editor.next(this.editor, { at: parentPath })
+          if (next) {
+            const path = Editor.start(this.editor, next[1]).path
+            const offset = Editor.end(this.editor, path)
+            Transforms.select(this.editor, offset)
+          }
+        } else {
+          path[2] = path[2] + 1
+          Transforms.select(this.editor, Editor.end(this.editor, path))
+        }
+        return true
+      }
     }
     return false
   }

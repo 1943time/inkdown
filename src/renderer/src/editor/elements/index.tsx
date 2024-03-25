@@ -123,8 +123,7 @@ export const MLeaf = (props: RenderLeafProps) => {
               e.stopPropagation()
               e.preventDefault()
               if (e.metaKey || e.ctrlKey) {
-                const sel = store.editor.selection
-                if (!sel || !Point.equals(sel.focus, sel.anchor) || !leaf.url) return
+                if (!leaf.url) return
                 if (/^https?/.test(leaf.url)) {
                   window.open(leaf.url)
                 } else {
