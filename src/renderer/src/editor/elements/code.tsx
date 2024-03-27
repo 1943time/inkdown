@@ -61,7 +61,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
 
   useSubject(selChange$, (ctx) => {
     if (props.element.katex || props.element.render || props.element.language === 'mermaid') {
-      if (ctx.node && ctx.node[0].type === 'code-line' && ctx.sel) {
+      if (ctx && ctx.node && ctx.node[0].type === 'code-line' && ctx.sel) {
         const show = Path.equals(ReactEditor.findPath(store.editor, props.element), Path.parent(ctx.node[1]))
         setState({hide: !show})
         return

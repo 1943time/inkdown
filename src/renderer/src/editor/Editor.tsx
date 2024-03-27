@@ -4,7 +4,7 @@ import { Editor, Element, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements'
 import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
-import { useOnchange } from './plugins/useOnchange'
+import { selChange$, useOnchange } from './plugins/useOnchange'
 import { htmlParser } from './plugins/htmlParser'
 import { observer } from 'mobx-react-lite'
 import { IFileItem } from '../index'
@@ -216,6 +216,13 @@ export const MEditor = observer(({note}: {
   }, [])
 
   const blur = useCallback(() => {
+    const [node] = Editor.nodes(store.editor, {
+      match: (n) => n.type === 'media'
+    })
+    if (node) {
+      editor.selection = null
+      selChange$.next(null)
+    }
     store.setState(state => {
       state.focus = false
       state.tableCellNode = null

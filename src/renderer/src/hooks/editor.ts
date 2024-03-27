@@ -39,8 +39,13 @@ export const useSelStatus = (element: any) => {
   })
 
   useSubject(selChange$, ctx => {
-    if (!ctx.sel) return
     const path = EditorUtils.findPath(store.editor, element)
+    if (!ctx) {
+      return setState({
+        selected: false,
+        path
+      })
+    }
     setState({
       path,
       selected: Path.equals(path, ctx.node?.[1] || [])
