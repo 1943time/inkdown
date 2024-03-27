@@ -1,21 +1,22 @@
-import {observer} from 'mobx-react-lite'
-import React, {useCallback, useEffect} from 'react'
-import {Tooltip} from 'antd'
-import {useLocalState} from '../../hooks/useLocalState'
-import {IFileItem} from '../../index'
-import {readdirSync} from 'fs'
-import {join} from 'path'
-import {configStore} from '../../store/config'
-import {updateFilePath} from '../utils/updateNode'
+import { observer } from 'mobx-react-lite'
+import React, { useCallback, useEffect } from 'react'
+import { Tooltip } from 'antd'
+import { useLocalState } from '../../hooks/useLocalState'
+import { IFileItem } from '../../index'
+import { readdirSync } from 'fs'
+import { join } from 'path'
+import { configStore } from '../../store/config'
+import { updateFilePath } from '../utils/updateNode'
 import isHotkey from 'is-hotkey'
-import {ReactEditor} from 'slate-react'
-import {useEditorStore} from '../store'
-import {Editor, Transforms} from 'slate'
-import {treeStore} from '../../store/tree'
-import {runInAction} from 'mobx'
-import {MainApi} from '../../api/main'
+import { ReactEditor } from 'slate-react'
+import { useEditorStore } from '../store'
+import { Editor, Transforms } from 'slate'
+import { treeStore } from '../../store/tree'
+import { runInAction } from 'mobx'
+import { MainApi } from '../../api/main'
+import { selChange$ } from '../plugins/useOnchange'
 
-export const Title = observer(({node}: { node: IFileItem }) => {
+export const Title = observer(({ node }: { node: IFileItem }) => {
   const store = useEditorStore()
   const [state, setState] = useLocalState({
     name: '',
@@ -23,45 +24,48 @@ export const Title = observer(({node}: { node: IFileItem }) => {
   })
 
   useEffect(() => {
-    setState({name: node?.filename || ''})
+    setState({ name: node?.filename || '' })
   }, [node])
 
   const detectRename = useCallback(() => {
     const name = state.name.trim()
-    if (node.parent && node.parent.children!.some(s => s.cid !== node.cid && s.filename === name)) {
-      setState({tip: true})
+    if (
+      node.parent &&
+      node.parent.children!.some((s) => s.cid !== node.cid && s.filename === name)
+    ) {
+      setState({ tip: true })
       return false
     }
     if (!node.parent && name !== node.filename) {
       const files = readdirSync(join(node.filePath, '..'))
-      if (files.some(f => f === name)) {
-        setState({tip: true})
+      if (files.some((f) => f === name)) {
+        setState({ tip: true })
         return false
       }
     }
-    setState({tip: false})
+    setState({ tip: false })
     return true
   }, [node])
 
   const save = useCallback(async () => {
     const name = state.name.trim()
     if (!name) {
-      setState({name: node.filename || ''})
+      setState({ name: node.filename || '' })
     } else if (node) {
       if (node.ghost) {
-        runInAction(() => node.filename = name)
+        runInAction(() => (node.filename = name))
       } else if (!node.parent && !node.spaceId) {
         const oldPath = node.filePath
         if (oldPath !== state.name) {
           MainApi.saveDialog({
-            filters: [{name: 'md', extensions: ['md']}],
+            filters: [{ name: 'md', extensions: ['md'] }],
             properties: ['createDirectory'],
-            defaultPath: state.name,
-          }).then(res => {
+            defaultPath: state.name
+          }).then((res) => {
             if (res.filePath && oldPath !== res.filePath) {
               updateFilePath(node, res.filePath)
             } else {
-              setState({name: node.filename})
+              setState({ name: node.filename })
             }
           })
         }
@@ -75,11 +79,11 @@ export const Title = observer(({node}: { node: IFileItem }) => {
             }
           }
         } else {
-          setState({name: node.filename})
+          setState({ name: node.filename })
         }
       }
     }
-    setState({tip: false})
+    setState({ tip: false })
   }, [node])
   return (
     <Tooltip
@@ -91,11 +95,20 @@ export const Title = observer(({node}: { node: IFileItem }) => {
       <div className={'mt-12'}>
         <input
           value={state.name}
-          onChange={e => {
-            setState({name: e.target.value})
+          onChange={(e) => {
+            setState({ name: e.target.value })
             detectRename()
           }}
-          onKeyDown={e => {
+          onFocus={() => {
+            const [node] = Editor.nodes(store.editor, {
+              match: (n) => n.type === 'media'
+            })
+            if (node) {
+              store.editor.selection = null
+              selChange$.next(null)
+            }
+          }}
+          onKeyDown={(e) => {
             if (isHotkey('mod+s', e)) {
               save()
             }

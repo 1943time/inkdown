@@ -4,14 +4,13 @@ import {ReactEditor} from 'slate-react'
 import {base64ToArrayBuffer, message$, nid} from '../../utils'
 import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
-import {EditorUtils} from './editorUtils'
-import ky from 'ky'
 import {mediaType} from './dom'
 
 export const getRemoteMediaType = async (url: string) => {
+  if (!url) return 'other'
   try {
     const image = mediaType(url)
-    const ext = url.match(/\.\w+$/)?.[0]
+    const ext = url.match(/\.(png|jpg|jpeg|webp|svg)/)?.[0]
     if (image !== 'other' && ext) return ext
     const res = await window.api.fetch(url, {
       method: 'HEAD',
