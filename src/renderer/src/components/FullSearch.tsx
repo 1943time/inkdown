@@ -41,25 +41,37 @@ export const FullSearch = observer(() => {
   }, [])
 
   const toNode = useCallback((res: { el: any, file: IFileItem }) => {
-    if (treeStore.openedNote !== res.file) {
-      treeStore.openNote(res.file, false)
-      setTimeout(() => {
-        requestIdleCallback(() => {
-          try {
-            const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
-            if (dom) toPoint(dom)
-          } catch (e) {
-            console.warn('dom not find', e)
-          }
-        })
-      }, 200)
-    } else {
-      try {
-        const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
-        if (dom) toPoint(dom)
-      } catch (e) {
-        console.warn('dom not find')
+    if (res.el) {
+      if (treeStore.openedNote !== res.file) {
+        treeStore.openNote(res.file, false)
+        setTimeout(() => {
+          requestIdleCallback(() => {
+            try {
+              const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
+              if (dom) toPoint(dom)
+            } catch (e) {
+              console.warn('dom not find', e)
+            }
+          })
+        }, 200)
+      } else {
+        try {
+          const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
+          if (dom) toPoint(dom)
+        } catch (e) {
+          console.warn('dom not find')
+        }
       }
+    } else {
+      if (treeStore.openedNote !== res.file) {
+        treeStore.openNote(res.file, false)
+      }
+      setTimeout(() => {
+        const title = document.querySelector('.page-title') as HTMLElement
+        if (title) {
+          toPoint(title)
+        }
+      }, 100)
     }
   }, [])
 
@@ -74,13 +86,22 @@ export const FullSearch = observer(() => {
       let results: any[] = []
       for (let f of treeStore.nodes) {
         let res: { file: IFileItem, results: { el: any, text: string }[] } | null = null
+        let matchText = treeStore.searchKeyWord.toLowerCase()
+        if (f.ext === 'md' && f.filename.toLowerCase().includes(matchText)) {
+          if (!res) res = { file: f, results: [] }
+          res.results.push({
+            el: null,
+            text: f.filename.toLowerCase().replaceAll(
+              matchText,
+              '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
+            )
+          })
+        }
         if (f.schema) {
           visitSchema(f.schema, node => {
             if (['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
               let str = Node.string(node)
-              let matchText = treeStore.searchKeyWord
               str = str.toLowerCase()
-              matchText = matchText.toLowerCase()
               if (str && str.includes(matchText)) {
                 if (!res) res = {file: f, results: []}
                 res.results.push({
