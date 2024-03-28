@@ -296,7 +296,6 @@ export class EditorStore {
         const curPath = join(rootPath, name)
         if (!existsSync(curPath)) {
           mkdirSync(curPath)
-          treeStore.watcher.onChange('update', curPath)
         }
         rootPath = curPath
       }
