@@ -42,7 +42,20 @@
     transition: none;
   }
 }
-
+.enter-space-top{
+  position: relative;
+  &:before {
+    content: '';
+    @apply w-full h-0.5 bg-blue-500 absolute left-0 top-0 pointer-events-none;
+  }
+}
+.enter-space-bottom{
+  position: relative;
+  &:after {
+    content: '';
+    @apply w-full h-0.5 bg-blue-500 absolute left-0 bottom-0 pointer-events-none;
+  }
+}
 .link{
   @apply text-indigo-500 duration-300 hover:text-indigo-600;
 }

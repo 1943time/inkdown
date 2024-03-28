@@ -25,42 +25,29 @@ export const TreeRender = observer(() => {
         className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-medium text-[15px] flex items-center'}>
-          <span>
-            Folders
-          </span>
+          <span>Folders</span>
         </span>
         <div
           className={'duration-200 dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer'}
-          onClick={e =>{
+          onClick={(e) => {
             openContextMenu(e, treeStore.root!)
           }}
         >
-          <PlusCircleOutlined/>
+          <PlusCircleOutlined />
         </div>
       </div>
-      <div
-        className={'px-3'}
-        onContextMenu={e => e.stopPropagation()}
-      >
-        {!!treeStore.root &&
-          <RenderItem items={treeStore.root.children || []} level={0}/>
-        }
-        {!treeStore.root &&
+      <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
+        {!!treeStore.root && <RenderItem items={treeStore.root.children || []} level={0} />}
+        {!treeStore.root && (
           <div className={'mt-20'}>
-            <div className={'text-gray-400 text-center text-sm'}>
-              No space document yet
-            </div>
-            <div
-              className={'mt-2 flex justify-center items-center link cursor-pointer'}
-              onClick={() => {
-                // $tree.createNote()
-              }}
-            >
-              <INote/>
-              <span className={'ml-1'}>New doc</span>
-            </div>
+            <div className={'text-gray-400 text-center text-sm'}>No space document yet</div>
           </div>
-        }
+        )}
+        {treeStore.root && !treeStore.root.children?.length && (
+          <div className={'text-gray-400 text-center text-sm mt-20'}>
+            {configStore.zh ? '暂未创建文档' : 'No document has been created yet'}
+          </div>
+        )}
       </div>
     </>
   )
@@ -87,6 +74,7 @@ const Item = observer((
           }
         }}
         onDragOver={action(e => {
+          if (!treeStore.dragNode) return
           e.stopPropagation()
           e.preventDefault()
           const scrollTop = document.querySelector('#tree-content')?.scrollTop || 0

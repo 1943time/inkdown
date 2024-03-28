@@ -72,7 +72,6 @@
     "prettier": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-sortable-hoc": "^2.0.0",
     "react-use": "^17.4.0",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^3.0.1",

@@ -4,16 +4,18 @@ import { ISpace } from '../../store/db'
 import { MoreOutlined } from '@ant-design/icons'
 import {treeStore} from '../../store/tree'
 import {editSpace$} from './EditSpace'
+import Drag from '../../icons/Drag'
+import { useLocalState } from '@renderer/hooks/useLocalState'
+import { useRef } from 'react'
 
 export const SpaceItem = observer((props: {
   item: ISpace
-  dragging: string
   onClick: () => void
   onEdit: () => void
 }) => {
   return (
     <div
-      className={`cursor-pointer ${props.dragging ? '' : 'dark:hover:bg-gray-200/10 hover:bg-gray-100 group'} py-1.5 px-5 flex items-center relative`}
+      className={`cursor-pointer group dark:hover:bg-gray-200/10 hover:bg-gray-100 group py-1.5 px-5 flex items-center relative`}
       onClick={props.onClick}
     >
       <div className={'flex flex-1 items-center'}>

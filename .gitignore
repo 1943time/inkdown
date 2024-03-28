@@ -20,3 +20,4 @@ mas-builder.yml
 src/main/auth.ts
 src/renderer/src/editor/parser/worker/bundle.js
 .DS_Store
+.VSCodeCounter
