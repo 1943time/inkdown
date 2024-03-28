@@ -17,7 +17,6 @@ import {runInAction} from 'mobx'
 
 export const Overview = observer(() => {
   const [state, setState] = useLocalState({
-    imagesFolder: '',
     version: ''
   })
   const [modal, context] = Modal.useModal()
@@ -25,7 +24,6 @@ export const Overview = observer(() => {
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
-    setState({imagesFolder: configStore.config.imagesFolder})
   }, [configStore.visible])
   return (
     <div
@@ -120,59 +118,6 @@ export const Overview = observer(() => {
         <div>
           <Checkbox checked={configStore.config.autoOpenSpace}
             onChange={e => configStore.setConfig('autoOpenSpace', e.target.checked)} />
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '图片存储文件夹' : 'Image storage folder'}</span>
-          <TextHelp text={
-            configStore.zh ? '在打开文件夹的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径' :
-              'The save location for pasting images when opening a folder, if using a relative path, the path is relative to the current document\'s path'
-          }/>
-        </div>
-        <div className={'flex items-center'}>
-          <Checkbox checked={configStore.config.relativePathForImageStore}
-                    onChange={e => configStore.setConfig('relativePathForImageStore', e.target.checked)}>Relative
-            path</Checkbox>
-          <Space.Compact style={{width: 300}}>
-            <Input placeholder={'folder name'} value={state.imagesFolder}
-                   onChange={e => setState({imagesFolder: e.target.value})}/>
-            <Button
-              type="primary"
-              onClick={async () => {
-                if (!/^\.?[\w\u4e00-\u9fa5@#*$!\/]+$/.test(state.imagesFolder)) {
-                  message$.next({
-                    type: 'warning',
-                    content: configStore.zh ? '请输入正确文件夹名称' : 'Please enter the correct folder name'
-                  })
-                }
-                if (treeStore.root && !configStore.config.relativePathForImageStore) {
-                  const path = join(treeStore.root.filePath, state.imagesFolder)
-                  if (existsSync(path)) {
-                    if (!statSync(path).isDirectory()) {
-                      message$.next({
-                        type: 'warning',
-                        content: configStore.zh ? '该文件名已存在' : 'The file name already exists'
-                      })
-                      return
-                    } else {
-                      treeStore.watcher.onChange('update', path)
-                    }
-                  } else {
-                    await MainApi.mkdirp(path)
-                    treeStore.watcher.onChange('update', path)
-                  }
-                }
-                configStore.setConfig('imagesFolder', state.imagesFolder)
-                message$.next({
-                  type: 'success',
-                  content: configStore.zh ? '设置成功' : 'Set successfully'
-                })
-              }}
-            >
-              {configStore.zh ? '保存' : 'Save'}
-            </Button>
-          </Space.Compact>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>

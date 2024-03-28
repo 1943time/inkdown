@@ -1,13 +1,14 @@
 import {treeStore} from '../store/tree'
 import {message$} from './index'
 import {configStore} from '../store/config'
-import {IFileItem} from '../index'
+import {IFileItem, ISpaceNode} from '../index'
 import {basename, isAbsolute, join} from 'path'
 import {MainApi} from '../api/main'
 import {runInAction} from 'mobx'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Elements} from '../el'
 import {readdir} from 'fs/promises'
+import { mediaType } from '@renderer/editor/utils/dom'
 
 const findMedia = (filePath: string, schema: Elements[], usedImages: Set<string>) => {
   for (let s of schema) {
@@ -31,23 +32,28 @@ export const clearUnusedImages = () => {
     title: configStore.zh ? '提示' : 'Notice',
     description: configStore.zh ? '存储区中未被引用的图片将被删除' : 'Unreferenced images in the storage area will be deleted',
     onConfirm: async () => {
-      let imgDirs: IFileItem[] = []
-      if (configStore.config.relativePathForImageStore) {
+      let imgDirs: (IFileItem | ISpaceNode)[] = []
+      const base = basename(treeStore.root!.imageFolder || '')
+      if (treeStore.root?.relative) {
         const stack = treeStore.root?.children!.slice() || []
-        const base = basename(configStore.config.imagesFolder)
         while (stack.length) {
           const item = stack.shift()!
           if (item.folder && item.children) {
             stack.unshift(...item.children)
-            if (item.filename === base) {
+            if (item.filename === base || !base || base === './' || base === '.') {
               imgDirs.push(item)
             }
           }
         }
       } else {
-        const item = treeStore.root?.children?.find(item => item.filePath === join(treeStore.root?.filePath || '', configStore.config.imagesFolder))
+        const item = treeStore.root?.children?.find(item => item.filePath === join(treeStore.root?.filePath || '', treeStore.root?.imageFolder || '.images'))
         if (item) imgDirs.push(item)
       }
+
+      if (!base || base === '.') {
+        imgDirs.push(treeStore.root!)
+      }
+
       if (imgDirs.length) {
         const usedImages = new Set<string>()
         const stack = treeStore.root?.children!.slice() || []
@@ -65,6 +71,7 @@ export const clearUnusedImages = () => {
           const images = await readdir(dir.filePath)
           const remove = new Set<string>()
           for (let img of images) {
+            if (mediaType(img) !== 'image') continue
             const path = join(dir.filePath, img)
             if (!usedImages.has(path)) {
               remove.add(path)

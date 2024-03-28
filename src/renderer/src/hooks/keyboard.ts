@@ -18,6 +18,7 @@ import { quickOpen$ } from '../components/QuickOpen'
 import { isAbsolute, join } from 'path'
 import { statSync, appendFileSync } from 'fs'
 import { createFileNode } from '../store/parserNode'
+import { selChange$ } from '@renderer/editor/plugins/useOnchange'
 
 export class KeyboardTask {
   get store() {
@@ -609,6 +610,19 @@ export class KeyboardTask {
       createDoc({ ghost: true })
     }
   }
+  blur() {
+    try {
+      if (treeStore.openedNote) {
+        const [node] = Editor.nodes(this.store.editor, {
+          match: (n) => n.type === 'media'
+        })
+        if (node) {
+          this.store.editor.selection = null
+          selChange$.next(null)
+        }
+      }
+    } catch (e) {}
+  }
 }
 
 const task = new KeyboardTask()
@@ -661,7 +675,7 @@ export const useSystemKeyboard = () => {
       return
     }
     if (!treeStore.currentTab?.current && !['newNote', 'openNote'].includes(key)) return
-    if (!treeStore.currentTab?.store.focus && !['newNote', 'openNote'].includes(key)) {
+    if (!treeStore.currentTab?.store.focus && !['newNote', 'openNote', 'blur'].includes(key)) {
       ReactEditor.focus(treeStore.currentTab.store.editor)
     }
     // @ts-ignore
@@ -669,15 +683,19 @@ export const useSystemKeyboard = () => {
   })
   const keydown = useCallback(
     action((e: KeyboardEvent) => {
+      const store = treeStore.currentTab?.store
       if (isHotkey('mod+,', e)) {
         e.preventDefault()
-        configStore.visible = true
+        runInAction(() => {
+          configStore.visible = true
+          treeStore.selectItem = null
+        })
+        task.blur()
       }
       if (isHotkey('mod+n', e)) {
         task.newNote()
         return
       }
-      const store = treeStore.currentTab?.store
       if (!store) return
       if (treeStore.selectItem && isHotkey('mod+backspace', e)) {
         treeStore.moveToTrash(treeStore.selectItem)
@@ -721,6 +739,7 @@ export const useSystemKeyboard = () => {
         task.quickOpen()
       }
       if (isHotkey('backspace', e)) {
+        if (!store.focus) return
         const [node] = task.curNodes
         if (node?.[0].type === 'media') {
           e.preventDefault()

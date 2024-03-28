@@ -39,6 +39,8 @@ export interface ISpace {
   created?: number
   sort: number
   lastOpenTime: number
+  imageFolder?: string
+  relative?: boolean
 }
 export interface IFile {
   cid: string

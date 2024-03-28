@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import React, { useCallback, useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Tooltip } from 'antd'
 import { useLocalState } from '../../hooks/useLocalState'
 import { IFileItem } from '../../index'
@@ -14,7 +14,7 @@ import { Editor, Transforms } from 'slate'
 import { treeStore } from '../../store/tree'
 import { runInAction } from 'mobx'
 import { MainApi } from '../../api/main'
-import { selChange$ } from '../plugins/useOnchange'
+import { keyTask$ } from '@renderer/hooks/keyboard'
 
 export const Title = observer(({ node }: { node: IFileItem }) => {
   const store = useEditorStore()
@@ -100,13 +100,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
             detectRename()
           }}
           onFocus={() => {
-            const [node] = Editor.nodes(store.editor, {
-              match: (n) => n.type === 'media'
-            })
-            if (node) {
-              store.editor.selection = null
-              selChange$.next(null)
-            }
+            keyTask$.next({key: 'blur'})
           }}
           onKeyDown={(e) => {
             if (isHotkey('mod+s', e)) {

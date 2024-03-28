@@ -113,7 +113,6 @@ export const Tree = observer(() => {
                 className={'w-80 pt-1 pb-2'}
                 onDragOver={(e) => e.preventDefault()}
                 onDragLeave={() => {
-                  console.log('close')
                   setState({
                     dragStatus: null
                   })

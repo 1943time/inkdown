@@ -43,7 +43,7 @@ export class Watcher {
     }
   }
 
-  private async perform() {
+  async perform() {
     const {parser, terminate} = openMdParserHandle()
     for (const op of this.ops) {
       const {e, path} = op

@@ -1,5 +1,5 @@
 import {observer} from 'mobx-react-lite'
-import {Button, Form, Input, Modal, Space} from 'antd'
+import {Button, Checkbox, Form, Input, Modal, Space} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
 import {configStore} from '../../store/config'
 import {FolderOpenOutlined} from '@ant-design/icons'
@@ -33,7 +33,9 @@ export const EditSpace = observer(() => {
           form.resetFields()
           form.setFieldsValue({
             name: res.name,
-            filePath: res.filePath
+            filePath: res.filePath,
+            imageFolder: res.imageFolder,
+            relative: res.relative
           })
           setState({spaceName: res.name, spaceId, open: true})
         }
@@ -56,28 +58,27 @@ export const EditSpace = observer(() => {
   const save = useCallback(() => {
     form.validateFields().then(async v => {
       if (state.spaceId) {
-        const record = await db.space.get(state.spaceId)
-        if (record?.name === v.name && record?.filePath === v.filePath) {
-          setState({open: false})
-        } else {
-          if (!await validate(v.filePath, state.spaceId)) return
-          await db.space.update(state.spaceId, {
-            name: v.name,
-            filePath: v.filePath
+        if (!(await validate(v.filePath, state.spaceId))) return
+        await db.space.update(state.spaceId, {
+          name: v.name,
+          filePath: v.filePath,
+          relative: v.relative,
+          imageFolder: v.imageFolder
+        })
+        const oldPath = treeStore.root?.filePath
+        if (state.spaceId === treeStore.root?.cid) {
+          runInAction(() => {
+            treeStore.root!.filePath = v.filePath
+            treeStore.root!.name = v.name
+            treeStore.root!.imageFolder = v.imageFolder
+            treeStore.root!.relative = v.relative
           })
-          const oldPath = treeStore.root?.filePath
-          if (state.spaceId === treeStore.root?.cid) {
-            runInAction(() => {
-              treeStore.root!.filePath = v.filePath
-              treeStore.root!.name = v.name
-            })
-          }
-          if (!treeStore.root || (oldPath && oldPath !== v.filePath)) {
-            await window.electron.ipcRenderer.invoke('open-space', '')
-            treeStore.initial(state.spaceId)
-          }
-          setState({open: false})
         }
+        if (!treeStore.root || (oldPath && oldPath !== v.filePath)) {
+          await window.electron.ipcRenderer.invoke('open-space', '')
+          treeStore.initial(state.spaceId)
+        }
+        setState({ open: false })
       } else {
         const exist = await db.space.filter(s => s.name === v.name || s.filePath === v.filePath).first()
         if (exist) {
@@ -98,7 +99,9 @@ export const EditSpace = observer(() => {
             filePath: v.filePath,
             sort: count,
             lastOpenTime: now,
-            created: now
+            created: now,
+            relative: v.relative,
+            imageFolder: v.imageFolder
           })
           setState({open: false})
           treeStore.initial(id)
@@ -111,44 +114,37 @@ export const EditSpace = observer(() => {
     <Modal
       width={420}
       open={state.open}
-      title={(
+      title={
         <div className={'flex items-center'}>
-          <Icon icon={'material-symbols:workspaces-outline'} className={'mr-1'}/>
+          <Icon icon={'material-symbols:workspaces-outline'} className={'mr-1'} />
           {state.spaceId ? state.spaceName : configStore.zh ? '创建文档空间' : 'Create doc space'}
         </div>
-      )}
-      onCancel={() => setState({open: false})}
+      }
+      onCancel={() => setState({ open: false })}
       footer={null}
     >
-      <Form
-        layout={'vertical'}
-        className={'pt-2'}
-        form={form}
-      >
+      <Form layout={'vertical'} className={'pt-2'} form={form}>
         <Form.Item
           label={configStore.zh ? '空间名称' : 'Space name'}
-          rules={[{required: true}]}
+          rules={[{ required: true }]}
           name={'name'}
         >
-          <Input placeholder={configStore.zh ? '输入名称' : 'Enter Name'}/>
+          <Input placeholder={configStore.zh ? '输入名称' : 'Enter Name'} />
         </Form.Item>
-        <Form.Item
-          label={configStore.zh ? '文件夹' : 'Folder'}
-        >
+        <Form.Item label={configStore.zh ? '文件夹' : 'Folder'}>
           <Space.Compact className={'w-full'}>
-            <Form.Item
-              rules={[{required: true}]}
-              name={'filePath'}
-              noStyle={true}
-            >
-              <Input disabled={true} placeholder={configStore.zh ? '请选择文件夹' : 'Select a folder'}/>
+            <Form.Item rules={[{ required: true }]} name={'filePath'} noStyle={true}>
+              <Input
+                disabled={true}
+                placeholder={configStore.zh ? '请选择文件夹' : 'Select a folder'}
+              />
             </Form.Item>
             <Button
               icon={<FolderOpenOutlined />}
               onClick={() => {
                 MainApi.openDialog({
                   properties: ['createDirectory', 'openDirectory']
-                }).then(res => {
+                }).then((res) => {
                   if (res.filePaths?.length) {
                     form.setFieldValue('filePath', res.filePaths[0])
                   }
@@ -159,11 +155,40 @@ export const EditSpace = observer(() => {
             </Button>
           </Space.Compact>
         </Form.Item>
+        <Form.Item
+          label={configStore.zh ? '图片存储文件夹' : 'Image storage folder'}
+          tooltip={
+            configStore.zh
+              ? '在打开空间的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径'
+              : "The save location for pasting images when opening a space, if using a relative path, the path is relative to the current document's path"
+          }
+        >
+          <Form.Item noStyle={true} name={'imageFolder'} initialValue={'.images'}>
+            <Input placeholder={'.images'} />
+          </Form.Item>
+          <div className={'flex justify-end mt-1'}>
+            <Form.Item noStyle={true} name={'relative'} valuePropName={'checked'}>
+              <Checkbox
+              >
+                {configStore.zh ? '相对路径' : 'Relative path'}
+              </Checkbox>
+            </Form.Item>
+          </div>
+        </Form.Item>
         <div className={'space-y-3'}>
-          <Button block={true} type={'primary'} onClick={save}>{state.spaceId ? configStore.zh ? '保存' : 'Save' : configStore.zh ? '创建' : 'Create'}</Button>
-          {!!state.spaceId &&
+          <Button block={true} type={'primary'} onClick={save}>
+            {state.spaceId
+              ? configStore.zh
+                ? '保存'
+                : 'Save'
+              : configStore.zh
+              ? '创建'
+              : 'Create'}
+          </Button>
+          {!!state.spaceId && (
             <Button
-              block={true} danger={true}
+              block={true}
+              danger={true}
               onClick={() => {
                 openConfirmDialog$.next({
                   title: 'Do you want to delete this space?',
@@ -184,14 +209,14 @@ export const EditSpace = observer(() => {
                       await window.electron.ipcRenderer.invoke('open-space', '')
                     }
                     spaceChange$.next(null)
-                    setState({open: false})
+                    setState({ open: false })
                   }
                 })
               }}
             >
               Delete
             </Button>
-          }
+          )}
         </div>
       </Form>
     </Modal>

@@ -272,10 +272,14 @@ export class EditorStore {
           } else {
             paths.push(copyPath)
           }
+          treeStore.watcher.onChange('update', copyPath)
         } else {
-          paths.push(await this.saveFile(f))
+          const path = await this.saveFile(f)
+          paths.push(path)
+          treeStore.watcher.onChange('update', path)
         }
       }
+      treeStore.watcher.perform()
       Transforms.insertNodes(this.editor, paths.map(p => {
         return {type: 'media', url: p, children: [{text: ''}]}
       }), {select: true, at: path})
@@ -302,7 +306,14 @@ export class EditorStore {
   }
   async getImageDir() {
     if (treeStore.root) {
-      const imageDir = configStore.config.relativePathForImageStore ? join(treeStore.openedNote!.filePath, '..', configStore.config.imagesFolder) : join(treeStore.root.filePath, configStore.config.imagesFolder)
+      let imageDir = join(treeStore.root.filePath, treeStore.root.imageFolder || '.images')
+      if (treeStore.root.relative) {
+        imageDir = join(
+          treeStore.openedNote!.filePath,
+          '..',
+          treeStore.root.imageFolder || '.images'
+        )
+      }
       if (!existsSync(imageDir)) {
         await this.createDir(imageDir)
         await insertFileNode(treeStore, {

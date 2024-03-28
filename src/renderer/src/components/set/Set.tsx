@@ -13,7 +13,6 @@ export const Set = observer(() => {
   }), [])
 
   const [state, setState] = useLocalState({
-    imagesFolder: '',
     tab: 'Overview' as 'Overview' | 'Editor',
     version: ''
   })
@@ -22,7 +21,7 @@ export const Set = observer(() => {
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
-    setState({imagesFolder: configStore.config.imagesFolder})
+
     const esc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         close()
