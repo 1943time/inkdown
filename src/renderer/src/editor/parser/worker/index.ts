@@ -6,7 +6,7 @@ import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../
 
 const findImageElement = (str: string) => {
   try {
-    const match = str.match(/^<img+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?$/)
+    const match = str.match(/^\s*<img+[%_\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?\s*$/)
     if (match) {
       const url = match[0].match(/src="([^"\n]+)"/)
       const height = match[0].match(/height="(\d+)"/)
@@ -190,7 +190,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
                 type: 'media', children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
               })
             } else {
-              textNodes.push(c)
+              textNodes.push({type: 'text', value: c.value})
             }
           } else {
             textNodes.push(c)
