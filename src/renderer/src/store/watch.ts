@@ -36,7 +36,7 @@ export class Watcher {
       }
     })
   }
-  private getFileMap() {
+  getFileMap() {
     this.fileMap.clear()
     for (const node of this.store.nodeMap.values()) {
       this.fileMap.set(node.filePath, node)

@@ -279,6 +279,7 @@ export class EditorStore {
           treeStore.watcher.onChange('update', path)
         }
       }
+      treeStore.watcher.getFileMap()
       treeStore.watcher.perform()
       Transforms.insertNodes(this.editor, paths.map(p => {
         return {type: 'media', url: p, children: [{text: ''}]}
