@@ -1,4 +1,4 @@
-import {app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, screen, shell} from 'electron'
+import {app, BrowserWindow, dialog, globalShortcut, ipcMain, nativeTheme, screen, shell, Menu, MenuItem} from 'electron'
 import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
@@ -47,6 +47,32 @@ function createWindow() {
         },
       })
     }
+  })
+  window.webContents.on('context-menu', (event, params) => {
+    const menu = new Menu()
+
+    // Add each spelling suggestion
+    for (const suggestion of params.dictionarySuggestions) {
+      menu.append(
+        new MenuItem({
+          label: suggestion,
+          click: () => window.webContents.replaceMisspelling(suggestion)
+        })
+      )
+    }
+
+    // Allow users to add the misspelled word to the dictionary
+    if (params.misspelledWord) {
+      menu.append(
+        new MenuItem({
+          label: 'Add to dictionary',
+          click: () =>
+            window.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord)
+        })
+      )
+    }
+
+    menu.popup()
   })
   window.on('leave-full-screen', () => {
     window.webContents?.send('leave-full-screen')
