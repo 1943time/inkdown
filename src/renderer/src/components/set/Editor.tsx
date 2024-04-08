@@ -20,52 +20,64 @@ export const SetEditor = observer(() => {
   }, [])
   return (
     <div
-      className={'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'}>
+      className={
+        'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'
+      }
+    >
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic rebuild'}</span> <TextHelp text={
-          configStore.zh ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改' :
-            'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
-        }
-        />
+          <span className={'mr-1'}>{configStore.zh ? '自动重建' : 'Automatic rebuild'}</span>{' '}
+          <TextHelp
+            text={
+              configStore.zh
+                ? '重命名或移动文件或文件夹时，文档引入的相关链接与图片路径将自动更改'
+                : 'When renaming or moving files or folders, the relevant links and image paths introduced by the document will automatically change'
+            }
+          />
         </div>
         <div>
-          <Checkbox checked={configStore.config.autoRebuild}
-                    onChange={e => configStore.setConfig('autoRebuild', e.target.checked)}/>
+          <Checkbox
+            checked={configStore.config.autoRebuild}
+            onChange={(e) => configStore.setConfig('autoRebuild', e.target.checked)}
+          />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-                      <span
-                        className={'mr-1'}>{configStore.zh ? '自动下载图片' : 'Automatically download images'}</span>
-          <TextHelp text={
-            configStore.zh ? '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址' :
-              'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'
-          }/>
+          <span className={'mr-1'}>
+            {configStore.zh ? '自动下载图片' : 'Automatically download images'}
+          </span>
+          <TextHelp
+            text={
+              configStore.zh
+                ? '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址'
+                : 'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code'
+            }
+          />
         </div>
         <div>
-          <Checkbox checked={configStore.config.autoDownload}
-                    onChange={e => configStore.setConfig('autoDownload', e.target.checked)}/>
+          <Checkbox
+            checked={configStore.config.autoDownload}
+            onChange={(e) => configStore.setConfig('autoDownload', e.target.checked)}
+          />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          {configStore.zh ? '拖拽排序' : 'Drag to sort'}
-        </div>
+        <div className={'text-sm'}>{configStore.zh ? '拖拽排序' : 'Drag to sort'}</div>
         <div>
-          <Checkbox checked={configStore.config.dragToSort}
-                    onChange={e => configStore.setConfig('dragToSort', e.target.checked)}/>
+          <Checkbox
+            checked={configStore.config.dragToSort}
+            onChange={(e) => configStore.setConfig('dragToSort', e.target.checked)}
+          />
         </div>
       </div>
-      <EditorFont/>
+      <EditorFont />
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          {configStore.zh ? '段落行高' : 'Paragraph line height'}
-        </div>
+        <div className={'text-sm'}>{configStore.zh ? '段落行高' : 'Paragraph line height'}</div>
         <div>
           <Radio.Group
             value={configStore.config.editorLineHeight}
-            onChange={e => {
+            onChange={(e) => {
               configStore.setConfig('editorLineHeight', e.target.value)
             }}
           >
@@ -80,18 +92,18 @@ export const SetEditor = observer(() => {
           {configStore.zh ? '显示代码段行号' : 'Show code line number'}
         </div>
         <div>
-          <Checkbox checked={configStore.config.codeLineNumber}
-                    onChange={e => configStore.setConfig('codeLineNumber', e.target.checked)}/>
+          <Checkbox
+            checked={configStore.config.codeLineNumber}
+            onChange={(e) => configStore.setConfig('codeLineNumber', e.target.checked)}
+          />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          {configStore.zh ? '代码段 TabSize' : 'Code tab size'}
-        </div>
+        <div className={'text-sm'}>{configStore.zh ? '代码段 TabSize' : 'Code tab size'}</div>
         <div>
           <Radio.Group
             value={configStore.config.codeTabSize}
-            onChange={e => {
+            onChange={(e) => {
               configStore.setConfig('codeTabSize', e.target.value)
             }}
           >
@@ -101,59 +113,67 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          {configStore.zh ? '代码风格' : 'Code style'}
-        </div>
+        <div className={'text-sm'}>{configStore.zh ? '代码风格' : 'Code style'}</div>
         <div>
           <Select
             value={configStore.config.codeTheme}
             className={'w-[220px]'}
-            onChange={e => {
+            onChange={(e) => {
               configStore.setConfig('codeTheme', e)
               configStore.reloadHighlighter(true)
             }}
-            options={[{label: 'auto', value: 'auto'}, ...Array.from(codeThemes).map(v => ({label: v, value: v}))]}
+            options={[
+              { label: 'auto', value: 'auto' },
+              ...Array.from(codeThemes).map((v) => ({ label: v, value: v }))
+            ]}
           />
         </div>
       </div>
       <div className={'py-3'}>
         <div className={'flex justify-between items-center'}>
-          <div className={'text-sm'}>
-            {configStore.zh ? '图床工具' : 'Image bed tool'}
-          </div>
+          <div className={'text-sm'}>{configStore.zh ? '图床工具' : 'Image bed tool'}</div>
           <div>
             <Checkbox
               checked={configStore.config.turnOnImageBed}
-              onChange={e => {
+              onChange={(e) => {
                 configStore.setConfig('turnOnImageBed', e.target.checked)
                 if (!e.target.checked) {
-                  setState({imgBedRoute: ''})
+                  setState({ imgBedRoute: '' })
                   localStorage.removeItem('pick-route')
                   imageBed.route = ''
                 }
-              }}>
-              </Checkbox>
+              }}
+            ></Checkbox>
           </div>
         </div>
-        {configStore.config.turnOnImageBed &&
+        {configStore.config.turnOnImageBed && (
           <div className={'flex items-center mt-3 text-sm'}>
             <div>
-              <span className={'mr-1'}>
-                PickGo(PicList)
-              </span>
-              <TextHelp text={(
-                <>
-                  <span>An image upload and manage tool</span>
-                  <a className={'link mx-1'} href={'https://github.com/Kuingsmile/PicList'} target={'_blank'}>Details.</a>
-                  <span>When enabled, adding images will automatically upload and use the network address.</span>
-                </>
-              )}/>
+              <span className={'mr-1'}>PickGo(PicList)</span>
+              <TextHelp
+                text={
+                  <>
+                    <span>An image upload and manage tool</span>
+                    <a
+                      className={'link mx-1'}
+                      href={'https://github.com/Kuingsmile/PicList'}
+                      target={'_blank'}
+                    >
+                      Details.
+                    </a>
+                    <span>
+                      When enabled, adding images will automatically upload and use the network
+                      address.
+                    </span>
+                  </>
+                }
+              />
             </div>
             <Space.Compact className={'flex-1 ml-4'}>
               <Input
                 value={state.imgBedRoute}
-                onChange={e => {
-                  setState({imgBedRoute: e.target.value})
+                onChange={(e) => {
+                  setState({ imgBedRoute: e.target.value })
                 }}
                 placeholder={'Upload Route: http://127.0.0.1:36677/upload?key=[optional]'}
               />
@@ -162,7 +182,9 @@ export const SetEditor = observer(() => {
                   if (!state.imgBedRoute || !/^https?:\/\//i.test(state.imgBedRoute)) {
                     message$.next({
                       type: 'warning',
-                      content: configStore.zh ? '请输入正确http地址' : 'Please enter the correct HTTP address'
+                      content: configStore.zh
+                        ? '请输入正确http地址'
+                        : 'Please enter the correct HTTP address'
                     })
                   } else {
                     localStorage.setItem('pick-route', state.imgBedRoute)
@@ -178,25 +200,44 @@ export const SetEditor = observer(() => {
               </Button>
             </Space.Compact>
           </div>
-        }
+        )}
       </div>
       <div className={'flex justify-between items-center py-3'}>
-      <div className={'text-sm'}>
-          {configStore.zh ? '拼写检查' : 'Spell check'}
-        </div>
+        <div className={'text-sm'}>{configStore.zh ? '拼写检查' : 'Spell check'}</div>
         <div>
-          <Checkbox checked={configStore.config.spellCheck}
-                    onChange={e => configStore.setConfig('spellCheck', e.target.checked)}/>
+          <Checkbox
+            checked={configStore.config.spellCheck}
+            onChange={(e) => configStore.setConfig('spellCheck', e.target.checked)}
+          />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          {configStore.zh ? '编辑区文字大小' : 'Edit area text size'}
+          <span className={'mr-1'}>{configStore.zh ? '高亮符号' : 'Highlight symbols'}</span>
+          <TextHelp
+            text={
+              configStore.zh
+                ? '括号和[@#$￥]等符号将高亮显示'
+                : 'Brackets and symbols such as [@#$￥] will be highlighted'
+            }
+          />
         </div>
+        <div>
+          <Checkbox
+            checked={configStore.config.symbolHighlight}
+            onChange={(e) => configStore.setConfig('symbolHighlight', e.target.checked)}
+          />
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>{configStore.zh ? '编辑区文字大小' : 'Edit area text size'}</div>
         <div className={'w-32'}>
           <Slider
-            value={configStore.config.editorTextSize} min={14} max={18} marks={{14: '14', 18: '18'}}
-            onChange={e => {
+            value={configStore.config.editorTextSize}
+            min={14}
+            max={18}
+            marks={{ 14: '14', 18: '18' }}
+            onChange={(e) => {
               configStore.setConfig('editorTextSize', e)
             }}
           />

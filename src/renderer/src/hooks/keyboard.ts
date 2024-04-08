@@ -16,7 +16,7 @@ import { createDoc } from '../components/tree/openContextMenu'
 import { db } from '../store/db'
 import { quickOpen$ } from '../components/QuickOpen'
 import { isAbsolute, join } from 'path'
-import { statSync, appendFileSync } from 'fs'
+import { statSync } from 'fs'
 import { createFileNode } from '../store/parserNode'
 import { selChange$ } from '@renderer/editor/plugins/useOnchange'
 
@@ -85,7 +85,7 @@ export class KeyboardTask {
       Transforms.select(this.editor, Path.parent(Path.parent(node[1])))
     } else if (node[0]?.type === 'code-line') {
       Transforms.select(this.editor, Path.parent(node[1]))
-    } else if (Editor.hasPath(this.editor, [1])) {
+    } else {
       Transforms.select(this.editor, {
         anchor: Editor.start(this.editor, []),
         focus: Editor.end(this.editor, [])
