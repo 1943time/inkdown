@@ -7,6 +7,7 @@ import {renameSync} from 'fs'
 import {runInAction} from 'mobx'
 import {findAbsoluteLinks} from '../../store/parserNode'
 import {shareStore} from '../../server/store'
+import { message$ } from '../../utils'
 
 export const updateNode = async (node: IFileItem) => {
   if (node.filePath && node.ext === 'md') {
@@ -23,7 +24,13 @@ export const updateNode = async (node: IFileItem) => {
       })
       node.links = links
       db.saveRecord(node)
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.message) {
+        message$.next({
+          type: 'error',
+          content: e.message
+        })
+      }
       console.error('save fail', e)
     }
   }
@@ -94,12 +101,21 @@ export const updateFilePath = async (node: IFileItem, targetPath: string) => {
         }
       }
       if (node.folder) {
-        const changeFiles = renameFiles(node.children || [], targetPath)
-        if (changeFiles.length) {
-          await updateRemotePath(changeFiles, 'doc')
-        }
-        if (shareStore.bookMap.get(oldPath)) {
-          await updateRemotePath([{from: oldPath, to: node.filePath}], 'book')
+        try {
+          const changeFiles = renameFiles(node.children || [], targetPath)
+          if (changeFiles.length) {
+            await updateRemotePath(changeFiles, 'doc')
+          }
+          if (shareStore.bookMap.get(oldPath)) {
+            await updateRemotePath([{from: oldPath, to: node.filePath}], 'book')
+          }
+        } catch(e: any) {
+          if (e?.message) {
+            message$.next({
+              type: 'error',
+              content: e.message
+            })
+          }
         }
       }
     } else {
