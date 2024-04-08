@@ -272,15 +272,27 @@ export class EditorStore {
           } else {
             paths.push(copyPath)
           }
-          treeStore.watcher.onChange('update', copyPath)
+
+          if (treeStore.root) {
+            insertFileNode(treeStore, {
+              filePath: copyPath,
+              folder: false,
+              spaceId: treeStore.root?.cid
+            })
+          }
+
         } else {
           const path = await this.saveFile(f)
           paths.push(path)
-          treeStore.watcher.onChange('update', path)
+          if (treeStore.root) {
+            insertFileNode(treeStore, {
+              filePath: path,
+              folder: false,
+              spaceId: treeStore.root?.cid
+            })
+          }
         }
       }
-      treeStore.watcher.getFileMap()
-      treeStore.watcher.perform()
       Transforms.insertNodes(this.editor, paths.map(p => {
         return {type: 'media', url: p, children: [{text: ''}]}
       }), {select: true, at: path})

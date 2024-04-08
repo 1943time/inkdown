@@ -66,14 +66,14 @@ const Item = observer((
         ref={el}
         data-fid={item.cid}
         className={'py-[1px]'}
-        onDragLeave={e => e.stopPropagation()}
-        onDrop={e => {
+        onDragLeave={(e) => e.stopPropagation()}
+        onDrop={(e) => {
           if (item.folder) {
             e.stopPropagation()
             treeStore.moveDragFiles(e, item)
           }
         }}
-        onDragOver={action(e => {
+        onDragOver={action((e) => {
           if (!treeStore.dragNode) return
           e.stopPropagation()
           e.preventDefault()
@@ -95,20 +95,24 @@ const Item = observer((
       >
         <div
           style={{
-            paddingLeft: level * 15,
+            paddingLeft: level * 15
           }}
           className={`rounded group relative ${getClass(item)}`}
         >
           <div
-            className={`${treeStore.openedNote === item ? 'dark:text-zinc-100 text-zinc-900' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+            className={`${
+              treeStore.openedNote === item
+                ? 'dark:text-zinc-100 text-zinc-900'
+                : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'
+            }
            text-sm cursor-default select-none h-7 pr-2 group`}
-            style={{paddingLeft: item.folder ? 6 : 21}}
+            style={{ paddingLeft: item.folder ? 6 : 21 }}
             onDragEnd={() => {
               treeStore.moveNode()
               el.current!.style.opacity = ''
             }}
             draggable={'true'}
-            onDragStart={action(e => {
+            onDragStart={action((e) => {
               treeStore.dragNode = item
               el.current!.style.opacity = '0.5'
               if (item === treeStore.openedNote && treeStore.currentTab.store.docChanged) {
@@ -133,59 +137,75 @@ const Item = observer((
               }
             })}
           >
-            <div className={`
-            ${item.folder && treeStore.dragNode !== item && treeStore.dragStatus?.dropNode === item && treeStore.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
+            <div
+              className={`
+            ${
+              item.folder &&
+              treeStore.dragNode !== item &&
+              treeStore.dragStatus?.dropNode === item &&
+              treeStore.dragStatus.mode === 'enter'
+                ? 'dark:border-white/30 border-black/30'
+                : 'border-transparent'
+            }
             flex items-center h-full rounded pr-2 border
-            `}>
-              {item.folder &&
+            `}
+            >
+              {item.folder && (
                 <div className={'w-4 h-full flex items-center justify-center'}>
                   <ArrowRight
-                    className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}
+                    className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${
+                      item.folder && item.expand ? 'rotate-90' : ''
+                    }`}
                   />
                 </div>
-              }
+              )}
               <div
-                className={`flex items-center flex-1 h-full relative max-w-full ${treeStore.openedNote === item ? 'text-indigo-600 dark:text-indigo-400' : ''}`}
-                data-entity={'true'}>
-                {!!item.folder &&
-                  <IFolder className={'flex-shrink-0'}/>
-                }
-                {item.ext === 'md' &&
-                  <INote className={'flex-shrink-0'}/>
-                }
-                {!item.folder && item.ext !== 'md' &&
-                  <Icon icon={'uil:file'} className={'text-base flex-shrink-0'}/>
-                }
-                <div className={'truncate max-w-full ml-1'}>
-                  {item.filename || 'Untitled'}
-                </div>
-                {!item.folder && item.ext !== 'md' &&
+                className={`flex items-center flex-1 h-full relative max-w-full ${
+                  treeStore.openedNote === item ? 'text-indigo-600 dark:text-indigo-400' : ''
+                }`}
+                data-entity={'true'}
+              >
+                {!!item.folder && <IFolder className={'flex-shrink-0'} />}
+                {item.ext === 'md' && <INote className={'flex-shrink-0'} />}
+                {!item.folder && item.ext !== 'md' && (
+                  <Icon icon={'uil:file'} className={'text-base flex-shrink-0'} />
+                )}
+                <div className={'truncate max-w-full ml-1'}>{item.filename || 'Untitled'}</div>
+                {!item.folder && item.ext !== 'md' && (
                   <sup className={'ml-1 text-indigo-600 mr-1'}>{item.ext}</sup>
-                }
-                {treeStore.dragStatus?.dropNode === item && treeStore.dragNode !== item && treeStore.dragStatus.mode !== 'enter' &&
-                  <div
-                    className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${treeStore.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}
-                  />
-                }
+                )}
+                {treeStore.dragStatus?.dropNode === item &&
+                  treeStore.dragNode !== item &&
+                  treeStore.dragStatus.mode !== 'enter' && (
+                    <div
+                      className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${
+                        treeStore.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'
+                      }`}
+                    />
+                  )}
               </div>
             </div>
           </div>
-          {treeStore.dragNode !== item &&
+          {treeStore.dragNode !== item && (
             <div
-              onClick={e => {
+              onClick={(e) => {
                 openContextMenu(e, item)
               }}
-              className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${treeStore.ctxNode === item ? 'flex' : 'hidden group-hover:flex'}
+              className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${
+                treeStore.ctxNode === item
+                  ? 'flex bg-gray-400/3 dark:bg-gray-200/20'
+                  : 'hidden group-hover:flex'
+              }
             absolute right-1 w-[14px] justify-center items-center dark:text-gray-200 text-lg`}
             >
-              <MoreOutlined/>
+              <MoreOutlined />
             </div>
-          }
+          )}
         </div>
       </div>
-      {item.folder && !!item.children?.length && !!item.expand &&
-        <RenderItem items={item.children} level={level + 1}/>
-      }
+      {item.folder && !!item.children?.length && !!item.expand && (
+        <RenderItem items={item.children} level={level + 1} />
+      )}
     </Fragment>
   )
 })

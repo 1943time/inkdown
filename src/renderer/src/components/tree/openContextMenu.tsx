@@ -10,7 +10,7 @@ import {db, IFile} from '../../store/db'
 import {join} from 'path'
 import {createFileNode} from '../../store/parserNode'
 import {statSync, writeFileSync} from 'fs'
-import {runInAction} from 'mobx'
+import {action, runInAction} from 'mobx'
 import {EditorUtils} from '../../editor/utils/editorUtils'
 import {openEditFolderDialog$} from './EditFolderDialog'
 import {openEbook$} from '../../server/ui/Ebook'
@@ -80,7 +80,10 @@ export const getCreateName = (parent?: IFileItem | ISpaceNode, name = 'Untitled'
   return cur
 }
 export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNode) => {
-  runInAction(() => treeStore.selectItem = node.root ? null : node)
+  runInAction(() => {
+    treeStore.selectItem = node.root ? null : node
+    treeStore.ctxNode = node.root ? null : node
+  })
   if (!node.root && !node.folder) {
     const isMd = node.ext === 'md'
     const menus: IMenu[] = [
@@ -140,7 +143,9 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         key: 'cmd+backspace'
       }
     ])
-    openMenus(e, menus)
+    openMenus(e, menus, action(() => {
+      treeStore.ctxNode = null
+    }))
   } else {
     const menus:IMenu[] = [
       {
@@ -201,6 +206,8 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         }
       ])
     }
-    openMenus(e, menus)
+    openMenus(e, menus, action(() => {
+      treeStore.ctxNode = null
+    }))
   }
 }
