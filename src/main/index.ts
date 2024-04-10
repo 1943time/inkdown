@@ -50,8 +50,6 @@ function createWindow() {
   })
   window.webContents.on('context-menu', (event, params) => {
     const menu = new Menu()
-
-    // Add each spelling suggestion
     for (const suggestion of params.dictionarySuggestions) {
       menu.append(
         new MenuItem({
@@ -61,8 +59,10 @@ function createWindow() {
       )
     }
 
-    // Allow users to add the misspelled word to the dictionary
     if (params.misspelledWord) {
+      if (menu.items.length) {
+        menu.append(new MenuItem({type: 'separator'}))
+      }
       menu.append(
         new MenuItem({
           label: 'Add to dictionary',
@@ -71,8 +71,9 @@ function createWindow() {
         })
       )
     }
-
-    menu.popup()
+    if (menu.items.length) {
+      menu.popup()
+    }
   })
   window.on('leave-full-screen', () => {
     window.webContents?.send('leave-full-screen')
