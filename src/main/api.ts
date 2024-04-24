@@ -63,6 +63,9 @@ export const registerApi = () => {
   ipcMain.handle('get-version', () => {
     return app.getVersion()
   })
+  ipcMain.on('add-recent', (e, path: string) => {
+    app.addRecentDocument(path)
+  })
   ipcMain.handle('get-machine-id', () => {
     return machineIdSync(true)
   })
