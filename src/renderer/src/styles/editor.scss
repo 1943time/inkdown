@@ -353,6 +353,28 @@ blockquote {
 
 ol.m-list {
   list-style: decimal;
+  ol.m-list{
+    list-style: lower-alpha;
+    ol.m-list {
+      list-style: upper-roman;
+      ol.m-list{
+        list-style: decimal;
+      }
+    }
+  }
+}
+
+ul.m-list {
+  list-style: disc;
+  ul.m-list{
+    list-style: circle;
+    ul.m-list {
+      list-style: revert;
+      ul.m-list{
+        list-style: disc;
+      }
+    }
+  }
 }
 
 .m-list-item {
