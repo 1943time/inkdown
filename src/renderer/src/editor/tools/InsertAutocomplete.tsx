@@ -13,146 +13,148 @@ import {useSubject} from '../../hooks/subscribe'
 import {EditorUtils} from '../utils/editorUtils'
 import IMermaid from '../../icons/IMermaid'
 import {getOffsetLeft, getOffsetTop} from '../utils/dom'
+import { configStore } from '../../store/config'
 
 type InsertOptions = {
-  label: string
-  key: string,
+  label: [string, string]
+  key: string
   children: {
-    label: string
+    label: [string, string]
     key: string
     task: Methods<KeyboardTask>
     args?: any[]
     icon?: ReactNode
   }[]
 }
-const getInsertOptions:(ctx: {isTop: boolean}) => InsertOptions[] = (ctx) => {
+
+const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => {
   const options: InsertOptions[] = [
     {
-      label: 'Elements',
+      label: ['元素', 'Elements'],
       key: 'element',
       children: [
         {
-          label: 'Table',
+          label: ['表格', 'Table'],
           key: 'table',
           task: 'insertTable',
-          icon: <Icon icon={'material-symbols:table'} className={'text-lg'}/>
+          icon: <Icon icon={'material-symbols:table'} className={'text-lg'} />
         },
         {
-          label: 'Quote',
+          label: ['引用', 'Quote'],
           key: 'quote',
           task: 'insertQuote',
-          icon: <Icon icon={'iconoir:quote-solid'} className={'text-lg'}/>
+          icon: <Icon icon={'iconoir:quote-solid'} className={'text-lg'} />
         },
         {
-          label: 'Code',
+          label: ['代码', 'Code'],
           key: 'code',
           task: 'insertCode',
-          icon: <Icon icon={'ic:sharp-code'} className={'text-lg'}/>
+          icon: <Icon icon={'ic:sharp-code'} className={'text-lg'} />
         },
         {
-          label: 'Local image',
+          label: ['本地图片', 'Local image'],
           key: 'local-image',
           task: 'localImage',
-          icon: <Icon icon={'material-symbols:image-outline'} className={'text-lg'}/>
+          icon: <Icon icon={'material-symbols:image-outline'} className={'text-lg'} />
         },
         {
-          label: 'Remote media',
+          label: ['远程媒体', 'Remote media'],
           task: 'image',
           key: 'remote-media',
           args: ['', true],
-          icon: <Icon icon={'ic:round-perm-media'} className={'text-lg'}/>
+          icon: <Icon icon={'ic:round-perm-media'} className={'text-lg'} />
         },
         {
-          label: 'Formula block',
+          label: ['公式块', 'Formula block'],
           task: 'insertCode',
           key: 'formula-block',
           args: ['katex'],
-          icon: <Icon icon={'pajamas:formula'} className={'text-lg'}/>
+          icon: <Icon icon={'pajamas:formula'} className={'text-lg'} />
         },
         {
-          label: 'Formula inline',
+          label: ['行内公式', 'Formula inline'],
           key: 'formula-inline',
           task: 'inlineKatex',
-          icon: <Icon icon={'pajamas:formula'} className={'text-lg'}/>
+          icon: <Icon icon={'pajamas:formula'} className={'text-lg'} />
         },
         {
-          label: 'Mermaid graphics',
+          label: ['Mermaid 图形', 'Mermaid graphics'],
           task: 'insertCode',
           key: 'mermaid',
           args: ['mermaid'],
-          icon: <IMermaid className={'text-lg'}/>
+          icon: <IMermaid className={'text-lg'} />
         },
         {
-          label: 'Horizontal line',
+          label: ['分割线', 'Horizontal line'],
           key: 'horizontal-line',
           task: 'horizontalLine',
-          icon: <Icon icon={'radix-icons:divider-horizontal'} className={'text-lg'}/>
+          icon: <Icon icon={'radix-icons:divider-horizontal'} className={'text-lg'} />
         }
       ]
     },
     {
-      label: 'List',
+      label: ['列表', 'List'],
       key: 'list',
       children: [
         {
-          label: 'Bulleted list',
+          label: ['无序列表', 'Bulleted list'],
           task: 'list',
           key: 'b-list',
           args: ['unordered'],
-          icon: <Icon icon={'ion:list-sharp'} className={'text-lg'}/>
+          icon: <Icon icon={'ion:list-sharp'} className={'text-lg'} />
         },
         {
-          label: 'Numbered list',
+          label: ['有序列表', 'Numbered list'],
           task: 'list',
           key: 'n-list',
           args: ['ordered'],
-          icon: <Icon icon={'ph:list-numbers-bold'} className={'text-lg'}/>
+          icon: <Icon icon={'ph:list-numbers-bold'} className={'text-lg'} />
         },
         {
-          label: 'Todo list',
+          label: ['任务列表', 'Todo list'],
           task: 'list',
           key: 't-list',
           args: ['task'],
-          icon: <Icon icon={'lucide:list-todo'} className={'text-lg'}/>
+          icon: <Icon icon={'lucide:list-todo'} className={'text-lg'} />
         }
       ]
     }
   ]
   if (ctx.isTop) {
     options.splice(1, 0, {
-      label: 'Heading',
+      label: ['标题', 'Heading'],
       key: 'head',
       children: [
         {
-          label: 'Heading 1',
+          label: ['标题 1', 'Heading 1'],
           task: 'head',
           key: 'head1',
           args: [1],
-          icon: <Icon icon={'gravity-ui:heading-1'} className={'text-lg'}/>
+          icon: <Icon icon={'gravity-ui:heading-1'} className={'text-lg'} />
         },
         {
-          label: 'Heading 2',
+          label: ['标题2', 'Heading 2'],
           task: 'head',
           key: 'head2',
-          icon: <Icon icon={'gravity-ui:heading-2'} className={'text-lg'}/>,
+          icon: <Icon icon={'gravity-ui:heading-2'} className={'text-lg'} />,
           args: [2]
         },
         {
-          label: 'Heading 3',
+          label: ['标题3', 'Heading 3'],
           task: 'head',
           key: 'head3',
-          icon: <Icon icon={'gravity-ui:heading-3'} className={'text-lg'}/>,
+          icon: <Icon icon={'gravity-ui:heading-3'} className={'text-lg'} />,
           args: [3]
         },
         {
-          label: 'Heading 4',
+          label: ['标题4', 'Heading 4'],
           task: 'head',
           key: 'head4',
-          icon: <Icon icon={'gravity-ui:heading-4'} className={'text-lg'}/>,
+          icon: <Icon icon={'gravity-ui:heading-4'} className={'text-lg'} />,
           args: [4]
         }
       ]
-    },)
+    })
   }
   return options
 }
@@ -243,6 +245,7 @@ export const InsertAutocomplete = observer(() => {
       })
     }
   }, [])
+
   useSubject(store.insertCompletionText$, text => {
     text = text || ''
     const insertOptions = getInsertOptions({
@@ -253,7 +256,7 @@ export const InsertAutocomplete = observer(() => {
     if (text) {
       for (let item of insertOptions) {
         const ops = item.children.filter(op => {
-          return op.label.toLowerCase().includes(text.toLowerCase())
+          return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
         })
         options.push(...ops)
         if (ops.length) {
@@ -321,7 +324,7 @@ export const InsertAutocomplete = observer(() => {
       absolute z-50 w-44 max-h-52 overflow-y-auto p-1.5
       border border-stone-200 rounded-lg py-1 text-gray-700/90 card-bg dark:text-gray-300 dark:border-gray-200/10
       `}
-      onMouseDown={e => {
+      onMouseDown={(e) => {
         e.preventDefault()
       }}
       style={{
@@ -330,13 +333,13 @@ export const InsertAutocomplete = observer(() => {
         bottom: state.bottom
       }}
     >
-      {state.filterOptions.map((l, i) =>
-        <div
-          key={l.key}
-        >
-          <div className={'text-xs leading-6 pl-2 dark:text-gray-500 text-gray-400'}>{l.label}</div>
+      {state.filterOptions.map((l, i) => (
+        <div key={l.key}>
+          <div className={'text-xs leading-6 pl-2 dark:text-gray-500 text-gray-400'}>
+            {configStore.zh ? l.label[0] : l.label[1]}
+          </div>
           <div>
-            {l.children.map(el =>
+            {l.children.map((el) => (
               <div
                 key={el.key}
                 data-action={el.key}
@@ -345,20 +348,19 @@ export const InsertAutocomplete = observer(() => {
                   insert(state.options[state.index])
                 }}
                 onMouseEnter={() => {
-                  setState({index: state.options.findIndex(op => op.key === el.key)})
+                  setState({ index: state.options.findIndex((op) => op.key === el.key) })
                 }}
                 className={`h-8 rounded px-2 cursor-pointer flex items-center text-sm space-x-1
                   ${el.key === selectedKey ? 'bg-gray-100 dark:bg-gray-300/10' : ''}
-                `}>
+                `}
+              >
                 {el.icon}
-                <span>
-                  {el.label}
-                </span>
+                <span>{configStore.zh ? el.label[0] : el.label[1]}</span>
               </div>
-            )}
+            ))}
           </div>
         </div>
-      )}
+      ))}
     </div>
   )
 })

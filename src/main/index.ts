@@ -183,7 +183,6 @@ const preCreate = () => {
 app.whenReady().then(() => {
   createAppMenus()
   registerApi()
-  app.clearRecentDocuments()
   if (isWindows) {
     app.on('browser-window-focus', () => {
       globalShortcut.register("CommandOrControl+W", () => {

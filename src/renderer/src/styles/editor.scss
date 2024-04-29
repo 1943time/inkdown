@@ -278,13 +278,14 @@ a {
 
 .inline-code {
   background: var(--md-bg-mute);
-  border: 1px solid var(--md-bg-mute);
-  font-size: .85em;
+  font-size: .88em;
   border-radius: 4px;
   padding: 2px 5px;
   position: relative;
+  margin: 0 1px;
   word-break: break-word;
   top: -1px;
+  @apply dark:text-rose-400/90 text-rose-500;
 }
 
 .t-handle {
@@ -294,6 +295,8 @@ a {
 blockquote {
   padding: 3px 14px 3px 21px;
   position: relative;
+  font-style: italic;
+  font-size: 0.97em;
   @apply dark:text-gray-300 text-gray-600;
   &:not(:last-child) {
     margin-bottom: .5em;

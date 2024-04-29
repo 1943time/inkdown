@@ -306,6 +306,9 @@ export const FloatBar = observer(() => {
                   closeLink()
                 }
               }
+              if (isHotkey('mod+a', e)) {
+                e.stopPropagation()
+              }
               if (e.key === '#') {
                 setTimeout(getAnchors)
               } else if (state.anchors.length && !state.url?.includes('#')) {

@@ -171,6 +171,16 @@ export class TreeStore {
     }
   }
 
+  getDepLinks(filePath: string) {
+    const docs: IFileItem[] = []
+    for (const item of this.nodeMap) {
+      if (item[1].filePath !== filePath && item[1].links?.some(l => l.target === filePath)) {
+        docs.push(item[1])
+      }
+    }
+    return docs
+  }
+
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
@@ -497,7 +507,6 @@ export class TreeStore {
         db.space.update(spaceId, {
           lastOpenTime: Date.now()
         })
-        window.electron.ipcRenderer.send('add-recent', res.space.filePath)
         await window.electron.ipcRenderer.invoke('open-space', res.space.cid)
         setTimeout(() => {
           this.restoreTabs()

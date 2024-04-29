@@ -21,13 +21,6 @@ export const Empty = observer(() => {
         spaces: res.sort((a, b) => a.lastOpenTime > b.lastOpenTime ? -1 : 1).slice(0, 5)
       })
     })
-    const clearRecent = () => {
-      setState({records: []})
-    }
-    window.electron.ipcRenderer.on('clear-recent', clearRecent)
-    return () => {
-      window.electron.ipcRenderer.removeListener('clear-recent', clearRecent)
-    }
   }, [])
   if (treeStore.loading) return null
   return (

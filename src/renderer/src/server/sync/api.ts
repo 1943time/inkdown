@@ -11,6 +11,7 @@ export class ShareApi {
     private readonly store: ShareStore
   ) {}
   private http = ky.create({
+    timeout: 60 * 1000,
     hooks: {
       beforeRequest: [req => {
         if (this.store.serviceConfig) {
