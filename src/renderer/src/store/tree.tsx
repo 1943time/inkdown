@@ -5,7 +5,7 @@ import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
-import {isMac, message$, nid, stat} from '../utils'
+import {isMac, message$, nid, parsePath, stat} from '../utils'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {configStore} from './config'
@@ -174,7 +174,10 @@ export class TreeStore {
   getDepLinks(filePath: string) {
     const docs: IFileItem[] = []
     for (const item of this.nodeMap) {
-      if (item[1].filePath !== filePath && item[1].links?.some(l => l.target === filePath)) {
+      if (item[1].filePath !== filePath && item[1].links?.some(l => {
+        const p = parsePath(l.target)
+        return p.path === filePath
+      })) {
         docs.push(item[1])
       }
     }

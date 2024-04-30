@@ -9,9 +9,7 @@ import {shareSuccessfully$} from './Successfully'
 import {Subject} from 'rxjs'
 import {useSubject} from '../../hooks/subscribe'
 import {treeStore} from '../../store/tree'
-import {db} from '../../store/db'
 import {message$} from '../../utils'
-import {IFileItem, ISpaceNode} from '../../index'
 
 export const openEbook$ = new Subject<{
   folderPath: string

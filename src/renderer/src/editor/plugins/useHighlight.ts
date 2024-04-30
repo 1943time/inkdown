@@ -159,7 +159,7 @@ export function useHighlight(store?: EditorStore) {
                   })
                 }
               }
-              cacheTextNode.set(c, {path, range: textRanges})
+              cacheTextNode.set(node, {path, range: textRanges})
               ranges.push(...textRanges)
             }
           }

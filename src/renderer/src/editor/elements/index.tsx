@@ -1,23 +1,23 @@
-import {RenderElementProps, RenderLeafProps} from 'slate-react/dist/components/editable'
-import {Table, TableCell} from './table'
-import {CodeCtx, CodeElement, CodeLine} from './code'
-import {Blockquote} from './blockquote'
-import {List, ListItem} from './list'
-import {Head} from './head'
-import React, {CSSProperties, useContext, useMemo} from 'react'
-import {Paragraph} from './paragraph'
-import {InlineChromiumBugfix} from '../utils/InlineChromiumBugfix'
-import {Media} from './media'
-import {useEditorStore} from '../store'
-import {Editor, Point, Transforms} from 'slate'
-import {treeStore} from '../../store/tree'
-import {InlineKatex} from './CodeUI/Katex/InlineKatex'
-import {parsePath} from '../../utils'
-import {ReactEditor} from 'slate-react'
-import {EditorUtils} from '../utils/editorUtils'
-import {isAbsolute, join} from 'path'
-import {db} from '../../store/db'
-import {slugify} from '../utils/dom'
+import { RenderElementProps, RenderLeafProps } from 'slate-react/dist/components/editable'
+import { Table, TableCell } from './table'
+import { CodeCtx, CodeElement, CodeLine } from './code'
+import { Blockquote } from './blockquote'
+import { List, ListItem } from './list'
+import { Head } from './head'
+import React, { CSSProperties, useContext, useMemo } from 'react'
+import { Paragraph } from './paragraph'
+import { InlineChromiumBugfix } from '../utils/InlineChromiumBugfix'
+import { Media } from './media'
+import { useEditorStore } from '../store'
+import { Editor, Transforms } from 'slate'
+import { treeStore } from '../../store/tree'
+import { InlineKatex } from './CodeUI/Katex/InlineKatex'
+import { parsePath } from '../../utils'
+import { ReactEditor } from 'slate-react'
+import { EditorUtils } from '../utils/editorUtils'
+import { isAbsolute, join } from 'path'
+import { db } from '../../store/db'
+import { slugify } from '../utils/dom'
 import { Tooltip } from 'antd'
 
 const dragStart = (e: React.DragEvent) => {
@@ -34,6 +34,7 @@ const toHash = (hash: string) => {
     })
   }
 }
+
 export const MElement = (props: RenderElementProps) => {
   switch (props.element.type) {
     case 'blockquote':
