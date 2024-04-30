@@ -134,7 +134,7 @@ export const ServiceSet = observer((props: {
           rules={[{required: true, message: configStore.zh ? '请输入域名' : 'Please enter domain'}]}
           tooltip={configStore.zh ? '需要http前缀' : 'HTTP prefix required'}
           label={configStore.zh ? '域名或IP' : 'Domain or IP'} name={['domain']}>
-          <Input placeholder={`${configStore.zh ? '例如' : 'for example'}: https://www.bluemd.me`}/>
+          <Input placeholder={`${configStore.zh ? '例如' : 'for example'}: https://www.inkdown.me`}/>
         </Form.Item>
         <Form.Item
           initialValue={'BLUESTONE'}

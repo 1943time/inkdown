@@ -71,7 +71,7 @@ export const registerApi = () => {
   ipcMain.handle('get-path', (e, type: Parameters<typeof app.getPath>[0]) => {
     return app.getPath(type)
   })
-  
+
   ipcMain.handle('get-env', () => {
     return {
       isPackaged: app.isPackaged,
@@ -147,6 +147,22 @@ export const registerApi = () => {
         ipcMain.emit('set-locale', value)
       }
     }
+  })
+  ipcMain.handle('get-system', () => {
+    if (process.platform === 'win32') {
+      return 'win'
+    }
+    if (process.platform === 'linux') {
+      return 'linux'
+    }
+    if (process.platform === 'darwin') {
+      if (process.mas) {
+        return 'mas'
+      } else {
+        return 'mac'
+      }
+    }
+    return process.platform
   })
   ipcMain.on('toggleShowLeading', (e, show: boolean) => {
     const showLeading = Menu.getApplicationMenu()?.getMenuItemById('showLeading')

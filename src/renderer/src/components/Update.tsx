@@ -29,12 +29,12 @@ export const Update = observer(() => {
 
   const check = useCallback(async () => {
     const v = await window.electron.ipcRenderer.invoke('get-version')
-    // https://www.bluemd.me/api/version
+    const system = await window.electron.ipcRenderer.invoke('get-system')
     try {
-      const res = await ky.get('https://www.bluemd.me/api/version', {
+      const res = await ky.get('https://www.inkdown.me/app/version', {
         searchParams: {
           version: v,
-          mas: configStore.mas ? 'true' : ''
+          system
         }
       }).json<{
         masVersion: string
