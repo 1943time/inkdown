@@ -1,24 +1,24 @@
-import {observer} from 'mobx-react-lite'
-import {LeftOutlined, RightOutlined} from '@ant-design/icons'
-import React, {Fragment, useCallback, useEffect} from 'react'
-import {action, runInAction} from 'mobx'
-import {treeStore} from '../../store/tree'
-import {isMac, message$} from '../../utils'
-import {IMenu, openMenus} from '../Menu'
-import {History} from './History'
+import { observer } from 'mobx-react-lite'
+import { LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { Fragment, useCallback, useEffect } from 'react'
+import { action, runInAction } from 'mobx'
+import { treeStore } from '../../store/tree'
+import { isMac, message$ } from '../../utils'
+import { IMenu, openMenus } from '../Menu'
+import { History } from './History'
 import Collapse from '../../icons/Collapse'
-import {Icon} from '@iconify/react'
-import {MainApi} from '../../api/main'
-import {useLocalState} from '../../hooks/useLocalState'
-import {sep} from 'path'
-import {Share} from '../../server/Share'
-import {configStore} from '../../store/config'
-import {toMarkdown} from '../../editor/utils/toMarkdown'
-import {convertRemoteImages} from '../../editor/utils/media'
-import {clearUnusedImages} from '../../utils/clearUnusedImages'
-import {Badge, Divider, Popover, Tooltip} from 'antd'
-import {Update} from '../Update'
-import {keyTask$} from '../../hooks/keyboard'
+import { Icon } from '@iconify/react'
+import { MainApi } from '../../api/main'
+import { useLocalState } from '../../hooks/useLocalState'
+import { sep } from 'path'
+import { Share } from '../../server/Share'
+import { configStore } from '../../store/config'
+import { toMarkdown } from '../../editor/utils/toMarkdown'
+import { convertRemoteImages } from '../../editor/utils/media'
+import { clearUnusedImages } from '../../utils/clearUnusedImages'
+import { Badge, Popover } from 'antd'
+import { Update } from '../Update'
+import { keyTask$ } from '../../hooks/keyboard'
 import { IFileItem } from '../..'
 import INote from '../../icons/INote'
 
@@ -38,7 +38,7 @@ export const Nav = observer(() => {
         setState({
           path: treeStore.openedNote.filePath.replace(treeStore.root?.filePath! + sep, '').split(sep)
         })
-        if (treeStore.openedNote.schema) {
+        if (treeStore.openedNote) {
           const path = treeStore.openedNote.filePath
           if (treeStore.openedNote.spaceId) {
             requestIdleCallback(() => {
@@ -73,7 +73,7 @@ export const Nav = observer(() => {
   }, [])
   return (
     <div
-      className={`h-10 w-full duration-200 select-none width-duration relative`}
+      className={`h-10 w-full drag-nav duration-200 select-none width-duration relative`}
       style={{
         paddingLeft: treeStore.blankMode ? (treeStore.fold ? 100 : 0) : treeStore.fold ? 45 : 35
       }}
@@ -131,6 +131,7 @@ export const Nav = observer(() => {
                 {state.depLinks.map(d => {
                   return (
                     <div
+                      key={d.filePath}
                       className={'flex items-center px-2 py-0.5 cursor-pointer rounded duration-200 dark:hover:bg-gray-100/10 hover:bg-gray-200/70'}
                       onClick={() => {
                         treeStore.openNote(d)
@@ -145,7 +146,7 @@ export const Nav = observer(() => {
             )}>
               <div
                 className={
-                  'ml-1 text-xl flex items-center dark:text-gray-400 text-gray-500 rounded hover:bg-gray-200/80 dark:hover:bg-gray-100/10 px-0.5 cursor-pointer duration-200'
+                  'ml-1 drag-none text-xl flex items-center dark:text-gray-400 text-gray-500 rounded hover:bg-gray-200/80 dark:hover:bg-gray-100/10 px-0.5 cursor-pointer duration-200'
                 }
               >
                 <Icon icon={'academicons:datacite'} />
