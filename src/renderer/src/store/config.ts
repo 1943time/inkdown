@@ -192,6 +192,9 @@ class ConfigStore {
       }
       imageBed.initial()
       document.body.classList.add('font-' + this.config.interfaceFont)
+      window.electron.ipcRenderer.invoke('get-system').then(res => {
+        runInAction(() => this.config.mas = res === 'mas')
+      })
       MainApi.getPath('home').then((res) => {
         this.homePath = res
         if (this.mas) {

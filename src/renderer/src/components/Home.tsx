@@ -50,8 +50,8 @@ export const Home = observer(() => {
       <div
         className={'flex-1 flex flex-col relative z-[100]'}
         style={{
-          // maxWidth: treeStore.fold ? '100%' : `calc(100% - ${treeStore.width}px)`
-          maxWidth: '100%'
+          width: 0,
+          minWidth: 300
         }}
       >
         <Nav/>
