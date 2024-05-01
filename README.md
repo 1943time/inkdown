@@ -26,7 +26,7 @@ and the double-column mode is not conducive to focusing,
 so the Bluestone Editor was developed. It combines rich text with markdown editing habits to help you record daily,
 and saves it in standard markdown format, which allows your notes to be used anywhere and backed up in any way.
 
-[![Watch the video](https://assets.inkdown.me/home/dv2-p.png)](https://assets.inkdown.me/home/dv1.mp4)
+https://github.com/1943time/bluestone/assets/115093678/e01c9d88-a278-4038-b786-7d0ed5d40cbb
 
 ![](https://assets.inkdown.me/home/h1.png)
 
