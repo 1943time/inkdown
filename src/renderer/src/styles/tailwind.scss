@@ -57,13 +57,12 @@
   }
 }
 .link{
-  @apply text-indigo-500 duration-300 hover:text-indigo-600;
+  @apply duration-200 dark:text-white/75 font-medium text-black/60;
 }
 
 .ant-popover-inner, .ant-dropdown-menu{
-  @apply border border-gray-200/20;
+  @apply border-none;
 }
-
 .ellipsis-10{
   overflow : hidden;
   text-overflow: ellipsis;

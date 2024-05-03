@@ -33,7 +33,6 @@ class ConfigStore {
     spellCheck: false,
     editorWidth: 720,
     autoRebuild: true,
-    showRemoveFileDialog: true,
     showHiddenFiles: false,
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
     interfaceFont: 'System',

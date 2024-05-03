@@ -24,7 +24,7 @@ export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   nodeMap = new Map<string, IFileItem>()
   root: ISpaceNode | null = null
-  ctxNode: IFileItem | null = null
+  ctxNode: IFileItem | ISpaceNode | null = null
   dragNode: IFileItem | null = null
   tabs: Tab[] = []
   dragStatus: null | {
@@ -188,26 +188,14 @@ export class TreeStore {
     try {
       if (item) {
         this.selectItem = null
-        if (configStore.config.showRemoveFileDialog && !force) {
-          let save = false
+        if (!force) {
           openConfirmDialog$.next({
             title: configStore.zh ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'` : `Are you sure you want to delete '${item.filename}' ${item.folder ? 'and its contents?' : '?'}`,
             description: configStore.zh ? '您可以从垃圾箱中恢复此文件。' : 'You can restore this file from the Trash.',
             onConfirm: () => {
               treeStore.moveToTrash(item, true)
-              if (save) {
-                configStore.setConfig('showRemoveFileDialog', false)
-              }
             },
-            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash',
-            footer: (
-              <Checkbox
-                defaultChecked={save}
-                className={'mt-6'}
-                onChange={e => save = e.target.checked}>
-                {configStore.zh ? '不再询问' : 'Do not ask me again'}
-              </Checkbox>
-            )
+            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash'
           })
         } else {
           this.removeSelf(item)

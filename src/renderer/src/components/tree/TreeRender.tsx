@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {MoreOutlined, PlusCircleOutlined} from '@ant-design/icons'
-import React, {Fragment, useRef} from 'react'
+import {Fragment, useRef} from 'react'
 import {action} from 'mobx'
 import INote from '../../icons/INote'
 import ArrowRight from '../../icons/ArrowRight'
@@ -10,7 +10,7 @@ import {IFileItem} from '../../index'
 import {openContextMenu} from './openContextMenu'
 import {Icon} from '@iconify/react'
 import {configStore} from '../../store/config'
-
+import Iplus from '../../icons/Iplus'
 const getClass = (c: IFileItem) => {
   if (treeStore.selectItem === c) return 'dark:bg-indigo-500/15 bg-indigo-500/15'
   if (treeStore.openedNote === c) return 'dark:bg-gray-300/10 bg-gray-500/10'
@@ -22,18 +22,22 @@ export const TreeRender = observer(() => {
   return (
     <>
       <div
-        className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500`}
+        className={`mb-1 py-1 flex justify-between items-center pl-5 pr-4 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-medium text-[15px] flex items-center'}>
           <span>Folders</span>
         </span>
         <div
-          className={'duration-200 dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer'}
+          className={`duration-100 py-0.5 px-1 cursor-pointer rounded ${
+            treeStore.ctxNode?.root
+              ? 'dark:bg-gray-300/10 bg-gray-200/70'
+              : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
+          } `}
           onClick={(e) => {
             openContextMenu(e, treeStore.root!)
           }}
         >
-          <PlusCircleOutlined />
+          <Iplus />
         </div>
       </div>
       <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>

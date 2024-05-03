@@ -78,13 +78,22 @@ html{
   }
 }
 .panel-bg{
-  @apply dark:bg-[rgba(35,35,35,0.95)] bg-white/95 backdrop-blur;
+  @apply dark:bg-[rgba(20,20,20)] bg-white/95 backdrop-blur;
 }
 .modal-panel{
-  @extend .modal-border, .panel-bg;
-  @apply border rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
+  @extend .panel-bg;
+  @apply rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
 }
 
+.dialog-content {
+  @apply dark:bg-[#1F1F1F] rounded-lg bg-white;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),0 3px 6px -4px rgba(0, 0, 0, 0.12),0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.dark{
+  .dialog-content {
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  }
+}
 .tools-panel{
   @apply rounded-lg dark:bg-[rgba(35,35,35,.95)] dark:text-gray-200 overflow-y-auto bg-white/95 text-gray-600 select-none
   backdrop-blur-lg shadow-lg shadow-gray-200/70 dark:shadow-gray-600/10 border dark:border-gray-200/10 border-gray-200;

@@ -91,15 +91,6 @@ export const Overview = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          {configStore.zh ? '删除文件确认' : 'Delete file confirmation'}
-        </div>
-        <div>
-          <Checkbox checked={configStore.config.showRemoveFileDialog}
-                    onChange={e => configStore.setConfig('showRemoveFileDialog', e.target.checked)}/>
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
           <span className={'mr-1'}>
             {configStore.zh ? '自动打开空间' : 'Automatically open space'}
           </span>
