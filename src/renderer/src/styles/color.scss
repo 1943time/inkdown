@@ -110,11 +110,11 @@ html{
 }
 
 .float-bar-icon{
-  @apply dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600 cursor-default;
+  @apply dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600 cursor-pointer;
 }
 
 .float-color-icon{
-  @apply w-5 h-5 rounded border border-white/10 hover:border-white/50;
+  @apply w-5 h-5 rounded-full hover:opacity-90 cursor-pointer;
 }
 .ant-btn-primary {
   &:not([disabled],.ant-btn-dangerous) {

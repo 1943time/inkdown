@@ -8,7 +8,7 @@ import {
   CaretDownOutlined,
   CheckOutlined,
   ClearOutlined,
-  HighlightOutlined,
+  FontColorsOutlined,
   ItalicOutlined,
   LinkOutlined,
   StrikethroughOutlined
@@ -37,43 +37,58 @@ function Mod() {
   }
 }
 const tools = [
-  {type: 'bold', icon: <BoldOutlined/>, tooltip: (
-    <div
-      className = {'text-xs flex items-center space-x-1'} >
-      <Mod/><span>B</span>
-    </div>
-  )},
-  {type: 'italic', icon: <ItalicOutlined/>, tooltip: (
-      <div
-        className={'text-xs flex items-center space-x-1'}>
-        <Mod/><span>I</span>
+  {
+    type: 'bold',
+    icon: <BoldOutlined />,
+    tooltip: (
+      <div className={'text-xs flex items-center space-x-1'}>
+        <Mod />
+        <span>B</span>
       </div>
     )
   },
-  {type: 'strikethrough', icon: <StrikethroughOutlined/>, tooltip: (
-      <div
-        className={'text-xs flex items-center space-x-1'}>
-        <Mod/><Shift/><span>S</span>
+  {
+    type: 'italic',
+    icon: <ItalicOutlined />,
+    tooltip: (
+      <div className={'text-xs flex items-center space-x-1'}>
+        <Mod />
+        <span>I</span>
       </div>
     )
   },
-  {type: 'code', icon: <ICode className={'w-5 h-5'}/>, tooltip: (
-      <div
-        className={'text-xs flex items-center space-x-0.5'}>
-        <Option/><span>`</span>
+  {
+    type: 'strikethrough',
+    icon: <StrikethroughOutlined />,
+    tooltip: (
+      <div className={'text-xs flex items-center space-x-1'}>
+        <Mod />
+        <Shift />
+        <span>S</span>
       </div>
     )
   },
-  {type: 'url', icon: <LinkOutlined/>}
+  {
+    type: 'code',
+    icon: <ICode className={'w-5 h-5'} />,
+    tooltip: (
+      <div className={'text-xs flex items-center space-x-0.5'}>
+        <Option />
+        <span>`</span>
+      </div>
+    )
+  }
 ]
 
 const colors = [
-  {color: 'rgba(16,185,129,1)'},
-  {color: 'rgba(245,158,11,1)'},
-  {color: 'rgba(59,130,246,1)'},
-  {color: 'rgba(156,163,175,.8)'},
-  {color: 'rgba(99,102, 241,1)'},
-  {color: 'rgba(244,63,94,1)'}
+  { color: 'rgba(16,185,129,1)' },
+  { color: 'rgba(245,158,11,1)' },
+  { color: 'rgba(59,130,246,1)' },
+  { color: 'rgba(156,163,175,.8)' },
+  { color: 'rgba(99,102, 241,1)' },
+  { color: 'rgba(244,63,94,1)' },
+  { color: 'rgba(217,70,239,1)' },
+  { color: 'rgba(14, 165, 233, 1)' }
 ]
 const fileMap = new Map<string, IFileItem>()
 export const FloatBar = observer(() => {
@@ -193,10 +208,10 @@ export const FloatBar = observer(() => {
     if (store.domRect) {
       let left = store.domRect.x
       if (!treeStore.fold) left -= treeStore.width
-      left = left - ((state.openSelectColor ? 206 : 218) - store.domRect.width) / 2
+      left = left - ((state.openSelectColor ? 260 : 240) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
-      const barWidth = state.link ? 304 : state.openSelectColor ? 210 : 222
+      const barWidth = state.link ? 304 : state.openSelectColor ? 264 : 244
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       let top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
       if (treeStore.tabs.length > 1) top -= 30
@@ -269,7 +284,9 @@ export const FloatBar = observer(() => {
         e.preventDefault()
         e.stopPropagation()
       }}
-      className={`${state.open ? (state.link ? '' : 'duration-100') : 'hidden'} float-bar
+      className={`${
+        state.open ? (state.link ? '' : 'duration-100') : 'hidden'
+      } float-bar rounded overflow-hidden
       `}
     >
       {state.link ? (
@@ -345,11 +362,46 @@ export const FloatBar = observer(() => {
           />
         </div>
       ) : (
-        <div className={`${state.openSelectColor ? 'w-[206px]' : 'w-[206px]'} h-full`}>
+        <div
+          className={`${state.openSelectColor ? 'w-[260px]' : 'w-[240px]'} h-full overflow-hidden`}
+        >
           {!state.openSelectColor && (
-            <div
-              className={'flex *:h-full *:flex *:items-center justify-center h-full'}
-            >
+            <div className={'flex *:h-full *:flex *:items-center justify-center h-full'}>
+              <div className={`flex *:h-full *:flex *:items-center`}>
+                <div
+                  className={`${
+                    EditorUtils.isFormatActive(store.editor, 'highColor')
+                      ? 'text-blue-500'
+                      : 'dark:text-gray-200 text-gray-600'
+                  } py-0.5 px-1.5  ${
+                    state.hoverSelectColor ? 'dark:bg-gray-100/10 bg-gray-200/50' : ''
+                  } dark:hover:bg-gray-100/10 hover:bg-gray-200/50 cursor-pointer`}
+                  onMouseEnter={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    if (EditorUtils.isFormatActive(store.editor, 'highColor')) {
+                      EditorUtils.highColor(store.editor)
+                    } else {
+                      EditorUtils.highColor(
+                        store.editor,
+                        localStorage.getItem('high-color') || '#10b981'
+                      )
+                    }
+                  }}
+                >
+                  <FontColorsOutlined />
+                </div>
+                <div
+                  className={'h-6 text-xs px-0.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50 cursor-pointer'}
+                  onMouseEnter={() => setState({ hoverSelectColor: true })}
+                  onMouseLeave={() => setState({ hoverSelectColor: false })}
+                  onClick={() => {
+                    setState({ openSelectColor: true, hoverSelectColor: false })
+                    resize()
+                  }}
+                >
+                  <CaretDownOutlined className={'scale-95'} />
+                </div>
+              </div>
               {tools.map((t) => (
                 <Tooltip title={t.tooltip} key={t.type} mouseEnterDelay={0.3}>
                   <div
@@ -367,48 +419,31 @@ export const FloatBar = observer(() => {
                         ? 'text-blue-500 '
                         : 'dark:hover:text-gray-200 hover:text-gray-600'
                     }
-              cursor-default py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
+              cursor-pointer py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
               `}
                   >
                     {t.icon}
                   </div>
                 </Tooltip>
               ))}
-              <div className={`flex *:h-full *:flex *:items-center`}>
-                <div
-                  className={`${
-                    EditorUtils.isFormatActive(store.editor, 'highColor')
-                      ? 'text-blue-500'
-                      : state.hoverSelectColor
-                      ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600'
-                      : 'float-bar-icon'
-                  } py-0.5 px-1.5`}
-                  onMouseEnter={(e) => e.stopPropagation()}
-                  onClick={() => {
-                    if (EditorUtils.isFormatActive(store.editor, 'highColor')) {
-                      EditorUtils.highColor(store.editor)
-                    } else {
-                      EditorUtils.highColor(
-                        store.editor,
-                        localStorage.getItem('high-color') || '#10b981'
-                      )
-                    }
-                  }}
-                >
-                  <HighlightOutlined />
-                </div>
-                <div
-                  className={'h-6 text-xs float-bar-icon px-0.5'}
-                  onMouseEnter={() => setState({ hoverSelectColor: true })}
-                  onMouseLeave={() => setState({ hoverSelectColor: false })}
-                  onClick={() => {
-                    setState({ openSelectColor: true, hoverSelectColor: false })
-                    resize()
-                  }}
-                >
-                  <CaretDownOutlined className={'scale-95'} />
-                </div>
+              <div className={'h-full w-[1px] dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'} />
+              <div
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  openLink()
+                }}
+                className={`${
+                  EditorUtils.isFormatActive(store.editor, 'url')
+                    ? 'text-blue-500 '
+                    : 'dark:hover:text-gray-200 hover:text-gray-600'
+                }
+              cursor-pointer py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
+              `}
+              >
+                <LinkOutlined />
+                <span className={'ml-1 text-sm'}>Link</span>
               </div>
+              <div className={'h-full w-[1px] dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'} />
               <Tooltip
                 mouseEnterDelay={0.3}
                 title={
@@ -420,7 +455,7 @@ export const FloatBar = observer(() => {
               >
                 <div
                   className={
-                    'border-l dark:border-gray-200/10 border-gray-200 cursor-default px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 hover:bg-gray-200/50 hover:text-gray-600'
+                    'cursor-pointer px-2 dark:hover:text-gray-200 dark:hover:bg-gray-200/5 hover:bg-gray-200/50 hover:text-gray-600'
                   }
                   onClick={() => {
                     EditorUtils.clearMarks(store.editor, true)
@@ -436,7 +471,7 @@ export const FloatBar = observer(() => {
             <div className={'flex items-center space-x-2 justify-center h-full'}>
               <div
                 className={
-                  'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'
+                  'w-5 h-5 rounded border cursor-pointer dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'
                 }
                 onClick={() => {
                   EditorUtils.highColor(store.editor)
@@ -450,9 +485,9 @@ export const FloatBar = observer(() => {
                 <div
                   key={c.color}
                   style={{ backgroundColor: c.color }}
-                  className={`float-color-icon ${
+                  className={`float-color-icon flex-shrink-0 duration-200 ${
                     EditorUtils.isFormatActive(store.editor, 'highColor', c.color)
-                      ? 'border-white/50'
+                      ? 'dark:border-white/50 border-gray-200/50'
                       : ''
                   }`}
                   onClick={() => {

@@ -333,7 +333,7 @@ blockquote {
     @apply text-gray-500;
   }
   &[data-task] {
-    list-style: none;
+    list-style: none !important;
     padding-left: 5px;
   }
   li:not(.task){
@@ -408,7 +408,7 @@ ul.m-list {
 }
 .m-hr {
   height: 1px;
-  @apply dark:bg-gray-200/30 bg-gray-300;
+  @apply dark:bg-gray-200/10 bg-gray-200;
   margin: 2em 0;
   border: none;
 }
@@ -645,6 +645,7 @@ ul.m-list {
 
 .float-bar{
   @apply z-20 dark:text-gray-300 h-8 rounded text-sm dark:bg-zinc-800 bg-white text-gray-500 absolute;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
 }
 .dark{
   .float-bar {

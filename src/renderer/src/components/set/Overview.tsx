@@ -20,7 +20,7 @@ export const Overview = observer(() => {
   return (
     <div
       className={
-        'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'
+        'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[550px] overflow-y-auto'
       }
     >
       {context}

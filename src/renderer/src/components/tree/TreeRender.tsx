@@ -24,11 +24,11 @@ export const TreeRender = observer(() => {
       <div
         className={`mb-1 py-1 flex justify-between items-center pl-5 pr-4 dark:text-gray-400 text-gray-500`}
       >
-        <span className={'font-medium text-[15px] flex items-center'}>
+        <span className={'font-semibold text-sm flex items-center'}>
           <span>Folders</span>
         </span>
         <div
-          className={`duration-100 py-0.5 px-1 cursor-pointer rounded ${
+          className={`duration-100 w-[22px] h-[22px] flex items-center justify-center cursor-pointer rounded ${
             treeStore.ctxNode?.root
               ? 'dark:bg-gray-300/10 bg-gray-200/70'
               : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
