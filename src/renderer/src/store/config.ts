@@ -28,7 +28,6 @@ class ConfigStore {
     codeTheme: 'auto',
     mas: false,
     symbolHighlight: true,
-    showCharactersCount: true,
     dragToSort: true,
     spellCheck: false,
     editorWidth: 720,

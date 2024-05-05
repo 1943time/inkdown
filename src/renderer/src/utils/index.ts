@@ -1,12 +1,15 @@
-import {existsSync, readFileSync, statSync} from 'fs'
-import {extname} from 'path'
-import {mediaType} from '../editor/utils/dom'
-import {Subject} from 'rxjs'
-import {ArgsProps} from 'antd/es/message'
-import {HookAPI} from 'antd/es/modal/useModal'
+import { existsSync, readFileSync, statSync } from 'fs'
+import { extname } from 'path'
+import { mediaType } from '../editor/utils/dom'
+import { Subject } from 'rxjs'
+import { ArgsProps } from 'antd/es/message'
+import { HookAPI } from 'antd/es/modal/useModal'
 import { customAlphabet } from 'nanoid'
 import React from 'react'
-export const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 13)
+export const nid = customAlphabet(
+  '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  13
+)
 
 const kb = 1024
 const mb = kb * 1024
@@ -26,7 +29,7 @@ export const stat = (filePath: string) => {
   }
 }
 
-export const copy = <T = any>(data: T):T => JSON.parse(JSON.stringify(data))
+export const copy = <T = any>(data: T): T => JSON.parse(JSON.stringify(data))
 
 export const isMod = (e: MouseEvent | KeyboardEvent | React.KeyboardEvent | React.MouseEvent) => {
   return e.metaKey || e.ctrlKey
@@ -45,7 +48,7 @@ export const getImageData = (filePath: string = '', force = false) => {
   const dev = process.env.NODE_ENV === 'development' || force
   if (existsSync(filePath)) {
     if (dev && mediaType(filePath) === 'image') {
-      const base64 = readFileSync(filePath, {'encoding': 'base64'})
+      const base64 = readFileSync(filePath, { encoding: 'base64' })
       return `data:image/${extname(filePath).slice(1)};base64,${base64}`
     } else {
       return `file://${filePath}`
@@ -69,7 +72,7 @@ export const download = (data: Blob | Uint8Array, fileName: string) => {
   const link = document.createElement('a')
   if (link.download !== undefined) {
     const url = URL.createObjectURL(data)
-    link.addEventListener('click', e => e.stopPropagation())
+    link.addEventListener('click', (e) => e.stopPropagation())
     link.setAttribute('href', url)
     link.setAttribute('download', fileName)
     link.style.visibility = 'hidden'
@@ -88,17 +91,26 @@ type ModalEvent<K extends keyof HookAPI> = {
 export const modal$ = new Subject<ModalEvent<keyof HookAPI>>()
 
 export const encodeHtml = (str: string) => {
-  const encodeHTMLRules = { "&": "&#38;", "<": "&#60;", ">": "&#62;", '"': '&#34;', "'": '&#39;', "/": '&#47;'},
-    matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g;
-  return str.replace(matchHTML, function(m) {return encodeHTMLRules[m] || m; })
+  const encodeHTMLRules = {
+      '&': '&#38;',
+      '<': '&#60;',
+      '>': '&#62;',
+      '"': '&#34;',
+      "'": '&#39;',
+      '/': '&#47;'
+    },
+    matchHTML = /&(?!#?\w+;)|<|>|"|'|\//g
+  return str.replace(matchHTML, function (m) {
+    return encodeHTMLRules[m] || m
+  })
 }
 
 export const parsePath = (path: string) => {
   const m = path.match(/#([^\n#\/]+)?$/)
   if (m) {
-    return {path: path.replace(m[0], ''), hash: m[1] || ''}
+    return { path: path.replace(m[0], ''), hash: m[1] || '' }
   }
-  return {path, hash: null}
+  return { path, hash: null }
 }
 
 export const isMac = /macintosh|mac os x/i.test(navigator.userAgent)

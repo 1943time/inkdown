@@ -78,10 +78,10 @@ html{
   }
 }
 .panel-bg{
-  @apply dark:bg-[rgba(20,20,20)] bg-white/95 backdrop-blur;
+  @apply dark:bg-[rgba(35,35,35,0.95)] bg-white/95 backdrop-blur;
 }
 .modal-panel{
-  @extend .panel-bg;
+  @extend .modal-border, .panel-bg;
   @apply rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
 }
 
@@ -106,7 +106,7 @@ html{
 }
 
 .modal-border{
-  @apply dark:border-gray-200/20 border-transparent;
+  @apply dark:border-gray-200/20 border-transparent border;
 }
 
 .float-bar-icon{

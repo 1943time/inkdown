@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useEditorStore} from '../store'
-import React, {useCallback, useEffect, useRef} from 'react'
+import {useCallback, useEffect, useRef} from 'react'
 import {treeStore} from '../../store/tree'
 import {
   BoldOutlined,
@@ -19,7 +19,7 @@ import {EditorUtils} from '../utils/editorUtils'
 import ICode from '../../icons/ICode'
 import {IFileItem} from '../../index'
 import {isAbsolute, join, relative} from 'path'
-import {isMac, isWindows, parsePath} from '../../utils'
+import {isMac, parsePath} from '../../utils'
 import {useSubject} from '../../hooks/subscribe'
 import {ReactEditor} from 'slate-react'
 import {getSelRect} from '../utils/dom'
@@ -193,10 +193,10 @@ export const FloatBar = observer(() => {
     if (store.domRect) {
       let left = store.domRect.x
       if (!treeStore.fold) left -= treeStore.width
-      left = left - ((state.openSelectColor ? 206 : 250) - store.domRect.width) / 2
+      left = left - ((state.openSelectColor ? 206 : 218) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
-      const barWidth = state.link ? 304 : state.openSelectColor ? 210 : 254
+      const barWidth = state.link ? 304 : state.openSelectColor ? 210 : 222
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       let top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
       if (treeStore.tabs.length > 1) top -= 30
@@ -265,41 +265,41 @@ export const FloatBar = observer(() => {
         left: state.left,
         top: state.top
       }}
-      onMouseDown={e => {
+      onMouseDown={(e) => {
         e.preventDefault()
         e.stopPropagation()
       }}
-      className={`absolute ${state.open ? state.link ? '' : 'duration-100' : 'hidden'} select-none
-        z-20 dark:text-gray-300 h-8 rounded text-sm dark:bg-zinc-800 bg-white text-gray-500  border dark:border-gray-200/10 border-gray-200
+      className={`${state.open ? (state.link ? '' : 'duration-100') : 'hidden'} float-bar
       `}
     >
-      {state.link ?
+      {state.link ? (
         <div className={'flex items-center h-full w-[300px] px-2'}>
           <AutoComplete
-            size={'small'} placeholder={'url, filepath or #hash'}
+            size={'small'}
+            placeholder={'url, filepath or #hash'}
             value={state.url}
             variant={'borderless'}
             className={'w-full'}
             ref={inputRef}
             autoFocus={true}
             allowClear={true}
-            onDropdownVisibleChange={v => {
+            onDropdownVisibleChange={(v) => {
               setTimeout(() => {
                 linkOptionsVisible.current = v
               })
             }}
-            onSelect={e => {
+            onSelect={(e) => {
               if (state.anchors.length) {
                 const parse = parsePath(state.url)
                 const path = parse.path === treeStore.openedNote?.filePath ? '' : parse.path
-                setState({url: path + '#' + e})
+                setState({ url: path + '#' + e })
               } else {
-                setState({url: e})
+                setState({ url: e })
               }
               setLink()
             }}
             options={state.anchors.length ? state.anchors : state.filterLinks}
-            onKeyDown={e => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 setLink()
                 if (!linkOptionsVisible.current) {
@@ -312,20 +312,20 @@ export const FloatBar = observer(() => {
               if (e.key === '#') {
                 setTimeout(getAnchors)
               } else if (state.anchors.length && !state.url?.includes('#')) {
-                setState({anchors: []})
+                setState({ anchors: [] })
               }
               if (isHotkey('esc', e) && store.editor.selection) {
                 EditorUtils.moveAfterSpace(store.editor, store.editor.selection.anchor.path)
                 ReactEditor.focus(store.editor)
               }
             }}
-            onSearch={e => {
+            onSearch={(e) => {
               setState({
                 url: e || '',
-                filterLinks: state.links.filter(l => l.label.includes(e))
+                filterLinks: state.links.filter((l) => l.label.includes(e))
               })
             }}
-            onMouseDown={e => {
+            onMouseDown={(e) => {
               e.stopPropagation()
             }}
           />
@@ -334,22 +334,27 @@ export const FloatBar = observer(() => {
             onClick={() => {
               Transforms.setNodes(
                 store.editor,
-                {url: state.url || undefined},
-                {match: Text.isText, split: true}
+                { url: state.url || undefined },
+                { match: Text.isText, split: true }
               )
               closeLink()
             }}
-            className={'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-indigo-500 ml-2'}
+            className={
+              'text-base dark:text-gray-300 text-gray-500 cursor-default duration-300 hover:text-indigo-500 ml-2'
+            }
           />
-        </div> :
-        <div className={`${state.openSelectColor ? 'w-[206px]' : 'w-[250px]'} h-full space-x-0.5`}>
-          {!state.openSelectColor &&
-            <div className={'flex items-center space-x-0.5 justify-center h-full'}>
-              {tools.map(t =>
-                <Tooltip title={t.tooltip} key={t.type} mouseEnterDelay={.3}>
+        </div>
+      ) : (
+        <div className={`${state.openSelectColor ? 'w-[206px]' : 'w-[206px]'} h-full`}>
+          {!state.openSelectColor && (
+            <div
+              className={'flex *:h-full *:flex *:items-center justify-center h-full'}
+            >
+              {tools.map((t) => (
+                <Tooltip title={t.tooltip} key={t.type} mouseEnterDelay={0.3}>
                   <div
                     key={t.type}
-                    onMouseDown={e => e.preventDefault()}
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={(e) => {
                       if (t.type !== 'url') {
                         EditorUtils.toggleFormat(store.editor, t.type)
@@ -357,90 +362,111 @@ export const FloatBar = observer(() => {
                         openLink()
                       }
                     }}
-                    className={`${EditorUtils.isFormatActive(store.editor, t.type) ? 'bg-indigo-500/80 dark:text-gray-200 text-white' : 'dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600'}
-              cursor-default py-0.5 px-2 rounded
+                    className={`${
+                      EditorUtils.isFormatActive(store.editor, t.type)
+                        ? 'text-blue-500 '
+                        : 'dark:hover:text-gray-200 hover:text-gray-600'
+                    }
+              cursor-default py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
               `}
                   >
                     {t.icon}
                   </div>
                 </Tooltip>
-              )}
-              <div
-                className={`flex items-center`}
-              >
+              ))}
+              <div className={`flex *:h-full *:flex *:items-center`}>
                 <div
-                  className={`${EditorUtils.isFormatActive(store.editor, 'highColor') ? 'bg-indigo-500/80 dark:text-gray-200 text-white' : state.hoverSelectColor ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600' : 'float-bar-icon'} py-0.5 px-2 rounded-tl rounded-bl`}
-                  onMouseEnter={e => e.stopPropagation()}
+                  className={`${
+                    EditorUtils.isFormatActive(store.editor, 'highColor')
+                      ? 'text-blue-500'
+                      : state.hoverSelectColor
+                      ? 'dark:text-gray-200 dark:bg-gray-200/10 bg-gray-200/50 text-gray-600'
+                      : 'float-bar-icon'
+                  } py-0.5 px-1.5`}
+                  onMouseEnter={(e) => e.stopPropagation()}
                   onClick={() => {
                     if (EditorUtils.isFormatActive(store.editor, 'highColor')) {
                       EditorUtils.highColor(store.editor)
                     } else {
-                      EditorUtils.highColor(store.editor, localStorage.getItem('high-color') || '#10b981')
+                      EditorUtils.highColor(
+                        store.editor,
+                        localStorage.getItem('high-color') || '#10b981'
+                      )
                     }
                   }}
                 >
-                  <HighlightOutlined/>
+                  <HighlightOutlined />
                 </div>
                 <div
-                  className={'h-6 text-xs rounded-tr rounded-br float-bar-icon flex items-center px-0.5'}
-                  onMouseEnter={() => setState({hoverSelectColor: true})}
-                  onMouseLeave={() => setState({hoverSelectColor: false})}
+                  className={'h-6 text-xs float-bar-icon px-0.5'}
+                  onMouseEnter={() => setState({ hoverSelectColor: true })}
+                  onMouseLeave={() => setState({ hoverSelectColor: false })}
                   onClick={() => {
-                    setState({openSelectColor: true, hoverSelectColor: false})
+                    setState({ openSelectColor: true, hoverSelectColor: false })
                     resize()
                   }}
                 >
-                  <CaretDownOutlined className={'scale-95'}/>
+                  <CaretDownOutlined className={'scale-95'} />
                 </div>
               </div>
-              <div className={'w-[1px] h-5 dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'}></div>
-              <Tooltip mouseEnterDelay={.3} title={(
+              <Tooltip
+                mouseEnterDelay={0.3}
+                title={
+                  <div className={'text-xs flex items-center space-x-1'}>
+                    <Mod />
+                    <span>\</span>
+                  </div>
+                }
+              >
                 <div
-                  className={'text-xs flex items-center space-x-1'}>
-                  <Mod/><span>\</span>
-                </div>
-              )}>
-                <div
-                  className={'cursor-default py-0.5 px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 rounded hover:bg-gray-200/50 hover:text-gray-600'}
+                  className={
+                    'border-l dark:border-gray-200/10 border-gray-200 cursor-default px-[6px] dark:hover:text-gray-200 dark:hover:bg-gray-200/5 hover:bg-gray-200/50 hover:text-gray-600'
+                  }
                   onClick={() => {
                     EditorUtils.clearMarks(store.editor, true)
                     EditorUtils.highColor(store.editor)
                   }}
                 >
-                  <ClearOutlined/>
+                  <ClearOutlined />
                 </div>
               </Tooltip>
             </div>
-          }
-          {state.openSelectColor &&
+          )}
+          {state.openSelectColor && (
             <div className={'flex items-center space-x-2 justify-center h-full'}>
               <div
-                className={'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'}
+                className={
+                  'w-5 h-5 rounded border dark:border-white/20 dark:hover:border-white/50 border-black/20 hover:border-black/50 flex items-center justify-center dark:text-white/30 dark:hover:text-white/50 text-black/30 hover:text-black/50'
+                }
                 onClick={() => {
                   EditorUtils.highColor(store.editor)
-                  setState({openSelectColor: false})
+                  setState({ openSelectColor: false })
                   resize()
                 }}
               >
                 /
               </div>
-              {colors.map(c =>
+              {colors.map((c) => (
                 <div
                   key={c.color}
-                  style={{backgroundColor: c.color}}
-                  className={`float-color-icon ${EditorUtils.isFormatActive(store.editor, 'highColor', c.color) ? 'border-white/50' : ''}`}
+                  style={{ backgroundColor: c.color }}
+                  className={`float-color-icon ${
+                    EditorUtils.isFormatActive(store.editor, 'highColor', c.color)
+                      ? 'border-white/50'
+                      : ''
+                  }`}
                   onClick={() => {
                     localStorage.setItem('high-color', c.color)
                     EditorUtils.highColor(store.editor, c.color)
-                    setState({openSelectColor: false})
+                    setState({ openSelectColor: false })
                     resize()
                   }}
                 />
-              )}
+              ))}
             </div>
-          }
+          )}
         </div>
-      }
+      )}
     </div>
   )
 })
