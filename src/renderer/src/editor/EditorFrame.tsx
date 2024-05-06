@@ -18,6 +18,7 @@ import {InsertNetworkImage} from './tools/InsertNetworkImage'
 import {LangAutocomplete} from './tools/LangAutocomplete'
 import {configStore} from '../store/config'
 import {InsertAutocomplete} from './tools/InsertAutocomplete'
+import { InsertLink } from './tools/InsertLink'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
@@ -122,6 +123,7 @@ export const EditorFrame = observer(({tab}: {
           <Empty/>
         }
         <FloatBar/>
+        <InsertLink/>
         <TableAttr/>
         <InsertNetworkImage/>
         <LangAutocomplete/>

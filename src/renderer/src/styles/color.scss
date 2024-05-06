@@ -9,7 +9,6 @@
   --md-bg-mute: rgba(23, 23, 23, .07);
   --md-high: rgba(141, 141, 141, 0.5);
   --md-border: #b9b9b9;
-  --card-bg: #fff;
 }
 .dark{
   --bg: #191919;
@@ -18,7 +17,6 @@
   --b1: rgb(229 231 235 / 0.1);
   --md-text: rgba(255, 255, 255, 0.82);
   --tree-bg: #1E1E1E;
-  --card-bg: #1E1E1E;
   --md-code-bg: #1c1c1c;
   --md-bg-mute: rgba(255, 255, 255, .07);
   --md-high: rgba(255, 255, 255, .2);
@@ -34,9 +32,6 @@ html.dark{
 }
 .def-bg{
   background: var(--bg);
-}
-.card-bg{
-  background: var(--card-bg);
 }
 .tree-bg{
   background: var(--tree-bg);
@@ -114,7 +109,7 @@ html{
 }
 
 .float-color-icon{
-  @apply w-5 h-5 rounded-full hover:opacity-90 cursor-pointer;
+  @apply w-5 h-5 rounded-full hover:opacity-80 cursor-pointer;
 }
 .ant-btn-primary {
   &:not([disabled],.ant-btn-dangerous) {
@@ -123,4 +118,15 @@ html{
       background-color: #6d6fec !important;
     }
   }
+}
+
+.ctx-panel{
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+.dark .ctx-panel{
+  background-color: rgb(37, 37, 37);
+  box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.2) 0px 3px 6px, rgba(15, 15, 15, 0.4) 0px 9px 24px;
 }

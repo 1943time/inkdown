@@ -321,8 +321,8 @@ export const InsertAutocomplete = observer(() => {
       ref={dom}
       className={`
       ${!store.openInsertCompletion || !state.filterOptions.length ? 'hidden' : ''}
-      absolute z-50 w-44 max-h-52 overflow-y-auto p-1.5
-      border border-stone-200 rounded-lg py-1 text-gray-700/90 card-bg dark:text-gray-300 dark:border-gray-200/10
+        absolute z-50 w-44 max-h-52 overflow-y-auto p-1.5
+        rounded-lg py-1 text-gray-700/90 ctx-panel dark:text-gray-300 dark:border-gray-200/10
       `}
       onMouseDown={(e) => {
         e.preventDefault()

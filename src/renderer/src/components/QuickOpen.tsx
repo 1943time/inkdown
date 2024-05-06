@@ -5,7 +5,6 @@ import {configStore} from '../store/config'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
 import {IFileItem} from '../index'
-import {sep} from 'path'
 import { useGetSetState } from 'react-use'
 
 export const quickOpen$ = new Subject()
@@ -57,17 +56,10 @@ export const QuickOpen = observer(() => {
   }, [])
   useSubject(quickOpen$, async () => {
     if (treeStore.root) {
-      const data = Array.from(treeStore.nodeMap.values()).filter(r => {
-        return r.ext === 'md'
-      }).sort((a, b) => a.lastOpenTime! > b.lastOpenTime! ? -1 : 1).map(r => {
-        return {
-          ...r,
-          path: r.filePath.replace(treeStore.root!.filePath + sep, '')
-        }
-      })
-      const filterData = data.filter((q) => !state().query || q.path.includes(state().query))
+      const {docs} = treeStore.allNotes
+      const filterData = docs.filter((q) => !state().query || q.path.includes(state().query))
       setState({
-        records: data,
+        records: docs,
         open: true,
         activeIndex: 0,
         filterRecords: filterData

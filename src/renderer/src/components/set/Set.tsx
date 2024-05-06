@@ -46,7 +46,7 @@ export const Set = observer(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className={'z-[10] p-1 dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30 absolute right-3 top-3'}
+            className={'z-[10] w-6 h-6 flex items-center justify-center dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30 absolute right-3 top-3'}
             onClick={close}
           >
             <CloseOutlined/>

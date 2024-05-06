@@ -4,7 +4,7 @@ import { Editor, Element, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements'
 import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
-import { selChange$, useOnchange } from './plugins/useOnchange'
+import { useOnchange } from './plugins/useOnchange'
 import { htmlParser } from './plugins/htmlParser'
 import { observer } from 'mobx-react-lite'
 import { IFileItem } from '../index'
@@ -21,6 +21,7 @@ import { ErrorBoundary, ErrorFallback } from '../components/ErrorBoundary'
 import { Title } from './tools/Title'
 import { updateNode } from './utils/updateNode'
 import { mediaType } from './utils/dom'
+import { toUnixPath } from '../utils/path'
 
 export const MEditor = observer(({ note }: { note: IFileItem }) => {
   const store = useEditorStore()
@@ -206,7 +207,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
           if (node.ext === 'md' || type === 'other') {
             Transforms.insertNodes(store.editor, {
               text: node.filename,
-              url: window.api.toUnix(relative(join(note.filePath, '..'), node.filePath))
+              url: toUnixPath(relative(join(note.filePath, '..'), node.filePath))
             })
           } else {
             EditorUtils.focus(store.editor)
@@ -216,7 +217,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
                 store.editor,
                 {
                   type: 'media',
-                  url: window.api.toUnix(relative(join(note.filePath, '..'), node.filePath)),
+                  url: toUnixPath(relative(join(note.filePath, '..'), node.filePath)),
                   children: [{ text: '' }]
                 },
                 { at: path, select: true }
@@ -278,7 +279,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
                 treeStore.root &&
                 url.startsWith(treeStore.root.filePath)
               ) {
-                url = window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), url))
+                url = toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), url))
               }
               Transforms.insertNodes(
                 store.editor,

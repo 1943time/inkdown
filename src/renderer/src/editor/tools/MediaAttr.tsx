@@ -16,6 +16,7 @@ import {join, relative} from 'path'
 import {getImageData} from '../../utils'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../utils/editorUtils'
+import { toUnixPath } from '../../utils/path'
 
 export const MediaAttr = observer(() => {
   const store = useEditorStore()
@@ -40,7 +41,9 @@ export const MediaAttr = observer(() => {
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
-          const path = window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!))
+          const path = toUnixPath(
+            relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
+          )
           files.push({
             label: (
               <div className={'flex items-center'}>

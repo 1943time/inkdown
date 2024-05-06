@@ -5,21 +5,21 @@ import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
-import {isMac, message$, nid, parsePath, stat} from '../utils'
+import {isMac, message$, nid, stat} from '../utils'
+import { parsePath } from '../utils/path'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {configStore} from './config'
 import {db, IFile} from './db'
 import {EditorStore} from '../editor/store'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
-import {Checkbox} from 'antd'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
 import {Refactor} from '../utils/refactor'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
+import { sep } from 'path'
 import React from 'react'
-
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   nodeMap = new Map<string, IFileItem>()
@@ -57,6 +57,26 @@ export class TreeStore {
 
   get openedNote() {
     return this.tabs[this.currentIndex]?.current
+  }
+
+  get allNotes() {
+    const map = new Map<string, IFileItem & { path: string; parentPath?: string }>()
+    const docs =  Array.from(this.nodeMap.values())
+      .filter((r) => {
+        return r.ext === 'md'
+      })
+      .sort((a, b) => (a.lastOpenTime! > b.lastOpenTime! ? -1 : 1))
+      .map((r) => {
+        const path = r.filePath.replace(treeStore.root!.filePath + sep, '')
+        const item = {
+          ...r,
+          parentPath: path.split(sep).slice(0, -1).join('/'),
+          path
+        }
+        map.set(r.filePath, item)
+        return item
+      })
+    return {map, docs}
   }
 
   get firstNote() {

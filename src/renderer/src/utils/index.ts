@@ -105,14 +105,6 @@ export const encodeHtml = (str: string) => {
   })
 }
 
-export const parsePath = (path: string) => {
-  const m = path.match(/#([^\n#\/]+)?$/)
-  if (m) {
-    return { path: path.replace(m[0], ''), hash: m[1] || '' }
-  }
-  return { path, hash: null }
-}
-
 export const isMac = /macintosh|mac os x/i.test(navigator.userAgent)
 
 export const isWindows = /windows|win32/i.test(navigator.userAgent)

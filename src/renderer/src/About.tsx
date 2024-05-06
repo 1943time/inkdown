@@ -1,4 +1,3 @@
-import {CloseOutlined, GithubOutlined} from '@ant-design/icons'
 import {useSetState} from 'react-use'
 import {useEffect} from 'react'
 import icon from '../../../resources/icon.png?asset'
@@ -34,7 +33,7 @@ export function About() {
             {configStore.zh ? '版本' : 'version'} {state.version}
           </div>
         </div>
-        <div className={'mt-4 text-xs dark:text-gray-400'}>Copyright © 2023-present 1943time</div>
+        <div className={'mt-4 text-xs dark:text-gray-400'}>Copyright © 2024 Inkdown</div>
       </div>
     </Modal>
   )
