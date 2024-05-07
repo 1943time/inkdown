@@ -1,13 +1,13 @@
 appId: bluestone
-productName: Bluestone
+productName: Inkdown
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
 afterSign: scripts/notarize.js
 protocols:
-  name: inkdown deeplink
+  name: bluestone deeplink
   schemes:
-    - inkdown
+    - bluestone
 files:
   - '!**/.vscode/*'
   - '!src/*'

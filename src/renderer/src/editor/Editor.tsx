@@ -261,7 +261,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       const text = window.api.getClipboardText()
       if (text) {
         try {
-          if (text.startsWith('inkdown://')) {
+          if (text.startsWith('bluestone://')) {
             const url = new URL(text)
             if (treeStore.root?.cid === url.searchParams.get('space')) {
               store.insertLink(url.searchParams.get('path')!)

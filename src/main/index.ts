@@ -3,10 +3,9 @@ import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {AppUpdate} from './update'
-import log from 'electron-log'
 import {isAbsolute, join} from 'path'
 const isWindows = process.platform === 'win32'
-app.setAsDefaultProtocolClient('inkdown')
+app.setAsDefaultProtocolClient('bluestone')
 
 let fileChangedWindow: BrowserWindow | null = null
 const openSpaceMap = new Map<BrowserWindow, string>()
@@ -134,7 +133,7 @@ app.on('will-finish-launching', () => {
     }
   })
   app.on('open-url', (event, schema) => {
-    if (schema?.startsWith('inkdown://')) {
+    if (schema?.startsWith('bluestone://')) {
       const url = new URL(schema)
       if (url.searchParams.get('path')) {
         const win = BrowserWindow.getAllWindows()?.find(w => !openSpaceMap.get(w) || openSpaceMap.get(w) === url.searchParams.get('space'))
