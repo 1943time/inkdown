@@ -12,13 +12,12 @@ import { useEditorStore } from '../store'
 import { Editor, Transforms } from 'slate'
 import { treeStore } from '../../store/tree'
 import { InlineKatex } from './CodeUI/Katex/InlineKatex'
-import { parsePath } from '../../utils/path'
+import { isLink, parsePath, toSpacePath } from '../../utils/path'
 import { ReactEditor } from 'slate-react'
 import { EditorUtils } from '../utils/editorUtils'
 import { isAbsolute, join } from 'path'
 import { db } from '../../store/db'
 import { slugify } from '../utils/dom'
-import { Tooltip } from 'antd'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -26,7 +25,9 @@ const dragStart = (e: React.DragEvent) => {
 }
 
 const toHash = (hash: string) => {
-  const dom = treeStore.currentTab.store.container?.querySelector(`[data-head="${slugify(hash.toLowerCase())}"]`) as HTMLElement
+  const dom = treeStore.currentTab.store.container?.querySelector(
+    `[data-head="${slugify(hash.toLowerCase())}"]`
+  ) as HTMLElement
   if (dom) {
     treeStore.currentTab.store.container?.scroll({
       top: dom.offsetTop - 10,
@@ -38,31 +39,30 @@ const toHash = (hash: string) => {
 export const MElement = (props: RenderElementProps) => {
   switch (props.element.type) {
     case 'blockquote':
-      return (
-        <Blockquote {...props}/>
-      )
+      return <Blockquote {...props} />
     case 'head':
-      return <Head {...props}/>
+      return <Head {...props} />
     case 'hr':
-      return <div {...props.attributes} contentEditable={false} className={'m-hr select-none'}>{props.children}</div>
+      return (
+        <div {...props.attributes} contentEditable={false} className={'m-hr select-none'}>
+          {props.children}
+        </div>
+      )
     case 'break':
-      return <span {...props.attributes} contentEditable={false}>{props.children}<br/></span>
+      return (
+        <span {...props.attributes} contentEditable={false}>
+          {props.children}
+          <br />
+        </span>
+      )
     case 'list-item':
-      return (
-        <ListItem {...props}/>
-      )
+      return <ListItem {...props} />
     case 'list':
-      return (
-        <List {...props}/>
-      )
+      return <List {...props} />
     case 'code':
-      return (
-        <CodeElement {...props}>{props.children}</CodeElement>
-      )
+      return <CodeElement {...props}>{props.children}</CodeElement>
     case 'code-line':
-      return (
-        <CodeLine {...props}/>
-      )
+      return <CodeLine {...props} />
     case 'table':
       return <Table {...props}>{props.children}</Table>
     case 'table-row':
@@ -70,11 +70,11 @@ export const MElement = (props: RenderElementProps) => {
     case 'table-cell':
       return <TableCell {...props}>{props.children}</TableCell>
     case 'media':
-      return <Media {...props}/>
+      return <Media {...props} />
     case 'inline-katex':
-      return <InlineKatex {...props}/>
+      return <InlineKatex {...props} />
     default:
-      return <Paragraph {...props}/>
+      return <Paragraph {...props} />
   }
 }
 
@@ -113,27 +113,33 @@ export const MLeaf = (props: RenderLeafProps) => {
     }
     if (leaf.url) {
       return (
-        <Tooltip title={`${leaf.url}`} mouseEnterDelay={0.5}>
-          <span
-            style={style}
-            data-be={'link'}
-            draggable={false}
-            title={`mod + click to open link, mod + alt + click to open file in new tab`}
-            onDragStart={dragStart}
-            onClick={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              if (e.metaKey || e.ctrlKey) {
-                if (!leaf.url) return
-                if (/^https?/.test(leaf.url)) {
-                  window.open(leaf.url)
-                } else {
-                  const parseRes = parsePath(leaf.url)
-                  if (!parseRes.path && parseRes.hash) {
-                    return toHash(parseRes.hash)
-                  }
-                  const path = isAbsolute(parseRes.path) ? parseRes.path : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
-                  db.file.where('filePath').equals(path).toArray().then(res => {
+        <span
+          style={style}
+          data-be={'link'}
+          draggable={false}
+          title={`mod + click to open link, mod + alt + click to open file in new tab`}
+          onDragStart={dragStart}
+          data-url={toSpacePath(treeStore.root?.filePath || '', store.openFilePath || '', leaf.url)}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            if (e.metaKey || e.ctrlKey) {
+              if (!leaf.url) return
+              if (isLink(leaf.url)) {
+                window.open(leaf.url)
+              } else {
+                const parseRes = parsePath(leaf.url)
+                if (!parseRes.path && parseRes.hash) {
+                  return toHash(parseRes.hash)
+                }
+                const path = isAbsolute(parseRes.path)
+                  ? parseRes.path
+                  : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                db.file
+                  .where('filePath')
+                  .equals(path)
+                  .toArray()
+                  .then((res) => {
                     if (!res.length) {
                       window.open(leaf.url)
                     } else {
@@ -151,23 +157,19 @@ export const MLeaf = (props: RenderLeafProps) => {
                       }
                     }
                   })
-                }
-              } else if (e.detail === 2) {
-                selectFormat()
               }
-            }}
-            data-slate-inline={true}
-            className={`mx-[1px] link cursor-default ${className}`}
-            {...props.attributes}>
-            {!!props.text?.text &&
-              <InlineChromiumBugfix />
+            } else if (e.detail === 2) {
+              selectFormat()
             }
-            {children}
-            {!!props.text?.text &&
-              <InlineChromiumBugfix />
-            }
-          </span>
-        </Tooltip>
+          }}
+          data-slate-inline={true}
+          className={`mx-[1px] link cursor-default ${className}`}
+          {...props.attributes}
+        >
+          {!!props.text?.text && <InlineChromiumBugfix />}
+          {children}
+          {!!props.text?.text && <InlineChromiumBugfix />}
+        </span>
       )
     }
     return (
@@ -176,7 +178,7 @@ export const MLeaf = (props: RenderLeafProps) => {
         data-be={'text'}
         draggable={false}
         onDragStart={dragStart}
-        onClick={e => {
+        onClick={(e) => {
           if (e.detail === 2) {
             selectFormat()
           }
@@ -186,17 +188,12 @@ export const MLeaf = (props: RenderLeafProps) => {
         data-fnc-name={leaf.fnc ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}
         data-fnd-name={leaf.fnd ? leaf.text?.replace(/\[\^(.+)]:?/g, '$1') : undefined}
         className={`${!!dirty ? 'mx-[1px]' : ''} ${className}`}
-        style={style}>
-        {!!dirty && !!leaf.text &&
-          <InlineChromiumBugfix/>
-        }
+        style={style}
+      >
+        {!!dirty && !!leaf.text && <InlineChromiumBugfix />}
         {children}
-        {!!dirty && !!leaf.text &&
-          <InlineChromiumBugfix/>
-        }
+        {!!dirty && !!leaf.text && <InlineChromiumBugfix />}
       </span>
     )
-  }, [
-    props.leaf, props.leaf.text, code.lang
-  ])
+  }, [props.leaf, props.leaf.text, code.lang])
 }

@@ -322,7 +322,7 @@ export const InsertLink = observer(() => {
               >
                 <div className={'text-gray-600 dark:text-gray-300 flex items-center'}>
                   <INet />
-                  <span className={'ml-1 flex-1 max-w-full truncate'}>{state().inputKeyword}</span>
+                  <span className={'ml-1 flex-1 max-w-full text-sm break-words'}>{state().inputKeyword}</span>
                 </div>
               </div>
             </>

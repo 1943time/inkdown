@@ -141,6 +141,7 @@ a {
     opacity: 1;
   }
 }
+
 .content {
   color: var(--md-text);
   font-family: -apple-system, system-ui,ui-sans-serif, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
@@ -271,9 +272,6 @@ a {
   a {
     font-weight: 500;
   }
-  li{
-    margin-bottom: 0.2em;
-  }
 }
 
 .inline-code {
@@ -398,7 +396,7 @@ ul.m-list {
     z-index: 10;
   }
   p:not(:last-child){
-    margin-bottom: 0.2em;
+    margin-bottom: 0.1em;
   }
 }
 .katex-container {

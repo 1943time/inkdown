@@ -85,6 +85,13 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           icon: <IMermaid className={'text-lg'} />
         },
         {
+          label: ['HTML', 'HTML'],
+          task: 'insertCode',
+          key: 'html',
+          args: ['html'],
+          icon: <Icon icon={'icon-park-outline:html-five'} className={'text-lg'} />
+        },
+        {
           label: ['分割线', 'Horizontal line'],
           key: 'horizontal-line',
           task: 'horizontalLine',
