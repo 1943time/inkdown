@@ -24,7 +24,7 @@ export const Update = observer(() => {
   })
   const checkTimer = useRef(0)
   const downLoad = useCallback(() => {
-    window.open(`https://github.com/1943time/bluestone/releases/latest`)
+    window.open(`https://github.com/1943time/inkdown/releases/latest`)
   }, [])
 
   const check = useCallback(async () => {
@@ -122,7 +122,7 @@ export const Update = observer(() => {
         </div>
       }
       <Modal
-        title={`Update Bluestone-${state.updateData.tag}`}
+        title={`Update Inkdown-${state.updateData.tag}`}
         width={600}
         onCancel={action(() => configStore.openUpdateDialog = false)}
         open={configStore.openUpdateDialog}
@@ -172,7 +172,7 @@ export const Update = observer(() => {
                 onClick={async () => {
                   if (state.mas) {
                     // window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
-                    window.open('itms-apps://apps.apple.com/us/app/bluestone-markdown/id6451391474')
+                    window.open('itms-apps://apps.apple.com/us/app/inkdown/id6451391474')
                   } else {
                     setState({loading: true})
                     ipcRenderer.invoke('check-updated').then(async () => {

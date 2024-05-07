@@ -58,7 +58,9 @@ export const Nav = observer(() => {
   }, [])
 
   useEffect(() => {
-    getPath()
+    setTimeout(() => {
+      getPath()
+    }, 30)
   }, [treeStore.openedNote, treeStore.openedNote?.filePath])
 
   const checkOpenedNote = useCallback(() => {
@@ -269,7 +271,7 @@ export const Nav = observer(() => {
               ]
               if (configStore.enableUpgrade) {
                 menus.unshift({
-                  text: 'Update Bluestone',
+                  text: 'Update Inkdown',
                   click: () => {
                     runInAction(() => {
                       configStore.openUpdateDialog = true

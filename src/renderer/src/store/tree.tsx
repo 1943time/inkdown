@@ -281,7 +281,7 @@ export class TreeStore {
         document.title = this.openedNote.filename
       }
     } else {
-      document.title = 'Bluestone'
+      document.title = 'Inkdown'
     }
   }
 

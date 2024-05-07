@@ -5,9 +5,9 @@ directories:
   buildResources: build
 afterSign: scripts/notarize.js
 protocols:
-  name: bluestone deeplink
+  name: inkdown deeplink
   schemes:
-    - bluestone
+    - inkdown
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -59,7 +59,7 @@ linux:
     - deb
   maintainer: 1943dejavu
   category: Markdown
-  executableName: Bluestone
+  executableName: Inkdown
 npmRebuild: false
 publish:
   provider: github

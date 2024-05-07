@@ -22,7 +22,7 @@ const getSystemMenus = () => {
   ] : []
   const menus: MenuOptions = [
     {
-      label: 'Bluestone',
+      label: 'Inkdown',
       role: 'appMenu',
       id: 'app',
       submenu: [
@@ -204,7 +204,7 @@ const getSystemMenus = () => {
           }
         },
         // {
-        //   label: 'Bluestone Website',
+        //   label: 'Inkdown Website',
         //   click: () => {
         //     shell.openExternal('https://www.bluemd.me')
         //   }
@@ -212,13 +212,13 @@ const getSystemMenus = () => {
         {
           label: 'Github',
           click: () => {
-            shell.openExternal('https://github.com/1943time/bluestone')
+            shell.openExternal('https://github.com/1943time/inkdown')
           }
         },
         {
           label: 'Issues',
           click: () => {
-            shell.openExternal('https://github.com/1943time/bluestone/issues')
+            shell.openExternal('https://github.com/1943time/inkdown/issues')
           }
         },
         {

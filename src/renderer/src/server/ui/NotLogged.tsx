@@ -10,7 +10,7 @@ export const NotLogged = observer((props: {
       <div className={'text-center text-[13px] mt-3 text-gray-500'}>
         {configStore.zh ? (
           <span>
-            如果您有自己的服务器，可以通过安装Bluestone的服务程序在
+            如果您有自己的服务器，可以通过安装Inkdown的服务程序在
             <br />
             5分钟内建立自己的web服务。
             <br />

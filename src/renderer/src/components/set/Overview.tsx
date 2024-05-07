@@ -32,7 +32,7 @@ export const Overview = observer(() => {
           <Button
             icon={<LinkOutlined />}
             onClick={() => {
-              window.open('https://github.com/1943time/bluestone/releases')
+              window.open('https://github.com/1943time/inkdown/releases')
             }}
           >
             {configStore.zh ? '发布记录' : 'Release Record'}
@@ -109,7 +109,7 @@ export const Overview = observer(() => {
             text={
               configStore.zh
                 ? '打开应用时，自动打开最后一次打开的空间。'
-                : 'When opening bluestone, automatically open the last space opened.'
+                : 'When opening inkdown, automatically open the last space opened.'
             }
           />
         </div>

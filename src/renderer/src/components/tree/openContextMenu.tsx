@@ -108,9 +108,9 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
           }
         },
         {
-          text: configStore.zh ? '复制Bluestone URL' : 'Copy Bluestone URL',
+          text: configStore.zh ? '复制Inkdown URL' : 'Copy Inkdown URL',
           click: async () => {
-            copyToClipboard(`bluestone://open?space=${treeStore.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
+            copyToClipboard(`inkdown://open?space=${treeStore.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
             message$.next({
               type: 'success',
               content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
