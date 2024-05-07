@@ -149,7 +149,7 @@ export const InsertLink = observer(() => {
       if (isLink(state().inputKeyword)) {
         close(state().inputKeyword)
       } else {
-        if (state().filterAnchors.length) {
+        if (state().anchors.length) {
           const target = state().filterAnchors[state().index]
           if (target) {
             setPath(target.item.path + target.value)
@@ -328,7 +328,7 @@ export const InsertLink = observer(() => {
             </>
           ) : (
             <>
-              {!!state().filterAnchors.length &&
+              {!!state().anchors.length &&
                 state().filterAnchors.map((a, i) => (
                   <div
                     key={i}
@@ -369,7 +369,7 @@ export const InsertLink = observer(() => {
                       }}
                       className={`flex justify-center py-1 rounded ${
                         state().index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''
-                      } cursor-pointer px-2 flex-col`}
+                      } cursor-pointer px-2 flex-col ${f.filePath === store.openFilePath ? 'hidden' : ''}`}
                     >
                       <div className={'text-gray-600 dark:text-white/90 flex items-center leading-6'}>
                         <INote />
@@ -383,7 +383,7 @@ export const InsertLink = observer(() => {
                     </div>
                   )
                 })}
-              {!state().filterDocs.length && !state().filterAnchors.length && (
+              {((state().anchors.length && !state().filterAnchors.length) || (state().docs.length && !state().filterDocs.length)) && (
                 <div className={'py-4 text-center text-gray-400'}>
                   {configStore.zh ? '没有相关文档' : 'No related documents'}
                 </div>

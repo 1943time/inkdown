@@ -1,4 +1,4 @@
-<h1><img src="resources/icon.png" width="25"/> Bluestone Markdown</h1>
+<h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
 Improve markdown reading and editing experience, and facilitate network sharing.
 
 [Documentation](https://doc.inkdown.me/book/inkdown/inkdown) | [中文文档](https://doc.inkdown.me/book/%E9%9D%92%E7%9F%B3%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3)
@@ -7,7 +7,7 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | ---------------------------------------------- |
 | [mac-arm64](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-mac-arm64.dmg) <br/> [mac-x64](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-mac-x64.dmg) | [win-arm64](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-win-arm64.exe)<br/> [win-x64](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-win-x64.exe) | [linux-amd64.deb](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-linux-amd64.deb) \| [linux-x86_64.AppImage](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-linux-x86_64.AppImage) <br/> [linux-arm64.AppImage](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-linux-arm64.AppImage) \| [linux-arm64.deb](https://github.com/1943time/bluestone/releases/latest/download/Bluestone-linux-arm64.deb) | [deploy](https://doc.inkdown.me/book/inkdown/deploy-to-linux)<br/>[deploy-cn](https://doc.inkdown.me/book/%E9%9D%92%E7%9F%B3%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3/%E9%83%A8%E7%BD%B2%E8%87%B3linux) |
 
-OR <a href="https://apps.apple.com/us/app/bluestone-markdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px;margin-left:10px"/></a>
+OR <a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px;margin-left:10px"/></a>
 
 > The release time of mac store will be delayed by 1-3 days
 >
@@ -23,7 +23,7 @@ As a document publisher, markdown source code mode is undoubtedly efficient and 
 but as a note, it is not conducive to reading.
 The table element of markdown is not conducive to writing,
 and the double-column mode is not conducive to focusing,
-so the Bluestone Editor was developed. It combines rich text with markdown editing habits to help you record daily,
+so the Inkdown Editor was developed. It combines rich text with markdown editing habits to help you record daily,
 and saves it in standard markdown format, which allows your notes to be used anywhere and backed up in any way.
 
 https://github.com/1943time/bluestone/assets/115093678/e01c9d88-a278-4038-b786-7d0ed5d40cbb
