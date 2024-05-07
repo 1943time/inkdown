@@ -129,6 +129,17 @@ export const SetEditor = observer(() => {
           />
         </div>
       </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>{configStore.zh ? '代码自动换行' : 'Code auto wrap'}</div>
+        <div>
+          <Checkbox
+            checked={configStore.config.codeAutoBreak}
+            onChange={(e) => {
+              configStore.setConfig('codeAutoBreak', e.target.checked)
+            }}
+          ></Checkbox>
+        </div>
+      </div>
       <div className={'py-3'}>
         <div className={'flex justify-between items-center'}>
           <div className={'text-sm'}>{configStore.zh ? '图床工具' : 'Image bed tool'}</div>

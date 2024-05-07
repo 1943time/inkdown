@@ -26,6 +26,7 @@ class ConfigStore {
     codeTabSize: 4,
     editorTextSize: 16,
     codeTheme: 'auto',
+    codeAutoBreak: false,
     mas: false,
     symbolHighlight: true,
     dragToSort: true,

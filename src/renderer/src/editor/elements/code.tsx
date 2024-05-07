@@ -11,7 +11,6 @@ import { observer } from 'mobx-react-lite'
 import { useEditorStore } from '../store'
 import { configStore } from '../../store/config'
 import { Editor, Node, Path, Transforms } from 'slate'
-import { EyeOutlined } from '@ant-design/icons'
 import { useSubject } from '../../hooks/subscribe'
 import { selChange$ } from '../plugins/useOnchange'
 import { DragHandle } from '../tools/DragHandle'
@@ -71,7 +70,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   return (
     <CodeCtx.Provider value={{ lang: state().lang || '', code: true }}>
       <div
-        className={'code-container'}
+        className={`code-container ${configStore.config.codeAutoBreak ? 'wrap' : ''}`}
         {...props.attributes}
         style={{
           padding: state().hide ? 1 : undefined,
@@ -219,8 +218,8 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             )}
           </div>
           {configStore.config.codeLineNumber && !store.webview && (
-            <pre className={`code-line-list`} contentEditable={false}>
-              {(props.children || []).map((c, i) => (
+            <pre className={`code-line-list select-none`} contentEditable={false}>
+              {!configStore.config.codeAutoBreak && (props.children || []).map((c, i) => (
                 <div key={i} />
               ))}
             </pre>

@@ -312,7 +312,7 @@ export const InsertLink = observer(() => {
           className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}
           ref={scrollRef}
         >
-          {isLink(state().inputKeyword) || !treeStore.root ? (
+          {isLink(state().inputKeyword) || (!treeStore.root && !!state().inputKeyword) ? (
             <>
               <div
                 onClick={(e) => {
