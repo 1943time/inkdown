@@ -129,7 +129,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                       state().openMenu
                         ? 'bg-gray-400/20'
                         : 'group-hover:opacity-100 hover:bg-gray-400/20'
-                    } duration-200 hover:text-indigo-400 text-gray-400 rounded px-1.5 py-0.5 text-xs cursor-pointer`}
+                    } duration-200 hover:text-blue-400 text-gray-400 rounded px-1.5 py-0.5 text-xs cursor-pointer`}
                     onClick={(e) => {
                       if (props.element.render) {
                         return

@@ -1,38 +1,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.hide-scrollbar{
+.hide-scrollbar {
   &::-webkit-scrollbar {
     display: none;
   }
 }
-.drag-nav{
+.drag-nav {
   app-region: drag;
 }
-.drag-none{
+.drag-none {
   app-region: no-drag;
 }
-.tree-tab{
+.tree-tab {
   @apply text-gray-600 dark:text-gray-300 flex justify-center items-center flex-1 relative z-10 cursor-pointer;
 }
-.tabs-nav{
+.tabs-nav {
   background-color: var(--tab);
   @apply h-8 border-gray-200 dark:border-gray-200/10 border-b border-t text-[13px] overflow-x-auto hide-scrollbar w-full z-50 relative flex-shrink-0;
 }
-.high-el{
-  background-color: rgba(6,182,212,.3);
+.high-el {
+  background-color: rgba(6, 182, 212, 0.3);
   border-radius: 4px;
 }
 
-.ant-btn > .anticon{
+.ant-btn > .anticon {
   display: inline-flex;
 }
 
-[contenteditable="true"] {
+[contenteditable='true'] {
   outline: none;
 }
 
-.anticon[tabindex]{
+.anticon[tabindex] {
   cursor: default;
 }
 
@@ -42,66 +42,67 @@
     transition: none;
   }
 }
-.enter-space-top{
+.enter-space-top {
   position: relative;
   &:before {
     content: '';
     @apply w-full h-0.5 bg-blue-500 absolute left-0 top-0 pointer-events-none;
   }
 }
-.enter-space-bottom{
+.enter-space-bottom {
   position: relative;
   &:after {
     content: '';
     @apply w-full h-0.5 bg-blue-500 absolute left-0 bottom-0 pointer-events-none;
   }
 }
-.link{
-  @apply duration-200 dark:text-white/75 font-medium text-black/60;
+.link {
+  @apply duration-200 dark:text-white/75 font-medium text-black/60 hover:dark:text-white/90 hover:text-black/80;
 }
 
-.ant-popover-inner, .ant-dropdown-menu{
+.ant-popover-inner,
+.ant-dropdown-menu {
   @apply border-none;
 }
-.ellipsis-10{
-  overflow : hidden;
+.ellipsis-10 {
+  overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 10;
   -webkit-box-orient: vertical;
 }
-.animate-show{
-  animation: show .05s .2s forwards;
+.animate-show {
+  animation: show 0.05s 0.2s forwards;
 }
 .pdf .code-highlight {
   pre {
     white-space: pre-wrap;
     word-break: break-all;
   }
-  .code-line{
+  .code-line {
     height: auto;
   }
 }
 
 @keyframes show {
-  from{
+  from {
     opacity: 0;
   }
-  to{
+  to {
     opacity: 1;
   }
 }
 
 @keyframes hide {
-  from{
+  from {
     opacity: 1;
   }
-  to{
+  to {
     opacity: 0;
   }
 }
-.animate-hide{
-  animation: hide .2s forwards ease;
+.animate-hide {
+  animation: hide 0.2s forwards ease;
 }
 
 @page {
@@ -109,47 +110,53 @@
   margin: 0;
 }
 
-.ant-dropdown-menu-item{
+.ant-dropdown-menu-item {
   padding: 3px 8px !important;
 }
 
-.start1-in{
+.start1-in {
   opacity: 0;
   transform: translateX(-200px);
-  animation: start1-in .2s ease forwards;
+  animation: start1-in 0.2s ease forwards;
 }
 @keyframes start1-in {
-  from{
+  from {
     opacity: 0;
     transform: translateX(-200px);
   }
-  to{
+  to {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-.start2-in{
+.start2-in {
   opacity: 0;
   transform: translateX(200px);
-  animation: start2-in .2s ease forwards;
+  animation: start2-in 0.2s ease forwards;
 }
 @keyframes start2-in {
-  from{
+  from {
     opacity: 0;
     transform: translateX(200px);
   }
-  to{
+  to {
     opacity: 1;
     transform: translateX(0);
   }
 }
-.tree-empty{
+.tree-empty {
   .ant-empty-description {
     @apply text-gray-400;
   }
 }
 
-.ant-btn-default{
+.ant-btn-default {
   background-color: transparent !important;
 }
+
+.light-poppver {
+    .ant-popover-inner-content {
+      @apply dark:border dark:border-gray-100/10 rounded-lg
+    }
+  }

@@ -53,17 +53,17 @@ export const Set = observer(() => {
           </div>
           <div className={'flex'}>
             <div className={'py-4 px-2 w-[230px] border-r b1 tree-bg rounded-tl-lg rounded-bl-lg'}>
-              <div className={'mb-4 px-2 text-gray-500'}>{'Preferences'}</div>
+              <div className={'mb-4 px-2 text-sm text-gray-500 dark:text-gray-400 font-medium'}>{'Preferences'}</div>
               <div className={'space-y-1'}>
                 <div
                   onClick={() => setState({tab: 'Overview'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded  ${state.tab === 'Overview' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
+                  className={`py-1 cursor-default px-3 text-sm rounded  ${state.tab === 'Overview' ? 'bg-blue-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}
                 >
                   Overview
                 </div>
                 <div
                   onClick={() => setState({tab: 'Editor'})}
-                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-indigo-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
+                  className={`py-1 cursor-default px-3 text-sm rounded ${state.tab === 'Editor' ? 'bg-blue-500/80 text-gray-100' : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'}`}>
                   Editor
                 </div>
               </div>

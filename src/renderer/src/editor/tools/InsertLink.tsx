@@ -304,12 +304,16 @@ export const InsertLink = observer(() => {
                 index: 0
               })
             }}
-            placeholder={`${treeStore.inRoot ? 'Url filepath #hash, tab key completion' : 'Link or #hash'}`}
+            placeholder={`${
+              treeStore.inRoot ? 'Url filepath #head, tab key completion' : 'Link or #head'
+            }`}
             className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-7 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
           />
-          <Tooltip title={configStore.zh ? '移除链接' : 'Remove link'} mouseEnterDelay={.5}>
+          <Tooltip title={configStore.zh ? '移除链接' : 'Remove link'} mouseEnterDelay={0.5}>
             <div
-              className={'p-1 rounded ml-1 hover:bg-gray-200/70 cursor-pointer dark:hover:bg-gray-100/10 text-gray-600 dark:text-gray-300'}
+              className={
+                'p-1 rounded ml-1 hover:bg-gray-200/70 cursor-pointer dark:hover:bg-gray-100/10 text-gray-600 dark:text-gray-300'
+              }
               onClick={() => {
                 close()
               }}
@@ -322,7 +326,8 @@ export const InsertLink = observer(() => {
           className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}
           ref={scrollRef}
         >
-          {isLink(state().inputKeyword) || (!treeStore.inRoot && !!state().inputKeyword) && !state().anchors.length ? (
+          {isLink(state().inputKeyword) ||
+          (!treeStore.inRoot && !!state().inputKeyword && !state().anchors.length) ? (
             <>
               <div
                 onClick={(e) => {
@@ -330,9 +335,11 @@ export const InsertLink = observer(() => {
                 }}
                 className={`flex justify-center py-1.5 rounded bg-gray-200/70 dark:bg-gray-100/10 cursor-pointer px-2 flex-col`}
               >
-                <div className={'text-gray-600 dark:text-gray-300 flex items-center'}>
-                  <INet />
-                  <span className={'ml-1 flex-1 max-w-full text-sm break-words'}>{state().inputKeyword}</span>
+                <div className={'text-gray-600 dark:text-gray-300 flex items-stretch'}>
+                  <INet className={'flex-shrink-0 mt-0.5'} />
+                  <span className={'ml-1 flex-1 max-w-full text-sm break-all'}>
+                    {state().inputKeyword}
+                  </span>
                 </div>
               </div>
             </>
@@ -360,7 +367,9 @@ export const InsertLink = observer(() => {
                       </span>
                     </div>
                     {!!a.item.parentPath && (
-                      <div className={'text-gray-500 dark:text-gray-400 text-sm pl-[18px] truncate'}>
+                      <div
+                        className={'text-gray-500 dark:text-gray-400 text-sm pl-[18px] truncate'}
+                      >
                         {a.item.parentPath}
                       </div>
                     )}
@@ -379,21 +388,28 @@ export const InsertLink = observer(() => {
                       }}
                       className={`flex justify-center py-1 rounded ${
                         state().index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''
-                      } cursor-pointer px-2 flex-col ${f.filePath === store.openFilePath ? 'hidden' : ''}`}
+                      } cursor-pointer px-2 flex-col ${
+                        f.filePath === store.openFilePath ? 'hidden' : ''
+                      }`}
                     >
-                      <div className={'text-gray-600 dark:text-white/90 flex items-center leading-6'}>
+                      <div
+                        className={'text-gray-600 dark:text-white/90 flex items-center leading-6'}
+                      >
                         <INote />
                         <span className={'ml-1 flex-1 max-w-full truncate'}>{f.filename}</span>
                       </div>
                       {!!f.parentPath && (
-                        <div className={'text-gray-500 dark:text-white/70 text-sm pl-[18px] truncate'}>
+                        <div
+                          className={'text-gray-500 dark:text-white/70 text-sm pl-[18px] truncate'}
+                        >
                           {f.parentPath}
                         </div>
                       )}
                     </div>
                   )
                 })}
-              {((!!state().anchors.length && !state().filterAnchors.length) || (!!state().docs.length && !state().filterDocs.length)) && (
+              {((!!state().anchors.length && !state().filterAnchors.length) ||
+                (!!state().docs.length && !state().filterDocs.length)) && (
                 <div className={'py-4 text-center text-gray-400'}>
                   {configStore.zh ? '没有相关文档' : 'No related documents'}
                 </div>

@@ -99,6 +99,7 @@ export const Tree = observer(() => {
           <Popover
             trigger={['click']}
             placement={'bottomLeft'}
+            overlayClassName={'light-poppver'}
             arrow={false}
             open={state.openMenu}
             onOpenChange={(v) => {
@@ -110,7 +111,7 @@ export const Tree = observer(() => {
             overlayInnerStyle={{ padding: 0 }}
             content={
               <div
-                className={'w-80 pt-1 pb-2'}
+                className={'w-72 py-1'}
                 onDragOver={(e) => e.preventDefault()}
                 onDragLeave={() => {
                   setState({
@@ -123,18 +124,7 @@ export const Tree = observer(() => {
                     'flex justify-between items-center text-sm h-7 dark:text-gray-400 text-gray-500'
                   }
                 >
-                  <span className={'pl-3'}>Space</span>
-                  <div
-                    className={
-                      'rounded duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 p-1 cursor-pointer mr-2'
-                    }
-                    onClick={() => {
-                      setState({ openMenu: false })
-                      editSpace$.next(null)
-                    }}
-                  >
-                    <Icon icon={'mingcute:add-line'} className={'text-base'} />
-                  </div>
+                  <span className={'pl-3 text-xs'}>Switch Workspace</span>
                 </div>
                 {!!state.spaces.length && (
                   <div className={'overflow-y-auto max-h-[400px] relative'} id={'space-container'}>
@@ -180,9 +170,6 @@ export const Tree = observer(() => {
                             }
                             closeMenu$.next(null)
                           }}
-                          onEdit={() => {
-                            closeMenu$.next(null)
-                          }}
                         />
                       </div>
                     ))}
@@ -193,6 +180,35 @@ export const Tree = observer(() => {
                     No document space has been created yet
                   </div>
                 )}
+                <div className={'h-[1px] my-1 bg-gray-200/70 dark:bg-gray-100/10'}></div>
+                <div className={'text-sm px-1'}>
+                  {!!treeStore.root && (
+                    <div
+                      onClick={() => {
+                        editSpace$.next(treeStore.root!.cid)
+                        setState({ openMenu: false })
+                      }}
+                      className={
+                        'flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded'
+                      }
+                    >
+                      <Icon icon={'mdi-light:settings'} />
+                      <span className={'text-xs ml-2'}>Workspace Settings</span>
+                    </div>
+                  )}
+                  <div
+                    onClick={() => {
+                      setState({ openMenu: false })
+                      editSpace$.next(null)
+                    }}
+                    className={
+                      'flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded'
+                    }
+                  >
+                    <Icon icon={'mingcute:add-line'} />
+                    <span className={'text-xs ml-2'}>Create Workspace</span>
+                  </div>
+                </div>
               </div>
             }
           >
@@ -203,7 +219,7 @@ export const Tree = observer(() => {
                 }
               >
                 <div
-                  className={`text-white flex-shrink-0 w-6 h-6 rounded bg-indigo-400 dark:bg-indigo-500 flex items-center justify-center  font-medium`}
+                  className={`text-white flex-shrink-0 w-6 h-6 rounded space-${treeStore.root.background || 'sky'} flex items-center justify-center  font-medium`}
                 >
                   {treeStore.root.name.slice(0, 1).toUpperCase()}
                 </div>
@@ -227,7 +243,7 @@ export const Tree = observer(() => {
                 >
                   <Icon icon={'ph:calendar-blank'} />
                 </div>
-                <div className={'ml-2 max-w-full truncate'}>Select doc space</div>
+                <div className={'ml-2 max-w-full truncate'}>Select Workspace</div>
                 <div>
                   <Icon
                     icon={'ic:round-unfold-more'}

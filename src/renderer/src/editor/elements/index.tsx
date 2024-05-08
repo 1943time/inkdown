@@ -30,7 +30,7 @@ const toHash = (hash: string) => {
   ) as HTMLElement
   if (dom) {
     treeStore.currentTab.store.container?.scroll({
-      top: dom.offsetTop - 10,
+      top: dom.offsetTop + 100,
       behavior: 'smooth'
     })
   }

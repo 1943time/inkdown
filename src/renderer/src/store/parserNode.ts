@@ -319,7 +319,8 @@ export class ReadSpace {
       filePath: space.filePath,
       name: space.name,
       imageFolder: space.imageFolder,
-      relative: space.relative
+      relative: space.relative,
+      background: space.background
     } as ISpaceNode)
     const docs = await db.file.where('spaceId').equals(space.cid).toArray()
     this.fileMap = new Map(docs.map(d => [d.filePath, d]))

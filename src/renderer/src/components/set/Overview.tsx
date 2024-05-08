@@ -81,7 +81,16 @@ export const Overview = observer(() => {
       </div>
       <InterfaceFont />
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{configStore.zh ? '显示大纲' : 'Show outline'}</div>
+        <div className={'text-sm'}>
+          <span className={'mr-1'}>{configStore.zh ? '显示大纲' : 'Show outline'}</span>
+          <TextHelp
+            text={
+              configStore.zh
+                ? '文档标题将在右侧生成大纲'
+                : 'The document title will generate an outline on the right side.'
+            }
+          />
+        </div>
         <div>
           <Checkbox
             checked={configStore.config.showLeading}

@@ -378,7 +378,7 @@ export class KeyboardTask {
         }))
       }
       if (type === 'katex') {
-        lang = 'text'
+        lang = 'tex'
         children = 'c = \\pm\\sqrt{a^2 + b^2}'
           .split('\n')
           .map((c) => ({ type: 'code-line', children: [{ text: c }] }))

@@ -24,109 +24,117 @@ export const Empty = observer(() => {
   }, [])
   if (treeStore.loading) return null
   return (
-    <div className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}>
+    <div
+      className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}
+    >
       <div className={'relative -top-12'}>
-        <div className={'flex-col space-y-5 text-indigo-500 '}>
+        <div className={'flex-col space-y-5 dark:text-white/70 text-black/60 '}>
           <div className={'dark:text-gray-400 text-gray-600 flex items-center'}>
-            <img src={logo} alt="" className={'w-5 h-5 mr-2 dark:shadow-none shadow shadow-gray-300 rounded'}/>
+            <img
+              src={logo}
+              alt=""
+              className={'w-5 h-5 mr-2 dark:shadow-none shadow shadow-gray-300 rounded'}
+            />
             Inkdown
           </div>
           <div className={'text-base text-gray-500'}>
             {configStore.zh ? '没有打开的文件' : 'No open files'}
           </div>
           <div
-            className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
+            className={
+              'dark:hover:text-white hover:text-black cursor-pointer duration-200 flex items-center'
+            }
             onClick={() => {
-              keyTask$.next({key: 'newNote'})
+              keyTask$.next({ key: 'newNote' })
             }}
           >
-            <Icon icon={'mingcute:file-new-line'} className={'text-lg'}/>
-            <span className={'ml-2'}>
-              {configStore.zh ? '新建文档' : 'New Doc'}
-            </span>
+            <Icon icon={'mingcute:file-new-line'} className={'text-lg'} />
+            <span className={'ml-2'}>{configStore.zh ? '新建文档' : 'New Doc'}</span>
           </div>
-          {!treeStore.root &&
+          {!treeStore.root && (
             <div
-              className={'hover:text-indigo-600 cursor-pointer duration-200 flex items-center'}
+              className={
+                'dark:hover:text-white hover:text-black cursor-pointer duration-200 flex items-center'
+              }
               onClick={() => {
-                keyTask$.next({key: 'openNote'})
+                keyTask$.next({ key: 'openNote' })
               }}
             >
-              <Icon icon={'tabler:file-text'} className={'text-lg'}/>
-              <span className={'ml-2'}>
-              {configStore.zh ? '打开文档' : 'Open Doc'}
-            </span>
+              <Icon icon={'tabler:file-text'} className={'text-lg'} />
+              <span className={'ml-2'}>{configStore.zh ? '打开文档' : 'Open Doc'}</span>
             </div>
-          }
-          {!!treeStore.root &&
+          )}
+          {!!treeStore.root && (
             <>
               <div
-                className={'cursor-pointer hover:text-indigo-600 duration-200'}
+                className={'cursor-pointer dark:hover:text-white hover:text-black duration-200'}
                 onClick={() => {
-                  keyTask$.next({key: 'quickOpen'})
+                  keyTask$.next({ key: 'quickOpen' })
                 }}
               >
-                <HistoryOutlined/>
+                <HistoryOutlined />
                 <span className={'ml-2'}>
                   {configStore.zh ? '最近打开的文档' : 'Recently opened docs'}
                 </span>
               </div>
-              {treeStore.tabs.length > 1 &&
+              {treeStore.tabs.length > 1 && (
                 <div
-                  className={'cursor-pointer hover:text-indigo-500 duration-200'}
+                  className={'cursor-pointer dark:hover:text-white hover:text-black duration-200'}
                   onClick={() => {
                     treeStore.removeTab(treeStore.currentIndex)
                   }}
                 >
-                  <CloseOutlined/>
-                  <span className={'ml-2'}>
-                  {configStore.zh ? '关闭' : 'Close'}
-                </span>
+                  <CloseOutlined />
+                  <span className={'ml-2'}>{configStore.zh ? '关闭' : 'Close'}</span>
                 </div>
-              }
+              )}
             </>
-          }
-          {!treeStore.root &&
+          )}
+          {!treeStore.root && (
             <>
               <div
-                className={'cursor-pointer hover:text-indigo-600 duration-200 flex items-center'}
+                className={
+                  'cursor-pointer dark:hover:text-white hover:text-black duration-200 flex items-center'
+                }
                 onClick={() => {
                   editSpace$.next(null)
                 }}
               >
-                <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'}/>
-                <span
-                  className={'ml-2'}>
-                  {configStore.zh ? '创建文档空间' : 'Create doc space'}
+                <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'} />
+                <span className={'ml-2'}>
+                  {configStore.zh ? '创建文档空间' : 'Create workspace'}
                 </span>
               </div>
             </>
-          }
+          )}
         </div>
-        {!treeStore.root && !!state.spaces.length &&
+        {!treeStore.root && !!state.spaces.length && (
           <div className={'mt-6'}>
             <div className={'text-gray-500'}>
               {configStore.zh ? '最近打开的空间' : 'Recently opened spaces'}
             </div>
             <div className={'mt-2'}>
-              {state.spaces.map(r =>
+              {state.spaces.map((r) => (
                 <div
-                  className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-base'} key={r.cid}
+                  className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-base'}
+                  key={r.cid}
                   onClick={() => {
                     treeStore.initial(r.cid)
                   }}
                 >
                   <span
-                    className={'cursor-pointer hover:text-indigo-500 duration-200 flex items-center'}
+                    className={
+                      'cursor-pointer dark:hover:text-white hover:text-black duration-200 flex items-center'
+                    }
                   >
-                    <Icon icon={'material-symbols:workspaces-outline'}/>
+                    <Icon icon={'material-symbols:workspaces-outline'} />
                     <span className={'ml-2'}>{r.name}</span>
                   </span>
                 </div>
-              )}
+              ))}
             </div>
           </div>
-        }
+        )}
       </div>
     </div>
   )

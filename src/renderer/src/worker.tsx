@@ -24,7 +24,7 @@ const App = observer(() => {
       theme={{
         algorithm: configStore.config.dark ? theme.darkAlgorithm : theme.defaultAlgorithm,
         token: {
-          colorPrimary: '#6366f1'
+          colorPrimary: '#3b82f6'
         }
       }}
     >

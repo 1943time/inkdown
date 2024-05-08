@@ -14,6 +14,7 @@ class ConfigStore {
   enableUpgrade = false
   openUpdateDialog = false
   codeDark = false
+  readonly spaceColors = ['sky', 'cyan', 'violet', 'slate', 'purple', 'green', 'amber', 'pink']
   config = {
     showLeading: false,
     autoDownload: false,

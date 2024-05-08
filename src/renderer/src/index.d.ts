@@ -9,6 +9,7 @@ export type ISpaceNode = {
   name: string
   imageFolder?: string
   relative?: boolean
+  background?: string
   children?: IFileItem[]
 }
 export type IFileItem = {

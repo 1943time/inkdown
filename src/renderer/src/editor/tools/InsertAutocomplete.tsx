@@ -37,65 +37,71 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           label: ['表格', 'Table'],
           key: 'table',
           task: 'insertTable',
-          icon: <Icon icon={'material-symbols:table'} className={'text-lg'} />
+          icon: <Icon icon={'material-symbols:table'} className={'text-base'} />
         },
         {
           label: ['引用', 'Quote'],
           key: 'quote',
           task: 'insertQuote',
-          icon: <Icon icon={'iconoir:quote-solid'} className={'text-lg'} />
+          icon: <Icon icon={'iconoir:quote-solid'} className={'text-base'} />
         },
         {
           label: ['代码', 'Code'],
           key: 'code',
           task: 'insertCode',
-          icon: <Icon icon={'ic:sharp-code'} className={'text-lg'} />
+          icon: <Icon icon={'ic:sharp-code'} className={'text-base'} />
         },
         {
           label: ['本地图片', 'Local image'],
           key: 'local-image',
           task: 'localImage',
-          icon: <Icon icon={'material-symbols:image-outline'} className={'text-lg'} />
+          icon: <Icon icon={'material-symbols:image-outline'} className={'text-base'} />
         },
         {
           label: ['远程媒体', 'Remote media'],
           task: 'image',
           key: 'remote-media',
           args: ['', true],
-          icon: <Icon icon={'ic:round-perm-media'} className={'text-lg'} />
+          icon: <Icon icon={'ic:round-perm-media'} className={'text-base'} />
         },
+        {
+          label: ['分割线', 'Horizontal line'],
+          key: 'horizontal-line',
+          task: 'horizontalLine',
+          icon: <Icon icon={'radix-icons:divider-horizontal'} className={'text-base'} />
+        }
+      ]
+    },
+    {
+      label: ['扩展', 'Extension'],
+      key: 'extension',
+      children: [
         {
           label: ['公式块', 'Formula block'],
           task: 'insertCode',
           key: 'formula-block',
           args: ['katex'],
-          icon: <Icon icon={'pajamas:formula'} className={'text-lg'} />
+          icon: <Icon icon={'pajamas:formula'} className={'text-base'} />
         },
         {
           label: ['行内公式', 'Formula inline'],
           key: 'formula-inline',
           task: 'inlineKatex',
-          icon: <Icon icon={'pajamas:formula'} className={'text-lg'} />
+          icon: <Icon icon={'pajamas:formula'} className={'text-base'} />
         },
         {
           label: ['Mermaid 图形', 'Mermaid graphics'],
           task: 'insertCode',
           key: 'mermaid',
           args: ['mermaid'],
-          icon: <IMermaid className={'text-lg'} />
+          icon: <IMermaid className={'text-sm'} />
         },
         {
           label: ['HTML', 'HTML'],
           task: 'insertCode',
           key: 'html',
           args: ['html'],
-          icon: <Icon icon={'icon-park-outline:html-five'} className={'text-lg'} />
-        },
-        {
-          label: ['分割线', 'Horizontal line'],
-          key: 'horizontal-line',
-          task: 'horizontalLine',
-          icon: <Icon icon={'radix-icons:divider-horizontal'} className={'text-lg'} />
+          icon: <Icon icon={'icon-park-outline:html-five'} className={'text-base'} />
         }
       ]
     },
@@ -108,21 +114,21 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           task: 'list',
           key: 'b-list',
           args: ['unordered'],
-          icon: <Icon icon={'ion:list-sharp'} className={'text-lg'} />
+          icon: <Icon icon={'ion:list-sharp'} className={'text-base'} />
         },
         {
           label: ['有序列表', 'Numbered list'],
           task: 'list',
           key: 'n-list',
           args: ['ordered'],
-          icon: <Icon icon={'ph:list-numbers-bold'} className={'text-lg'} />
+          icon: <Icon icon={'ph:list-numbers-bold'} className={'text-base'} />
         },
         {
           label: ['任务列表', 'Todo list'],
           task: 'list',
           key: 't-list',
           args: ['task'],
-          icon: <Icon icon={'lucide:list-todo'} className={'text-lg'} />
+          icon: <Icon icon={'lucide:list-todo'} className={'text-base'} />
         }
       ]
     }
@@ -137,27 +143,27 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           task: 'head',
           key: 'head1',
           args: [1],
-          icon: <Icon icon={'gravity-ui:heading-1'} className={'text-lg'} />
+          icon: <Icon icon={'gravity-ui:heading-1'} className={'text-base'} />
         },
         {
           label: ['标题2', 'Heading 2'],
           task: 'head',
           key: 'head2',
-          icon: <Icon icon={'gravity-ui:heading-2'} className={'text-lg'} />,
+          icon: <Icon icon={'gravity-ui:heading-2'} className={'text-base'} />,
           args: [2]
         },
         {
           label: ['标题3', 'Heading 3'],
           task: 'head',
           key: 'head3',
-          icon: <Icon icon={'gravity-ui:heading-3'} className={'text-lg'} />,
+          icon: <Icon icon={'gravity-ui:heading-3'} className={'text-base'} />,
           args: [3]
         },
         {
           label: ['标题4', 'Heading 4'],
           task: 'head',
           key: 'head4',
-          icon: <Icon icon={'gravity-ui:heading-4'} className={'text-lg'} />,
+          icon: <Icon icon={'gravity-ui:heading-4'} className={'text-base'} />,
           args: [4]
         }
       ]
@@ -328,7 +334,7 @@ export const InsertAutocomplete = observer(() => {
       ref={dom}
       className={`
       ${!store.openInsertCompletion || !state.filterOptions.length ? 'hidden' : ''}
-        absolute z-50 w-44 max-h-52 overflow-y-auto p-1.5
+        absolute z-50 w-44 max-h-52 overflow-y-auto p-1
         rounded-lg py-1 text-gray-700/90 ctx-panel dark:text-gray-300 dark:border-gray-200/10
       `}
       onMouseDown={(e) => {
@@ -340,11 +346,12 @@ export const InsertAutocomplete = observer(() => {
         bottom: state.bottom
       }}
     >
+      <div className={'text-xs leading-6 pl-1 dark:text-gray-400 text-gray-500 mb-1'}>
+        {configStore.zh ? '快速插入' : 'Quick Actions'}
+      </div>
       {state.filterOptions.map((l, i) => (
         <div key={l.key}>
-          <div className={'text-xs leading-6 pl-2 dark:text-gray-500 text-gray-400'}>
-            {configStore.zh ? l.label[0] : l.label[1]}
-          </div>
+          {i !== 0 && <div className={'my-1 h-[1px] dark:bg-gray-200/10'}></div>}
           <div>
             {l.children.map((el) => (
               <div
@@ -357,7 +364,7 @@ export const InsertAutocomplete = observer(() => {
                 onMouseEnter={() => {
                   setState({ index: state.options.findIndex((op) => op.key === el.key) })
                 }}
-                className={`h-8 rounded px-2 cursor-pointer flex items-center text-sm space-x-1
+                className={`h-7 rounded px-2 cursor-pointer flex items-center text-[13px] space-x-1.5
                   ${el.key === selectedKey ? 'bg-gray-100 dark:bg-gray-300/10' : ''}
                 `}
               >

@@ -54,8 +54,9 @@ html{
 }
 
 .input{
-  @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-zinc-900 bg-white
-  h-7 rounded pr-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
+  border-radius: 6px;
+  @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-black/30 bg-white
+  h-7 pr-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
 }
 
 .high-block{
@@ -113,9 +114,9 @@ html{
 }
 .ant-btn-primary {
   &:not([disabled],.ant-btn-dangerous) {
-    background-color: #6366f1 !important;
+    background-color: #3b82f6 !important;
     &:hover{
-      background-color: #6d6fec !important;
+      background-color: #2563eb !important;
     }
   }
 }
@@ -129,4 +130,36 @@ html{
 .dark .ctx-panel{
   background-color: rgb(37, 37, 37);
   box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.2) 0px 3px 6px, rgba(15, 15, 15, 0.4) 0px 9px 24px;
+}
+
+.space-cyan {
+  @apply bg-gradient-to-br from-cyan-500 to-blue-500;
+}
+
+.space-sky {
+  @apply bg-gradient-to-br from-sky-500 to-indigo-500;
+}
+
+.space-violet {
+  @apply bg-gradient-to-br from-violet-500 to-fuchsia-500
+}
+
+.space-purple{
+  @apply bg-gradient-to-br from-purple-500 to-pink-500
+}
+
+.space-green {
+  @apply bg-gradient-to-br from-green-500 to-teal-500
+}
+
+.space-amber{
+  @apply bg-gradient-to-br from-amber-500 to-yellow-500;
+}
+
+.space-pink{
+  @apply bg-gradient-to-br from-pink-500 to-rose-500;
+}
+
+.space-slate{
+  @apply bg-gradient-to-br from-slate-500 to-stone-500;
 }

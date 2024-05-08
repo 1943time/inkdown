@@ -17,7 +17,7 @@ export const TreeEmpty = observer((props: {
         }
         {!!props.spaces.length &&
           <div className={'text-pretty leading-5 text-[13px]'}>
-            {configStore.zh ? '请选择文档空间' : 'Please select a doc space'}
+            {configStore.zh ? '请选择文档空间' : 'Please select a workspace'}
           </div>
         }
         {!props.spaces.length &&
@@ -29,7 +29,7 @@ export const TreeEmpty = observer((props: {
           >
             <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'}/>
             <span className={'ml-1'}>
-              {configStore.zh ? '创建文档空间' : 'Create doc space'}
+              {configStore.zh ? '创建文档空间' : 'Create Workspace'}
             </span>
           </div>
         }
