@@ -40,7 +40,7 @@ export const InsertLink = observer(() => {
     filterAnchors: [] as { item: DocItem; value: string }[]
   })
 
-  const getAnchors = useCallback((item: DocItem, path: string) => {
+  const getAnchors = useCallback((item: DocItem) => {
     return (item.schema || [])
       .filter((e) => e.type === 'head')
       .map((e) => {
@@ -53,9 +53,13 @@ export const InsertLink = observer(() => {
     if (isLink(state().inputKeyword)) return setState({ anchors: [] })
     const parse = parsePath(state().inputKeyword)
     if (!parse.path) {
-      const item = docMap.current.get(store.openFilePath!)
+      const item = treeStore.openedNote
       if (item) {
-        const anchors = getAnchors(item, item.path)
+        const anchors = getAnchors({
+          ...item,
+          parentPath: '',
+          path: ''
+        })
         setState({
           anchors,
           filterAnchors: parse.hash
@@ -70,7 +74,7 @@ export const InsertLink = observer(() => {
     } else {
       const item = docMap.current.get(join(treeStore.root?.filePath || '', parse.path))
       if (item) {
-        const anchors = getAnchors(item, item.path)
+        const anchors = getAnchors(item)
         setState({
           anchors,
           filterAnchors: parse.hash
@@ -158,6 +162,8 @@ export const InsertLink = observer(() => {
           const target = state().filterDocs[state().index]
           if (target) {
             setPath(target.path)
+          } else {
+            close(state().inputKeyword)
           }
         }
       }
@@ -191,12 +197,16 @@ export const InsertLink = observer(() => {
       let left = store.domRect.x
       left = left - (width - store.domRect.width) / 2
       if (left > window.innerWidth - width) left = window.innerWidth - width - 4
+      if (left < 4) left = 4
+      if (left + width > window.innerWidth - 4) {
+        left = window.innerWidth - 4 - width
+      }
       const { docs, map } = treeStore.allNotes
       docMap.current = map
       const url = EditorUtils.getUrl(store.editor)
       let path = url
-      if (url && !url.startsWith('#') && !isLink(url) && treeStore.root) {
-        path = toSpacePath(treeStore.root.filePath, store.openFilePath || '', url)
+      if (url && !url.startsWith('#') && !isLink(url) && treeStore.inRoot) {
+        path = toSpacePath(treeStore.root!.filePath, store.openFilePath || '', url)
       }
       const parse = parsePath(path)
       const filterDocs = parse.path ? docs.filter((f) => f.path.includes(parse.path)) : docs.slice()
@@ -206,8 +216,8 @@ export const InsertLink = observer(() => {
         oldUrl: url || '',
         mode,
         open: true,
-        filterDocs: filterDocs,
-        docs,
+        filterDocs: treeStore.inRoot ? filterDocs : [],
+        docs: treeStore.inRoot ? docs : [],
         inputKeyword: path
       })
       if (parse.hash) {
@@ -294,7 +304,7 @@ export const InsertLink = observer(() => {
                 index: 0
               })
             }}
-            placeholder={`${treeStore.root ? 'Url filepath #hash, tab key completion' : 'Link'}`}
+            placeholder={`${treeStore.inRoot ? 'Url filepath #hash, tab key completion' : 'Link or #hash'}`}
             className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-7 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
           />
           <Tooltip title={configStore.zh ? '移除链接' : 'Remove link'} mouseEnterDelay={.5}>
@@ -312,7 +322,7 @@ export const InsertLink = observer(() => {
           className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}
           ref={scrollRef}
         >
-          {isLink(state().inputKeyword) || (!treeStore.root && !!state().inputKeyword) ? (
+          {isLink(state().inputKeyword) || (!treeStore.inRoot && !!state().inputKeyword) && !state().anchors.length ? (
             <>
               <div
                 onClick={(e) => {
