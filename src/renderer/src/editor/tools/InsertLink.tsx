@@ -383,7 +383,7 @@ export const InsertLink = observer(() => {
                     </div>
                   )
                 })}
-              {((state().anchors.length && !state().filterAnchors.length) || (state().docs.length && !state().filterDocs.length)) && (
+              {((!!state().anchors.length && !state().filterAnchors.length) || (!!state().docs.length && !state().filterDocs.length)) && (
                 <div className={'py-4 text-center text-gray-400'}>
                   {configStore.zh ? '没有相关文档' : 'No related documents'}
                 </div>
