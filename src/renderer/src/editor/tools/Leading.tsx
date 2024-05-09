@@ -89,7 +89,7 @@ export const Heading = observer(({note}: {
         }
         setState({active: ''})
       }
-      div.addEventListener('scroll', scroll)
+      div.addEventListener('scroll', scroll, {passive: true})
       return () => div.removeEventListener('scroll', scroll)
     }
     return () => {}
