@@ -243,7 +243,7 @@ export const Tree = observer(() => {
                 >
                   <Icon icon={'ph:calendar-blank'} />
                 </div>
-                <div className={'ml-2 max-w-full truncate'}>Select Workspace</div>
+                <div className={'ml-2 max-w-full truncate text-sm'}>Select Workspace</div>
                 <div>
                   <Icon
                     icon={'ic:round-unfold-more'}

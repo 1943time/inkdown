@@ -79,7 +79,7 @@
     "remark-parse": "^10.0.1",
     "rxjs": "^7.8.0",
     "sass": "^1.58.3",
-    "shiki": "1.4.0",
+    "shiki": "1.5.1",
     "slate": "^0.101.5",
     "slate-history": "^0.100.0",
     "slate-hyperscript": "^0.100.0",
