@@ -16,7 +16,7 @@ class ConfigStore {
   codeDark = false
   readonly spaceColors = ['sky', 'cyan', 'violet', 'slate', 'purple', 'green', 'amber', 'pink']
   config = {
-    showLeading: false,
+    showLeading: true,
     autoDownload: false,
     autoOpenSpace: false,
     theme: 'system' as 'system' | 'dark' | 'light',

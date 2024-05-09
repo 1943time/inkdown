@@ -156,7 +156,7 @@
 }
 
 .light-poppver {
-    .ant-popover-inner-content {
-      @apply dark:border dark:border-gray-100/10 rounded-lg
-    }
+  .ant-popover-inner-content {
+    @apply dark:border dark:border-gray-100/10 rounded-lg;
   }
+}

@@ -190,7 +190,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
                 type: 'media', children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
               })
             } else {
-              textNodes.push({type: 'text', value: c.value})
+              textNodes.push({type: 'html', value: c.value})
             }
           } else {
             textNodes.push(c)
@@ -251,6 +251,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       default:
         if (n.type === 'text' && htmlTag.length) {
+          console.log('text', n)
           el = {text: n.value}
           if (n.value) {
             for (let t of htmlTag) {
@@ -320,10 +321,11 @@ const findLinks = (schema: any[], prePath: number[] = [], links: {path: number[]
   return links
 }
 
-// export const parse = (files: string[]) => {
+// export const parseMarkdown = (files: string[]) => {
 //   const root = parser.parse(files[0] || '')
 //   const schema = parserBlock(root.children as any[], true)
 //   const links = findLinks(schema)
+//   return {schema, links}
 // }
 
 onmessage = e => {
