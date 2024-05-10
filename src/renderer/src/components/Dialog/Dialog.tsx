@@ -61,7 +61,7 @@ export const Dialog = observer((props: {
         >
           {props.title && (
             <div className={'flex items-center justify-between h-10 px-3 border-b b1'}>
-              <div className={'text-sm dark:text-gray-400 text-gray-500'}>{props.title}</div>
+              <div className={'text-sm dark:text-gray-300 text-gray-600'}>{props.title}</div>
               <div
                 className={
                   'p-1 dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30'

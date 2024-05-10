@@ -78,11 +78,11 @@ export const QuickOpen = observer(() => {
   return (
     <div className={'z-[1000] fixed inset-0 dark:bg-black/30 bg-black/10'} onClick={close}>
       <div
-        className={'mt-20 w-[600px] modal-panel rounded-lg mx-auto'}
+        className={'mt-20 w-[600px] ctx-panel rounded-lg mx-auto'}
         onClick={e => e.stopPropagation()}
       >
         <input
-          className={'bg-transparent outline-none h-10 w-full px-4 dark:text-gray-200 text-gray-600 dark:placeholder-gray-200/30 placeholder-gray-300'}
+          className={'bg-transparent outline-none h-10 w-full px-4 dark:text-gray-200 text-gray-600 dark:placeholder-gray-200/50 placeholder-gray-400'}
           placeholder={'Find recent open note'}
           autoFocus={true}
           value={state().query}

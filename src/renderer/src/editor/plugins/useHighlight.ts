@@ -11,7 +11,6 @@ import {configStore} from '../../store/config'
 import {highlighter, langSet, loadedLanguage} from '../utils/highlight'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
-const symbols = new Set(['@', '#', '$', '￥','&'])
 export const codeCache = new WeakMap<object, {path: Path, range: Range[]}>()
 export const cacheTextNode = new WeakMap<object, { path: Path; range: Range[] }>()
 export const clearAllCodeCache = (editor: Editor) => {
@@ -151,11 +150,9 @@ export function useHighlight(store?: EditorStore) {
                   textRanges.push({
                     anchor: { path: [...path, i], offset: m.index },
                     focus: { path: [...path, i], offset: m.index! + m[0].length },
-                    color: symbols.has(m[0])
-                      ? configStore.config.dark
+                    color: configStore.config.dark
                         ? '#a78bfa'
                         : '#8b5cf6'
-                      : '#a8a29e'
                   })
                 }
               }

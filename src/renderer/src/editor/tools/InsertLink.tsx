@@ -209,7 +209,7 @@ export const InsertLink = observer(() => {
         path = toSpacePath(treeStore.root!.filePath, store.openFilePath || '', url)
       }
       const parse = parsePath(path)
-      const filterDocs = parse.path ? docs.filter((f) => f.path.includes(parse.path)) : docs.slice()
+      const filterDocs = parse.path ? docs.filter((f) => f.path.includes(parse.path) && f.filePath !== treeStore.openedNote?.filePath) : docs.slice()
       setState({
         left,
         y,
@@ -293,7 +293,7 @@ export const InsertLink = observer(() => {
                 })
               } else {
                 const filterDocs = state().docs.filter((d) => {
-                  return d.path.toLowerCase().includes(key)
+                  return d.path.toLowerCase().includes(key) && d.filePath !== treeStore.openedNote?.filePath
                 })
                 setState({
                   filterDocs
@@ -359,7 +359,7 @@ export const InsertLink = observer(() => {
                       state().index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''
                     } cursor-pointer px-2 flex-col`}
                   >
-                    <div className={'text-gray-600 dark:text-gray-300 flex items-center leading-6'}>
+                    <div className={'text-gray-700 dark:text-white/90 flex items-center leading-6'}>
                       <INote />
                       <span className={'ml-1 flex-1 max-w-full truncate'}>
                         {a.item.filePath === store.openFilePath ? '' : a.item.filename + '.md'}
@@ -393,7 +393,7 @@ export const InsertLink = observer(() => {
                       }`}
                     >
                       <div
-                        className={'text-gray-600 dark:text-white/90 flex items-center leading-6'}
+                        className={'text-gray-700 dark:text-white/90 flex items-center leading-6'}
                       >
                         <INote />
                         <span className={'ml-1 flex-1 max-w-full truncate'}>{f.filename}</span>
