@@ -162,7 +162,7 @@ export const FullSearch = observer(() => {
                     }}
                   >
                     <ArrowRight
-                      className={`w-3 h-3 dark:text-gray-500 text-gray-400 ${state().foldIndex.includes(i) ? '' : 'rotate-90'}`}
+                      className={`w-3 h-3 duration-200 dark:text-gray-500 text-gray-400 ${state().foldIndex.includes(i) ? '' : 'rotate-90'}`}
                     />
                   </div>
                   <div className={'flex-1 w-full truncate'}>

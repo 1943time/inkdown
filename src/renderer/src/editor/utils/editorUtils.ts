@@ -223,7 +223,7 @@ export class EditorUtils {
       match: n => Text.isText(n) && !!n.url,
       mode: 'lowest'
     })
-    return match?.[0].url
+    return match?.[0].url as string || ''
   }
 
   static toggleFormat(editor: Editor, format: any) {

@@ -15,6 +15,7 @@ export const DragHandle = observer((props: {
     <span
       className={'drag-handle'}
       style={{...props.style,}}
+      contentEditable={false}
       ref={ref}
       onMouseDown={(e) => {
         let parent = ref.current!.parentElement!

@@ -1,39 +1,43 @@
-import {observer} from 'mobx-react-lite'
-import {MoreOutlined, PlusCircleOutlined} from '@ant-design/icons'
-import React, {Fragment, useRef} from 'react'
-import {action} from 'mobx'
+import { observer } from 'mobx-react-lite'
+import { MoreOutlined } from '@ant-design/icons'
+import { Fragment, useRef } from 'react'
+import { action } from 'mobx'
 import INote from '../../icons/INote'
 import ArrowRight from '../../icons/ArrowRight'
 import IFolder from '../../icons/IFolder'
-import {treeStore} from '../../store/tree'
-import {IFileItem} from '../../index'
-import {openContextMenu} from './openContextMenu'
-import {Icon} from '@iconify/react'
-import {configStore} from '../../store/config'
-
+import { treeStore } from '../../store/tree'
+import { IFileItem } from '../../index'
+import { openContextMenu } from './openContextMenu'
+import { Icon } from '@iconify/react'
+import { configStore } from '../../store/config'
+import Iplus from '../../icons/Iplus'
 const getClass = (c: IFileItem) => {
-  if (treeStore.selectItem === c) return 'dark:bg-indigo-500/15 bg-indigo-500/15'
-  if (treeStore.openedNote === c) return 'dark:bg-gray-300/10 bg-gray-500/10'
+  if (treeStore.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
+  if (treeStore.openedNote === c) return 'dark:bg-white/10 bg-gray-600/15'
   if (treeStore.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
-  return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/10'
+  return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/15'
 }
 
 export const TreeRender = observer(() => {
   return (
     <>
       <div
-        className={`mb-1 py-1 flex justify-between items-center px-5 dark:text-gray-400 text-gray-500`}
+        className={`mb-1 py-1 flex justify-between items-center pl-5 pr-4 dark:text-gray-400 text-gray-500`}
       >
-        <span className={'font-medium text-[15px] flex items-center'}>
+        <span className={'font-semibold text-sm flex items-center'}>
           <span>Folders</span>
         </span>
         <div
-          className={'duration-200 dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer'}
+          className={`duration-100 w-[22px] h-[22px] flex items-center text-base justify-center cursor-pointer rounded ${
+            treeStore.ctxNode?.root
+              ? 'dark:bg-gray-300/10 bg-gray-200/70'
+              : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
+          } `}
           onClick={(e) => {
             openContextMenu(e, treeStore.root!)
           }}
         >
-          <PlusCircleOutlined />
+          <Iplus />
         </div>
       </div>
       <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
@@ -161,7 +165,7 @@ const Item = observer((
               )}
               <div
                 className={`flex items-center flex-1 h-full relative max-w-full ${
-                  treeStore.openedNote === item ? 'text-indigo-600 dark:text-indigo-400' : ''
+                  treeStore.openedNote === item ? 'text-black dark:text-white' : ''
                 }`}
                 data-entity={'true'}
               >
@@ -172,7 +176,7 @@ const Item = observer((
                 )}
                 <div className={'truncate max-w-full ml-1'}>{item.filename || 'Untitled'}</div>
                 {!item.folder && item.ext !== 'md' && (
-                  <sup className={'ml-1 text-indigo-600 mr-1'}>{item.ext}</sup>
+                  <sup className={'ml-1 text-blue-600 mr-1'}>{item.ext}</sup>
                 )}
                 {treeStore.dragStatus?.dropNode === item &&
                   treeStore.dragNode !== item &&

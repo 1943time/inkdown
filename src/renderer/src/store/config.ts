@@ -14,8 +14,9 @@ class ConfigStore {
   enableUpgrade = false
   openUpdateDialog = false
   codeDark = false
+  readonly spaceColors = ['sky', 'cyan', 'violet', 'slate', 'purple', 'green', 'amber', 'pink']
   config = {
-    showLeading: false,
+    showLeading: true,
     autoDownload: false,
     autoOpenSpace: false,
     theme: 'system' as 'system' | 'dark' | 'light',
@@ -26,14 +27,13 @@ class ConfigStore {
     codeTabSize: 4,
     editorTextSize: 16,
     codeTheme: 'auto',
+    codeAutoBreak: false,
     mas: false,
     symbolHighlight: true,
-    showCharactersCount: true,
     dragToSort: true,
     spellCheck: false,
     editorWidth: 720,
     autoRebuild: true,
-    showRemoveFileDialog: true,
     showHiddenFiles: false,
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
     interfaceFont: 'System',
@@ -192,6 +192,9 @@ class ConfigStore {
       }
       imageBed.initial()
       document.body.classList.add('font-' + this.config.interfaceFont)
+      window.electron.ipcRenderer.invoke('get-system').then(res => {
+        runInAction(() => this.config.mas = res === 'mas')
+      })
       MainApi.getPath('home').then((res) => {
         this.homePath = res
         if (this.mas) {

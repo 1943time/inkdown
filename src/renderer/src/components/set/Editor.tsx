@@ -21,7 +21,7 @@ export const SetEditor = observer(() => {
   return (
     <div
       className={
-        'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[600px] overflow-y-auto'
+        'divide-y divide-gray-200 dark:divide-gray-200/10 text-gray-600 dark:text-gray-300 px-4 py-2 h-[550px] overflow-y-auto'
       }
     >
       <div className={'flex justify-between items-center py-3'}>
@@ -127,6 +127,17 @@ export const SetEditor = observer(() => {
               ...Array.from(codeThemes).map((v) => ({ label: v, value: v }))
             ]}
           />
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>{configStore.zh ? '代码自动换行' : 'Code auto wrap'}</div>
+        <div>
+          <Checkbox
+            checked={configStore.config.codeAutoBreak}
+            onChange={(e) => {
+              configStore.setConfig('codeAutoBreak', e.target.checked)
+            }}
+          ></Checkbox>
         </div>
       </div>
       <div className={'py-3'}>

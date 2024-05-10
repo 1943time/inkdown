@@ -363,29 +363,39 @@ export class KeyboardTask {
     }
   }
 
-  insertCode(type?: 'katex' | 'mermaid') {
+  insertCode(type?: 'katex' | 'mermaid' | 'html') {
     const [node] = this.curNodes
     if (node && ['paragraph', 'head'].includes(node[0].type)) {
       const path =
         node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
       let children = [{ type: 'code-line', children: [{ text: '' }] }]
+      let lang = ''
       if (type === 'mermaid') {
+        lang = 'mermaid'
         children = 'flowchart TD\n    Start --> Stop'.split('\n').map((c) => ({
           type: 'code-line',
           children: [{ text: c }]
         }))
       }
       if (type === 'katex') {
+        lang = 'tex'
         children = 'c = \\pm\\sqrt{a^2 + b^2}'
           .split('\n')
           .map((c) => ({ type: 'code-line', children: [{ text: c }] }))
+      }
+      if (type === 'html') {
+        lang = 'html'
+        children = [
+          { type: 'code-line', children: [{ text: '<div style="text-align:center">text</div>' }] }
+        ]
       }
       Transforms.insertNodes(
         this.editor,
         {
           type: 'code',
-          language: type === 'katex' ? 'tex' : type === 'mermaid' ? 'mermaid' : undefined,
+          language: lang ? lang : undefined,
           children: children,
+          render: type === 'html' ? true : undefined,
           katex: type === 'katex'
         },
         { at: path }

@@ -20,8 +20,11 @@ export class Watcher {
     this.onChange = this.onChange.bind(this)
     window.electron.ipcRenderer.on('window-blur', () => {
       if (this.store.root) {
-        window.api.watch(this.store.root.filePath, this.onChange)
-        this.getFileMap()
+        const root = this.store.root.filePath
+        setTimeout(() => {
+          window.api.watch(root, this.onChange)
+          this.getFileMap()
+        }, 60)
       }
     })
     window.electron.ipcRenderer.on('window-focus', async () => {

@@ -1,5 +1,5 @@
 import {useCallback, useMemo} from 'react'
-import {Editor, Element, Node, NodeEntry, Range} from 'slate'
+import {Editor, Element, Node, NodeEntry, Range, Path} from 'slate'
 import {useSlate} from 'slate-react'
 import {CodeNode} from '../../el'
 import {observer} from 'mobx-react-lite'
@@ -12,8 +12,8 @@ import {highlighter, langSet, loadedLanguage} from '../utils/highlight'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 const symbols = new Set(['@', '#', '$', '￥','&'])
-export const codeCache = new WeakMap<object, Range[]>()
-export const cacheTextNode = new WeakMap<object, Range[]>
+export const codeCache = new WeakMap<object, {path: Path, range: Range[]}>()
+export const cacheTextNode = new WeakMap<object, { path: Path; range: Range[] }>()
 export const clearAllCodeCache = (editor: Editor) => {
   const codes = Array.from<any>(Editor.nodes(editor, {
     match: n => Element.isElement(n) && (n.type === 'code'),
@@ -71,7 +71,7 @@ const run = (node: NodeEntry, code: string, lang: any) => {
         start = end
       }
     }
-    codeCache.set(el, ranges)
+    codeCache.set(el, {path: node[1], range: ranges})
   } catch (e) {
   }
 }
@@ -82,11 +82,12 @@ export function useHighlight(store?: EditorStore) {
     if (Element.isElement(node) && highlightNodes.has(node.type)) {
       const ranges = store?.highlightCache.get(node) || []
       if (node.type === 'code') {
-        ranges.push(...codeCache.get(node) || [])
+        ranges.push(...codeCache.get(node)?.range || [])
       }
+      const cacheText = cacheTextNode.get(node)
       if (node.type === 'inline-katex') {
-        if (cacheTextNode.get(node)) {
-          ranges.push(...cacheTextNode.get(node)!)
+        if (cacheText && Path.equals(cacheText.path, path)) {
+          ranges.push(...cacheText.range)
         } else {
           const code = Node.string(node)
           if (code) {
@@ -112,7 +113,7 @@ export function useHighlight(store?: EditorStore) {
               })
               start = end
             }
-            cacheTextNode.set(node, textRanges)
+            cacheTextNode.set(node, {path, range: textRanges})
             ranges.push(...textRanges)
           }
         }
@@ -122,16 +123,15 @@ export function useHighlight(store?: EditorStore) {
         for (let i = 0; i < node.children.length; i++) {
           const c = node.children[i]
           if (c.text && !EditorUtils.isDirtLeaf(c)) {
-            const cache = cacheTextNode.get(c)
-            if (cache) {
-              ranges.push(...cache)
+            if (cacheText && Path.equals(cacheText.path, path)) {
+              ranges.push(...cacheText.range)
             } else {
               let textRanges: any[] = []
               const matchHtml = c.text.matchAll(htmlReg)
               for (let m of matchHtml) {
                 textRanges.push({
-                  anchor: {path: [...path, i], offset: m.index},
-                  focus: {path: [...path, i], offset: m.index + m[0].length},
+                  anchor: { path: [...path, i], offset: m.index },
+                  focus: { path: [...path, i], offset: m.index + m[0].length },
                   html: true
                 })
               }
@@ -139,13 +139,13 @@ export function useHighlight(store?: EditorStore) {
               for (let m of match) {
                 if (typeof m.index !== 'number') continue
                 textRanges.push({
-                  anchor: {path: [...path, i], offset: m.index},
-                  focus: {path: [...path, i], offset: m.index + m[0].length},
+                  anchor: { path: [...path, i], offset: m.index },
+                  focus: { path: [...path, i], offset: m.index + m[0].length },
                   fnc: !m[0].endsWith(':'),
-                  fnd: m[0].endsWith(':'),
+                  fnd: m[0].endsWith(':')
                 })
               }
-              if(configStore.config.symbolHighlight) {
+              if (configStore.config.symbolHighlight) {
                 const matchSymbol = (c.text as string).matchAll(/[\[\]\{\}@;#$￥&]/g)
                 for (let m of matchSymbol) {
                   textRanges.push({
@@ -159,15 +159,15 @@ export function useHighlight(store?: EditorStore) {
                   })
                 }
               }
-              cacheTextNode.set(c, textRanges)
+              cacheTextNode.set(node, {path, range: textRanges})
               ranges.push(...textRanges)
             }
           }
         }
       }
       if (node.type === 'paragraph' && node.children.length === 1 && !EditorUtils.isDirtLeaf(node.children[0])) {
-        if (cacheTextNode.get(node)) {
-          ranges.push(...cacheTextNode.get(node)!)
+        if (cacheText && Path.equals(cacheText.path, path)) {
+          ranges.push(...cacheText.range)
         } else {
           const str = Node.string(node)
           if (str.startsWith('```')) {
@@ -182,7 +182,7 @@ export function useHighlight(store?: EditorStore) {
               },
               color: '#a3a3a3'
             })
-            cacheTextNode.set(node, ranges)
+            cacheTextNode.set(node, {path, range: ranges})
           } else if (/^\|([^|]+\|)+$/.test(str)) {
             ranges.push({
               anchor: {
@@ -195,7 +195,7 @@ export function useHighlight(store?: EditorStore) {
               },
               color: '#a3a3a3'
             })
-            cacheTextNode.set(node, ranges)
+            cacheTextNode.set(node, {path, range: ranges})
           }
         }
       }
@@ -212,12 +212,37 @@ export const SetNodeToDecorations = observer(() => {
     const codes = Array.from(
       Editor.nodes<CodeNode>(editor, {
         at: [],
-        match: n => Element.isElement(n) && n.type === 'code' && !codeCache.get(n)
+        match: (n, path) => {
+          if (Element.isElement(n) && n.type === 'code') {
+            const cache = codeCache.get(n)
+            if (!cache) return true
+            if (!Path.equals(cache.path, path)) {
+              codeCache.set(n, {
+                path,
+                range: cache.range.map((r) => {
+                  return {
+                    ...r,
+                    anchor: {
+                      path: [...path, ...r.anchor.path.slice(-2)],
+                      offset: r.anchor.offset
+                    },
+                    focus: {
+                      path: [...path, ...r.focus.path.slice(-2)],
+                      offset: r.focus.offset
+                    }
+                  }
+                })
+              })
+              return true
+            }
+          }
+          return false
+        }
       })
-    ).map(node => {
+    ).map((node) => {
       return {
         node,
-        code: node[0].children.map(n => Node.string(n)).join('\n')
+        code: node[0].children.map((n) => Node.string(n)).join('\n')
       }
     })
     for (let c of codes) {

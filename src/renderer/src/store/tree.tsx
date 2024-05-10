@@ -6,25 +6,25 @@ import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
 import {isMac, message$, nid, stat} from '../utils'
+import { parsePath } from '../utils/path'
 import {Watcher} from './watch'
 import {Subject} from 'rxjs'
 import {configStore} from './config'
 import {db, IFile} from './db'
 import {EditorStore} from '../editor/store'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
-import {Checkbox} from 'antd'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
 import {Refactor} from '../utils/refactor'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
+import { sep } from 'path'
 import React from 'react'
-
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   nodeMap = new Map<string, IFileItem>()
   root: ISpaceNode | null = null
-  ctxNode: IFileItem | null = null
+  ctxNode: IFileItem | ISpaceNode | null = null
   dragNode: IFileItem | null = null
   tabs: Tab[] = []
   dragStatus: null | {
@@ -58,6 +58,28 @@ export class TreeStore {
   get openedNote() {
     return this.tabs[this.currentIndex]?.current
   }
+  get inRoot() {
+    return this.root && this.openedNote && this.openedNote.filePath.startsWith(this.root.filePath)
+  }
+  get allNotes() {
+    const map = new Map<string, IFileItem & { path: string; parentPath?: string }>()
+    const docs = Array.from(this.nodeMap.values())
+      .filter((r) => {
+        return r.ext === 'md'
+      })
+      .sort((a, b) => (a.lastOpenTime! > b.lastOpenTime! ? -1 : 1))
+      .map((r) => {
+        const path = r.filePath.replace(treeStore.root!.filePath + sep, '')
+        const item = {
+          ...r,
+          parentPath: path.split(sep).slice(0, -1).join('/'),
+          path
+        }
+        map.set(r.filePath, item)
+        return item
+      })
+    return { map, docs }
+  }
 
   get firstNote() {
     let firstNote: IFileItem | null = null
@@ -82,25 +104,34 @@ export class TreeStore {
       watcher: false,
       recordTimer: false
     })
-    window.addEventListener('resize', action(() => {
-      this.size = {
-        width: window.innerWidth,
-        height: window.innerHeight
-      }
-    }))
-    window.addEventListener('click', e => {
+    window.addEventListener(
+      'resize',
+      action(() => {
+        this.size = {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      })
+    )
+    window.addEventListener('click', (e) => {
       if (this.selectItem) {
         runInAction(() => {
           this.selectItem = null
         })
       }
     })
-    window.electron.ipcRenderer.on('enter-full-screen', action(() => {
-      this.blankMode = false
-    }))
-    window.electron.ipcRenderer.on('leave-full-screen', action(() => {
-      this.blankMode = isMac
-    }))
+    window.electron.ipcRenderer.on(
+      'enter-full-screen',
+      action(() => {
+        this.blankMode = false
+      })
+    )
+    window.electron.ipcRenderer.on(
+      'leave-full-screen',
+      action(() => {
+        this.blankMode = isMac
+      })
+    )
     this.tabs.push(this.createTab())
     window.electron.ipcRenderer.on('open-path', async (e, path: string) => {
       if (existsSync(path)) {
@@ -123,7 +154,7 @@ export class TreeStore {
                 this.openExternalNode(createFileNode(record))
               } else {
                 if (mediaType(record.filePath) === 'markdown') {
-                  const [res] = await parserMdToSchema([{filePath: record.filePath}])
+                  const [res] = await parserMdToSchema([{ filePath: record.filePath }])
                   db.file.update(record.cid, {
                     schema: res.schema,
                     updated: s.mtime.valueOf(),
@@ -145,7 +176,7 @@ export class TreeStore {
                 updated: s.mtime.valueOf()
               }
               if (mediaType(path) === 'markdown') {
-                const [res] = await parserMdToSchema([{filePath: path}])
+                const [res] = await parserMdToSchema([{ filePath: path }])
                 data.schema = res.schema
                 data.links = res.links
               }
@@ -159,42 +190,54 @@ export class TreeStore {
   }
 
   openExternalNode(node: IFileItem) {
-    if (!this.tabs.some((t, i) => {
-      if (!t.current) {
-        this.currentIndex = i
-        this.openNote(node)
-        return true
-      }
-      return false
-    })) {
+    if (
+      !this.tabs.some((t, i) => {
+        if (!t.current) {
+          this.currentIndex = i
+          this.openNote(node)
+          return true
+        }
+        return false
+      })
+    ) {
       this.appendTab(node)
     }
+  }
+
+  getDepLinks(filePath: string) {
+    const docs: IFileItem[] = []
+    for (const item of this.nodeMap) {
+      if (
+        item[1].filePath !== filePath &&
+        item[1].links?.some((l) => {
+          const p = parsePath(l.target)
+          return p.path === filePath
+        })
+      ) {
+        docs.push(item[1])
+      }
+    }
+    return docs
   }
 
   moveToTrash(item: IFileItem, force = false) {
     try {
       if (item) {
         this.selectItem = null
-        if (configStore.config.showRemoveFileDialog && !force) {
-          let save = false
+        if (!force) {
           openConfirmDialog$.next({
-            title: configStore.zh ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'` : `Are you sure you want to delete '${item.filename}' ${item.folder ? 'and its contents?' : '?'}`,
-            description: configStore.zh ? '您可以从垃圾箱中恢复此文件。' : 'You can restore this file from the Trash.',
+            title: configStore.zh
+              ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'`
+              : `Are you sure you want to delete '${item.filename}' ${
+                  item.folder ? 'and its contents?' : '?'
+                }`,
+            description: configStore.zh
+              ? '您可以从垃圾箱中恢复此文件。'
+              : 'You can restore this file from the Trash.',
             onConfirm: () => {
               treeStore.moveToTrash(item, true)
-              if (save) {
-                configStore.setConfig('showRemoveFileDialog', false)
-              }
             },
-            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash',
-            footer: (
-              <Checkbox
-                defaultChecked={save}
-                className={'mt-6'}
-                onChange={e => save = e.target.checked}>
-                {configStore.zh ? '不再询问' : 'Do not ask me again'}
-              </Checkbox>
-            )
+            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash'
           })
         } else {
           this.removeSelf(item)
@@ -205,7 +248,7 @@ export class TreeStore {
         }
       }
     } catch (e) {
-      MainApi.errorLog(e, {name: 'moveToTrash'})
+      MainApi.errorLog(e, { name: 'moveToTrash' })
     }
   }
 
@@ -247,9 +290,12 @@ export class TreeStore {
         }
       }
     }
-    setTimeout(action(() => {
-      this.dragStatus = null
-    }), 100)
+    setTimeout(
+      action(() => {
+        this.dragStatus = null
+      }),
+      100
+    )
   }
 
   updateTitle() {
@@ -260,14 +306,17 @@ export class TreeStore {
         document.title = this.openedNote.filename
       }
     } else {
-      document.title = 'Bluestone'
+      document.title = 'Inkdown'
     }
   }
 
   async restoreTabs() {
     if (!this.root) return
-    let files = await db.recent.orderBy('sort').filter(x => x.spaceId === this.root!.cid).toArray()
-    files = files.filter(f => !!this.nodeMap.get(f.fileId))
+    let files = await db.recent
+      .orderBy('sort')
+      .filter((x) => x.spaceId === this.root!.cid)
+      .toArray()
+    files = files.filter((f) => !!this.nodeMap.get(f.fileId))
     let curId = ''
     if (files.length) {
       runInAction(() => {
@@ -299,7 +348,7 @@ export class TreeStore {
     }
     if (!tabs.length) tabs.push(this.createTab())
     runInAction(() => {
-      let index = tabs.findIndex(t => t.current?.cid === curId)
+      let index = tabs.findIndex((t) => t.current?.cid === curId)
       this.currentIndex = index < 0 ? 0 : index
       this.tabs = tabs
     })
@@ -320,12 +369,12 @@ export class TreeStore {
 
   openNote(file: IFileItem, scroll = true) {
     if (this.currentTab.current?.filePath === file.filePath || !file) return
-    const index = this.tabs.findIndex(t => t.current?.filePath === file.filePath)
+    const index = this.tabs.findIndex((t) => t.current?.filePath === file.filePath)
     if (index !== -1) {
       return this.selectTab(index)
     }
 
-    this.currentTab.history = this.currentTab.history.filter(t => t.filePath !== file.filePath)
+    this.currentTab.history = this.currentTab.history.filter((t) => t.filePath !== file.filePath)
     this.currentTab.history.push(file)
     this.openParentDir(file)
     this.currentTab.index = this.currentTab.history.length - 1
@@ -370,20 +419,20 @@ export class TreeStore {
   async moveNode() {
     if (this.dragNode && this.dragStatus && this.dragStatus.dropNode !== this.dragNode) {
       if (!this.dragNode.parent) return
-      const {dropNode, mode} = this.dragStatus
+      const { dropNode, mode } = this.dragStatus
       if (!dropNode) return
       const dragNode = this.dragNode
       let targetList = dropNode.parent?.children!
-      let index = targetList.findIndex(l => l === dropNode)
+      let index = targetList.findIndex((l) => l === dropNode)
       this.dragNode = null
       this.dragStatus = null
       if (mode === 'top' && targetList[index - 1] === dragNode) return
       if (mode === 'bottom' && targetList[index + 1] === dragNode) return
       const oldPath = dragNode.filePath
-      dragNode.parent!.children = dragNode.parent!.children!.filter(c => c !== dragNode)
+      dragNode.parent!.children = dragNode.parent!.children!.filter((c) => c !== dragNode)
       if (dragNode.parent === dropNode.parent) {
-        targetList = targetList.filter(c => c !== dragNode)
-        index = targetList.findIndex(l => l === dropNode)
+        targetList = targetList.filter((c) => c !== dragNode)
+        index = targetList.findIndex((l) => l === dropNode)
       }
       if (mode === 'bottom' || mode === 'top') {
         targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
@@ -395,14 +444,14 @@ export class TreeStore {
           this.refactor.refactorDepLink(dragNode)
           this.refactor.refactorDepOnLink(dragNode, oldPath)
         }
-        targetList.map((n, i) => db.file.update(n.cid, {sort: i}))
+        targetList.map((n, i) => db.file.update(n.cid, { sort: i }))
       }
       if (mode === 'enter' && dropNode.folder) {
         dropNode.children!.unshift(dragNode)
         const newPath = join(dropNode.filePath, basename(dragNode.filePath))
         defineParent(dragNode, dropNode)
         await updateFilePath(dragNode, newPath)
-        dropNode.children!.map((n, i) => db.file.update(n.cid, {sort: i}))
+        dropNode.children!.map((n, i) => db.file.update(n.cid, { sort: i }))
         this.refactor.refactorDepLink(dragNode)
         this.refactor.refactorDepOnLink(dragNode, oldPath)
       }
@@ -484,7 +533,10 @@ export class TreeStore {
       await db.file.where('spaceId').equals(spaceId).delete()
     }
     const read = new ReadSpace(spaceId)
-    const timer = setTimeout(action(() => this.loading = true), 100)
+    const timer = setTimeout(
+      action(() => (this.loading = true)),
+      100
+    )
     try {
       const res = await read.getTree()
       clearTimeout(timer)
@@ -520,25 +572,28 @@ export class TreeStore {
   }
 
   createTab() {
-    return observable({
-      get current() {
-        return this.history[this.index]
-      },
-      history: [],
-      index: 0,
-      id: nanoid(),
-      get hasPrev() {
-        return this.index > 0
-      },
-      store: new EditorStore(),
-      get hasNext() {
-        return this.index < this.history.length - 1
-      }
-    } as Tab, {range: false, id: false})
+    return observable(
+      {
+        get current() {
+          return this.history[this.index]
+        },
+        history: [],
+        index: 0,
+        id: nanoid(),
+        get hasPrev() {
+          return this.index > 0
+        },
+        store: new EditorStore(),
+        get hasNext() {
+          return this.index < this.history.length - 1
+        }
+      } as Tab,
+      { range: false, id: false }
+    )
   }
 
   appendTab(file?: IFileItem | null) {
-    const index = this.tabs.findIndex(t => {
+    const index = this.tabs.findIndex((t) => {
       return file && t.current === file
     })
     if (index !== -1) {
@@ -590,7 +645,7 @@ export class TreeStore {
         t.store.editor.selection = null
       }
       if (t.history?.length) {
-        t.history = t.history.filter(h => h !== node)
+        t.history = t.history.filter((h) => h !== node)
         if (t.history.length > 0 && t.index > t.history.length - 1) {
           t.index = t.history.length - 1
         } else if (!t.history.length) {
@@ -604,7 +659,7 @@ export class TreeStore {
     if (!node.folder) this.removeNodeFromHistory(node)
     const parent = node.parent || treeStore.root
     if (parent) {
-      parent.children = parent.children!.filter(c => c !== node)
+      parent.children = parent.children!.filter((c) => c !== node)
     }
     this.nodeMap.delete(node.cid)
     if (node.folder) {

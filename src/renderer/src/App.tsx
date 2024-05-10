@@ -50,13 +50,13 @@ const App = observer(() => {
       theme={{
         algorithm: themeObject,
         token: {
-          colorPrimary: '#6366f1'
+          colorPrimary: '#3b82f6'
         }
       }}
     >
       {contextHolder}
       {modalContext}
-      <Home/>
+      <Home />
     </ConfigProvider>
   )
 })

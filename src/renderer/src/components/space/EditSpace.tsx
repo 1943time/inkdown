@@ -22,7 +22,8 @@ export const EditSpace = observer(() => {
   const [state, setState] = useLocalState({
     open: false,
     spaceId: '',
-    spaceName: ''
+    spaceName: '',
+    background: 'sky'
   })
 
   const [form] = Form.useForm()
@@ -37,7 +38,7 @@ export const EditSpace = observer(() => {
             imageFolder: res.imageFolder,
             relative: res.relative
           })
-          setState({spaceName: res.name, spaceId, open: true})
+          setState({spaceName: res.name, spaceId, open: true, background: res.background || 'sky'})
         }
       })
     } else {
@@ -63,7 +64,8 @@ export const EditSpace = observer(() => {
           name: v.name,
           filePath: v.filePath,
           relative: v.relative,
-          imageFolder: v.imageFolder
+          imageFolder: v.imageFolder,
+          background: state.background
         })
         const oldPath = treeStore.root?.filePath
         if (state.spaceId === treeStore.root?.cid) {
@@ -72,6 +74,7 @@ export const EditSpace = observer(() => {
             treeStore.root!.name = v.name
             treeStore.root!.imageFolder = v.imageFolder
             treeStore.root!.relative = v.relative
+            treeStore.root!.background = state.background
           })
         }
         if (!treeStore.root || (oldPath && oldPath !== v.filePath)) {
@@ -101,7 +104,8 @@ export const EditSpace = observer(() => {
             lastOpenTime: now,
             created: now,
             relative: v.relative,
-            imageFolder: v.imageFolder
+            imageFolder: v.imageFolder,
+            background: state.background
           })
           setState({open: false})
           treeStore.initial(id)
@@ -117,15 +121,20 @@ export const EditSpace = observer(() => {
       title={
         <div className={'flex items-center'}>
           <Icon icon={'material-symbols:workspaces-outline'} className={'mr-1'} />
-          {state.spaceId ? state.spaceName : configStore.zh ? '创建文档空间' : 'Create doc space'}
+          {state.spaceId ? state.spaceName : configStore.zh ? '创建工作空间' : 'Create a workspace'}
         </div>
       }
       onCancel={() => setState({ open: false })}
       footer={null}
     >
+      <div className={'text-xs text-center dark:text-white/60 mb-4 text-black/60'}>
+        {configStore.zh
+          ? 'Inkdown将自动解析和存储内容至空间文件夹内'
+          : 'Inkdown will parse the content and store it in the space folder'}
+      </div>
       <Form layout={'vertical'} className={'pt-2'} form={form}>
         <Form.Item
-          label={configStore.zh ? '空间名称' : 'Space name'}
+          label={configStore.zh ? '空间名称' : 'Space Name'}
           rules={[{ required: true }]}
           name={'name'}
         >
@@ -155,8 +164,25 @@ export const EditSpace = observer(() => {
             </Button>
           </Space.Compact>
         </Form.Item>
+        <Form.Item label={configStore.zh ? '定义颜色' : 'Color Indentifer'} name={'background'}>
+          <div className={'space-x-3 flex'}>
+            {configStore.spaceColors.map((c) => {
+              return (
+                <div
+                  onClick={() => {
+                    setState({ background: c })
+                  }}
+                  className={`rounded space-${c} w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-90 duration-200 text-white`}
+                  key={c}
+                >
+                  {state.background === c && <Icon icon={'mingcute:check-fill'} />}
+                </div>
+              )
+            })}
+          </div>
+        </Form.Item>
         <Form.Item
-          label={configStore.zh ? '图片存储文件夹' : 'Image storage folder'}
+          label={configStore.zh ? '图片存储文件夹' : 'Image storage Folder'}
           tooltip={
             configStore.zh
               ? '在打开空间的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径'
@@ -168,10 +194,7 @@ export const EditSpace = observer(() => {
           </Form.Item>
           <div className={'flex justify-end mt-1'}>
             <Form.Item noStyle={true} name={'relative'} valuePropName={'checked'}>
-              <Checkbox
-              >
-                {configStore.zh ? '相对路径' : 'Relative path'}
-              </Checkbox>
+              <Checkbox>{configStore.zh ? '相对路径' : 'Relative path'}</Checkbox>
             </Form.Item>
           </div>
         </Form.Item>

@@ -1,25 +1,25 @@
-import {action, makeAutoObservable, runInAction} from 'mobx'
-import {BaseSelection, createEditor, Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
-import {ReactEditor, withReact} from 'slate-react'
-import {GetFields, IFileItem} from '../index'
-import React, {createContext, useContext} from 'react'
-import {MediaNode, TableCellNode} from '../el'
-import {Subject} from 'rxjs'
-import {existsSync, mkdirSync, readFileSync, writeFileSync, cpSync} from 'fs'
-import {isAbsolute, join, parse, relative, sep} from 'path'
-import {getOffsetLeft, getOffsetTop, mediaType} from './utils/dom'
-import {treeStore} from '../store/tree'
-import {MainApi} from '../api/main'
-import {clearAllCodeCache, clearCodeCache} from './plugins/useHighlight'
-import {withMarkdown} from './plugins'
-import {withHistory} from 'slate-history'
-import {configStore} from '../store/config'
-import {withErrorReporting} from './plugins/catchError'
-import {imageBed} from '../utils/imageBed'
-import {nid} from '../utils'
-import {openMenus} from '../components/Menu'
-import {EditorUtils} from './utils/editorUtils'
-import {insertFileNode} from '../store/parserNode'
+import { action, makeAutoObservable, runInAction } from 'mobx'
+import { BaseSelection, createEditor, Editor, Element, Node, NodeEntry, Path, Range, Transforms, Selection } from 'slate'
+import { ReactEditor, withReact } from 'slate-react'
+import { GetFields } from '../index'
+import React, { createContext, useContext } from 'react'
+import { MediaNode, TableCellNode } from '../el'
+import { Subject } from 'rxjs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
+import { isAbsolute, join, parse, relative, sep } from 'path'
+import { getOffsetLeft, getOffsetTop, mediaType } from './utils/dom'
+import { treeStore } from '../store/tree'
+import { MainApi } from '../api/main'
+import { clearAllCodeCache } from './plugins/useHighlight'
+import { withMarkdown } from './plugins'
+import { withHistory } from 'slate-history'
+import { withErrorReporting } from './plugins/catchError'
+import { imageBed } from '../utils/imageBed'
+import { nid } from '../utils'
+import { openMenus } from '../components/Menu'
+import { EditorUtils } from './utils/editorUtils'
+import { insertFileNode } from '../store/parserNode'
+import { toUnixPath } from '../utils/path'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -57,6 +57,8 @@ export class EditorStore {
   langCompletionText = new Subject<string>()
   floatBar$ = new Subject<string>()
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
+  openInsertLink$ = new Subject<Selection>()
+  openLinkPanel = false
   tableCellNode: null | NodeEntry<TableCellNode> = null
   refreshHighlight = false
   pauseCodeHighlight = false
@@ -93,6 +95,7 @@ export class EditorStore {
       highlightCache: false,
       dragEl: false,
       manual: false,
+      openLinkPanel: false,
       initializing: false
     })
   }
@@ -268,7 +271,7 @@ export class EditorStore {
           const copyPath = join(imgDir, name)
           cpSync(f.path, copyPath)
           if (treeStore.root && treeStore.openedNote) {
-            paths.push(window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
+            paths.push(toUnixPath(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
           } else {
             paths.push(copyPath)
           }
@@ -360,7 +363,9 @@ export class EditorStore {
       const base = file instanceof File ? nid() + p.ext : file.name
       if (treeStore.root) {
         targetPath = join(imgDir, base)
-        mediaUrl = window.api.toUnix(relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imgDir, base)))
+        mediaUrl = toUnixPath(
+          relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imgDir, base))
+        )
       } else {
         targetPath = join(imgDir, base)
         mediaUrl = targetPath
@@ -373,7 +378,7 @@ export class EditorStore {
           spaceId: treeStore.root?.cid
         })
       }
-      return window.api.toUnix(mediaUrl)
+      return toUnixPath(mediaUrl)
     }
   }
 
@@ -405,7 +410,9 @@ export class EditorStore {
             folder: false,
             spaceId: treeStore.root.cid
           })
-          insertPaths.push(window.api.toUnix(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
+          insertPaths.push(
+            toUnixPath(relative(join(treeStore.openedNote.filePath, '..'), copyPath))
+          )
         } else {
           insertPaths.push(copyPath)
         }
@@ -418,7 +425,10 @@ export class EditorStore {
 
   insertLink(filePath: string) {
     const p = parse(filePath)
-    const insertPath = treeStore.root && isAbsolute(filePath) && filePath.startsWith(treeStore.root.filePath) ? window.api.toUnix(relative(join(treeStore.openedNote!.filePath, '..'), filePath)) : filePath
+    const insertPath =
+      treeStore.root && isAbsolute(filePath) && filePath.startsWith(treeStore.root.filePath)
+        ? toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), filePath))
+        : filePath
     let node = {text: filePath.startsWith('http') ? filePath : p.name, url: insertPath}
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return

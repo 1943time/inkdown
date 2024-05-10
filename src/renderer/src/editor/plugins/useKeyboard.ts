@@ -107,7 +107,7 @@ export const useKeyboard = (store: EditorStore) => {
               match: n => Element.isElement(n) && n.type === 'paragraph',
               mode: 'lowest'
             })
-            if (node && node[0].children.length === 1 && !EditorUtils.isDirtLeaf(node[0].children[0]) && (e.key === 'Backspace' || /^[\w+\-#\/]$/.test(e.key))) {
+            if (node && node[0].children.length === 1 && !EditorUtils.isDirtLeaf(node[0].children[0]) && (e.key === 'Backspace' || /^[^\n]$/.test(e.key))) {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {
@@ -116,7 +116,7 @@ export const useKeyboard = (store: EditorStore) => {
                   store.langCompletionText.next(codeMatch[1])
                 })
               } else {
-                const insertMatch = str.match(/^\/([\w\s]+)?$/i)
+                const insertMatch = str.match(/^\/([^\n]+)?$/i)
                 if (insertMatch && !(!Path.hasPrevious(node[1]) && Node.parent(store.editor, node[1]).type === 'list-item')) {
                   runInAction(() => store.openInsertCompletion = true)
                   setTimeout(() => {

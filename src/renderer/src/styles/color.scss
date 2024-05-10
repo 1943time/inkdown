@@ -3,24 +3,22 @@
   --nav: #fff;
   --tab: #fafafa;
   --b1: rgb(229 231 235 / 0.8);
-  --md-text: rgba(60,60,60);
+  --md-text: rgb(40, 40, 36);
   --tree-bg: #fafafa;
   --md-code-bg: #2a2929;
-  --md-bg-mute: rgba(0, 0, 0, .07);
+  --md-bg-mute: rgba(23, 23, 23, .07);
   --md-high: rgba(141, 141, 141, 0.5);
   --md-border: #b9b9b9;
-  --card-bg: #fff;
 }
 .dark{
   --bg: #191919;
   --nav: #191919;
   --tab: #191919;
   --b1: rgb(229 231 235 / 0.1);
-  --md-text: rgba(255, 255, 255, 0.82);
+  --md-text: rgba(255, 255, 255, 0.86);
   --tree-bg: #1E1E1E;
-  --card-bg: #1E1E1E;
   --md-code-bg: #1c1c1c;
-  --md-bg-mute: rgba(255, 255, 255, .1);
+  --md-bg-mute: rgba(255, 255, 255, .07);
   --md-high: rgba(255, 255, 255, .2);
   --md-border: #3f3f46;
 }
@@ -34,9 +32,6 @@ html.dark{
 }
 .def-bg{
   background: var(--bg);
-}
-.card-bg{
-  background: var(--card-bg);
 }
 .tree-bg{
   background: var(--tree-bg);
@@ -59,8 +54,9 @@ html{
 }
 
 .input{
-  @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-zinc-900 bg-white
-  h-7 rounded pr-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
+  border-radius: 6px;
+  @apply outline-none dark:text-gray-300 text-gray-600 text-sm dark:bg-black/30 bg-white
+  h-7 pr-2 border dark:border-zinc-700 border-gray-500/50 dark:focus:border-zinc-500 focus:border-gray-500/80 duration-200;
 }
 
 .high-block{
@@ -82,9 +78,18 @@ html{
 }
 .modal-panel{
   @extend .modal-border, .panel-bg;
-  @apply border rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
+  @apply rounded-xl shadow-lg shadow-gray-400/80 dark:shadow-gray-600/5;
 }
 
+.dialog-content {
+  @apply dark:bg-[#1F1F1F] rounded-lg bg-white;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08),0 3px 6px -4px rgba(0, 0, 0, 0.12),0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+.dark{
+  .dialog-content {
+    box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  }
+}
 .tools-panel{
   @apply rounded-lg dark:bg-[rgba(35,35,35,.95)] dark:text-gray-200 overflow-y-auto bg-white/95 text-gray-600 select-none
   backdrop-blur-lg shadow-lg shadow-gray-200/70 dark:shadow-gray-600/10 border dark:border-gray-200/10 border-gray-200;
@@ -97,21 +102,64 @@ html{
 }
 
 .modal-border{
-  @apply dark:border-gray-200/20 border-transparent;
+  @apply dark:border-gray-200/20 border-transparent border;
 }
 
 .float-bar-icon{
-  @apply dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600 cursor-default;
+  @apply dark:hover:text-gray-200 dark:hover:bg-gray-200/10 hover:bg-gray-200/50 hover:text-gray-600 cursor-pointer;
 }
 
 .float-color-icon{
-  @apply w-5 h-5 rounded border border-white/10 hover:border-white/50;
+  @apply w-5 h-5 rounded-full hover:opacity-80 cursor-pointer;
 }
 .ant-btn-primary {
   &:not([disabled],.ant-btn-dangerous) {
-    background-color: #6366f1 !important;
+    background-color: #3b82f6 !important;
     &:hover{
-      background-color: #6d6fec !important;
+      background-color: #2563eb !important;
     }
   }
+}
+
+.ctx-panel{
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 3px 6px, rgba(15, 15, 15, 0.2) 0px 9px 24px;
+}
+
+.dark .ctx-panel{
+  background-color: rgb(37, 37, 37);
+  box-shadow: rgba(15, 15, 15, 0.1) 0px 0px 0px 1px, rgba(15, 15, 15, 0.2) 0px 3px 6px, rgba(15, 15, 15, 0.4) 0px 9px 24px;
+}
+
+.space-cyan {
+  @apply bg-gradient-to-br from-cyan-500 to-blue-500;
+}
+
+.space-sky {
+  @apply bg-gradient-to-br from-sky-500 to-indigo-500;
+}
+
+.space-violet {
+  @apply bg-gradient-to-br from-violet-500 to-fuchsia-500
+}
+
+.space-purple{
+  @apply bg-gradient-to-br from-purple-500 to-pink-500
+}
+
+.space-green {
+  @apply bg-gradient-to-br from-green-500 to-teal-500
+}
+
+.space-amber{
+  @apply bg-gradient-to-br from-amber-500 to-yellow-500;
+}
+
+.space-pink{
+  @apply bg-gradient-to-br from-pink-500 to-rose-500;
+}
+
+.space-slate{
+  @apply bg-gradient-to-br from-slate-500 to-stone-500;
 }

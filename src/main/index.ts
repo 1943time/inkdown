@@ -3,7 +3,6 @@ import {electronApp, is, optimizer} from '@electron-toolkit/utils'
 import {baseUrl, registerApi, windowOptions} from './api'
 import {createAppMenus} from './appMenus'
 import {AppUpdate} from './update'
-import log from 'electron-log'
 import {isAbsolute, join} from 'path'
 const isWindows = process.platform === 'win32'
 app.setAsDefaultProtocolClient('bluestone')
@@ -183,7 +182,6 @@ const preCreate = () => {
 app.whenReady().then(() => {
   createAppMenus()
   registerApi()
-  app.clearRecentDocuments()
   if (isWindows) {
     app.on('browser-window-focus', () => {
       globalShortcut.register("CommandOrControl+W", () => {

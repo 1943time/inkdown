@@ -22,7 +22,7 @@ const getSystemMenus = () => {
   ] : []
   const menus: MenuOptions = [
     {
-      label: 'Bluestone',
+      label: 'Inkdown',
       role: 'appMenu',
       id: 'app',
       submenu: [
@@ -195,14 +195,16 @@ const getSystemMenus = () => {
           label: 'Documentation',
           click: () => {
             if (app.getLocale() === 'zh-CN') {
-              shell.openExternal(`https://doc.bluemd.me/doc/Q1vCjNmL8Dnvz`)
+              shell.openExternal(
+                `https://doc.inkdown.me/book/%E9%9D%92%E7%9F%B3%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3`
+              )
             } else {
-              shell.openExternal(`https://doc.bluemd.me/doc/tAfxJPwODVe4i`)
+              shell.openExternal(`https://doc.inkdown.me/book/inkdown`)
             }
           }
         },
         // {
-        //   label: 'Bluestone Website',
+        //   label: 'Inkdown Website',
         //   click: () => {
         //     shell.openExternal('https://www.bluemd.me')
         //   }
@@ -210,13 +212,13 @@ const getSystemMenus = () => {
         {
           label: 'Github',
           click: () => {
-            shell.openExternal('https://github.com/1943time/bluestone')
+            shell.openExternal('https://github.com/1943time/inkdown')
           }
         },
         {
           label: 'Issues',
           click: () => {
-            shell.openExternal('https://github.com/1943time/bluestone/issues')
+            shell.openExternal('https://github.com/1943time/inkdown/issues')
           }
         },
         {

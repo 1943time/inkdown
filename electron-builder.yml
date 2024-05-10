@@ -1,5 +1,5 @@
 appId: bluestone
-productName: Bluestone
+productName: Inkdown
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
@@ -59,7 +59,7 @@ linux:
     - deb
   maintainer: 1943dejavu
   category: Markdown
-  executableName: Bluestone
+  executableName: Inkdown
 npmRebuild: false
 publish:
   provider: github

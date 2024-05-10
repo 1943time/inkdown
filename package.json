@@ -1,6 +1,6 @@
 {
   "name": "bluestone",
-  "version": "0.21.2",
+  "version": "0.22.0",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
@@ -79,7 +79,7 @@
     "remark-parse": "^10.0.1",
     "rxjs": "^7.8.0",
     "sass": "^1.58.3",
-    "shiki": "1.2.0",
+    "shiki": "1.5.1",
     "slate": "^0.101.5",
     "slate-history": "^0.100.0",
     "slate-hyperscript": "^0.100.0",

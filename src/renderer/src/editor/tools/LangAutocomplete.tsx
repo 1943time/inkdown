@@ -107,8 +107,8 @@ export const LangAutocomplete = observer(() => {
       ref={dom}
       className={`
       ${!store.openLangCompletion || !state.showOptions.length ? 'hidden' : ''}
-      absolute z-50 w-40 max-h-40 overflow-y-auto
-      border border-stone-200 rounded-lg py-1 text-gray-700/90 dark:text-gray-300 card-bg dark:border-gray-200/10
+      absolute z-50 w-40 max-h-40 overflow-y-auto ctx-panel
+      rounded-lg py-1 text-gray-700/90 dark:text-gray-300 dark:border-gray-200/10
       `}
       style={{
         left: state.left,

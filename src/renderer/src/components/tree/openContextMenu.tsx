@@ -82,7 +82,7 @@ export const getCreateName = (parent?: IFileItem | ISpaceNode, name = 'Untitled'
 export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNode) => {
   runInAction(() => {
     treeStore.selectItem = node.root ? null : node
-    treeStore.ctxNode = node.root ? null : node
+    treeStore.ctxNode = node
   })
   if (!node.root && !node.folder) {
     const isMd = node.ext === 'md'
@@ -108,7 +108,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
           }
         },
         {
-          text: configStore.zh ? '复制Bluestone URL' : 'Copy Bluestone URL',
+          text: configStore.zh ? '复制Inkdown URL' : 'Copy Inkdown URL',
           click: async () => {
             copyToClipboard(`bluestone://open?space=${treeStore.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
             message$.next({

@@ -146,7 +146,11 @@ const processFragment = (fragment: any[], parentType = '') => {
       f.text = f.text.replace(/^\n+|\n+$/g, '')
       if (!f.text) continue
     }
-    if ((['media', 'link'].includes(f.type) || f.text) && !['paragraph', 'table-cell', 'head'].includes(parentType)) {
+    if (f.type === 'media') {
+      trans.push(f)
+      continue
+    }
+    if ((['link'].includes(f.type) || f.text) && !['paragraph', 'table-cell', 'head'].includes(parentType)) {
       if (!container) {
         f = {type: 'paragraph', children: [f]}
         container = f

@@ -89,15 +89,14 @@ export const Heading = observer(({note}: {
         }
         setState({active: ''})
       }
-      div.addEventListener('scroll', scroll)
+      div.addEventListener('scroll', scroll, {passive: true})
       return () => div.removeEventListener('scroll', scroll)
     }
     return () => {}
   }, [])
   const pt = useMemo(() => {
-    let pt = 40
+    let pt = 70
     if (store.openSearch) pt += 46
-    if (treeStore.tabs.length > 1) pt += 32
     return pt
   }, [treeStore.tabs.length, store.openSearch])
   return (
@@ -137,7 +136,7 @@ export const Heading = observer(({note}: {
                   })
                 }
               }}
-              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-indigo-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
+              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-blue-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
               {h.title}
             </div>
           )}

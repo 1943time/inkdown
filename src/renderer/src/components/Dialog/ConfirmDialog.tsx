@@ -86,16 +86,15 @@ export const ConfirmDialog = observer(() => {
       open={state.open}
       onClose={close}
     >
-      <div className={'w-[260px] px-4 py-6 flex flex-col items-center text-center'}>
-        <img src={logo} alt="" className={'w-12 h-12'}/>
-        <div className={'font-semibold mt-4 text-sm dark:text-gray-200'}>{state.title}</div>
+      <div className={'w-[260px] px-5 py-6 flex flex-col items-center text-center'}>
+        <div className={'font-semibold text-sm dark:text-gray-200'}>{state.title}</div>
         {state.description &&
           <div className={'text-gray-500 mt-2 text-xs dark:text-gray-400'}>{state.description}</div>
         }
         <Button
-          type={'primary'}
           block={true}
-          className={'mb-3 mt-4'}
+          danger={true}
+          className={'my-4'}
           loading={state.loading}
           onClick={confirm}
         >
