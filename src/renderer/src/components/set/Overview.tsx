@@ -138,9 +138,9 @@ export const Overview = observer(() => {
             <Slider
               className={'w-64'}
               value={configStore.config.editorWidth}
-              min={720}
+              min={700}
               max={1000}
-              marks={{ 720: 'Recommend', 1000: 'Max' }}
+              marks={{ 700: 'Recommend', 1000: 'Max' }}
               step={20}
               onChange={(e) => {
                 configStore.setConfig('editorWidth', e)

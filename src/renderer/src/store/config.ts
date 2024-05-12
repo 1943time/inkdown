@@ -1,9 +1,8 @@
-import { action, makeAutoObservable, runInAction } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { MainApi } from '../api/main'
-import { ipcRenderer } from 'electron'
 import mermaid from 'mermaid'
 import { shareStore } from '../server/store'
-import { codeReady, highlighter } from '../editor/utils/highlight'
+import { highlighter } from '../editor/utils/highlight'
 import { imageBed } from '../utils/imageBed'
 import { db } from './db'
 import { treeStore } from './tree'
@@ -32,7 +31,7 @@ class ConfigStore {
     symbolHighlight: true,
     dragToSort: true,
     spellCheck: false,
-    editorWidth: 720,
+    editorWidth: 700,
     autoRebuild: true,
     showHiddenFiles: false,
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',

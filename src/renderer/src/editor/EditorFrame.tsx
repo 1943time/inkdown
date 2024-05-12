@@ -8,7 +8,6 @@ import {EditorStoreContext} from './store'
 import {FloatBar} from './tools/FloatBar'
 import {TableAttr} from './tools/TableAttr'
 import {Search} from './tools/Search'
-import {MediaAttr} from './tools/MediaAttr'
 import {mediaType} from './utils/dom'
 import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
@@ -72,7 +71,7 @@ export const EditorFrame = observer(({tab}: {
             >
               <div className={`flex-1 flex justify-center items-start h-full pr-8`}>
                 <div
-                  style={{maxWidth: configStore.config.editorWidth + 96 || 816}}
+                  style={{maxWidth: configStore.config.editorWidth + 96 || 796}}
                   className={`flex-1 content px-12 ${configStore.config.editorLineHeight === 'compact' ? 'line-height-compact' : configStore.config.editorLineHeight === 'loose' ? 'line-height-loose' : ''}`}
                 >
                   <MEditor note={tab.current}/>
