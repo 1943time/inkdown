@@ -28,7 +28,7 @@ and saves it in standard markdown format, which allows your notes to be used any
 
 https://github.com/1943time/bluestone/assets/115093678/e01c9d88-a278-4038-b786-7d0ed5d40cbb
 
-![](./docs//assets/d8.png)
+![](./docs//assets/d9.png)
 
 ## Features
 
@@ -44,7 +44,3 @@ https://github.com/1943time/bluestone/assets/115093678/e01c9d88-a278-4038-b786-7
 - Supports multi tab editing mode
 - Support pasting HTML, plain text, and markdown code. When pasting HTML and markdown code, it can be configured to automatically download network images to the local machine and convert paths during pasting.
 
-
-### 如果你想直接提出建议或反馈问题，欢迎使用微信反馈。
-
-<img src="./docs/assets/weixin.png" width="200"/>

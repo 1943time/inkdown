@@ -251,7 +251,6 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       default:
         if (n.type === 'text' && htmlTag.length) {
-          console.log('text', n)
           el = {text: n.value}
           if (n.value) {
             for (let t of htmlTag) {

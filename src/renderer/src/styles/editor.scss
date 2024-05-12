@@ -384,7 +384,9 @@ ul.m-list {
   &.task {
     padding-left: 24px;
   }
-
+  >[data-be="list"] {
+    margin-bottom: 0;
+  }
   .check-item {
     display: flex;
     align-items: center;

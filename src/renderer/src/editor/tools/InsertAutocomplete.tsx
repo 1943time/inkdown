@@ -351,7 +351,7 @@ export const InsertAutocomplete = observer(() => {
       </div>
       {state.filterOptions.map((l, i) => (
         <div key={l.key}>
-          {i !== 0 && <div className={'my-1 h-[1px] dark:bg-gray-200/10'}></div>}
+          {i !== 0 && <div className={'my-1 h-[1px] dark:bg-gray-200/10 bg-gray-200/70'}></div>}
           <div>
             {l.children.map((el) => (
               <div
