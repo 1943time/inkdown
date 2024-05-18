@@ -3,7 +3,7 @@ import { Tree } from './tree/Tree'
 import { Nav } from './editor/Nav'
 import { treeStore } from '../store/tree'
 import { EditorFrame } from '../editor/EditorFrame'
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { Set } from './set/Set'
 import { About } from '../About'
 import { Characters } from './editor/Characters'
@@ -12,7 +12,7 @@ import { action } from 'mobx'
 import { useSystemMenus } from '../hooks/menu'
 import { Tabs } from './editor/Tabs'
 import { isWindows } from '../utils'
-import { ConfirmDialog } from './Dialog/ConfirmDialog'
+import { ConfirmDialog } from './dialog/ConfirmDialog'
 import { EditSpace } from './space/EditSpace'
 import { EditFolderDialog } from './tree/EditFolderDialog'
 import { Tools } from './tools/Tools'
@@ -32,19 +32,25 @@ export const Home = observer(() => {
       treeStore.width = width
     })
     window.addEventListener('mousemove', move)
-    window.addEventListener('mouseup', () => {
-      window.removeEventListener('mousemove', move)
-      document.documentElement.classList.remove('move')
-      localStorage.setItem('tree-width', String(treeStore.width))
-    }, {once: true})
+    window.addEventListener(
+      'mouseup',
+      () => {
+        window.removeEventListener('mousemove', move)
+        document.documentElement.classList.remove('move')
+        localStorage.setItem('tree-width', String(treeStore.width))
+      },
+      { once: true }
+    )
   }, [])
 
   return (
     <div className={`flex h-screen overflow-hidden ${isWindows ? 'win' : ''}`}>
-      <Tree/>
+      <Tree />
       <div
-        className={'fixed w-1 bg-transparent z-[200] left-0 top-0 h-screen -ml-0.5 cursor-col-resize select-none'}
-        style={{left: treeStore.width}}
+        className={
+          'fixed w-1 bg-transparent z-[200] left-0 top-0 h-screen -ml-0.5 cursor-col-resize select-none'
+        }
+        style={{ left: treeStore.width }}
         onMouseDown={moveStart}
       />
       <div
@@ -54,28 +60,30 @@ export const Home = observer(() => {
           minWidth: 300
         }}
       >
-        <Nav/>
-        <Tabs/>
-        {treeStore.tabs.map((t) =>
+        <Nav />
+        <Tabs />
+        {treeStore.tabs.map((t) => (
           <div
-            className={`flex-1 overflow-y-auto overflow-x-hidden items-start ${treeStore.currentTab === t ? 'h-full' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
+            className={`flex-1 overflow-y-auto overflow-x-hidden items-start ${
+              treeStore.currentTab === t ? 'h-full' : 'opacity-0 fixed w-0 h-0 pointer-events-none'
+            }`}
             style={{
               contentVisibility: treeStore.currentTab === t ? 'inherit' : 'hidden'
             }}
             key={t.id}
           >
-            <EditorFrame tab={t}/>
+            <EditorFrame tab={t} />
           </div>
-        )}
-        <Tools/>
-        <Characters/>
+        ))}
+        <Tools />
+        <Characters />
       </div>
-      <About/>
-      <Set/>
-      <QuickOpen/>
-      <ConfirmDialog/>
-      <EditSpace/>
-      <EditFolderDialog/>
+      <About />
+      <Set />
+      <QuickOpen />
+      <ConfirmDialog />
+      <EditSpace />
+      <EditFolderDialog />
     </div>
   )
 })

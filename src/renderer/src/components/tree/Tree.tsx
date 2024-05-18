@@ -124,7 +124,7 @@ export const Tree = observer(() => {
                     'flex justify-between items-center text-sm h-7 dark:text-gray-400 text-gray-500'
                   }
                 >
-                  <span className={'pl-3 text-xs'}>Switch Workspace</span>
+                  <span className={'pl-3 text-xs'}>Select Workspace</span>
                 </div>
                 {!!state.spaces.length && (
                   <div className={'overflow-y-auto max-h-[400px] relative'} id={'space-container'}>
@@ -219,7 +219,9 @@ export const Tree = observer(() => {
                 }
               >
                 <div
-                  className={`text-white flex-shrink-0 w-6 h-6 rounded space-${treeStore.root.background || 'sky'} flex items-center justify-center  font-medium`}
+                  className={`text-white flex-shrink-0 w-6 h-6 rounded space-${
+                    treeStore.root.background || 'sky'
+                  } flex items-center justify-center  font-medium`}
                 >
                   {treeStore.root.name.slice(0, 1).toUpperCase()}
                 </div>

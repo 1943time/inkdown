@@ -19,7 +19,7 @@ class ConfigStore {
     autoDownload: false,
     autoOpenSpace: false,
     theme: 'system' as 'system' | 'dark' | 'light',
-    leadingWidth: 220,
+    leadingWidth: 240,
     dark: false,
     locale: 'en' as 'en' | 'zh',
     codeLineNumber: false,

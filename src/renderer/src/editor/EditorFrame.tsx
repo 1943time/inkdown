@@ -69,7 +69,7 @@ export const EditorFrame = observer(({tab}: {
               onClick={click}
               style={{paddingTop: pt}}
             >
-              <div className={`flex-1 flex justify-center items-start h-full pr-8`}>
+              <div className={`flex-1 flex justify-center items-start h-full pr-10`}>
                 <div
                   style={{maxWidth: configStore.config.editorWidth + 96 || 796}}
                   className={`flex-1 content px-12 ${configStore.config.editorLineHeight === 'compact' ? 'line-height-compact' : configStore.config.editorLineHeight === 'loose' ? 'line-height-loose' : ''}`}

@@ -11,7 +11,7 @@ import {db} from '../../store/db'
 import {nid} from '../../utils'
 import {treeStore} from '../../store/tree'
 import {Icon} from '@iconify/react'
-import {openConfirmDialog$} from '../Dialog/ConfirmDialog'
+import {openConfirmDialog$} from '../dialog/ConfirmDialog'
 import {runInAction} from 'mobx'
 
 export const editSpace$ = new Subject<string | null>()
