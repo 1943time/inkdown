@@ -155,9 +155,9 @@ export const Overview = observer(() => {
           <Slider
             className={'w-64'}
             value={configStore.config.leadingWidth}
-            min={240}
+            min={260}
             max={400}
-            marks={{ 240: '240', 400: '400' }}
+            marks={{ 260: '260', 400: '400' }}
             step={20}
             onChange={(e) => {
               configStore.setConfig('leadingWidth', e)
