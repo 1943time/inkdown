@@ -79,7 +79,7 @@ export const InsertNetworkImage = observer(() => {
 
   return (
     <Modal
-      title={'Insert media file'}
+      title={'Insert media link'}
       footer={null}
       width={400}
       open={store.openInsertNetworkImage}

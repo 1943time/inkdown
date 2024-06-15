@@ -45,7 +45,7 @@ const getSystemMenus = () => {
         },
         {role: 'services',},
         {type: 'separator'},
-        {role: 'quit'}
+        {role: 'quit', label: 'Quit Inkdown'}
       ]
     }
   ]

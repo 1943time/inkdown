@@ -528,10 +528,6 @@ export class TreeStore {
         }
       }
     }
-    // deprecated
-    if (!localStorage.getItem(`space-${spaceId}`)) {
-      await db.file.where('spaceId').equals(spaceId).delete()
-    }
     const read = new ReadSpace(spaceId)
     const timer = setTimeout(
       action(() => (this.loading = true)),
@@ -553,10 +549,6 @@ export class TreeStore {
         setTimeout(() => {
           this.restoreTabs()
         }, 200)
-      }
-      // deprecated
-      if (!localStorage.getItem(`space-${spaceId}`)) {
-        localStorage.setItem(`space-${spaceId}`, '1')
       }
     } catch (e: any) {
       message$.next({
