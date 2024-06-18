@@ -276,7 +276,7 @@ export const Nav = observer(() => {
                 },
                 { hr: true },
                 {
-                  text: 'Preferences',
+                  text: 'Settings',
                   key: 'cmd+,',
                   click: action(() => (configStore.visible = true))
                 }

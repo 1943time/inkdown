@@ -11,6 +11,7 @@ import isHotkey from 'is-hotkey'
 export const openConfirmDialog$ = new Subject<{
   onClose?: () => void
   title: string
+  okType?: 'primary'
   okText?: string
   cancelText?: string
   description?: string
@@ -25,6 +26,7 @@ export const ConfirmDialog = observer(() => {
     description: '',
     loading: false,
     okText: '',
+    okType: undefined as undefined | 'primary',
     cancelText: ''
   })
   const paramsRef = useRef<{
@@ -71,7 +73,8 @@ export const ConfirmDialog = observer(() => {
       title: params.title,
       description: params.description || '',
       okText: params.okText || '',
-      cancelText: params.cancelText || ''
+      cancelText: params.cancelText || '',
+      okType: params.okType || undefined
     })
     paramsRef.current = {
       onCancel: params.onCancel,
@@ -89,13 +92,14 @@ export const ConfirmDialog = observer(() => {
       <div className={'w-[260px] px-5 py-6 flex flex-col items-center text-center'}>
         <div className={'font-semibold text-sm dark:text-gray-200'}>{state.title}</div>
         {state.description &&
-          <div className={'text-gray-500 mt-2 text-xs dark:text-gray-400'}>{state.description}</div>
+          <div className={'dark:text-white/80 text-black/80 mt-3 text-[13px]'}>{state.description}</div>
         }
         <Button
           block={true}
-          danger={true}
-          className={'my-4'}
+          danger={state.okType ? undefined : true}
+          className={'mt-5 mb-3'}
           loading={state.loading}
+          type={state.okType}
           onClick={confirm}
         >
           {state.okText || 'Ok'}

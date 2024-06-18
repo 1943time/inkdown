@@ -9,6 +9,7 @@ import {findAbsoluteLinks} from '../../store/parserNode'
 import {shareStore} from '../../server/store'
 import { message$ } from '../../utils'
 
+
 export const updateNode = async (node: IFileItem) => {
   if (node.filePath && node.ext === 'md') {
     const md = toMarkdown(node.schema || [])

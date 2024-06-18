@@ -64,6 +64,9 @@
 .ant-dropdown-menu {
   @apply border-none;
 }
+.ant-popover-content {
+  @apply dark:border dark:border-gray-100/10 rounded-lg;
+}
 .ellipsis-10 {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -153,10 +156,4 @@
 
 .ant-btn-default {
   background-color: transparent !important;
-}
-
-.light-poppver {
-  .ant-popover-inner-content {
-    @apply dark:border dark:border-gray-100/10 rounded-lg;
-  }
 }

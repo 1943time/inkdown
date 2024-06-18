@@ -46,14 +46,14 @@ export const Set = observer(() => {
           onClick={(e) => e.stopPropagation()}
         >
           <div
-            className={'z-[10] w-6 h-6 flex items-center justify-center dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30 absolute right-3 top-3'}
+            className={'z-[10] w-6 h-6 flex cursor-pointer items-center justify-center dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30 absolute right-3 top-3'}
             onClick={close}
           >
             <CloseOutlined/>
           </div>
           <div className={'flex'}>
             <div className={'py-4 px-2 w-[230px] border-r b1 tree-bg rounded-tl-lg rounded-bl-lg'}>
-              <div className={'mb-4 px-2 text-sm text-gray-500 dark:text-gray-400 font-medium'}>{'Preferences'}</div>
+              <div className={'mb-4 px-2 text-sm text-gray-500 dark:text-gray-400 font-medium'}>{'Settings'}</div>
               <div className={'space-y-1'}>
                 <div
                   onClick={() => setState({tab: 'Overview'})}

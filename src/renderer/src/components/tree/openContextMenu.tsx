@@ -1,21 +1,61 @@
-import {IFileItem, ISpaceNode} from '../../index'
-import {IMenu, openMenus} from '../Menu'
+import { IFileItem, ISpaceNode } from '../../index'
+import { IMenu, openMenus } from '../Menu'
 import React from 'react'
-import {treeStore} from '../../store/tree'
-import {configStore} from '../../store/config'
-import {isMac, message$, nid} from '../../utils'
-import {MainApi} from '../../api/main'
-import {toMarkdown} from '../../editor/utils/toMarkdown'
-import {db, IFile} from '../../store/db'
-import {join} from 'path'
-import {createFileNode} from '../../store/parserNode'
-import {statSync, writeFileSync} from 'fs'
-import {action, runInAction} from 'mobx'
-import {EditorUtils} from '../../editor/utils/editorUtils'
-import {openEditFolderDialog$} from './EditFolderDialog'
-import {openEbook$} from '../../server/ui/Ebook'
-import {shareStore} from '../../server/store'
-import {copyToClipboard} from '../../utils/copy'
+import { treeStore } from '../../store/tree'
+import { configStore } from '../../store/config'
+import { isMac, message$, nid } from '../../utils'
+import { MainApi } from '../../api/main'
+import { toMarkdown } from '../../editor/utils/toMarkdown'
+import { db, IFile } from '../../store/db'
+import { join, parse, sep } from 'path'
+import { createFileNode } from '../../store/parserNode'
+import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs'
+import { action, runInAction } from 'mobx'
+import { EditorUtils } from '../../editor/utils/editorUtils'
+import { openEditFolderDialog$ } from './EditFolderDialog'
+import { openEbook$ } from '../../server/ui/Ebook'
+import { shareStore } from '../../server/store'
+import { copyToClipboard } from '../../utils/copy'
+
+export const deepCreateDoc = async (filePath: string) => {
+  if (!treeStore.root) {
+    return
+  }
+  const parent = join(filePath, '..')
+  const nodeMap = new Map(treeStore.nodes.map(n => [n.filePath, n]))
+  let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || treeStore.root
+  if (!existsSync(parent)) {
+    mkdirSync(parent, {recursive: true})
+    const stack = parent.replace(treeStore.root.filePath + sep, '').split(sep)
+    let curPaths: string[] = []
+    for (const item of stack) {
+      curPaths.push(item)
+      const path = join(treeStore.root.filePath, curPaths.join(sep))
+      if (nodeMap.get(path)) {
+        parentNode = nodeMap.get(path)!
+      } else {
+        const id = nid()
+        const now = Date.now()
+        const data: IFile = {
+          cid: id,
+          filePath: path,
+          spaceId: treeStore.root!.cid,
+          updated: now,
+          sort: 0,
+          folder: true,
+          created: now
+        }
+        await db.file.add(data)
+        runInAction(() => {
+          const node = createFileNode(data, parentNode)
+          parentNode.children!.unshift(node)
+          parentNode = node
+        })
+      }
+    }
+  }
+  createDoc({parent: parentNode, newName: parse(filePath).name})
+}
 
 export const createDoc = async ({parent, newName, copyItem, ghost}: {
   parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean

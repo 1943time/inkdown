@@ -18,6 +18,10 @@ import { EditorUtils } from '../utils/editorUtils'
 import { isAbsolute, join } from 'path'
 import { db } from '../../store/db'
 import { slugify } from '../utils/dom'
+import { openConfirmDialog$ } from '../../components/dialog/ConfirmDialog'
+import { message$ } from '../../utils'
+import { existsSync, mkdirSync } from 'fs'
+import { deepCreateDoc } from '../../components/tree/openContextMenu'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -140,21 +144,33 @@ export const MLeaf = (props: RenderLeafProps) => {
                   .equals(path)
                   .toArray()
                   .then((res) => {
-                    if (!res.length) {
-                      window.open(leaf.url)
-                    } else {
-                      for (let f of res) {
-                        const node = treeStore.nodeMap.get(f.cid)
-                        if (node) {
-                          e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
-                          if (parseRes.hash) {
-                            setTimeout(() => {
-                              toHash(parseRes.hash)
-                            }, 200)
-                          }
-                          break
+                    for (let f of res) {
+                      const node = treeStore.nodeMap.get(f.cid)
+                      if (node) {
+                        e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                        if (parseRes.hash) {
+                          setTimeout(() => {
+                            toHash(parseRes.hash)
+                          }, 200)
                         }
+                        return
                       }
+                    }
+                    if (treeStore.root && path.endsWith('.md') && path.startsWith(treeStore.root.filePath)) {
+                      openConfirmDialog$.next({
+                        title: 'Note',
+                        description: 'The file does not exist. Do you want to create it?',
+                        okText: 'Create',
+                        okType: 'primary',
+                        onConfirm: () => {
+                          deepCreateDoc(path)
+                        }
+                      })
+                    } else {
+                      message$.next({
+                        type: 'info',
+                        content: 'Invalid link'
+                      })
                     }
                   })
               }

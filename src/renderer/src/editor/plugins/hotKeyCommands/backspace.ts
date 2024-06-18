@@ -31,7 +31,7 @@ export class BackspaceKey {
   run() {
     const sel = this.editor.selection
     if (!sel) return
-    const nodes = Array.from(Editor.nodes<Elements>(this.editor, {
+    const nodes = Array.from<any>(Editor.nodes<Elements>(this.editor, {
       mode: 'lowest',
       match: n => Element.isElement(n)
     }))
@@ -174,6 +174,7 @@ export class BackspaceKey {
           const next = Editor.hasPath(this.editor, Path.next(path))
           if (Editor.isEditor(parent[0]) && next && Editor.node(this.editor, Path.next(path))[0].type !== 'hr') {
             Transforms.delete(this.editor, {at: path})
+            return true
           }
         }
         return false

@@ -4,9 +4,7 @@ import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'
 import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
-import Drag from '../../icons/Drag'
 import {configStore} from '../../store/config'
-import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 
 export const List = observer(({element, attributes, children}: ElementProps<ListNode>) => {
   const store = useEditorStore()

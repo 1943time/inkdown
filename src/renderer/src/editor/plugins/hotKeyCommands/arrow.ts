@@ -30,22 +30,35 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
     if (isHotkey('left', e)) {
       e.preventDefault()
       e.stopPropagation()
+      e.preventDefault()
+      e.stopPropagation()
       const leaf = Node.leaf(editor, sel.focus.path)
       const dirt = EditorUtils.isDirtLeaf(leaf)
-      const pre = Editor.previous<any>(editor, {at: sel.focus.path})
+      const pre = Editor.previous<any>(editor, { at: sel.focus.path })
       const [node] = Editor.nodes<any>(editor, {
-        match: n => n.type === 'media' || n.type === 'inline-katex'
+        match: (n) => n.type === 'inline-katex'
       })
       if (node) {
         EditorUtils.moveBeforeSpace(editor, node[1])
-      } else if (sel.focus.offset === 0 && pre && pre[0].type === 'media') {
+      } else if (
+        sel.focus.offset === 0 &&
+        pre &&
+        (pre[0].type === 'media')
+      ) {
         Transforms.select(editor, pre[1])
       } else if (sel.focus.offset === 0 && dirt) {
         EditorUtils.moveBeforeSpace(editor, sel.focus.path)
       } else {
-        if (sel.focus.offset === 0 && Path.hasPrevious(sel.focus.path) && Editor.isVoid(editor, Node.get(editor, Path.previous(sel.focus.path)))) {
+        if (
+          sel.focus.offset === 0 &&
+          Path.hasPrevious(sel.focus.path) &&
+          Editor.isVoid(editor, Node.get(editor, Path.previous(sel.focus.path)))
+        ) {
           if (Path.hasPrevious(Path.previous(sel.focus.path))) {
-            Transforms.select(editor, Editor.end(editor, Path.previous(Path.previous(sel.focus.path))))
+            Transforms.select(
+              editor,
+              Editor.end(editor, Path.previous(Path.previous(sel.focus.path)))
+            )
           }
         } else {
           Transforms.move(editor, { unit: 'offset', reverse: true })

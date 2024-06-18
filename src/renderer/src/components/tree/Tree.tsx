@@ -99,7 +99,6 @@ export const Tree = observer(() => {
           <Popover
             trigger={['click']}
             placement={'bottomLeft'}
-            overlayClassName={'light-poppver'}
             arrow={false}
             open={state.openMenu}
             onOpenChange={(v) => {

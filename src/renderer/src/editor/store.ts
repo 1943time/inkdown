@@ -20,6 +20,7 @@ import { openMenus } from '../components/Menu'
 import { EditorUtils } from './utils/editorUtils'
 import { insertFileNode } from '../store/parserNode'
 import { toUnixPath } from '../utils/path'
+import { selChange$ } from './plugins/useOnchange'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -41,7 +42,7 @@ export class EditorStore {
   sel: BaseSelection | undefined
   focus = false
   readonly = false
-  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list'])
+  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'media'])
   dragEl: null | HTMLElement = null
   openSearch = false
   focusSearch = false
@@ -421,6 +422,15 @@ export class EditorStore {
         return {type: 'media', url: p, children: [{text: ''}]}
       }), {at: path, select: true})
     }
+    const next = Editor.next(this.editor, { at: path })
+    if (next?.[0].type === 'paragraph' && !Node.string(next[0])) {
+      Transforms.delete(this.editor, { at: next[1] })
+    }
+    const [node] = Editor.nodes(this.editor, {
+      match: n => !!n.type,
+      mode: 'lowest'
+    })
+    selChange$.next({node, sel: this.editor.selection})
   }
 
   insertLink(filePath: string) {
@@ -542,7 +552,7 @@ export class EditorStore {
       top: number
       left: number
     }
-    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item']) : this.ableToEnter
+    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item', 'media']) : this.ableToEnter
     let mark: null | HTMLDivElement = null
     const els = document.querySelectorAll<HTMLDivElement>('[data-be]')
     const points: MovePoint[] = []
