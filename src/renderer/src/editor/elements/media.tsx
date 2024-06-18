@@ -44,21 +44,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     selected: false,
     type: mediaType(element.url)
   })
-
-  useLayoutEffect(() => {
-    if (element.downloadUrl) {
-      return
-    }
-    setState({ type: mediaType(element.url) })
-    if (state().type === 'other' && element.url?.startsWith('http')) {
-      getRemoteMediaType(element.url).then((res) => {
-        if (res) setState({ type: mediaType('.' + res) })
-      })
-    }
-    if (!['image', 'other'].includes(state().type) || element.url?.startsWith('data:')) {
-      setState({ loadSuccess: true, url: element.url })
-      return
-    }
+  const initial = useCallback(async () => {
+    let type = !element.url?.startsWith('http')
+      ? mediaType(element.url)
+      : await getRemoteMediaType(element.url)
+    type = !type ? 'image' : type
+    setState({ type: ['image', 'video', 'autio'].includes(type!) ? type! : 'other' })
     let realUrl = element.url
     if (realUrl && !realUrl?.startsWith('http') && !realUrl.startsWith('file:')) {
       const currentFilePath = store.webview ? store.webviewFilePath : store.openFilePath
@@ -79,17 +70,23 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
       }
       img.onload = () => setState({ loadSuccess: true })
     }
+  }, [element])
+  useLayoutEffect(() => {
+    if (element.downloadUrl) {
+      return
+    }
+    initial()
   }, [element.url, element.downloadUrl, store.webviewFilePath])
 
   const download = useCallback(
     async (url: string) => {
       let ext = await getRemoteMediaType(url)
-      if (ext) {
+      if (ext && ext !== 'other') {
         window.api.fetch(url).then(async (res) => {
           const buffer = await res.buffer()
           store
             .saveFile({
-              name: nid() + '.' + ext,
+              name: nid() + '.' + ext[1],
               buffer: buffer.buffer
             })
             .then((res) => {
@@ -122,7 +119,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
         <>
           {state().url?.startsWith('http') && (
             <div
-              onMouseDown={e => e.preventDefault()}
+              onMouseDown={(e) => e.preventDefault()}
               className={`text-sm bg-gray-100 text-gray-700 dark:text-gray-100 group-hover:block hidden
             z-10 rounded border dark:border-gray-500 border-gray-300 absolute dark:bg-black backdrop-blur right-3 top-4 px-1 py-0.5 cursor-pointer
             `}
@@ -150,7 +147,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           )}
           {(state().url?.startsWith('file:') || state().url?.startsWith('data:')) && (
             <div
-              onMouseDown={e => e.preventDefault()}
+              onMouseDown={(e) => e.preventDefault()}
               className={`text-sm bg-gray-100 text-gray-700 dark:text-gray-100 group-hover:block hidden
             z-10 rounded border dark:border-gray-500 border-gray-300 absolute dark:bg-black backdrop-blur right-3 top-4 p-0.5 px-1 cursor-pointer
             `}
@@ -206,7 +203,10 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           }
         }}
       >
-        <div className={'w-full h-full flex justify-center'} style={{ height: state().height }}>
+        <div
+          className={'w-full h-full flex justify-center'}
+          style={{ height: state().height || (state().type === 'other' ? 260 : undefined) }}
+        >
           {state().type === 'video' && (
             <video
               src={element.url}
@@ -224,15 +224,21 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               ref={ref}
             />
           )}
-          {state().type === 'document' && (
-            <object
-              data={element.url}
-              className={'w-full h-full rounded'}
+          {state().type === 'other' && (
+            <div
+              className={'p-2 rounded bg-black/5 dark:bg-white/10 flex-1'}
               // @ts-ignore
               ref={ref}
-            />
+            >
+              <iframe
+                src={element.url}
+                className={`w-full h-full border-none rounded ${
+                  state().dragging ? 'pointer-events-none' : ''
+                }`}
+              />
+            </div>
           )}
-          {(state().type === 'image' || state().type === 'other') && (
+          {state().type === 'image' && (
             <img
               src={state().url}
               alt={'image'}

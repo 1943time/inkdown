@@ -447,7 +447,7 @@ ul.m-list {
           position: absolute;
           width:32px;
           top:0;
-          left: -44px;
+          left: -37px;
         }
       }
     }
@@ -503,15 +503,17 @@ ul.m-list {
     word-spacing: normal;
     word-break: normal;
     hyphens: none;
+    padding-left: 16px;
+    padding-right: 16px;
   }
   &.dark {
     caret-color: rgba(255, 255, 255, .9);
-    .code-line-list{
-      @apply text-gray-100/50 border-gray-300/20;
-    }
     .ant-select-selector{
       color: #e5e7eb !important;
       border-color: rgba(229,231,235,.3);
+    }
+    .code-line-list{
+      @apply text-white/70
     }
     &.frontmatter {
       &:before{
@@ -524,12 +526,12 @@ ul.m-list {
   }
   &.light {
     caret-color: rgba(0, 0, 0, .9);
-    .code-line-list{
-      @apply text-black/50 border-black/10;
-    }
     .ant-select-selector{
       color: #4b5563 !important;
       border-color: rgba(75,85,99,.3);
+    }
+    .code-line-list{
+      @apply text-black/70
     }
     &.frontmatter {
       &:before{
@@ -546,7 +548,7 @@ ul.m-list {
     z-index: 10;
     padding-top: 10px;
     width:32px;
-    @apply border-r top-0 left-0 h-full text-black/50 absolute overflow-hidden;
+    @apply top-0 left-0 h-full absolute overflow-hidden;
     > div{
       &:before{
         content: counter(step);
@@ -564,12 +566,8 @@ ul.m-list {
   &.num {
     padding-left: 32px;
     code{
-      padding-left: 12px;
+      padding-left: 5px;
     }
-  }
-  code{
-    padding-left: 20px;
-    padding-right: 20px;
   }
   .code-line {
     position: relative;

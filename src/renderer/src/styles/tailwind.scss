@@ -56,8 +56,8 @@
     @apply w-full h-0.5 bg-blue-500 absolute left-0 bottom-0 pointer-events-none;
   }
 }
-.link {
-  @apply duration-200 dark:text-white/80 font-medium text-black/70 hover:dark:text-white/90 hover:text-black/80;
+.link{
+  @apply duration-200 dark:text-white/75 font-medium text-black/70 hover:dark:text-white/90 hover:text-black/85;
 }
 
 .ant-popover-inner,

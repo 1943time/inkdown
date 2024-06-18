@@ -13,7 +13,6 @@ import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {getImageData, isMod} from '../utils'
-import {InsertNetworkImage} from './tools/InsertNetworkImage'
 import {LangAutocomplete} from './tools/LangAutocomplete'
 import {configStore} from '../store/config'
 import {InsertAutocomplete} from './tools/InsertAutocomplete'
@@ -124,7 +123,6 @@ export const EditorFrame = observer(({tab}: {
         <FloatBar/>
         <InsertLink/>
         <TableAttr/>
-        <InsertNetworkImage/>
         <LangAutocomplete/>
         <InsertAutocomplete/>
       </div>

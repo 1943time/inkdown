@@ -1,13 +1,13 @@
 import { autoUpdater, CancellationToken } from 'electron-updater'
 import log from 'electron-log'
-import {BrowserWindow, ipcMain, app} from 'electron'
+import {BrowserWindow, ipcMain} from 'electron'
 autoUpdater.logger = log
 // @ts-ignore
 autoUpdater.logger.transports.file.level = 'info'
 autoUpdater.setFeedURL({
   provider: 'github',
   owner: '1943time',
-  repo: 'inkdown'
+  repo: 'bluestone'
 })
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true

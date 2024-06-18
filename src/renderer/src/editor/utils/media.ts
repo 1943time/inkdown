@@ -9,15 +9,22 @@ import {mediaType} from './dom'
 export const getRemoteMediaType = async (url: string) => {
   if (!url) return 'other'
   try {
-    const image = mediaType(url)
-    const ext = url.match(/\.(png|jpg|jpeg|webp|svg)/)?.[0]
-    if (image !== 'other' && ext) return ext
-    const res = await window.api.fetch(url, {
+    const type = mediaType(url)
+    if (type !== 'other') return type
+    let contentType = ''
+    const controller = new AbortController()
+    const res = await fetch(url, {
       method: 'HEAD',
-      timeout: 1000
+      signal: controller.signal
     })
-    const contentType = res.headers.get('content-type') || ''
-    return contentType.split('/')[1]
+    if (!res.ok) {
+      throw new Error()
+    }
+    setTimeout(() => {
+      controller.abort()
+    }, 1000)
+    contentType = res.headers.get('content-type') || ''
+    return contentType.split('/')[0]
   } catch (e) {
     return null
   }

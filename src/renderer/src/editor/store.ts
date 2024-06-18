@@ -384,7 +384,7 @@ export class EditorStore {
 
   async insertFiles(files: string[]) {
     const path = EditorUtils.findMediaInsertPath(this.editor)
-    files = files.filter(f => mediaType(f) === 'image')
+    files = files.filter(f => ['image', 'video'].includes(mediaType(f)))
     if (!treeStore.openedNote || !path || !files.length) return
     if (imageBed.route) {
       const urls = await imageBed.uploadFile(files.map(f => {

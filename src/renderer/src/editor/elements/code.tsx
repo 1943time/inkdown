@@ -129,7 +129,9 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
                       state().openMenu
                         ? 'bg-gray-400/20'
                         : 'group-hover:opacity-100 hover:bg-gray-400/20'
-                    } duration-200 hover:text-blue-400 text-gray-400 rounded px-1.5 py-0.5 text-xs cursor-pointer`}
+                    } duration-200 ${
+                      configStore.codeDark ? 'text-white/60' : 'text-black/60'
+                    } rounded px-1.5 py-0.5 text-xs cursor-pointer`}
                     onClick={(e) => {
                       if (props.element.render) {
                         return
@@ -219,9 +221,8 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           </div>
           {configStore.config.codeLineNumber && !store.webview && (
             <pre className={`code-line-list select-none`} contentEditable={false}>
-              {!configStore.config.codeAutoBreak && (props.children || []).map((c, i) => (
-                <div key={i} />
-              ))}
+              {!configStore.config.codeAutoBreak &&
+                (props.children || []).map((c, i) => <div key={i} />)}
             </pre>
           )}
           <pre data-bl-type={'code'} className={'code-content'} data-bl-lang={state().lang}>

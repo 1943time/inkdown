@@ -514,11 +514,19 @@ export class KeyboardTask {
     })
   }
 
-  localImage() {
+  localImage(type: 'image' | 'video' = 'image') {
     if (treeStore.openedNote) {
       MainApi.openDialog({
-        properties: ['openFile', 'showHiddenFiles', 'multiSelections'],
-        filters: [{ extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'], name: 'Image' }]
+        properties: type === 'image' ? ['openFile', 'showHiddenFiles', 'multiSelections'] : ['openFile', 'showHiddenFiles'],
+        filters: [
+          {
+            extensions:
+              type === 'image'
+                ? ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']
+                : ['av1', 'mp4', 'webm', 'hevc'],
+            name: 'Image'
+          }
+        ]
       }).then((res) => {
         if (res.filePaths.length) {
           this.store.insertFiles(res.filePaths)

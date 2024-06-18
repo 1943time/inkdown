@@ -121,7 +121,7 @@ export const Heading = observer(({note}: {
                   behavior: 'smooth'
                 })
               }}
-              className={`cursor-default dark:hover:text-gray-200 hover:text-gray-800`}>
+              className={`cursor-pointer dark:hover:text-gray-200 hover:text-gray-800`}>
               {note.filename}
             </div>
           }
@@ -136,7 +136,7 @@ export const Heading = observer(({note}: {
                   })
                 }
               }}
-              className={`${levelClass.get(h.level)} cursor-default ${state().active === h.id ? 'text-blue-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
+              className={`${levelClass.get(h.level)} cursor-pointer ${state().active === h.id ? 'text-blue-500' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}>
               {h.title}
             </div>
           )}

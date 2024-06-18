@@ -6,17 +6,20 @@ import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../
 
 const findImageElement = (str: string) => {
   try {
-    const match = str.match(/^\s*<img+[%_\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/img>:?)?\s*$/)
+    const match = str.match(
+      /^\s*<(img|video|iframe)[%\s"'=:;()\w\-\[\]\/.\?]*\/?>(.*<\/(?:img|video|iframe)>:?)?\s*$/
+    )
     if (match) {
       const url = match[0].match(/src="([^"\n]+)"/)
       const height = match[0].match(/height="(\d+)"/)
-      return {url: url?.[1], height: height ? +height[1] : undefined}
+      return { url: url?.[1], height: height ? +height[1] : undefined }
     }
     return null
   } catch (e) {
     return null
   }
 }
+
 const parseText = (els: Content[], leaf: CustomLeaf = {}) => {
   let leafs: CustomLeaf[] = []
   for (let n of els) {

@@ -1,6 +1,7 @@
 import {Node, Text} from 'slate'
 import {TableNode} from '../../el'
 import stringWidth from 'string-width'
+import { mediaType } from './dom'
 const space = '  '
 const inlineNode = new Set(['inline-katex', 'break'])
 export const isMix = (t: Text) => {
@@ -143,10 +144,24 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += toMarkdown(node.children, preString, newParent)
       break
     case 'media':
+      const url = node.url
+      const type = mediaType(url)
       if (node.height) {
-        str += `<img src="${encodeURI(node.url)}" alt="" height="${node.height || ''}"/>`
+        if (type === 'video') {
+          str += `<video src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
+        } else if (type === 'image') {
+          str += `<img src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
+        } else {
+          str += `<iframe src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
+        }
       } else {
-        str += `![${node.alt || ''}](${encodeURI(node.url)})`
+        if (type === 'video') {
+          str += `<video src="${encodeURI(url)}"/>`
+        } else if (type === 'image') {
+          str += `![${node.alt || ''}](${encodeURI(url)})`
+        } else {
+          str += `<iframe src="${encodeURI(url)}"/>`
+        }
       }
       break
     case 'inline-katex':
