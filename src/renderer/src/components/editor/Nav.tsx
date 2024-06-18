@@ -77,7 +77,7 @@ export const Nav = observer(() => {
     <div
       className={`h-10 w-full drag-nav duration-200 select-none width-duration relative`}
       style={{
-        paddingLeft: treeStore.blankMode ? (treeStore.fold ? 100 : 0) : treeStore.fold ? 45 : 35
+        paddingLeft: treeStore.blankMode ? (treeStore.fold ? 105 : 0) : treeStore.fold ? 45 : 35
       }}
       onClick={(e) => {
         if (e.detail === 2) {
@@ -88,7 +88,7 @@ export const Nav = observer(() => {
       <div
         className={`absolute z-10 dark:hover:bg-gray-400/10 hover:bg-black/5 p-1 rounded drag-none duration-200`}
         style={{
-          left: treeStore.blankMode ? (treeStore.fold ? 70 : -36) : 10,
+          left: treeStore.blankMode ? (treeStore.fold ? 75 : -36) : 10,
           top: 7
         }}
         onClick={action(() => {

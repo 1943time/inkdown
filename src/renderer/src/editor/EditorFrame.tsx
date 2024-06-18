@@ -17,10 +17,14 @@ import {LangAutocomplete} from './tools/LangAutocomplete'
 import {configStore} from '../store/config'
 import {InsertAutocomplete} from './tools/InsertAutocomplete'
 import { InsertLink } from './tools/InsertLink'
+import { useLocalState } from '../hooks/useLocalState'
 
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
+  const [state, setState] = useLocalState({
+    showLeftPadding: false
+  })
   const click = useCallback((e: React.MouseEvent) => {
     if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement
@@ -52,79 +56,114 @@ export const EditorFrame = observer(({tab}: {
     if (tab.store.openSearch) pt += 46
     return pt
   }, [tab.store.openSearch, treeStore.tabs.length])
+  useEffect(() => {
+    const show = treeStore.fold && configStore.config.showLeading
+    if (show) {
+      setTimeout(() => {
+        setState({
+          showLeftPadding: true
+        })
+      }, 300)
+    } else {
+      setState({
+        showLeftPadding: false
+      })
+    }
+  }, [treeStore.fold])
   return (
     <EditorStoreContext.Provider value={tab.store}>
-      <Search/>
+      <Search />
       <div
         className={'flex-1 h-full overflow-y-auto items-start relative'}
-        ref={dom => {
-          tab.store.setState(state => state.container = dom)
+        ref={(dom) => {
+          tab.store.setState((state) => (state.container = dom))
         }}
       >
-        {tab.current &&
+        {tab.current && (
           <>
             <div
-              className={`items-start min-h-[calc(100vh_-_40px)] relative ${mt === 'markdown' ? '' : 'hidden'}`}
+              className={`items-start min-h-[calc(100vh_-_40px)] relative ${
+                mt === 'markdown' ? '' : 'hidden'
+              }`}
               onClick={click}
-              style={{paddingTop: pt}}
+              style={{ paddingTop: pt }}
             >
-              <div className={`flex-1 flex justify-center items-start h-full pr-10`}>
+              <div className={`flex-1 flex justify-center items-start h-full pr-8`}>
                 <div
-                  style={{maxWidth: configStore.config.editorWidth + 96 || 796}}
-                  className={`flex-1 content px-12 ${configStore.config.editorLineHeight === 'compact' ? 'line-height-compact' : configStore.config.editorLineHeight === 'loose' ? 'line-height-loose' : ''}`}
+                  className={`duration-200 ${
+                    state.showLeftPadding ? 'w-40' : 'w-0'
+                  } xl:block hidden`}
+                />
+                <div
+                  style={{ maxWidth: configStore.config.editorWidth + 96 || 796 }}
+                  className={`flex-1 content px-12 ${
+                    configStore.config.editorLineHeight === 'compact'
+                      ? 'line-height-compact'
+                      : configStore.config.editorLineHeight === 'loose'
+                      ? 'line-height-loose'
+                      : ''
+                  }`}
                 >
-                  <MEditor note={tab.current}/>
+                  <MEditor note={tab.current} />
                 </div>
-                {tab === treeStore.currentTab &&
-                  <Heading note={tab.current}/>
-                }
+                {tab === treeStore.currentTab && <Heading note={tab.current} />}
               </div>
             </div>
-            {mt !== 'other' && mt !== 'markdown' &&
+            {mt !== 'other' && mt !== 'markdown' && (
               <>
-                {mt === 'image' ?
-                  <div className={'h-full overflow-y-auto flex items-center flex-wrap justify-center py-5 px-10'} style={{paddingTop: pt + 20}}>
-                    <img src={getImageData(tab.current?.filePath)} alt="" className={'block'}/>
-                  </div> :
-                  (
-                    <div
-                      style={{
-                        ...size,
-                        paddingTop: pt + 20
-                      }}
-                      className={'px-10 pb-5'}
-                    >
-                      <iframe
-                        className={'w-full h-full overflow-y-auto rounded border b1'} src={tab.current.filePath}
-                      />
-                    </div>
-                  )
-                }
+                {mt === 'image' ? (
+                  <div
+                    className={
+                      'h-full overflow-y-auto flex items-center flex-wrap justify-center py-5 px-10'
+                    }
+                    style={{ paddingTop: pt + 20 }}
+                  >
+                    <img src={getImageData(tab.current?.filePath)} alt="" className={'block'} />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      ...size,
+                      paddingTop: pt + 20
+                    }}
+                    className={'px-10 pb-5'}
+                  >
+                    <iframe
+                      className={'w-full h-full overflow-y-auto rounded border b1'}
+                      src={tab.current.filePath}
+                    />
+                  </div>
+                )}
               </>
-            }
-            {mt === 'other' &&
-              <div style={{height: size.height}} className={'flex items-center flex-col justify-center'}>
-                <div className={'text-gray-600'}>{'Opening this file type is not currently supported'}</div>
+            )}
+            {mt === 'other' && (
+              <div
+                style={{ height: size.height }}
+                className={'flex items-center flex-col justify-center'}
+              >
+                <div className={'text-gray-600'}>
+                  {'Opening this file type is not currently supported'}
+                </div>
                 <div
-                  className={'text-indigo-500 text-sm mt-3 cursor-default duration-200 hover:text-indigo-600'}
+                  className={
+                    'text-indigo-500 text-sm mt-3 cursor-default duration-200 hover:text-indigo-600'
+                  }
                   onClick={() => {
                     MainApi.openInFolder(tab.current?.filePath || '')
                   }}
                 >
-                  <FolderOpenOutlined/> {'Show in Finder'}
+                  <FolderOpenOutlined /> {'Show in Finder'}
                 </div>
               </div>
-            }
+            )}
           </>
-        }
-        {!tab.current &&
-          <Empty/>
-        }
-        <FloatBar/>
-        <InsertLink/>
-        <TableAttr/>
-        <LangAutocomplete/>
-        <InsertAutocomplete/>
+        )}
+        {!tab.current && <Empty />}
+        <FloatBar />
+        <InsertLink />
+        <TableAttr />
+        <LangAutocomplete />
+        <InsertAutocomplete />
       </div>
     </EditorStoreContext.Provider>
   )

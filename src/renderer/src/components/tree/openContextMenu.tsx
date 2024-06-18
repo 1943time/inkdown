@@ -170,6 +170,9 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       menus.push({
         text: configStore.zh ? '重命名' : 'Rename',
         click: () => {
+          runInAction(() => {
+            treeStore.selectItem = null
+          })
           openEditFolderDialog$.next({
             ctxNode: node,
             mode: 'update'

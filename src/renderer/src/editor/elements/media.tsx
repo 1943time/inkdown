@@ -211,7 +211,9 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             <video
               src={element.url}
               controls={true}
-              className={'rounded h-full'}
+              className={`rounded h-full select-none ${
+                state().dragging ? 'pointer-events-none' : ''
+              }`}
               // @ts-ignore
               ref={ref}
             />
@@ -220,6 +222,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             <audio
               controls={true}
               src={element.url}
+              className={`select-none ${state().dragging ? 'pointer-events-none' : ''}`}
               // @ts-ignore
               ref={ref}
             />
@@ -232,7 +235,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             >
               <iframe
                 src={element.url}
-                className={`w-full h-full border-none rounded ${
+                className={`w-full h-full border-none select-none rounded ${
                   state().dragging ? 'pointer-events-none' : ''
                 }`}
               />
@@ -260,12 +263,13 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               }
               onMouseDown={(e) => {
                 e.preventDefault()
+                setState({ dragging: true })
                 resize({
                   e,
                   height: state().height,
                   dom: ref.current!,
                   cb: (height: number) => {
-                    setState({ height })
+                    setState({ height, dragging: false })
                     Transforms.setNodes(store.editor, { height }, { at: path })
                   }
                 })

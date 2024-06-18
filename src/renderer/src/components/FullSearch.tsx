@@ -26,7 +26,7 @@ export const FullSearch = observer(() => {
     foldIndex: [] as number[],
     searching: false
   })
-
+  const dom = useRef<HTMLDivElement>(null)
   const toPoint = useCallback((target: HTMLElement) => {
     requestIdleCallback(() => {
       const top = treeStore.currentTab.store!.offsetTop(target)
@@ -118,12 +118,15 @@ export const FullSearch = observer(() => {
     }, immediate ? 0 : 300)
   }, [])
   useEffect(() => {
-    if (treeStore.treeTab === 'search' && treeStore.searchKeyWord) {
-      search()
+    if (treeStore.treeTab === 'search') {
+      if (treeStore.searchKeyWord) {
+        search()
+      }
+      dom.current?.querySelector('input')?.focus()
     }
   }, [treeStore.treeTab])
   return (
-    <div className={'py-1 h-full'}>
+    <div className={'py-1 h-full'} ref={dom}>
       <div className={'px-4 relative'}>
         <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'}/>
         <input

@@ -95,7 +95,7 @@ export const Tree = observer(() => {
         <div className={'h-10 left-0 top-0 w-[calc(100%_-_40px)] absolute drag-nav'} />
       )}
       <div style={{ width: treeStore.width }} className={`h-full`}>
-        <div className={`h-9 ${!treeStore.blankMode ? 'px-2' : 'px-4'}`}>
+        <div className={`h-9 ${!treeStore.blankMode ? 'px-2' : 'px-3'}`}>
           <Popover
             trigger={['click']}
             placement={'bottomLeft'}
@@ -215,7 +215,7 @@ export const Tree = observer(() => {
             {!!treeStore.root && (
               <div
                 className={
-                  'px-2 h-full flex items-center text-sm duration-200 rounded dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
+                  'pl-2 pr-4 h-full relative flex items-center text-sm duration-200 rounded-lg dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
                 }
               >
                 <div
@@ -226,10 +226,10 @@ export const Tree = observer(() => {
                   {treeStore.root.name.slice(0, 1).toUpperCase()}
                 </div>
                 <div className={'ml-2 max-w-full truncate'}>{treeStore.root.name}</div>
-                <div>
+                <div className={'absolute right-1 top-1/2 -translate-y-1/2'}>
                   <Icon
                     icon={'ic:round-unfold-more'}
-                    className={'text-base ml-1 flex-shrink-0 text-gray-500'}
+                    className={'text-lg ml-1 flex-shrink-0 dark:text-white/60 text-black/60'}
                   />
                 </div>
               </div>
@@ -237,7 +237,7 @@ export const Tree = observer(() => {
             {!treeStore.root && (
               <div
                 className={
-                  'px-2 h-full flex items-center text-sm duration-200 rounded dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
+                  'px-2 h-full relative flex items-center text-sm duration-200 rounded-lg dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
                 }
               >
                 <div
@@ -246,10 +246,10 @@ export const Tree = observer(() => {
                   <Icon icon={'ph:calendar-blank'} />
                 </div>
                 <div className={'ml-2 max-w-full truncate text-sm'}>Select Workspace</div>
-                <div>
+                <div className={'absolute right-1 top-1/2 -translate-y-1/2'}>
                   <Icon
                     icon={'ic:round-unfold-more'}
-                    className={'text-base ml-1 flex-shrink-0 text-gray-500'}
+                    className={'text-lg ml-1 flex-shrink-0 dark:text-white/60 text-black/60'}
                   />
                 </div>
               </div>
@@ -271,7 +271,7 @@ export const Tree = observer(() => {
         {!!treeStore.root && !treeStore.loading && (
           <>
             <div className={'h-[calc(100vh_-_76px)] flex flex-col'}>
-              <div className={'h-7 mb-3 mt-3 px-4 flex-shrink-0'}>
+              <div className={'h-7 mb-3 mt-3 px-3 flex-shrink-0'}>
                 <div
                   className={
                     'flex dark:bg-white/5 bg-black/5 h-full rounded relative overflow-hidden px-1'

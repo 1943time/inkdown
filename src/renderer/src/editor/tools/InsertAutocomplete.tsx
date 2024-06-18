@@ -19,6 +19,7 @@ import { Button, Input } from 'antd'
 import { IPlanet } from '../../icons/IPlanet'
 import { message$ } from '../../utils'
 import { getRemoteMediaType } from '../utils/media'
+import { selChange$ } from '../plugins/useOnchange'
 
 type InsertOptions = {
   label: [string, string]
@@ -386,6 +387,13 @@ export const InsertAutocomplete = observer(() => {
       const node = { type: 'media', url, children: [{ text: '' }] }
       Transforms.setNodes(store.editor, node, { at: ctx.current.path })
       EditorUtils.focus(store.editor)
+      const [n] = Editor.nodes(store.editor, {
+        match: n => !!n.type,
+        mode: 'lowest'
+      })
+      selChange$.next({
+        sel: store.editor.selection, node: n
+      })
       close()
     } finally {
       setState({ loading: false })
