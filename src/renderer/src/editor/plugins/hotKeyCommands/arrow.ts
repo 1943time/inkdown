@@ -43,7 +43,7 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
       } else if (
         sel.focus.offset === 0 &&
         pre &&
-        (pre[0].type === 'media')
+        (pre[0].type === 'media' || pre[0].type === 'attach')
       ) {
         Transforms.select(editor, pre[1])
       } else if (sel.focus.offset === 0 && dirt) {
@@ -74,10 +74,10 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
         const [node] = Editor.nodes<any>(editor, {
-          match: n => n.type === 'media' || n.type === 'inline-katex'
+          match: n => n.type === 'media' || n.type === 'inline-katex' || n.type === 'attach'
         })
         if (node) {
-          if (node[0].type === 'media') {
+          if (node[0].type === 'media' || node[0].type === 'attach') {
             Transforms.select(editor, Editor.start(editor, Path.next(node[1])))
           } else {
             EditorUtils.moveAfterSpace(editor, node[1])
@@ -113,7 +113,7 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
         input?.focus()
         return
       }
-      if (pre?.[0].type === 'media') {
+      if (pre?.[0].type === 'media' || pre?.[0].type === 'attach') {
         e.preventDefault()
         e.stopPropagation()
         Transforms.select(editor, pre[1])
@@ -144,7 +144,7 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
           e.preventDefault()
         }
       }
-      if (el.type === 'media') {
+      if (el.type === 'media' || el.type === 'attach') {
         e.preventDefault()
         const pre = EditorUtils.findPrev(editor, path)
         Transforms.select(editor, Editor.end(editor, pre))
@@ -157,7 +157,7 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
       })
       const [el, path] = node
       const next = Editor.node(editor, EditorUtils.findNext(editor, path))
-      if (next?.[0].type === 'media') {
+      if (next?.[0].type === 'media' || next?.[0].type === 'attach') {
         e.preventDefault()
         e.stopPropagation()
         Transforms.select(editor, next[1])
@@ -187,7 +187,7 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
           })
         }
       }
-      if (el.type === 'media') {
+      if (el.type === 'media' || el.type === 'attach') {
         const next = EditorUtils.findNext(editor, path)
         e.preventDefault()
         Transforms.select(editor, Editor.start(editor, next))

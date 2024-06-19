@@ -18,9 +18,15 @@ export type HrNode = {type: 'hr'}
 export type BreakNode = {type: 'break'}
 export type MediaNode = {type: 'media', url?: string, alt: string, downloadUrl?: string, height?: number, docId?: string, hash?: string, h?: number}
 export type InlineKatexNode = {type: 'inline-katex', value: string, children: BaseElement['children']}
+export type AttachNode = {
+  type: 'attach'
+  name: string
+  size: number
+  url: string
+}
 export type Elements =
   CodeNode | CodeLineNode | ParagraphNode | TableNode | TableRowNode | TableCellNode |
-  BlockQuoteNode | ListNode | ListItemNode | HeadNode | HrNode | MediaNode | InlineKatexNode | BreakNode
+  BlockQuoteNode | ListNode | ListItemNode | HeadNode | HrNode | MediaNode | InlineKatexNode | BreakNode | AttachNode
 
 export type CustomLeaf = {
   bold?: boolean | null

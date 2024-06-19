@@ -174,7 +174,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
     menus.push(...[
       {
         text: configStore.zh ? isMac ? '在Finder中显示' : '在File Explorer中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
-        click: () => MainApi.openInFolder(node.filePath)
+        click: () => MainApi.showInFolder(node.filePath)
       },
       {hr: true},
       {
@@ -224,7 +224,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       {hr: true},
       {
         text: configStore.zh ? isMac ? '在Finder中显示' : '在File Explorer中显示' : isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
-        click: () => MainApi.openInFolder(node.filePath)
+        click: () => MainApi.showInFolder(node.filePath)
       },
       {
         text: configStore.zh ? '分享文件夹' : 'Share Folder',

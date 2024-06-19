@@ -1,7 +1,7 @@
-import {BasePoint, BaseRange, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {EditorUtils} from '../../utils/editorUtils'
-import {configStore} from '../../../store/config'
-import {Elements} from '../../../el'
+import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
+import { EditorUtils } from '../../utils/editorUtils'
+import { configStore } from '../../../store/config'
+import { Elements } from '../../../el'
 
 export class BackspaceKey {
   constructor(
@@ -50,6 +50,14 @@ export class BackspaceKey {
         }, {at: path})
         return true
       }
+    }
+    if (el.type === 'media' || el.type === 'attach') {
+      Transforms.removeNodes(this.editor, { at: path })
+      Transforms.insertNodes(this.editor, EditorUtils.p, {
+        at: node[1],
+        select: true
+      })
+      return true
     }
     if (el.type === 'table-cell') {
       const start = Range.start(sel)
@@ -119,7 +127,7 @@ export class BackspaceKey {
               return true
             }
           }
-          if (pre[0].type === 'media') {
+          if (pre[0].type === 'media' || pre[0].type === 'attach') {
             if (!Node.string(el)) {
               Transforms.delete(this.editor, {at: path})
             }

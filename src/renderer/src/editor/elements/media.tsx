@@ -135,7 +135,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                     }).then((res) => {
                       if (res.filePath) {
                         writeFileSync(res.filePath, buffer)
-                        MainApi.openInFolder(res.filePath)
+                        MainApi.showInFolder(res.filePath)
                       }
                     })
                   }
@@ -152,7 +152,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             z-10 rounded border dark:border-gray-500 border-gray-300 absolute dark:bg-black backdrop-blur right-3 top-4 p-0.5 px-1 cursor-pointer
             `}
               onClick={() => {
-                MainApi.openInFolder(state().url.replace('file://', ''))
+                MainApi.showInFolder(state().url.replace('file://', ''))
               }}
             >
               <Icon icon={'ph:folder-open'} className={'dark:text-gray-200'} />

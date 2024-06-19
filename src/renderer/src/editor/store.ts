@@ -42,7 +42,7 @@ export class EditorStore {
   sel: BaseSelection | undefined
   focus = false
   readonly = false
-  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'media'])
+  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'media', 'attach'])
   dragEl: null | HTMLElement = null
   openSearch = false
   focusSearch = false
@@ -552,7 +552,7 @@ export class EditorStore {
       top: number
       left: number
     }
-    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item', 'media']) : this.ableToEnter
+    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item', 'media', 'attach']) : this.ableToEnter
     let mark: null | HTMLDivElement = null
     const els = document.querySelectorAll<HTMLDivElement>('[data-be]')
     const points: MovePoint[] = []

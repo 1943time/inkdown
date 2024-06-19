@@ -149,7 +149,7 @@ export const EditorFrame = observer(({tab}: {
                     'text-indigo-500 text-sm mt-3 cursor-default duration-200 hover:text-indigo-600'
                   }
                   onClick={() => {
-                    MainApi.openInFolder(tab.current?.filePath || '')
+                    MainApi.showInFolder(tab.current?.filePath || '')
                   }}
                 >
                   <FolderOpenOutlined /> {'Show in Finder'}

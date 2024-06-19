@@ -7,12 +7,28 @@ import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../
 const findImageElement = (str: string) => {
   try {
     const match = str.match(
-      /^\s*<(img|video|iframe)[%\s"'=:;()\w\-\[\]\/.\?]*\/?>(.*<\/(?:img|video|iframe)>:?)?\s*$/
+      /^\s*<(img|video|iframe)[^>\n]*\/?>(.*<\/(?:img|video|iframe)>:?)?\s*$/
     )
     if (match) {
       const url = match[0].match(/src="([^"\n]+)"/)
       const height = match[0].match(/height="(\d+)"/)
       return { url: url?.[1], height: height ? +height[1] : undefined }
+    }
+    return null
+  } catch (e) {
+    return null
+  }
+}
+
+const findAttachment = (str: string) => {
+  try {
+    const match = str.match(/^\s*<a[^>\n]*download[^>\n]*\/?>(.*<\/a>:?)?\s*$/)
+    if (match) {
+      const url = match[0].match(/href="([^"\n]+)"/)
+      const size = match[0].match(/data-size="(\d+)"/)
+      if (url) {
+        return {url: url[1], size: Number(size?.[1] || 0)}
+      }
     }
     return null
   } catch (e) {
@@ -173,6 +189,21 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {type: 'list-item', checked: n.checked, children: children}
         break
       case 'paragraph':
+        if (n.children?.[0].type === 'html' && n.children[0].value.startsWith('<a')) {
+          const text = n.children.map((n) => (n as any).value || '').join('')
+          const attach = findAttachment(text)
+          if (attach) {
+            const name = text.match(/\>(.*)<\/a\>/)
+            el = {
+              type: 'attach',
+              url: decodeURIComponent(attach.url),
+              size: attach.size,
+              children: [{ text: '' }],
+              name: name ? name[1] : attach.url
+            }
+            break
+          }
+        }
         el = []
         let textNodes:any[] = []
         for (let c of (n.children || [])) {

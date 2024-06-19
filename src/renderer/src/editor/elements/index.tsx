@@ -20,8 +20,8 @@ import { db } from '../../store/db'
 import { slugify } from '../utils/dom'
 import { openConfirmDialog$ } from '../../components/dialog/ConfirmDialog'
 import { message$ } from '../../utils'
-import { existsSync, mkdirSync } from 'fs'
 import { deepCreateDoc } from '../../components/tree/openContextMenu'
+import { Attachment } from './attachment'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -61,6 +61,8 @@ export const MElement = (props: RenderElementProps) => {
       )
     case 'list-item':
       return <ListItem {...props} />
+    case 'attach':
+      return <Attachment {...props} />
     case 'list':
       return <List {...props} />
     case 'code':

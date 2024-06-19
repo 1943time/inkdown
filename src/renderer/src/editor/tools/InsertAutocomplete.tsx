@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { ReactNode, useCallback, useEffect, useMemo, useRef, WheelEvent } from 'react'
-import { Editor, Element, Transforms } from 'slate'
+import { Editor, Element, Node, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { Icon } from '@iconify/react'
 import { runInAction } from 'mobx'
@@ -15,11 +15,15 @@ import IMermaid from '../../icons/IMermaid'
 import { getOffsetLeft, getOffsetTop } from '../utils/dom'
 import { configStore } from '../../store/config'
 import { TextHelp } from '../../components/set/Help'
-import { Button, Input } from 'antd'
+import { Button, Input, Tabs } from 'antd'
 import { IPlanet } from '../../icons/IPlanet'
-import { message$ } from '../../utils'
+import { message$, nid } from '../../utils'
 import { getRemoteMediaType } from '../utils/media'
 import { selChange$ } from '../plugins/useOnchange'
+import { MainApi } from '../../api/main'
+import { cpSync, existsSync, statSync } from 'fs'
+import { basename, join, parse, relative } from 'path'
+import { toUnixPath } from '../../utils/path'
 
 type InsertOptions = {
   label: [string, string]
@@ -27,7 +31,7 @@ type InsertOptions = {
   children: {
     label: [string, string]
     key: string
-    task: Methods<KeyboardTask>
+    task: Methods<KeyboardTask> | 'attachment'
     args?: any[]
     icon?: ReactNode
   }[]
@@ -109,6 +113,12 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           key: 'media-link',
           args: ['', true],
           icon: <Icon icon={'ic:round-perm-media'} className={'text-base'} />
+        },
+        {
+          label: ['附件', 'Attachment'],
+          task: 'attachment',
+          key: 'attachment',
+          icon: <Icon icon={'hugeicons:attachment-square'} className={'text-base'} />
         }
       ]
     },
@@ -225,6 +235,7 @@ export const InsertAutocomplete = observer(() => {
     options: [] as InsertOptions['children'],
     left: 0,
     insertLink: false,
+    insertAttachment: false,
     loading: false,
     insertUrl: '',
     top: 0 as number | undefined,
@@ -248,17 +259,22 @@ export const InsertAutocomplete = observer(() => {
       index: 0,
       text: '',
       insertLink: false,
+      insertAttachment: false,
       insertUrl: ''
     })
     window.removeEventListener('click', clickClose)
   }, [])
 
   const insert = useCallback((op: InsertOptions['children'][number]) => {
-    if (op.task === 'image') {
-      setState({ insertLink: true })
-      setTimeout(() => {
-        dom.current?.querySelector('input')?.focus()
-      }, 30)
+    if (op.task === 'image' || op.task === 'attachment') {
+      if (op.task === 'image') {
+        setState({ insertLink: true })
+        setTimeout(() => {
+          dom.current?.querySelector('input')?.focus()
+        }, 30)
+      } else {
+        setState({insertAttachment: true})
+      }
     } else if (op) {
       Transforms.insertText(store.editor, '', {
         at: {
@@ -274,6 +290,71 @@ export const InsertAutocomplete = observer(() => {
         store.openInsertCompletion = false
       })
       close()
+    }
+  }, [])
+
+  const insertAttachByLink = useCallback(async () => {
+    setState({ loading: true })
+    try {
+      let url = state.insertUrl
+      let size = 0
+      let name = url
+      if (/^https?:\/\//.test(url)) {
+        const res = await window.api.fetch(url)
+        if (!res.ok) {
+          message$.next({
+            type: 'info',
+            content: 'The resource could not be loaded.'
+          })
+          throw new Error()
+        }
+        size = Number(res.headers.get('content-length') || 0)
+        const match = url.match(/([\w\_\-]+)\.\w+$/)
+        if (match) {
+          name = match[1]
+        }
+      } else if (!existsSync(url)) {
+        message$.next({
+          type: 'info',
+          content: 'Please enter a valid link.'
+        })
+        throw new Error()
+      } else {
+        name = basename(url)
+        const imgDir = await store.getImageDir()
+        const copyPath = join(imgDir, name)
+        cpSync(url, copyPath)
+        const stat = statSync(copyPath)
+        url = toUnixPath(relative(join(store.openFilePath!, '..'), copyPath))
+        size = stat.size
+      }
+      Transforms.insertText(store.editor, '', {
+        at: {
+          anchor: Editor.start(store.editor, ctx.current.path),
+          focus: Editor.end(store.editor, ctx.current.path)
+        }
+      })
+      const node = {
+        type: 'attach',
+        name,
+        url,
+        size,
+        children: [{ text: '' }]
+      }
+      Transforms.setNodes(store.editor, node, { at: ctx.current.path })
+      EditorUtils.focus(store.editor)
+      const next = Editor.next(store.editor, { at: ctx.current.path })
+      if (next?.[0].type === 'paragraph' && !Node.string(next[0])) {
+        Transforms.delete(store.editor, { at: next[1] })
+      }
+      const [m] = Editor.nodes(store.editor, {
+        match: (n) => !!n.type,
+        mode: 'lowest'
+      })
+      selChange$.next({ node: m, sel: store.editor.selection })
+      close()
+    } finally {
+      setState({ loading: false })
     }
   }, [])
 
@@ -447,7 +528,7 @@ export const InsertAutocomplete = observer(() => {
       ref={dom}
       className={`
       ${!store.openInsertCompletion || !state.filterOptions.length ? 'hidden' : ''}
-        absolute z-50 ${state.insertLink ? 'w-80' : 'w-44'} max-h-52 overflow-y-auto p-1
+        absolute z-50 ${state.insertLink || state.insertAttachment ? 'w-80' : 'w-44'} max-h-52 overflow-y-auto p-1
         rounded-lg py-1 text-gray-700/90 ctx-panel dark:text-gray-300 dark:border-gray-200/10
       `}
       onMouseDown={(e) => {
@@ -459,7 +540,7 @@ export const InsertAutocomplete = observer(() => {
         bottom: state.bottom
       }}
     >
-      {!state.insertLink && (
+      {!state.insertLink && !state.insertAttachment && (
         <>
           <div className={'text-xs leading-6 pl-1 dark:text-gray-400 text-gray-500 mb-1'}>
             {configStore.zh ? '快速插入' : 'Quick Actions'}
@@ -525,6 +606,76 @@ export const InsertAutocomplete = observer(() => {
           >
             Embed
           </Button>
+        </div>
+      )}
+      {state.insertAttachment && (
+        <div className={'px-1 pb-3'}>
+          <Tabs
+            size={'small'}
+            items={[
+              {
+                label: 'Local',
+                key: 'local',
+                children: (
+                  <div>
+                    <Button
+                      block={true}
+                      size={'small'}
+                      type={'primary'}
+                      onClick={() => {
+                        MainApi.openDialog({
+                          properties: ['openFile']
+                        }).then(res => {
+                          if (res.filePaths.length) {
+                            Transforms.insertText(store.editor, '', {
+                              at: {
+                                anchor: Editor.start(store.editor, ctx.current.path),
+                                focus: Editor.end(store.editor, ctx.current.path)
+                              }
+                            })
+                            setState({insertUrl: res.filePaths[0]})
+                            insertAttachByLink()
+                          }
+                        })
+                      }}
+                    >
+                      Choose a file
+                    </Button>
+                  </div>
+                )
+              },
+              {
+                label: 'Embed Link',
+                key: 'embed',
+                children: (
+                  <div>
+                    <Input
+                      placeholder={'Paste attachment link'}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      value={state.insertUrl}
+                      onKeyDown={(e) => {
+                        if (isHotkey('enter', e)) {
+                          insertAttachByLink()
+                        }
+                      }}
+                      onChange={(e) => setState({ insertUrl: e.target.value })}
+                    />
+                    <Button
+                      block={true}
+                      loading={state.loading}
+                      type={'primary'}
+                      className={'mt-4'}
+                      size={'small'}
+                      onClick={insertAttachByLink}
+                      disabled={!state.insertUrl}
+                    >
+                      Embed
+                    </Button>
+                  </div>
+                )
+              }
+            ]}
+          />
         </div>
       )}
     </div>

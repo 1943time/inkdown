@@ -142,7 +142,7 @@ export const ShareData = observer((props: {
   return (
     <Modal
       title={configStore.zh ? '分享数据' : 'Share Records'}
-      width={1000}
+      width={900}
       open={props.open}
       onCancel={props.onClose}
       footer={null}
@@ -152,7 +152,7 @@ export const ShareData = observer((props: {
         setState({openServiceSet: false})
         getDevices()
       }}/>
-      <div className={'min-h-[260px] overflow-x-auto'}>
+      <div className={'overflow-x-auto'}>
         <Tabs
           activeKey={state.activeKey}
           size={'small'}

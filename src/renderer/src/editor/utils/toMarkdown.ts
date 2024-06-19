@@ -127,9 +127,11 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += '#'.repeat(node.level) + ' ' + toMarkdown(node.children, preString, newParent)
       break
     case 'code':
-      const code = node.children.map(c => {
-        return preString + c.children[0]?.text || ''
-      }).join('\n')
+      const code = node.children
+        .map((c) => {
+          return preString + c.children[0]?.text || ''
+        })
+        .join('\n')
       if (node.katex && (node.language === 'latex' || node.language === 'tex')) {
         str += `${preString}$$\n${code}\n${preString}$$`
       } else if (node.language === 'html' && node.render) {
@@ -137,8 +139,13 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       } else if (node.frontmatter) {
         str += `${preString}---\n${code}\n${preString}---`
       } else {
-        str += `${preString}\`\`\`${node.language || '`'}\n${code}\n${preString}\`\`\`${!node.language ? '`' : ''}`
+        str += `${preString}\`\`\`${node.language || '`'}\n${code}\n${preString}\`\`\`${
+          !node.language ? '`' : ''
+        }`
       }
+      break
+    case 'attach':
+      str += `<a href="${encodeURI(node.url)}" download data-size="${node.size}">${node.name}</a>`
       break
     case 'blockquote':
       str += toMarkdown(node.children, preString, newParent)

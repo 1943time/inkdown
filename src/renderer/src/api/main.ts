@@ -100,8 +100,8 @@ export const MainApi = {
   getCachePath():Promise<string> {
     return ipcRenderer.invoke('getCachePath')
   },
-  openInFolder(path: string) {
-    ipcRenderer.send('openInFolder', path)
+  showInFolder(path: string) {
+    ipcRenderer.send('showInFolder', path)
   },
   mkdirp(path: string) {
     return ipcRenderer.invoke('mkdirp', path)

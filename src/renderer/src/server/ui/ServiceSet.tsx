@@ -88,7 +88,7 @@ export const ServiceSet = observer((props: {
   return (
     <Modal
       open={props.open}
-      width={700}
+      width={430}
       title={configStore.zh ? '分享服务设置' : 'Shared Service Settings'}
       confirmLoading={state.loading}
       onCancel={props.onClose}
@@ -123,12 +123,12 @@ export const ServiceSet = observer((props: {
         </Space>
       )}
     >
-      <Form form={form} layout={'horizontal'} labelCol={{span: 6}} className={'mt-4'}>
+      <Form form={form} layout={'vertical'} className={'mt-4'}>
         {shareStore.currentVersion &&
-          <Form.Item
-            label={configStore.zh ? '服务版本' : 'Service Version'}>
+          <div className={'flex items-center mb-4'}>
+            <span className={'mr-4'}>{configStore.zh ? '服务版本' : 'Service Version'}</span>
             <Tag>{shareStore.currentVersion}</Tag>
-          </Form.Item>
+          </div>
         }
         <Form.Item
           rules={[{required: true, message: configStore.zh ? '请输入域名' : 'Please enter domain'}]}

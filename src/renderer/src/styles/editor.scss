@@ -185,6 +185,18 @@ a {
       }
     }
   }
+  .attach {
+    padding: 3px 0;
+    &:not(:last-child) {
+      margin-bottom: 0.3em;
+    }
+    .file {
+      @apply py-2 px-3 rounded-lg border border-gray-200 bg-gray-50 duration-100 dark:bg-white/5 dark:border-white/10;
+      &.active {
+        @apply border-black/50 dark:border-white/50;
+      }
+    }
+  }
   .mermaid-container{
     @apply mb-3 cursor-default select-none py-3 bg-gray-500/5 rounded flex justify-center;
   }

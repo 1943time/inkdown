@@ -3,14 +3,14 @@ import {message$} from '../../utils'
 import {getHeadId, slugify} from '../../utils/sections'
 import {ShareApi} from './api'
 import {getFileSize, toPath} from './utils'
-import {existsSync} from 'fs'
+import {existsSync, statSync} from 'fs'
 import {Node} from 'slate'
 
 const uploadType = new Set([
   '.png', '.jpeg', '.jpg', '.webp', '.gif', '.pdf', '.doc', '.docx', 'xls', '.xlsx', '.ppt', '.pptx', '.txt'
 ])
 
-type ImageList = {el: any, filePath: string}
+type ImageList = {el: any, filePath: string, size: number}
 
 export class BsFile {
   private root = ''
@@ -54,8 +54,16 @@ export class BsFile {
     for (let d of data) {
       imageList.push(...this.processSchema(d.schema, d.filePath))
     }
+    if (imageList.some(s => s.size > 100 * 1024 * 1024)) {
+      message$.next({
+        type: 'info',
+        duration: 5000,
+        content:
+          'Please note that if the release contains files larger than 100mb, the upload may fail.'
+      })
+    }
     await this.upload(imageList)
-    return new Set(imageList.map(i => i.filePath))
+    return new Set(imageList.map((i) => i.filePath))
   }
 
   private async upload(imageList: ImageList[]) {
@@ -85,15 +93,19 @@ export class BsFile {
   }
 
   private processSchema(schema: any[], docPath: string) {
-    const imageList: {el: any, filePath: string}[] = []
+    const imageList: {el: any, filePath: string, size: number}[] = []
     for (let s of schema) {
-      if (s.type === 'media' && s.url && uploadType.has(parse(s.url).ext)) {
+      if ((s.type === 'media' || s.type === 'attach') && s.url) {
         const realPath = this.getRealPath(docPath, s.url)
         if (!realPath) continue
-        imageList.push({
-          el: s,
-          filePath: realPath
-        })
+        try {
+          const stat = statSync(realPath)
+          imageList.push({
+            el: s,
+            size: stat.size,
+            filePath: realPath
+          })
+        } catch(e) {}
       }
       if (s.text && s.url && !/^\w+:\/\//.test(s.url)) {
         let url = s.url as string

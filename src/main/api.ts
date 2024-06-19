@@ -210,7 +210,7 @@ export const registerApi = () => {
       securityScopedBookmarks: true
     })
   })
-  ipcMain.on('openInFolder', (e, path: string) => {
+  ipcMain.on('showInFolder', (e, path: string) => {
     shell.showItemInFolder(path)
   })
   ipcMain.on('max-size', (e) => {

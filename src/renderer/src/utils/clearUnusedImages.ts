@@ -8,11 +8,10 @@ import {runInAction} from 'mobx'
 import {openConfirmDialog$} from '../components/dialog/ConfirmDialog'
 import {Elements} from '../el'
 import {readdir} from 'fs/promises'
-import { mediaType } from '@renderer/editor/utils/dom'
 
 const findMedia = (filePath: string, schema: Elements[], usedImages: Set<string>) => {
   for (let s of schema) {
-    if (s.type === 'media') {
+    if (s.type === 'media' || s.type === 'attach') {
       if (!s.url || s.url.startsWith('http')) continue
       const path = isAbsolute(s.url) ? s.url : join(filePath, '..', s.url)
       usedImages.add(path)
@@ -71,7 +70,6 @@ export const clearUnusedImages = () => {
           const images = await readdir(dir.filePath)
           const remove = new Set<string>()
           for (let img of images) {
-            if (mediaType(img) !== 'image') continue
             const path = join(dir.filePath, img)
             if (!usedImages.has(path)) {
               remove.add(path)

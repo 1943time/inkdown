@@ -250,7 +250,7 @@ export const Nav = observer(() => {
                   text: isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
                   disabled: !treeStore.openedNote || treeStore.openedNote?.ghost,
                   click: () => {
-                    MainApi.openInFolder(treeStore.openedNote!.filePath)
+                    MainApi.showInFolder(treeStore.openedNote!.filePath)
                   }
                 },
                 {
