@@ -16,7 +16,7 @@ import { db } from '../store/db'
 import { slugify } from '../editor/utils/dom'
 
 export class ShareStore {
-  readonly minVersion = '0.3.1'
+  readonly minVersion = '0.5.0'
   remoteVersion = ''
   currentVersion = ''
   docMap = new Map<string, IDoc>()

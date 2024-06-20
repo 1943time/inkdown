@@ -133,12 +133,6 @@ const insertKeys = (ctx: string[]):IKeyItem[] => [
     disabled: ['code-line', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'localImage'})
   },
-  {
-    name: 'Insert remote media',
-    key: ['mod', 'option', 'p'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
-    click: () => keyTask$.next({key: 'image', args: ['',  true]})
-  },
   {type: 'hr'},
   {
     name: 'Bulleted list',
