@@ -243,7 +243,7 @@ a {
   }
 
   p {
-    margin-bottom: 0.2em;
+    margin-bottom: 0.1em;
     padding:3px 0;
   }
   h1,h2,h3,h4,h5{
@@ -313,7 +313,7 @@ blockquote {
   }
   p {
     &:not(:last-child){
-      margin-bottom: 0.2em !important;
+      margin-bottom: 0.1em !important;
     }
   }
   &:before {
@@ -517,6 +517,7 @@ ul.m-list {
   }
   &.dark {
     caret-color: rgba(255, 255, 255, .9);
+    color: rgba(255, 255, 255, .8);
     .ant-select-selector{
       color: #e5e7eb !important;
       border-color: rgba(229,231,235,.3);
@@ -535,6 +536,7 @@ ul.m-list {
   }
   &.light {
     caret-color: rgba(0, 0, 0, .9);
+    color: rgba(0, 0, 0, .8);
     .ant-select-selector{
       color: #4b5563 !important;
       border-color: rgba(75,85,99,.3);

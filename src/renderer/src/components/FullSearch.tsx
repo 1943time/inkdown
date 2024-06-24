@@ -74,7 +74,6 @@ export const FullSearch = observer(() => {
       }, 100)
     }
   }, [])
-
   const timer = useRef(0)
   const search = useCallback((immediate?: true) => {
     clearTimeout(timer.current)

@@ -37,7 +37,7 @@ export const api = {
   fs,
   watch: async (
     path: string,
-    cb: (event: 'add' | 'addDir' | 'change' | 'unlink' | 'unlinkDir', path: string) => void
+    cb: (event: 'remove' | 'update', path: string) => void
   ) => {
     if (watchers.get(path)) await watchers.get(path)!.close()
     const watcher = watch(path, {

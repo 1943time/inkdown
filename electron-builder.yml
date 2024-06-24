@@ -3,7 +3,7 @@ productName: Inkdown
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
-afterSign: scripts/notarize.js
+# afterSign: scripts/notarize.js
 protocols:
   name: bluestone deeplink
   schemes:
@@ -35,7 +35,7 @@ nsis:
   oneClick: false
   perMachine: true
 mac:
-#  identity: null
+  identity: null
   entitlementsInherit: build/entitlements.mac.plist
 #  minimumSystemVersion: 12.0
 #  category: public.app-category.productivity

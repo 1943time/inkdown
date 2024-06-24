@@ -7,6 +7,7 @@ import {configStore} from './store/config'
 import {Webview} from './components/Webview'
 import ReactDOM from 'react-dom/client'
 import {codeReady} from './editor/utils/highlight'
+import { runInAction } from 'mobx'
 
 const App = observer(() => {
   const [ready, setReady] = useState(false)
@@ -14,6 +15,9 @@ const App = observer(() => {
     Promise.allSettled([
       configStore.initial()
     ]).then(async () => {
+      runInAction(() => {
+        configStore.config.codeAutoBreak = true
+      })
       await codeReady(true)
       setReady(true)
     })

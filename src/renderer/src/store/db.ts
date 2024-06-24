@@ -35,7 +35,6 @@ export interface ISpace {
   cid: string
   name: string
   filePath: string
-  cloud?: 0 | 1
   created?: number
   sort: number
   lastOpenTime: number
@@ -71,8 +70,8 @@ class Db extends Dexie {
   public config!: Table<IConfig, string>
   public constructor() {
     super('db')
-    this.version(9).stores({
-      space: '&cid,name,filePath,cloud,sort',
+    this.version(10).stores({
+      space: '&cid,name,filePath,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,filePath,spaceId,sort',
       history: '&id,fileId,spaceId,updated',

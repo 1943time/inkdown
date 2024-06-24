@@ -87,7 +87,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
           onDragStart={store.dragStart}
           className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${
             props.element.frontmatter ? 'frontmatter' : ''
-          } ${configStore.config.codeLineNumber && !store.webview ? 'num' : ''} tab-${
+          } ${configStore.config.codeLineNumber ? 'num' : ''} tab-${
             configStore.config.codeTabSize
           } code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${
             !!props.element.katex ? 'katex-container' : ''
@@ -219,7 +219,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
               </>
             )}
           </div>
-          {configStore.config.codeLineNumber && !store.webview && (
+          {configStore.config.codeLineNumber && (
             <pre className={`code-line-list select-none`} contentEditable={false}>
               {!configStore.config.codeAutoBreak &&
                 (props.children || []).map((c, i) => <div key={i} />)}

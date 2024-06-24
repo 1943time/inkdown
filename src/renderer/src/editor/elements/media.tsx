@@ -86,7 +86,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           const buffer = await res.buffer()
           store
             .saveFile({
-              name: nid() + '.' + ext[1],
+              name: nid() + '.' + ext![1],
               buffer: buffer.buffer
             })
             .then((res) => {
@@ -211,6 +211,9 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             <video
               src={element.url}
               controls={true}
+              onMouseDown={(e) => {
+                e.preventDefault()
+              }}
               className={`rounded h-full select-none ${
                 state().dragging ? 'pointer-events-none' : ''
               }`}
@@ -222,6 +225,9 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             <audio
               controls={true}
               src={element.url}
+              onMouseDown={(e) => {
+                e.preventDefault()
+              }}
               className={`select-none ${state().dragging ? 'pointer-events-none' : ''}`}
               // @ts-ignore
               ref={ref}
