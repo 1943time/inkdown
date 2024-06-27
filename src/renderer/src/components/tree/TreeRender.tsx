@@ -13,7 +13,7 @@ import { configStore } from '../../store/config'
 import Iplus from '../../icons/Iplus'
 const getClass = (c: IFileItem) => {
   if (treeStore.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
-  if (treeStore.openedNote === c) return 'dark:bg-white/10 bg-gray-600/15'
+  if (treeStore.openedNote === c) return 'dark:bg-white/10 bg-gray-700/10'
   if (treeStore.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
   return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/15'
 }
@@ -197,7 +197,7 @@ const Item = observer((
               }}
               className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${
                 treeStore.ctxNode === item
-                  ? 'flex bg-gray-400/3 dark:bg-gray-200/20'
+                  ? 'flex bg-gray-400/30 dark:bg-gray-200/20'
                   : 'hidden group-hover:flex'
               }
             absolute right-1 w-[14px] justify-center items-center dark:text-gray-200 text-lg`}

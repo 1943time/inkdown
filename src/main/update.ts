@@ -7,7 +7,7 @@ autoUpdater.logger.transports.file.level = 'info'
 autoUpdater.setFeedURL({
   provider: 'github',
   owner: '1943time',
-  repo: 'bluestone'
+  repo: 'inkdown'
 })
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true

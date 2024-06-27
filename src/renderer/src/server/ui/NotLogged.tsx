@@ -18,7 +18,7 @@ export const NotLogged = observer((props: {
             <a
               className={'link mx-0.5'}
               href={
-                'https://doc.inkdown.me/book/%E9%9D%92%E7%9F%B3%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3/inkdown#%E5%88%86%E4%BA%AB%E6%9C%8D%E5%8A%A1'
+                'https://pb.inkdown.me/inkdown/book/docs/offline-version#deployment-publish-program'
               }
               target={'_blank'}
             >
@@ -35,7 +35,9 @@ export const NotLogged = observer((props: {
             management of related dependencies such as images.{' '}
             <a
               className={'link mx-0.5'}
-              href={'https://doc.inkdown.me/book/inkdown/inkdown#sharing-service'}
+              href={
+                'https://pb.inkdown.me/inkdown/book/docs/offline-version#deployment-publish-program'
+              }
               target={'_blank'}
             >
               guide

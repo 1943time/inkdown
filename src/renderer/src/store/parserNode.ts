@@ -185,7 +185,7 @@ export class ReadSpace {
       return {path: join(dir, f), update: s.mtime.valueOf(), folder: s.isDirectory(), name: basename(path)}
     }).sort((a, b) => {
       if (a.folder !== b.folder) return a.folder ? -1 : 1
-      else return a.name > b.name ? - 1 : 1
+      else return a.name > b.name ? 1 : -1
     })
     let tree: IFile[] = []
     for (let i = 0; i < fileList.length; i++) {

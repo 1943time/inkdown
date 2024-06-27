@@ -10,17 +10,17 @@ import {
   clipboard,
   nativeImage
 } from 'electron'
-import {mkdirp} from 'mkdirp'
-import {is} from '@electron-toolkit/utils'
-import {join} from 'path'
-import {getLocale, store} from './store'
-import {readFileSync, writeFileSync} from 'fs'
-import {machineIdSync} from 'node-machine-id'
+import { mkdirp } from 'mkdirp'
+import { is } from '@electron-toolkit/utils'
+import { join } from 'path'
+import { store } from './store'
+import { writeFileSync } from 'fs'
+import { machineIdSync } from 'node-machine-id'
 import icon from '../../resources/icon.png?asset'
+import log from 'electron-log'
 export const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] ? process.env['ELECTRON_RENDERER_URL'] : join(__dirname, '../renderer/index.html')
 const workerPath = join(__dirname, '../renderer/worker.html')
 import BrowserWindowConstructorOptions = Electron.BrowserWindowConstructorOptions
-import log from 'electron-log'
 
 export const windowOptions: BrowserWindowConstructorOptions = {
   show: false,
@@ -86,38 +86,6 @@ export const registerApi = () => {
   })
   ipcMain.handle('getServerConfig', (e) => {
     return store.get('server-config')
-  })
-  ipcMain.handle('getConfig', () => {
-    const config:any = store.get('config') || {}
-    const theme = typeof config.theme === 'string' ? config.theme : nativeTheme.themeSource
-    const dark = isDark(config)
-    return {
-      showLeading: getBoolean(config.showLeading, true),
-      theme: theme,
-      autoDownload: !!config.autoDownload,
-      dark: dark,
-      spellCheck: !!config.spellCheck,
-      editorWidth: config.editorWidth || 720,
-      imagesFolder: config.imagesFolder || '.images',
-      codeLineNumber: !!config.codeLineNumber,
-      codeTabSize: config.codeTabSize || 4,
-      codeTheme: config.codeTheme || 'one-dark-pro',
-      editorTextSize: config.editorTextSize || 16,
-      leadingWidth: config.leadingWidth || 220,
-      showCharactersCount: getBoolean(config.showCharactersCount, true),
-      mas: getBoolean(process.mas, false),
-      dragToSort: getBoolean(config.dragToSort, true),
-      autoRebuild: getBoolean(config.autoRebuild, true),
-      locale: getLocale(),
-      showRemoveFileDialog: getBoolean(config.showRemoveFileDialog, true),
-      relativePathForImageStore: getBoolean(config.relativePathForImageStore, false),
-      showHiddenFiles: getBoolean(config.showHiddenFiles, false),
-      editorLineHeight: config.editorLineHeight || 'default',
-      interfaceFont: config.interfaceFont || 'System',
-      editorFont: config.editorFont || 'System',
-      isLinux: process.platform === 'linux',
-      turnOnImageBed: getBoolean(config.turnOnImageBed, false)
-    }
   })
 
   ipcMain.on('relaunch', () => {

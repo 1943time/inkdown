@@ -31,7 +31,7 @@ export const Update = observer(() => {
     const v = await window.electron.ipcRenderer.invoke('get-version')
     const system = await window.electron.ipcRenderer.invoke('get-system')
     try {
-      const res = await ky.get('https://www.inkdown.me/app/version', {
+      const res = await ky.get('https://adm.inkdown.me/app/version', {
         searchParams: {
           version: v,
           system

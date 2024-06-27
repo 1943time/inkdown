@@ -194,13 +194,7 @@ const getSystemMenus = () => {
         {
           label: 'Documentation',
           click: () => {
-            if (app.getLocale() === 'zh-CN') {
-              shell.openExternal(
-                `https://doc.inkdown.me/book/%E9%9D%92%E7%9F%B3%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3`
-              )
-            } else {
-              shell.openExternal(`https://doc.inkdown.me/book/inkdown`)
-            }
+            shell.openExternal(`https://pb.inkdown.me/inkdown/book/docs`)
           }
         },
         // {
