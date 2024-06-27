@@ -7,9 +7,7 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 
 OR <a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px;margin-left:10px"/></a>
 
-> The release time of mac store will be delayed by 1-3 days
->
-> 由于工信部要求APP备案原因，中国内地地区暂未上架Mac Store。
+> The `mac store` is a network version. If you want to save the data completely on your computer, please use github to download it.
 
 ---
 
@@ -24,9 +22,10 @@ and the double-column mode is not conducive to focusing,
 so the Inkdown Editor was developed. It combines rich text with markdown editing habits to help you record daily,
 and saves it in standard markdown format, which allows your notes to be used anywhere and backed up in any way.
 
-https://github.com/1943time/bluestone/assets/115093678/e01c9d88-a278-4038-b786-7d0ed5d40cbb
 
-![](./docs//assets/d9.png)
+![](./docs//assets/d10.png)
+
+![](./docs//assets/d11.png)
 
 ## Features
 
