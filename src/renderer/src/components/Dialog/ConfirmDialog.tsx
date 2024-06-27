@@ -1,11 +1,10 @@
-import {observer} from 'mobx-react-lite'
-import {Button} from 'antd'
-import {Dialog} from './Dialog'
-import logo from '../../logo.svg'
-import {createElement, ReactNode, useCallback, useRef} from 'react'
-import {Subject} from 'rxjs'
-import {useLocalState} from '../../hooks/useLocalState'
-import {useSubject} from '../../hooks/subscribe'
+import { observer } from 'mobx-react-lite'
+import { Button } from 'antd'
+import { Dialog } from './Dialog'
+import { ReactNode, useCallback, useRef } from 'react'
+import { Subject } from 'rxjs'
+import { useLocalState } from '../../hooks/useLocalState'
+import { useSubject } from '../../hooks/subscribe'
 import isHotkey from 'is-hotkey'
 
 export const openConfirmDialog$ = new Subject<{

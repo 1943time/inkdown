@@ -5,7 +5,7 @@ import {IFileItem, ISpaceNode} from '../index'
 import {basename, isAbsolute, join} from 'path'
 import {MainApi} from '../api/main'
 import {runInAction} from 'mobx'
-import {openConfirmDialog$} from '../components/dialog/ConfirmDialog'
+import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {Elements} from '../el'
 import {readdir} from 'fs/promises'
 

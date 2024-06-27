@@ -1,20 +1,20 @@
-import {observer} from 'mobx-react-lite'
-import { Button, Form, Input } from 'antd'
-import {useCallback} from 'react'
-import {Subject} from 'rxjs'
+import { observer } from 'mobx-react-lite'
+import { Button, Input } from 'antd'
+import { useCallback } from 'react'
+import { Subject } from 'rxjs'
 import isHotkey from 'is-hotkey'
-import {Dialog} from '../dialog/Dialog'
-import {IFileItem} from '../../index'
-import {useLocalState} from '../../hooks/useLocalState'
-import {treeStore} from '../../store/tree'
-import {useSubject} from '../../hooks/subscribe'
-import {nid} from '../../utils'
-import {createFileNode} from '../../store/parserNode'
-import {db, IFile} from '../../store/db'
-import {join} from 'path'
-import {runInAction} from 'mobx'
-import {mkdirSync, renameSync} from 'fs'
-import {updateFilePath} from '../../editor/utils/updateNode'
+import { Dialog } from '../Dialog/Dialog'
+import { IFileItem } from '../../index'
+import { useLocalState } from '../../hooks/useLocalState'
+import { treeStore } from '../../store/tree'
+import { useSubject } from '../../hooks/subscribe'
+import { nid } from '../../utils'
+import { createFileNode } from '../../store/parserNode'
+import { db, IFile } from '../../store/db'
+import { join } from 'path'
+import { runInAction } from 'mobx'
+import { mkdirSync } from 'fs'
+import { updateFilePath } from '../../editor/utils/updateNode'
 
 export const openEditFolderDialog$ = new Subject<{
   ctxNode?: IFileItem
@@ -34,15 +34,17 @@ export const EditFolderDialog = observer(() => {
     const name = state.name.trim()
     if (name) {
       if (state.mode === 'create') {
-        const stack = state.ctxNode? state.ctxNode.children! : treeStore.root!.children!
-        if (stack.some(s => s.filename === name && s.folder)) {
-          return setState({message: 'The folder already exists'})
+        const stack = state.ctxNode ? state.ctxNode.children! : treeStore.root!.children!
+        if (stack.some((s) => s.filename === name && s.folder)) {
+          return setState({ message: 'The folder already exists' })
         }
         const id = nid()
         const now = Date.now()
-        const data:IFile = {
+        const data: IFile = {
           cid: id,
-          filePath: state.ctxNode ? join(state.ctxNode.filePath, name) : join(treeStore.root!.filePath, name),
+          filePath: state.ctxNode
+            ? join(state.ctxNode.filePath, name)
+            : join(treeStore.root!.filePath, name),
           spaceId: treeStore.root!.cid,
           updated: now,
           sort: 0,
@@ -55,14 +57,14 @@ export const EditFolderDialog = observer(() => {
           const node = createFileNode(data, state.ctxNode || treeStore.root!)
           stack.unshift(node)
           stack.map((s, i) => {
-            db.file.update(s.cid, {sort: i})
+            db.file.update(s.cid, { sort: i })
           })
         })
       } else if (state.ctxNode) {
         const ctx = state.ctxNode
-        const stack = ctx.parent? ctx.parent.children! : treeStore.root!.children!
-        if (stack.some(s => s.filename === name && s.folder && s.cid !== ctx.cid)) {
-          return setState({message: 'The folder already exists'})
+        const stack = ctx.parent ? ctx.parent.children! : treeStore.root!.children!
+        if (stack.some((s) => s.filename === name && s.folder && s.cid !== ctx.cid)) {
+          return setState({ message: 'The folder already exists' })
         }
         const oldPath = ctx.filePath
         const target = join(state.ctxNode.filePath, '..', name)
@@ -84,10 +86,10 @@ export const EditFolderDialog = observer(() => {
 
   const close = useCallback(() => {
     window.removeEventListener('keydown', enter)
-    setState({open: false})
+    setState({ open: false })
   }, [])
 
-  useSubject(openEditFolderDialog$, params => {
+  useSubject(openEditFolderDialog$, (params) => {
     setState({
       open: true,
       mode: params.mode,
@@ -111,18 +113,16 @@ export const EditFolderDialog = observer(() => {
           placeholder={'Folder Name'}
           data-type={'folderInputName'}
           value={state.name}
-          onChange={e => {
-            setState({name: e.target.value})
+          onChange={(e) => {
+            setState({ name: e.target.value })
             if (!e.target.value) {
-              setState({message: ''})
+              setState({ message: '' })
             }
           }}
         />
-        {state.message &&
-          <div className={'text-amber-500 pt-1 text-[13px] w-full'}>
-            {state.message}
-          </div>
-        }
+        {state.message && (
+          <div className={'text-amber-500 pt-1 text-[13px] w-full'}>{state.message}</div>
+        )}
         <Button
           type={'primary'}
           block={true}

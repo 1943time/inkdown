@@ -4,7 +4,7 @@ import {useLocalState} from '../hooks/useLocalState'
 import {useCallback, useEffect, useRef} from 'react'
 import {message$} from '../utils'
 import {configStore} from '../store/config'
-import {openConfirmDialog$} from './dialog/ConfirmDialog'
+import {openConfirmDialog$} from './Dialog/ConfirmDialog'
 import {action, runInAction} from 'mobx'
 import ky from 'ky'
 const ipcRenderer = window.electron.ipcRenderer
