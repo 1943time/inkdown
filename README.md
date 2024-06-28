@@ -5,9 +5,9 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | [mac-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) <br/> [mac-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) | [win-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)<br/> [win-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [linux-amd64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-amd64.deb) \| [linux-x86_64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-x86_64.AppImage) <br/> [linux-arm64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.AppImage) \| [linux-arm64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.deb)
 
-OR <a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:120px;margin-left:10px"/></a>
+<a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:140px;margin-left:10px"/></a>
 
-> The `mac store` is a network version. If you want to save the data completely on your computer, please use github to download it.
+> The `Mac Store` is a network version. If you want to save the data completely on your computer, please use github to download it.
 
 ---
 

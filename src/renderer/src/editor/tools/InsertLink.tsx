@@ -19,7 +19,7 @@ import { Icon } from '@iconify/react'
 import { Tooltip } from 'antd'
 
 type DocItem = IFileItem & { path: string; parentPath?: string }
-const width = 350
+const width = 370
 export const InsertLink = observer(() => {
   const store = useEditorStore()
   const selRef = useRef<Selection>()
@@ -251,7 +251,7 @@ export const InsertLink = observer(() => {
     <div className={'fixed z-[100] inset-0'} onClick={() => close(state().oldUrl)}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className={'absolute z-30 w-[350px] ctx-panel pt-3 flex flex-col'}
+        className={'absolute z-30 w-[370px] ctx-panel pt-3 flex flex-col'}
         style={{
           left: state().left,
           top: state().mode === 'top' ? state().y : undefined,
@@ -307,7 +307,7 @@ export const InsertLink = observer(() => {
             placeholder={`${
               treeStore.inRoot ? 'Url filepath #head, tab key completion' : 'Link or #head'
             }`}
-            className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-7 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
+            className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-8 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
           />
           <Tooltip title={configStore.zh ? '移除链接' : 'Remove link'} mouseEnterDelay={0.5}>
             <div
