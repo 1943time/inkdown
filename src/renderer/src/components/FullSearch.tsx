@@ -127,67 +127,82 @@ export const FullSearch = observer(() => {
   return (
     <div className={'py-1 h-full'} ref={dom}>
       <div className={'px-4 relative'}>
-        <SearchOutlined className={'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'}/>
+        <SearchOutlined
+          className={
+            'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'
+          }
+        />
         <input
           value={treeStore.searchKeyWord}
           autoFocus={true}
           className={'input h-8 w-full pl-7'}
-          onChange={e => {
-            treeStore.setState({searchKeyWord: e.target.value})
+          onChange={(e) => {
+            treeStore.setState({ searchKeyWord: e.target.value })
             search()
           }}
           placeholder={configStore.zh ? '搜索' : 'Search'}
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>
-        {!state().searching && !state().searchResults.length && treeStore.searchKeyWord &&
+        {!state().searching && !state().searchResults.length && treeStore.searchKeyWord && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
-              {configStore.zh ? '未找到相关内容' : 'No content found for'} <span className={'text-indigo-500 inline'}>{treeStore.searchKeyWord}</span>
+              {configStore.zh ? '未找到相关内容' : 'No content found for'}{' '}
+              <span className={'text-indigo-500 inline'}>{treeStore.searchKeyWord}</span>
             </span>
           </div>
-        }
+        )}
         <div className={'space-y-3'}>
-          {state().searchResults.slice(0, 100).map((s, i) =>
-            <div key={i}>
-              <div
-                className={'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-default select-none'}>
-                <div className={'flex items-center flex-1 w-0'}>
-                  <div
-                    className={'p-1'}
-                    onClick={() => {
-                      if (state().foldIndex.includes(i)) {
-                        setState({foldIndex: state().foldIndex.filter(index => index !== i)})
-                      } else {
-                        setState({foldIndex: [...state().foldIndex, i]})
-                      }
-                    }}
-                  >
-                    <ArrowRight
-                      className={`w-3 h-3 duration-200 dark:text-gray-500 text-gray-400 ${state().foldIndex.includes(i) ? '' : 'rotate-90'}`}
-                    />
-                  </div>
-                  <div className={'flex-1 w-full truncate'}>
-                    {s.file.filename}
-                  </div>
-                </div>
-                <span className={'ml-2 dark:text-gray-500 pr-1 text-gray-600'}>{s.results.length}</span>
-              </div>
-              {!state().foldIndex.includes(i) &&
+          {state()
+            .searchResults.slice(0, 100)
+            .map((s, i) => (
+              <div key={i}>
                 <div
-                  className={'space-y-2 text-xs dark:text-gray-400 text-gray-600 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'}>
-                  {s.results.slice(0, 100).map((r, j) =>
-                    <div
-                      key={j}
-                      onClick={() => toNode({el: r.el, file: s.file})}
-                      className={'cursor-default dark:hover:text-gray-200 hover:text-gray-800 group break-all ellipsis-10'}
-                      dangerouslySetInnerHTML={{__html: r.text}}
-                    />
-                  )}
+                  className={
+                    'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-pointer select-none'
+                  }
+                  onClick={() => {
+                    if (state().foldIndex.includes(i)) {
+                      setState({ foldIndex: state().foldIndex.filter((index) => index !== i) })
+                    } else {
+                      setState({ foldIndex: [...state().foldIndex, i] })
+                    }
+                  }}
+                >
+                  <div className={'flex items-center flex-1 w-0'}>
+                    <div className={'p-1'}>
+                      <ArrowRight
+                        className={`w-3 h-3 duration-200 dark:text-gray-500 text-gray-400 ${
+                          state().foldIndex.includes(i) ? '' : 'rotate-90'
+                        }`}
+                      />
+                    </div>
+                    <div className={'flex-1 w-full truncate'}>{s.file.filename}</div>
+                  </div>
+                  <span className={'ml-2 dark:text-gray-500 pr-1 text-gray-600'}>
+                    {s.results.length}
+                  </span>
                 </div>
-              }
-            </div>
-          )}
+                {!state().foldIndex.includes(i) && (
+                  <div
+                    className={
+                      'space-y-2 text-xs dark:text-white/80 text-black/80 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'
+                    }
+                  >
+                    {s.results.slice(0, 100).map((r, j) => (
+                      <div
+                        key={j}
+                        onClick={() => toNode({ el: r.el, file: s.file })}
+                        className={
+                          'cursor-pointer dark:hover:text-white hover:text-black group break-all ellipsis-10'
+                        }
+                        dangerouslySetInnerHTML={{ __html: r.text }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
         </div>
       </div>
     </div>
