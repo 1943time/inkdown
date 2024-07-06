@@ -1,5 +1,7 @@
 <h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
-Improve markdown reading and editing experience, and facilitate network sharing.
+
+Improve markdown reading and editing experience, and facilitate network sharing. [Document🔗](https://pb.inkdown.me/inkdown/book/docs)
+
 
 |                                                                               <img src="docs/assets/apple.svg" width="40">                                                                                |                                                                             <img src="docs/assets/windows.svg" width="40"/>                                                                              |                                                                                                                                                                                                                   <img src="docs/assets/linux.svg" width="40"/>                                                                                                                                                                                                                   |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
@@ -7,7 +9,7 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 
 <a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:140px;margin-left:10px"/></a>
 
-> The `Mac Store` is a network version. If you want to save the data completely on your computer, please use github to download it.
+> Please note that the `Mac Store Version` is a network version
 
 ---
 
