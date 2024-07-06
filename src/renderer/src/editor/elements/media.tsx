@@ -241,6 +241,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             >
               <iframe
                 src={element.url}
+                referrerPolicy={'origin-when-cross-origin'}
                 className={`w-full h-full border-none select-none rounded ${
                   state().dragging ? 'pointer-events-none' : ''
                 }`}
