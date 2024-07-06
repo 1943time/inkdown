@@ -1,6 +1,6 @@
 <h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
 
-Improve markdown reading and editing experience, and facilitate network sharing. [Document🔗](https://pb.inkdown.me/inkdown/book/docs)
+Improve markdown reading and editing experience, and facilitate network sharing. [Document 🔗](https://pb.inkdown.me/inkdown/book/docs)
 
 
 |                                                                               <img src="docs/assets/apple.svg" width="40">                                                                                |                                                                             <img src="docs/assets/windows.svg" width="40"/>                                                                              |                                                                                                                                                                                                                   <img src="docs/assets/linux.svg" width="40"/>                                                                                                                                                                                                                   |

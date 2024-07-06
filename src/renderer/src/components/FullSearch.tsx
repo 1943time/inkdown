@@ -152,7 +152,7 @@ export const FullSearch = observer(() => {
             <div key={i}>
               <div
                 className={'flex justify-between items-center dark:text-gray-300 text-gray-600 text-sm cursor-default select-none'}>
-                <div className={'flex items-center'}>
+                <div className={'flex items-center flex-1 w-0'}>
                   <div
                     className={'p-1'}
                     onClick={() => {
