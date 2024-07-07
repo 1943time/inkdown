@@ -1,5 +1,5 @@
 import {IFileItem, ISpaceNode} from '../index'
-import {existsSync, readdirSync, renameSync, statSync} from 'fs'
+import {cp, cpSync, existsSync, readdirSync, renameSync, statSync} from 'fs'
 import {basename, extname, isAbsolute, join, parse, sep} from 'path'
 import {observable, runInAction} from 'mobx'
 import {db, IFile} from './db'
@@ -37,7 +37,7 @@ export const defineParent = (node: IFileItem, parent: IFileItem | ISpaceNode) =>
   })
 }
 
-export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentNode?: IFileItem) => {
+export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentNode?: IFileItem, copy = false) => {
   const parent = parentNode || tree.root!
   const fileMap = new Map(Array.from(tree.nodeMap.values()).map(v => [v.filePath, v]))
   if (existsSync(filePath)) {
@@ -66,7 +66,7 @@ export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentN
             insertData.links = res.links
           }
           await db.file.add(insertData)
-          const node = createFileNode(insertData)
+          const node = createFileNode(insertData, parent)
           runInAction(() => {
             folder ? parent.children!.unshift(node) : parent.children!.push(node)
           })
@@ -79,9 +79,15 @@ export const moveFileToSpace = async (tree: TreeStore, filePath: string, parentN
     }
     try {
       const targetPath = join(parent.filePath, basename(filePath))
-      tree.watcher.ignorePath.add(targetPath)
-      renameSync(filePath, targetPath)
-      await appendFiles([targetPath], parent)
+      if (!existsSync(targetPath)) {
+        tree.watcher.ignorePath.add(targetPath)
+        if (copy) {
+          cpSync(filePath, targetPath, {recursive: true})
+        } else {
+          renameSync(filePath, targetPath)
+        }
+        await appendFiles([targetPath], parent)
+      }
     } finally {
       terminate()
     }

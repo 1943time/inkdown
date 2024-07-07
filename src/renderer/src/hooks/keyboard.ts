@@ -17,7 +17,7 @@ import { db } from '../store/db'
 import { quickOpen$ } from '../components/QuickOpen'
 import { isAbsolute, join } from 'path'
 import { statSync } from 'fs'
-import { createFileNode } from '../store/parserNode'
+import { createFileNode, moveFileToSpace } from '../store/parserNode'
 import { selChange$ } from '@renderer/editor/plugins/useOnchange'
 import { AttachNode, MediaNode } from '../el'
 
@@ -764,6 +764,12 @@ export const useSystemKeyboard = () => {
               content: 'Image address copied to clipboard'
             })
           }
+        }
+      }
+      if (isHotkey('mod+v', e)) {
+        const copyPath = window.api.getClipboardFilePath()
+        if (copyPath && treeStore.selectItem?.folder && treeStore.root && !copyPath.startsWith(treeStore.root.filePath)) {
+          moveFileToSpace(treeStore, copyPath, treeStore.selectItem, true)
         }
       }
       if (isHotkey('mod+o', e)) {
