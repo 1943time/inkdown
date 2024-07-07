@@ -768,7 +768,8 @@ export const useSystemKeyboard = () => {
       }
       if (isHotkey('mod+v', e)) {
         const copyPath = window.api.getClipboardFilePath()
-        if (copyPath && treeStore.selectItem?.folder && treeStore.root && !copyPath.startsWith(treeStore.root.filePath)) {
+        console.log('copy', copyPath)
+        if (copyPath && treeStore.selectItem?.folder && treeStore.root) {
           moveFileToSpace(treeStore, copyPath, treeStore.selectItem, true)
         }
       }

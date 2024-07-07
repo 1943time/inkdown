@@ -17,9 +17,13 @@ export const api = {
   },
   getClipboardFilePath() {
     if (process.platform === 'darwin') {
-      return clipboard.read('public.file-url')?.replace('file://', '')
+      return decodeURIComponent(clipboard.read('public.file-url')?.replace('file://', '') || '')
     } else {
-      return clipboard.readBuffer('FileNameW')?.toString('ucs2')
+      const text = clipboard.readBuffer('FileNameW')?.toString('ucs2')
+      if (text) {
+        return decodeURIComponent(text.replace(new RegExp(String.fromCharCode(0), 'g'), ''))
+      }
+      return ''
     }
   },
   writeClipboardText(str: string) {

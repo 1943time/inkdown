@@ -1,6 +1,6 @@
 {
   "name": "inkdown",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
