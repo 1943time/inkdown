@@ -20,6 +20,7 @@ import { statSync } from 'fs'
 import { createFileNode, moveFileToSpace } from '../store/parserNode'
 import { selChange$ } from '@renderer/editor/plugins/useOnchange'
 import { AttachNode, MediaNode } from '../el'
+import { openConfirmDialog$ } from '../components/Dialog/ConfirmDialog'
 
 export class KeyboardTask {
   get store() {
@@ -768,9 +769,16 @@ export const useSystemKeyboard = () => {
       }
       if (isHotkey('mod+v', e)) {
         const copyPath = window.api.getClipboardFilePath()
-        console.log('copy', copyPath)
         if (copyPath && treeStore.selectItem?.folder && treeStore.root) {
-          moveFileToSpace(treeStore, copyPath, treeStore.selectItem, true)
+          const cur = treeStore.selectItem
+          openConfirmDialog$.next({
+            title: 'Note',
+            description: `Do you want to paste the file ${copyPath} into the current folder?`,
+            okType: 'primary',
+            onConfirm: () => {
+              moveFileToSpace(treeStore, copyPath, cur, true)
+            }
+          })
         }
       }
       if (isHotkey('mod+o', e)) {
