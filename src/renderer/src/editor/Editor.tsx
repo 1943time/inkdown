@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Editable, ReactEditor, Slate } from 'slate-react'
-import { Editor, Element, Range, Transforms } from 'slate'
+import { Editor, Element, Node, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements'
 import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
@@ -269,29 +269,56 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
               return
             }
           }
-          if (text.startsWith('media:')) {
-            let url = text.split('media:')[1]
+          if (text.startsWith('media://') || text.startsWith('attach://')) {
             const path = EditorUtils.findMediaInsertPath(store.editor)
-            if (path && !note.ghost) {
-              e.preventDefault()
-              if (
-                !url.startsWith('http') &&
-                treeStore.root &&
-                url.startsWith(treeStore.root.filePath)
-              ) {
-                url = toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), url))
-              }
-              Transforms.insertNodes(
-                store.editor,
-                {
-                  type: 'media',
-                  url: url,
-                  children: [{ text: '' }]
-                },
-                { select: true, at: path }
-              )
+            let insert = false
+            const urlObject = new URL(text)
+            let url = urlObject.searchParams.get('url')
+            if (
+              url &&
+              !url.startsWith('http') &&
+              treeStore.root &&
+              url.startsWith(treeStore.root.filePath)
+            ) {
+              url = toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), url))
             }
-          } else if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
+            if (path) {
+              if (text.startsWith('media://')) {
+                insert = true
+                Transforms.insertNodes(
+                  store.editor,
+                  {
+                    type: 'media',
+                    url: url || undefined,
+                    children: [{ text: '' }]
+                  },
+                  { select: true, at: path }
+                )
+              }
+              if (text.startsWith('attach://')) {
+                insert = true
+                  Transforms.insertNodes(
+                    store.editor,
+                    {
+                      type: 'attach',
+                      name: urlObject.searchParams.get('name'),
+                      size: Number(urlObject.searchParams.get('size') || 0),
+                      url: url || undefined,
+                      children: [{ text: '' }]
+                    },
+                    { select: true, at: path }
+                  )
+              }
+              if (insert) {
+                e.preventDefault()
+                const next = Editor.next(store.editor, { at: path })
+                if (next && next[0].type === 'paragraph' && !Node.string(next[0])) {
+                  Transforms.delete(store.editor, { at: next[1] })
+                }
+              }
+            }
+          }
+          if (text.startsWith('http') || (isAbsolute(text) && existsSync(text))) {
             e.preventDefault()
             e.stopPropagation()
             if (['image', 'video', 'audio'].includes(mediaType(text))) {

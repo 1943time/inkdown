@@ -19,6 +19,7 @@ import { isAbsolute, join } from 'path'
 import { statSync } from 'fs'
 import { createFileNode } from '../store/parserNode'
 import { selChange$ } from '@renderer/editor/plugins/useOnchange'
+import { AttachNode, MediaNode } from '../el'
 
 export class KeyboardTask {
   get store() {
@@ -727,19 +728,33 @@ export const useSystemKeyboard = () => {
           store.setOpenSearch(false)
         }
       }
-      if (isHotkey('mod+x', e) || isHotkey('mod+c', e)) {
-        const [node] = Editor.nodes<any>(store.editor, {
+      if (isHotkey('mod+c', e) || isHotkey('mod+x', e)) {
+        const [node] = Editor.nodes<MediaNode | AttachNode>(store.editor, {
           mode: 'lowest',
-          match: (m) => Element.isElement(m)
+          match: (m) => Element.isElement(m) && (m.type === 'media' || m.type === 'attach')
         })
         if (!node) return
-        let url = node[0].url as string
-        if (node && url && node[0].type === 'media') {
-          url =
-            !url.startsWith('http') && !isAbsolute(url)
-              ? join(treeStore.openedNote!.filePath, '..', url)
-              : url
-          window.api.copyToClipboard('media:' + url)
+        let readlUrl = node[0].url as string
+        readlUrl =
+          !readlUrl.startsWith('http') && !isAbsolute(readlUrl)
+            ? join(treeStore.openedNote!.filePath, '..', readlUrl)
+            : readlUrl
+        if (node[0].type === 'media') {
+          const url = `media://file?url=${readlUrl}`
+          window.api.copyToClipboard(url)
+          if (isHotkey('mod+x', e)) {
+            Transforms.delete(store.editor, { at: node[1] })
+            ReactEditor.focus(store.editor)
+          } else {
+            message$.next({
+              type: 'success',
+              content: 'Image address copied to clipboard'
+            })
+          }
+        }
+        if (node[0].type === 'attach') {
+          const url = `attach://file?size=${node[0].size}&name=${node[0].name}&url=${node[0].url}`
+          window.api.copyToClipboard(url)
           if (isHotkey('mod+x', e)) {
             Transforms.delete(store.editor, { at: node[1] })
             ReactEditor.focus(store.editor)
