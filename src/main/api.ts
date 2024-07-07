@@ -30,6 +30,7 @@ export const windowOptions: BrowserWindowConstructorOptions = {
   webPreferences: {
     preload: join(__dirname, '../preload/index.js'),
     sandbox: false,
+    webviewTag: true,
     nodeIntegration: true,
     contextIsolation: false
   }

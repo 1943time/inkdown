@@ -740,7 +740,6 @@ export const useSystemKeyboard = () => {
               ? join(treeStore.openedNote!.filePath, '..', url)
               : url
           window.api.copyToClipboard('media:' + url)
-          window.api.copyToClipboard('media:' + url)
           if (isHotkey('mod+x', e)) {
             Transforms.delete(store.editor, { at: node[1] })
             ReactEditor.focus(store.editor)

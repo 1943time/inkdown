@@ -239,12 +239,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               // @ts-ignore
               ref={ref}
             >
-              <iframe
+              <webview
                 src={element.url}
-                referrerPolicy={'origin-when-cross-origin'}
-                className={`w-full h-full border-none select-none rounded ${
+                className={`w-full h-full select-none border-none rounded ${
                   state().dragging ? 'pointer-events-none' : ''
                 }`}
+                allowFullScreen={true}
               />
             </div>
           )}
