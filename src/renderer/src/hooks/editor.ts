@@ -5,7 +5,7 @@ import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, useEditorStore} from '../editor/store'
 import {useSubject} from './subscribe'
 import {selChange$} from '../editor/plugins/useOnchange'
-import {useGetSetState, useSetState} from 'react-use'
+import {useGetSetState} from 'react-use'
 
 export const useMEditor = (el: BaseElement) => {
   const editor = useSlate()

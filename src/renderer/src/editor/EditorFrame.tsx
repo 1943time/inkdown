@@ -146,7 +146,7 @@ export const EditorFrame = observer(({tab}: {
                 </div>
                 <div
                   className={
-                    'text-indigo-500 text-sm mt-3 cursor-default duration-200 hover:text-indigo-600'
+                    'dark:text-white/70 hover:dark:text-white/90 text-sm mt-3 cursor-pointer duration-200 text-black/70 hover:text-black/90'
                   }
                   onClick={() => {
                     MainApi.showInFolder(tab.current?.filePath || '')

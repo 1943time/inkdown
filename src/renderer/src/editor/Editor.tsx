@@ -289,6 +289,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
                   store.editor,
                   {
                     type: 'media',
+                    height: urlObject.searchParams.get('height') ? +urlObject.searchParams.get('height')! : undefined,
                     url: url || undefined,
                     children: [{ text: '' }]
                   },

@@ -165,11 +165,6 @@ export const MdElements: Record<string, MdNode> = {
       return false
     },
     run: ctx => {
-      const removeLength = ctx.match[0].match(/\s*\[x|\s]\s+/)?.[0].length || 0
-      let texts:any[] = [{text: ''}]
-      if (!Point.equals(ctx.sel.anchor, Editor.end(ctx.editor, ctx.path))) {
-        texts = EditorUtils.cutText(ctx.editor, ctx.sel.anchor)
-      }
       Transforms.delete(ctx.editor, {
         at: ctx.path
       })
@@ -180,14 +175,11 @@ export const MdElements: Record<string, MdNode> = {
           {
             type: 'list-item',
             checked: ctx.match[1] === 'x',
-            children: [{type: 'paragraph', children: texts}]
+            children: [EditorUtils.p]
           }
         ]
       } as ListNode, {at: ctx.path})
-      Transforms.select(ctx.editor, {
-        path: Editor.start(ctx.editor, ctx.path).path,
-        offset: ctx.sel.anchor.offset - removeLength
-      })
+      Transforms.select(ctx.editor, Editor.start(ctx.editor, ctx.path).path)
       return true
     }
   },

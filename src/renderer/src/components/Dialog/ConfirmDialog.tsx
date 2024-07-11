@@ -91,7 +91,7 @@ export const ConfirmDialog = observer(() => {
       <div className={'w-[260px] px-5 py-6 flex flex-col items-center text-center'}>
         <div className={'font-semibold text-sm dark:text-gray-200'}>{state.title}</div>
         {state.description &&
-          <div className={'dark:text-white/80 text-black/80 mt-3 text-[13px] leading-5'}>{state.description}</div>
+          <div className={'dark:text-white/80 text-black/80 mt-3 text-[13px] leading-5 break-words w-full'}>{state.description}</div>
         }
         <Button
           block={true}

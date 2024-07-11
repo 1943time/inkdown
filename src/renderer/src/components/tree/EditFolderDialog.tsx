@@ -15,6 +15,7 @@ import { join } from 'path'
 import { runInAction } from 'mobx'
 import { mkdirSync } from 'fs'
 import { updateFilePath } from '../../editor/utils/updateNode'
+import IFolder from '../../icons/IFolder'
 
 export const openEditFolderDialog$ = new Subject<{
   ctxNode?: IFileItem
@@ -106,7 +107,12 @@ export const EditFolderDialog = observer(() => {
     <Dialog
       open={state.open}
       onClose={close}
-      title={state.mode === 'create' ? 'Create New Folder' : 'Update'}
+      title={
+        <div className={'flex items-center'}>
+          <IFolder className={'text-lg'} />
+          <span className={'ml-1'}>{state.mode === 'create' ? 'Create New Folder' : 'Update'}</span>
+        </div>
+      }
     >
       <div className={'w-[280px] p-5 flex flex-col items-center'}>
         <Input

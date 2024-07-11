@@ -741,7 +741,7 @@ export const useSystemKeyboard = () => {
             ? join(treeStore.openedNote!.filePath, '..', readlUrl)
             : readlUrl
         if (node[0].type === 'media') {
-          const url = `media://file?url=${readlUrl}`
+          const url = `media://file?url=${readlUrl}&height=${node[0].height || ''}`
           window.api.copyToClipboard(url)
           if (isHotkey('mod+x', e)) {
             Transforms.delete(store.editor, { at: node[1] })
