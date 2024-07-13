@@ -251,7 +251,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
         >
           {state().type === 'video' && (
             <video
-              src={element.url}
+              src={state().url}
               controls={true}
               onMouseDown={(e) => {
                 e.preventDefault()
@@ -266,7 +266,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           {state().type === 'audio' && (
             <audio
               controls={true}
-              src={element.url}
+              src={state().url}
               onMouseDown={(e) => {
                 e.preventDefault()
               }}
@@ -282,7 +282,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               ref={ref}
             >
               <webview
-                src={element.url}
+                src={state().url}
                 className={`w-full h-full select-none border-none rounded ${
                   state().dragging ? 'pointer-events-none' : ''
                 }`}
