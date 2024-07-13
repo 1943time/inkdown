@@ -12,7 +12,8 @@ const findImageElement = (str: string) => {
     if (match) {
       const url = match[0].match(/src="([^"\n]+)"/)
       const height = match[0].match(/height="(\d+)"/)
-      return { url: url?.[1], height: height ? +height[1] : undefined }
+      const align = match[0].match(/data\-align="(\w+)"/)
+      return { url: url?.[1], height: height ? +height[1] : undefined, align: align?.[1] }
     }
     return null
   } catch (e) {
@@ -87,7 +88,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
           const img = findImageElement(n.value)
           if (img) {
-            el = {type: 'media', height: img?.height, url: decodeURIComponent(img?.url || ''), children: [{text: ''}]}
+            el = {type: 'media', align: img.align, height: img?.height, url: decodeURIComponent(img?.url || ''), children: [{text: ''}]}
           } else {
             if (n.value === '<br/>') {
               el = {type: 'paragraph', children: [{text: ''}]}
@@ -146,7 +147,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             } else {
               const img = findImageElement(n.value)
               if (img) {
-                el = {type: 'media', height: img?.height, url: img?.url, children: [{text: ''}]}
+                el = {type: 'media',align: img.align, height: img?.height, url: img?.url, children: [{text: ''}]}
               } else {
                 el = {text: n.value}
               }
@@ -221,7 +222,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             const img = findImageElement(c.value)
             if (img) {
               el.push({
-                type: 'media', children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
+                type: 'media', align: img.align, children: [{text: ''}], url: decodeURIComponent(img.url || ''), height: img.height
               })
             } else {
               textNodes.push({type: 'html', value: c.value})

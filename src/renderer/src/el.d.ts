@@ -16,7 +16,18 @@ export type ListItemNode = {type: 'list-item', children: BaseElement['children']
 export type HeadNode = {type: 'head', children: BaseElement['children'], level: number, h?: number}
 export type HrNode = {type: 'hr'}
 export type BreakNode = {type: 'break'}
-export type MediaNode = {type: 'media', url?: string, alt: string, downloadUrl?: string, height?: number, docId?: string, hash?: string, h?: number}
+export type MediaNode = {
+  type: 'media'
+  url?: string
+  alt: string
+  downloadUrl?: string
+  height?: number
+  docId?: string
+  hash?: string
+  h?: number
+  align?: 'left' | 'right'
+  mediaType?: string
+}
 export type InlineKatexNode = {type: 'inline-katex', value: string, children: BaseElement['children']}
 export type AttachNode = {
   type: 'attach'

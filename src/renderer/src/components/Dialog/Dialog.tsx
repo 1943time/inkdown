@@ -47,7 +47,7 @@ export const Dialog = observer((props: {
   if (!state.open) return null
   return (
     <div
-      className={`fixed inset-0 z-[2100] dark:bg-black/30 bg-black/20 duration-150 ${
+      className={`fixed inset-0 z-[2100] dark:bg-black/30 bg-black/20 duration-100 ${
         state.visible ? 'opacity-100' : 'opacity-0'
       }`}
     >

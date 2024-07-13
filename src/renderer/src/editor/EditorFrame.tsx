@@ -18,7 +18,8 @@ import {configStore} from '../store/config'
 import {InsertAutocomplete} from './tools/InsertAutocomplete'
 import { InsertLink } from './tools/InsertLink'
 import { useLocalState } from '../hooks/useLocalState'
-
+import { action } from 'mobx'
+import {PhotoSlider} from 'react-photo-view'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
@@ -164,6 +165,15 @@ export const EditorFrame = observer(({tab}: {
         <TableAttr />
         <LangAutocomplete />
         <InsertAutocomplete />
+        <PhotoSlider
+          maskOpacity={0.5}
+          className={'desktop-img-view'}
+          images={tab.store.viewImages.map((src) => ({ src, key: src }))}
+          visible={tab.store.openViewImage}
+          onClose={action(() => (tab.store.openViewImage = false))}
+          index={tab.store.viewImageIndex}
+          onIndexChange={action((i) => (tab.store.viewImageIndex = i))}
+        />
       </div>
     </EditorStoreContext.Provider>
   )

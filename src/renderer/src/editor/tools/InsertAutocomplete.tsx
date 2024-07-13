@@ -580,7 +580,7 @@ export const InsertAutocomplete = observer(() => {
             <span className={'mx-1'}>Embed media links</span>
             <TextHelp
               text={
-                'Embed remote links, such as youtube, etc. Please note whether the link allows access from other domains'
+                'Embed remote links. Please note whether the link allows access from other domains'
               }
             />
           </div>

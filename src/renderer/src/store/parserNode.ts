@@ -170,6 +170,9 @@ export const createFileNode = (file: IFile, parent?: IFileItem | ISpaceNode, gho
 
 export const sortFiles = <T extends IFileItem | IFile>(files: T[]):T[] => {
   return files.sort((a, b) => {
+    if (a.sort === b.sort) {
+      return 0
+    }
     return a.sort > b.sort ? 1 : -1
   })
 }

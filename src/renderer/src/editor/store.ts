@@ -1,5 +1,16 @@
 import { action, makeAutoObservable, runInAction } from 'mobx'
-import { BaseSelection, createEditor, Editor, Element, Node, NodeEntry, Path, Range, Transforms, Selection } from 'slate'
+import {
+  BaseSelection,
+  createEditor,
+  Editor,
+  Element,
+  Node,
+  NodeEntry,
+  Path,
+  Range,
+  Transforms,
+  Selection
+} from 'slate'
 import { ReactEditor, withReact } from 'slate-react'
 import { GetFields } from '../index'
 import React, { createContext, useContext } from 'react'
@@ -15,7 +26,7 @@ import { withMarkdown } from './plugins'
 import { withHistory } from 'slate-history'
 import { withErrorReporting } from './plugins/catchError'
 import { imageBed } from '../utils/imageBed'
-import { nid } from '../utils'
+import { getImageData, nid } from '../utils'
 import { openMenus } from '../components/Menu'
 import { EditorUtils } from './utils/editorUtils'
 import { insertFileNode } from '../store/parserNode'
@@ -32,7 +43,7 @@ export class EditorStore {
   search = {
     text: '',
     currentIndex: 0,
-    refresh: false,
+    refresh: false
   }
   // Manually perform editor operations
   manual = false
@@ -42,7 +53,16 @@ export class EditorStore {
   sel: BaseSelection | undefined
   focus = false
   readonly = false
-  private ableToEnter = new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'media', 'attach'])
+  private ableToEnter = new Set([
+    'paragraph',
+    'head',
+    'blockquote',
+    'code',
+    'table',
+    'list',
+    'media',
+    'attach'
+  ])
   dragEl: null | HTMLElement = null
   openSearch = false
   focusSearch = false
@@ -72,13 +92,16 @@ export class EditorStore {
   saveDoc$ = new Subject<any[] | null>()
   tableTask$ = new Subject<string>()
   docChanged$ = new Subject<boolean>()
+  viewImages: string[] = []
+  viewImageIndex = 0
+  openViewImage = false
   get doc() {
     return this.container?.querySelector('.content') as HTMLDivElement
   }
 
   doManual() {
     this.manual = true
-    setTimeout(() => this.manual = false, 30)
+    setTimeout(() => (this.manual = false), 30)
   }
 
   constructor(webview = false, history = false) {
@@ -100,7 +123,39 @@ export class EditorStore {
       initializing: false
     })
   }
-
+  openPreviewImages(el: MediaNode) {
+    const nodes = Array.from(
+      Editor.nodes<MediaNode>(this.editor, {
+        at: [],
+        match: (n) => n.type === 'media' && n.mediaType === 'image'
+      })
+    )
+    let index = nodes.findIndex((n) => n[0] === el)
+    if (index < 0) {
+      index = 0
+    }
+    if (nodes.length) {
+      this.viewImageIndex = index
+      this.viewImages = nodes
+        .map((n) => {
+          let realUrl = n[0].url
+          if (realUrl && !realUrl?.startsWith('http') && !realUrl.startsWith('file:')) {
+            const file = isAbsolute(realUrl)
+              ? n[0].url
+              : join(this.openFilePath || '', '..', realUrl)
+            const data = getImageData(file)
+            if (data) {
+              realUrl = data
+            }
+          }
+          return realUrl!
+        })
+        .filter((url) => (!/^\w+:/.test(url) && existsSync(url)) || /^\w+:/.test(url))
+      if ((this, this.viewImages.length)) {
+        this.openViewImage = true
+      }
+    }
+  }
   hideRanges() {
     if (this.highlightCache.size) {
       setTimeout(() => {
@@ -133,9 +188,12 @@ export class EditorStore {
   }
 
   doRefreshHighlight() {
-    setTimeout(action(() => {
-      this.refreshHighlight = !this.refreshHighlight
-    }), 60)
+    setTimeout(
+      action(() => {
+        this.refreshHighlight = !this.refreshHighlight
+      }),
+      60
+    )
   }
 
   matchSearch(scroll: boolean = true) {
@@ -146,10 +204,13 @@ export class EditorStore {
       this.refreshHighlight = !this.refreshHighlight
       return
     }
-    const nodes = Array.from(Editor.nodes<any>(this.editor, {
-      at: [],
-      match: n => Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type),
-    }))
+    const nodes = Array.from(
+      Editor.nodes<any>(this.editor, {
+        at: [],
+        match: (n) =>
+          Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type)
+      })
+    )
     let matchCount = 0
     const keyWord = this.search.text.toLowerCase()
     for (let n of nodes) {
@@ -181,7 +242,7 @@ export class EditorStore {
               current: matchCount === this.search.currentIndex,
               highlight: true
             })
-            offset += (sep[j].length + keyWord.length)
+            offset += sep[j].length + keyWord.length
             matchCount++
           }
         }
@@ -222,7 +283,6 @@ export class EditorStore {
     }, 300)
   }
 
-
   private changeCurrent() {
     this.searchRanges.forEach((r, i) => {
       this.searchRanges[i].current = i === this.search.currentIndex
@@ -261,7 +321,7 @@ export class EditorStore {
   }
 
   async insertMultipleFiles(files: File[]) {
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
+    const imageFiles = Array.from(files).filter((f) => f.type.startsWith('image/'))
     const path = EditorUtils.findMediaInsertPath(this.editor)
     if (path && imageFiles.length) {
       const paths: string[] = []
@@ -284,7 +344,6 @@ export class EditorStore {
               spaceId: treeStore.root?.cid
             })
           }
-
         } else {
           const path = await this.saveFile(f)
           paths.push(path)
@@ -297,9 +356,13 @@ export class EditorStore {
           }
         }
       }
-      Transforms.insertNodes(this.editor, paths.map(p => {
-        return {type: 'media', url: p, children: [{text: ''}]}
-      }), {select: true, at: path})
+      Transforms.insertNodes(
+        this.editor,
+        paths.map((p) => {
+          return { type: 'media', url: p, children: [{ text: '' }] }
+        }),
+        { select: true, at: path }
+      )
     }
   }
 
@@ -346,11 +409,13 @@ export class EditorStore {
       return imageDir
     }
   }
-  async saveFile(file: File | { name: string, buffer: ArrayBuffer }) {
+  async saveFile(file: File | { name: string; buffer: ArrayBuffer }) {
     if (imageBed.route) {
       const p = parse(file.name)
       const name = nid() + p.ext
-      const res = await imageBed.uploadFile([{name, data: file instanceof File ? await file.arrayBuffer() : file.buffer }])
+      const res = await imageBed.uploadFile([
+        { name, data: file instanceof File ? await file.arrayBuffer() : file.buffer }
+      ])
       if (res) {
         return res[0].imgUrl
       }
@@ -385,22 +450,28 @@ export class EditorStore {
 
   async insertFiles(files: string[]) {
     const path = EditorUtils.findMediaInsertPath(this.editor)
-    files = files.filter(f => ['image', 'video'].includes(mediaType(f)))
+    files = files.filter((f) => ['image', 'video'].includes(mediaType(f)))
     if (!treeStore.openedNote || !path || !files.length) return
     if (imageBed.route) {
-      const urls = await imageBed.uploadFile(files.map(f => {
-        const p = parse(f)
-        const name = nid() + p.ext
-        return {data: readFileSync(f).buffer, name}
-      }))
+      const urls = await imageBed.uploadFile(
+        files.map((f) => {
+          const p = parse(f)
+          const name = nid() + p.ext
+          return { data: readFileSync(f).buffer, name }
+        })
+      )
       if (urls) {
-        Transforms.insertNodes(this.editor, urls.map(p => {
-          return {type: 'media', url: p.imgUrl, children: [{text: ''}]}
-        }), {at: path, select: true})
+        Transforms.insertNodes(
+          this.editor,
+          urls.map((p) => {
+            return { type: 'media', url: p.imgUrl, children: [{ text: '' }] }
+          }),
+          { at: path, select: true }
+        )
       }
     } else {
       const imgDir = await this.getImageDir()
-      const insertPaths:string[] = []
+      const insertPaths: string[] = []
       for (let f of files) {
         const name = nid() + parse(f).ext
         const copyPath = join(imgDir, name)
@@ -418,19 +489,23 @@ export class EditorStore {
           insertPaths.push(copyPath)
         }
       }
-      Transforms.insertNodes(this.editor, insertPaths.map(p => {
-        return {type: 'media', url: p, children: [{text: ''}]}
-      }), {at: path, select: true})
+      Transforms.insertNodes(
+        this.editor,
+        insertPaths.map((p) => {
+          return { type: 'media', url: p, children: [{ text: '' }] }
+        }),
+        { at: path, select: true }
+      )
     }
     const next = Editor.next(this.editor, { at: path })
     if (next?.[0].type === 'paragraph' && !Node.string(next[0])) {
       Transforms.delete(this.editor, { at: next[1] })
     }
     const [node] = Editor.nodes(this.editor, {
-      match: n => !!n.type,
+      match: (n) => !!n.type,
       mode: 'lowest'
     })
-    selChange$.next({node, sel: this.editor.selection})
+    selChange$.next({ node, sel: this.editor.selection })
   }
 
   insertLink(filePath: string) {
@@ -439,23 +514,27 @@ export class EditorStore {
       treeStore.root && isAbsolute(filePath) && filePath.startsWith(treeStore.root.filePath)
         ? toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), filePath))
         : filePath
-    let node = {text: filePath.startsWith('http') ? filePath : p.name, url: insertPath}
+    let node = { text: filePath.startsWith('http') ? filePath : p.name, url: insertPath }
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     const [cur] = Editor.nodes<any>(this.editor, {
-      match: n => Element.isElement(n),
+      match: (n) => Element.isElement(n),
       mode: 'lowest'
     })
     if (node.text && ['table-cell', 'paragraph'].includes(cur[0].type)) {
-      Transforms.insertNodes(this.editor, node, {select: true})
+      Transforms.insertNodes(this.editor, node, { select: true })
     } else {
       const [par] = Editor.nodes<any>(this.editor, {
-        match: n => Element.isElement(n) && ['table', 'code', 'head'].includes(n.type)
+        match: (n) => Element.isElement(n) && ['table', 'code', 'head'].includes(n.type)
       })
-      Transforms.insertNodes(this.editor, {
-        type: 'paragraph',
-        children: [node]
-      }, {select: true, at: Path.next(par[1])})
+      Transforms.insertNodes(
+        this.editor,
+        {
+          type: 'paragraph',
+          children: [node]
+        },
+        { select: true, at: Path.next(par[1]) }
+      )
     }
   }
   openTableMenus(e: MouseEvent | React.MouseEvent, head?: boolean) {
@@ -469,7 +548,7 @@ export class EditorStore {
         key: 'cmd+enter',
         click: () => this.tableTask$.next('insertRowAfter')
       },
-      {hr: true},
+      { hr: true },
       {
         text: 'Add Column Before',
         click: () => this.tableTask$.next('insertColBefore')
@@ -478,7 +557,7 @@ export class EditorStore {
         text: 'Add Column After',
         click: () => this.tableTask$.next('insertColAfter')
       },
-      {hr: true},
+      { hr: true },
       {
         text: 'Line break within table-cell',
         key: 'cmd+shift+enter',
@@ -507,7 +586,7 @@ export class EditorStore {
           }
         ]
       },
-      {hr: true},
+      { hr: true },
       {
         text: 'Delete Col',
         click: () => this.tableTask$.next('removeCol')
@@ -527,7 +606,8 @@ export class EditorStore {
       const dom = ReactEditor.toDOMNode(this.editor, node)
       if (dom) {
         const top = this.offsetTop(dom)
-        if (top > this.container!.scrollTop && top < this.container!.scrollTop + window.innerHeight) return
+        if (top > this.container!.scrollTop && top < this.container!.scrollTop + window.innerHeight)
+          return
         this.container!.scroll({
           top: top - 100
         })
@@ -547,12 +627,25 @@ export class EditorStore {
     e.stopPropagation()
     this.readonly = true
     type MovePoint = {
-      el: HTMLDivElement,
-      direction: 'top' | 'bottom',
+      el: HTMLDivElement
+      direction: 'top' | 'bottom'
       top: number
       left: number
     }
-    const ableToEnter = this.dragEl?.dataset?.be === 'list-item' ? new Set(['paragraph', 'head', 'blockquote', 'code', 'table', 'list', 'list-item', 'media', 'attach']) : this.ableToEnter
+    const ableToEnter =
+      this.dragEl?.dataset?.be === 'list-item'
+        ? new Set([
+            'paragraph',
+            'head',
+            'blockquote',
+            'code',
+            'table',
+            'list',
+            'list-item',
+            'media',
+            'attach'
+          ])
+        : this.ableToEnter
     let mark: null | HTMLDivElement = null
     const els = document.querySelectorAll<HTMLDivElement>('[data-be]')
     const points: MovePoint[] = []
@@ -560,7 +653,11 @@ export class EditorStore {
       if (!ableToEnter.has(el.dataset.be!)) continue
       if (el.classList.contains('frontmatter')) continue
       const pre = el.previousSibling as HTMLElement
-      if (el.dataset.be === 'paragraph' && this.dragEl?.dataset.be === 'list-item' && (!pre || pre.classList.contains('check-item'))) {
+      if (
+        el.dataset.be === 'paragraph' &&
+        this.dragEl?.dataset.be === 'list-item' &&
+        (!pre || pre.classList.contains('check-item'))
+      ) {
         continue
       }
       if (el === this.dragEl) continue
@@ -594,7 +691,10 @@ export class EditorStore {
       }
       if (cur) {
         last = cur
-        const width = last.el.dataset.be === 'list-item' ? last.el.clientWidth + 20 + 'px' : last.el.clientWidth + 'px'
+        const width =
+          last.el.dataset.be === 'list-item'
+            ? last.el.clientWidth + 20 + 'px'
+            : last.el.clientWidth + 'px'
         if (!mark) {
           mark = document.createElement('div')
           mark.classList.add('move-mark')
@@ -608,40 +708,57 @@ export class EditorStore {
       }
     }
     window.addEventListener('dragover', dragover)
-    window.addEventListener('dragend', action(() => {
-      window.removeEventListener('dragover', dragover)
-      this.readonly = false
-      if (mark) this.container!.removeChild(mark)
-      if (last && this.dragEl) {
-        let [dragPath, dragNode] = this.toPath(this.dragEl)
-        let [targetPath] = this.toPath(last.el)
-        let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
-        if (!Path.equals(targetPath, dragPath)) {
-          const parent = Node.parent(this.editor, dragPath)
-          if (dragNode.type === 'code') clearAllCodeCache(this.editor)
-          if (dragNode.type === 'table') {
-            setTimeout(action(() => {
-              treeStore.size = JSON.parse(JSON.stringify(treeStore.size))
-            }))
-          }
-          if (Path.equals(Path.parent(targetPath), Path.parent(dragPath)) && Path.compare(dragPath, targetPath) === -1) {
-            toPath = Path.previous(toPath)
-          }
-          let delPath = Path.parent(dragPath)
-          const targetNode = Node.get(this.editor, targetPath)
-          if (dragNode.type === 'list-item') {
-            if (targetNode.type !== 'list-item') {
-              Transforms.delete(this.editor, {at: dragPath})
-              Transforms.insertNodes(this.editor, {
-                ...parent,
-                children: [EditorUtils.copy(dragNode)]
-              }, {at: toPath, select: true})
-              if (parent.children?.length === 1) {
-                if (EditorUtils.isNextPath(Path.parent(dragPath), targetPath)) {
-                  delPath = Path.next(Path.parent(dragPath))
-                } else {
-                  delPath = Path.parent(dragPath)
+    window.addEventListener(
+      'dragend',
+      action(() => {
+        window.removeEventListener('dragover', dragover)
+        this.readonly = false
+        if (mark) this.container!.removeChild(mark)
+        if (last && this.dragEl) {
+          let [dragPath, dragNode] = this.toPath(this.dragEl)
+          let [targetPath] = this.toPath(last.el)
+          let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
+          if (!Path.equals(targetPath, dragPath)) {
+            const parent = Node.parent(this.editor, dragPath)
+            if (dragNode.type === 'code') clearAllCodeCache(this.editor)
+            if (dragNode.type === 'table') {
+              setTimeout(
+                action(() => {
+                  treeStore.size = JSON.parse(JSON.stringify(treeStore.size))
+                })
+              )
+            }
+            if (
+              Path.equals(Path.parent(targetPath), Path.parent(dragPath)) &&
+              Path.compare(dragPath, targetPath) === -1
+            ) {
+              toPath = Path.previous(toPath)
+            }
+            let delPath = Path.parent(dragPath)
+            const targetNode = Node.get(this.editor, targetPath)
+            if (dragNode.type === 'list-item') {
+              if (targetNode.type !== 'list-item') {
+                Transforms.delete(this.editor, { at: dragPath })
+                Transforms.insertNodes(
+                  this.editor,
+                  {
+                    ...parent,
+                    children: [EditorUtils.copy(dragNode)]
+                  },
+                  { at: toPath, select: true }
+                )
+                if (parent.children?.length === 1) {
+                  if (EditorUtils.isNextPath(Path.parent(dragPath), targetPath)) {
+                    delPath = Path.next(Path.parent(dragPath))
+                  } else {
+                    delPath = Path.parent(dragPath)
+                  }
                 }
+              } else {
+                Transforms.moveNodes(this.editor, {
+                  at: dragPath,
+                  to: toPath
+                })
               }
             } else {
               Transforms.moveNodes(this.editor, {
@@ -649,22 +766,21 @@ export class EditorStore {
                 to: toPath
               })
             }
-          } else {
-            Transforms.moveNodes(this.editor, {
-              at: dragPath,
-              to: toPath
-            })
-          }
-          if (parent.children?.length === 1) {
-            if (Path.equals(Path.parent(toPath), Path.parent(delPath)) && Path.compare(toPath, delPath) !== 1) {
-              delPath = Path.next(delPath)
+            if (parent.children?.length === 1) {
+              if (
+                Path.equals(Path.parent(toPath), Path.parent(delPath)) &&
+                Path.compare(toPath, delPath) !== 1
+              ) {
+                delPath = Path.next(delPath)
+              }
+              Transforms.delete(this.editor, { at: delPath })
             }
-            Transforms.delete(this.editor, {at: delPath})
           }
+          if (dragNode?.type !== 'media') this.dragEl!.draggable = false
         }
-        if (dragNode?.type !== 'media') this.dragEl!.draggable = false
-      }
-      this.dragEl = null
-    }), {once: true})
+        this.dragEl = null
+      }),
+      { once: true }
+    )
   }
 }

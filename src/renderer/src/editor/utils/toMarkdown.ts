@@ -157,7 +157,9 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
         if (type === 'video') {
           str += `<video src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
         } else if (type === 'image') {
-          str += `<img src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
+          str += `<img src="${encodeURI(url)}" alt="" height="${node.height || ''}" ${
+            node.align ? `data-align="${node.align}"` : ''
+          }/>`
         } else {
           str += `<iframe src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
         }
@@ -165,7 +167,13 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
         if (type === 'video') {
           str += `<video src="${encodeURI(url)}"/>`
         } else if (type === 'image') {
-          str += `![${node.alt || ''}](${encodeURI(url)})`
+          if (node.align) {
+            str += `<img src="${encodeURI(url)}" alt="" ${
+              node.align ? `data-align="${node.align}"` : ''
+            }/>`
+          } else {
+            str += `![${node.alt || ''}](${encodeURI(url)})`
+          }
         } else {
           str += `<iframe src="${encodeURI(url)}"/>`
         }

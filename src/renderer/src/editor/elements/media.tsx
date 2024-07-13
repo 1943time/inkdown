@@ -12,7 +12,14 @@ import { getRemoteMediaType } from '../utils/media'
 import { Icon } from '@iconify/react'
 import { MainApi } from '../../api/main'
 import { writeFileSync } from 'fs'
+import { IAlignLeft } from '../../icons/keyboard/AlignLeft'
+import { IAlignRight } from '../../icons/keyboard/AlignRight'
+import { IFull } from '../../icons/keyboard/IFull'
 
+const alignType = new Map([
+  ['left', 'justify-start'],
+  ['right', 'justify-end']
+])
 const resize = (ctx: { e: React.MouseEvent; dom: HTMLElement; height?: number; cb: Function }) => {
   const height = ctx.height || ctx.dom.clientHeight
   const startY = ctx.e.clientY
@@ -32,7 +39,6 @@ const resize = (ctx: { e: React.MouseEvent; dom: HTMLElement; height?: number; c
     { once: true }
   )
 }
-
 export function Media({ element, attributes, children }: ElementProps<MediaNode>) {
   const [selected, path, store] = useSelStatus(element)
   const ref = useRef<HTMLElement>(null)
@@ -44,6 +50,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     selected: false,
     type: mediaType(element.url)
   })
+  const updateElement = useCallback(
+    (attr: Record<string, any>) => {
+      Transforms.setNodes(store.editor, attr, { at: path })
+    },
+    [path]
+  )
   const initial = useCallback(async () => {
     let type = !element.url?.startsWith('http')
       ? mediaType(element.url)
@@ -70,6 +82,11 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
       }
       img.onload = () => setState({ loadSuccess: true })
     }
+    if (!element.mediaType) {
+      updateElement({
+        mediaType: state().type
+      })
+    }
   }, [element])
   useLayoutEffect(() => {
     if (element.downloadUrl) {
@@ -90,14 +107,10 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               buffer: buffer.buffer
             })
             .then((res) => {
-              Transforms.setNodes(
-                store.editor,
-                {
-                  url: res,
-                  downloadUrl: null
-                },
-                { at: path }
-              )
+              updateElement({
+                url: res,
+                downloadUrl: null
+              })
             })
             .catch((e) => {
               console.log('err', e)
@@ -116,13 +129,41 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
   return (
     <div className={'py-2 relative group'} contentEditable={false} {...attributes}>
       {state().loadSuccess && state().type === 'image' && (
-        <>
+        <div
+          className={`text-base  text-white group-hover:flex hidden items-center space-x-1 *:duration-200 *:cursor-pointer
+            z-10 rounded border border-white/20 absolute bg-black/70 backdrop-blur right-3 top-4 px-1 h-7`}
+        >
+          <div
+            title={'Valid when the image width is not full'}
+            className={`p-0.5 ${
+              element.align === 'left' ? 'text-blue-500' : 'hover:text-gray-300'
+            }`}
+            onClick={() => updateElement({ align: element.align === 'left' ? undefined : 'left' })}
+          >
+            <IAlignLeft />
+          </div>
+          <div
+            title={'Valid when the image width is not full'}
+            className={`p-0.5 ${
+              element.align === 'right' ? 'text-blue-500' : 'hover:text-gray-300'
+            }`}
+            onClick={() =>
+              updateElement({ align: element.align === 'right' ? undefined : 'right' })
+            }
+          >
+            <IAlignRight />
+          </div>
+          <div
+            className={'p-0.5 hover:text-gray-300'}
+            onClick={() => {
+              store.openPreviewImages(element)
+            }}
+          >
+            <IFull />
+          </div>
           {state().url?.startsWith('http') && (
             <div
               onMouseDown={(e) => e.preventDefault()}
-              className={`text-sm bg-gray-100 text-gray-700 dark:text-gray-100 group-hover:block hidden
-            z-10 rounded border dark:border-gray-500 border-gray-300 absolute dark:bg-black backdrop-blur right-3 top-4 px-1 py-0.5 cursor-pointer
-            `}
               onClick={() => {
                 window.api.fetch(state().url).then(async (res) => {
                   const contentType = res.headers.get('content-type') || ''
@@ -148,9 +189,6 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           {(state().url?.startsWith('file:') || state().url?.startsWith('data:')) && (
             <div
               onMouseDown={(e) => e.preventDefault()}
-              className={`text-sm bg-gray-100 text-gray-700 dark:text-gray-100 group-hover:block hidden
-            z-10 rounded border dark:border-gray-500 border-gray-300 absolute dark:bg-black backdrop-blur right-3 top-4 p-0.5 px-1 cursor-pointer
-            `}
               onClick={() => {
                 MainApi.showInFolder(state().url.replace('file://', ''))
               }}
@@ -158,7 +196,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               <Icon icon={'ph:folder-open'} className={'dark:text-gray-200'} />
             </div>
           )}
-        </>
+        </div>
       )}
       {selected && (
         <>
@@ -204,7 +242,11 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
         }}
       >
         <div
-          className={'w-full h-full flex justify-center'}
+          className={`w-full h-full flex ${
+            state().type === 'image' && element.align
+              ? alignType.get(element.align) || 'justify-center'
+              : 'justify-center'
+          }`}
           style={{ height: state().height || (state().type === 'other' ? 260 : undefined) }}
         >
           {state().type === 'video' && (
