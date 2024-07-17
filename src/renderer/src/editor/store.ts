@@ -661,6 +661,12 @@ export class EditorStore {
         continue
       }
       if (el === this.dragEl) continue
+      if (
+        this.dragEl?.tagName.toLowerCase().startsWith('h') &&
+        !el.parentElement?.getAttribute('data-slate-editor')
+      ) {
+        continue
+      }
       const top = getOffsetTop(el, this.container!)
       const left = getOffsetLeft(el, this.container!)
       points.push({
