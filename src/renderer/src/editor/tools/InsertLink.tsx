@@ -359,16 +359,16 @@ export const InsertLink = observer(() => {
                       state().index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''
                     } cursor-pointer px-2 flex-col`}
                   >
-                    <div className={'text-gray-700 dark:text-white/90 flex items-center leading-6'}>
-                      <INote />
-                      <span className={'ml-1 flex-1 max-w-full truncate'}>
+                    <div className={'text-gray-700 dark:text-white/90 flex items-start leading-6 text-sm'}>
+                      <INote className={'relative top-[5px]'}/>
+                      <span className={'ml-1 w-0 flex-1 max-w-full break-all'}>
                         {a.item.filePath === store.openFilePath ? '' : a.item.filename + '.md'}
                         {a.value}
                       </span>
                     </div>
                     {!!a.item.parentPath && (
                       <div
-                        className={'text-gray-500 dark:text-gray-400 text-sm pl-[18px] truncate'}
+                        className={'text-gray-500 dark:text-gray-400 pl-[18px] text-[13px] break-all'}
                       >
                         {a.item.parentPath}
                       </div>
@@ -393,14 +393,14 @@ export const InsertLink = observer(() => {
                       }`}
                     >
                       <div
-                        className={'text-gray-700 dark:text-white/90 flex items-center leading-6'}
+                        className={'text-gray-700 dark:text-white/90 flex items-start leading-6 text-sm'}
                       >
-                        <INote />
-                        <span className={'ml-1 flex-1 max-w-full truncate'}>{f.filename}</span>
+                        <INote className={'relative top-[5px]'}/>
+                        <span className={'ml-1 flex-1 max-w-full break-all'}>{f.filename}</span>
                       </div>
                       {!!f.parentPath && (
                         <div
-                          className={'text-gray-500 dark:text-white/70 text-sm pl-[18px] truncate'}
+                          className={'text-gray-500 dark:text-white/70 text-[13px] pl-[18px] break-all'}
                         >
                           {f.parentPath}
                         </div>
