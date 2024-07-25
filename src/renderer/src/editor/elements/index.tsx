@@ -117,7 +117,7 @@ export const MLeaf = (props: RenderLeafProps) => {
         }
       } catch (e) {}
     }
-    if (leaf.url) {
+    if (leaf.url || leaf.link) {
       return (
         <span
           style={style}
@@ -125,56 +125,63 @@ export const MLeaf = (props: RenderLeafProps) => {
           draggable={false}
           title={`mod + click to open link, mod + alt + click to open file in new tab`}
           onDragStart={dragStart}
-          data-url={toSpacePath(treeStore.root?.filePath || '', store.openFilePath || '', leaf.url)}
+          data-url={leaf.url ? toSpacePath(treeStore.root?.filePath || '', store.openFilePath || '', leaf.url) : leaf.link}
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
             if (e.metaKey || e.ctrlKey) {
-              if (!leaf.url) return
-              if (isLink(leaf.url)) {
-                window.open(leaf.url)
-              } else {
-                const parseRes = parsePath(leaf.url)
-                if (!parseRes.path && parseRes.hash) {
-                  return toHash(parseRes.hash)
-                }
-                const path = isAbsolute(parseRes.path)
-                  ? parseRes.path
-                  : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
-                db.file
-                  .where('filePath')
-                  .equals(path)
-                  .toArray()
-                  .then((res) => {
-                    for (let f of res) {
-                      const node = treeStore.nodeMap.get(f.cid)
-                      if (node) {
-                        e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
-                        if (parseRes.hash) {
-                          setTimeout(() => {
-                            toHash(parseRes.hash)
-                          }, 200)
+              if (leaf.url) {
+                if (isLink(leaf.url)) {
+                  window.open(leaf.url)
+                } else {
+                  const parseRes = parsePath(leaf.url)
+                  if (!parseRes.path && parseRes.hash) {
+                    return toHash(parseRes.hash)
+                  }
+                  const path = isAbsolute(parseRes.path)
+                    ? parseRes.path
+                    : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                  db.file
+                    .where('filePath')
+                    .equals(path)
+                    .toArray()
+                    .then((res) => {
+                      for (let f of res) {
+                        const node = treeStore.nodeMap.get(f.cid)
+                        if (node) {
+                          e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                          if (parseRes.hash) {
+                            setTimeout(() => {
+                              toHash(parseRes.hash)
+                            }, 200)
+                          }
+                          return
                         }
-                        return
                       }
-                    }
-                    if (treeStore.root && path.endsWith('.md') && path.startsWith(treeStore.root.filePath)) {
-                      openConfirmDialog$.next({
-                        title: 'Note',
-                        description: 'The file does not exist. Do you want to create it?',
-                        okText: 'Create',
-                        okType: 'primary',
-                        onConfirm: () => {
-                          deepCreateDoc(path)
-                        }
-                      })
-                    } else {
-                      message$.next({
-                        type: 'info',
-                        content: 'Invalid link'
-                      })
-                    }
-                  })
+                      if (
+                        treeStore.root &&
+                        path.endsWith('.md') &&
+                        path.startsWith(treeStore.root.filePath)
+                      ) {
+                        openConfirmDialog$.next({
+                          title: 'Note',
+                          description: 'The file does not exist. Do you want to create it?',
+                          okText: 'Create',
+                          okType: 'primary',
+                          onConfirm: () => {
+                            deepCreateDoc(path)
+                          }
+                        })
+                      } else {
+                        message$.next({
+                          type: 'info',
+                          content: 'Invalid link'
+                        })
+                      }
+                    })
+                }
+              } else {
+                window.open(leaf.link)
               }
             } else if (e.detail === 2) {
               selectFormat()

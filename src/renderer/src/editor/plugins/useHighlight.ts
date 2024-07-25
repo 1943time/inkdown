@@ -11,6 +11,8 @@ import {configStore} from '../../store/config'
 import {highlighter, langSet, loadedLanguage} from '../utils/highlight'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
+const linkReg = /(https?|ftp):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/gi
+
 export const codeCache = new WeakMap<object, {path: Path, range: Range[]}>()
 export const cacheTextNode = new WeakMap<object, { path: Path; range: Range[] }>()
 export const clearAllCodeCache = (editor: Editor) => {
@@ -159,6 +161,21 @@ export function useHighlight(store?: EditorStore) {
               cacheTextNode.set(node, {path, range: textRanges})
               ranges.push(...textRanges)
             }
+          }
+          if (c.text && !c.url && !c.docId && !c.hash) {
+            let textRanges: any[] = []
+            const links = (c.text as string).matchAll(linkReg)
+            for (let m of links) {
+              textRanges.push({
+                anchor: { path: [...path, i], offset: m.index },
+                focus: {
+                  path: [...path, i],
+                  offset: m.index! + m[0].length
+                },
+                link: m[0]
+              })
+            }
+            ranges.push(...textRanges)
           }
         }
       }

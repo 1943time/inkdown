@@ -51,6 +51,7 @@ export type CustomLeaf = {
   highlight?: boolean | null
   current?: boolean | null
   html?: string
+  link?: stirng
   // footnote
   fnc?: boolean
   fnd?: boolean
