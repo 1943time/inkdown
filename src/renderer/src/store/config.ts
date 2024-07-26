@@ -13,6 +13,7 @@ class ConfigStore {
   enableUpgrade = false
   openUpdateDialog = false
   codeDark = false
+  _defDark = window.matchMedia && window.matchMedia?.('(prefers-color-scheme: dark)').matches
   readonly spaceColors = ['sky', 'cyan', 'violet', 'slate', 'purple', 'green', 'amber', 'pink']
   config = {
     showLeading: true,
@@ -74,6 +75,21 @@ class ConfigStore {
         this.visible = true
       })
     })
+    try {
+      const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
+      setTimeout(() => {
+        darkModePreference.addEventListener('change', (e) => {
+          if (this.config.theme === 'system') {
+            this.initial()
+            if (this.config.codeTheme === 'auto') {
+              this.reloadHighlighter(true)
+            }
+          }
+        })
+      }, 1000)
+    } catch (e) {
+      console.error(e)
+    }
   }
   async reloadHighlighter(refresh = false) {
     try {
@@ -183,6 +199,11 @@ class ConfigStore {
         this.config.dark =
           this.config.theme === 'system' ? this.systemDark : this.config.theme === 'dark'
       })
+      if (this.config.dark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
       localStorage.setItem('theme', this.config.dark ? 'dark' : 'light')
       if (this.config.dark) {
         mermaid.initialize({
@@ -191,8 +212,8 @@ class ConfigStore {
       }
       imageBed.initial()
       document.body.classList.add('font-' + this.config.interfaceFont)
-      window.electron.ipcRenderer.invoke('get-system').then(res => {
-        runInAction(() => this.config.mas = res === 'mas')
+      window.electron.ipcRenderer.invoke('get-system').then((res) => {
+        runInAction(() => (this.config.mas = res === 'mas'))
       })
       MainApi.getPath('home').then((res) => {
         this.homePath = res
