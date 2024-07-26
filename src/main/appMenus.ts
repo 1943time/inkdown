@@ -192,17 +192,11 @@ const getSystemMenus = () => {
       role: 'help',
       submenu: [
         {
-          label: 'Documentation',
+          label: 'Inkdown Website',
           click: () => {
-            shell.openExternal(`https://pb.inkdown.me/inkdown/book/docs`)
+            shell.openExternal('https://www.inkdown.me')
           }
         },
-        // {
-        //   label: 'Inkdown Website',
-        //   click: () => {
-        //     shell.openExternal('https://www.bluemd.me')
-        //   }
-        // },
         {
           label: 'Github',
           click: () => {

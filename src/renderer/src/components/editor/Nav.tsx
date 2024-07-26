@@ -265,7 +265,7 @@ export const Nav = observer(() => {
                 {
                   text: 'Document',
                   click: () => {
-                    window.open(`https://pb.inkdown.me/inkdown/book/docs`)
+                    window.open(`https://pb.inkdown.me/inkdown/doc/introduction`)
                   }
                 },
                 { hr: true },

@@ -10,39 +10,27 @@ export const NotLogged = observer((props: {
       <div className={'text-center text-[13px] mt-3 text-gray-500'}>
         {configStore.zh ? (
           <span>
-            如果您有自己的服务器，可以通过安装Inkdown的服务程序在
-            <br />
-            5分钟内建立自己的web服务。
-            <br />
-            它可以帮助你一键分享Markdown文档或文件夹，并且完全自动管理相关依赖 如：图片等{' '}
+            可以通过部署自己的发布程序来将Markdown文档在线化，请查看
             <a
-              className={'link mx-0.5'}
-              href={
-                'https://pb.inkdown.me/inkdown/book/docs/offline-version#deployment-publish-program'
-              }
+              href={'https://pb.inkdown.me/inkdown/doc/introduction#deployment-publish-program'}
               target={'_blank'}
+              className={'link px-0.5 underline hover:underline'}
             >
-              指南
-            </a>
-            。
+              详情
+            </a>。
           </span>
         ) : (
           <span>
-            If you have your own server, you can set up your own web service in 5 minutes by
-            installing a simple service program.
-            <br />
-            It can share your markdown documents or folders with one click. And fully automated
-            management of related dependencies such as images.{' '}
+            You can put Markdown documents online by deploying your own publishing program. please
+            see{' '}
             <a
-              className={'link mx-0.5'}
-              href={
-                'https://pb.inkdown.me/inkdown/book/docs/offline-version#deployment-publish-program'
-              }
+              href={'https://pb.inkdown.me/inkdown/doc/introduction#deployment-publish-program'}
               target={'_blank'}
+              className={'link px-0.5 underline hover:underline'}
             >
-              guide
+              details
             </a>
-            for details.
+            .
           </span>
         )}
       </div>
