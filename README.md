@@ -7,11 +7,9 @@ Improve markdown reading and editing experience, and facilitate network sharing.
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | [mac-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) <br/> [mac-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) | [win-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)<br/> [win-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [linux-amd64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-amd64.deb) \| [linux-x86_64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-x86_64.AppImage) <br/> [linux-arm64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.AppImage) \| [linux-arm64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.deb)
 
-<a href="https://apps.apple.com/us/app/inkdown/id6451391474"><img src="docs/assets/mac-store.svg" style="width:140px;margin-left:10px"/></a>
-
-> Please note that the `Mac Store Version` is a network version
-
----
+## Online version
+- [Web App](https://app.inkdown.me)
+- [Mac App Store](https://apps.apple.com/us/app/inkdown/id6451391474)
 
 # Introduction
 
