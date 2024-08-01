@@ -158,18 +158,18 @@ export const Nav = observer(() => {
           )}
           <div
             className={
-              'hide-scrollbar overflow-x-auto ml-3 dark:text-gray-400/80 text-gray-500 text-sm flex items-center h-full'
+              'hide-scrollbar overflow-x-auto flex-1 w-0 ml-3 mr-3 dark:text-gray-400/80 text-gray-500 text-sm flex items-center h-full'
             }
           >
             {!!state.path.length && (
               <>
                 {state.path.map((c, i) => (
                   <Fragment key={i}>
-                    {i !== 0 && <span className={'mx-2'}>/</span>}
+                    {i !== 0 && <span className={'mx-2 drag-none'}>/</span>}
                     <span
                       className={`${
                         i === state.path.length - 1 ? 'dark:text-gray-300 text-gray-600' : ''
-                      } inline-block truncate max-w-[260px]`}
+                      } inline-block drag-none`}
                     >
                       {i === state.path.length - 1 ? c.replace(/\.\w+/, '') : c}
                     </span>
