@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Tooltip } from 'antd'
 import { useLocalState } from '../../hooks/useLocalState'
 import { IFileItem } from '../../index'
@@ -14,7 +14,6 @@ import { Editor, Transforms } from 'slate'
 import { treeStore } from '../../store/tree'
 import { runInAction } from 'mobx'
 import { MainApi } from '../../api/main'
-import { keyTask$ } from '@renderer/hooks/keyboard'
 
 export const Title = observer(({ node }: { node: IFileItem }) => {
   const store = useEditorStore()
@@ -22,13 +21,22 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
     name: '',
     tip: false
   })
-
+  const inputRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    setState({ name: node?.filename || '' })
+    setName(node?.filename)
+    setState({ tip: false })
   }, [node])
-
+  const setName = useCallback((name: string = '') => {
+    if (inputRef.current) {
+      inputRef.current.innerText = name
+    }
+    setState({ name })
+  }, [])
+  const getName = useCallback(() => {
+    return (inputRef.current?.innerText || '').trim().replace(/\n/g, '')
+  }, [])
   const detectRename = useCallback(() => {
-    const name = state.name.trim()
+    const name = getName()
     if (
       node.parent &&
       node.parent.children!.some((s) => s.cid !== node.cid && s.filename === name)
@@ -48,9 +56,10 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
   }, [node])
 
   const save = useCallback(async () => {
-    const name = state.name.trim()
+    const name = getName()
     if (!name) {
-      setState({ name: node.filename || '' })
+      setName(node.filename)
+      setState({ tip: false })
     } else if (node) {
       if (node.ghost) {
         runInAction(() => (node.filename = name))
@@ -65,10 +74,11 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
             if (res.filePath && oldPath !== res.filePath) {
               updateFilePath(node, res.filePath)
             } else {
-              setState({ name: node.filename })
+              setName(node.filename)
             }
           })
         }
+        setState({ tip: false })
       } else if (treeStore.root && treeStore.nodeMap.get(node.cid)) {
         if (detectRename()) {
           if (node.spaceId && treeStore.root) {
@@ -78,12 +88,10 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
               treeStore.refactor.refactorDepOnLink(node, oldPath)
             }
           }
-        } else {
-          setState({ name: node.filename })
+          setState({ tip: false })
         }
       }
     }
-    setState({ tip: false })
   }, [node])
   return (
     <Tooltip
@@ -93,17 +101,16 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
       placement={'bottom'}
     >
       <div className={'mt-12'}>
-        <input
-          value={state.name}
-          onChange={(e) => {
-            setState({ name: e.target.value })
-            detectRename()
-          }}
-          onFocus={() => {
-            keyTask$.next({key: 'blur'})
-          }}
+        <div
+          contentEditable={true}
+          ref={inputRef}
+          suppressContentEditableWarning={true}
           onKeyDown={(e) => {
+            if (e.key.toLowerCase() === 'enter') {
+              e.preventDefault()
+            }
             if (isHotkey('mod+s', e)) {
+              e.preventDefault()
               save()
             }
             if (isHotkey('enter', e) || isHotkey('down', e)) {
@@ -117,7 +124,6 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
             }
           }}
           onBlur={save}
-          placeholder={'Untitled'}
           className={'page-title'}
         />
       </div>

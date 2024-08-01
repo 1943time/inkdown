@@ -103,7 +103,19 @@ export const createDoc = async ({parent, newName, copyItem, ghost}: {
   }
   treeStore.openNote(newNode)
   setTimeout(() => {
-    treeStore.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')?.focus()
+    setTimeout(() => {
+      const title =
+        treeStore.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')
+      if (title) {
+        title.focus()
+        const range = document.createRange()
+        range.selectNodeContents(title)
+        range.collapse(false)
+        const sel = window.getSelection()
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+      }
+    }, 30)
   }, 30)
 }
 

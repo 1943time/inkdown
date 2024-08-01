@@ -65,7 +65,17 @@ a {
 }
 .page-title{
   font-size: 2em;
-  @apply w-full h-14 bg-transparent outline-none font-bold placeholder-gray-400 dark:placeholder-gray-300/30 border-b dark:border-gray-200/10 border-gray-200 mb-4;
+  @apply w-full relative py-1 bg-transparent break-words outline-none font-bold placeholder-gray-400 dark:placeholder-gray-300/30 border-b dark:border-gray-200/10 border-gray-200 mb-4;
+  &:empty {
+    &:before {
+      position: absolute;
+      left: 0;
+      top: 0.25rem;
+      display: block;
+      @apply text-gray-400 dark:text-gray-300/30 cursor-text;
+      content: "Untitled";
+    }
+  }
 }
 .edit-area {
   &.focus{

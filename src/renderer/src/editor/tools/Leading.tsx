@@ -112,7 +112,7 @@ export const Heading = observer(({note}: {
     >
       <div className={`h-full pt-10 pb-10 pr-4 overflow-y-auto`} style={{width: configStore.config.leadingWidth}}>
         <div className={'text-gray-500 text-sm mb-4'}>{configStore.zh ? '大纲' : 'Outline'}</div>
-        <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm'}>
+        <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm break-words'}>
           {!!note &&
             <div
               onClick={() => {
