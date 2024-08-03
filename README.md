@@ -1,15 +1,14 @@
 <h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
 
-Improve markdown reading and editing experience, and facilitate network sharing. [Document 🔗](https://pb.inkdown.me/inkdown/book/docs)
+Improve markdown reading and editing experience, and facilitate network sharing. [Document 🔗](https://pb.inkdown.me/inkdown/doc/introduction)
 
 
 |                                                                               <img src="docs/assets/apple.svg" width="40">                                                                                |                                                                             <img src="docs/assets/windows.svg" width="40"/>                                                                              |                                                                                                                                                                                                                   <img src="docs/assets/linux.svg" width="40"/>                                                                                                                                                                                                                   |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | [mac-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) <br/> [mac-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) | [win-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)<br/> [win-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [linux-amd64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-amd64.deb) \| [linux-x86_64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-x86_64.AppImage) <br/> [linux-arm64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.AppImage) \| [linux-arm64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.deb)
 
-## Online version
+## Online
 - [Web App](https://app.inkdown.me)
-- [Mac App Store](https://apps.apple.com/us/app/inkdown/id6451391474)
 
 # Introduction
 
