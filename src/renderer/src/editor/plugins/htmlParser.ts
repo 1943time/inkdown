@@ -161,6 +161,14 @@ const processFragment = (fragment: any[], parentType = '') => {
       continue
     }
     if (f.type === 'list-item' && parentType !== 'list') {
+      if (f.children?.length) {
+        f.children = f.children.map((c: any) => {
+          if (c.text) {
+            return { type: 'paragraph', children: [c] }
+          }
+          return c
+        })
+      }
       if (!container) {
         container = {type: 'list', children: [f]}
         trans.push(container)
