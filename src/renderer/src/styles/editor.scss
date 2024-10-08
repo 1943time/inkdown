@@ -62,6 +62,7 @@ a {
   padding-bottom: 160px;
   min-height: calc(100vh - 40px);
   outline: none !important;
+  hyphens: auto;
 }
 .page-title{
   font-size: 2em;
@@ -405,7 +406,6 @@ ul.m-list {
 
 .m-list-item {
   position: relative;
-  word-break: break-all;
   &.task {
     padding-left: 24px;
   }
@@ -452,7 +452,6 @@ ul.m-list {
       height: auto;
     }
     code{
-      word-break: break-all;
       counter-reset: step;
       counter-increment: step 0;
       .code-line {
