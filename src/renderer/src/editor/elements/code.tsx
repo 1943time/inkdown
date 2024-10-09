@@ -1,7 +1,7 @@
 import { ReactEditor } from 'slate-react'
 import { useGetSetState } from 'react-use'
 import { createContext, useCallback, useContext, useMemo } from 'react'
-import { AutoComplete, Tooltip } from 'antd'
+import { AutoComplete, Input, Popover, Tooltip } from 'antd'
 import { useMEditor } from '../../hooks/editor'
 import { CodeLineNode, CodeNode, ElementProps } from '../../el'
 import { codeCache } from '../plugins/useHighlight'
@@ -15,15 +15,27 @@ import { useSubject } from '../../hooks/subscribe'
 import { selChange$ } from '../plugins/useOnchange'
 import { DragHandle } from '../tools/DragHandle'
 import { runInAction } from 'mobx'
-import { allLanguages } from '../utils/highlight'
 import { IMenu, openMenus } from '../../components/Menu'
 import { Icon } from '@iconify/react'
 import { message$ } from '../../utils'
 import { EditorUtils } from '../utils/editorUtils'
+import { langIconMap } from '../tools/langIconMap'
+import { SearchOutlined } from '@ant-design/icons'
+import { ICopy } from '../../icons/ICopy'
+import { IArrowRight } from '../../icons/IArrowRight'
 
-export const CodeCtx = createContext({lang: '', code: false})
-const langOptions = allLanguages.map(l => {
-  return {value: l}
+export const CodeCtx = createContext({ lang: '', code: false })
+
+const langOptions = Array.from(langIconMap).map(([lang, icon]) => {
+  return {
+    value: lang,
+    label: (
+      <span className={'flex items-center'}>
+        <img src={icon} className={'w-4'} />
+        <span className={'ml-1'}>{lang}</span>
+      </span>
+    )
+  }
 })
 
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
@@ -34,15 +46,19 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
     editable: false,
     options: langOptions,
     openMenu: false,
-    hide: props.element.katex || props.element.render || props.element.language?.toLowerCase() === 'mermaid'
+    openSelectMenu: false,
+    hide:
+      props.element.katex ||
+      props.element.render ||
+      props.element.language?.toLowerCase() === 'mermaid'
   })
 
   const setLanguage = useCallback(() => {
-    setState({editable: false})
+    setState({ editable: false })
     if (props.element.language?.toLowerCase() === state().lang) return
     codeCache.delete(props.element)
-    runInAction(() => store.pauseCodeHighlight = true)
-    update({language: state().lang})
+    runInAction(() => (store.pauseCodeHighlight = true))
+    update({ language: state().lang })
     setTimeout(() => {
       runInAction(() => {
         store.pauseCodeHighlight = false
@@ -52,21 +68,26 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   }, [props.element, props.element.children, state().lang])
 
   const child = useMemo(() => {
-    return (
-      <code>{props.children}</code>
-    )
+    return <code>{props.children}</code>
   }, [props.element, props.element.children, store.refreshHighlight])
 
-  useSubject(selChange$, (ctx) => {
-    if (props.element.katex || props.element.render || props.element.language === 'mermaid') {
-      if (ctx && ctx.node && ctx.node[0].type === 'code-line' && ctx.sel) {
-        const show = Path.equals(ReactEditor.findPath(store.editor, props.element), Path.parent(ctx.node[1]))
-        setState({hide: !show})
-        return
+  useSubject(
+    selChange$,
+    (ctx) => {
+      if (props.element.katex || props.element.render || props.element.language === 'mermaid') {
+        if (ctx && ctx.node && ctx.node[0].type === 'code-line' && ctx.sel) {
+          const show = Path.equals(
+            ReactEditor.findPath(store.editor, props.element),
+            Path.parent(ctx.node[1])
+          )
+          setState({ hide: !show })
+          return
+        }
+        setState({ hide: true })
       }
-      setState({hide: true})
-    }
-  }, [props.element])
+    },
+    [props.element]
+  )
   return (
     <CodeCtx.Provider value={{ lang: state().lang || '', code: true }}>
       <div
@@ -93,132 +114,109 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             !!props.element.katex ? 'katex-container' : ''
           }`}
         >
-          {!props.element.frontmatter && <DragHandle />}
-          <div
-            className={`absolute z-10 right-2 top-1 flex items-center select-none`}
-            contentEditable={false}
-          >
-            {state().editable && (
-              <AutoComplete
-                size={'small'}
-                value={state().lang}
-                options={langOptions}
-                style={{ width: 130 }}
-                filterOption={(text, item) => {
-                  return item?.value.includes(text) || false
-                }}
-                onChange={(e) => {
-                  setState({ lang: e })
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    setLanguage()
+          {!props.element.frontmatter && (
+            <div
+              contentEditable={false}
+              className={
+                'h-7 pl-3 pr-1.5 flex items-center w-full absolute left-0 top-0 text-sm text-black/60 dark:text-white/60 justify-between z-50 select-none'
+              }
+            >
+              <Popover
+                trigger={['click']}
+                placement={'bottomLeft'}
+                overlayClassName={'light-poppver'}
+                arrow={false}
+                open={state().openSelectMenu}
+                onOpenChange={(v) => {
+                  if (props.element.katex || props.element.render) {
+                    return
+                  }
+                  setState({ openSelectMenu: v })
+                  if (v) {
+                    setTimeout(() => {
+                      ;(document.querySelector('.lang-select input') as HTMLInputElement)?.focus()
+                    })
                   }
                 }}
-                onBlur={setLanguage}
-                className={'lang-select'}
-              />
-            )}
-            {!state().editable && (
-              <>
-                {!props.element.frontmatter && (
-                  <div
-                    className={`${
-                      state().openMenu
-                        ? 'bg-gray-400/20'
-                        : 'group-hover:opacity-100 hover:bg-gray-400/20'
-                    } duration-200 ${
-                      configStore.codeDark ? 'text-white/60' : 'text-black/60'
-                    } rounded px-1.5 py-0.5 text-xs cursor-pointer`}
-                    onClick={(e) => {
-                      if (props.element.render) {
-                        return
-                      }
-                      setState({ openMenu: true })
-                      const menus: IMenu[] = [
-                        {
-                          text: (
-                            <div className={'flex items-center'}>
-                              <Icon icon={'fluent:copy-16-regular'} className={'mr-1.5 text-lg'} />
-                              copy
-                            </div>
-                          ),
-                          click: () => {
-                            window.api.copyToClipboard(
-                              props.element.children?.map((c) => Node.string(c)).join('\n')
-                            )
-                            message$.next({
-                              type: 'success',
-                              content: 'Copied to clipboard'
-                            })
-                          }
-                        },
-                        { hr: true },
-                        {
-                          text: (
-                            <div className={'flex items-center'}>
-                              <Icon
-                                icon={'material-symbols-light:delete-outline'}
-                                className={'mr-1.5 text-lg'}
-                              />
-                              delete
-                            </div>
-                          ),
-                          click: () => {
-                            try {
-                              Transforms.delete(editor, {
-                                at: ReactEditor.findPath(editor, props.element)
-                              })
-                            } catch (e) {
-                              console.error('delete code node error', e)
-                            }
-                          }
-                        }
-                      ]
-                      if (!props.element.katex) {
-                        menus.unshift({
-                          text: (
-                            <div className={'flex items-center'}>
-                              <Icon icon={'ic:sharp-code'} className={'mr-1.5 text-lg'} />
-                              {props.element.katex
-                                ? 'Formula'
-                                : props.element.language || 'plain text'}
-                            </div>
-                          ),
-                          click: () => {
-                            EditorUtils.blur(store.editor)
-                            setState({ editable: true })
-                            setTimeout(() => {
-                              document
-                                .querySelector<HTMLInputElement>('.lang-select input')
-                                ?.focus()
-                            }, 30)
-                          }
-                        })
-                      }
-                      openMenus(e, menus, () => {
-                        setState({ openMenu: false })
-                      })
+                overlayInnerStyle={{ padding: 10 }}
+                content={
+                  <AutoComplete
+                    value={state().lang}
+                    options={langOptions}
+                    placeholder={'Search'}
+                    autoFocus={true}
+                    style={{ width: 200 }}
+                    filterOption={(text, item) => {
+                      return item?.value.includes(text) || false
                     }}
+                    onChange={(e) => {
+                      setState({ lang: e })
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setLanguage()
+                        setState({ openSelectMenu: false })
+                      }
+                    }}
+                    onBlur={setLanguage}
+                    className={'lang-select'}
                   >
+                    <Input prefix={<SearchOutlined />} placeholder={'Search'} />
+                  </AutoComplete>
+                }
+              >
+                <div
+                  className={
+                    'flex items-center cursor-pointer hover:text-black/80 dark:hover:text-white/80'
+                  }
+                >
+                  {langIconMap.get(props.element.language?.toLowerCase()!) &&
+                    !props.element.katex && (
+                      <div className={'h-4 w-4 flex items-center justify-center mr-1'}>
+                        <img
+                          className={'w-4 h-4'}
+                          src={langIconMap.get(props.element.language?.toLowerCase()!)}
+                        />
+                      </div>
+                    )}
+                  <div>
                     {props.element.language ? (
                       <span>
                         {props.element.katex
                           ? 'Formula'
                           : props.element.language === 'html' && props.element.render
-                          ? 'Html Rendering'
+                          ? 'Html Renderer'
                           : props.element.language}
                       </span>
                     ) : (
                       <span>{'plain text'}</span>
                     )}
                   </div>
-                )}
-              </>
-            )}
-          </div>
+                  {!props.element.katex && !props.element.render && (
+                    <IArrowRight className={'rotate-90 text-lg ml-0.5'} />
+                  )}
+                </div>
+              </Popover>
+              <div>
+                <div
+                  className={'text-lg cursor-pointer hover:text-black/80 dark:hover:text-white/80'}
+                  onClick={() => {
+                    const code = props.element.children?.map((c) => Node.string(c)).join('\n')
+                    window.api.copyToClipboard(code)
+                    message$.next({
+                      type: 'success',
+                      content: 'Copied to clipboard'
+                    })
+                  }}
+                >
+                  <ICopy />
+                </div>
+              </div>
+            </div>
+          )}
+          {!props.element.frontmatter && <DragHandle />}
           {configStore.config.codeLineNumber && (
             <pre className={`code-line-list select-none`} contentEditable={false}>
               {!configStore.config.codeAutoBreak &&
@@ -254,16 +252,12 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   )
 })
 
-
 export const CodeLine = observer((props: ElementProps<CodeLineNode>) => {
   const ctx = useContext(CodeCtx)
   const store = useEditorStore()
   return useMemo(() => {
     return (
-      <div
-        className={`code-line`}
-        data-be={'code-line'}
-        {...props.attributes}>
+      <div className={`code-line`} data-be={'code-line'} {...props.attributes}>
         {props.children}
       </div>
     )

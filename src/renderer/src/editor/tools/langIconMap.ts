@@ -8,6 +8,7 @@ import astro from './langIcons/astro.svg'
 import apex from './langIcons/apex.svg'
 import apache from './langIcons/apache.svg'
 import apl from './langIcons/apl.svg'
+import env from './langIcons/dotenv.svg'
 import awk from './langIcons/awk.svg'
 import ballerina from './langIcons/ballerina.svg'
 import bat from './langIcons/bat.svg'
@@ -158,6 +159,7 @@ export const langIconMap = new Map([
   ['shellscript', shell],
   ['bash', shell],
   ['sh', shell],
+  ['dotenv', env],
   ['zsh', shell],
   ['shader', shaderlab],
   ['shaderlab', shaderlab],

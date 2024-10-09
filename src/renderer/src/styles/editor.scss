@@ -510,7 +510,7 @@ ul.m-list {
   }
   pre{
     white-space: pre;
-    padding: 10px 0;
+    padding: 30px 0 8px;
     position: relative;
   }
   code{
@@ -566,7 +566,7 @@ ul.m-list {
     counter-reset: step;
     counter-increment: step 0;
     z-index: 10;
-    padding-top: 10px;
+    padding-top: 30px;
     width:32px;
     @apply top-0 left-0 h-full absolute overflow-hidden;
     > div{
