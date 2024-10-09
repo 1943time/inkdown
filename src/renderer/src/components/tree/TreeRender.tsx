@@ -11,6 +11,19 @@ import { openContextMenu } from './openContextMenu'
 import { Icon } from '@iconify/react'
 import { configStore } from '../../store/config'
 import Iplus from '../../icons/Iplus'
+
+const checkChildren = (node: IFileItem, targetNode?: IFileItem) => {
+  while(targetNode) {
+    if (targetNode.parent?.root) {
+      return true
+    }
+    if (targetNode.parent?.cid === node.cid) {
+      return false
+    }
+    targetNode = targetNode.parent
+  }
+  return true
+}
 const getClass = (c: IFileItem) => {
   if (treeStore.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
   if (treeStore.openedNote === c) return 'dark:bg-white/10 bg-gray-700/10'
@@ -84,6 +97,10 @@ const Item = observer((
           const scrollTop = document.querySelector('#tree-content')?.scrollTop || 0
           const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
           const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
+          if (!checkChildren(treeStore.dragNode, item)) {
+            treeStore.dragStatus = null
+            return
+          }
           if (mode === 'enter' && !item.folder && treeStore.dragStatus) {
             treeStore.dragStatus = null
           } else {
