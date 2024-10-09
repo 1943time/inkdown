@@ -89,6 +89,41 @@ export const useKeyboard = (store: EditorStore) => {
           mode: 'lowest'
         })
         if (!node) return
+        const [text] = Editor.nodes<any>(store.editor, {
+          match: Text.isText,
+          mode: 'lowest'
+        })
+        if (e.key === '@' && ['paragraph', 'head', 'table-cell'].includes(node[0].type)) {
+          if (text) {
+            const dirt = EditorUtils.isDirtLeaf(text[0])
+            if (!dirt) {
+              runInAction(() => (store.openQuickLinkComplete = true))
+            }
+          }
+        } else if (store.openQuickLinkComplete && text) {
+          setTimeout(() => {
+            const [text] = Editor.nodes<any>(store.editor, {
+              match: Text.isText,
+              mode: 'lowest'
+            })
+            const str = Node.string(text[0])
+            const startStr = str.slice(0, store.editor.selection?.anchor.offset)
+            const quickMatch = startStr.match(/@([^\n@]+)$/)
+            store.quickLinkText$.next(quickMatch?.[1])
+          })
+        }
+        if (e.key.toLowerCase() === 'backspace' && store.openQuickLinkComplete && text) {
+          if (e.metaKey) {
+            runInAction(() => (store.openQuickLinkComplete = false))
+          } else {
+            const str = Node.string(text[0])
+            const startStr = str.slice(0, store.editor.selection?.anchor.offset)
+            const quickMatch = startStr.match(/@$/)
+            if (quickMatch) {
+              runInAction(() => (store.openQuickLinkComplete = false))
+            }
+          }
+        }
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
           if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {

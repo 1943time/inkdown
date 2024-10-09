@@ -20,6 +20,7 @@ import { InsertLink } from './tools/InsertLink'
 import { useLocalState } from '../hooks/useLocalState'
 import { action } from 'mobx'
 import {PhotoSlider} from 'react-photo-view'
+import { QuickLinkComplete } from './tools/QuickLinkComplete'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
@@ -109,6 +110,7 @@ export const EditorFrame = observer(({tab}: {
                 </div>
                 {tab === treeStore.currentTab && <Heading note={tab.current} />}
               </div>
+              <QuickLinkComplete/>
             </div>
             {mt !== 'other' && mt !== 'markdown' && (
               <>

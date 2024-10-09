@@ -76,6 +76,8 @@ export class EditorStore {
   refreshTableAttr = false
   openLangCompletion = false
   langCompletionText = new Subject<string>()
+  quickLinkText$ = new Subject<string | undefined>()
+  openQuickLinkComplete = false
   floatBar$ = new Subject<string>()
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
   openInsertLink$ = new Subject<Selection>()

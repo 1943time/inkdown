@@ -85,8 +85,13 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       }
       if (editor.operations[0]?.type === 'set_selection') {
         try {
-          runInAction(() => (store.openLangCompletion = false))
-          treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
+          if (store.openInsertCompletion || store.openQuickLinkComplete) {
+            runInAction(() => {
+              store.openLangCompletion = false
+              store.openQuickLinkComplete = false
+            })
+            treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
+          }
         } catch (e) {}
       }
       if (!editor.operations?.every((o) => o.type === 'set_selection')) {
