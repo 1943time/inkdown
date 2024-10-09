@@ -28,8 +28,6 @@ class ConfigStore {
     editorTextSize: 16,
     codeTheme: 'auto',
     codeAutoBreak: false,
-    mas: false,
-    symbolHighlight: true,
     dragToSort: true,
     spellCheck: false,
     editorWidth: 700,
@@ -45,9 +43,6 @@ class ConfigStore {
   timer = 0
   homePath = ''
   deviceId = ''
-  get mas() {
-    return this.config.mas || false
-  }
   get tab() {
     return ' '.repeat(this.config.codeTabSize)
   }
@@ -212,15 +207,8 @@ class ConfigStore {
       }
       imageBed.initial()
       document.body.classList.add('font-' + this.config.interfaceFont)
-      window.electron.ipcRenderer.invoke('get-system').then((res) => {
-        runInAction(() => (this.config.mas = res === 'mas'))
-      })
       MainApi.getPath('home').then((res) => {
         this.homePath = res
-        if (this.mas) {
-          const m = this.homePath.match(/\/Users\/[^\/]+/)
-          if (m) this.homePath = m[0]
-        }
         resolve(true)
       })
       shareStore.initial()

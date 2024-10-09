@@ -146,18 +146,6 @@ export function useHighlight(store?: EditorStore) {
                   fnd: m[0].endsWith(':')
                 })
               }
-              if (configStore.config.symbolHighlight) {
-                const matchSymbol = (c.text as string).matchAll(/[\[\]\{\}@;#$￥&]/g)
-                for (let m of matchSymbol) {
-                  textRanges.push({
-                    anchor: { path: [...path, i], offset: m.index },
-                    focus: { path: [...path, i], offset: m.index! + m[0].length },
-                    color: configStore.config.dark
-                        ? '#a78bfa'
-                        : '#8b5cf6'
-                  })
-                }
-              }
               cacheTextNode.set(node, {path, range: textRanges})
               ranges.push(...textRanges)
             }

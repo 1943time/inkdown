@@ -223,24 +223,6 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '高亮符号' : 'Highlight symbols'}</span>
-          <TextHelp
-            text={
-              configStore.zh
-                ? '括号和[@#$￥]等符号将高亮显示'
-                : 'Brackets and symbols such as [@#$￥] will be highlighted'
-            }
-          />
-        </div>
-        <div>
-          <Checkbox
-            checked={configStore.config.symbolHighlight}
-            onChange={(e) => configStore.setConfig('symbolHighlight', e.target.checked)}
-          />
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>{configStore.zh ? '编辑区文字大小' : 'Edit area text size'}</div>
         <div className={'w-32'}>
           <Slider
