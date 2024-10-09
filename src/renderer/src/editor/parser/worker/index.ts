@@ -109,7 +109,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           if (breakMatch) {
             el = {type: 'break', children: [{text: ''}]}
           } else {
-            const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)[^\n>]*?>/)
+            const htmlMatch = n.value.match(/<\/?(b|i|del|code|span|a)\s+[^\n>]*?>/)
             if (htmlMatch) {
               const [str, tag] = htmlMatch
               if (str.startsWith('</') && htmlTag.length && htmlTag[htmlTag.length - 1].tag === tag) {

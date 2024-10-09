@@ -5,6 +5,10 @@ import {createAppMenus} from './appMenus'
 import {AppUpdate} from './update'
 import {isAbsolute, join} from 'path'
 const isWindows = process.platform === 'win32'
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+    app.quit()
+}
 app.setAsDefaultProtocolClient('bluestone')
 
 let fileChangedWindow: BrowserWindow | null = null
@@ -108,7 +112,20 @@ function createWindow() {
   window.show()
   return window
 }
-
+app.on('second-instance', (e, commands) => {
+  const wins = BrowserWindow.getAllWindows()
+  if (wins.length) {
+    const win = wins.pop()!
+    if (win.isMinimized()) {
+      win.restore()
+    }
+    win.focus()
+    const file = commands?.find(f => f.endsWith('.md'))
+    if (file) {
+      win.webContents.send('open-path', file)
+    }
+  }
+})
 let waitOpenFile = ''
 let waitOpenProtocol = ''
 app.on('will-finish-launching', () => {
@@ -161,9 +178,9 @@ const preCreate = () => {
     win.on('ready-to-show', () => {
       setTimeout(() => {
         win.webContents.send('open-path', waitOpenFile)
+        waitOpenFile = ''
       }, 100)
     })
-    waitOpenFile = ''
   }
   if (waitOpenProtocol) {
     const url = new URL(waitOpenProtocol)
