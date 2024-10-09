@@ -545,7 +545,7 @@ export class EditorStore {
       },
       {
         text: 'Add Row Below',
-        key: 'cmd+enter',
+        key: 'cmd+shift+enter',
         click: () => this.tableTask$.next('insertRowAfter')
       },
       { hr: true },
@@ -560,7 +560,7 @@ export class EditorStore {
       { hr: true },
       {
         text: 'Line break within table-cell',
-        key: 'cmd+shift+enter',
+        key: 'cmd+enter',
         click: () => this.tableTask$.next('insertTableCellBreak')
       },
       {
@@ -589,6 +589,7 @@ export class EditorStore {
       { hr: true },
       {
         text: 'Delete Col',
+        key: 'cmd+option+backspace',
         click: () => this.tableTask$.next('removeCol')
       },
       {

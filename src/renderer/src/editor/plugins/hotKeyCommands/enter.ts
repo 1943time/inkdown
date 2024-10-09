@@ -178,19 +178,12 @@ export class EnterKey {
   private table(node: NodeEntry<TableNode>, sel: BaseSelection, e: React.KeyboardEvent) {
     if (isMod(e)) {
       if (e.shiftKey) {
-        Transforms.insertNodes(this.editor, [{type: 'break', children: [{text: ''}]}, {text: ''}], {select: true})
+        this.store.tableTask$.next('insertRowAfter')
+      } else if (e.altKey) {
+        this.store.tableTask$.next('insertColAfter')
+      }else {
+        this.store.tableTask$.next('insertTableCellBreak')
         e.preventDefault()
-      } else {
-        const row = Editor.parent(this.editor, node[1])
-        const insertRow = {
-          type: 'table-row', children: row[0].children.map(c => {
-            return {type: 'table-cell', children: [{text: ''}]}
-          })
-        }
-        Transforms.insertNodes(this.editor, insertRow, {
-          at: Path.next(row[1])
-        })
-        Transforms.select(this.editor, Editor.start(this.editor, Path.next(row[1])))
       }
     } else {
       const index = node[1][node[1].length - 1]

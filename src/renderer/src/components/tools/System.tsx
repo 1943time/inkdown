@@ -74,6 +74,11 @@ const actionKeys = (ctx: string[]):IKeyItem[] => [
     key: ['mod', 'o'],
     click: () => keyTask$.next({key: 'quickOpen'})
   },
+  {
+    name: 'Line break within a paragraph',
+    key: ['mod', 'enter'],
+    click: () => keyTask$.next({ key: 'lineBreakWithinParagraph' })
+  },
   {type: 'hr'},
   {
     name: 'Undo',

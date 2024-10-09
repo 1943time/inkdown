@@ -109,6 +109,17 @@ export class KeyboardTask {
     }
   }
 
+  lineBreakWithinParagraph() {
+    if (this.editor.selection) {
+      const [node] = Editor.nodes<any>(this.editor, {
+        mode: 'lowest',
+        match: (m) => Element.isElement(m)
+      })
+      if (node[0].type === 'paragraph' && Node.parent(this.editor, node[1])?.type !== 'list-item') {
+        Transforms.insertText(this.editor, '\n')
+      }
+    }
+  }
   selectFormat() {
     if (this.editor.selection) {
       const [node] = Editor.nodes<any>(this.editor, {
@@ -657,6 +668,7 @@ const keyMap: [string, Methods<KeyboardTask>, any[]?, boolean?][] = [
   ['mod+e', 'selectFormat'],
   ['mod+d', 'selectWord'],
   ['mod+a', 'selectAll'],
+  ['mod+enter', 'lineBreakWithinParagraph'],
   ['mod+option+v', 'pasteMarkdownCode'],
   ['mod+shift+v', 'pastePlainText'],
   ['mod+1', 'head', [1]],

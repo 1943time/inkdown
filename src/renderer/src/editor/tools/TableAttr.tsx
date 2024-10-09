@@ -322,6 +322,10 @@ export const TableAttr = observer(() => {
         e.preventDefault()
         task('removeRow')
       }
+      if (isHotkey('mod+alt+backspace', e)) {
+        e.preventDefault()
+        task('removeCol')
+      }
     }
     window.addEventListener('keydown', keydown)
     return () => {
@@ -415,7 +419,7 @@ export const TableAttr = observer(() => {
           onClick={(e) => {
             store.openTableMenus(e, isHead())
           }}
-          className={`t-handle`}
+          className={`t-handle text-lg`}
         >
           <EllipsisOutlined/>
         </div>
