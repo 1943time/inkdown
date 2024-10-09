@@ -12,7 +12,7 @@ export const NotLogged = observer((props: {
           <span>
             可以通过部署自己的发布程序来将Markdown文档在线化，请查看
             <a
-              href={'https://pb.inkdown.me/inkdown/doc/introduction#deployment-publish-program'}
+              href={'https://github.com/1943time/inkdown?tab=readme-ov-file#deployment-publish-program'}
               target={'_blank'}
               className={'link px-0.5 underline hover:underline'}
             >
@@ -24,7 +24,7 @@ export const NotLogged = observer((props: {
             You can put Markdown documents online by deploying your own publishing program. please
             see{' '}
             <a
-              href={'https://pb.inkdown.me/inkdown/doc/introduction#deployment-publish-program'}
+              href={'https://github.com/1943time/inkdown?tab=readme-ov-file#deployment-publish-program'}
               target={'_blank'}
               className={'link px-0.5 underline hover:underline'}
             >

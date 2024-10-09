@@ -263,9 +263,9 @@ export const Nav = observer(() => {
                   disabled: !treeStore.openedNote || treeStore.openedNote?.ghost
                 },
                 {
-                  text: 'Document',
+                  text: 'Github',
                   click: () => {
-                    window.open(`https://pb.inkdown.me/inkdown/doc/introduction`)
+                    window.open(`https://github.com/1943time/inkdown`)
                   }
                 },
                 { hr: true },
