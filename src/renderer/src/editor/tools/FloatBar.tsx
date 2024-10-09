@@ -24,7 +24,7 @@ import Ctrl from '../../icons/keyboard/Ctrl'
 import Shift from '../../icons/keyboard/Shift'
 import Option from '../../icons/keyboard/Option'
 import { runInAction } from 'mobx'
-
+const FloatBarWidth = 246
 function Mod() {
   if (isMac) {
     return <Command className={'w-3 h-3'} />
@@ -142,10 +142,10 @@ export const FloatBar = observer(() => {
     if (store.domRect && !store.openLinkPanel) {
       let left = store.domRect.x
       if (!treeStore.fold) left -= treeStore.width
-      left = left - ((state.openSelectColor ? 260 : 228) - store.domRect.width) / 2
+      left = left - ((state.openSelectColor ? 260 : FloatBarWidth) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
-      const barWidth = state.openSelectColor ? 264 : 232
+      const barWidth = state.openSelectColor ? 264 : FloatBarWidth + 4
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       let top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
       if (treeStore.tabs.length > 1) top -= 30
@@ -201,13 +201,6 @@ export const FloatBar = observer(() => {
     window.addEventListener('resize', change)
     return () => window.removeEventListener('resize', change)
   }, [])
-  const setLink = useCallback(() => {
-    Transforms.setNodes(
-      store.editor,
-      { url: state.url || undefined },
-      { match: Text.isText, split: true }
-    )
-  }, [])
   return (
     <div
       style={{
@@ -224,7 +217,10 @@ export const FloatBar = observer(() => {
       `}
     >
       <div
-        className={`${state.openSelectColor ? 'w-[260px]' : 'w-[228px]'} h-full overflow-hidden`}
+        style={{
+          width: state.openSelectColor ? 260 : FloatBarWidth
+        }}
+        className={`h-full overflow-hidden`}
       >
         {!state.openSelectColor && (
           <div className={'flex *:h-full *:flex *:items-center justify-center h-full'}>
@@ -234,7 +230,7 @@ export const FloatBar = observer(() => {
                   EditorUtils.isFormatActive(store.editor, 'highColor')
                     ? 'text-blue-500'
                     : 'dark:text-gray-200 text-gray-600'
-                } py-0.5 px-1.5  ${
+                } py-0.5 px-2  ${
                   state.hoverSelectColor ? 'dark:bg-gray-100/10 bg-gray-200/50' : ''
                 } dark:hover:bg-gray-100/10 hover:bg-gray-200/50 cursor-pointer`}
                 onMouseEnter={(e) => e.stopPropagation()}
@@ -278,7 +274,7 @@ export const FloatBar = observer(() => {
                       ? 'text-blue-500 '
                       : 'dark:hover:text-gray-200 hover:text-gray-600'
                   }
-              cursor-pointer py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
+              cursor-pointer py-0.5 ${t.type !== 'code' ? 'px-2' : 'px-1.5'} dark:hover:bg-gray-100/10 hover:bg-gray-200/50
               `}
                 >
                   {t.icon}

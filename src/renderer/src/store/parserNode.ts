@@ -202,6 +202,9 @@ export class ReadSpace {
       const filePath = f.path
       this.existSet.add(filePath)
       const s = statSync(filePath)
+      if (s.isDirectory() && f.path.toLowerCase() === 'node_modules') {
+        continue
+      }
       const mtime = s.mtime.valueOf()
       if (!this.fileMap.get(filePath)) {
         const cid = nid()
