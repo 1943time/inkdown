@@ -126,6 +126,9 @@ app.on('second-instance', (e, commands) => {
           win.restore()
         }
         win.webContents.send('open-path', file)
+      } else {
+        waitOpenFile = file
+        preCreate()
       }
     }
   } else {
