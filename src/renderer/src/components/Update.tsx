@@ -1,11 +1,11 @@
-import {observer} from 'mobx-react-lite'
-import {Button, Modal, notification, Progress} from 'antd'
-import {useLocalState} from '../hooks/useLocalState'
-import {useCallback, useEffect, useRef} from 'react'
-import {message$} from '../utils'
-import {configStore} from '../store/config'
-import {openConfirmDialog$} from './Dialog/ConfirmDialog'
-import {action, runInAction} from 'mobx'
+import { observer } from 'mobx-react-lite'
+import { Button, Modal, notification, Progress } from 'antd'
+import { useLocalState } from '../hooks/useLocalState'
+import { useCallback, useEffect, useRef } from 'react'
+import { message$ } from '../utils'
+import { configStore } from '../store/config'
+import { openConfirmDialog$ } from './Dialog/ConfirmDialog'
+import { action, runInAction } from 'mobx'
 import ky from 'ky'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
@@ -13,7 +13,6 @@ export const Update = observer(() => {
     startUpdate: false,
     percent: 0,
     manual: false,
-    mas: configStore.mas,
     loading: false,
     enableUpgrade: false,
     updateData: {
@@ -31,25 +30,27 @@ export const Update = observer(() => {
     const v = await window.electron.ipcRenderer.invoke('get-version')
     const system = await window.electron.ipcRenderer.invoke('get-system')
     try {
-      const res = await ky.get('https://adm.inkdown.me/app/version', {
-        searchParams: {
-          version: v,
-          system
-        }
-      }).json<{
-        masVersion: string
-        github: Record<string, any>
-      }>()
-      if (res.github) {
-        const info:string[] = res.github.body.split('***')
-        setState({
-          updateData: {
-            tag: configStore.mas ? 'v' + res.masVersion : res.github.tag_name,
-            englishInfo: info[0]?.split(/\n|\r\n/).filter(item => !!item) || [],
-            zhInfo: info[1]?.split(/\n|\r\n/).filter(item => !!item) || []
+      const res = await ky
+        .get('https://adm.inkdown.me/app/version', {
+          searchParams: {
+            version: v,
+            system
           }
         })
-        runInAction(() => configStore.enableUpgrade = true)
+        .json<{
+          masVersion: string
+          github: Record<string, any>
+        }>()
+      if (res.github) {
+        const info: string[] = res.github.body.split('***')
+        setState({
+          updateData: {
+            tag: res.github.tag_name,
+            englishInfo: info[0]?.split(/\n|\r\n/).filter((item) => !!item) || [],
+            zhInfo: info[1]?.split(/\n|\r\n/).filter((item) => !!item) || []
+          }
+        })
+        runInAction(() => (configStore.enableUpgrade = true))
       } else {
         checkTimer.current = window.setTimeout(check, 60 * 1000 * 60)
       }
@@ -63,12 +64,12 @@ export const Update = observer(() => {
   const [api, contextHolder] = notification.useNotification()
   useEffect(() => {
     check()
-    ipcRenderer.on('check-updated', e => {
-      setState({manual: true})
+    ipcRenderer.on('check-updated', (e) => {
+      setState({ manual: true })
       clearTimeout(checkTimer.current)
       check().then((updated) => {
         if (updated) {
-          runInAction(() => configStore.openUpdateDialog = true)
+          runInAction(() => (configStore.openUpdateDialog = true))
         } else {
           message$.next({
             type: 'info',
@@ -78,25 +79,32 @@ export const Update = observer(() => {
       })
     })
     ipcRenderer.on('update-progress', (e, data) => {
-      const percent = (data.percent as number || 0).toFixed(1)
-      setState({percent: +percent})
+      const percent = ((data.percent as number) || 0).toFixed(1)
+      setState({ percent: +percent })
     })
 
     ipcRenderer.on('update-error', (e, err) => {
       console.error('update-error', err)
       if (state.startUpdate || state.manual) {
-        let msg = typeof err === 'string' ? err : err instanceof Error ? err.message : 'The network is abnormal, please try again later or download manually'
+        let msg =
+          typeof err === 'string'
+            ? err
+            : err instanceof Error
+            ? err.message
+            : 'The network is abnormal, please try again later or download manually'
         api.error({
           message: configStore.zh ? '更新失败' : 'The update failed',
           description: msg
         })
       }
-      setState({startUpdate: false, percent: 0, manual: false})
+      setState({ startUpdate: false, percent: 0, manual: false })
     })
-    ipcRenderer.on('update-downloaded', e => {
-      setState({startUpdate: false, percent: 0})
+    ipcRenderer.on('update-downloaded', (e) => {
+      setState({ startUpdate: false, percent: 0 })
       openConfirmDialog$.next({
-        title: configStore.zh ? '下载更新已完成，是否立即重新启动？' : 'Download the update is complete, do you want to restart it now?',
+        title: configStore.zh
+          ? '下载更新已完成，是否立即重新启动？'
+          : 'Download the update is complete, do you want to restart it now?',
         okText: 'Restart now',
         onConfirm: () => {
           ipcRenderer.send('install-update')
@@ -113,40 +121,40 @@ export const Update = observer(() => {
   return (
     <>
       {contextHolder}
-      {state.startUpdate &&
+      {state.startUpdate && (
         <div
           className={`w-28 mr-2 rounded px-2 cursor-pointer drag-none duration-200 flex items-center relative -top-0.5`}
-          onClick={action(() => configStore.openUpdateDialog = true)}
+          onClick={action(() => (configStore.openUpdateDialog = true))}
         >
-          <Progress percent={10} className={'m-0'} showInfo={false} status={'active'}/>
+          <Progress percent={10} className={'m-0'} showInfo={false} status={'active'} />
         </div>
-      }
+      )}
       <Modal
         title={`Update Inkdown-${state.updateData.tag}`}
         width={600}
-        onCancel={action(() => configStore.openUpdateDialog = false)}
+        onCancel={action(() => (configStore.openUpdateDialog = false))}
         open={configStore.openUpdateDialog}
         footer={null}
       >
-        <div
-          className={'py-2 break-words'}
-        >
-          {configStore.zh ? (
-            state.updateData.zhInfo.map((item, i) =>
-              <p key={i} className={'mb-2'}>{item}</p>
-            )
-          ) : (
-            state.updateData.englishInfo.map((item, i) =>
-              <p key={i} className={'mb-2'}>{item}</p>
-            )
-          )}
+        <div className={'py-2 break-words'}>
+          {configStore.zh
+            ? state.updateData.zhInfo.map((item, i) => (
+                <p key={i} className={'mb-2'}>
+                  {item}
+                </p>
+              ))
+            : state.updateData.englishInfo.map((item, i) => (
+                <p key={i} className={'mb-2'}>
+                  {item}
+                </p>
+              ))}
         </div>
-        {state.startUpdate &&
+        {state.startUpdate && (
           <div className={'flex items-center mt-4'}>
             <span className={'mr-4'}>{'Updating'}</span>
-            <Progress percent={state.percent} className={'flex-1 mb-0'}/>
+            <Progress percent={state.percent} className={'flex-1 mb-0'} />
           </div>
-        }
+        )}
         <div className={'mt-4 flex justify-center space-x-4 px-20'}>
           {state.startUpdate ? (
             <>
@@ -154,7 +162,7 @@ export const Update = observer(() => {
               <Button
                 onClick={() => {
                   ipcRenderer.send('cancel-update')
-                  setState({startUpdate: false, percent: 0})
+                  setState({ startUpdate: false, percent: 0 })
                 }}
               >
                 {configStore.zh ? '取消更新' : 'Cancel update'}
@@ -162,34 +170,37 @@ export const Update = observer(() => {
             </>
           ) : (
             <>
-              {!state.mas &&
-                <Button onClick={downLoad}>{configStore.zh ? '手动下载' : 'Download manually'}</Button>
-              }
+              <Button onClick={downLoad}>
+                {configStore.zh ? '手动下载' : 'Download manually'}
+              </Button>
               <Button
                 type={'primary'}
-                block={state.mas}
                 loading={state.loading}
                 onClick={async () => {
-                  if (state.mas) {
-                    // window.open('https://apps.apple.com/us/app/bluestone-markdown/id6451391474')
-                    window.open('itms-apps://apps.apple.com/us/app/inkdown/id6451391474')
-                  } else {
-                    setState({loading: true})
-                    ipcRenderer.invoke('check-updated').then(async () => {
+                  setState({ loading: true })
+                  ipcRenderer
+                    .invoke('check-updated')
+                    .then(async () => {
                       ipcRenderer.invoke('start-update')
-                      setState({startUpdate: true})
-                      runInAction(() => configStore.openUpdateDialog = false)
-                    }).catch(e => {
-                      let msg = typeof e === 'string' ? e : e instanceof Error ? e.message : 'The network is abnormal, please try again later or download manually'
+                      setState({ startUpdate: true })
+                      runInAction(() => (configStore.openUpdateDialog = false))
+                    })
+                    .catch((e) => {
+                      let msg =
+                        typeof e === 'string'
+                          ? e
+                          : e instanceof Error
+                          ? e.message
+                          : 'The network is abnormal, please try again later or download manually'
                       api.error({
                         message: configStore.zh ? '更新失败' : 'The update failed',
                         description: msg
                       })
                       console.error('update fail', e)
-                    }).finally(() => {
-                      setState({loading: false})
                     })
-                  }
+                    .finally(() => {
+                      setState({ loading: false })
+                    })
                 }}
               >
                 {configStore.zh ? '立即更新' : 'Update now'}

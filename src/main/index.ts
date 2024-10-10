@@ -113,17 +113,23 @@ function createWindow() {
   return window
 }
 app.on('second-instance', (e, commands) => {
-  const wins = BrowserWindow.getAllWindows()
-  if (wins.length) {
-    const win = wins.pop()!
-    if (win.isMinimized()) {
-      win.restore()
+  const file = commands?.find(f => f.endsWith('.md'))
+  if (file) {
+    const focusWindow = BrowserWindow.getFocusedWindow()
+    if (focusWindow) {
+      focusWindow.webContents.send('open-path', file)
+    } else {
+      const wins = BrowserWindow.getAllWindows()
+      if (wins.length) {
+        const win = wins.pop()!
+        if (win.isMinimized()) {
+          win.restore()
+        }
+        win.webContents.send('open-path', file)
+      }
     }
-    win.focus()
-    const file = commands?.find(f => f.endsWith('.md'))
-    if (file) {
-      win.webContents.send('open-path', file)
-    }
+  } else {
+    preCreate()
   }
 })
 let waitOpenFile = ''

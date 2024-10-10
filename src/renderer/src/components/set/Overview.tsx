@@ -26,7 +26,7 @@ export const Overview = observer(() => {
       {context}
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          Version{configStore.mas ? ' (App Store) ' : ''}: {state.version}
+          Version: {state.version}
         </div>
         <div>
           <Button
