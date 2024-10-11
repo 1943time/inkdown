@@ -36,6 +36,7 @@ nsis:
   perMachine: true
 mac:
   # identity: null
+  notarize: true
   entitlementsInherit: build/entitlements.mac.plist
 #  minimumSystemVersion: 12.0
 #  category: public.app-category.productivity
