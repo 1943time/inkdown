@@ -51,7 +51,11 @@ export const mediaType = (name?: string) => {
 }
 
 export const getSelRect = () => {
-  const domSelection = window.getSelection()
-  const domRange = domSelection?.getRangeAt(0)
-  return domRange?.getBoundingClientRect() || null
+  try {
+    const domSelection = window.getSelection()
+    const domRange = domSelection?.getRangeAt(0)
+    return domRange?.getBoundingClientRect() || null
+  } catch(e) {
+    return null
+  }
 }
