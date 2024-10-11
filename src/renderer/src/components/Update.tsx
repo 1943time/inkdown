@@ -126,7 +126,7 @@ export const Update = observer(() => {
           className={`w-28 mr-2 rounded px-2 cursor-pointer drag-none duration-200 flex items-center relative -top-0.5`}
           onClick={action(() => (configStore.openUpdateDialog = true))}
         >
-          <Progress percent={10} className={'m-0'} showInfo={false} status={'active'} />
+          <Progress percent={state.percent} className={'m-0'} showInfo={false} status={'active'} />
         </div>
       )}
       <Modal
