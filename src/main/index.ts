@@ -117,6 +117,9 @@ app.on('second-instance', (e, commands) => {
   if (file) {
     const focusWindow = BrowserWindow.getFocusedWindow()
     if (focusWindow) {
+      if (focusWindow.isMinimized()) {
+        focusWindow.restore()
+      }
       focusWindow.webContents.send('open-path', file)
     } else {
       const wins = BrowserWindow.getAllWindows()
