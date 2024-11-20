@@ -6,22 +6,24 @@ import { Node, Selection, Text, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
 import { useGetSetState } from 'react-use'
 import { IFileItem } from '../..'
-import { treeStore } from '../../store/tree'
 import { createPortal } from 'react-dom'
 import INote from '../../icons/INote'
 import INet from '../../icons/Net'
 import isHotkey from 'is-hotkey'
 import { runInAction } from 'mobx'
-import { configStore } from '../../store/config'
 import { join } from 'path'
 import { isLink, parsePath, toRelativePath, toSpacePath } from '../../utils/path'
 import { Icon } from '@iconify/react'
 import { Tooltip } from 'antd'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 type DocItem = IFileItem & { path: string; parentPath?: string }
 const width = 370
 export const InsertLink = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
+  const {t} = useTranslation()
   const selRef = useRef<Selection>()
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -53,7 +55,7 @@ export const InsertLink = observer(() => {
     if (isLink(state().inputKeyword)) return setState({ anchors: [] })
     const parse = parsePath(state().inputKeyword)
     if (!parse.path) {
-      const item = treeStore.openedNote
+      const item = core.tree.openedNote
       if (item) {
         const anchors = getAnchors({
           ...item,
@@ -72,7 +74,7 @@ export const InsertLink = observer(() => {
       }
       return
     } else {
-      const item = docMap.current.get(join(treeStore.root?.filePath || '', parse.path))
+      const item = docMap.current.get(join(core.tree.root?.filePath || '', parse.path))
       if (item) {
         const anchors = getAnchors(item)
         setState({
@@ -101,7 +103,7 @@ export const InsertLink = observer(() => {
         return close('#' + parse.hash)
       }
       const filePath = store.openFilePath || ''
-      const realPath = join(treeStore.root?.filePath || '', parse.path)
+      const realPath = join(core.tree.root?.filePath || '', parse.path)
       const relativePath = realPath === store.openFilePath ? '' : toRelativePath(filePath, realPath)
       close(`${relativePath}${parse.hash ? `#${parse.hash}` : ''}`)
     }
@@ -201,23 +203,23 @@ export const InsertLink = observer(() => {
       if (left + width > window.innerWidth - 4) {
         left = window.innerWidth - 4 - width
       }
-      const { docs, map } = treeStore.allNotes
+      const { docs, map } = core.tree.allNotes
       docMap.current = map
       const url = EditorUtils.getUrl(store.editor)
       let path = url
-      if (url && !url.startsWith('#') && !isLink(url) && treeStore.inRoot) {
-        path = toSpacePath(treeStore.root!.filePath, store.openFilePath || '', url)
+      if (url && !url.startsWith('#') && !isLink(url) && core.tree.inRoot) {
+        path = toSpacePath(core.tree.root!.filePath, store.openFilePath || '', url)
       }
       const parse = parsePath(path)
-      const filterDocs = parse.path ? docs.filter((f) => f.path.includes(parse.path) && f.filePath !== treeStore.openedNote?.filePath) : docs.slice()
+      const filterDocs = parse.path ? docs.filter((f) => f.path.includes(parse.path) && f.filePath !== core.tree.openedNote?.filePath) : docs.slice()
       setState({
         left,
         y,
         oldUrl: url || '',
         mode,
         open: true,
-        filterDocs: treeStore.inRoot ? filterDocs : [],
-        docs: treeStore.inRoot ? docs : [],
+        filterDocs: core.tree.inRoot ? filterDocs : [],
+        docs: core.tree.inRoot ? docs : [],
         inputKeyword: path
       })
       if (parse.hash) {
@@ -293,7 +295,7 @@ export const InsertLink = observer(() => {
                 })
               } else {
                 const filterDocs = state().docs.filter((d) => {
-                  return d.path.toLowerCase().includes(key) && d.filePath !== treeStore.openedNote?.filePath
+                  return d.path.toLowerCase().includes(key) && d.filePath !== core.tree.openedNote?.filePath
                 })
                 setState({
                   filterDocs
@@ -305,11 +307,11 @@ export const InsertLink = observer(() => {
               })
             }}
             placeholder={`${
-              treeStore.inRoot ? 'Url filepath #head, tab key completion' : 'Link or #head'
+              core.tree.inRoot ? 'Url filepath #head, tab key completion' : 'Link or #head'
             }`}
             className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-8 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
           />
-          <Tooltip title={configStore.zh ? '移除链接' : 'Remove link'} mouseEnterDelay={0.5}>
+          <Tooltip title={t('removeLink')} mouseEnterDelay={0.5}>
             <div
               className={
                 'p-1 rounded ml-1 hover:bg-gray-200/70 cursor-pointer dark:hover:bg-gray-100/10 text-gray-600 dark:text-gray-300'
@@ -327,7 +329,7 @@ export const InsertLink = observer(() => {
           ref={scrollRef}
         >
           {isLink(state().inputKeyword) ||
-          (!treeStore.inRoot && !!state().inputKeyword && !state().anchors.length) ? (
+          (!core.tree.inRoot && !!state().inputKeyword && !state().anchors.length) ? (
             <>
               <div
                 onClick={(e) => {
@@ -411,7 +413,7 @@ export const InsertLink = observer(() => {
               {((!!state().anchors.length && !state().filterAnchors.length) ||
                 (!!state().docs.length && !state().filterDocs.length)) && (
                 <div className={'py-4 text-center text-gray-400'}>
-                  {configStore.zh ? '没有相关文档' : 'No related documents'}
+                  {t('noRelatedDocs')}
                 </div>
               )}
             </>

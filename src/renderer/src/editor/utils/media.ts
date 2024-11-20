@@ -1,10 +1,10 @@
-import {treeStore} from '../../store/tree'
 import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {base64ToArrayBuffer, message$, nid} from '../../utils'
 import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
 import {mediaType} from './dom'
+import { Core } from '../../store/core'
 
 export const getRemoteMediaType = async (url: string) => {
   if (!url) return 'other'
@@ -30,12 +30,12 @@ export const getRemoteMediaType = async (url: string) => {
   }
 }
 
-export const convertRemoteImages = async (node: IFileItem) => {
+export const convertRemoteImages = async (node: IFileItem, core: Core) => {
   if (node.ext === 'md') {
     const schema = node.schema
     if (schema) {
       const stack = schema.slice()
-      const store = treeStore.currentTab.store
+      const store = core.tree.currentTab.store
       let change = false
       while (stack.length) {
         const item = stack.pop()!

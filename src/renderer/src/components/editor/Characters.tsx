@@ -2,19 +2,20 @@ import {observer} from 'mobx-react-lite'
 import {useCallback, useEffect} from 'react'
 import {countWords} from 'alfaaz'
 import {Editor} from 'slate'
-import {treeStore} from '../../store/tree'
 import {CustomLeaf} from '../../el'
 import {useLocalState} from '../../hooks/useLocalState'
+import { useCoreContext } from '../../store/core'
 
 export const Characters = observer(() => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     words: 0,
     characters: 0
   })
   const count = useCallback(() => {
-    if (treeStore.openedNote) {
+    if (core.tree.openedNote) {
       try {
-        const texts = Editor.nodes<CustomLeaf>(treeStore.currentTab.store.editor, {
+        const texts = Editor.nodes<CustomLeaf>(core.tree.currentTab.store.editor, {
           at: [],
           match: n => n.text
         })
@@ -36,15 +37,15 @@ export const Characters = observer(() => {
   useEffect(() => {
     count()
     let timer = 0
-    const sub = treeStore.currentTab?.store.docChanged$.subscribe(() => {
+    const sub = core.tree.currentTab?.store.docChanged$.subscribe(() => {
       clearTimeout(timer)
       timer = window.setTimeout(count, 300)
     })
     return () => {
       sub?.unsubscribe()
     }
-  }, [treeStore.openedNote])
-  if (!treeStore.openedNote || treeStore.openedNote.ext !== 'md') return null
+  }, [core.tree.openedNote])
+  if (!core.tree.openedNote || core.tree.openedNote.ext !== 'md') return null
   return (
     <div className={`
       px-2 absolute text-center z-10 bg-gray-200 text-gray-500 panel-bg

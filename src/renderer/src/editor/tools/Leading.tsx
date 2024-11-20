@@ -1,13 +1,13 @@
 import {observer} from 'mobx-react-lite'
 import {useCallback, useEffect, useMemo, useRef} from 'react'
 import {IFileItem} from '../../index'
-import {treeStore} from '../../store/tree'
 import {useDebounce, useGetSetState} from 'react-use'
 import {Node} from 'slate'
 import {getOffsetTop, slugify} from '../utils/dom'
 import {nanoid} from 'nanoid'
 import {useEditorStore} from '../store'
-import {configStore} from '../../store/config'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 type Leading = {title: string, level: number, id: string, key: string, dom?: HTMLElement, schema: object}
 
 const cache = new Map<object, Leading>
@@ -20,7 +20,9 @@ const levelClass = new Map([
 export const Heading = observer(({note}: {
   note: IFileItem
 }) => {
+  const core = useCoreContext()
   const store = useEditorStore()
+  const {t} = useTranslation()
   const [state, setState] = useGetSetState({
     headings: [] as Leading[],
     active: ''
@@ -30,10 +32,10 @@ export const Heading = observer(({note}: {
     cache.clear()
     getHeading()
     setState({active: ''})
-  }, [note, treeStore.currentTab])
+  }, [note, core.tree.currentTab])
 
   const getHeading = useCallback(() => {
-    if (note && configStore.config.showLeading) {
+    if (note && core.config.state.showLeading) {
       const schema = note.schema
       if (schema?.length) {
         const headings: Leading[] = []
@@ -71,7 +73,7 @@ export const Heading = observer(({note}: {
     }
   }, [note])
 
-  useDebounce(getHeading, 100, [note, note?.refresh, configStore.config.showLeading])
+  useDebounce(getHeading, 100, [note, note?.refresh, core.config.state.showLeading])
 
   useEffect(() => {
     const div = box.current
@@ -98,20 +100,20 @@ export const Heading = observer(({note}: {
     let pt = 70
     if (store.openSearch) pt += 46
     return pt
-  }, [treeStore.tabs.length, store.openSearch])
+  }, [core.tree.tabs.length, store.openSearch])
   return (
     <div
       style={{
         top: pt - 40,
         height: `calc(100vh - ${pt}px)`
       }}
-      className={`${configStore.config.showLeading ? 'xl:block' : ''} hidden sticky flex-shrink-0`}
+      className={`${core.config.state.showLeading ? 'xl:block' : ''} hidden sticky flex-shrink-0`}
       ref={e => {
         box.current = e?.parentElement?.parentElement?.parentElement || undefined
       }}
     >
-      <div className={`h-full pt-10 pb-10 pr-4 overflow-y-auto`} style={{width: configStore.config.leadingWidth}}>
-        <div className={'text-gray-500 text-sm mb-4'}>{configStore.zh ? '大纲' : 'Outline'}</div>
+      <div className={`h-full pt-10 pb-10 pr-4 overflow-y-auto`} style={{width: core.config.state.leadingWidth}}>
+        <div className={'text-gray-500 text-sm mb-4'}>{t('outline')}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm break-words'}>
           {!!note &&
             <div

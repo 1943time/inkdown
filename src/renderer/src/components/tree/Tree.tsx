@@ -5,7 +5,6 @@ import { Popover, Skeleton } from 'antd'
 import React, { useCallback, useEffect } from 'react'
 import { useLocalState } from '../../hooks/useLocalState'
 import { db, ISpace } from '../../store/db'
-import { treeStore } from '../../store/tree'
 import { SpaceItem } from '../space/SpaceItem'
 import Folder from '../../icons/Folder'
 import { FullSearch } from '../FullSearch'
@@ -17,6 +16,7 @@ import { useSubject } from '../../hooks/subscribe'
 import { arrayMoveImmutable } from 'array-move'
 import { Subject } from 'rxjs'
 import { getOffsetTop } from '@renderer/editor/utils/dom'
+import { useCoreContext } from '../../store/core'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -25,6 +25,7 @@ const tabIndex = new Map([
 
 const closeMenu$ = new Subject()
 export const Tree = observer(() => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     openMenu: false,
     spaces: [] as ISpace[],
@@ -87,15 +88,15 @@ export const Tree = observer(() => {
   return (
     <div
       className={`flex-shrink-0 b1 tree-bg h-full width-duration ${
-        !treeStore.blankMode ? 'pt-2' : 'pt-10'
+        !core.tree.blankMode ? 'pt-2' : 'pt-10'
       } border-r relative overflow-hidden duration-200`}
-      style={{ width: treeStore.fold ? 0 : treeStore.width }}
+      style={{ width: core.tree.fold ? 0 : core.tree.width }}
     >
-      {treeStore.blankMode && (
+      {core.tree.blankMode && (
         <div className={'h-10 left-0 top-0 w-[calc(100%_-_40px)] absolute drag-nav'} />
       )}
-      <div style={{ width: treeStore.width }} className={`h-full`}>
-        <div className={`h-9 ${!treeStore.blankMode ? 'px-2' : 'px-3'}`}>
+      <div style={{ width: core.tree.width }} className={`h-full`}>
+        <div className={`h-9 ${!core.tree.blankMode ? 'px-2' : 'px-3'}`}>
           <Popover
             trigger={['click']}
             placement={'bottomLeft'}
@@ -164,8 +165,8 @@ export const Tree = observer(() => {
                         <SpaceItem
                           item={s}
                           onClick={() => {
-                            if (treeStore.root?.cid !== s.cid) {
-                              treeStore.initial(s.cid)
+                            if (core.tree.root?.cid !== s.cid) {
+                              core.tree.initial(s.cid)
                             }
                             closeMenu$.next(null)
                           }}
@@ -181,10 +182,10 @@ export const Tree = observer(() => {
                 )}
                 <div className={'h-[1px] my-1 bg-gray-200/70 dark:bg-gray-100/10'}></div>
                 <div className={'text-sm px-1'}>
-                  {!!treeStore.root && (
+                  {!!core.tree.root && (
                     <div
                       onClick={() => {
-                        editSpace$.next(treeStore.root!.cid)
+                        editSpace$.next(core.tree.root!.cid)
                         setState({ openMenu: false })
                       }}
                       className={
@@ -211,7 +212,7 @@ export const Tree = observer(() => {
               </div>
             }
           >
-            {!!treeStore.root && (
+            {!!core.tree.root && (
               <div
                 className={
                   'pl-2 pr-4 h-full relative flex items-center text-sm duration-200 rounded-lg dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
@@ -219,12 +220,12 @@ export const Tree = observer(() => {
               >
                 <div
                   className={`text-white flex-shrink-0 w-6 h-6 rounded space-${
-                    treeStore.root.background || 'sky'
+                    core.tree.root.background || 'sky'
                   } flex items-center justify-center  font-medium`}
                 >
-                  {treeStore.root.name.slice(0, 1).toUpperCase()}
+                  {core.tree.root.name.slice(0, 1).toUpperCase()}
                 </div>
-                <div className={'ml-2 max-w-full truncate'}>{treeStore.root.name}</div>
+                <div className={'ml-2 max-w-full truncate'}>{core.tree.root.name}</div>
                 <div className={'absolute right-1 top-1/2 -translate-y-1/2'}>
                   <Icon
                     icon={'ic:round-unfold-more'}
@@ -233,7 +234,7 @@ export const Tree = observer(() => {
                 </div>
               </div>
             )}
-            {!treeStore.root && (
+            {!core.tree.root && (
               <div
                 className={
                   'px-2 h-full relative flex items-center text-sm duration-200 rounded-lg dark:hover:bg-gray-200/5 hover:bg-gray-200/60 cursor-pointer'
@@ -255,7 +256,7 @@ export const Tree = observer(() => {
             )}
           </Popover>
         </div>
-        {treeStore.loading && (
+        {core.tree.loading && (
           <div className={'p-4 w-full'}>
             <Skeleton
               active={true}
@@ -266,8 +267,8 @@ export const Tree = observer(() => {
             />
           </div>
         )}
-        {!treeStore.loading && !treeStore.root && <TreeEmpty spaces={state.spaces} />}
-        {!!treeStore.root && !treeStore.loading && (
+        {!core.tree.loading && !core.tree.root && <TreeEmpty spaces={state.spaces} />}
+        {!!core.tree.root && !core.tree.loading && (
           <>
             <div className={'h-[calc(100vh_-_76px)] flex flex-col'}>
               <div className={'h-7 mb-3 mt-3 px-3 flex-shrink-0'}>
@@ -278,13 +279,13 @@ export const Tree = observer(() => {
                 >
                   <div
                     className={'tree-tab'}
-                    onClick={action(() => (treeStore.treeTab = 'folder'))}
+                    onClick={action(() => (core.tree.treeTab = 'folder'))}
                   >
                     <Folder className={'text-[17px]'} />
                   </div>
                   <div
                     className={'tree-tab'}
-                    onClick={action(() => (treeStore.treeTab = 'search'))}
+                    onClick={action(() => (core.tree.treeTab = 'search'))}
                   >
                     <Icon icon={'tdesign:search'} className={'text-[17px]'} />
                   </div>
@@ -293,7 +294,7 @@ export const Tree = observer(() => {
                       'absolute w-[calc(50%_-_4px)] h-[22px] top-[3px] left-1 dark:bg-black/30 bg-white/90 rounded duration-150 dark:shadow-gray-200/10 shadow-sm shadow-gray-300'
                     }
                     style={{
-                      transform: `translateX(${(tabIndex.get(treeStore.treeTab)! - 1) * 100 + '%'})`
+                      transform: `translateX(${(tabIndex.get(core.tree.treeTab)! - 1) * 100 + '%'})`
                     }}
                   />
                 </div>
@@ -303,17 +304,17 @@ export const Tree = observer(() => {
                 id={'tree-content'}
                 onDragOver={(e) => e.preventDefault()}
                 onDragLeave={action((e) => {
-                  treeStore.dragStatus = null
+                  core.tree.dragStatus = null
                 })}
-                onDrop={(e) => treeStore.moveDragFiles(e)}
+                onDrop={(e) => core.tree.moveDragFiles(e)}
                 onContextMenu={(e) => {
-                  if (treeStore.treeTab === 'folder') {
-                    openContextMenu(e, treeStore.root!)
+                  if (core.tree.treeTab === 'folder') {
+                    openContextMenu(e, core.tree.root!)
                   }
                 }}
               >
                 <div
-                  className={`${treeStore.treeTab === 'folder' ? '' : 'hidden'}`}
+                  className={`${core.tree.treeTab === 'folder' ? '' : 'hidden'}`}
                   onContextMenu={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -323,7 +324,7 @@ export const Tree = observer(() => {
                     <TreeRender />
                   </div>
                 </div>
-                <div className={`${treeStore.treeTab === 'search' ? '' : 'hidden'}`}>
+                <div className={`${core.tree.treeTab === 'search' ? '' : 'hidden'}`}>
                   <FullSearch />
                 </div>
               </div>

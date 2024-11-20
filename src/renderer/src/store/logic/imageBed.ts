@@ -1,11 +1,14 @@
-import {message$} from './index'
+import {message$} from '../../utils/index'
 import ky from 'ky'
-import {configStore} from '../store/config'
+import { Core } from '../core'
 
-class ImageBed {
+export class ImageBed {
+  constructor(
+    private readonly core: Core
+  ) {}
   route = ''
   initial() {
-    if (configStore.config.turnOnImageBed) {
+    if (this.core.config.state.turnOnImageBed) {
       this.route = localStorage.getItem('pick-route') || ''
     }
   }
@@ -51,5 +54,3 @@ class ImageBed {
     return null
   }
 }
-
-export const imageBed = new ImageBed()

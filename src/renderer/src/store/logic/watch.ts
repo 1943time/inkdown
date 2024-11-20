@@ -1,21 +1,24 @@
-import {TreeStore} from './tree'
+import {TreeStore} from '../tree'
 import {join} from 'path'
-import {IFileItem, ISpaceNode} from '../index'
-import {openMdParserHandle} from '../editor/parser/parser'
+import {IFileItem, ISpaceNode} from '../../index'
+import {openMdParserHandle} from '../../editor/parser/parser'
 import {existsSync, statSync} from 'fs'
-import {db, IFile} from './db'
-import {nid} from '../utils'
-import {mediaType} from '../editor/utils/dom'
-import {createFileNode} from './parserNode'
+import {db, IFile} from '../db'
+import {nid} from '../../utils'
+import {mediaType} from '../../editor/utils/dom'
 import {runInAction} from 'mobx'
+import { Core } from '../core'
 
 export class Watcher {
   private fileMap = new Map<string, IFileItem>()
   private ops:{e: 'remove' | 'update', path: string}[] = []
   pause = false
   ignorePath = new Set<string>()
+  get store () {
+    return this.core.tree
+  }
   constructor(
-    private readonly store: TreeStore
+    private readonly core: Core
   ) {
     this.onChange = this.onChange.bind(this)
     window.electron.ipcRenderer.on('window-blur', () => {
@@ -98,7 +101,7 @@ export class Watcher {
               data.links = res.links
             }
             db.file.add(data)
-            const node = createFileNode(data, parent)
+            const node = this.core.node.createFileNode(data, parent)
             runInAction(() => {
               if (s.isDirectory()) {
                 parent!.children!.unshift(node)

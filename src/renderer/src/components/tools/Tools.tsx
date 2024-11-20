@@ -4,10 +4,11 @@ import Command from '../../icons/keyboard/Command'
 import { SystemPanel } from './System'
 import { Icon } from '@iconify/react'
 import {useLocalState} from '../../hooks/useLocalState'
-import {treeStore} from '../../store/tree'
 import IFormat from '../../icons/IFormat'
+import { useCoreContext } from '../../store/core'
 
 export const Tools = observer(() => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     open: false,
     tab: '',
@@ -41,7 +42,7 @@ export const Tools = observer(() => {
       return window.removeEventListener('click', close)
     }
   }, [])
-  if (!treeStore.openedNote || treeStore.openedNote.ext !== 'md') return null
+  if (!core.tree.openedNote || core.tree.openedNote.ext !== 'md') return null
   return (
     <>
       <div
@@ -49,7 +50,7 @@ export const Tools = observer(() => {
           e.preventDefault()
         }}
         style={{
-          top: treeStore.tabs.length > 1 ? 180 : 120,
+          top: core.tree.tabs.length > 1 ? 180 : 120,
           transitionProperty: 'opacity,border'
         }}
         className={`system-tools select-none absolute right-5 p-1 space-y-2 ${state.open ? 'text-zinc-600 dark:text-zinc-300' : 'dark:text-zinc-500 dark:hover:text-zinc-300 text-zinc-400 hover:text-zinc-600'}

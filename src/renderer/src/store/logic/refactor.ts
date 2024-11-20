@@ -1,14 +1,13 @@
-import {treeStore, TreeStore} from '../store/tree'
-import {IFileItem} from '../index'
-import {basename, isAbsolute, join, relative} from 'path'
-import {copy} from './index'
-import { parsePath, toUnixPath } from './path'
-import {db} from '../store/db'
-import {configStore} from '../store/config'
+import { basename, isAbsolute, join, relative } from 'path'
+import { IFileItem } from '../..'
+import { copy } from '../../utils'
+import { Core } from '../core'
+import { parsePath, toUnixPath } from '../../utils/path'
+import { db } from '../db'
 
 export class Refactor {
   constructor(
-    private readonly store: TreeStore
+    private readonly core: Core
   ) {}
 
   private findElByPath(schema: any[], path: number[]): any | null {
@@ -44,7 +43,7 @@ export class Refactor {
           schema, links: node.links
         })
         node.schema = schema
-        for (let t of treeStore.tabs) {
+        for (let t of this.core.tree.tabs) {
           if (t.current === node) {
             t.store.saveDoc$.next(node.schema)
           }
@@ -53,7 +52,7 @@ export class Refactor {
     }
   }
   private checkDepOn(target: IFileItem, oldPath: string) {
-    for (const [, node] of this.store.nodeMap) {
+    for (const [, node] of this.core.tree.nodeMap) {
       if (!node.folder && node.links?.length) {
         if (node.links.some(l => l.target === oldPath)) {
           const schema = copy(node.schema!)
@@ -73,7 +72,7 @@ export class Refactor {
               schema, links: node.links
             })
             node.schema = schema
-            for (let t of treeStore.tabs) {
+            for (let t of this.core.tree.tabs) {
               if (t.current === node) {
                 t.store.saveDoc$.next(node.schema)
               }
@@ -84,7 +83,6 @@ export class Refactor {
     }
   }
   refactorDepLink(node: IFileItem) {
-    if (!configStore.config.autoRebuild) return
     if (node.folder) {
       for (const n of node.children!) {
         if (n.folder) {
@@ -98,7 +96,6 @@ export class Refactor {
     }
   }
   refactorDepOnLink(node: IFileItem, oldPath: string) {
-    if (!configStore.config.autoRebuild) return
     if (node.folder) {
       for (const n of node.children!) {
         if (n.folder) {

@@ -1,9 +1,12 @@
 import {useSetState} from 'react-use'
 import {useEffect} from 'react'
 import icon from '../../../resources/icon.png?asset'
-import {configStore} from './store/config'
 import { Modal } from 'antd'
+import { useCoreContext } from './store/core'
+import { useTranslation } from 'react-i18next'
 export function About() {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useSetState({
     version: '',
     open: false
@@ -30,7 +33,7 @@ export function About() {
         <div className={'mt-2 text-sm text-white font-medium'}>{'Inkdown'}</div>
         <div className={'flex items-center mt-1'}>
           <div className={'text-xs'}>
-            {configStore.zh ? '版本' : 'version'} {state.version}
+            {t('version')} {state.version}
           </div>
         </div>
         <div className={'mt-4 text-xs dark:text-gray-400'}>Copyright © 2024 Inkdown</div>

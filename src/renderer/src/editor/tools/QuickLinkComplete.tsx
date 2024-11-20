@@ -11,16 +11,17 @@ import { ISort } from '../../icons/keyboard/ISort'
 import { join, parse } from 'path'
 import { useEditorStore } from '../store'
 import { runInAction } from 'mobx'
-import { treeStore } from '../../store/tree'
 import { IFileItem } from '../..'
 import { isLink, parsePath, toRelativePath } from '../../utils/path'
 import { observer } from 'mobx-react-lite'
+import { useCoreContext } from '../../store/core'
 
 let panelWidth = 350
 type DocItem = IFileItem & { path: string; parentPath?: string }
 
 export const QuickLinkComplete = observer(() => {
   const store = useEditorStore()
+  const core = useCoreContext()
   const scrollRef = useRef<HTMLDivElement>(null)
   const keyword = useRef<string | undefined>('')
   const [state, setState] = useGetSetState({
@@ -143,7 +144,7 @@ export const QuickLinkComplete = observer(() => {
         return close('#' + parse.hash)
       }
       const filePath = store.openFilePath || ''
-      const realPath = join(treeStore.root?.filePath || '', parse.path)
+      const realPath = join(core.tree.root?.filePath || '', parse.path)
       const relativePath = realPath === store.openFilePath ? '' : toRelativePath(filePath, realPath)
       close(`${relativePath}${parse.hash ? `#${parse.hash}` : ''}`)
     }
@@ -179,17 +180,17 @@ export const QuickLinkComplete = observer(() => {
           ? client - container.scrollTop - rect.bottom + 190
           : container.scrollTop + rect.top - 10
       let left = rect.x - 4
-      if (!treeStore.fold) {
-        left -= treeStore.width
+      if (!core.tree.fold) {
+        left -= core.tree.width
       }
       if (left < 4) left = 4
       if (left > container.clientWidth - panelWidth) left = container.clientWidth - panelWidth - 4
-      if (treeStore.tabs.length > 1) {
+      if (core.tree.tabs.length > 1) {
         y = mode === 'bottom' ? y + 30 : y - 30
       }
-      const { docs, map } = treeStore.allNotes
+      const { docs, map } = core.tree.allNotes
       const notes = docs.filter(d => {
-        return d.filePath !== treeStore.openedNote?.filePath
+        return d.filePath !== core.tree.openedNote?.filePath
       })
       setState({
         left,

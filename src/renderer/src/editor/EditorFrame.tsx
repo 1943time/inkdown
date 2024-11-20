@@ -9,21 +9,21 @@ import {FloatBar} from './tools/FloatBar'
 import {TableAttr} from './tools/TableAttr'
 import {Search} from './tools/Search'
 import {mediaType} from './utils/dom'
-import {treeStore} from '../store/tree'
 import {MainApi} from '../api/main'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {getImageData, isMod} from '../utils'
 import {LangAutocomplete} from './tools/LangAutocomplete'
-import {configStore} from '../store/config'
 import {InsertAutocomplete} from './tools/InsertAutocomplete'
 import { InsertLink } from './tools/InsertLink'
 import { useLocalState } from '../hooks/useLocalState'
 import { action } from 'mobx'
 import {PhotoSlider} from 'react-photo-view'
 import { QuickLinkComplete } from './tools/QuickLinkComplete'
+import { useCoreContext } from '../store/core'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     showLeftPadding: false
   })
@@ -49,17 +49,17 @@ export const EditorFrame = observer(({tab}: {
 
   const size = useMemo(() => {
     return {
-      width: window.innerWidth - (treeStore.fold ? 0 : treeStore.width),
+      width: window.innerWidth - (core.tree.fold ? 0 : core.tree.width),
       height: window.innerHeight - 40
     }
-  }, [treeStore.size, treeStore.fold, treeStore.width])
+  }, [core.tree.size, core.tree.fold, core.tree.width])
   const pt = useMemo(() => {
     let pt = 0
     if (tab.store.openSearch) pt += 46
     return pt
-  }, [tab.store.openSearch, treeStore.tabs.length])
+  }, [tab.store.openSearch, core.tree.tabs.length])
   useEffect(() => {
-    const show = treeStore.fold && configStore.config.showLeading
+    const show = core.tree.fold && core.config.state.showLeading
     if (show) {
       setTimeout(() => {
         setState({
@@ -71,7 +71,7 @@ export const EditorFrame = observer(({tab}: {
         showLeftPadding: false
       })
     }
-  }, [treeStore.fold])
+  }, [core.tree.fold])
   return (
     <EditorStoreContext.Provider value={tab.store}>
       <Search />
@@ -97,18 +97,18 @@ export const EditorFrame = observer(({tab}: {
                   } xl:block hidden`}
                 />
                 <div
-                  style={{ maxWidth: configStore.config.editorWidth + 96 || 796 }}
+                  style={{ maxWidth: core.config.state.editorWidth + 96 || 796 }}
                   className={`flex-1 content px-12 ${
-                    configStore.config.editorLineHeight === 'compact'
+                    core.config.state.editorLineHeight === 'compact'
                       ? 'line-height-compact'
-                      : configStore.config.editorLineHeight === 'loose'
+                      : core.config.state.editorLineHeight === 'loose'
                       ? 'line-height-loose'
                       : ''
                   }`}
                 >
                   <MEditor note={tab.current} />
                 </div>
-                {tab === treeStore.currentTab && <Heading note={tab.current} />}
+                {tab === core.tree.currentTab && <Heading note={tab.current} />}
               </div>
               <QuickLinkComplete/>
             </div>

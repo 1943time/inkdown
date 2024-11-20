@@ -1,7 +1,6 @@
 import { IFileItem, ISpaceNode } from '../../index'
 import { IMenu, openMenus } from '../Menu'
 import React from 'react'
-import { treeStore } from '../../store/tree'
 import { configStore } from '../../store/config'
 import { isMac, message$, nid } from '../../utils'
 import { MainApi } from '../../api/main'
@@ -16,21 +15,23 @@ import { openEditFolderDialog$ } from './EditFolderDialog'
 import { openEbook$ } from '../../server/ui/Ebook'
 import { shareStore } from '../../server/store'
 import { copyToClipboard } from '../../utils/copy'
+import { Core, useCoreContext } from '../../store/core'
 
 export const deepCreateDoc = async (filePath: string) => {
-  if (!treeStore.root) {
+  const core = useCoreContext()
+  if (!core.tree.root) {
     return
   }
   const parent = join(filePath, '..')
-  const nodeMap = new Map(treeStore.nodes.map(n => [n.filePath, n]))
-  let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || treeStore.root
+  const nodeMap = new Map(core.tree.nodes.map(n => [n.filePath, n]))
+  let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || core.tree.root
   if (!existsSync(parent)) {
     mkdirSync(parent, {recursive: true})
-    const stack = parent.replace(treeStore.root.filePath + sep, '').split(sep)
+    const stack = parent.replace(core.tree.root.filePath + sep, '').split(sep)
     let curPaths: string[] = []
     for (const item of stack) {
       curPaths.push(item)
-      const path = join(treeStore.root.filePath, curPaths.join(sep))
+      const path = join(core.tree.root.filePath, curPaths.join(sep))
       if (nodeMap.get(path)) {
         parentNode = nodeMap.get(path)!
       } else {
@@ -39,7 +40,7 @@ export const deepCreateDoc = async (filePath: string) => {
         const data: IFile = {
           cid: id,
           filePath: path,
-          spaceId: treeStore.root!.cid,
+          spaceId: core.tree.root!.cid,
           updated: now,
           sort: 0,
           folder: true,
@@ -60,6 +61,7 @@ export const deepCreateDoc = async (filePath: string) => {
 export const createDoc = async ({parent, newName, copyItem, ghost}: {
   parent?: IFileItem | ISpaceNode, newName?: string, copyItem?: IFileItem, ghost?: boolean
 }) => {
+  const core = useCoreContext()
   newName = newName || 'Untitled'
   const name = getCreateName(parent, newName)
   const id = nid()
@@ -96,16 +98,16 @@ export const createDoc = async ({parent, newName, copyItem, ghost}: {
       db.file.update(n.cid, {sort: i})
       n.sort = i
     })
-    treeStore.nodeMap.set(data.cid, newNode)
+    core.tree.nodeMap.set(data.cid, newNode)
   }
-  if (treeStore.selectItem) {
-    runInAction(() => treeStore.selectItem = null)
+  if (core.tree.selectItem) {
+    runInAction(() => core.tree.selectItem = null)
   }
-  treeStore.openNote(newNode)
+  core.tree.openNote(newNode)
   setTimeout(() => {
     setTimeout(() => {
       const title =
-        treeStore.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')
+        core.tree.currentTab.store.container?.querySelector<HTMLInputElement>('.page-title')
       if (title) {
         title.focus()
         const range = document.createRange()
@@ -131,10 +133,10 @@ export const getCreateName = (parent?: IFileItem | ISpaceNode, name = 'Untitled'
   }
   return cur
 }
-export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNode) => {
+export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNode, core: Core) => {
   runInAction(() => {
-    treeStore.selectItem = node.root ? null : node
-    treeStore.ctxNode = node
+    core.tree.selectItem = node.root ? null : node
+    core.tree.ctxNode = node
   })
   if (!node.root && !node.folder) {
     const isMd = node.ext === 'md'
@@ -142,7 +144,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       {
         text: configStore.zh ? '在新标签中打开' : 'Open in New Tab',
         click: () => {
-          treeStore.appendTab(node)
+          core.tree.appendTab(node)
         },
         key: 'cmd+click'
       }
@@ -162,7 +164,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         {
           text: configStore.zh ? '复制Inkdown URL' : 'Copy Inkdown URL',
           click: async () => {
-            copyToClipboard(`bluestone://open?space=${treeStore.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
+            copyToClipboard(`bluestone://open?space=${core.tree.root?.cid}&path=${encodeURIComponent(node.filePath)}`)
             message$.next({
               type: 'success',
               content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
@@ -191,12 +193,12 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
       {hr: true},
       {
         text: configStore.zh ? '移到废纸篓' : 'Move to Trash',
-        click: () => treeStore.moveToTrash(node),
+        click: () => core.tree.moveToTrash(node),
         key: 'cmd+backspace'
       }
     ])
     openMenus(e, menus, action(() => {
-      treeStore.ctxNode = null
+      core.tree.ctxNode = null
     }))
   } else {
     const menus:IMenu[] = [
@@ -223,7 +225,7 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         text: configStore.zh ? '重命名' : 'Rename',
         click: () => {
           runInAction(() => {
-            treeStore.selectItem = null
+            core.tree.selectItem = null
           })
           openEditFolderDialog$.next({
             ctxNode: node,
@@ -256,13 +258,13 @@ export const openContextMenu = (e: React.MouseEvent, node: IFileItem | ISpaceNod
         {hr: true},
         {
           text: configStore.zh ? '移到废纸篓' : 'Move to Trash',
-          click: () => treeStore.moveToTrash(node),
+          click: () => core.tree.moveToTrash(node),
           key: 'cmd+backspace'
         }
       ])
     }
     openMenus(e, menus, action(() => {
-      treeStore.ctxNode = null
+      core.tree.ctxNode = null
     }))
   }
 }

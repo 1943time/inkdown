@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite'
 import { useLocalState } from '../../hooks/useLocalState'
 import { useEditorStore } from '../store'
 import { useCallback, useEffect, useRef } from 'react'
-import { treeStore } from '../../store/tree'
 import {
   BoldOutlined,
   CaretDownOutlined, ClearOutlined,
@@ -24,6 +23,7 @@ import Ctrl from '../../icons/keyboard/Ctrl'
 import Shift from '../../icons/keyboard/Shift'
 import Option from '../../icons/keyboard/Option'
 import { runInAction } from 'mobx'
+import { useCoreContext } from '../../store/core'
 const FloatBarWidth = 246
 function Mod() {
   if (isMac) {
@@ -88,6 +88,7 @@ const colors = [
 ]
 const fileMap = new Map<string, IFileItem>()
 export const FloatBar = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
   const inputRef = useRef<any>()
   const [state, setState] = useLocalState({
@@ -141,14 +142,14 @@ export const FloatBar = observer(() => {
   const resize = useCallback((force = false) => {
     if (store.domRect && !store.openLinkPanel) {
       let left = store.domRect.x
-      if (!treeStore.fold) left -= treeStore.width
+      if (!core.tree.fold) left -= core.tree.width
       left = left - ((state.openSelectColor ? 260 : FloatBarWidth) - store.domRect.width) / 2
       const container = store.container!
       if (left < 4) left = 4
       const barWidth = state.openSelectColor ? 264 : FloatBarWidth + 4
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
       let top = state.open && !force ? state.top : container.scrollTop + store.domRect.top - 80
-      if (treeStore.tabs.length > 1) top -= 30
+      if (core.tree.tabs.length > 1) top -= 30
       setState({
         open: true,
         left,

@@ -2,18 +2,20 @@ import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useCallback, useEffect, useMemo, useRef} from 'react'
 import {Button, Space, Tooltip} from 'antd'
-import {configStore} from '../../store/config'
 import IClose from '../../icons/IClose'
 import isHotkey from 'is-hotkey'
-import {treeStore} from '../../store/tree'
 import Replace from '../../icons/Replace'
 import {ArrowRightOutlined, DownOutlined, UpOutlined} from '@ant-design/icons'
 import {useLocalState} from '../../hooks/useLocalState'
 import {Editor, Element, Transforms} from 'slate'
 import {runInAction} from 'mobx'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Search = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     replaceText: '',
     openReplace: false
@@ -26,9 +28,9 @@ export const Search = observer(() => {
   }, [store.openSearch, store.focusSearch])
   const top = useMemo(() => {
     let pt = 40
-    if (treeStore.tabs.length > 1) pt += 32
+    if (core.tree.tabs.length > 1) pt += 32
     return pt
-  }, [treeStore.tabs.length])
+  }, [core.tree.tabs.length])
 
   const replace = useCallback(() => {
     if (!store.highlightCache.size) {
@@ -90,7 +92,7 @@ export const Search = observer(() => {
             <div className={'flex-1 relative'}>
               <input
                 value={store.search.text}
-                placeholder={configStore.zh ? '查找' : 'Find'}
+                placeholder={t('find')}
                 autoFocus={true}
                 ref={inputRef}
                 onFocus={() => {
@@ -116,7 +118,7 @@ export const Search = observer(() => {
                 <ArrowRightOutlined className={'px-2 text-sm text-gray-500 dark:text-gray-300'}/>
                 <input
                   value={state.replaceText}
-                  placeholder={configStore.zh ? '替换' : 'Replace'}
+                  placeholder={t('replace')}
                   className={'w-full input px-2'}
                   onChange={e => setState({replaceText: e.target.value})}
                 />
@@ -132,13 +134,13 @@ export const Search = observer(() => {
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={() => store.prevSearch()}
                   >
-                    {configStore.zh ? '上一个' : 'Prev'}
+                    {t('prev')}
                   </div>
                   <div
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={() => store.nextSearch()}
                   >
-                    {configStore.zh ? '下一个' : 'Next'}
+                    {t('next')}
                   </div>
                 </>
               }
@@ -162,13 +164,13 @@ export const Search = observer(() => {
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={replace}
                   >
-                    {configStore.zh ? '替换' : 'Replace'}
+                    {t('replace')}
                   </div>
                   <div
                     className={'dark:bg-zinc-700/30 px-2 py-0.5 rounded cursor-pointer border dark:border-zinc-700 border-gray-500/50 hover:text-gray-600 dark:hover:text-gray-300 duration-100'}
                     onClick={replaceAll}
                   >
-                    {configStore.zh ? '替换所有' : 'Replace All'}
+                    {t('replaceAll')}
                   </div>
                 </>
               }
@@ -183,7 +185,7 @@ export const Search = observer(() => {
               }
               {!store.searchRanges.length && !!store.search.text &&
                 <div className={'text-gray-500 text-sm'}>
-                  {configStore.zh ? '没有结果' : 'No result'}
+                  {t('noResult')}
                 </div>
               }
             </div>

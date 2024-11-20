@@ -2,7 +2,6 @@ import {observer} from 'mobx-react-lite'
 import {Button, Modal, Tooltip} from 'antd'
 import {useEffect, useMemo} from 'react'
 import {useLocalState} from '../../hooks/useLocalState'
-import {treeStore} from '../../store/tree'
 import {basename} from 'path'
 import {HistoryOutlined, QuestionCircleOutlined} from '@ant-design/icons'
 import {Webview} from '../Webview'
@@ -11,6 +10,7 @@ import dayjs from 'dayjs'
 import {toJS} from 'mobx'
 import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
+import { useCoreContext } from '../../store/core'
 
 function Help(props: {
   text: string
@@ -27,6 +27,7 @@ export const History = observer((props: {
   node?: IFileItem
   onClose: () => void
 }) => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     fileName: '',
     selectIndex: 0,
@@ -35,7 +36,7 @@ export const History = observer((props: {
   })
   useEffect(() => {
     if (props.open) {
-      const node = treeStore.openedNote
+      const node = core.tree.openedNote
       if (node?.ext === 'md') {
         db.history.where('fileId').equals(node.cid).toArray().then(records => {
           setState({
@@ -117,7 +118,7 @@ export const History = observer((props: {
           disabled={!schema.length}
           onClick={() => {
             if (schema.length) {
-              treeStore.currentTab.store.saveDoc$.next(schema)
+              core.tree.currentTab.store.saveDoc$.next(schema)
             }
             props.onClose()
           }}
