@@ -10,34 +10,20 @@ import { InlineChromiumBugfix } from '../utils/InlineChromiumBugfix'
 import { Media } from './media'
 import { useEditorStore } from '../store'
 import { Editor, Transforms } from 'slate'
-import { treeStore } from '../../store/tree'
 import { InlineKatex } from './CodeUI/Katex/InlineKatex'
 import { isLink, parsePath, toSpacePath } from '../../utils/path'
 import { ReactEditor } from 'slate-react'
 import { EditorUtils } from '../utils/editorUtils'
 import { isAbsolute, join } from 'path'
 import { db } from '../../store/db'
-import { slugify } from '../utils/dom'
 import { openConfirmDialog$ } from '../../components/Dialog/ConfirmDialog'
 import { message$ } from '../../utils'
-import { deepCreateDoc } from '../../components/tree/openContextMenu'
 import { Attachment } from './attachment'
+import { useCoreContext } from '../../store/core'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
   e.stopPropagation()
-}
-
-const toHash = (hash: string) => {
-  const dom = treeStore.currentTab.store.container?.querySelector(
-    `[data-head="${slugify(hash.toLowerCase())}"]`
-  ) as HTMLElement
-  if (dom) {
-    treeStore.currentTab.store.container?.scroll({
-      top: dom.offsetTop + 100,
-      behavior: 'smooth'
-    })
-  }
 }
 
 export const MElement = (props: RenderElementProps) => {
@@ -85,6 +71,7 @@ export const MElement = (props: RenderElementProps) => {
 }
 
 export const MLeaf = (props: RenderLeafProps) => {
+  const core = useCoreContext()
   const code = useContext(CodeCtx)
   const store = useEditorStore()
   return useMemo(() => {
@@ -125,7 +112,7 @@ export const MLeaf = (props: RenderLeafProps) => {
           draggable={false}
           title={`mod + click to open link, mod + alt + click to open file in new tab`}
           onDragStart={dragStart}
-          data-url={leaf.url ? toSpacePath(treeStore.root?.filePath || '', store.openFilePath || '', leaf.url) : leaf.link}
+          data-url={leaf.url ? toSpacePath(core.tree.root?.filePath || '', store.openFilePath || '', leaf.url) : leaf.link}
           onClick={(e) => {
             e.stopPropagation()
             e.preventDefault()
@@ -136,32 +123,32 @@ export const MLeaf = (props: RenderLeafProps) => {
                 } else {
                   const parseRes = parsePath(leaf.url)
                   if (!parseRes.path && parseRes.hash) {
-                    return toHash(parseRes.hash)
+                    return store.toHash(parseRes.hash)
                   }
                   const path = isAbsolute(parseRes.path)
                     ? parseRes.path
-                    : join(treeStore.currentTab.current!.filePath, '..', parseRes.path)
+                    : join(core.tree.currentTab.current!.filePath, '..', parseRes.path)
                   db.file
                     .where('filePath')
                     .equals(path)
                     .toArray()
                     .then((res) => {
                       for (let f of res) {
-                        const node = treeStore.nodeMap.get(f.cid)
+                        const node = core.tree.nodeMap.get(f.cid)
                         if (node) {
-                          e.altKey ? treeStore.appendTab(node) : treeStore.openNote(node)
+                          e.altKey ? core.tree.appendTab(node) : core.tree.openNote(node)
                           if (parseRes.hash) {
                             setTimeout(() => {
-                              toHash(parseRes.hash)
+                              store.toHash(parseRes.hash)
                             }, 200)
                           }
                           return
                         }
                       }
                       if (
-                        treeStore.root &&
+                        core.tree.root &&
                         path.endsWith('.md') &&
-                        path.startsWith(treeStore.root.filePath)
+                        path.startsWith(core.tree.root.filePath)
                       ) {
                         openConfirmDialog$.next({
                           title: 'Note',
@@ -169,7 +156,7 @@ export const MLeaf = (props: RenderLeafProps) => {
                           okText: 'Create',
                           okType: 'primary',
                           onConfirm: () => {
-                            deepCreateDoc(path)
+                            core.node.deepCreateDoc(path)
                           }
                         })
                       } else {

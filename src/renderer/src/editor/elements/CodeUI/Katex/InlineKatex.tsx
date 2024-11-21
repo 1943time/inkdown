@@ -1,10 +1,10 @@
-import {observer} from 'mobx-react-lite'
-import {ElementProps, InlineKatexNode} from '../../../../el'
-import React, {useEffect, useMemo, useRef, useState} from 'react'
-import {InlineChromiumBugfix} from '../../../utils/InlineChromiumBugfix'
-import {useSelStatus} from '../../../../hooks/editor'
+import { observer } from 'mobx-react-lite'
+import { ElementProps, InlineKatexNode } from '../../../../el'
+import { useEffect, useMemo, useRef } from 'react'
+import { InlineChromiumBugfix } from '../../../utils/InlineChromiumBugfix'
+import { useSelStatus } from '../../../../hooks/editor'
 import katex from 'katex'
-import {Editor, Node, Transforms} from 'slate'
+import { Editor, Node, Transforms } from 'slate'
 
 export const InlineKatex = observer(({children, element, attributes}: ElementProps<InlineKatexNode>) => {
   const renderEl = useRef<HTMLElement>(null)

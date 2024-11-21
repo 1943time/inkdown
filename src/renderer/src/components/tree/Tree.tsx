@@ -9,7 +9,6 @@ import { SpaceItem } from '../space/SpaceItem'
 import Folder from '../../icons/Folder'
 import { FullSearch } from '../FullSearch'
 import { TreeRender } from './TreeRender'
-import { openContextMenu } from './openContextMenu'
 import { editSpace$, spaceChange$ } from '../space/EditSpace'
 import { TreeEmpty } from './TreeEmpty'
 import { useSubject } from '../../hooks/subscribe'
@@ -309,7 +308,7 @@ export const Tree = observer(() => {
                 onDrop={(e) => core.tree.moveDragFiles(e)}
                 onContextMenu={(e) => {
                   if (core.tree.treeTab === 'folder') {
-                    openContextMenu(e, core.tree.root!)
+                    core.menu.openTreeMenu(e, core.tree.root!)
                   }
                 }}
               >

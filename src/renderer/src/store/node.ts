@@ -1,9 +1,9 @@
 import { basename, extname, isAbsolute, join, parse, sep } from 'path'
 import { IFileItem, ISpaceNode } from '..'
-import { Core } from './core'
+import { Core, useCoreContext } from './core'
 import { db, IFile } from './db'
 import { observable, runInAction } from 'mobx'
-import { cpSync, existsSync, readdirSync, renameSync, statSync, writeFileSync } from 'fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from 'fs'
 import { openMdParserHandle, parserMdToSchema } from '../editor/parser/parser'
 import { nid } from '../utils'
 import { mediaType } from '../editor/utils/dom'
@@ -469,5 +469,46 @@ export class NodeStore {
       cur = name + ' ' + index
     }
     return cur
+  }
+
+ async deepCreateDoc(filePath: string) {
+    const core = useCoreContext()
+    if (!core.tree.root) {
+      return
+    }
+    const parent = join(filePath, '..')
+    const nodeMap = new Map(core.tree.nodes.map(n => [n.filePath, n]))
+    let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || core.tree.root
+    if (!existsSync(parent)) {
+      mkdirSync(parent, {recursive: true})
+      const stack = parent.replace(core.tree.root.filePath + sep, '').split(sep)
+      let curPaths: string[] = []
+      for (const item of stack) {
+        curPaths.push(item)
+        const path = join(core.tree.root.filePath, curPaths.join(sep))
+        if (nodeMap.get(path)) {
+          parentNode = nodeMap.get(path)!
+        } else {
+          const id = nid()
+          const now = Date.now()
+          const data: IFile = {
+            cid: id,
+            filePath: path,
+            spaceId: core.tree.root!.cid,
+            updated: now,
+            sort: 0,
+            folder: true,
+            created: now
+          }
+          await db.file.add(data)
+          runInAction(() => {
+            const node = this.createFileNode(data, parentNode)
+            parentNode.children!.unshift(node)
+            parentNode = node
+          })
+        }
+      }
+    }
+    this.createDoc({parent: parentNode, newName: parse(filePath).name})
   }
 }

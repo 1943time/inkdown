@@ -10,12 +10,13 @@ import isHotkey from 'is-hotkey'
 import {MainApi} from '../../api/main'
 import {EditorStore} from '../store'
 import {runInAction} from 'mobx'
+import { Core } from '../../store/core'
 
-export const useKeyboard = (store: EditorStore) => {
+export const useKeyboard = (core: Core, store: EditorStore) => {
   return useMemo(() => {
-    const tab = new TabKey(store.editor)
-    const backspace = new BackspaceKey(store.editor)
-    const enter = new EnterKey(store, backspace)
+    const tab = new TabKey(core, store)
+    const backspace = new BackspaceKey(core, store)
+    const enter = new EnterKey(core, store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
       if (store.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {

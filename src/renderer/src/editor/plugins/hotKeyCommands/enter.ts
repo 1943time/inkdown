@@ -5,14 +5,15 @@ import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
 import {EditorStore} from '../../store'
-import {configStore} from '../../../store/config'
 import {isMod} from '../../../utils'
+import { Core } from '../../../store/core'
 export class EnterKey {
   bracketsMap = new Map([
     ['[', ']'],
     ['{', '}']
   ])
   constructor(
+    private readonly core: Core,
     private readonly store: EditorStore,
     private readonly backspace: BackspaceKey
   ) {}
@@ -169,7 +170,7 @@ export class EnterKey {
           }, {at: Path.next(parentPath), select: true})
           let cur = Path.next(path)
           let index = 1
-          EditorUtils.moveNodes(this.editor, cur, Path.next(parentPath), index)
+          EditorUtils.moveNodes(this.store, cur, Path.next(parentPath), index)
         }
       }
     }
@@ -315,7 +316,7 @@ export class EnterKey {
 
         Transforms.select(this.editor, Editor.start(this.editor, Path.next(parent[1])))
         if (Editor.hasPath(this.editor, Path.next(node[1]))) {
-          EditorUtils.moveNodes(this.editor, Path.next(node[1]), Path.next(parent[1]), 1)
+          EditorUtils.moveNodes(this.store, Path.next(node[1]), Path.next(parent[1]), 1)
         }
       }
     }
@@ -345,20 +346,20 @@ export class EnterKey {
     }
     if (['[', '{'].includes(str[end.offset - 1]) && remainText) {
       if (this.bracketsMap.get(str[end.offset - 1]) === str[end.offset]) {
-        const line = {type: 'code-line', children: [{text: space + configStore.tab}]}
+        const line = {type: 'code-line', children: [{text: space + this.core.config.tab}]}
         Transforms.insertNodes(this.editor, [
           line,
           {type: 'code-line', children: [{text: space + remainText}]},
         ], {at: next})
         Transforms.select(this.editor, Editor.end(this.editor, Path.next(path)))
       } else {
-        const text = space + configStore.tab + str.slice(end.offset)
+        const text = space + this.core.config.tab + str.slice(end.offset)
         Transforms.insertNodes(this.editor, [
           {type: 'code-line', children: [{text}]}
         ], {at: next})
         Transforms.select(this.editor, {
           path: [...Path.next(path), 0],
-          offset: (space + configStore.tab).length
+          offset: (space + this.core.config.tab).length
         })
       }
     } else if (remainText) {

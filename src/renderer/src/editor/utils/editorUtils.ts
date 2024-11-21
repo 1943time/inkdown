@@ -2,7 +2,6 @@ import {BaseSelection, Editor, Element, Node, Path, Point, Range, Text, Transfor
 import {CustomLeaf} from '../../el'
 import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
-import {clearCodeCache} from '../plugins/useHighlight'
 import {getOffsetTop} from './dom'
 import {EditorStore} from '../store'
 
@@ -101,14 +100,16 @@ export class EditorUtils {
     }
     return []
   }
-  static moveNodes(editor: Editor, from: Path, to: Path, index = 1) {
+  static moveNodes(store: EditorStore, from: Path, to: Path, index = 1) {
     let count = 0
-    while (Editor.hasPath(editor, from)) {
+    while (Editor.hasPath(store.editor, from)) {
       if (count > 100) break
-      const node = Editor.node(editor, from)
+      const node = Editor.node(store.editor, from)
       // 刷新code元素缓存
-      if (node[0].type === 'code') clearCodeCache(node[0])
-      Transforms.moveNodes(editor, {
+      if (node[0].type === 'code') {
+        store.clearCodeCache(node[0])
+      }
+      Transforms.moveNodes(store.editor, {
         at: from,
         to: [...to, index]
       })

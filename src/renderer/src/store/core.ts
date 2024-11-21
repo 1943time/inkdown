@@ -6,6 +6,8 @@ import { NodeStore } from './node'
 import { ImageBed } from './logic/imageBed'
 import { Refactor } from './logic/refactor'
 import { KeyboardTask } from './logic/keyboard'
+import { FileAssets } from './logic/file'
+import { ContextMenu } from './logic/menu'
 
 export class Core {
   tree: TreeStore
@@ -14,6 +16,8 @@ export class Core {
   imageBed: ImageBed
   refactor: Refactor
   keyboard: KeyboardTask
+  file: FileAssets
+  menu: ContextMenu
   get curEditor() {
     return this.tree.currentTab.store.editor
   }
@@ -26,6 +30,8 @@ export class Core {
     this.imageBed = new ImageBed(this)
     this.refactor = new Refactor(this)
     this.keyboard = new KeyboardTask(this)
+    this.file = new FileAssets(this)
+    this.menu = new ContextMenu(this)
   }
 }
 

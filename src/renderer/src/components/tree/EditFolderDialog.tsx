@@ -8,7 +8,6 @@ import { IFileItem } from '../../index'
 import { useLocalState } from '../../hooks/useLocalState'
 import { useSubject } from '../../hooks/subscribe'
 import { nid } from '../../utils'
-import { createFileNode } from '../../store/parserNode'
 import { db, IFile } from '../../store/db'
 import { join } from 'path'
 import { runInAction } from 'mobx'
@@ -56,7 +55,7 @@ export const EditFolderDialog = observer(() => {
         await db.file.add(data)
         mkdirSync(data.filePath)
         runInAction(() => {
-          const node = createFileNode(data, state.ctxNode || core.tree.root!)
+          const node = core.node.createFileNode(data, state.ctxNode || core.tree.root!)
           stack.unshift(node)
           stack.map((s, i) => {
             db.file.update(s.cid, { sort: i })
@@ -74,7 +73,7 @@ export const EditFolderDialog = observer(() => {
           filePath: join(ctx.filePath, '..', name)
         })
         await updateFilePath(ctx, target)
-        core.tree.refactor.refactorDepOnLink(ctx, oldPath)
+        core.refactor.refactorDepOnLink(ctx, oldPath)
       }
       close()
     }

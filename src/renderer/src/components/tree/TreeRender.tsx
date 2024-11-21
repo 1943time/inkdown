@@ -6,11 +6,10 @@ import INote from '../../icons/INote'
 import ArrowRight from '../../icons/ArrowRight'
 import IFolder from '../../icons/IFolder'
 import { IFileItem } from '../../index'
-import { openContextMenu } from './openContextMenu'
 import { Icon } from '@iconify/react'
-import { configStore } from '../../store/config'
 import Iplus from '../../icons/Iplus'
 import { Core, useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 const checkChildren = (node: IFileItem, targetNode?: IFileItem) => {
   while(targetNode) {
@@ -33,6 +32,7 @@ const getClass = (c: IFileItem, core: Core) => {
 
 export const TreeRender = observer(() => {
   const core = useCoreContext()
+  const {t} = useTranslation()
   return (
     <>
       <div
@@ -48,7 +48,7 @@ export const TreeRender = observer(() => {
               : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
           } `}
           onClick={(e) => {
-            openContextMenu(e, core.tree.root!)
+            core.menu.openTreeMenu(e, core.tree.root!)
           }}
         >
           <Iplus />
@@ -63,7 +63,7 @@ export const TreeRender = observer(() => {
         )}
         {core.tree.root && !core.tree.root.children?.length && (
           <div className={'text-gray-400 text-center text-sm mt-20'}>
-            {configStore.zh ? '暂未创建文档' : 'No document has been created yet'}
+            {t('noCreateDoc')}
           </div>
         )}
       </div>
@@ -120,7 +120,7 @@ const Item = observer((
           style={{
             paddingLeft: level * 15
           }}
-          className={`rounded group relative ${getClass(item)}`}
+          className={`rounded group relative ${getClass(item, core)}`}
         >
           <div
             className={`${
@@ -144,7 +144,7 @@ const Item = observer((
             })}
             onContextMenu={(e) => {
               e.preventDefault()
-              openContextMenu(e, item)
+              core.menu.openTreeMenu(e, item)
             }}
             onClick={action((e) => {
               e.stopPropagation()
@@ -212,7 +212,7 @@ const Item = observer((
           {core.tree.dragNode !== item && (
             <div
               onClick={(e) => {
-                openContextMenu(e, item)
+                core.menu.openTreeMenu(e, item)
               }}
               className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${
                 core.tree.ctxNode === item
@@ -237,7 +237,7 @@ const RenderItem = observer(({items, level}: { items: IFileItem[], level: number
   const core = useCoreContext()
   return (
     <>
-      {items.filter(c => configStore.config.showHiddenFiles || !c.hidden || c.filename === (core.tree.root?.imageFolder || '.images')).map(c =>
+      {items.filter(c => core.config.config.showHiddenFiles || !c.hidden || c.filename === (core.tree.root?.imageFolder || '.images')).map(c =>
         <Item
           key={c.cid}
           item={c}

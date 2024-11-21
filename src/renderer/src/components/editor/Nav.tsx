@@ -11,19 +11,18 @@ import { MainApi } from '../../api/main'
 import { useLocalState } from '../../hooks/useLocalState'
 import { sep } from 'path'
 import { Share } from '../../server/Share'
-import { configStore } from '../../store/config'
 import { toMarkdown } from '../../editor/utils/toMarkdown'
-import { convertRemoteImages } from '../../editor/utils/media'
-import { clearUnusedImages } from '../../utils/clearUnusedImages'
 import { Badge, Popover } from 'antd'
 import { Update } from '../Update'
 import { keyTask$ } from '../../hooks/keyboard'
 import { IFileItem } from '../..'
 import INote from '../../icons/INote'
 import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Nav = observer(() => {
   const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     path: [] as string[],
     openImport: false,
@@ -50,7 +49,7 @@ export const Nav = observer(() => {
         }
       } else {
         setState({
-          path: core.tree.openedNote.filePath.replace(configStore.homePath, '~').split(sep)
+          path: core.tree.openedNote.filePath.replace(core.config.homePath, '~').split(sep)
         })
       }
     } else {
@@ -185,7 +184,7 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-300 space-x-1 text-gray-500'}>
           <Update />
-          <Share />
+          {/* <Share /> */}
           <div
             className={
               'flex items-center justify-center h-[27px] w-[30px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'
@@ -221,7 +220,7 @@ export const Nav = observer(() => {
                       window.api.copyToClipboard(md)
                       message$.next({
                         type: 'success',
-                        content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
+                        content: t('copied')
                       })
                     }
                   }
@@ -233,17 +232,17 @@ export const Nav = observer(() => {
                   disabled: core.tree.openedNote?.ext !== 'md'
                 },
                 {
-                  text: configStore.zh ? '下载远程图片至本机' : 'Download remote images to local',
+                  text: t('downloadRemote'),
                   disabled: core.tree.openedNote?.ext !== 'md',
                   click: () => {
-                    convertRemoteImages(core.tree.openedNote!)
+                    core.file.convertRemoteImages(core.tree.openedNote!)
                   }
                 },
                 {
-                  text: configStore.zh ? '清除未使用的图片' : 'Clear unused images',
+                  text: t('claerImage'),
                   disabled: !core.tree.root,
                   click: () => {
-                    clearUnusedImages()
+                    core.file.clear()
                   }
                 },
                 { hr: true },
@@ -255,7 +254,7 @@ export const Nav = observer(() => {
                   }
                 },
                 {
-                  text: configStore.zh ? '使用默认APP打开' : 'Open in default app',
+                  text: t('openInDefault'),
                   click: () =>
                     window.electron.ipcRenderer.send(
                       'open-in-default-app',
@@ -273,15 +272,15 @@ export const Nav = observer(() => {
                 {
                   text: 'Settings',
                   key: 'cmd+,',
-                  click: action(() => (configStore.visible = true))
+                  click: action(() => (core.config.visible = true))
                 }
               ]
-              if (configStore.enableUpgrade) {
+              if (core.config.enableUpgrade) {
                 menus.unshift({
                   text: 'Update Inkdown',
                   click: () => {
                     runInAction(() => {
-                      configStore.openUpdateDialog = true
+                      core.config.openUpdateDialog = true
                     })
                   }
                 })
@@ -289,7 +288,7 @@ export const Nav = observer(() => {
               openMenus(e, menus)
             }}
           >
-            <Badge offset={[4, 1]} status={'warning'} dot={configStore.enableUpgrade}>
+            <Badge offset={[4, 1]} status={'warning'} dot={core.config.enableUpgrade}>
               <Icon icon={'uiw:more'} className={'text-lg dark:text-gray-300 text-gray-500'} />
             </Badge>
           </div>

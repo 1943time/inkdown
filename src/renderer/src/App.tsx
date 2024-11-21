@@ -24,7 +24,7 @@ const App = observer(() => {
   const [ready, setReady] = useState(false)
   const initial = useCallback(async () => {
     await core.config.initial()
-    await codeReady()
+    await codeReady(core)
     if (core.config.config.autoOpenSpace) {
       const spaces = await db.space.toArray()
       const lastOpenSpace = spaces.sort((a, b) => (a.lastOpenTime > b.lastOpenTime ? -1 : 1))[0]

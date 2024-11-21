@@ -1,15 +1,16 @@
 import {observer} from 'mobx-react-lite'
 import {CloseOutlined} from '@ant-design/icons'
-import {configStore} from '../../store/config'
 import {useCallback, useEffect} from 'react'
 import {action} from 'mobx'
 import {useLocalState} from '../../hooks/useLocalState'
 import {Overview} from './Overview'
 import {SetEditor} from './Editor'
+import { useCoreContext } from '../../store/core'
 
 export const Set = observer(() => {
+  const core = useCoreContext()
   const close = useCallback(action(() => {
-    configStore.visible = false
+    core.config.visible = false
   }), [])
 
   const [state, setState] = useLocalState({
@@ -27,14 +28,14 @@ export const Set = observer(() => {
         close()
       }
     }
-    if (configStore.visible) {
+    if (core.config.visible) {
       window.addEventListener('keydown', esc)
     } else {
       window.removeEventListener('keydown', esc)
     }
-  }, [configStore.visible])
+  }, [core.config.visible])
 
-  if (!configStore.visible) return null
+  if (!core.config.visible) return null
   return (
     <div className={`fixed inset-0 z-[300] dark:bg-black/30 bg-black/10`}>
       <div

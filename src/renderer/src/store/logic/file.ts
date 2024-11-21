@@ -7,8 +7,11 @@ import { IFileItem, ISpaceNode } from '../..'
 import { MainApi } from '../../api/main'
 import { readdir } from 'fs/promises'
 import { runInAction } from 'mobx'
+import { Transforms } from 'slate'
+import { base64ToArrayBuffer, nid } from '../../utils'
+import { ReactEditor } from 'slate-react'
 
-export class ClaerUnusedFiles {
+export class FileAssets {
   constructor(
     private readonly core: Core
   ) {}
@@ -32,7 +35,7 @@ export class ClaerUnusedFiles {
     if (!this.core.tree.root) return
     openConfirmDialog$.next({
       title: i18n.t('note'),
-      description: i18n.t('clearImage'),
+      description: i18n.t('clearImageTip'),
       onConfirm: async () => {
         let imgDirs: (IFileItem | ISpaceNode)[] = []
         const base = basename(this.core.tree.root!.imageFolder || '')
@@ -90,5 +93,56 @@ export class ClaerUnusedFiles {
       }
     })
   }
-
+  async convertRemoteImages(node: IFileItem) {
+    if (node.ext === 'md') {
+      const schema = node.schema
+      if (schema) {
+        const stack = schema.slice()
+        const store = this.core.tree.currentTab.store
+        let change = false
+        while (stack.length) {
+          const item = stack.pop()!
+          if (item.type === 'media') {
+            if (item.url?.startsWith('http')) {
+              const ext = item.url.match(/[\w_-]+\.(png|webp|jpg|jpeg|gif|svg)/i)
+              if (ext) {
+                try {
+                  change = true
+                  const res = await window.api.fetch(item.url).then(res => res.arrayBuffer())
+                  let path = await store.saveFile({
+                    name: nid() + '.' + ext[1].toLowerCase(),
+                    buffer: res
+                  })
+                  Transforms.setNodes(store.editor, {
+                    url: path
+                  }, {at: ReactEditor.findPath(store.editor, item)})
+                } catch (e) {
+                  console.error(e)
+                }
+              }
+            } else if (item.url?.startsWith('data:')) {
+              const m = item.url.match(/data:image\/(\w+);base64,(.*)/)
+              if (m) {
+                try {
+                  change = true
+                  const path = await store.saveFile({
+                    name: Date.now().toString(16) + '.' + m[1].toLowerCase(),
+                    buffer: base64ToArrayBuffer(m[2])
+                  })
+                  Transforms.setNodes(store.editor, {
+                    url: path
+                  }, {at: ReactEditor.findPath(store.editor, item)})
+                } catch (e) {}
+              }
+            }
+          } else if (item.children?.length) {
+            stack.push(...item.children)
+          }
+        }
+        this.core.message.info(
+          change ? this.core.config.zh ? '转换成功' : 'Conversion successful' : this.core.config.zh ? '当前文档未引入网络图片' : 'The current note does not include network images'
+        )
+      }
+    }
+  }
 }

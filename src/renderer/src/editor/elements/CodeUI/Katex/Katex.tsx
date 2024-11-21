@@ -1,11 +1,11 @@
 import './katex.min.css'
-import React, {useEffect, useRef} from 'react'
-import {CodeNode} from '../../../../el'
-import {Editor, Node, Transforms} from 'slate'
-import {useGetSetState} from 'react-use'
+import { useEffect, useRef } from 'react'
+import { CodeNode } from '../../../../el'
+import { Editor, Node, Transforms } from 'slate'
+import { useGetSetState } from 'react-use'
 import katex from 'katex'
-import {ReactEditor, useSlateStatic} from 'slate-react'
-import {observer} from 'mobx-react-lite'
+import { ReactEditor, useSlateStatic } from 'slate-react'
+import { observer } from 'mobx-react-lite'
 
 export const Katex = observer((props: {
   el: CodeNode

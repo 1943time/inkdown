@@ -8,9 +8,9 @@ import {Webview} from '../Webview'
 import {db, IHistory} from '../../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
-import {configStore} from '../../store/config'
 import {IFileItem} from '../../index'
 import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 function Help(props: {
   text: string
@@ -28,6 +28,7 @@ export const History = observer((props: {
   onClose: () => void
 }) => {
   const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     fileName: '',
     selectIndex: 0,
@@ -66,9 +67,9 @@ export const History = observer((props: {
       <div className={'h-12 border-b b2 px-5 text-sm font-semibold'}>
         <div className={'flex items-center h-full'}>
           <Help
-            text={configStore.zh ? '最后15条记录将被记录。如果文件更改间隔超过10分钟，将添加新记录，Inkdown将定期清理缓存。' : 'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added, inkdown will clean cache periodically.'}/>
+            text={t('history.tip')}/>
           <span className={'ml-1'}>
-            {configStore.zh ? '文件历史' : 'File history for'} <span className={'text-indigo-500 ml-1'}>{state.fileName}</span>
+            {t('history.title')} <span className={'text-indigo-500 ml-1'}>{state.fileName}</span>
           </span>
         </div>
       </div>
@@ -77,7 +78,7 @@ export const History = observer((props: {
           className={'w-[200px] border-r b2 h-full overflow-y-auto divide-y px-3 text-gray-500 dark:text-gray-300 divide-gray-200/70 dark:divide-gray-200/10 flex-shrink-0'}>
           {!state.records.length ?
             <div className={'text-center text-gray-400 text-sm mt-10'}>
-              {configStore.zh ? '暂无记录' : 'No records'}
+              {t('noResult')}
             </div> : (
               <>
                 {state.records.map((r, i) =>
@@ -110,7 +111,7 @@ export const History = observer((props: {
         <Button
           onClick={props.onClose}
         >
-          {configStore.zh ? '取消' : 'Cancel'}
+          {t('close')}
         </Button>
         <Button
           icon={<HistoryOutlined/>}
@@ -123,7 +124,7 @@ export const History = observer((props: {
             props.onClose()
           }}
         >
-          {configStore.zh ? '重置到此记录' : 'Reset to this record'}
+          {t('history.reset')}
         </Button>
       </div>
     </Modal>

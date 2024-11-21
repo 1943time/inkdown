@@ -175,7 +175,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                       properties: ['createDirectory']
                     }).then((res) => {
                       if (res.filePath) {
-                        writeFileSync(res.filePath, buffer)
+                        writeFileSync(res.filePath, new Uint8Array(buffer))
                         MainApi.showInFolder(res.filePath)
                       }
                     })

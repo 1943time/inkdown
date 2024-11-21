@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { useSelStatus } from '../../hooks/editor'
 import { EditorUtils } from '../utils/editorUtils'
 import { message$, sizeUnit } from '../../utils'

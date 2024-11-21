@@ -6,6 +6,7 @@ import { highlighter } from '../editor/utils/highlight'
 import { db } from './db'
 import { clearAllCodeCache, clearInlineKatex } from '../editor/plugins/useHighlight'
 import { Core } from './core'
+import i18n from '../utils/i18n'
 
 export class ConfigStore {
   visible = false
@@ -171,6 +172,9 @@ export class ConfigStore {
         [key]: value
       })
     }
+    if (key === 'locale') {
+      i18n.changeLanguage(this.config.locale)
+    }
   }
   setInterfaceFont(value: string) {
     for (let key of document.body.classList.values()) {
@@ -212,7 +216,7 @@ export class ConfigStore {
         this.homePath = res
         resolve(true)
       })
-      shareStore.initial()
+      i18n.changeLanguage(this.config.locale)
     }).catch((e) => {
       console.log('catch', e)
     })

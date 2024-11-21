@@ -18,7 +18,7 @@ import { MediaNode, TableCellNode } from '../el'
 import { Subject } from 'rxjs'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
 import { isAbsolute, join, parse, relative, sep } from 'path'
-import { getOffsetLeft, getOffsetTop, mediaType } from './utils/dom'
+import { getOffsetLeft, getOffsetTop, mediaType, slugify } from './utils/dom'
 import { MainApi } from '../api/main'
 import { clearAllCodeCache, codeCache } from './plugins/useHighlight'
 import { withMarkdown } from './plugins'
@@ -803,5 +803,16 @@ export class EditorStore {
       }),
       { once: true }
     )
+  }
+  toHash(hash: string) {
+    const dom = this.container?.querySelector(
+      `[data-head="${slugify(hash.toLowerCase())}"]`
+    ) as HTMLElement
+    if (dom) {
+      this.container?.scroll({
+        top: dom.offsetTop + 100,
+        behavior: 'smooth'
+      })
+    }
   }
 }

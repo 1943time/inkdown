@@ -102,7 +102,7 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'py-3'}>
         <div className={'flex justify-between items-center'}>
-          <div className={'text-sm'}>{t('imageBed')}</div>
+          <div className={'text-sm'}>{t('config.imageBed')}</div>
           <div>
             <Checkbox
               checked={core.config.config.turnOnImageBed}

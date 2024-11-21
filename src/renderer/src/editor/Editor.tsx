@@ -5,7 +5,6 @@ import { MElement, MLeaf } from './elements'
 import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
 import { useOnchange } from './plugins/useOnchange'
-import { htmlParser } from './plugins/htmlParser'
 import { observer } from 'mobx-react-lite'
 import { IFileItem } from '../index'
 import { EditorUtils } from './utils/editorUtils'
@@ -35,7 +34,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
     []
   )
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children} />, [])
-  const keydown = useKeyboard(store)
+  const keydown = useKeyboard(core, store)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
   const save = useCallback(async () => {
@@ -372,7 +371,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         }
       }
       let paste = e.clipboardData.getData('text/html')
-      if (paste && htmlParser(editor, paste)) {
+      if (paste) {
         e.stopPropagation()
         e.preventDefault()
       }

@@ -1,7 +1,6 @@
-import {BlockQuoteNode, ElementProps} from '../../el'
-import {useMemo} from 'react'
-import {useEditorStore} from '../store'
-import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
+import { BlockQuoteNode, ElementProps } from '../../el'
+import { useMemo } from 'react'
+import { useEditorStore } from '../store'
 export function Blockquote(props: ElementProps<BlockQuoteNode>) {
   const store = useEditorStore()
   return useMemo(() => (
