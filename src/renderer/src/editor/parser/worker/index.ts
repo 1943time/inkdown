@@ -2,7 +2,7 @@
 import parser from './bundle'
 import { Element } from 'slate'
 import { Content, Table } from 'mdast'
-import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../../../types/el'
+import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableCellNode, TableNode } from '../../../types/el'
 
 const findImageElement = (str: string) => {
   try {
@@ -70,6 +70,31 @@ const parseTable = (table: Table) => {
       }
     })
   }
+  const maxCells = Math.max.apply(null, node.children.map(c => c.children.length))
+  node.children = node.children.map((row, i) => {
+    if (!row.children?.length) {
+      const addCels = Array.from(new Array(maxCells)).map(a => {
+        return {
+          type: 'table-cell',
+          title: i === 0,
+            // @ts-ignore
+          children: [{text: ''}]
+        } as TableCellNode
+      })
+      row.children = addCels
+    } else if (row.children.length < maxCells) {
+      const addCels = Array.from(new Array(maxCells - row.children.length)).map(a => {
+        return {
+          type: 'table-cell',
+          title: i === 0,
+            // @ts-ignore
+          children: [{text: ''}]
+        } as TableCellNode
+      })
+      row.children = row.children.concat(addCels)
+    }
+    return row
+  })
   return node
 }
 const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
