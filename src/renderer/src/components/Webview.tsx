@@ -9,17 +9,19 @@ import { parserMdToSchema } from '../editor/parser/parser'
 import { useLocalState } from '../hooks/useLocalState'
 import { parse } from 'path'
 import { action, runInAction } from 'mobx'
+import { useCoreContext } from '../store/core'
 
 export const Webview = observer((props: {
   value?: any[]
   history?: boolean
   filePath?: string
 }) => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     ready: !!props.history,
     name: ''
   })
-  const store = useMemo(() => new EditorStore(true, props.history), [])
+  const store = useMemo(() => new EditorStore(core, true, props.history), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
   const high = useHighlight(store)

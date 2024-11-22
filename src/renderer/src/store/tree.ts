@@ -1,25 +1,23 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
 import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
-import {createFileNode, defineParent, insertFileNode, moveFileToSpace, ReadSpace} from './parserNode'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
 import {isMac, message$, nid, stat} from '../utils'
 import { parsePath } from '../utils/path'
-import {Watcher} from './watch'
+import {Watcher} from './logic/watch'
 import {Subject} from 'rxjs'
-import {configStore} from './config'
 import {db, IFile} from './db'
 import {EditorStore} from '../editor/store'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
 import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
-import {Refactor} from '../utils/refactor'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
 import { sep } from 'path'
 import React from 'react'
+import { Core } from './core'
 export class TreeStore {
   treeTab: 'folder' | 'search' | 'bookmark' = 'folder'
   nodeMap = new Map<string, IFileItem>()
@@ -43,7 +41,6 @@ export class TreeStore {
   fold = true
   watcher: Watcher
   recordTimer = 0
-  refactor: Refactor
   blankMode = isMac
   externalChange$ = new Subject<IFileItem>()
 
@@ -69,7 +66,7 @@ export class TreeStore {
       })
       .sort((a, b) => (a.lastOpenTime! > b.lastOpenTime! ? -1 : 1))
       .map((r) => {
-        const path = r.filePath.replace(treeStore.root!.filePath + sep, '')
+        const path = r.filePath.replace(this.root!.filePath + sep, '')
         const item = {
           ...r,
           parentPath: path.split(sep).slice(0, -1).join('/'),
@@ -97,9 +94,8 @@ export class TreeStore {
     return firstNote
   }
 
-  constructor() {
-    this.watcher = new Watcher(this)
-    this.refactor = new Refactor(this)
+  constructor(private readonly core: Core) {
+    this.watcher = new Watcher(this.core)
     makeAutoObservable(this, {
       watcher: false,
       recordTimer: false
@@ -138,7 +134,7 @@ export class TreeStore {
         const s = stat(path)
         if (s && !s.isDirectory()) {
           if (this.root && path.startsWith(this.root.filePath)) {
-            const node = await insertFileNode(this, {
+            const node = await this.core.node.insertFileNode({
               spaceId: this.root.cid,
               folder: false,
               filePath: path
@@ -151,7 +147,7 @@ export class TreeStore {
             const record = await db.file.where('filePath').equals(path).first()
             if (record) {
               if (record.updated === s.mtime.valueOf()) {
-                this.openExternalNode(createFileNode(record))
+                this.openExternalNode(this.core.node.createFileNode(record))
               } else {
                 if (mediaType(record.filePath) === 'markdown') {
                   const [res] = await parserMdToSchema([{ filePath: record.filePath }])
@@ -161,7 +157,7 @@ export class TreeStore {
                     links: res.links
                   })
                   record.schema = res.schema
-                  this.openExternalNode(createFileNode(record))
+                  this.openExternalNode(this.core.node.createFileNode(record))
                 }
               }
             } else {
@@ -181,7 +177,7 @@ export class TreeStore {
                 data.links = res.links
               }
               db.file.add(data)
-              this.openExternalNode(createFileNode(data))
+              this.openExternalNode(this.core.node.createFileNode(data))
             }
           }
         }
@@ -226,18 +222,18 @@ export class TreeStore {
         this.selectItem = null
         if (!force) {
           openConfirmDialog$.next({
-            title: configStore.zh
+            title: this.core.config.zh
               ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.filename}'`
               : `Are you sure you want to delete '${item.filename}' ${
                   item.folder ? 'and its contents?' : '?'
                 }`,
-            description: configStore.zh
+            description: this.core.config.zh
               ? '您可以从垃圾箱中恢复此文件。'
               : 'You can restore this file from the Trash.',
             onConfirm: () => {
-              treeStore.moveToTrash(item, true)
+              this.moveToTrash(item, true)
             },
-            okText: configStore.zh ? '移入垃圾箱' : 'Move To Trash'
+            okText: this.core.config.zh ? '移入垃圾箱' : 'Move To Trash'
           })
         } else {
           this.removeSelf(item)
@@ -286,7 +282,7 @@ export class TreeStore {
     if (file.length) {
       for (let f of file) {
         if (f.path && mediaType(f.path) !== 'markdown') {
-          moveFileToSpace(treeStore, f.path, parentNode)
+          this.core.node.moveFileToSpace(f.path, parentNode)
         }
       }
     }
@@ -440,20 +436,20 @@ export class TreeStore {
         if (dragNode.parent !== dropNode.parent) {
           const newPath = join(dropNode.parent!.filePath, basename(dragNode.filePath))
           await updateFilePath(dragNode, newPath)
-          defineParent(dragNode, dropNode.parent!)
-          this.refactor.refactorDepLink(dragNode)
-          this.refactor.refactorDepOnLink(dragNode, oldPath)
+          this.core.node.defineParent(dragNode, dropNode.parent!)
+          this.core.refactor.refactorDepLink(dragNode)
+          this.core.refactor.refactorDepOnLink(dragNode, oldPath)
         }
         targetList.map((n, i) => db.file.update(n.cid, { sort: i }))
       }
       if (mode === 'enter' && dropNode.folder) {
         dropNode.children!.unshift(dragNode)
         const newPath = join(dropNode.filePath, basename(dragNode.filePath))
-        defineParent(dragNode, dropNode)
+        this.core.node.defineParent(dragNode, dropNode)
         await updateFilePath(dragNode, newPath)
         dropNode.children!.map((n, i) => db.file.update(n.cid, { sort: i }))
-        this.refactor.refactorDepLink(dragNode)
-        this.refactor.refactorDepOnLink(dragNode, oldPath)
+        this.core.refactor.refactorDepLink(dragNode)
+        this.core.refactor.refactorDepOnLink(dragNode, oldPath)
       }
     } else {
       this.dragNode = null
@@ -528,13 +524,12 @@ export class TreeStore {
         }
       }
     }
-    const read = new ReadSpace(spaceId)
     const timer = setTimeout(
       action(() => (this.loading = true)),
       100
     )
     try {
-      const res = await read.getTree()
+      const res = await this.core.node.getTree(spaceId)
       clearTimeout(timer)
       if (res) {
         runInAction(() => {
@@ -575,7 +570,7 @@ export class TreeStore {
         get hasPrev() {
           return this.index > 0
         },
-        store: new EditorStore(),
+        store: new EditorStore(this.core),
         get hasNext() {
           return this.index < this.history.length - 1
         }
@@ -649,7 +644,7 @@ export class TreeStore {
 
   private removeSelf(node: IFileItem) {
     if (!node.folder) this.removeNodeFromHistory(node)
-    const parent = node.parent || treeStore.root
+    const parent = node.parent || this.root
     if (parent) {
       parent.children = parent.children!.filter((c) => c !== node)
     }
@@ -668,5 +663,3 @@ export class TreeStore {
     }
   }
 }
-
-export const treeStore = new TreeStore()

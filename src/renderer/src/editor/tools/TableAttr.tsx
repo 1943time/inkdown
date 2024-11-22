@@ -15,12 +15,12 @@ import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
 import isHotkey from 'is-hotkey'
 import {TableCellNode, TableNode, TableRowNode} from '../../el'
-import {treeStore} from '../../store/tree'
 import {EditorUtils} from '../utils/editorUtils'
 import {useSubject} from '../../hooks/subscribe'
-import {configStore} from '../../store/config'
+import { useCoreContext } from '../../store/core'
 
 export const TableAttr = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
   const editor = store.editor
   const [state, setState] = useGetSetState({
@@ -48,7 +48,7 @@ export const TableAttr = observer(() => {
         if (dom) {
           let top = store.offsetTop(dom)
           let left = getOffsetLeft(dom)
-          if (!treeStore.fold) left -= treeStore.width
+          if (!core.tree.fold) left -= core.tree.width
           setState({
             rows: table[0].children.length,
             cols: table[0].children[0].children.length,
@@ -180,7 +180,7 @@ export const TableAttr = observer(() => {
 
   useEffect(() => {
     resize()
-  }, [treeStore.size, store.openSearch, treeStore.tabs.length, configStore.config.showLeading])
+  }, [core.tree.size, store.openSearch, core.tree.tabs.length, core.config.config.showLeading])
 
   const insertRow = useCallback((path: Path, columns: number) => {
     Transforms.insertNodes(editor, {

@@ -5,11 +5,11 @@ import { IKeyItem, KeyItems } from './KeyItems'
 import { keyTask$ } from '../../hooks/keyboard'
 import { useMemo } from 'react'
 import IFormat from '../../icons/IFormat'
-import {treeStore} from '../../store/tree'
 import IAdd from '../../icons/IAdd'
 import System from '../../icons/keyboard/System'
+import { Core, useCoreContext } from '../../store/core'
 
-const actionKeys = (ctx: string[]):IKeyItem[] => [
+const actionKeys = (ctx: string[], core: Core):IKeyItem[] => [
   {
     name: 'Select All',
     key: ['mod', 'a'],
@@ -66,8 +66,8 @@ const actionKeys = (ctx: string[]):IKeyItem[] => [
   {
     name: 'Close Current Tab',
     key: ['mod', 'w'],
-    click: () => treeStore.removeTab(treeStore.currentIndex),
-    disabled: treeStore.tabs.length < 2
+    click: () => core.tree.removeTab(core.tree.currentIndex),
+    disabled: core.tree.tabs.length < 2
   },
   {
     name: 'Open Quickly',
@@ -83,13 +83,13 @@ const actionKeys = (ctx: string[]):IKeyItem[] => [
   {
     name: 'Undo',
     key: ['mod', 'z'],
-    disabled: !treeStore.openedNote,
+    disabled: !core.tree.openedNote,
     click: () => keyTask$.next({key: 'undo'})
   },
   {
     name: 'Redo',
     key: ['mod', 'shift', 'z'],
-    disabled: !treeStore.openedNote,
+    disabled: !core.tree.openedNote,
     click: () => keyTask$.next({key: 'redo'})
   }
 ]
@@ -242,9 +242,10 @@ export const SystemPanel = observer((props: {
   tab: string
   onClose: () => void
 }) => {
+  const core = useCoreContext()
   const type = useMemo(() => {
     if (props.open) {
-      const editor = treeStore.currentTab.store.editor
+      const editor = core.tree.currentTab.store.editor
       const [node ] = Editor.nodes<any>(editor, {
         match: n => Element.isElement(n),
         mode: 'lowest'
@@ -257,7 +258,7 @@ export const SystemPanel = observer((props: {
     } else {
       return []
     }
-  }, [props.open, treeStore.currentTab])
+  }, [props.open, core.tree.currentTab])
   return (
     <AnimatePresence>
       {props.open &&
@@ -290,7 +291,7 @@ export const SystemPanel = observer((props: {
                   <span className={'ml-1.5'}>Actions</span>
                 </div>
               </div>
-              <KeyItems keys={actionKeys(type)} onClick={props.onClose}/>
+              <KeyItems keys={actionKeys(type, core)} onClick={props.onClose}/>
             </>
           }
           {props.tab === 'insert' &&

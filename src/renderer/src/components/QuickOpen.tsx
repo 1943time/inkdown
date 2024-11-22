@@ -1,14 +1,16 @@
 import {observer} from 'mobx-react-lite'
 import React, {useCallback, useRef} from 'react'
-import {treeStore} from '../store/tree'
-import {configStore} from '../store/config'
 import {Subject} from 'rxjs'
 import {useSubject} from '../hooks/subscribe'
 import {IFileItem} from '../index'
 import { useGetSetState } from 'react-use'
+import { useCoreContext } from '../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const quickOpen$ = new Subject()
 export const QuickOpen = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useGetSetState({
     records: [] as (IFileItem & {path: string})[],
     filterRecords: [] as (IFileItem & {path: string})[],
@@ -45,9 +47,9 @@ export const QuickOpen = observer(() => {
     }
     if (e.key === 'Enter' && state().filterRecords.length) {
       close()
-      const node = treeStore.nodeMap.get(state().filterRecords[state().activeIndex]?.cid)
+      const node = core.tree.nodeMap.get(state().filterRecords[state().activeIndex]?.cid)
       if (node) {
-        treeStore.openNote(node)
+        core.tree.openNote(node)
       }
     }
     if (e.key === 'Escape') {
@@ -55,8 +57,8 @@ export const QuickOpen = observer(() => {
     }
   }, [])
   useSubject(quickOpen$, async () => {
-    if (treeStore.root) {
-      const {docs} = treeStore.allNotes
+    if (core.tree.root) {
+      const {docs} = core.tree.allNotes
       const filterData = docs.filter((q) => !state().query || q.path.includes(state().query))
       setState({
         records: docs,
@@ -103,7 +105,7 @@ export const QuickOpen = observer(() => {
               }}
               onClick={() => {
                 close()
-                treeStore.openNote(treeStore.nodeMap.get(r.cid)!)
+                core.tree.openNote(core.tree.nodeMap.get(r.cid)!)
               }}
               className={`cursor-default px-3 py-1 rounded dark:text-gray-300 text-gray-600 text-sm ${state().activeIndex === i ? 'dark:bg-gray-200/10 bg-gray-200/60' : ''}`}
               key={r.cid}>
@@ -112,7 +114,7 @@ export const QuickOpen = observer(() => {
           )}
         </div>
         <div className={`px-4 py-2 ${!state().filterRecords.length ? '' : 'hidden'}`}>
-          <div className={'text-gray-500 text-center text-sm'}>{configStore.zh ? '没有最近打开的记录' : 'No recently opened history'}</div>
+          <div className={'text-gray-500 text-center text-sm'}>{t('noOpendHistory')}</div>
         </div>
       </div>
     </div>

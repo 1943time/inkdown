@@ -1,0 +1,180 @@
+const en = {
+  version: 'version',
+  note: 'Note',
+  clearImageTip: 'Unreferenced images in the workspace will be deleted',
+  clearSuccess: 'Clear successfully',
+  nameConflict: "There's already a file with the same name",
+  find: 'Find',
+  replace: 'Replace',
+  prev: 'Prev',
+  next: 'Next',
+  replaceAll: 'Replace All',
+  noResult: 'No Result',
+  outline: 'Outline',
+  removeLink: 'Remove Link',
+  noRelatedDocs: 'No related documents',
+  quickActions: 'Quick Actions',
+  search: 'Search',
+  noOpenFiles: 'No open files',
+  newDoc: 'New Doc',
+  openDoc: 'Open Doc',
+  recentlyDoc: 'Recently opened docs',
+  close: 'Close',
+  createWorkspace: 'Create Workspace',
+  recentlySpace: 'Recently opened spaces',
+  noSpace: 'No document space has been created yet',
+  selectSpace: 'Please select a workspace',
+  parseTip: 'Inkdown will parse the content and store it in the space folder.',
+  spaceName: 'Space Name',
+  enterName: 'Enter Name',
+  folder: 'Folder',
+  selectFolder: 'Select Folder',
+  noOpendHistory: 'No recently opened history',
+  colorIndentifer: 'Color Indentifer',
+  storageFolder: 'Image storage Folder',
+  storageFolderTip:
+    "The save location for pasting images when opening a space, if using a relative path, the path is relative to the current document's path",
+  relativePath: 'Relative path',
+  save: 'Save',
+  create: 'Create',
+  cancel: 'Cancel',
+  autoDownload: 'Automatically download images',
+  autoDownloadTip:
+    'Automatically download and convert network images to local addresses when pasting webpage elements or markdown code',
+  lineHeight: 'Paragraph line height',
+  lineDef: 'Default',
+  lineCompact: 'Compact',
+  lineLoose: 'Loose',
+  codeTabSize: 'Code tab size',
+  codeStyle: 'Code style',
+  codeAutoWrap: 'Code auto wrap',
+  spellCheck: 'Spell check',
+  editorFontSize: 'Edit area text size',
+  httpInvalid: 'Please enter the correct HTTP address',
+  saveSuccess: 'Successfully saved',
+  config: {
+    imageBed: 'Image bed tool',
+    releaseRecord: 'Release Record',
+    changeLocalTip: 'The language switch will take full effect after the application restarts.',
+    themes: 'Themes',
+    theme: {
+      system: 'System',
+      dark: 'Dark',
+      light: 'Light'
+    },
+    showOutline: 'Show outline',
+    showOutlineTip: 'The document title will generate an outline on the right side.',
+    showHiddenFiles: 'Show hidden files',
+    autoOpenSpace: 'Automatically open space',
+    autoOpenSpaceTip: 'When opening inkdown, automatically open the last space opened.',
+    editorWidth: 'Maximum width of the editing area',
+    outlineWidth: 'Outline width'
+  },
+  history: {
+    tip: 'The last 15 records will be recorded. If the file change interval is more than 10 minutes, new records will be added, inkdown will clean cache periodically.',
+    title: 'File history for',
+    reset: 'Reset to this record'
+  },
+  copied: 'Copied to clipboard',
+  downloadRemote: 'Download remote images to local',
+  claerImage: 'Clear unused images',
+  openInDefault: 'Open in default app',
+  noCreateDoc: 'No document has been created yet'
+}
+
+const zh: Local = {
+  version: '版本',
+  note: '提示',
+  clearImageTip: '存储区中未被引用的图片将被删除',
+  clearSuccess: '清除成功',
+  nameConflict: '已经有一个同名的文件',
+  find: '查找',
+  replace: '替换',
+  prev: '上一个',
+  next: '下一个',
+  replaceAll: '替换所有',
+  noResult: '没有结果',
+  outline: '大纲',
+  removeLink: '移除链接',
+  noRelatedDocs: '没有相关文档',
+  quickActions: '快速插入',
+  search: '搜索',
+  noOpenFiles: '没有打开的文件',
+  newDoc: '新建文档',
+  openDoc: '打开文档',
+  recentlyDoc: '最近打开的文档',
+  close: '关闭',
+  createWorkspace: '创建文档空间',
+  recentlySpace: '最近打开的空间',
+  noSpace: '暂未创建文档空间',
+  selectSpace: '请选择文档空间',
+  parseTip: 'Inkdown将自动解析和存储内容至空间文件夹内。',
+  spaceName: '空间名称',
+  enterName: '输入名称',
+  folder: '文件夹',
+  selectFolder: '选择文件夹',
+  noOpendHistory: '没有最近打开的记录',
+  colorIndentifer: '定义颜色',
+  storageFolder: '图片存储文件夹',
+  storageFolderTip:
+    '在打开空间的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径',
+  relativePath: '相对路径',
+  save: '保存',
+  create: '创建',
+  cancel: '取消',
+  autoDownload: '自动下载图片',
+  autoDownloadTip: '粘贴网页元素或Markdown代码时自动下载网络图像并将其转换为本机地址',
+  lineHeight: '段落行高',
+  lineDef: '默认',
+  lineCompact: '紧凑',
+  lineLoose: '宽松',
+  codeTabSize: '代码段 TabSize',
+  codeStyle: '代码风格',
+  codeAutoWrap: '代码自动换行',
+  spellCheck: '拼写检查',
+  editorFontSize: '编辑区文字大小',
+  httpInvalid: '请输入正确http地址',
+  saveSuccess: '保存成功',
+  config: {
+    imageBed: '图床工具',
+    releaseRecord: '发布记录',
+    changeLocalTip: '语言切换将在应用重启后完全生效。',
+    themes: '主题',
+    theme: {
+      system: '系统',
+      dark: '暗黑',
+      light: '明亮'
+    },
+    showOutline: '显示大纲',
+    showOutlineTip: '文档标题将在右侧生成大纲',
+    showHiddenFiles: '显示隐藏文件',
+    autoOpenSpace: '自动打开空间',
+    autoOpenSpaceTip: '打开应用时，自动打开最后一次打开的空间。',
+    editorWidth: '编辑器最大宽度',
+    outlineWidth: '大纲宽度'
+  },
+  history: {
+    tip: '最后15条记录将被记录。如果文件更改间隔超过10分钟，将添加新记录，Inkdown将定期清理缓存。',
+    title: '文件历史',
+    reset: '重置到此记录'
+  },
+  copied: '已复制到剪贴板',
+  downloadRemote: '下载远程图片至本机',
+  claerImage: '清除未使用的图片',
+  openInDefault: '使用默认APP打开',
+  noCreateDoc: '暂未创建文档'
+}
+
+type Local = typeof en
+export const locales = {
+  en: { translation: en },
+  zh: { translation: zh }
+}
+
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    resources: {
+      translation: Local
+    }
+  }
+}

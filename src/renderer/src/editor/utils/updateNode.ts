@@ -5,37 +5,8 @@ import {db} from '../../store/db'
 import {basename, join, parse} from 'path'
 import {renameSync} from 'fs'
 import {runInAction} from 'mobx'
-import {findAbsoluteLinks} from '../../store/parserNode'
 import {shareStore} from '../../server/store'
 import { message$ } from '../../utils'
-
-
-export const updateNode = async (node: IFileItem) => {
-  if (node.filePath && node.ext === 'md') {
-    const md = toMarkdown(node.schema || [])
-    try {
-      await writeFile(node.filePath, md, {encoding: 'utf-8'})
-      const links = findAbsoluteLinks(node.schema!, node.filePath)
-      const s = await stat(node.filePath)
-      await db.file.update(node.cid, {
-        filePath: node.filePath,
-        updated: s.mtime.valueOf(),
-        schema: node.schema,
-        links
-      })
-      node.links = links
-      db.saveRecord(node)
-    } catch (e: any) {
-      if (e?.message) {
-        message$.next({
-          type: 'error',
-          content: e.message
-        })
-      }
-      console.error('save fail', e)
-    }
-  }
-}
 
 const renameFiles = (nodes: IFileItem[], dir: string, changeFiles: {from: string, to: string}[] = []) => {
   for (let n of nodes) {

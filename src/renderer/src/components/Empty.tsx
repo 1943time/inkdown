@@ -4,13 +4,15 @@ import logo from '../../../../resources/icon.png?asset'
 import { useLayoutEffect } from 'react'
 import { useLocalState } from '../hooks/useLocalState'
 import { db, ISpace } from '../store/db'
-import { treeStore } from '../store/tree'
-import { configStore } from '../store/config'
 import { Icon } from '@iconify/react'
 import { editSpace$ } from './space/EditSpace'
 import { keyTask$ } from '../hooks/keyboard'
+import { useCoreContext } from '../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Empty = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     records: [] as {name: string, filePath: string, dir: string}[],
     spaces: [] as ISpace[]
@@ -22,7 +24,7 @@ export const Empty = observer(() => {
       })
     })
   }, [])
-  if (treeStore.loading) return null
+  if (core.tree.loading) return null
   return (
     <div
       className={'flex justify-center items-center h-[calc(100vh_-_40px)] overflow-y-auto py-10'}
@@ -38,7 +40,7 @@ export const Empty = observer(() => {
             Inkdown
           </div>
           <div className={'text-base text-gray-500'}>
-            {configStore.zh ? '没有打开的文件' : 'No open files'}
+            {t('noOpenFiles')}
           </div>
           <div
             className={
@@ -49,9 +51,9 @@ export const Empty = observer(() => {
             }}
           >
             <Icon icon={'mingcute:file-new-line'} className={'text-lg'} />
-            <span className={'ml-2'}>{configStore.zh ? '新建文档' : 'New Doc'}</span>
+            <span className={'ml-2'}>{t('newDoc')}</span>
           </div>
-          {!treeStore.root && (
+          {!core.tree.root && (
             <div
               className={
                 'dark:hover:text-white hover:text-black cursor-pointer duration-200 flex items-center'
@@ -61,10 +63,10 @@ export const Empty = observer(() => {
               }}
             >
               <Icon icon={'tabler:file-text'} className={'text-lg'} />
-              <span className={'ml-2'}>{configStore.zh ? '打开文档' : 'Open Doc'}</span>
+              <span className={'ml-2'}>{t('openDoc')}</span>
             </div>
           )}
-          {!!treeStore.root && (
+          {!!core.tree.root && (
             <>
               <div
                 className={'cursor-pointer dark:hover:text-white hover:text-black duration-200'}
@@ -74,23 +76,23 @@ export const Empty = observer(() => {
               >
                 <HistoryOutlined />
                 <span className={'ml-2'}>
-                  {configStore.zh ? '最近打开的文档' : 'Recently opened docs'}
+                  {t('recentlyDoc')}
                 </span>
               </div>
-              {treeStore.tabs.length > 1 && (
+              {core.tree.tabs.length > 1 && (
                 <div
                   className={'cursor-pointer dark:hover:text-white hover:text-black duration-200'}
                   onClick={() => {
-                    treeStore.removeTab(treeStore.currentIndex)
+                    core.tree.removeTab(core.tree.currentIndex)
                   }}
                 >
                   <CloseOutlined />
-                  <span className={'ml-2'}>{configStore.zh ? '关闭' : 'Close'}</span>
+                  <span className={'ml-2'}>{t('close')}</span>
                 </div>
               )}
             </>
           )}
-          {!treeStore.root && (
+          {!core.tree.root && (
             <>
               <div
                 className={
@@ -102,16 +104,16 @@ export const Empty = observer(() => {
               >
                 <Icon icon={'material-symbols:workspaces-outline'} className={'text-lg'} />
                 <span className={'ml-2'}>
-                  {configStore.zh ? '创建文档空间' : 'Create Workspace'}
+                  {t('createWorkspace')}
                 </span>
               </div>
             </>
           )}
         </div>
-        {!treeStore.root && !!state.spaces.length && (
+        {!core.tree.root && !!state.spaces.length && (
           <div className={'mt-6'}>
             <div className={'text-gray-500'}>
-              {configStore.zh ? '最近打开的空间' : 'Recently opened spaces'}
+              {t('recentlySpace')}
             </div>
             <div className={'mt-2'}>
               {state.spaces.map((r) => (
@@ -119,7 +121,7 @@ export const Empty = observer(() => {
                   className={'flex items-center py-1 dark:text-gray-300 text-gray-700 text-base'}
                   key={r.cid}
                   onClick={() => {
-                    treeStore.initial(r.cid)
+                    core.tree.initial(r.cid)
                   }}
                 >
                   <span

@@ -1,7 +1,7 @@
 import { ReactEditor } from 'slate-react'
 import { useGetSetState } from 'react-use'
 import { createContext, useCallback, useContext, useMemo } from 'react'
-import { AutoComplete, Input, Popover, Tooltip } from 'antd'
+import { AutoComplete, Input, Popover } from 'antd'
 import { useMEditor } from '../../hooks/editor'
 import { CodeLineNode, CodeNode, ElementProps } from '../../el'
 import { codeCache } from '../plugins/useHighlight'
@@ -9,20 +9,17 @@ import { Mermaid } from './CodeUI/Mermaid'
 import { Katex } from './CodeUI/Katex/Katex'
 import { observer } from 'mobx-react-lite'
 import { useEditorStore } from '../store'
-import { configStore } from '../../store/config'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { useSubject } from '../../hooks/subscribe'
 import { selChange$ } from '../plugins/useOnchange'
 import { DragHandle } from '../tools/DragHandle'
 import { runInAction } from 'mobx'
-import { IMenu, openMenus } from '../../components/Menu'
-import { Icon } from '@iconify/react'
 import { message$ } from '../../utils'
-import { EditorUtils } from '../utils/editorUtils'
 import { langIconMap } from '../tools/langIconMap'
 import { SearchOutlined } from '@ant-design/icons'
 import { ICopy } from '../../icons/ICopy'
 import { IArrowRight } from '../../icons/IArrowRight'
+import { useCoreContext } from '../../store/core'
 
 export const CodeCtx = createContext({ lang: '', code: false })
 
@@ -39,6 +36,7 @@ const langOptions = Array.from(langIconMap).map(([lang, icon]) => {
 })
 
 export const CodeElement = observer((props: ElementProps<CodeNode>) => {
+  const core = useCoreContext()
   const store = useEditorStore()
   const [editor, update] = useMEditor(props.element)
   const [state, setState] = useGetSetState({
@@ -91,7 +89,7 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
   return (
     <CodeCtx.Provider value={{ lang: state().lang || '', code: true }}>
       <div
-        className={`code-container ${configStore.config.codeAutoBreak ? 'wrap' : ''}`}
+        className={`code-container ${core.config.state.codeAutoBreak ? 'wrap' : ''}`}
         {...props.attributes}
         style={{
           padding: state().hide ? 1 : undefined,
@@ -101,18 +99,16 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
         <div
           data-be={'code'}
           style={{
-            background: /#f{3,6}/i.test(configStore.config.codeBackground || '')
+            background: /#f{3,6}/i.test(core.config.state.codeBackground || '')
               ? '#fafafa'
-              : configStore.config.codeBackground
+              : core.config.state.codeBackground
           }}
           onDragStart={store.dragStart}
-          className={`${configStore.codeDark ? 'dark' : 'light'} drag-el ${
+          className={`${core.config.codeDark ? 'dark' : 'light'} drag-el ${
             props.element.frontmatter ? 'frontmatter' : ''
-          } ${configStore.config.codeLineNumber ? 'num' : ''} tab-${
-            configStore.config.codeTabSize
-          } code-highlight ${!state().hide ? '' : 'h-0 overflow-hidden border-none'} ${
-            !!props.element.katex ? 'katex-container' : ''
-          }`}
+          } num tab-${core.config.state.codeTabSize} code-highlight ${
+            !state().hide ? '' : 'h-0 overflow-hidden border-none'
+          } ${!!props.element.katex ? 'katex-container' : ''}`}
         >
           {!props.element.frontmatter && (
             <div
@@ -217,12 +213,10 @@ export const CodeElement = observer((props: ElementProps<CodeNode>) => {
             </div>
           )}
           {!props.element.frontmatter && <DragHandle />}
-          {configStore.config.codeLineNumber && (
-            <pre className={`code-line-list select-none`} contentEditable={false}>
-              {!configStore.config.codeAutoBreak &&
-                (props.children || []).map((c, i) => <div key={i} />)}
-            </pre>
-          )}
+          <pre className={`code-line-list select-none`} contentEditable={false}>
+            {!core.config.config.codeAutoBreak &&
+              (props.children || []).map((c, i) => <div key={i} />)}
+          </pre>
           <pre data-bl-type={'code'} className={'code-content'} data-bl-lang={state().lang}>
             {child}
           </pre>

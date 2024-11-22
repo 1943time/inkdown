@@ -4,13 +4,14 @@ import {useGetSetState, useUpdateEffect} from 'react-use'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'
 import {Editor, Node, Transforms} from 'slate'
 import mermaid from 'mermaid'
-import {configStore} from '../../../store/config'
 import {observer} from 'mobx-react-lite'
+import { useCoreContext } from '../../../store/core'
 
 export const Mermaid = observer((props: {
   lines: CodeLineNode[]
   el: CodeNode
 }) => {
+  const core = useCoreContext()
   const editor = useSlateStatic()
   const [state, setState] = useGetSetState({
     code: '',
@@ -36,7 +37,7 @@ export const Mermaid = observer((props: {
     setTimeout(() => {
       render()
     })
-  }, [configStore.config.dark])
+  }, [core.config.state.dark])
 
   useEffect(() => {
     const code = props.lines.map(c => Node.string(c)).join('\n')

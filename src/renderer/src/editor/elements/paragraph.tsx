@@ -5,7 +5,6 @@ import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'
 import {useSelStatus} from '../../hooks/editor'
 import {Node} from 'slate'
-import {getVisibleStyle, useMonitorHeight} from '../plugins/elHeight'
 
 export const Paragraph = observer((props: ElementProps<ParagraphNode>) => {
   const store = useEditorStore()

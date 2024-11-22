@@ -6,9 +6,8 @@ import {observer} from 'mobx-react-lite'
 import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'
 import {runInAction} from 'mobx'
-import {treeStore} from '../../store/tree'
-import {configStore} from '../../store/config'
 import {highlighter, langSet, loadedLanguage} from '../utils/highlight'
+import { useCoreContext } from '../../store/core'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 const linkReg = /(https?|ftp):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]/gi
@@ -34,23 +33,15 @@ export const clearInlineKatex = (editor: Editor) => {
 const highlightNodes = new Set(['paragraph', 'table-cell', 'code', 'head', 'inline-katex', 'code-line'])
 let clearTimer = 0
 
-export const clearCodeCache = (node: any) => {
-  codeCache.delete(node)
-  clearTimeout(clearTimer)
-  clearTimer = window.setTimeout(() => {
-    runInAction(() => {
-      treeStore.currentTab!.store!.refreshHighlight = !treeStore.currentTab!.store!.refreshHighlight
-    })
-  }, 60)
-}
 
-const run = (node: NodeEntry, code: string, lang: any) => {
+const run = (node: NodeEntry, code: string, lang: any, theme: any) => {
   try {
     const el = node[0]
     const ranges: Range[] = []
     const tokens = highlighter.codeToTokensBase(code, {
       lang: lang,
-      theme: configStore.curCodeTheme as any,
+      // theme: configStore.curCodeTheme as any,
+      theme,
       includeExplanation: false,
       tokenizeMaxLineLength: 5000
     })
@@ -79,6 +70,7 @@ const run = (node: NodeEntry, code: string, lang: any) => {
 let stack: { run: Function, lang: string }[] = []
 
 export function useHighlight(store?: EditorStore) {
+  const core = useCoreContext()
   return useCallback(([node, path]: NodeEntry):Range[] => {
     if (Element.isElement(node) && highlightNodes.has(node.type)) {
       const ranges = store?.highlightCache.get(node) || []
@@ -95,7 +87,7 @@ export function useHighlight(store?: EditorStore) {
             let textRanges: any[] = []
             const tokens = highlighter.codeToTokensBase(code, {
               lang: 'tex',
-              theme: configStore.curCodeTheme as any,
+              theme: core.config.curCodeTheme as any,
               includeExplanation: false,
               tokenizeMaxLineLength: 5000
             })
@@ -208,6 +200,7 @@ export function useHighlight(store?: EditorStore) {
 }
 
 export const SetNodeToDecorations = observer(() => {
+  const core = useCoreContext()
   const editor = useSlate()
   const store = useEditorStore()
   const parser = useCallback(() => {
@@ -256,11 +249,11 @@ export const SetNodeToDecorations = observer(() => {
       if (!handle) {
         if (!loadedLanguage.has(lang)) {
           stack.push({
-            run: () => run(c.node, c.code, lang),
+            run: () => run(c.node, c.code, lang, core.config.curCodeTheme),
             lang: lang
           })
         } else {
-          run(c.node, c.code, lang)
+          run(c.node, c.code, lang, core.config.curCodeTheme)
         }
       }
     }

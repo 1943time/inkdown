@@ -1,13 +1,17 @@
 import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
-import { configStore } from '../../../store/config'
 import { Elements } from '../../../el'
+import { EditorStore } from '../../store'
+import { Core } from '../../../store/core'
 
 export class BackspaceKey {
   constructor(
-    private readonly editor: Editor
+    private readonly core: Core,
+    private readonly store: EditorStore
   ) {}
-
+  get editor() {
+    return this.store.editor
+  }
   range() {
     const sel = this.editor.selection
     if (!sel) return
@@ -86,8 +90,8 @@ export class BackspaceKey {
       let m = str.match(/\s+$/)
       str = m?.[0] || ''
       if (str) {
-        let decrement = str.length % configStore.config.codeTabSize
-        if (decrement === 0) decrement = configStore.config.codeTabSize
+        let decrement = str.length % this.core.config.config.codeTabSize
+        if (decrement === 0) decrement = this.core.config.config.codeTabSize
         let ao = sel.anchor.offset - decrement
         Transforms.delete(this.editor, {
           at: {
@@ -165,7 +169,7 @@ export class BackspaceKey {
               let cur = Path.next(path)
               const moveIndex = preListItem[0].children.length
               if (Editor.hasPath(this.editor, cur)) {
-                EditorUtils.moveNodes(this.editor, cur, preListItem[1], moveIndex)
+                EditorUtils.moveNodes(this.store, cur, preListItem[1], moveIndex)
               }
               const movePath = [...preListItem[1], moveIndex]
               Transforms.moveNodes(this.editor, {

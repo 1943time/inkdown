@@ -2,12 +2,12 @@ import {observer} from 'mobx-react-lite'
 import {useGetSetState} from 'react-use'
 import {useCallback, useEffect, useRef} from 'react'
 import {IFileItem} from '../index'
-import {treeStore} from '../store/tree'
 import {Node} from 'slate'
 import {ReactEditor} from 'slate-react'
-import {configStore} from '../store/config'
 import {SearchOutlined} from '@ant-design/icons'
 import ArrowRight from '../icons/ArrowRight'
+import { useCoreContext } from '../store/core'
+import { useTranslation } from 'react-i18next'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -18,6 +18,8 @@ const visitSchema = (schema: any[], cb: (node: any) => void) => {
   }
 }
 export const FullSearch = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useGetSetState({
     unfold: false,
     searchResults: [] as {
@@ -29,8 +31,8 @@ export const FullSearch = observer(() => {
   const dom = useRef<HTMLDivElement>(null)
   const toPoint = useCallback((target: HTMLElement) => {
     requestIdleCallback(() => {
-      const top = treeStore.currentTab.store!.offsetTop(target)
-      treeStore.currentTab.store!.container!.scroll({
+      const top = core.tree.currentTab.store!.offsetTop(target)
+      core.tree.currentTab.store!.container!.scroll({
         top: top - 100
       })
       target.classList.add('high-block')
@@ -42,12 +44,12 @@ export const FullSearch = observer(() => {
 
   const toNode = useCallback((res: { el: any, file: IFileItem }) => {
     if (res.el) {
-      if (treeStore.openedNote !== res.file) {
-        treeStore.openNote(res.file, false)
+      if (core.tree.openedNote !== res.file) {
+        core.tree.openNote(res.file, false)
         setTimeout(() => {
           requestIdleCallback(() => {
             try {
-              const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
+              const dom = ReactEditor.toDOMNode(core.tree.currentTab.store?.editor!, res.el)
               if (dom) toPoint(dom)
             } catch (e) {
               console.warn('dom not find', e)
@@ -56,15 +58,15 @@ export const FullSearch = observer(() => {
         }, 200)
       } else {
         try {
-          const dom = ReactEditor.toDOMNode(treeStore.currentTab.store?.editor!, res.el)
+          const dom = ReactEditor.toDOMNode(core.tree.currentTab.store?.editor!, res.el)
           if (dom) toPoint(dom)
         } catch (e) {
           console.warn('dom not find')
         }
       }
     } else {
-      if (treeStore.openedNote !== res.file) {
-        treeStore.openNote(res.file, false)
+      if (core.tree.openedNote !== res.file) {
+        core.tree.openNote(res.file, false)
       }
       setTimeout(() => {
         const title = document.querySelector('.page-title') as HTMLElement
@@ -79,13 +81,13 @@ export const FullSearch = observer(() => {
     clearTimeout(timer.current)
     setState({searching: true})
     timer.current = window.setTimeout(() => {
-      if (!treeStore.searchKeyWord.trim() || !treeStore.nodes.length) {
+      if (!core.tree.searchKeyWord.trim() || !core.tree.nodes.length) {
         return setState({searchResults: []})
       }
       let results: any[] = []
-      for (let f of treeStore.nodes) {
+      for (let f of core.tree.nodes) {
         let res: { file: IFileItem, results: { el: any, text: string }[] } | null = null
-        let matchText = treeStore.searchKeyWord.toLowerCase()
+        let matchText = core.tree.searchKeyWord.toLowerCase()
         if (f.ext === 'md' && f.filename.toLowerCase().includes(matchText)) {
           if (!res) res = { file: f, results: [] }
           res.results.push({
@@ -117,13 +119,13 @@ export const FullSearch = observer(() => {
     }, immediate ? 0 : 300)
   }, [])
   useEffect(() => {
-    if (treeStore.treeTab === 'search') {
-      if (treeStore.searchKeyWord) {
+    if (core.tree.treeTab === 'search') {
+      if (core.tree.searchKeyWord) {
         search()
       }
       dom.current?.querySelector('input')?.focus()
     }
-  }, [treeStore.treeTab])
+  }, [core.tree.treeTab])
   return (
     <div className={'py-1 h-full'} ref={dom}>
       <div className={'px-4 relative'}>
@@ -133,22 +135,22 @@ export const FullSearch = observer(() => {
           }
         />
         <input
-          value={treeStore.searchKeyWord}
+          value={core.tree.searchKeyWord}
           autoFocus={true}
           className={'input h-8 w-full pl-7'}
           onChange={(e) => {
-            treeStore.setState({ searchKeyWord: e.target.value })
+            core.tree.setState({ searchKeyWord: e.target.value })
             search()
           }}
-          placeholder={configStore.zh ? '搜索' : 'Search'}
+          placeholder={t('search')}
         />
       </div>
       <div className={'py-3 px-5 space-y-3 h-[calc(100%_-_1.5rem)] overflow-y-auto'}>
-        {!state().searching && !state().searchResults.length && treeStore.searchKeyWord && (
+        {!state().searching && !state().searchResults.length && core.tree.searchKeyWord && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
-              {configStore.zh ? '未找到相关内容' : 'No content found for'}{' '}
-              <span className={'text-indigo-500 inline'}>{treeStore.searchKeyWord}</span>
+              {t('noResult')}
+              <span className={'text-indigo-500 inline'}>{core.tree.searchKeyWord}</span>
             </span>
           </div>
         )}

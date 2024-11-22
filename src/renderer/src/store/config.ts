@@ -3,12 +3,12 @@ import { MainApi } from '../api/main'
 import mermaid from 'mermaid'
 import { shareStore } from '../server/store'
 import { highlighter } from '../editor/utils/highlight'
-import { imageBed } from '../utils/imageBed'
 import { db } from './db'
-import { treeStore } from './tree'
 import { clearAllCodeCache, clearInlineKatex } from '../editor/plugins/useHighlight'
+import { Core } from './core'
+import i18n from '../utils/i18n'
 
-class ConfigStore {
+export class ConfigStore {
   visible = false
   enableUpgrade = false
   openUpdateDialog = false
@@ -23,15 +23,12 @@ class ConfigStore {
     leadingWidth: 260,
     dark: false,
     locale: 'en' as 'en' | 'zh',
-    codeLineNumber: true,
     codeTabSize: 2,
     editorTextSize: 16,
     codeTheme: 'auto',
     codeAutoBreak: false,
-    dragToSort: true,
     spellCheck: false,
     editorWidth: 700,
-    autoRebuild: true,
     showHiddenFiles: false,
     editorLineHeight: 'default' as 'default' | 'loose' | 'compact',
     interfaceFont: 'System',
@@ -43,6 +40,9 @@ class ConfigStore {
   timer = 0
   homePath = ''
   deviceId = ''
+  get state() {
+    return this.config
+  }
   get tab() {
     return ' '.repeat(this.config.codeTabSize)
   }
@@ -59,7 +59,9 @@ class ConfigStore {
   get curCodeTheme() {
     return this.config.codeTheme === 'auto' ? this.defaultTheme : this.config.codeTheme
   }
-  constructor() {
+  constructor(
+    private readonly core: Core
+  ) {
     makeAutoObservable(this, {
       timer: false,
       deviceId: false
@@ -92,7 +94,7 @@ class ConfigStore {
       highlighter.setTheme(this.curCodeTheme)
       if (refresh) {
         requestIdleCallback(() => {
-          for (const t of treeStore.tabs) {
+          for (const t of this.core.tree.tabs) {
             clearAllCodeCache(t.store.editor)
             clearInlineKatex(t.store.editor)
             t.store.setState((state) => (state.pauseCodeHighlight = true))
@@ -103,8 +105,8 @@ class ConfigStore {
               })
               runInAction(() => {
                 const theme = highlighter.getTheme(this.curCodeTheme)
-                configStore.config.codeBackground = theme.bg
-                configStore.codeDark = theme.type === 'dark'
+                this.config.codeBackground = theme.bg
+                this.codeDark = theme.type === 'dark'
               })
             }, 30)
           }
@@ -170,6 +172,9 @@ class ConfigStore {
         [key]: value
       })
     }
+    if (key === 'locale') {
+      i18n.changeLanguage(this.config.locale)
+    }
   }
   setInterfaceFont(value: string) {
     for (let key of document.body.classList.values()) {
@@ -205,17 +210,15 @@ class ConfigStore {
           theme: 'dark'
         })
       }
-      imageBed.initial()
+      this.core.imageBed.initial()
       document.body.classList.add('font-' + this.config.interfaceFont)
       MainApi.getPath('home').then((res) => {
         this.homePath = res
         resolve(true)
       })
-      shareStore.initial()
+      i18n.changeLanguage(this.config.locale)
     }).catch((e) => {
       console.log('catch', e)
     })
   }
 }
-
-export const configStore = new ConfigStore()

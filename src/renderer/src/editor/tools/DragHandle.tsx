@@ -1,8 +1,7 @@
-import {observer} from 'mobx-react-lite'
-import React, {CSSProperties, useRef} from 'react'
+import { observer } from 'mobx-react-lite'
+import { CSSProperties, useRef } from 'react'
 import Drag from '../../icons/Drag'
-import {useEditorStore} from '../store'
-import {configStore} from '../../store/config'
+import { useEditorStore } from '../store'
 
 
 export const DragHandle = observer((props: {
@@ -10,7 +9,6 @@ export const DragHandle = observer((props: {
 }) => {
   const ref = useRef<HTMLDivElement>(null)
   const store = useEditorStore()
-  if (!configStore.config.dragToSort) return null
   return (
     <span
       className={'drag-handle'}

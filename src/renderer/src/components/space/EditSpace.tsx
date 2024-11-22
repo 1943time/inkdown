@@ -1,7 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {Button, Checkbox, Form, Input, Modal, Space} from 'antd'
 import {useLocalState} from '../../hooks/useLocalState'
-import {configStore} from '../../store/config'
 import {FolderOpenOutlined} from '@ant-design/icons'
 import {Subject} from 'rxjs'
 import {useSubject} from '../../hooks/subscribe'
@@ -9,16 +8,19 @@ import {MainApi} from '../../api/main'
 import {useCallback} from 'react'
 import {db} from '../../store/db'
 import {nid} from '../../utils'
-import {treeStore} from '../../store/tree'
 import {Icon} from '@iconify/react'
 import {openConfirmDialog$} from '../Dialog/ConfirmDialog'
 import {runInAction} from 'mobx'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const editSpace$ = new Subject<string | null>()
 
 export const spaceChange$ = new Subject()
 
 export const EditSpace = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     open: false,
     spaceId: '',
@@ -67,19 +69,19 @@ export const EditSpace = observer(() => {
           imageFolder: v.imageFolder,
           background: state.background
         })
-        const oldPath = treeStore.root?.filePath
-        if (state.spaceId === treeStore.root?.cid) {
+        const oldPath = core.tree.root?.filePath
+        if (state.spaceId === core.tree.root?.cid) {
           runInAction(() => {
-            treeStore.root!.filePath = v.filePath
-            treeStore.root!.name = v.name
-            treeStore.root!.imageFolder = v.imageFolder
-            treeStore.root!.relative = v.relative
-            treeStore.root!.background = state.background
+            core.tree.root!.filePath = v.filePath
+            core.tree.root!.name = v.name
+            core.tree.root!.imageFolder = v.imageFolder
+            core.tree.root!.relative = v.relative
+            core.tree.root!.background = state.background
           })
         }
-        if (!treeStore.root || (oldPath && oldPath !== v.filePath)) {
+        if (!core.tree.root || (oldPath && oldPath !== v.filePath)) {
           await window.electron.ipcRenderer.invoke('open-space', '')
-          treeStore.initial(state.spaceId)
+          core.tree.initial(state.spaceId)
         }
         setState({ open: false })
       } else {
@@ -108,7 +110,7 @@ export const EditSpace = observer(() => {
             background: state.background
           })
           setState({open: false})
-          treeStore.initial(id)
+          core.tree.initial(id)
           spaceChange$.next(null)
         }
       }
@@ -121,31 +123,29 @@ export const EditSpace = observer(() => {
       title={
         <div className={'flex items-center'}>
           <Icon icon={'material-symbols:workspaces-outline'} className={'mr-1'} />
-          {state.spaceId ? state.spaceName : configStore.zh ? '创建工作空间' : 'Create a workspace'}
+          {state.spaceId ? state.spaceName : t('createWorkspace')}
         </div>
       }
       onCancel={() => setState({ open: false })}
       footer={null}
     >
       <div className={'text-xs text-center dark:text-white/60 mb-4 text-black/60'}>
-        {configStore.zh
-          ? 'Inkdown将自动解析和存储内容至空间文件夹内'
-          : 'Inkdown will parse the content and store it in the space folder'}
+        {t('parseTip')}
       </div>
       <Form layout={'vertical'} className={'pt-2'} form={form}>
         <Form.Item
-          label={configStore.zh ? '空间名称' : 'Space Name'}
+          label={t('spaceName')}
           rules={[{ required: true }]}
           name={'name'}
         >
-          <Input placeholder={configStore.zh ? '输入名称' : 'Enter Name'} />
+          <Input placeholder={t('enterName')} />
         </Form.Item>
-        <Form.Item label={configStore.zh ? '文件夹' : 'Folder'}>
+        <Form.Item label={t('folder')}>
           <Space.Compact className={'w-full'}>
             <Form.Item rules={[{ required: true }]} name={'filePath'} noStyle={true}>
               <Input
                 disabled={true}
-                placeholder={configStore.zh ? '请选择文件夹' : 'Select a folder'}
+                placeholder={t('selectFolder')}
               />
             </Form.Item>
             <Button
@@ -164,9 +164,9 @@ export const EditSpace = observer(() => {
             </Button>
           </Space.Compact>
         </Form.Item>
-        <Form.Item label={configStore.zh ? '定义颜色' : 'Color Indentifer'} name={'background'}>
+        <Form.Item label={t('colorIndentifer')} name={'background'}>
           <div className={'space-x-3 flex'}>
-            {configStore.spaceColors.map((c) => {
+            {core.config.spaceColors.map((c) => {
               return (
                 <div
                   onClick={() => {
@@ -182,31 +182,23 @@ export const EditSpace = observer(() => {
           </div>
         </Form.Item>
         <Form.Item
-          label={configStore.zh ? '图片存储文件夹' : 'Image storage Folder'}
-          tooltip={
-            configStore.zh
-              ? '在打开空间的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径'
-              : "The save location for pasting images when opening a space, if using a relative path, the path is relative to the current document's path"
-          }
+          label={t('storageFolder')}
+          tooltip={t('storageFolderTip')}
         >
           <Form.Item noStyle={true} name={'imageFolder'} initialValue={'.images'}>
             <Input placeholder={'.images'} />
           </Form.Item>
           <div className={'flex justify-end mt-1'}>
             <Form.Item noStyle={true} name={'relative'} valuePropName={'checked'}>
-              <Checkbox>{configStore.zh ? '相对路径' : 'Relative path'}</Checkbox>
+              <Checkbox>{t('relativePath')}</Checkbox>
             </Form.Item>
           </div>
         </Form.Item>
         <div className={'space-y-3'}>
           <Button block={true} type={'primary'} onClick={save}>
             {state.spaceId
-              ? configStore.zh
-                ? '保存'
-                : 'Save'
-              : configStore.zh
-              ? '创建'
-              : 'Create'}
+              ? t('save')
+              : t('create')}
           </Button>
           {!!state.spaceId && (
             <Button
@@ -222,12 +214,12 @@ export const EditSpace = observer(() => {
                     await db.recent.where('spaceId').equals(state.spaceId).delete()
                     await db.history.where('spaceId').equals(state.spaceId).delete()
                     await db.space.delete(state.spaceId)
-                    if (treeStore.root?.cid === state.spaceId) {
+                    if (core.tree.root?.cid === state.spaceId) {
                       runInAction(() => {
-                        treeStore.tabs = [treeStore.createTab()]
-                        treeStore.nodeMap.clear()
-                        treeStore.root = null
-                        treeStore.selectItem = null
+                        core.tree.tabs = [core.tree.createTab()]
+                        core.tree.nodeMap.clear()
+                        core.tree.root = null
+                        core.tree.selectItem = null
                       })
                       await window.electron.ipcRenderer.invoke('open-space', '')
                     }

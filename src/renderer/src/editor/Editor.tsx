@@ -5,25 +5,23 @@ import { MElement, MLeaf } from './elements'
 import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
 import { useOnchange } from './plugins/useOnchange'
-import { htmlParser } from './plugins/htmlParser'
 import { observer } from 'mobx-react-lite'
 import { IFileItem } from '../index'
-import { treeStore } from '../store/tree'
 import { EditorUtils } from './utils/editorUtils'
 import { useEditorStore } from './store'
 import { action, runInAction } from 'mobx'
 import { useSubject } from '../hooks/subscribe'
-import { configStore } from '../store/config'
 import { ipcRenderer } from 'electron'
 import { isAbsolute, join, relative } from 'path'
 import { existsSync } from 'fs'
 import { ErrorBoundary, ErrorFallback } from '../components/ErrorBoundary'
 import { Title } from './tools/Title'
-import { updateNode } from './utils/updateNode'
 import { mediaType } from './utils/dom'
 import { toUnixPath } from '../utils/path'
+import { useCoreContext } from '../store/core'
 
 export const MEditor = observer(({ note }: { note: IFileItem }) => {
+  const core = useCoreContext()
   const store = useEditorStore()
   const changedMark = useRef(false)
   const editor = store.editor
@@ -36,7 +34,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
     []
   )
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children} />, [])
-  const keydown = useKeyboard(store)
+  const keydown = useKeyboard(core, store)
   const onChange = useOnchange(editor, store)
   const first = useRef(true)
   const save = useCallback(async () => {
@@ -48,7 +46,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         store.docChanged = false
       })
       window.electron.ipcRenderer.send('file-saved')
-      updateNode(node)
+      core.node.updateNode(node)
     }
   }, [note])
 
@@ -90,7 +88,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
               store.openLangCompletion = false
               store.openQuickLinkComplete = false
             })
-            treeStore.currentTab.range = document.getSelection()?.getRangeAt(0)
+            core.tree.currentTab.range = document.getSelection()?.getRangeAt(0)
           }
         } catch (e) {}
       }
@@ -147,10 +145,10 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
 
   useEffect(() => {
     save()
-    if (note === treeStore.openedNote && nodeRef.current !== note) {
+    if (note === core.tree.openedNote && nodeRef.current !== note) {
       initialNote()
     }
-  }, [note, editor, treeStore.openedNote])
+  }, [note, editor, core.tree.openedNote])
 
   useEffect(() => {
     const blur = async () => {
@@ -165,7 +163,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
   }, [editor])
 
   useSubject(
-    treeStore.externalChange$,
+    core.tree.externalChange$,
     (changeNote) => {
       if (changeNote === note) {
         try {
@@ -205,8 +203,8 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
 
   const drop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      if (treeStore.dragNode) {
-        const node = treeStore.dragNode
+      if (core.tree.dragNode) {
+        const node = core.tree.dragNode
         if (!node.folder) {
           const type = mediaType(node.filePath)
           if (node.ext === 'md' || type === 'other') {
@@ -268,7 +266,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         try {
           if (text.startsWith('bluestone://')) {
             const url = new URL(text)
-            if (treeStore.root?.cid === url.searchParams.get('space')) {
+            if (core.tree.root?.cid === url.searchParams.get('space')) {
               store.insertLink(url.searchParams.get('path')!)
               e.preventDefault()
               return
@@ -282,10 +280,10 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
             if (
               url &&
               !url.startsWith('http') &&
-              treeStore.root &&
-              url.startsWith(treeStore.root.filePath)
+              core.tree.root &&
+              url.startsWith(core.tree.root.filePath)
             ) {
-              url = toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), url))
+              url = toUnixPath(relative(join(core.tree.openedNote!.filePath, '..'), url))
             }
             if (path) {
               if (text.startsWith('media://')) {
@@ -364,7 +362,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
           Transforms.insertFragment(
             editor,
             text.split('\n').map((c) => {
-              return { type: 'code-line', children: [{ text: c.replace(/\t/g, configStore.tab) }] }
+              return { type: 'code-line', children: [{ text: c.replace(/\t/g, core.config.tab) }] }
             })
           )
           e.stopPropagation()
@@ -373,7 +371,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         }
       }
       let paste = e.clipboardData.getData('text/html')
-      if (paste && htmlParser(editor, paste)) {
+      if (paste) {
         e.stopPropagation()
         e.preventDefault()
       }
@@ -409,13 +407,13 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
           onError={onError}
           decorate={high}
           onDragOver={(e) => e.preventDefault()}
-          spellCheck={configStore.config.spellCheck}
+          spellCheck={core.config.state.spellCheck}
           readOnly={store.readonly}
-          className={`edit-area font-${configStore.config.editorFont} ${
+          className={`edit-area font-${core.config.state.editorFont} ${
             store.focus ? 'focus' : ''
           }`}
           style={{
-            fontSize: configStore.config.editorTextSize || 16
+            fontSize: core.config.state.editorTextSize || 16
           }}
           onMouseDown={checkEnd}
           onDrop={drop}

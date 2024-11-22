@@ -13,7 +13,6 @@ import { useSubject } from '../../hooks/subscribe'
 import { EditorUtils } from '../utils/editorUtils'
 import IMermaid from '../../icons/IMermaid'
 import { getOffsetLeft, getOffsetTop } from '../utils/dom'
-import { configStore } from '../../store/config'
 import { TextHelp } from '../../components/set/Help'
 import { Button, Input, Tabs } from 'antd'
 import { IPlanet } from '../../icons/IPlanet'
@@ -24,6 +23,8 @@ import { MainApi } from '../../api/main'
 import { cpSync, existsSync, statSync } from 'fs'
 import { basename, join, parse, relative } from 'path'
 import { toUnixPath } from '../../utils/path'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 type InsertOptions = {
   label: [string, string]
@@ -223,7 +224,9 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
 }
 
 export const InsertAutocomplete = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
+  const {t} = useTranslation()
   const dom = useRef<HTMLDivElement>(null)
   const ctx = useRef<{
     path: number[]
@@ -543,7 +546,7 @@ export const InsertAutocomplete = observer(() => {
       {!state.insertLink && !state.insertAttachment && (
         <>
           <div className={'text-xs leading-6 pl-1 dark:text-gray-400 text-gray-500 mb-1'}>
-            {configStore.zh ? '快速插入' : 'Quick Actions'}
+            {t('quickActions')}
           </div>
           {state.filterOptions.map((l, i) => (
             <div key={l.key}>
@@ -565,7 +568,7 @@ export const InsertAutocomplete = observer(() => {
                 `}
                   >
                     {el.icon}
-                    <span>{configStore.zh ? el.label[0] : el.label[1]}</span>
+                    <span>{core.config.zh ? el.label[0] : el.label[1]}</span>
                   </div>
                 ))}
               </div>

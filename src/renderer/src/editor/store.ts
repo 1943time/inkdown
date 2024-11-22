@@ -18,20 +18,18 @@ import { MediaNode, TableCellNode } from '../el'
 import { Subject } from 'rxjs'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
 import { isAbsolute, join, parse, relative, sep } from 'path'
-import { getOffsetLeft, getOffsetTop, mediaType } from './utils/dom'
-import { treeStore } from '../store/tree'
+import { getOffsetLeft, getOffsetTop, mediaType, slugify } from './utils/dom'
 import { MainApi } from '../api/main'
-import { clearAllCodeCache } from './plugins/useHighlight'
+import { clearAllCodeCache, codeCache } from './plugins/useHighlight'
 import { withMarkdown } from './plugins'
 import { withHistory } from 'slate-history'
 import { withErrorReporting } from './plugins/catchError'
-import { imageBed } from '../utils/imageBed'
 import { getImageData, nid } from '../utils'
 import { openMenus } from '../components/Menu'
 import { EditorUtils } from './utils/editorUtils'
-import { insertFileNode } from '../store/parserNode'
 import { toUnixPath } from '../utils/path'
 import { selChange$ } from './plugins/useOnchange'
+import { Core } from '../store/core'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -50,6 +48,7 @@ export class EditorStore {
   openInsertNetworkImage = false
   webview = false
   initializing = false
+  clearTimer = 0
   sel: BaseSelection | undefined
   focus = false
   readonly = false
@@ -106,7 +105,10 @@ export class EditorStore {
     setTimeout(() => (this.manual = false), 30)
   }
 
-  constructor(webview = false, history = false) {
+  constructor(
+    private readonly core: Core,
+    webview = false, history = false
+  ) {
     this.webview = webview
     this.history = history
     this.dragStart = this.dragStart.bind(this)
@@ -122,8 +124,18 @@ export class EditorStore {
       dragEl: false,
       manual: false,
       openLinkPanel: false,
-      initializing: false
+      initializing: false,
+      clearTimer: false
     })
+  }
+  clearCodeCache(node: any) {
+    codeCache.delete(node)
+    clearTimeout(this.clearTimer)
+    this.clearTimer = window.setTimeout(() => {
+      runInAction(() => {
+        this.refreshHighlight = !this.refreshHighlight
+      })
+    }, 60)
   }
   openPreviewImages(el: MediaNode) {
     const nodes = Array.from(
@@ -333,27 +345,27 @@ export class EditorStore {
           const name = nid() + parse(f.path).ext
           const copyPath = join(imgDir, name)
           cpSync(f.path, copyPath)
-          if (treeStore.root && treeStore.openedNote) {
-            paths.push(toUnixPath(relative(join(treeStore.openedNote.filePath, '..'), copyPath)))
+          if (this.core.tree.root && this.core.tree.openedNote) {
+            paths.push(toUnixPath(relative(join(this.core.tree.openedNote.filePath, '..'), copyPath)))
           } else {
             paths.push(copyPath)
           }
 
-          if (treeStore.root) {
-            insertFileNode(treeStore, {
+          if (this.core.tree.root) {
+            this.core.node.insertFileNode({
               filePath: copyPath,
               folder: false,
-              spaceId: treeStore.root?.cid
+              spaceId: this.core.tree.root?.cid
             })
           }
         } else {
           const path = await this.saveFile(f)
           paths.push(path)
-          if (treeStore.root) {
-            insertFileNode(treeStore, {
+          if (this.core.tree.root) {
+            this.core.node.insertFileNode({
               filePath: path,
               folder: false,
-              spaceId: treeStore.root?.cid
+              spaceId: this.core.tree.root?.cid
             })
           }
         }
@@ -370,8 +382,8 @@ export class EditorStore {
 
   private async createDir(path: string) {
     try {
-      if (!treeStore.root) return
-      let rootPath = treeStore.root.filePath
+      if (!this.core.tree.root) return
+      let rootPath = this.core.tree.root.filePath
       const stack = path.replace(rootPath, '').split(sep).slice(1)
       while (stack.length) {
         const name = stack.shift()!
@@ -386,21 +398,21 @@ export class EditorStore {
     }
   }
   async getImageDir() {
-    if (treeStore.root) {
-      let imageDir = join(treeStore.root.filePath, treeStore.root.imageFolder || '.images')
-      if (treeStore.root.relative) {
+    if (this.core.tree.root) {
+      let imageDir = join(this.core.tree.root.filePath, this.core.tree.root.imageFolder || '.images')
+      if (this.core.tree.root.relative) {
         imageDir = join(
-          treeStore.openedNote!.filePath,
+          this.core.tree.openedNote!.filePath,
           '..',
-          treeStore.root.imageFolder || '.images'
+          this.core.tree.root.imageFolder || '.images'
         )
       }
       if (!existsSync(imageDir)) {
         await this.createDir(imageDir)
-        await insertFileNode(treeStore, {
+        await this.core.node.insertFileNode({
           filePath: imageDir,
           folder: true,
-          spaceId: treeStore.root.cid
+          spaceId: this.core.tree.root.cid
         })
       }
       return imageDir
@@ -412,10 +424,10 @@ export class EditorStore {
     }
   }
   async saveFile(file: File | { name: string; buffer: ArrayBuffer }) {
-    if (imageBed.route) {
+    if (this.core.imageBed.route) {
       const p = parse(file.name)
       const name = nid() + p.ext
-      const res = await imageBed.uploadFile([
+      const res = await this.core.imageBed.uploadFile([
         { name, data: file instanceof File ? await file.arrayBuffer() : file.buffer }
       ])
       if (res) {
@@ -429,21 +441,21 @@ export class EditorStore {
       const buffer = file instanceof File ? await file.arrayBuffer() : file.buffer
       const p = parse(file.name)
       const base = file instanceof File ? nid() + p.ext : file.name
-      if (treeStore.root) {
+      if (this.core.tree.root) {
         targetPath = join(imgDir, base)
         mediaUrl = toUnixPath(
-          relative(join(treeStore.currentTab.current?.filePath || '', '..'), join(imgDir, base))
+          relative(join(this.core.tree.currentTab.current?.filePath || '', '..'), join(imgDir, base))
         )
       } else {
         targetPath = join(imgDir, base)
         mediaUrl = targetPath
       }
       writeFileSync(targetPath, new DataView(buffer))
-      if (treeStore.root && targetPath.startsWith(treeStore.root.filePath)) {
-        await insertFileNode(treeStore, {
+      if (this.core.tree.root && targetPath.startsWith(this.core.tree.root.filePath)) {
+        await this.core.node.insertFileNode({
           filePath: targetPath,
           folder: false,
-          spaceId: treeStore.root?.cid
+          spaceId: this.core.tree.root?.cid
         })
       }
       return toUnixPath(mediaUrl)
@@ -453,9 +465,9 @@ export class EditorStore {
   async insertFiles(files: string[]) {
     const path = EditorUtils.findMediaInsertPath(this.editor)
     files = files.filter((f) => ['image', 'video'].includes(mediaType(f)))
-    if (!treeStore.openedNote || !path || !files.length) return
-    if (imageBed.route) {
-      const urls = await imageBed.uploadFile(
+    if (!this.core.tree.openedNote || !path || !files.length) return
+    if (this.core.imageBed.route) {
+      const urls = await this.core.imageBed.uploadFile(
         files.map((f) => {
           const p = parse(f)
           const name = nid() + p.ext
@@ -478,14 +490,14 @@ export class EditorStore {
         const name = nid() + parse(f).ext
         const copyPath = join(imgDir, name)
         cpSync(f, copyPath)
-        if (treeStore.root) {
-          insertFileNode(treeStore, {
+        if (this.core.tree.root) {
+          this.core.node.insertFileNode({
             filePath: copyPath,
             folder: false,
-            spaceId: treeStore.root.cid
+            spaceId: this.core.tree.root.cid
           })
           insertPaths.push(
-            toUnixPath(relative(join(treeStore.openedNote.filePath, '..'), copyPath))
+            toUnixPath(relative(join(this.core.tree.openedNote.filePath, '..'), copyPath))
           )
         } else {
           insertPaths.push(copyPath)
@@ -513,8 +525,8 @@ export class EditorStore {
   insertLink(filePath: string) {
     const p = parse(filePath)
     const insertPath =
-      treeStore.root && isAbsolute(filePath) && filePath.startsWith(treeStore.root.filePath)
-        ? toUnixPath(relative(join(treeStore.openedNote!.filePath, '..'), filePath))
+      this.core.tree.root && isAbsolute(filePath) && filePath.startsWith(this.core.tree.root.filePath)
+        ? toUnixPath(relative(join(this.core.tree.openedNote!.filePath, '..'), filePath))
         : filePath
     let node = { text: filePath.startsWith('http') ? filePath : p.name, url: insertPath }
     const sel = this.editor.selection
@@ -733,7 +745,7 @@ export class EditorStore {
             if (dragNode.type === 'table') {
               setTimeout(
                 action(() => {
-                  treeStore.size = JSON.parse(JSON.stringify(treeStore.size))
+                  this.core.tree.size = JSON.parse(JSON.stringify(this.core.tree.size))
                 })
               )
             }
@@ -791,5 +803,16 @@ export class EditorStore {
       }),
       { once: true }
     )
+  }
+  toHash(hash: string) {
+    const dom = this.container?.querySelector(
+      `[data-head="${slugify(hash.toLowerCase())}"]`
+    ) as HTMLElement
+    if (dom) {
+      this.container?.scroll({
+        top: dom.offsetTop + 100,
+        behavior: 'smooth'
+      })
+    }
   }
 }

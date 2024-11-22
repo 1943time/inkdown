@@ -1,15 +1,19 @@
 import React from 'react'
 import {BasePoint, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms} from 'slate'
 import {CodeLineNode, NodeTypes, ParagraphNode, TableCellNode, TableRowNode} from '../../../el'
-import {configStore} from '../../../store/config'
 import {clearAllCodeCache} from '../useHighlight'
+import { EditorStore } from '../../store'
+import { Core } from '../../../store/core'
 
 export class TabKey {
   constructor(
-    private readonly editor: Editor
+    private readonly core: Core,
+    private readonly store: EditorStore
   ) {
   }
-
+  get editor() {
+    return this.store.editor
+  }
   run(e: React.KeyboardEvent) {
     const sel = this.editor.selection
     if (!sel) return
@@ -74,7 +78,7 @@ export class TabKey {
             const start = Editor.start(this.editor, path)
             if (e.shiftKey) {
               const str = Node.string(el)
-              const reg = configStore.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
+              const reg = this.core.config.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
               const m = str.match(reg)
               if (m) {
                 const length = m[0].length
@@ -92,7 +96,7 @@ export class TabKey {
                 })
               }
             } else {
-              Transforms.insertFragment(this.editor, [{text: configStore.tab}], {
+              Transforms.insertFragment(this.editor, [{text: this.core.config.tab}], {
                 at: start
               })
             }
@@ -124,7 +128,7 @@ export class TabKey {
   private codeLine(e: React.KeyboardEvent, node: NodeEntry<CodeLineNode>, sel: Range) {
     if (e.shiftKey) {
       const str = Node.string(node[0])
-      const reg = configStore.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
+      const reg = this.core.config.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
       const m = str.match(reg)
       if (m) {
         const length = m[0].length
@@ -150,7 +154,7 @@ export class TabKey {
         })
       }
     } else {
-      Transforms.insertText(this.editor, configStore.tab)
+      Transforms.insertText(this.editor, this.core.config.tab)
     }
     return true
   }

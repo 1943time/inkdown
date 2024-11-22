@@ -9,7 +9,6 @@ import {getOffsetLeft, mediaType} from '../utils/dom'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'
 import {useSubject} from '../../hooks/subscribe'
-import {treeStore} from '../../store/tree'
 import {keyArrow} from '../plugins/hotKeyCommands/arrow'
 import {IFileItem} from '../../index'
 import {join, relative} from 'path'
@@ -17,8 +16,10 @@ import {getImageData} from '../../utils'
 import isHotkey from 'is-hotkey'
 import {EditorUtils} from '../utils/editorUtils'
 import { toUnixPath } from '../../utils/path'
+import { useCoreContext } from '../../store/core'
 
 export const MediaAttr = observer(() => {
+  const core = useCoreContext()
   const store = useEditorStore()
   const [state, setState] = useGetSetState({
     visible: false,
@@ -35,14 +36,14 @@ export const MediaAttr = observer(() => {
   const domRef = useRef<HTMLDivElement>(null)
 
   const getFilePaths = useCallback(() => {
-    if (treeStore.root) {
+    if (core.tree.root) {
       let files: {label: string | ReactNode, value: string}[] = []
-      const stack: IFileItem[] = treeStore.root.children!.slice()
+      const stack: IFileItem[] = core.tree.root.children!.slice()
       while (stack.length) {
         const node = stack.shift()!
         if (!node.folder && ['image', 'video', 'document'].includes(mediaType(node.filePath))) {
           const path = toUnixPath(
-            relative(join(treeStore.openedNote!.filePath, '..'), node.filePath!)
+            relative(join(core.tree.openedNote!.filePath, '..'), node.filePath!)
           )
           files.push({
             label: (
@@ -86,9 +87,9 @@ export const MediaAttr = observer(() => {
       let width = dom.clientWidth < 400 ? 400 : dom.clientWidth
       if (dom) {
         let top = store.offsetTop(dom)
-        if (treeStore.tabs.length > 1) top += 32
+        if (core.tree.tabs.length > 1) top += 32
         let left = getOffsetLeft(dom)
-        if (!treeStore.fold) left -= treeStore.width
+        if (!core.tree.fold) left -= core.tree.width
         if (left + width > window.innerWidth - 10) left = window.innerWidth - width - 20
         setState({
           top: top - 32, left, width, visible: true
@@ -207,7 +208,7 @@ export const MediaAttr = observer(() => {
 
   useEffect(() => {
     resize()
-  }, [treeStore.size, store.openSearch, treeStore.tabs.length])
+  }, [core.tree.size, store.openSearch, core.tree.tabs.length])
 
   const setUrl = useCallback(() => {
     const path = nodeRef.current![1]

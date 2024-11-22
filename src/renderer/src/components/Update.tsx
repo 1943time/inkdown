@@ -3,12 +3,13 @@ import { Button, Modal, notification, Progress } from 'antd'
 import { useLocalState } from '../hooks/useLocalState'
 import { useCallback, useEffect, useRef } from 'react'
 import { message$ } from '../utils'
-import { configStore } from '../store/config'
 import { openConfirmDialog$ } from './Dialog/ConfirmDialog'
 import { action, runInAction } from 'mobx'
 import ky from 'ky'
+import { useCoreContext } from '../store/core'
 const ipcRenderer = window.electron.ipcRenderer
 export const Update = observer(() => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     startUpdate: false,
     percent: 0,
@@ -50,7 +51,7 @@ export const Update = observer(() => {
             zhInfo: info[1]?.split(/\n|\r\n/).filter((item) => !!item) || []
           }
         })
-        runInAction(() => (configStore.enableUpgrade = true))
+        runInAction(() => (core.config.enableUpgrade = true))
       } else {
         checkTimer.current = window.setTimeout(check, 60 * 1000 * 60)
       }
@@ -69,11 +70,11 @@ export const Update = observer(() => {
       clearTimeout(checkTimer.current)
       check().then((updated) => {
         if (updated) {
-          runInAction(() => (configStore.openUpdateDialog = true))
+          runInAction(() => (core.config.openUpdateDialog = true))
         } else {
           message$.next({
             type: 'info',
-            content: configStore.zh ? '没有可用的更新' : 'No updates are available'
+            content: core.config.zh ? '没有可用的更新' : 'No updates are available'
           })
         }
       })
@@ -93,7 +94,7 @@ export const Update = observer(() => {
             ? err.message
             : 'The network is abnormal, please try again later or download manually'
         api.error({
-          message: configStore.zh ? '更新失败' : 'The update failed',
+          message: core.config.zh ? '更新失败' : 'The update failed',
           description: msg
         })
       }
@@ -102,7 +103,7 @@ export const Update = observer(() => {
     ipcRenderer.on('update-downloaded', (e) => {
       setState({ startUpdate: false, percent: 0 })
       openConfirmDialog$.next({
-        title: configStore.zh
+        title: core.config.zh
           ? '下载更新已完成，是否立即重新启动？'
           : 'Download the update is complete, do you want to restart it now?',
         okText: 'Restart now',
@@ -124,7 +125,7 @@ export const Update = observer(() => {
       {state.startUpdate && (
         <div
           className={`w-28 mr-2 rounded px-2 cursor-pointer drag-none duration-200 flex items-center relative -top-0.5`}
-          onClick={action(() => (configStore.openUpdateDialog = true))}
+          onClick={action(() => (core.config.openUpdateDialog = true))}
         >
           <Progress percent={state.percent} className={'m-0'} showInfo={false} status={'active'} />
         </div>
@@ -132,12 +133,12 @@ export const Update = observer(() => {
       <Modal
         title={`Update Inkdown-${state.updateData.tag}`}
         width={600}
-        onCancel={action(() => (configStore.openUpdateDialog = false))}
-        open={configStore.openUpdateDialog}
+        onCancel={action(() => (core.config.openUpdateDialog = false))}
+        open={core.config.openUpdateDialog}
         footer={null}
       >
         <div className={'py-2 break-words'}>
-          {configStore.zh
+          {core.config.zh
             ? state.updateData.zhInfo.map((item, i) => (
                 <p key={i} className={'mb-2'}>
                   {item}
@@ -165,13 +166,13 @@ export const Update = observer(() => {
                   setState({ startUpdate: false, percent: 0 })
                 }}
               >
-                {configStore.zh ? '取消更新' : 'Cancel update'}
+                {core.config.zh ? '取消更新' : 'Cancel update'}
               </Button>
             </>
           ) : (
             <>
               <Button onClick={downLoad}>
-                {configStore.zh ? '手动下载' : 'Download manually'}
+                {core.config.zh ? '手动下载' : 'Download manually'}
               </Button>
               <Button
                 type={'primary'}
@@ -183,7 +184,7 @@ export const Update = observer(() => {
                     .then(async () => {
                       ipcRenderer.invoke('start-update')
                       setState({ startUpdate: true })
-                      runInAction(() => (configStore.openUpdateDialog = false))
+                      runInAction(() => (core.config.openUpdateDialog = false))
                     })
                     .catch((e) => {
                       let msg =
@@ -193,7 +194,7 @@ export const Update = observer(() => {
                           ? e.message
                           : 'The network is abnormal, please try again later or download manually'
                       api.error({
-                        message: configStore.zh ? '更新失败' : 'The update failed',
+                        message: core.config.zh ? '更新失败' : 'The update failed',
                         description: msg
                       })
                       console.error('update fail', e)
@@ -203,7 +204,7 @@ export const Update = observer(() => {
                     })
                 }}
               >
-                {configStore.zh ? '立即更新' : 'Update now'}
+                {core.config.zh ? '立即更新' : 'Update now'}
               </Button>
             </>
           )}

@@ -5,18 +5,20 @@ import { useLocalState } from '../../hooks/useLocalState'
 import { IFileItem } from '../../index'
 import { readdirSync } from 'fs'
 import { join } from 'path'
-import { configStore } from '../../store/config'
 import { updateFilePath } from '../utils/updateNode'
 import isHotkey from 'is-hotkey'
 import { ReactEditor } from 'slate-react'
 import { useEditorStore } from '../store'
 import { Editor, Transforms } from 'slate'
-import { treeStore } from '../../store/tree'
 import { runInAction } from 'mobx'
 import { MainApi } from '../../api/main'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Title = observer(({ node }: { node: IFileItem }) => {
+  const core = useCoreContext()
   const store = useEditorStore()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     name: '',
     tip: false
@@ -79,13 +81,13 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
           })
         }
         setState({ tip: false })
-      } else if (treeStore.root && treeStore.nodeMap.get(node.cid)) {
+      } else if (core.tree.root && core.tree.nodeMap.get(node.cid)) {
         if (detectRename()) {
-          if (node.spaceId && treeStore.root) {
+          if (node.spaceId && core.tree.root) {
             const oldPath = node.filePath
             await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
             if (node.spaceId) {
-              treeStore.refactor.refactorDepOnLink(node, oldPath)
+              core.tree.refactor.refactorDepOnLink(node, oldPath)
             }
           }
           setState({ tip: false })
@@ -95,7 +97,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
   }, [node])
   return (
     <Tooltip
-      title={configStore.zh ? '已经有一个同名的文件' : `There's already a file with the same name`}
+      title={t('nameConflict')}
       color={'magenta'}
       open={state.tip}
       placement={'bottom'}

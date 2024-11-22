@@ -1,38 +1,38 @@
-import {ConfigProvider, message, Modal, theme} from 'antd'
-import {observer} from 'mobx-react-lite'
-import {useCallback, useEffect, useMemo, useState} from 'react'
+import { ConfigProvider, message, Modal, theme } from 'antd'
+import { observer } from 'mobx-react-lite'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSubject } from './hooks/subscribe'
-import { configStore } from './store/config'
-import {message$, modal$} from './utils'
+import { message$, modal$ } from './utils'
 import { Home } from './components/Home'
-import zhCN from 'antd/locale/zh_CN';
-import {codeReady} from './editor/utils/highlight'
+import zhCN from 'antd/locale/zh_CN'
+import { codeReady } from './editor/utils/highlight'
 import { db } from './store/db'
-import { treeStore } from './store/tree'
+import { Core, CoreContext } from './store/core'
 
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
+  const core = useMemo(() => new Core(messageApi), [])
   const [modal, modalContext] = Modal.useModal()
   const [locale, setLocale] = useState('en')
-  useSubject(message$, args => {
+  useSubject(message$, (args) => {
     args === 'destroy' ? messageApi.destroy() : messageApi.open(args)
   })
 
-  useSubject(modal$, args => {
+  useSubject(modal$, (args) => {
     modal[args.type](args.params)
   })
   const [ready, setReady] = useState(false)
   const initial = useCallback(async () => {
-    await configStore.initial()
-    await codeReady()
-    if (configStore.config.autoOpenSpace) {
+    await core.config.initial()
+    await codeReady(core)
+    if (core.config.config.autoOpenSpace) {
       const spaces = await db.space.toArray()
-      const lastOpenSpace = spaces.sort((a, b) => a.lastOpenTime > b.lastOpenTime ? -1 : 1)[0]
+      const lastOpenSpace = spaces.sort((a, b) => (a.lastOpenTime > b.lastOpenTime ? -1 : 1))[0]
       if (lastOpenSpace) {
-        await treeStore.initial(lastOpenSpace.cid)
+        await core.tree.initial(lastOpenSpace.cid)
       }
     }
-    setLocale(configStore.zh ? 'zh' : 'en')
+    setLocale(core.config.zh ? 'zh' : 'en')
     setReady(true)
   }, [])
 
@@ -41,23 +41,25 @@ const App = observer(() => {
     initial()
   }, [])
   const themeObject = useMemo(() => {
-    return configStore.config.dark ? theme.darkAlgorithm : theme.defaultAlgorithm
-  }, [configStore.config.dark])
+    return core.config.config.dark ? theme.darkAlgorithm : theme.defaultAlgorithm
+  }, [core.config.config.dark])
   if (!ready) return null
   return (
-    <ConfigProvider
-      locale={locale === 'zh' ? zhCN : undefined}
-      theme={{
-        algorithm: themeObject,
-        token: {
-          colorPrimary: '#3b82f6'
-        }
-      }}
-    >
-      {contextHolder}
-      {modalContext}
-      <Home />
-    </ConfigProvider>
+    <CoreContext.Provider value={core}>
+      <ConfigProvider
+        locale={locale === 'zh' ? zhCN : undefined}
+        theme={{
+          algorithm: themeObject,
+          token: {
+            colorPrimary: '#3b82f6'
+          }
+        }}
+      >
+        {contextHolder}
+        {modalContext}
+        <Home />
+      </ConfigProvider>
+    </CoreContext.Provider>
   )
 })
 

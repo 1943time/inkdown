@@ -13,15 +13,14 @@ import {
   StopOutlined,
   SyncOutlined
 } from '@ant-design/icons'
-import { treeStore } from '../../store/tree'
 import { useLocalState } from '../../hooks/useLocalState'
 import { action } from 'mobx'
 import { shareStore } from '../store'
 import { NotLogged } from './NotLogged'
 import { EBook, openEbook$ } from './Ebook'
 import { shareSuccessfully$ } from './Successfully'
-import { configStore } from '../../store/config'
 import { Icon } from '@iconify/react'
+import { useCoreContext } from '../../store/core'
 
 export const BookItem = observer(
   (props: {
@@ -31,6 +30,7 @@ export const BookItem = observer(
     onRefresh: () => void
     onOpenSetting: () => void
   }) => {
+    const core = useCoreContext()
     const [modal, context] = Modal.useModal()
     const closeMask = useCallback(() => {
       setTimeout(() => {
@@ -180,10 +180,10 @@ export const BookItem = observer(
             <Button
               onClick={() => {
                 props.onMask(true)
-                openEbook$.next({ folderPath: treeStore.root!.filePath })
+                openEbook$.next({ folderPath: core.tree.root!.filePath })
               }}
               icon={<BookOutlined />}
-              disabled={!shareStore.serviceConfig || !treeStore.root}
+              disabled={!shareStore.serviceConfig || !core.tree.root}
               className={'flex-1'}
               block={true}
             >

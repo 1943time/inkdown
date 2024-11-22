@@ -5,12 +5,11 @@ import { action } from 'mobx'
 import INote from '../../icons/INote'
 import ArrowRight from '../../icons/ArrowRight'
 import IFolder from '../../icons/IFolder'
-import { treeStore } from '../../store/tree'
 import { IFileItem } from '../../index'
-import { openContextMenu } from './openContextMenu'
 import { Icon } from '@iconify/react'
-import { configStore } from '../../store/config'
 import Iplus from '../../icons/Iplus'
+import { Core, useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 const checkChildren = (node: IFileItem, targetNode?: IFileItem) => {
   while(targetNode) {
@@ -24,14 +23,16 @@ const checkChildren = (node: IFileItem, targetNode?: IFileItem) => {
   }
   return true
 }
-const getClass = (c: IFileItem) => {
-  if (treeStore.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
-  if (treeStore.openedNote === c) return 'dark:bg-white/10 bg-gray-700/10'
-  if (treeStore.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
+const getClass = (c: IFileItem, core: Core) => {
+  if (core.tree.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
+  if (core.tree.openedNote === c) return 'dark:bg-white/10 bg-gray-700/10'
+  if (core.tree.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
   return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/15'
 }
 
 export const TreeRender = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   return (
     <>
       <div
@@ -42,27 +43,27 @@ export const TreeRender = observer(() => {
         </span>
         <div
           className={`duration-100 w-[22px] h-[22px] flex items-center text-base justify-center cursor-pointer rounded ${
-            treeStore.ctxNode?.root
+            core.tree.ctxNode?.root
               ? 'dark:bg-gray-300/10 bg-gray-200/70'
               : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
           } `}
           onClick={(e) => {
-            openContextMenu(e, treeStore.root!)
+            core.menu.openTreeMenu(e, core.tree.root!)
           }}
         >
           <Iplus />
         </div>
       </div>
       <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
-        {!!treeStore.root && <RenderItem items={treeStore.root.children || []} level={0} />}
-        {!treeStore.root && (
+        {!!core.tree.root && <RenderItem items={core.tree.root.children || []} level={0} />}
+        {!core.tree.root && (
           <div className={'mt-20'}>
             <div className={'text-gray-400 text-center text-sm'}>No space document yet</div>
           </div>
         )}
-        {treeStore.root && !treeStore.root.children?.length && (
+        {core.tree.root && !core.tree.root.children?.length && (
           <div className={'text-gray-400 text-center text-sm mt-20'}>
-            {configStore.zh ? '暂未创建文档' : 'No document has been created yet'}
+            {t('noCreateDoc')}
           </div>
         )}
       </div>
@@ -76,6 +77,7 @@ const Item = observer((
     level: number
   }
 ) => {
+  const core = useCoreContext()
   const el = useRef<HTMLDivElement>(null)
   return (
     <Fragment>
@@ -87,26 +89,26 @@ const Item = observer((
         onDrop={(e) => {
           if (item.folder) {
             e.stopPropagation()
-            treeStore.moveDragFiles(e, item)
+            core.tree.moveDragFiles(e, item)
           }
         }}
         onDragOver={action((e) => {
-          if (!treeStore.dragNode) return
+          if (!core.tree.dragNode) return
           e.stopPropagation()
           e.preventDefault()
           const scrollTop = document.querySelector('#tree-content')?.scrollTop || 0
           const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
           const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
-          if (!checkChildren(treeStore.dragNode, item)) {
-            treeStore.dragStatus = null
+          if (!checkChildren(core.tree.dragNode, item)) {
+            core.tree.dragStatus = null
             return
           }
-          if (mode === 'enter' && !item.folder && treeStore.dragStatus) {
-            treeStore.dragStatus = null
+          if (mode === 'enter' && !item.folder && core.tree.dragStatus) {
+            core.tree.dragStatus = null
           } else {
             const mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
-            if (treeStore.dragStatus?.dropNode !== item || treeStore.dragStatus.mode !== mode) {
-              treeStore.dragStatus = {
+            if (core.tree.dragStatus?.dropNode !== item || core.tree.dragStatus.mode !== mode) {
+              core.tree.dragStatus = {
                 dropNode: item,
                 mode
               }
@@ -118,40 +120,40 @@ const Item = observer((
           style={{
             paddingLeft: level * 15
           }}
-          className={`rounded group relative ${getClass(item)}`}
+          className={`rounded group relative ${getClass(item, core)}`}
         >
           <div
             className={`${
-              treeStore.openedNote === item
+              core.tree.openedNote === item
                 ? 'dark:text-zinc-100 text-zinc-900'
                 : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'
             }
            text-sm cursor-default select-none h-7 pr-2 group`}
             style={{ paddingLeft: item.folder ? 6 : 21 }}
             onDragEnd={() => {
-              treeStore.moveNode()
+              core.tree.moveNode()
               el.current!.style.opacity = ''
             }}
             draggable={'true'}
             onDragStart={action((e) => {
-              treeStore.dragNode = item
+              core.tree.dragNode = item
               el.current!.style.opacity = '0.5'
-              if (item === treeStore.openedNote && treeStore.currentTab.store.docChanged) {
-                treeStore.currentTab.store.saveDoc$.next(null)
+              if (item === core.tree.openedNote && core.tree.currentTab.store.docChanged) {
+                core.tree.currentTab.store.saveDoc$.next(null)
               }
             })}
             onContextMenu={(e) => {
               e.preventDefault()
-              openContextMenu(e, item)
+              core.menu.openTreeMenu(e, item)
             }}
             onClick={action((e) => {
               e.stopPropagation()
-              treeStore.selectItem = item
+              core.tree.selectItem = item
               if (!item.folder) {
                 if (e.metaKey || e.ctrlKey) {
-                  treeStore.appendTab(item)
+                  core.tree.appendTab(item)
                 } else {
-                  treeStore.openNote(item)
+                  core.tree.openNote(item)
                 }
               } else {
                 item.expand = !item.expand
@@ -162,9 +164,9 @@ const Item = observer((
               className={`
             ${
               item.folder &&
-              treeStore.dragNode !== item &&
-              treeStore.dragStatus?.dropNode === item &&
-              treeStore.dragStatus.mode === 'enter'
+              core.tree.dragNode !== item &&
+              core.tree.dragStatus?.dropNode === item &&
+              core.tree.dragStatus.mode === 'enter'
                 ? 'dark:border-white/30 border-black/30'
                 : 'border-transparent'
             }
@@ -182,7 +184,7 @@ const Item = observer((
               )}
               <div
                 className={`flex items-center flex-1 h-full relative max-w-full ${
-                  treeStore.openedNote === item ? 'text-black dark:text-white' : ''
+                  core.tree.openedNote === item ? 'text-black dark:text-white' : ''
                 }`}
                 data-entity={'true'}
               >
@@ -195,25 +197,25 @@ const Item = observer((
                 {!item.folder && item.ext !== 'md' && (
                   <sup className={'ml-1 text-blue-600 mr-1'}>{item.ext}</sup>
                 )}
-                {treeStore.dragStatus?.dropNode === item &&
-                  treeStore.dragNode !== item &&
-                  treeStore.dragStatus.mode !== 'enter' && (
+                {core.tree.dragStatus?.dropNode === item &&
+                  core.tree.dragNode !== item &&
+                  core.tree.dragStatus.mode !== 'enter' && (
                     <div
                       className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${
-                        treeStore.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'
+                        core.tree.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'
                       }`}
                     />
                   )}
               </div>
             </div>
           </div>
-          {treeStore.dragNode !== item && (
+          {core.tree.dragNode !== item && (
             <div
               onClick={(e) => {
-                openContextMenu(e, item)
+                core.menu.openTreeMenu(e, item)
               }}
               className={`dark:hover:bg-gray-200/20 hover:bg-gray-400/30 h-6 rounded top-1/2 -mt-3 ${
-                treeStore.ctxNode === item
+                core.tree.ctxNode === item
                   ? 'flex bg-gray-400/30 dark:bg-gray-200/20'
                   : 'hidden group-hover:flex'
               }
@@ -232,9 +234,10 @@ const Item = observer((
 })
 
 const RenderItem = observer(({items, level}: { items: IFileItem[], level: number }) => {
+  const core = useCoreContext()
   return (
     <>
-      {items.filter(c => configStore.config.showHiddenFiles || !c.hidden || c.filename === (treeStore.root?.imageFolder || '.images')).map(c =>
+      {items.filter(c => core.config.config.showHiddenFiles || !c.hidden || c.filename === (core.tree.root?.imageFolder || '.images')).map(c =>
         <Item
           key={c.cid}
           item={c}

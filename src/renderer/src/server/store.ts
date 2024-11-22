@@ -9,9 +9,7 @@ import { MainApi } from '../api/main'
 import { compareVersions } from 'compare-versions'
 import { message$ } from '../utils'
 import { join, parse } from 'path'
-import { configStore } from '../store/config'
 import { IFileItem, ISpaceNode } from '../index'
-import { treeStore } from '../store/tree'
 import { db } from '../store/db'
 import { slugify } from '../editor/utils/dom'
 
@@ -135,10 +133,10 @@ export class ShareStore {
           }))
         } catch (e) {
           console.log('e', e)
-          message$.next({
-            type: 'error',
-            content: configStore.zh ? '服务连接失败' : 'Custom service connection failed'
-          })
+          // message$.next({
+          //   type: 'error',
+          //   content: configStore.zh ? '服务连接失败' : 'Custom service connection failed'
+          // })
         }
       }
     })
@@ -170,21 +168,21 @@ export class ShareStore {
   }
 
   async shareBook(data: Partial<IBook>) {
-    let node: ISpaceNode | IFileItem | null = data.filePath === treeStore.root!.filePath ? treeStore.root : null
-    if (!node) {
-      const file = await db.file.where('filePath').equals(data.filePath!).and(x => x.spaceId === treeStore.root!.cid).first()
-      node = treeStore.nodeMap.get(file?.cid!) || null
-    }
-    if (node) {
-      return this.book.syncBook(data, node).then(res => {
-        if (res) {
-          this.bookMap.set(res.book.filePath, res.book)
-          return res
-        }
-        return null
-      })
-    }
-    return null
+    // let node: ISpaceNode | IFileItem | null = data.filePath === treeStore.root!.filePath ? treeStore.root : null
+    // if (!node) {
+    //   const file = await db.file.where('filePath').equals(data.filePath!).and(x => x.spaceId === treeStore.root!.cid).first()
+    //   node = treeStore.nodeMap.get(file?.cid!) || null
+    // }
+    // if (node) {
+    //   return this.book.syncBook(data, node).then(res => {
+    //     if (res) {
+    //       this.bookMap.set(res.book.filePath, res.book)
+    //       return res
+    //     }
+    //     return null
+    //   })
+    // }
+    // return null
   }
 
   async delBook(book: IBook) {

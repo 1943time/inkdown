@@ -1,13 +1,16 @@
 import { observer } from 'mobx-react-lite'
-import { configStore } from '../../store/config'
 import { Button, Checkbox, Modal, Radio, Select, Slider, Space } from 'antd'
 import { LinkOutlined } from '@ant-design/icons'
 import { useLocalState } from '../../hooks/useLocalState'
 import { useEffect } from 'react'
 import { TextHelp } from './Help'
 import { InterfaceFont } from './Font'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Overview = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     version: ''
   })
@@ -16,7 +19,7 @@ export const Overview = observer(() => {
     window.electron.ipcRenderer.invoke('get-version').then(res => {
       setState({version: res})
     })
-  }, [configStore.visible])
+  }, [core.config.visible])
   return (
     <div
       className={
@@ -35,7 +38,7 @@ export const Overview = observer(() => {
               window.open('https://github.com/1943time/inkdown/releases')
             }}
           >
-            {configStore.zh ? '发布记录' : 'Release Record'}
+            {t('config.releaseRecord')}
           </Button>
         </div>
       </div>
@@ -43,124 +46,114 @@ export const Overview = observer(() => {
         <div className={'text-sm'}>{'Language'}</div>
         <div>
           <Select
-            value={configStore.config.locale}
+            value={core.config.config.locale}
             className={'w-36'}
             options={[
               { label: 'English', value: 'en' },
               { label: '简体中文', value: 'zh' }
             ]}
             onChange={(e) => {
-              configStore.setConfig('locale', e)
+              core.config.setConfig('locale', e)
               modal.info({
-                title: configStore.zh ? '提示' : 'Notice',
-                content: configStore.zh
-                  ? '语言切换将在应用重启后完全生效。'
-                  : 'The language switch will take full effect after the application restarts.'
+                title: t('note'),
+                content: t('config.changeLocalTip')
               })
             }}
           ></Select>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{configStore.zh ? '主题' : 'Themes'}</div>
+        <div className={'text-sm'}>{t('config.themes')}</div>
         <div>
           <Radio.Group
-            value={configStore.config.theme}
+            value={core.config.config.theme}
             onChange={async (e) => {
-              await configStore.setTheme(e.target.value)
-              if (configStore.config.codeTheme === 'auto') {
-                configStore.reloadHighlighter(true)
+              await core.config.setTheme(e.target.value)
+              if (core.config.config.codeTheme === 'auto') {
+                core.config.reloadHighlighter(true)
               }
             }}
           >
-            <Radio.Button value={'system'}>{configStore.zh ? '系统' : 'System'}</Radio.Button>
-            <Radio.Button value={'light'}>{configStore.zh ? '明亮' : 'Light'}</Radio.Button>
-            <Radio.Button value={'dark'}>{configStore.zh ? '暗黑' : 'Dark'}</Radio.Button>
+            <Radio.Button value={'system'}>{t('config.theme.system')}</Radio.Button>
+            <Radio.Button value={'light'}>{t('config.theme.light')}</Radio.Button>
+            <Radio.Button value={'dark'}>{t('config.theme.system')}</Radio.Button>
           </Radio.Group>
         </div>
       </div>
       <InterfaceFont />
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          <span className={'mr-1'}>{configStore.zh ? '显示大纲' : 'Show outline'}</span>
+          <span className={'mr-1'}>{t('config.showOutline')}</span>
           <TextHelp
-            text={
-              configStore.zh
-                ? '文档标题将在右侧生成大纲'
-                : 'The document title will generate an outline on the right side.'
-            }
+            text={t('config.showOutlineTip')}
           />
         </div>
         <div>
           <Checkbox
-            checked={configStore.config.showLeading}
+            checked={core.config.config.showLeading}
             onChange={(e) => {
-              configStore.toggleShowLeading()
+              core.config.toggleShowLeading()
             }}
           />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{configStore.zh ? '显示隐藏文件' : 'Show hidden files'}</div>
+        <div className={'text-sm'}>{t('config.showHiddenFiles')}</div>
         <div>
           <Checkbox
-            checked={configStore.config.showHiddenFiles}
-            onChange={(e) => configStore.setConfig('showHiddenFiles', e.target.checked)}
+            checked={core.config.config.showHiddenFiles}
+            onChange={(e) => core.config.setConfig('showHiddenFiles', e.target.checked)}
           />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
           <span className={'mr-1'}>
-            {configStore.zh ? '自动打开空间' : 'Automatically open space'}
+            {t('config.autoOpenSpace')}
           </span>
           <TextHelp
-            text={
-              configStore.zh
-                ? '打开应用时，自动打开最后一次打开的空间。'
-                : 'When opening inkdown, automatically open the last space opened.'
-            }
+            text={t('config.autoOpenSpaceTip')}
           />
         </div>
         <div>
           <Checkbox
-            checked={configStore.config.autoOpenSpace}
-            onChange={(e) => configStore.setConfig('autoOpenSpace', e.target.checked)}
+            checked={core.config.config.autoOpenSpace}
+            onChange={(e) => core.config.setConfig('autoOpenSpace', e.target.checked)}
           />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          {configStore.zh ? '编辑区最大宽度' : 'Maximum width of the editing area'}
+          {t('config.editorWidth')}
         </div>
         <div className={'flex items-center'}>
           <Space.Compact>
             <Slider
               className={'w-64'}
-              value={configStore.config.editorWidth}
+              value={core.config.config.editorWidth}
               min={700}
               max={1000}
               marks={{ 700: 'Recommend', 1000: 'Max' }}
               step={20}
               onChange={(e) => {
-                configStore.setConfig('editorWidth', e)
+                core.config.setConfig('editorWidth', e)
               }}
             />
           </Space.Compact>
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{configStore.zh ? '大纲宽度' : 'Outline width'}</div>
+        <div className={'text-sm'}>{t('config.outlineWidth')}</div>
         <div>
           <Slider
             className={'w-64'}
-            value={configStore.config.leadingWidth}
+            value={core.config.config.leadingWidth}
             min={260}
             max={400}
             marks={{ 260: '260', 400: '400' }}
             step={20}
             onChange={(e) => {
-              configStore.setConfig('leadingWidth', e)
+              core.config.setConfig('leadingWidth', e)
             }}
           />
         </div>

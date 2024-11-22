@@ -15,6 +15,7 @@ import { writeFileSync } from 'fs'
 import { IAlignLeft } from '../../icons/keyboard/AlignLeft'
 import { IAlignRight } from '../../icons/keyboard/AlignRight'
 import { IFull } from '../../icons/keyboard/IFull'
+import { LoadingOutlined } from '@ant-design/icons'
 
 const alignType = new Map([
   ['left', 'justify-start'],
@@ -48,6 +49,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     loadSuccess: true,
     url: '',
     selected: false,
+    downloading: false,
     type: mediaType(element.url)
   })
   const updateElement = useCallback(
@@ -101,7 +103,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
       if (ext && ext !== 'other') {
         window.api.fetch(url).then(async (res) => {
           const buffer = await res.buffer()
-          store
+          return store
             .saveFile({
               name: nid() + '.' + ext![1],
               buffer: buffer.buffer
@@ -165,25 +167,37 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             <div
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
-                window.api.fetch(state().url).then(async (res) => {
-                  const contentType = res.headers.get('content-type') || ''
-                  const ext = contentType.split('/')[1]
-                  if (ext) {
-                    const buffer = await res.buffer()
-                    MainApi.saveDialog({
-                      filters: [{ name: 'img', extensions: [ext] }],
-                      properties: ['createDirectory']
-                    }).then((res) => {
-                      if (res.filePath) {
-                        writeFileSync(res.filePath, buffer)
-                        MainApi.showInFolder(res.filePath)
-                      }
-                    })
-                  }
-                })
+                setState({ downloading: true })
+                window.api
+                  .fetch(state().url)
+                  .then(async (res) => {
+                    const contentType = res.headers.get('content-type') || ''
+                    const ext = contentType.split('/')[1]
+                    if (ext) {
+                      const buffer = await res.buffer()
+                      MainApi.saveDialog({
+                        filters: [{ name: 'img', extensions: [ext] }],
+                        properties: ['createDirectory']
+                      }).then((res) => {
+                        if (res.filePath) {
+                          writeFileSync(res.filePath, new Uint8Array(buffer))
+                          MainApi.showInFolder(res.filePath)
+                        }
+                      })
+                    }
+                  })
+                  .finally(() => {
+                    setState({ downloading: false })
+                  })
               }}
             >
-              <Icon icon={'ic:round-download'} className={'dark:text-gray-200'} />
+              {state().downloading ? (
+                <div>
+                  <LoadingOutlined />
+                </div>
+              ) : (
+                <Icon icon={'ic:round-download'} className={'dark:text-gray-200'} />
+              )}
             </div>
           )}
           {(state().url?.startsWith('file:') || state().url?.startsWith('data:')) && (

@@ -4,7 +4,6 @@ import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'
 import {useEditorStore} from '../store'
 import {observer} from 'mobx-react-lite'
-import {configStore} from '../../store/config'
 
 export const List = observer(({element, attributes, children}: ElementProps<ListNode>) => {
   const store = useEditorStore()
@@ -20,7 +19,7 @@ export const List = observer(({element, attributes, children}: ElementProps<List
         {createElement(tag, {className: 'm-list', start: element.start, ['data-task']: element.task ? 'true' : undefined}, children)}
       </div>
     )
-  }, [element.task, element.order, element.start, element.children, configStore.config.dragToSort])
+  }, [element.task, element.order, element.start, element.children])
 })
 
 export const ListItem = observer(({element, children, attributes}: ElementProps<ListItemNode>) => {

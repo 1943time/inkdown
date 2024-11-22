@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { Fragment, useCallback, useEffect } from 'react'
 import { action, runInAction } from 'mobx'
-import { treeStore } from '../../store/tree'
 import { isMac, message$ } from '../../utils'
 import { IMenu, openMenus } from '../Menu'
 import { History } from './History'
@@ -12,17 +11,18 @@ import { MainApi } from '../../api/main'
 import { useLocalState } from '../../hooks/useLocalState'
 import { sep } from 'path'
 import { Share } from '../../server/Share'
-import { configStore } from '../../store/config'
 import { toMarkdown } from '../../editor/utils/toMarkdown'
-import { convertRemoteImages } from '../../editor/utils/media'
-import { clearUnusedImages } from '../../utils/clearUnusedImages'
 import { Badge, Popover } from 'antd'
 import { Update } from '../Update'
 import { keyTask$ } from '../../hooks/keyboard'
 import { IFileItem } from '../..'
 import INote from '../../icons/INote'
+import { useCoreContext } from '../../store/core'
+import { useTranslation } from 'react-i18next'
 
 export const Nav = observer(() => {
+  const core = useCoreContext()
+  const {t} = useTranslation()
   const [state, setState] = useLocalState({
     path: [] as string[],
     openImport: false,
@@ -33,23 +33,23 @@ export const Nav = observer(() => {
     depLinks: [] as IFileItem[]
   })
   const getPath = useCallback(() => {
-    if (treeStore.openedNote) {
-      if (treeStore.openedNote.spaceId) {
+    if (core.tree.openedNote) {
+      if (core.tree.openedNote.spaceId) {
         setState({
-          path: treeStore.openedNote.filePath.replace(treeStore.root?.filePath! + sep, '').split(sep)
+          path: core.tree.openedNote.filePath.replace(core.tree.root?.filePath! + sep, '').split(sep)
         })
-        if (treeStore.openedNote) {
-          const path = treeStore.openedNote.filePath
-          if (treeStore.openedNote.spaceId) {
+        if (core.tree.openedNote) {
+          const path = core.tree.openedNote.filePath
+          if (core.tree.openedNote.spaceId) {
             requestIdleCallback(() => {
-              const links = treeStore.getDepLinks(path)
+              const links = core.tree.getDepLinks(path)
               setState({ depLinks: links })
             })
           }
         }
       } else {
         setState({
-          path: treeStore.openedNote.filePath.replace(configStore.homePath, '~').split(sep)
+          path: core.tree.openedNote.filePath.replace(core.config.homePath, '~').split(sep)
         })
       }
     } else {
@@ -61,10 +61,10 @@ export const Nav = observer(() => {
     setTimeout(() => {
       getPath()
     }, 30)
-  }, [treeStore.openedNote, treeStore.openedNote?.filePath])
+  }, [core.tree.openedNote, core.tree.openedNote?.filePath])
 
   const checkOpenedNote = useCallback(() => {
-    if (!treeStore.openedNote) {
+    if (!core.tree.openedNote) {
       message$.next({
         type: 'warning',
         content: 'Please open at least one doc'
@@ -77,7 +77,7 @@ export const Nav = observer(() => {
     <div
       className={`h-10 w-full drag-nav duration-200 select-none width-duration relative`}
       style={{
-        paddingLeft: treeStore.blankMode ? (treeStore.fold ? 105 : 0) : treeStore.fold ? 45 : 35
+        paddingLeft: core.tree.blankMode ? (core.tree.fold ? 105 : 0) : core.tree.fold ? 45 : 35
       }}
       onClick={(e) => {
         if (e.detail === 2) {
@@ -88,11 +88,11 @@ export const Nav = observer(() => {
       <div
         className={`absolute z-10 dark:hover:bg-gray-400/10 hover:bg-black/5 p-1 rounded drag-none duration-200`}
         style={{
-          left: treeStore.blankMode ? (treeStore.fold ? 75 : -36) : 10,
+          left: core.tree.blankMode ? (core.tree.fold ? 75 : -36) : 10,
           top: 7
         }}
         onClick={action(() => {
-          treeStore.fold = !treeStore.fold
+          core.tree.fold = !core.tree.fold
         })}
       >
         <Collapse
@@ -103,31 +103,31 @@ export const Nav = observer(() => {
         <div className={'flex items-center h-full flex-1 max-w-[calc(100%_-_90px)]'}>
           <div
             className={`text-gray-300 flex items-center text-sm select-none ${
-              treeStore.fold ? '' : 'ml-3'
+              core.tree.fold ? '' : 'ml-3'
             }`}
           >
             <div
               className={`duration-200 cursor-pointer drag-none py-[3px] px-1 rounded ${
-                treeStore.currentTab?.hasPrev
+                core.tree.currentTab?.hasPrev
                   ? 'dark:text-gray-200 hover:bg-gray-400/10 text-gray-500'
                   : 'dark:text-gray-500 text-gray-300'
               }`}
-              onClick={() => treeStore.navigatePrev()}
+              onClick={() => core.tree.navigatePrev()}
             >
               <LeftOutlined />
             </div>
             <div
               className={`duration-200 cursor-pointer drag-none py-[3px] px-1 rounded ${
-                treeStore.currentTab?.hasNext
+                core.tree.currentTab?.hasNext
                   ? 'dark:text-gray-200 hover:bg-gray-400/10 text-gray-500'
                   : 'dark:text-gray-500 text-gray-300'
               }`}
-              onClick={() => treeStore.navigateNext()}
+              onClick={() => core.tree.navigateNext()}
             >
               <RightOutlined />
             </div>
           </div>
-          {treeStore.root && !!state.depLinks.length && (
+          {core.tree.root && !!state.depLinks.length && (
             <Popover trigger={['click']} title={null} overlayInnerStyle={{padding: 8}} arrow={false} content={(
               <div>
                 {state.depLinks.map(d => {
@@ -136,11 +136,11 @@ export const Nav = observer(() => {
                       key={d.filePath}
                       className={'flex items-center px-2 py-0.5 cursor-pointer rounded duration-200 dark:hover:bg-gray-100/10 hover:bg-gray-200/70'}
                       onClick={() => {
-                        treeStore.openNote(d)
+                        core.tree.openNote(d)
                       }}
                     >
                       <INote className={'flex-shrink-0'} />
-                      <span className={'ml-1'}>{d.filePath.replace(treeStore.root?.filePath! + '/', '')}</span>
+                      <span className={'ml-1'}>{d.filePath.replace(core.tree.root?.filePath! + '/', '')}</span>
                     </div>
                   )
                 })}
@@ -173,7 +173,7 @@ export const Nav = observer(() => {
                     >
                       {i === state.path.length - 1 ? c.replace(/\.\w+/, '') : c}
                     </span>
-                    {i === state.path.length - 1 && treeStore.currentTab?.store?.docChanged && (
+                    {i === state.path.length - 1 && core.tree.currentTab?.store?.docChanged && (
                       <sup className={'ml-0.5'}>*</sup>
                     )}
                   </Fragment>
@@ -184,7 +184,7 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-300 space-x-1 text-gray-500'}>
           <Update />
-          <Share />
+          {/* <Share /> */}
           <div
             className={
               'flex items-center justify-center h-[27px] w-[30px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'
@@ -193,34 +193,34 @@ export const Nav = observer(() => {
               const menus: IMenu[] = [
                 {
                   text: 'Export To PDF',
-                  disabled: treeStore.openedNote?.ext !== 'md',
+                  disabled: core.tree.openedNote?.ext !== 'md',
                   click: () => {
-                    if (treeStore.openedNote?.ghost) {
+                    if (core.tree.openedNote?.ghost) {
                       keyTask$.next({
                         key: 'save',
                         args: [
                           () =>
                             window.electron.ipcRenderer.send(
                               'print-pdf',
-                              treeStore.openedNote?.filePath
+                              core.tree.openedNote?.filePath
                             )
                         ]
                       })
                     } else {
-                      window.electron.ipcRenderer.send('print-pdf', treeStore.openedNote?.filePath)
+                      window.electron.ipcRenderer.send('print-pdf', core.tree.openedNote?.filePath)
                     }
                   }
                 },
                 {
                   text: 'Copy markdown source code',
-                  disabled: treeStore.openedNote?.ext !== 'md',
+                  disabled: core.tree.openedNote?.ext !== 'md',
                   click: async () => {
                     if (checkOpenedNote()) {
-                      const md = toMarkdown(treeStore.openedNote?.schema || [])
+                      const md = toMarkdown(core.tree.openedNote?.schema || [])
                       window.api.copyToClipboard(md)
                       message$.next({
                         type: 'success',
-                        content: configStore.zh ? '已复制到剪贴板' : 'Copied to clipboard'
+                        content: t('copied')
                       })
                     }
                   }
@@ -229,38 +229,38 @@ export const Nav = observer(() => {
                 {
                   text: 'File History',
                   click: () => setState({ openHistory: true }),
-                  disabled: treeStore.openedNote?.ext !== 'md'
+                  disabled: core.tree.openedNote?.ext !== 'md'
                 },
                 {
-                  text: configStore.zh ? '下载远程图片至本机' : 'Download remote images to local',
-                  disabled: treeStore.openedNote?.ext !== 'md',
+                  text: t('downloadRemote'),
+                  disabled: core.tree.openedNote?.ext !== 'md',
                   click: () => {
-                    convertRemoteImages(treeStore.openedNote!)
+                    core.file.convertRemoteImages(core.tree.openedNote!)
                   }
                 },
                 {
-                  text: configStore.zh ? '清除未使用的图片' : 'Clear unused images',
-                  disabled: !treeStore.root,
+                  text: t('claerImage'),
+                  disabled: !core.tree.root,
                   click: () => {
-                    clearUnusedImages()
+                    core.file.clear()
                   }
                 },
                 { hr: true },
                 {
                   text: isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',
-                  disabled: !treeStore.openedNote || treeStore.openedNote?.ghost,
+                  disabled: !core.tree.openedNote || core.tree.openedNote?.ghost,
                   click: () => {
-                    MainApi.showInFolder(treeStore.openedNote!.filePath)
+                    MainApi.showInFolder(core.tree.openedNote!.filePath)
                   }
                 },
                 {
-                  text: configStore.zh ? '使用默认APP打开' : 'Open in default app',
+                  text: t('openInDefault'),
                   click: () =>
                     window.electron.ipcRenderer.send(
                       'open-in-default-app',
-                      treeStore.openedNote?.filePath
+                      core.tree.openedNote?.filePath
                     ),
-                  disabled: !treeStore.openedNote || treeStore.openedNote?.ghost
+                  disabled: !core.tree.openedNote || core.tree.openedNote?.ghost
                 },
                 {
                   text: 'Github',
@@ -272,15 +272,15 @@ export const Nav = observer(() => {
                 {
                   text: 'Settings',
                   key: 'cmd+,',
-                  click: action(() => (configStore.visible = true))
+                  click: action(() => (core.config.visible = true))
                 }
               ]
-              if (configStore.enableUpgrade) {
+              if (core.config.enableUpgrade) {
                 menus.unshift({
                   text: 'Update Inkdown',
                   click: () => {
                     runInAction(() => {
-                      configStore.openUpdateDialog = true
+                      core.config.openUpdateDialog = true
                     })
                   }
                 })
@@ -288,14 +288,14 @@ export const Nav = observer(() => {
               openMenus(e, menus)
             }}
           >
-            <Badge offset={[4, 1]} status={'warning'} dot={configStore.enableUpgrade}>
+            <Badge offset={[4, 1]} status={'warning'} dot={core.config.enableUpgrade}>
               <Icon icon={'uiw:more'} className={'text-lg dark:text-gray-300 text-gray-500'} />
             </Badge>
           </div>
         </div>
       </div>
       <History
-        node={treeStore.openedNote}
+        node={core.tree.openedNote}
         open={state.openHistory}
         onClose={() => setState({ openHistory: false })}
       />

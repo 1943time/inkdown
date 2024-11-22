@@ -1,14 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Icon } from '@iconify/react'
 import { ISpace } from '../../store/db'
-import { MoreOutlined } from '@ant-design/icons'
-import {treeStore} from '../../store/tree'
-import {editSpace$} from './EditSpace'
+import { useCoreContext } from '../../store/core'
 
 export const SpaceItem = observer((props: {
   item: ISpace
   onClick: () => void
 }) => {
+  const core = useCoreContext()
   return (
     <div
       className={`cursor-pointer group dark:hover:bg-gray-200/10 hover:bg-gray-100 group py-1.5 px-3 flex items-center relative`}
@@ -24,7 +23,7 @@ export const SpaceItem = observer((props: {
         </div>
         <span className={'ml-2 flex-1 truncate max-w-56'}>{props.item.name}</span>
       </div>
-      {treeStore.root?.cid === props.item.cid && (
+      {core.tree.root?.cid === props.item.cid && (
         <div className={'pr-2'}>
           <Icon icon={'mingcute:check-fill'} className={'text-teal-500'} />
         </div>
