@@ -9,7 +9,7 @@ import { MainApi } from '../api/main'
 import { compareVersions } from 'compare-versions'
 import { message$ } from '../utils'
 import { join, parse } from 'path'
-import { IFileItem, ISpaceNode } from '../index'
+import { IFileItem, ISpaceNode } from '../types/index'
 import { db } from '../store/db'
 import { slugify } from '../editor/utils/dom'
 

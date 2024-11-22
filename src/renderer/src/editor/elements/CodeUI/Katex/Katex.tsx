@@ -1,6 +1,6 @@
 import './katex.min.css'
 import { useEffect, useRef } from 'react'
-import { CodeNode } from '../../../../el'
+import { CodeNode } from '../../../../types/el'
 import { Editor, Node, Transforms } from 'slate'
 import { useGetSetState } from 'react-use'
 import katex from 'katex'

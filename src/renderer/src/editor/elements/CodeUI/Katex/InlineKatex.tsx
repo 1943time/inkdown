@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { ElementProps, InlineKatexNode } from '../../../../el'
+import { ElementProps, InlineKatexNode } from '../../../../types/el'
 import { useEffect, useMemo, useRef } from 'react'
 import { InlineChromiumBugfix } from '../../../utils/InlineChromiumBugfix'
 import { useSelStatus } from '../../../../hooks/editor'

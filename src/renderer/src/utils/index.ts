@@ -6,6 +6,10 @@ import { ArgsProps } from 'antd/es/message'
 import { HookAPI } from 'antd/es/modal/useModal'
 import { customAlphabet } from 'nanoid'
 import React from 'react'
+import * as gfm from 'turndown-plugin-gfm'
+import turndown from 'turndown'
+
+
 export const nid = customAlphabet(
   '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
   13
@@ -115,4 +119,10 @@ export const isExist = (filePath: string) => {
   } catch (e) {
     return false
   }
+}
+
+export const htmlToMarkdown = (html: string) => {
+  const t = new turndown()
+  t.use(gfm.gfm)
+  return t.turndown(html)
 }

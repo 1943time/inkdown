@@ -1,7 +1,7 @@
 /// <reference types="electron-vite/node" />
-import {EditorStore} from './editor/store'
+import {EditorStore} from '../editor/store'
 import {BaseRange, BaseSelection} from 'slate'
-import { Locale } from './utils/i18n'
+import { Locale } from '../utils/i18n'
 
 export type ISpaceNode = {
   cid: string

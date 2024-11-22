@@ -1,6 +1,6 @@
 import {TreeStore} from '../tree'
 import {join} from 'path'
-import {IFileItem, ISpaceNode} from '../../index'
+import {IFileItem, ISpaceNode} from '../../types/index'
 import {openMdParserHandle} from '../../editor/parser/parser'
 import {existsSync, statSync} from 'fs'
 import {db, IFile} from '../db'

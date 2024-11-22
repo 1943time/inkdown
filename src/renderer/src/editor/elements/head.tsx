@@ -1,4 +1,4 @@
-import {ElementProps, HeadNode} from '../../el'
+import {ElementProps, HeadNode} from '../../types/el'
 import {createElement, useMemo} from 'react'
 import {useEditorStore} from '../store'
 import {DragHandle} from '../tools/DragHandle'

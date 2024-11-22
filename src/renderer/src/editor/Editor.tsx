@@ -6,7 +6,7 @@ import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins
 import { useKeyboard } from './plugins/useKeyboard'
 import { useOnchange } from './plugins/useOnchange'
 import { observer } from 'mobx-react-lite'
-import { IFileItem } from '../index'
+import { IFileItem } from '../types/index'
 import { EditorUtils } from './utils/editorUtils'
 import { useEditorStore } from './store'
 import { action, runInAction } from 'mobx'
@@ -19,6 +19,7 @@ import { Title } from './tools/Title'
 import { mediaType } from './utils/dom'
 import { toUnixPath } from '../utils/path'
 import { useCoreContext } from '../store/core'
+import { htmlToMarkdown } from '../utils'
 
 export const MEditor = observer(({ note }: { note: IFileItem }) => {
   const core = useCoreContext()
@@ -372,8 +373,16 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       }
       let paste = e.clipboardData.getData('text/html')
       if (paste) {
-        e.stopPropagation()
-        e.preventDefault()
+        const parsed = new DOMParser().parseFromString(paste, 'text/html').body
+        const inner = !!parsed.querySelector('[data-be]')
+        if (!inner) {
+          const md = htmlToMarkdown(paste)
+          if (md) {
+            core.keyboard.insertMarkdown(md)
+          }
+          e.stopPropagation()
+          e.preventDefault()
+        }
       }
     },
     [note]

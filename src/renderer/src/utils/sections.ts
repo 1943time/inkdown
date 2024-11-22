@@ -1,5 +1,5 @@
 import {remove as removeDiacritics} from 'diacritics'
-import {CustomLeaf, Elements} from '../el'
+import {CustomLeaf, Elements} from '../types/el'
 import {Node} from 'slate'
 import {encodeHtml} from './index'
 import {basename} from 'path'

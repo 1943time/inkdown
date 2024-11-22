@@ -1,4 +1,4 @@
-import {ElementProps, ParagraphNode} from '../../el'
+import {ElementProps, ParagraphNode} from '../../types/el'
 import {useMemo} from 'react'
 import {observer} from 'mobx-react-lite'
 import {useEditorStore} from '../store'

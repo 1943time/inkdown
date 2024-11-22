@@ -1,4 +1,4 @@
-import {CodeLineNode, CodeNode} from '../../../el'
+import {CodeLineNode, CodeNode} from '../../../types/el'
 import {ReactEditor, useSlateStatic} from 'slate-react'
 import {useGetSetState, useUpdateEffect} from 'react-use'
 import React, {useCallback, useEffect, useMemo, useRef} from 'react'

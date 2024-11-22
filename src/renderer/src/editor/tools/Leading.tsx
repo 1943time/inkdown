@@ -1,6 +1,6 @@
 import {observer} from 'mobx-react-lite'
 import {useCallback, useEffect, useMemo, useRef} from 'react'
-import {IFileItem} from '../../index'
+import {IFileItem} from '../../types/index'
 import {useDebounce, useGetSetState} from 'react-use'
 import {Node} from 'slate'
 import {getOffsetTop, slugify} from '../utils/dom'

@@ -1,5 +1,5 @@
 import { action, runInAction } from 'mobx'
-import { IFileItem, ISpaceNode } from '../..'
+import { IFileItem, ISpaceNode } from '../../types'
 import { Core } from '../core'
 import { IMenu, openMenus } from '../../components/Menu'
 import { copyToClipboard } from '../../utils/copy'

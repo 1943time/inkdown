@@ -1,4 +1,4 @@
-import {ElementProps, ListItemNode, ListNode} from '../../el'
+import {ElementProps, ListItemNode, ListNode} from '../../types/el'
 import React, {createElement, useMemo, useRef} from 'react'
 import {useMEditor} from '../../hooks/editor'
 import {Checkbox} from 'antd'

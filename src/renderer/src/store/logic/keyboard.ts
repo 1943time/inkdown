@@ -9,12 +9,10 @@ import { nid } from '../../utils'
 import { EditorUtils } from '../../editor/utils/editorUtils'
 import { MainApi } from '../../api/main'
 import { quickOpen$ } from '../../components/QuickOpen'
-import { IFileItem, ISpaceNode } from '../..'
+import { IFileItem, ISpaceNode } from '../../types'
 
 export class KeyboardTask {
-  constructor(
-    private readonly core: Core
-  ) {}
+  constructor(private readonly core: Core) {}
   get store() {
     return this.core.tree.currentTab.store
   }
@@ -187,57 +185,56 @@ export class KeyboardTask {
       }
     }
   }
-
-  async pasteMarkdownCode() {
-    const markdownCode = window.api.getClipboardText()
-    if (markdownCode) {
-      const [node] = this.curNodes
-      const [res] = await parserMdToSchema([{ code: markdownCode, filePath: '' }])
-      if (this.core.config.state.autoDownload) {
-        const stack = res.schema.slice()
-        while (stack.length) {
-          const item = stack.pop()! as Element
-          if (item.type === 'media' && item.url?.startsWith('http')) {
-            item.downloadUrl = item.url
-          }
-          if (item.children?.length) {
-            stack.push(...item.children)
-          }
+  async insertMarkdown(md: string) {
+    const [node] = this.curNodes
+    const [res] = await parserMdToSchema([{ code: md, filePath: '' }])
+    if (this.core.config.state.autoDownload) {
+      const stack = res.schema.slice()
+      while (stack.length) {
+        const item = stack.pop()! as Element
+        if (item.type === 'media' && item.url?.startsWith('http')) {
+          item.downloadUrl = item.url
+        }
+        if (item.children?.length) {
+          stack.push(...item.children)
         }
       }
-      if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
-        Transforms.delete(this.editor, { at: node[1] })
-        Transforms.insertNodes(this.editor, res.schema, { at: node[1], select: true })
-        return
-      }
-      if (
-        res.schema[0]?.type === 'paragraph' &&
-        ['paragraph', 'table-cell'].includes(node[0].type)
-      ) {
-        const first = res.schema.shift()
-        Editor.insertNode(this.editor, first.children)
-      }
-      if (res.schema.length) {
-        if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
-          const [block] = Editor.nodes<any>(this.editor, {
-            match: (n) => ['table', 'code', 'paragraph'].includes(n.type),
-            mode: 'lowest'
-          })
-          Transforms.insertNodes(this.editor, res.schema, {
-            at: Path.next(block[1]),
-            select: true
-          })
-        } else {
-          Transforms.insertNodes(this.editor, res.schema, {
-            at: Path.next(node[1]),
-            select: true
-          })
-        }
+    }
+    if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
+      Transforms.delete(this.editor, { at: node[1] })
+      Transforms.insertNodes(this.editor, res.schema, { at: node[1], select: true })
+      return
+    }
+    if (res.schema[0]?.type === 'paragraph' && ['paragraph', 'table-cell'].includes(node[0].type)) {
+      const first = res.schema.shift()
+      Editor.insertNode(this.editor, first.children)
+    }
+    if (res.schema.length) {
+      if (['code-line', 'table-cell', 'inline-katex'].includes(node[0].type)) {
+        const [block] = Editor.nodes<any>(this.editor, {
+          match: (n) => ['table', 'code', 'paragraph'].includes(n.type),
+          mode: 'lowest'
+        })
+        Transforms.insertNodes(this.editor, res.schema, {
+          at: Path.next(block[1]),
+          select: true
+        })
+      } else {
+        Transforms.insertNodes(this.editor, res.schema, {
+          at: Path.next(node[1]),
+          select: true
+        })
       }
     }
     setTimeout(() => {
       runInAction(() => (this.store!.refreshHighlight = !this.store!.refreshHighlight))
     }, 100)
+  }
+  async pasteMarkdownCode() {
+    const markdownCode = window.api.getClipboardText()
+    if (markdownCode) {
+      this.insertMarkdown(markdownCode)
+    }
   }
 
   head(level: number) {
@@ -523,7 +520,10 @@ export class KeyboardTask {
   localImage(type: 'image' | 'video' = 'image') {
     if (this.tree.openedNote) {
       MainApi.openDialog({
-        properties: type === 'image' ? ['openFile', 'showHiddenFiles', 'multiSelections'] : ['openFile', 'showHiddenFiles'],
+        properties:
+          type === 'image'
+            ? ['openFile', 'showHiddenFiles', 'multiSelections']
+            : ['openFile', 'showHiddenFiles'],
         filters: [
           {
             extensions:

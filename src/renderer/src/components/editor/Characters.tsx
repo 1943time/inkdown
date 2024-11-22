@@ -2,7 +2,7 @@ import {observer} from 'mobx-react-lite'
 import {useCallback, useEffect} from 'react'
 import {countWords} from 'alfaaz'
 import {Editor} from 'slate'
-import {CustomLeaf} from '../../el'
+import {CustomLeaf} from '../../types/el'
 import {useLocalState} from '../../hooks/useLocalState'
 import { useCoreContext } from '../../store/core'
 

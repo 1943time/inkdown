@@ -1,6 +1,6 @@
 import Dexie, { Table } from 'dexie'
 import { nanoid } from 'nanoid'
-import { IFileItem } from '../index'
+import { IFileItem } from '../types/index'
 
 export interface IRecent {
   id: string

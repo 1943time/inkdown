@@ -1,6 +1,6 @@
 import React from 'react'
 import {BasePoint, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms} from 'slate'
-import {CodeLineNode, NodeTypes, ParagraphNode, TableCellNode, TableRowNode} from '../../../el'
+import {CodeLineNode, NodeTypes, ParagraphNode, TableCellNode, TableRowNode} from '../../../types/el'
 import {clearAllCodeCache} from '../useHighlight'
 import { EditorStore } from '../../store'
 import { Core } from '../../../store/core'

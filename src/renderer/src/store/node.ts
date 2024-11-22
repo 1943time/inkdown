@@ -1,5 +1,5 @@
 import { basename, extname, isAbsolute, join, parse, sep } from 'path'
-import { IFileItem, ISpaceNode } from '..'
+import { IFileItem, ISpaceNode } from '../types'
 import { Core, useCoreContext } from './core'
 import { db, IFile } from './db'
 import { observable, runInAction } from 'mobx'

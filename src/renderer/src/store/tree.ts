@@ -1,5 +1,5 @@
 import {action, makeAutoObservable, observable, runInAction} from 'mobx'
-import {GetFields, IFileItem, ISpaceNode, Tab} from '../index'
+import {GetFields, IFileItem, ISpaceNode, Tab} from '../types/index'
 import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'

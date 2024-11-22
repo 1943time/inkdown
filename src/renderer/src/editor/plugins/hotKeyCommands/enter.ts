@@ -1,6 +1,6 @@
 import React from 'react'
 import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../../../el'
+import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../../../types/el'
 import {EditorUtils} from '../../utils/editorUtils'
 import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'

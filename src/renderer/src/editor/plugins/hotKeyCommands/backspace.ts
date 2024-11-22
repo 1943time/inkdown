@@ -1,6 +1,6 @@
 import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
-import { Elements } from '../../../el'
+import { Elements } from '../../../types/el'
 import { EditorStore } from '../../store'
 import { Core } from '../../../store/core'
 

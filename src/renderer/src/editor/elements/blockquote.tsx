@@ -1,4 +1,4 @@
-import { BlockQuoteNode, ElementProps } from '../../el'
+import { BlockQuoteNode, ElementProps } from '../../types/el'
 import { useMemo } from 'react'
 import { useEditorStore } from '../store'
 export function Blockquote(props: ElementProps<BlockQuoteNode>) {

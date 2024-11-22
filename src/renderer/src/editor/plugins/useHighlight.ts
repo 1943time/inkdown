@@ -1,7 +1,7 @@
 import {useCallback, useMemo} from 'react'
 import {Editor, Element, Node, NodeEntry, Range, Path} from 'slate'
 import {useSlate} from 'slate-react'
-import {CodeNode} from '../../el'
+import {CodeNode} from '../../types/el'
 import {observer} from 'mobx-react-lite'
 import {EditorStore, useEditorStore} from '../store'
 import {EditorUtils} from '../utils/editorUtils'

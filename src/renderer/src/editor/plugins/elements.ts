@@ -1,5 +1,5 @@
 import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {Elements, ListNode, TableRowNode} from '../../el'
+import {Elements, ListNode, TableRowNode} from '../../types/el'
 import {EditorUtils} from '../utils/editorUtils'
 import {clearAllCodeCache} from './useHighlight'
 

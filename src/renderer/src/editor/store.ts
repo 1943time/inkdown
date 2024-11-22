@@ -12,9 +12,9 @@ import {
   Selection
 } from 'slate'
 import { ReactEditor, withReact } from 'slate-react'
-import { GetFields } from '../index'
+import { GetFields } from '../types/index'
 import React, { createContext, useContext } from 'react'
-import { MediaNode, TableCellNode } from '../el'
+import { MediaNode, TableCellNode } from '../types/el'
 import { Subject } from 'rxjs'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
 import { isAbsolute, join, parse, relative, sep } from 'path'

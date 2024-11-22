@@ -2,7 +2,7 @@
 import parser from './bundle'
 import { Element } from 'slate'
 import { Content, Table } from 'mdast'
-import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../../../el'
+import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableNode } from '../../../types/el'
 
 const findImageElement = (str: string) => {
   try {

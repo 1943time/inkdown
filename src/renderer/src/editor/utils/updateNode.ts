@@ -1,4 +1,4 @@
-import {IFileItem} from '../../index'
+import {IFileItem} from '../../types/index'
 import {toMarkdown} from './toMarkdown'
 import {stat, writeFile} from 'fs/promises'
 import {db} from '../../store/db'

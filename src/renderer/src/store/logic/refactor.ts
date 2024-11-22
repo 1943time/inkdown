@@ -1,5 +1,5 @@
 import { basename, isAbsolute, join, relative } from 'path'
-import { IFileItem } from '../..'
+import { IFileItem } from '../../types'
 import { copy } from '../../utils'
 import { Core } from '../core'
 import { parsePath, toUnixPath } from '../../utils/path'

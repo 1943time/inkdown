@@ -1,5 +1,5 @@
 import {Node, Text} from 'slate'
-import {TableNode} from '../../el'
+import {TableNode} from '../../types/el'
 import stringWidth from 'string-width'
 import { mediaType } from './dom'
 const space = '  '

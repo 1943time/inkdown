@@ -1,7 +1,7 @@
 import {observer} from 'mobx-react-lite'
 import {useGetSetState} from 'react-use'
 import {useCallback, useEffect, useRef} from 'react'
-import {IFileItem} from '../index'
+import {IFileItem} from '../types/index'
 import {Node} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {SearchOutlined} from '@ant-design/icons'

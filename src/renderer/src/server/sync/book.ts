@@ -7,7 +7,7 @@ import {nanoid} from 'nanoid'
 import {ShareApi} from './api'
 import {IBook} from '../model'
 import {openMdParserHandle, parserMdToSchema, ParserResult} from '../../editor/parser/parser'
-import {IFileItem, ISpaceNode} from '../../index'
+import {IFileItem, ISpaceNode} from '../../types/index'
 import {slugify} from '../../editor/utils/dom'
 
 export type SpaceDocMap = {

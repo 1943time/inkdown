@@ -1,5 +1,5 @@
 import {BaseSelection, Editor, Element, Node, Path, Point, Range, Text, Transforms} from 'slate'
-import {CustomLeaf} from '../../el'
+import {CustomLeaf} from '../../types/el'
 import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
 import {getOffsetTop} from './dom'

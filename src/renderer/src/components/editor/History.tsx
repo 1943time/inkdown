@@ -8,7 +8,7 @@ import {Webview} from '../Webview'
 import {db, IHistory} from '../../store/db'
 import dayjs from 'dayjs'
 import {toJS} from 'mobx'
-import {IFileItem} from '../../index'
+import {IFileItem} from '../../types/index'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
 

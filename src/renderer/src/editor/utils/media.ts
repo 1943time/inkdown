@@ -1,7 +1,7 @@
 import {Transforms} from 'slate'
 import {ReactEditor} from 'slate-react'
 import {base64ToArrayBuffer, message$, nid} from '../../utils'
-import {IFileItem} from '../../index'
+import {IFileItem} from '../../types/index'
 import {mediaType} from './dom'
 import { Core } from '../../store/core'
 
