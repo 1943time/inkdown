@@ -361,7 +361,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         if (node) {
           Transforms.insertFragment(
             editor,
-            text.split('\n').map((c) => {
+            text.split(/\r?\n/).map((c) => {
               return { type: 'code-line', children: [{ text: c.replace(/\t/g, core.config.tab) }] }
             })
           )

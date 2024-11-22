@@ -131,7 +131,7 @@ export const useKeyboard = (core: Core, store: EditorStore) => {
             Transforms.delete(store.editor, {at: node[1]})
             Transforms.insertNodes(store.editor, {
               type: 'code', language: 'html', render: true,
-              children: str.split('\n').map(s => {
+              children: str.split(/\r?\n/).map(s => {
                 return {type: 'code-line', children: [{text: s}]}
               })
             }, {select: true, at: node[1]})

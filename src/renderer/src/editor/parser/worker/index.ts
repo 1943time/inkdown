@@ -95,7 +95,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             } else {
               el = {
                 type: 'code', language: 'html', render: true,
-                children: n.value.split('\n').map(s => {
+                children: n.value.split(/\r?\n/).map(s => {
                   return {
                     type: 'code-line',
                     children: [{text: s}]
@@ -246,7 +246,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
       case 'code':
         el = {
           type: 'code', language: n.lang, render: n.meta === 'render',
-          children: n.value.split('\n').map(s => {
+          children: n.value.split(/\r?\n/).map(s => {
             return {
               type: 'code-line',
               children: [{text: s}]
@@ -257,7 +257,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
       case 'yaml':
         el = {
           type: 'code', language: 'yaml', frontmatter: true,
-          children: n.value.split('\n').map(s => {
+          children: n.value.split(/\r?\n/).map(s => {
             return {
               type: 'code-line',
               children: [{text: s}]
@@ -270,7 +270,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = {
           type: 'code', language: 'latex', katex: true,
           // @ts-ignore
-          children: n.value.split('\n').map(s => {
+          children: n.value.split(/\r?\n/).map(s => {
             return {
               type: 'code-line',
               children: [{text: s}]

@@ -171,7 +171,7 @@ export class KeyboardTask {
       if (node[0].type === 'code-line') {
         Transforms.insertFragment(
           this.editor,
-          text.split('\n').map((c) => {
+          text.split(/\r?\n/).map((c) => {
             return { type: 'code-line', children: [{ text: c }] }
           })
         )
