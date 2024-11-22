@@ -16,6 +16,7 @@ import { arrayMoveImmutable } from 'array-move'
 import { Subject } from 'rxjs'
 import { getOffsetTop } from '@renderer/editor/utils/dom'
 import { useCoreContext } from '../../store/core'
+import SortableList, { SortableItem } from 'react-easy-sort'
 
 const tabIndex = new Map([
   ['folder', 1],
@@ -28,18 +29,16 @@ export const Tree = observer(() => {
   const [state, setState] = useLocalState({
     openMenu: false,
     spaces: [] as ISpace[],
-    fullScreen: false,
-    dragIndex: 0,
-    dragStatus: null as {
-      index: number
-      mode: 'top' | 'bottom'
-    } | null
+    fullScreen: false
   })
 
   const getSpace = useCallback(() => {
-    db.space.orderBy('sort').toArray().then(res => {
-      setState({spaces: res})
-    })
+    db.space
+      .orderBy('sort')
+      .toArray()
+      .then((res) => {
+        setState({ spaces: res })
+      })
   }, [])
 
   useEffect(() => {
@@ -47,42 +46,17 @@ export const Tree = observer(() => {
   }, [])
 
   useSubject(closeMenu$, () => {
-    setState({openMenu: false})
+    setState({ openMenu: false })
   })
 
   useSubject(spaceChange$, getSpace)
-  const move = useCallback(({oldIndex, newIndex}: {oldIndex: number, newIndex: number}) => {
+  const move = useCallback(({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
     if (oldIndex !== newIndex) {
       setState({
         spaces: arrayMoveImmutable(state.spaces, oldIndex, newIndex)
       })
-      state.spaces.map((s, i) => db.space.update(s.cid, {sort: i}))
+      state.spaces.map((s, i) => db.space.update(s.cid, { sort: i }))
     }
-  }, [])
-
-  const dragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault()
-    if (index === state.dragIndex) {
-      setState({dragStatus: null})
-      return
-    }
-    const co = document.querySelector('#space-container') as HTMLDivElement
-    const target = co.children[index] as HTMLElement
-    const top = getOffsetTop(target) - co.scrollTop
-    const mode = e.clientY - top < 18 ? 'top' : 'bottom'
-    if (
-      (mode === 'top' && index === state.dragIndex + 1) ||
-      (mode === 'bottom' && index === state.dragIndex - 1)
-    ) {
-      setState({ dragStatus: null })
-      return
-    }
-    setState({
-      dragStatus: {
-        index,
-        mode
-      }
-    })
   }, [])
   return (
     <div
@@ -111,12 +85,6 @@ export const Tree = observer(() => {
             content={
               <div
                 className={'w-72 py-1'}
-                onDragOver={(e) => e.preventDefault()}
-                onDragLeave={() => {
-                  setState({
-                    dragStatus: null
-                  })
-                }}
               >
                 <div
                   className={
@@ -126,53 +94,30 @@ export const Tree = observer(() => {
                   <span className={'pl-3 text-xs'}>Select Workspace</span>
                 </div>
                 {!!state.spaces.length && (
-                  <div className={'overflow-y-auto max-h-[400px] relative'} id={'space-container'}>
+                  <SortableList
+                    className={`overflow-y-auto max-h-[200px] relative }`}
+                    id={'space-container'}
+                    draggedItemClassName={'z-[2100]'}
+                    onSortEnd={(oldIndex: number, newIndex: number) => {
+                      move({ oldIndex, newIndex })
+                    }}
+                  >
                     {state.spaces.map((s, i) => (
-                      <div
-                        key={s.cid}
-                        draggable={true}
-                        className={
-                          state.dragStatus?.index === i
-                            ? state.dragStatus?.mode === 'top'
-                              ? 'enter-space-top'
-                              : 'enter-space-bottom'
-                            : ''
-                        }
-                        onDragStart={(e) => {
-                          setState({
-                            dragIndex: i
-                          })
-                        }}
-                        onDragLeave={(e) => e.stopPropagation()}
-                        onDragEnd={() => {
-                          if (state.dragStatus) {
-                            move({
-                              oldIndex: state.dragIndex,
-                              newIndex:
-                                state.dragStatus.mode === 'top'
-                                  ? state.dragStatus.index
-                                  : state.dragStatus.index + 1
-                            })
-                          }
-                          setState({
-                            dragIndex: 0,
-                            dragStatus: null
-                          })
-                        }}
-                        onDragOver={(e) => dragOver(e, i)}
-                      >
-                        <SpaceItem
-                          item={s}
-                          onClick={() => {
-                            if (core.tree.root?.cid !== s.cid) {
-                              core.tree.initial(s.cid)
-                            }
-                            closeMenu$.next(null)
-                          }}
-                        />
-                      </div>
+                      <SortableItem key={s.cid}>
+                        <div key={s.cid} className={'select-none'}>
+                          <SpaceItem
+                            item={s}
+                            onClick={() => {
+                              if (core.tree.root?.cid !== s.cid) {
+                                core.tree.initial(s.cid)
+                              }
+                              closeMenu$.next(null)
+                            }}
+                          />
+                        </div>
+                      </SortableItem>
                     ))}
-                  </div>
+                  </SortableList>
                 )}
                 {!state.spaces.length && (
                   <div className={'text-center py-2 text-[13px] dark:text-gray-400 text-gray-500'}>
