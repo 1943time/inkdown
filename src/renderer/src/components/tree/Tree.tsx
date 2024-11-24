@@ -14,7 +14,6 @@ import { TreeEmpty } from './TreeEmpty'
 import { useSubject } from '../../hooks/subscribe'
 import { arrayMoveImmutable } from 'array-move'
 import { Subject } from 'rxjs'
-import { getOffsetTop } from '@renderer/editor/utils/dom'
 import { useCoreContext } from '../../store/core'
 import SortableList, { SortableItem } from 'react-easy-sort'
 

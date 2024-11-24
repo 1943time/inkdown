@@ -375,7 +375,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       if (paste) {
         const parsed = new DOMParser().parseFromString(paste, 'text/html').body
         const inner = !!parsed.querySelector('[data-be]')
-        if (!inner) {
+        if (inner) {
           const md = htmlToMarkdown(paste)
           if (md) {
             core.keyboard.insertMarkdown(md)

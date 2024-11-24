@@ -9,7 +9,6 @@ import React from 'react'
 import * as gfm from 'turndown-plugin-gfm'
 import turndown from 'turndown'
 
-
 export const nid = customAlphabet(
   '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
   13
@@ -121,8 +120,8 @@ export const isExist = (filePath: string) => {
   }
 }
 
+const toMd = new turndown()
+toMd.use(gfm.gfm)
 export const htmlToMarkdown = (html: string) => {
-  const t = new turndown()
-  t.use(gfm.gfm)
-  return t.turndown(html)
+  return toMd.turndown(html)
 }

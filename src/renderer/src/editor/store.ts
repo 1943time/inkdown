@@ -431,7 +431,7 @@ export class EditorStore {
         { name, data: file instanceof File ? await file.arrayBuffer() : file.buffer }
       ])
       if (res) {
-        return res[0].imgUrl
+        return res[0]
       }
       return ''
     } else {
@@ -477,8 +477,8 @@ export class EditorStore {
       if (urls) {
         Transforms.insertNodes(
           this.editor,
-          urls.map((p) => {
-            return { type: 'media', url: p.imgUrl, children: [{ text: '' }] }
+          urls.map((url) => {
+            return { type: 'media', url: url, children: [{ text: '' }] }
           }),
           { at: path, select: true }
         )

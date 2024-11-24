@@ -27,6 +27,7 @@ export class ImageBed {
       }).json<{
         success: boolean
         message?: string
+        result?: string[]
         fullResult: {
           imgUrl: string
         }[]
@@ -39,7 +40,11 @@ export class ImageBed {
           })
         }, 100)
       } else {
-        return res.fullResult
+        if (res.result) {
+          return res.result
+        } else {
+          return res.fullResult?.map(r => r.imgUrl) || []
+        }
       }
     } catch (e: any) {
       setTimeout(() => {
