@@ -68,12 +68,12 @@ a {
   @apply border-b dark:border-gray-200/10 border-gray-200;
   .page-title{
     font-size: 1em;
-    @apply mb-0 px-1 border-none;
+    @apply mb-0 px-1 border-none pr-8;
   }
 }
 .page-title{
   font-size: 2em;
-  @apply w-full relative py-1 bg-transparent break-words outline-none font-bold placeholder-gray-400 dark:placeholder-gray-300/30 border-b dark:border-gray-200/10 border-gray-200 mb-4;
+  @apply w-full relative py-1 bg-transparent break-words outline-none font-bold placeholder-gray-400 dark:placeholder-gray-300/30 border-b dark:border-gray-200/10 border-gray-200 mb-4 pr-8;
   &:empty {
     &:before {
       position: absolute;

@@ -1,14 +1,15 @@
 import {observer} from 'mobx-react-lite'
 import {Button} from 'antd'
-import {configStore} from '../../store/config'
+import { useCoreContext } from '../../store/core'
 
 export const NotLogged = observer((props: {
   onOpen: () => void
 }) => {
+  const core = useCoreContext()
   return (
     <>
       <div className={'text-center text-[13px] mt-3 text-gray-500'}>
-        {configStore.zh ? (
+        {core.config.zh ? (
           <span>
             可以通过部署自己的发布程序来将Markdown文档在线化，请查看
             <a

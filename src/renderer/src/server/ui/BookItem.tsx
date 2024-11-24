@@ -15,7 +15,6 @@ import {
 } from '@ant-design/icons'
 import { useLocalState } from '../../hooks/useLocalState'
 import { action } from 'mobx'
-import { shareStore } from '../store'
 import { NotLogged } from './NotLogged'
 import { EBook, openEbook$ } from './Ebook'
 import { shareSuccessfully$ } from './Successfully'
@@ -44,16 +43,16 @@ export const BookItem = observer(
           <Net className={'w-5 h-5 fill-gray-500'} />
           <span className={'ml-1'}>
             {props.books.length
-              ? configStore.zh
+              ? core.config.zh
                 ? '当前工作区中分享的文件夹'
                 : 'Books in current workspace folder'
-              : configStore.zh
+              : core.config.zh
               ? '将多个笔记组合为 Book'
               : 'Combine multiple notes into a book'}
           </span>
         </div>
-        {!shareStore.serviceConfig && <NotLogged onOpen={props.onOpenSetting} />}
-        {!!shareStore.serviceConfig && (
+        {!core.share.serviceConfig && <NotLogged onOpen={props.onOpenSetting} />}
+        {!!core.share.serviceConfig && (
           <div
             className={'link absolute right-2 top-0 cursor-pointer text-base'}
             onClick={props.onOpenSetting}
@@ -73,7 +72,7 @@ export const BookItem = observer(
                   <div className={'flex items-center'}>
                     <IBook className={'w-4 h-4 dark:fill-gray-400 fill-gray-600'} />
                     <a
-                      href={`${shareStore.serviceConfig?.domain}/book/${b.path}`}
+                      href={`${core.share.serviceConfig?.domain}/book/${b.path}`}
                       target={'_blank'}
                       className={'ml-1 max-w-[330px] truncate link'}
                     >
@@ -88,14 +87,14 @@ export const BookItem = observer(
                         }
                         onClick={action(() => {
                           b.updating = true
-                          shareStore
+                          core.share
                             .shareBook({
                               ...b,
                               name: ''
                             })
                             .then(() => {
                               shareSuccessfully$.next(
-                                `${shareStore.serviceConfig?.domain}/book/${b.path}`
+                                `${core.share.serviceConfig?.domain}/book/${b.path}`
                               )
                             })
                             .finally(action(() => (b.updating = false)))
@@ -114,15 +113,15 @@ export const BookItem = observer(
                       menu={{
                         items: [
                           {
-                            label: configStore.zh ? '复制链接' : 'Copy Link',
+                            label: core.config.zh ? '复制链接' : 'Copy Link',
                             key: 'copy',
                             icon: <CopyOutlined />,
                             onClick: () => {
-                              props.onCopy(`${shareStore.serviceConfig?.domain}/book/${b.path}`)
+                              props.onCopy(`${core.share.serviceConfig?.domain}/book/${b.path}`)
                             }
                           },
                           {
-                            label: configStore.zh ? '设置' : 'Settings',
+                            label: core.config.zh ? '设置' : 'Settings',
                             key: 'setting',
                             icon: <SettingOutlined />,
                             onClick: () => {
@@ -134,7 +133,7 @@ export const BookItem = observer(
                           },
                           { type: 'divider' },
                           {
-                            label: configStore.zh ? '删除' : 'Remove',
+                            label: core.config.zh ? '删除' : 'Remove',
                             key: 'remove',
                             icon: <StopOutlined />,
                             danger: true,
@@ -142,11 +141,11 @@ export const BookItem = observer(
                               props.onMask(true)
                               modal.confirm({
                                 title: 'Notice',
-                                content: configStore.zh
+                                content: core.config.zh
                                   ? `确认删除已分享的文件夹 ${b.name}`
                                   : `Confirm to remove shared book ${b.name}`,
                                 onOk: () => {
-                                  return shareStore
+                                  return core.share
                                     .delBook(b)
                                     .then(props.onRefresh)
                                     .finally(closeMask)
@@ -175,7 +174,7 @@ export const BookItem = observer(
             ))}
           </div>
         )}
-        {!!shareStore.serviceConfig && (
+        {!!core.share.serviceConfig && (
           <div className={'mt-3 flex space-x-5'}>
             <Button
               onClick={() => {
@@ -183,11 +182,11 @@ export const BookItem = observer(
                 openEbook$.next({ folderPath: core.tree.root!.filePath })
               }}
               icon={<BookOutlined />}
-              disabled={!shareStore.serviceConfig || !core.tree.root}
+              disabled={!core.share.serviceConfig || !core.tree.root}
               className={'flex-1'}
               block={true}
             >
-              <span>{configStore.zh ? '分享文件夹' : 'Create Book'}</span>
+              <span>{core.config.zh ? '分享文件夹' : 'Create Book'}</span>
             </Button>
           </div>
         )}

@@ -2,14 +2,13 @@ import {observer} from 'mobx-react-lite'
 import {Button, Form, Input, Modal, Space, Spin} from 'antd'
 import {useCallback, useEffect} from 'react'
 import {IBook} from '../model'
-import {shareStore} from '../store'
 import {useLocalState} from '../../hooks/useLocalState'
 import {openDialog} from '../../api/main'
 import {shareSuccessfully$} from './Successfully'
 import {Subject} from 'rxjs'
 import {useSubject} from '../../hooks/subscribe'
-import {treeStore} from '../../store/tree'
 import {message$} from '../../utils'
+import { useCoreContext } from '../../store/core'
 
 export const openEbook$ = new Subject<{
   folderPath: string
@@ -20,6 +19,7 @@ export const EBook = observer((props: {
   onClose?: () => void
   defaultRootPath?: string
 }) => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     submitting: false,
     config: {} as any,
@@ -36,7 +36,7 @@ export const EBook = observer((props: {
     setState({book: null})
     if (v.folderPath) {
       setState({loading: true})
-      shareStore.api.findBookByFilepath(v.folderPath).then(res => {
+      core.share.api.findBookByFilepath(v.folderPath).then(res => {
         if (!res.book) {
           form.setFieldsValue({
             filePath: v.folderPath
@@ -72,7 +72,7 @@ export const EBook = observer((props: {
           setState({submitting: true})
           try {
             const oldFilePath = state.book?.filePath
-            const res = await shareStore.shareBook({
+            const res = await core.share.shareBook({
               id: state.book?.id,
               name: v.name,
               path: v.path,
@@ -85,11 +85,11 @@ export const EBook = observer((props: {
               })
             }
             if (state.book?.id && state.book.filePath !==  v.filePath) {
-              shareStore.bookMap.delete(oldFilePath!)
+              core.share.bookMap.delete(oldFilePath!)
             }
             if (res) {
               props.onSave(res.book)
-              shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/book/${res.book.path}`)
+              shareSuccessfully$.next(`${core.share.serviceConfig?.domain}/book/${res.book.path}`)
               close()
             }
           } finally {
@@ -120,7 +120,7 @@ export const EBook = observer((props: {
             {
               validator: async (rule, value) => {
                 if (state.book && state.book.path === value) return Promise.resolve()
-                const res = await shareStore.api.checkBookPath(value)
+                const res = await core.share.api.checkBookPath(value)
                 return res.book ? Promise.reject('The book id already exists') : Promise.resolve()
               },
               validateTrigger: 'submit'
@@ -150,7 +150,7 @@ export const EBook = observer((props: {
                 {required: true, message: 'Please enter the path of the folder to be synchronized'},
                 {
                   validator: (rule, value: string) => {
-                    if (!value?.startsWith(treeStore.root!.filePath)) {
+                    if (!value?.startsWith(core.tree.root!.filePath)) {
                       return Promise.reject(`The folder needs to be within the space`)
                     }
                     return Promise.resolve()

@@ -13,21 +13,20 @@ import {
 import {default as BookIcon} from '../../icons/IBook'
 import {IBook, IDevice, IDoc, IFile} from '../model'
 import {useLocalState} from '../../hooks/useLocalState'
-import {shareStore} from '../store'
 import {CloseShare} from './CloseShare'
 import {message$, sizeUnit} from '../../utils'
 import {ServiceSet} from './ServiceSet'
 import {shareSuccessfully$} from './Successfully'
 import {existsSync} from 'fs'
 import {MainApi} from '../../api/main'
-import {treeStore} from '../../store/tree'
-import {configStore} from '../../store/config'
 import {openEbook$} from './Ebook'
+import { useCoreContext } from '../../store/core'
 
 const Sync = observer((props: {
   doc?: IDoc
   book?: IBook
 }) => {
+  const core = useCoreContext()
   const [state, setState] = useLocalState({
     syncing: false
   })
@@ -35,8 +34,8 @@ const Sync = observer((props: {
     setState({syncing: true})
     try {
       if (props.doc) {
-        const res = await shareStore.shareDoc(props.doc.filePath)
-        shareSuccessfully$.next(`${shareStore.serviceConfig?.domain}/doc/${res.name}`)
+        const res = await core.share.shareDoc(props.doc.filePath)
+        shareSuccessfully$.next(`${core.share.serviceConfig?.domain}/doc/${res.name}`)
       }
     } finally {
       setState({syncing: false})
@@ -56,6 +55,7 @@ export const ShareData = observer((props: {
   open: boolean
   onClose: () => void
 }) => {
+  const core = useCoreContext()
   const [modal, contextHolder] = Modal.useModal()
   const [state, setState] = useLocalState({
     activeKey: 'doc' as 'doc' | 'book' | 'file' | 'device',
@@ -80,7 +80,7 @@ export const ShareData = observer((props: {
   })
   const getDocs = useCallback(() => {
     setState({loading: true})
-    shareStore.api.getDocs({
+    core.share.api.getDocs({
       page: state.docPage,
       pageSize: 10,
       all: state.all ? true : ''
@@ -91,7 +91,7 @@ export const ShareData = observer((props: {
 
   const getDevices = useCallback(() => {
     setState({loading: true})
-    shareStore.api.getDevices({
+    core.share.api.getDevices({
       page: state.devicePage,
       pageSize: 10,
     }).then(res => {
@@ -101,7 +101,7 @@ export const ShareData = observer((props: {
 
   const getBooks = useCallback(() => {
     setState({loading: true})
-    shareStore.api.getBooks({
+    core.share.api.getBooks({
       page: state.bookPage,
       pageSize: 10,
       all: state.all ? true : ''
@@ -112,7 +112,7 @@ export const ShareData = observer((props: {
 
   const getFiles = useCallback(() => {
     setState({loading: true})
-    shareStore.api.getFiles({
+    core.share.api.getFiles({
       page: state.filePage,
       pageSize: 10,
       all: state.all ? true : ''
@@ -141,7 +141,7 @@ export const ShareData = observer((props: {
   }, [props.open])
   return (
     <Modal
-      title={configStore.zh ? '分享数据' : 'Share Records'}
+      title={core.config.zh ? '分享数据' : 'Share Records'}
       width={900}
       open={props.open}
       onCancel={props.onClose}
@@ -184,7 +184,7 @@ export const ShareData = observer((props: {
           items={[
             {
               key: 'doc',
-              label: configStore.zh ? '分享文档' : 'Share Doc',
+              label: core.config.zh ? '分享文档' : 'Share Doc',
               children: (
                 <div>
                   <Table
@@ -210,7 +210,7 @@ export const ShareData = observer((props: {
                             <a
                               className={'link'}
                               target={'_blank'}
-                              href={`${shareStore.serviceConfig?.domain}/doc/${v}`}
+                              href={`${core.share.serviceConfig?.domain}/doc/${v}`}
                             >{v}</a>
                           </>
                         )
@@ -233,14 +233,14 @@ export const ShareData = observer((props: {
                                   defaultFilePath: v,
                                 }).then(res => {
                                   if (res.filePaths.length) {
-                                    shareStore.api.updateFilePath({
+                                    core.share.api.updateFilePath({
                                       files: [{from: v, to: res.filePaths[0]}],
                                       mode: 'updateDocs'
                                     }).then(res => {
-                                      res.docs?.map(d => shareStore.docMap.set(d.filePath, d))
+                                      res.docs?.map(d => core.share.docMap.set(d.filePath, d))
                                       message$.next({
                                         type: 'success',
-                                        content: configStore.zh ? '映射文件路径已更改' : 'Mapping file changed'
+                                        content: core.config.zh ? '映射文件路径已更改' : 'Mapping file changed'
                                       })
                                       getDocs()
                                     })
@@ -288,7 +288,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'book',
-              label: configStore.zh ? '分享文件夹' : 'Share Book',
+              label: core.config.zh ? '分享文件夹' : 'Share Book',
               children: (
                 <div>
                   <Table
@@ -313,7 +313,7 @@ export const ShareData = observer((props: {
                           <a
                             className={'link'}
                             target={'_blank'}
-                            href={`${shareStore.serviceConfig?.domain}/book/${record.path}`}
+                            href={`${core.share.serviceConfig?.domain}/book/${record.path}`}
                           >{v}</a>
                         )
                       },
@@ -348,7 +348,7 @@ export const ShareData = observer((props: {
                           <div className={'space-x-1'}>
                             <Button
                               type={'link'} size={'small'}
-                              disabled={!v.filePath.startsWith(treeStore.root?.filePath)}
+                              disabled={!v.filePath.startsWith(core.tree.root?.filePath)}
                               onClick={() => {
                                 openEbook$.next({folderPath: v.filePath})
                               }}
@@ -372,7 +372,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'file',
-              label: configStore.zh ? '依赖文件' : 'Files',
+              label: core.config.zh ? '依赖文件' : 'Files',
               children: (
                 <div>
                   <Table
@@ -406,7 +406,7 @@ export const ShareData = observer((props: {
                           <a
                             className={'link'}
                             target={'_blank'}
-                            href={`${shareStore.serviceConfig?.domain}/stream/${v}`}
+                            href={`${core.share.serviceConfig?.domain}/stream/${v}`}
                           >{record.filePath.includes('/') ? record.filePath.split('/').pop() : record.filePath.split('\\').pop()}</a>
                         )
                       },
@@ -439,7 +439,7 @@ export const ShareData = observer((props: {
                               {record.doc &&
                                 <span>
                                   <FileTextOutlined className={'mr-1 w-4'}/>
-                                  <a href={`${shareStore.serviceConfig?.domain}/doc/${record.doc.name}`}
+                                  <a href={`${core.share.serviceConfig?.domain}/doc/${record.doc.name}`}
                                      className={'link'} target={'_blank'}>
                                     {record.doc.name}
                                   </a>
@@ -449,7 +449,7 @@ export const ShareData = observer((props: {
                                 <span className={'flex items-center'}>
                                   <BookIcon className={'w-4 h-4 mr-1 dark:fill-gray-300'}/>
                                   <a className={'link'}
-                                     href={`${shareStore.serviceConfig?.domain}/book/${record.book.path}`}
+                                     href={`${core.share.serviceConfig?.domain}/book/${record.book.path}`}
                                      target={'_blank'}>
                                     {record.book.name}
                                   </a>
@@ -471,7 +471,7 @@ export const ShareData = observer((props: {
             },
             {
               key: 'device',
-              label: configStore.zh ? '设备' : 'Devices',
+              label: core.config.zh ? '设备' : 'Devices',
               children: (
                 <div>
                   <Table
@@ -494,7 +494,7 @@ export const ShareData = observer((props: {
                         dataIndex: 'name',
                         render: (v, record) => (
                           <span>
-                            {record.id === shareStore.serviceConfig?.deviceId &&
+                            {record.id === core.share.serviceConfig?.deviceId &&
                               <StarOutlined className={'text-yellow-500 mr-1'}/>
                             }
                             {v}
@@ -511,7 +511,7 @@ export const ShareData = observer((props: {
                         key: 'handle',
                         render: (v, record) => (
                           <div className={'space-x-1'}>
-                            {record.id === shareStore.serviceConfig?.deviceId &&
+                            {record.id === core.share.serviceConfig?.deviceId &&
                               <Button
                                 type={'link'} size={'small'}
                                 onClick={() => setState({openServiceSet: true})}
@@ -522,15 +522,15 @@ export const ShareData = observer((props: {
                               type={'link'} size={'small'} danger={true}
                               onClick={() => {
                                 modal.confirm({
-                                  title: configStore.zh ? '提示' : 'Notice',
+                                  title: core.config.zh ? '提示' : 'Notice',
                                   type: 'warning',
-                                  content: configStore.zh ? '删除设备将清除设备下的所有共享数据，删除后无法访问。' : 'Deleting a device will clear all shared data under the device and will become inaccessible.',
+                                  content: core.config.zh ? '删除设备将清除设备下的所有共享数据，删除后无法访问。' : 'Deleting a device will clear all shared data under the device and will become inaccessible.',
                                   onOk: () => {
-                                    const currentId = shareStore.serviceConfig?.deviceId
-                                    return shareStore.delDevice(record.id).then(() => {
+                                    const currentId = core.share.serviceConfig?.deviceId
+                                    return core.share.delDevice(record.id).then(() => {
                                       message$.next({
                                         type: 'success',
-                                        content: configStore.zh ? '删除成功' : 'successfully deleted'
+                                        content: core.config.zh ? '删除成功' : 'successfully deleted'
                                       })
                                       if (record.id === currentId) {
                                         setState({

@@ -184,7 +184,7 @@ export const Nav = observer(() => {
         </div>
         <div className={'flex items-center pr-3 dark:text-gray-300 space-x-1 text-gray-500'}>
           <Update />
-          {/* <Share /> */}
+          <Share />
           <div
             className={
               'flex items-center justify-center h-[27px] w-[30px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'

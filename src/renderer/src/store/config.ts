@@ -1,7 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { MainApi } from '../api/main'
 import mermaid from 'mermaid'
-import { shareStore } from '../server/store'
 import { highlighter } from '../editor/utils/highlight'
 import { db } from './db'
 import { clearAllCodeCache, clearInlineKatex } from '../editor/plugins/useHighlight'
@@ -169,8 +168,8 @@ export class ConfigStore {
     } else {
       await db.config.add({ key, value })
     }
-    if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && shareStore.serviceConfig) {
-      shareStore.api.setPreferences({
+    if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && this.core.share.serviceConfig) {
+      this.core.share.api.setPreferences({
         [key]: value
       })
     }

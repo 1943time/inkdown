@@ -387,6 +387,9 @@ export class NodeStore {
       db.file.update(n.cid, {
         filePath: path
       })
+      if (this.core.share.docMap.get(n.filePath)) {
+        changeFiles.push({from: n.filePath, to: path})
+      }
       runInAction(() => {
         n.filePath = path
       })
@@ -510,5 +513,51 @@ export class NodeStore {
       }
     }
     this.createDoc({parent: parentNode, newName: parse(filePath).name})
+  }
+
+  updateFilePath = async (node: IFileItem, targetPath: string) => {
+    try {
+      if (node.filePath === targetPath) return
+      if (!node.ghost) {
+        renameSync(node.filePath, targetPath)
+        const s = await stat(targetPath)
+        const oldPath = node.filePath
+        runInAction(() => {
+          node.filePath = targetPath
+          node.filename = parse(targetPath).name
+        })
+        await db.file.update(node.cid, {
+          filePath: targetPath,
+          updated: s.mtime.valueOf()
+        })
+        if (this.core.share.serviceConfig) {
+          if (node.ext === 'md' && this.core.share.docMap.get(oldPath)) {
+            this.core.share.updateRemotePath([{from: oldPath, to: node.filePath}], 'doc')
+          }
+        }
+        if (node.folder) {
+          try {
+            const changeFiles = this.renameFiles(node.children || [], targetPath)
+            if (changeFiles.length) {
+              await this.core.share.updateRemotePath(changeFiles, 'doc')
+            }
+            if (this.core.share.bookMap.get(oldPath)) {
+              await this.core.share.updateRemotePath([{from: oldPath, to: node.filePath}], 'book')
+            }
+          } catch(e: any) {
+            if (e?.message) {
+              this.core.message.error(e.message)
+            }
+          }
+        }
+      } else {
+        runInAction(() => {
+          node.filePath = targetPath
+          node.filename = parse(targetPath).name
+        })
+      }
+    } catch (e) {
+      console.error('update filePath', e)
+    }
   }
 }

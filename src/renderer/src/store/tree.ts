@@ -11,7 +11,6 @@ import {Subject} from 'rxjs'
 import {db, IFile} from './db'
 import {EditorStore} from '../editor/store'
 import {openConfirmDialog$} from '../components/Dialog/ConfirmDialog'
-import {updateFilePath} from '../editor/utils/updateNode'
 import {editSpace$} from '../components/space/EditSpace'
 import {mediaType} from '../editor/utils/dom'
 import {parserMdToSchema} from '../editor/parser/parser'
@@ -435,7 +434,7 @@ export class TreeStore {
         dropNode.parent!.children = targetList
         if (dragNode.parent !== dropNode.parent) {
           const newPath = join(dropNode.parent!.filePath, basename(dragNode.filePath))
-          await updateFilePath(dragNode, newPath)
+          await this.core.node.updateFilePath(dragNode, newPath)
           this.core.node.defineParent(dragNode, dropNode.parent!)
           this.core.refactor.refactorDepLink(dragNode)
           this.core.refactor.refactorDepOnLink(dragNode, oldPath)
@@ -446,7 +445,7 @@ export class TreeStore {
         dropNode.children!.unshift(dragNode)
         const newPath = join(dropNode.filePath, basename(dragNode.filePath))
         this.core.node.defineParent(dragNode, dropNode)
-        await updateFilePath(dragNode, newPath)
+        await this.core.node.updateFilePath(dragNode, newPath)
         dropNode.children!.map((n, i) => db.file.update(n.cid, { sort: i }))
         this.core.refactor.refactorDepLink(dragNode)
         this.core.refactor.refactorDepOnLink(dragNode, oldPath)

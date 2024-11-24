@@ -4,7 +4,6 @@ import { Tooltip } from 'antd'
 import { useLocalState } from '../../hooks/useLocalState'
 import { readdirSync } from 'fs'
 import { join } from 'path'
-import { updateFilePath } from '../utils/updateNode'
 import isHotkey from 'is-hotkey'
 import { ReactEditor } from 'slate-react'
 import { useEditorStore } from '../store'
@@ -77,7 +76,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
             defaultPath: state.name
           }).then((res) => {
             if (res.filePath && oldPath !== res.filePath) {
-              updateFilePath(node, res.filePath)
+              core.node.updateFilePath(node, res.filePath)
             } else {
               setName(node.filename)
             }
@@ -88,7 +87,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
         if (detectRename()) {
           if (node.spaceId && core.tree.root) {
             const oldPath = node.filePath
-            await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
+            await core.node.updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
             if (node.spaceId) {
               core.refactor.refactorDepOnLink(node, oldPath)
             }
@@ -161,7 +160,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
         )}
         <div
           style={{transitionProperty: 'background-color'}}
-          className={`hidden group-hover:block absolute right-1 ${core.config.config.miniTitle ? 'top-1' : 'top-5'} rounded dark:bg-white/5 p-1 cursor-pointer hover:dark:bg-white/10 duration-200`}
+          className={`hidden group-hover:block absolute right-1 ${core.config.config.miniTitle ? 'top-1' : 'top-4'} rounded dark:bg-white/5 p-1 cursor-pointer hover:dark:bg-white/10 duration-200`}
           onClick={async () => {
             const text = inputRef.current?.innerText
             core.config.setConfig('miniTitle', !core.config.config.miniTitle)

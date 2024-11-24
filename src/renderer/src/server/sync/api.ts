@@ -1,10 +1,10 @@
 import {createHmac} from 'crypto'
 import {IBook, IDevice, IDoc, IFile} from '../model'
-import {ShareStore} from '../store'
 import {message$} from '../../utils'
 import ky from 'ky'
 import {readFileSync} from 'fs'
 import {basename} from 'path'
+import { ShareStore } from '../../store/server'
 
 export class ShareApi {
   constructor(
@@ -93,7 +93,6 @@ export class ShareApi {
     preferences: {
       codeTabSize: number
       codeTheme: string
-      codeLineNumber: boolean
     }
   }) {
     const time = Date.now()

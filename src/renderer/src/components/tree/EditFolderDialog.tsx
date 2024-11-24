@@ -12,7 +12,6 @@ import { db, IFile } from '../../store/db'
 import { join } from 'path'
 import { runInAction } from 'mobx'
 import { mkdirSync } from 'fs'
-import { updateFilePath } from '../../editor/utils/updateNode'
 import IFolder from '../../icons/IFolder'
 import { useCoreContext } from '../../store/core'
 
@@ -72,7 +71,7 @@ export const EditFolderDialog = observer(() => {
         await db.file.update(ctx.cid, {
           filePath: join(ctx.filePath, '..', name)
         })
-        await updateFilePath(ctx, target)
+        await core.node.updateFilePath(ctx, target)
         core.refactor.refactorDepOnLink(ctx, oldPath)
       }
       close()

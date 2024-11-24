@@ -1,17 +1,17 @@
 import { action, makeAutoObservable, runInAction } from 'mobx'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
-import { ShareApi } from './sync/api'
-import { IBook, IDoc } from './model'
-import { BsFile } from './sync/file'
-import { Book } from './sync/book'
+import { ShareApi } from '../server/sync/api'
+import { IBook, IDoc } from '../server/model'
+import { BsFile } from '../server/sync/file'
+import { Book } from '../server/sync/book'
 import { parserMdToSchema } from '../editor/parser/parser'
 import { MainApi } from '../api/main'
 import { compareVersions } from 'compare-versions'
-import { message$ } from '../utils'
 import { join, parse } from 'path'
 import { IFileItem, ISpaceNode } from '../types/index'
-import { db } from '../store/db'
+import { db } from './db'
 import { slugify } from '../editor/utils/dom'
+import { Core } from './core'
 
 export class ShareStore {
   readonly minVersion = '0.5.0'
@@ -33,7 +33,9 @@ export class ShareStore {
   api: ShareApi
   private changedDocs: {from: string, to: string}[] = []
   private changedBooks: {from: string, to: string}[] = []
-  constructor() {
+  constructor(
+    private readonly core: Core
+  ) {
     this.api = new ShareApi(this)
     this.file = new BsFile(this.api)
     this.book = new Book(this.api, this.file)
@@ -110,7 +112,7 @@ export class ShareStore {
         try {
           const v = await this.api.getVersion()
           runInAction(() => this.currentVersion = v.version)
-          if (v.version !== localStorage.getItem('ignore-service-version') && !shareStore.pausedUpdate) {
+          if (v.version !== localStorage.getItem('ignore-service-version') && !this.pausedUpdate) {
             if (compareVersions(this.minVersion, v.version) === 1) {
               fetch('https://api.github.com/repos/1943time/bluestone-service/releases/latest').then(async res => {
                 const data = await res.json() as {
@@ -168,21 +170,21 @@ export class ShareStore {
   }
 
   async shareBook(data: Partial<IBook>) {
-    // let node: ISpaceNode | IFileItem | null = data.filePath === treeStore.root!.filePath ? treeStore.root : null
-    // if (!node) {
-    //   const file = await db.file.where('filePath').equals(data.filePath!).and(x => x.spaceId === treeStore.root!.cid).first()
-    //   node = treeStore.nodeMap.get(file?.cid!) || null
-    // }
-    // if (node) {
-    //   return this.book.syncBook(data, node).then(res => {
-    //     if (res) {
-    //       this.bookMap.set(res.book.filePath, res.book)
-    //       return res
-    //     }
-    //     return null
-    //   })
-    // }
-    // return null
+    let node: ISpaceNode | IFileItem | null = data.filePath === this.core.tree.root!.filePath ? this.core.tree.root : null
+    if (!node) {
+      const file = await db.file.where('filePath').equals(data.filePath!).and(x => x.spaceId === this.core.tree.root!.cid).first()
+      node = this.core.tree.nodeMap.get(file?.cid!) || null
+    }
+    if (node) {
+      return this.book.syncBook(data, node).then(res => {
+        if (res) {
+          this.bookMap.set(res.book.filePath, res.book)
+          return res
+        }
+        return null
+      })
+    }
+    return null
   }
 
   async delBook(book: IBook) {
@@ -215,6 +217,31 @@ export class ShareStore {
       }
     })
   }
+
+  updateRemotePath(paths: {from: string, to: string}[], mode: 'doc' | 'book') {
+    return this.api.updateFilePath({
+      mode: mode === 'doc' ? 'updateDocs' : 'updateBooks',
+      files: paths
+    }).then(res => {
+      for (const item of paths) {
+        if (mode === 'doc') {
+          const d = this.docMap.get(item.from)!
+          if (d) {
+            d.filePath = item.to
+            this.docMap.delete(item.from)
+            this.docMap.set(item.to, d)
+          }
+        }
+        if (mode === 'book') {
+          const d = this.bookMap.get(item.from)!
+          if (d) {
+            d.filePath = item.to
+            this.bookMap.delete(item.from)
+            this.bookMap.set(item.to, d)
+          }
+        }
+      }
+    })
+  }
 }
 
-export const shareStore = new ShareStore()

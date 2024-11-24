@@ -2,8 +2,7 @@ import {observer} from 'mobx-react-lite'
 import {Popconfirm} from 'antd'
 import {ReactNode} from 'react'
 import {IBook, IDoc} from '../model'
-import {shareStore} from '../store'
-import {configStore} from '../../store/config'
+import { useCoreContext } from '../../store/core'
 
 export const CloseShare = observer((props: {
   children: ReactNode
@@ -11,25 +10,26 @@ export const CloseShare = observer((props: {
   book?: IBook
   onRemove: () => void
 }) => {
+  const core = useCoreContext()
   return (
     <Popconfirm
-      title={configStore.zh ? '提示' : 'Notice'}
-      description={configStore.zh ? '删除后无法访问' : 'Network inaccessible after removal'}
+      title={core.config.zh ? '提示' : 'Notice'}
+      description={core.config.zh ? '删除后无法访问' : 'Network inaccessible after removal'}
       placement={'bottom'}
       onConfirm={() => {
         if (props.doc) {
-          shareStore.api.delDoc(props.doc.id).then(() => {
-            shareStore.docMap.delete(props.doc!.filePath)
+          core.share.api.delDoc(props.doc.id).then(() => {
+            core.share.docMap.delete(props.doc!.filePath)
             props.onRemove()
           })
         }
-        if (props.book) return shareStore.delBook(props.book).then(() => {
+        if (props.book) return core.share.delBook(props.book).then(() => {
           props.onRemove()
         })
         return Promise.resolve()
       }}
-      okText={configStore.zh ? '确定' : 'Yes'}
-      cancelText={configStore.zh ? '取消' : 'No'}
+      okText={core.config.zh ? '确定' : 'Yes'}
+      cancelText={core.config.zh ? '取消' : 'No'}
     >
       {props.children}
     </Popconfirm>
