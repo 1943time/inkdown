@@ -7,7 +7,7 @@ import { runInAction } from 'mobx'
 import isHotkey from 'is-hotkey'
 import { useEditorStore } from '../store'
 import { Methods } from '../../types/index'
-import { KeyboardTask, keyTask$ } from '../../hooks/keyboard'
+import { keyTask$ } from '../../hooks/keyboard'
 import { useLocalState } from '../../hooks/useLocalState'
 import { useSubject } from '../../hooks/subscribe'
 import { EditorUtils } from '../utils/editorUtils'
@@ -25,6 +25,7 @@ import { basename, join, parse, relative } from 'path'
 import { toUnixPath } from '../../utils/path'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
+import { KeyboardTask } from '../../store/logic/keyboard'
 
 type InsertOptions = {
   label: [string, string]

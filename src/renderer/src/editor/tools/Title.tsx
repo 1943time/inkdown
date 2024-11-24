@@ -160,7 +160,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
         )}
         <div
           style={{transitionProperty: 'background-color'}}
-          className={`hidden group-hover:block absolute right-1 ${core.config.config.miniTitle ? 'top-1' : 'top-4'} rounded dark:bg-white/5 p-1 cursor-pointer hover:dark:bg-white/10 duration-200`}
+          className={`hidden group-hover:block absolute right-1 ${core.config.config.miniTitle ? 'top-1' : 'top-4'} rounded dark:bg-white/5 p-1 cursor-pointer hover:dark:bg-white/10 duration-200 bg-gray-100 hover:bg-gray-200/80`}
           onClick={async () => {
             const text = inputRef.current?.innerText
             core.config.setConfig('miniTitle', !core.config.config.miniTitle)

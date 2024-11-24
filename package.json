@@ -1,11 +1,11 @@
 {
   "name": "inkdown",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "./out/main/index.js",
   "license": "AGPL-3.0",
   "author": "1943time",
-  "homepage": "https://github.com/1943time/bluestone",
+  "homepage": "https://github.com/1943time/inkdown",
   "scripts": {
     "format": "prettier --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",

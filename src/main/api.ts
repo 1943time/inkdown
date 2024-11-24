@@ -227,7 +227,7 @@ export const registerApi = () => {
                 right: 0
               },
             })
-            writeFileSync(save.filePath, buffer)
+            writeFileSync(save.filePath, new Uint8Array(buffer))
             shell.showItemInFolder(save.filePath)
           }
         } finally {
