@@ -27,6 +27,7 @@ export class ConfigStore {
     restoreRange: false,
     editorTextSize: 16,
     codeTheme: 'auto',
+    miniTitle: false,
     codeAutoBreak: false,
     spellCheck: false,
     editorWidth: 700,

@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useRef } from 'react'
 import { Tooltip } from 'antd'
 import { useLocalState } from '../../hooks/useLocalState'
-import { IFileItem } from '../../types/index'
 import { readdirSync } from 'fs'
 import { join } from 'path'
 import { updateFilePath } from '../utils/updateNode'
@@ -14,11 +13,15 @@ import { runInAction } from 'mobx'
 import { MainApi } from '../../api/main'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
+import { IFileItem } from '../../types'
+import INote from '../../icons/INote'
+import { IMini } from '../../icons/IMini'
+import { IMax } from '../../icons/IMax'
 
 export const Title = observer(({ node }: { node: IFileItem }) => {
   const core = useCoreContext()
   const store = useEditorStore()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     name: '',
     tip: false
@@ -87,7 +90,7 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
             const oldPath = node.filePath
             await updateFilePath(node, join(node.filePath, '..', name + '.' + node.ext))
             if (node.spaceId) {
-              core.tree.refactor.refactorDepOnLink(node, oldPath)
+              core.refactor.refactorDepOnLink(node, oldPath)
             }
           }
           setState({ tip: false })
@@ -96,38 +99,85 @@ export const Title = observer(({ node }: { node: IFileItem }) => {
     }
   }, [node])
   return (
-    <Tooltip
-      title={t('nameConflict')}
-      color={'magenta'}
-      open={state.tip}
-      placement={'bottom'}
-    >
-      <div className={'mt-12'}>
-        <div
-          contentEditable={true}
-          ref={inputRef}
-          suppressContentEditableWarning={true}
-          onKeyDown={(e) => {
-            if (e.key.toLowerCase() === 'enter') {
-              e.preventDefault()
-            }
-            if (isHotkey('mod+s', e)) {
-              e.preventDefault()
-              save()
-            }
-            if (isHotkey('enter', e) || isHotkey('down', e)) {
-              e.preventDefault()
-              try {
-                ReactEditor.focus(store.editor)
-                Transforms.select(store.editor, Editor.start(store.editor, []))
-              } catch (e) {
-                console.error(e)
+    <Tooltip title={t('nameConflict')} color={'magenta'} open={state.tip} placement={'bottom'}>
+      <div className={`${core.config.config.miniTitle ? 'mt-10 mb-6 mini-title' : 'mt-12'} relative group`}>
+        {core.config.config.miniTitle ? (
+          <div className={'flex items-baseline select-none'} contentEditable={false}>
+            <INote className={'mr-0.5 relative top-0.5'}/>
+            <div
+              contentEditable={true}
+              ref={inputRef}
+              suppressContentEditableWarning={true}
+              onKeyDown={(e) => {
+                if (e.key.toLowerCase() === 'enter') {
+                  e.preventDefault()
+                }
+                if (isHotkey('mod+s', e)) {
+                  e.preventDefault()
+                  save()
+                }
+                if (isHotkey('enter', e) || isHotkey('down', e)) {
+                  e.preventDefault()
+                  try {
+                    ReactEditor.focus(store.editor)
+                    Transforms.select(store.editor, Editor.start(store.editor, []))
+                  } catch (e) {
+                    console.error(e)
+                  }
+                }
+              }}
+              onBlur={save}
+              className={'page-title mini'}
+            />
+          </div>
+        ) : (
+          <div>
+            <div
+            contentEditable={true}
+            ref={inputRef}
+            suppressContentEditableWarning={true}
+            onKeyDown={(e) => {
+              if (e.key.toLowerCase() === 'enter') {
+                e.preventDefault()
               }
-            }
+              if (isHotkey('mod+s', e)) {
+                e.preventDefault()
+                save()
+              }
+              if (isHotkey('enter', e) || isHotkey('down', e)) {
+                e.preventDefault()
+                try {
+                  ReactEditor.focus(store.editor)
+                  Transforms.select(store.editor, Editor.start(store.editor, []))
+                } catch (e) {
+                  console.error(e)
+                }
+              }
+            }}
+            onBlur={save}
+            className={'page-title'}
+          />
+          </div>
+        )}
+        <div
+          style={{transitionProperty: 'background-color'}}
+          className={`hidden group-hover:block absolute right-1 ${core.config.config.miniTitle ? 'top-1' : 'top-5'} rounded dark:bg-white/5 p-1 cursor-pointer hover:dark:bg-white/10 duration-200`}
+          onClick={async () => {
+            const text = inputRef.current?.innerText
+            core.config.setConfig('miniTitle', !core.config.config.miniTitle)
+            setTimeout(() => {
+              if (inputRef.current) {
+                inputRef.current.innerText = text || ''
+              }
+            }, 30)
           }}
-          onBlur={save}
-          className={'page-title'}
-        />
+        >
+          {core.config.config.miniTitle ? (
+            <IMax/>
+          ): (
+            <IMini/>
+          )}
+        </div>
       </div>
     </Tooltip>
   )
