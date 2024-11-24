@@ -59,6 +59,24 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>
+          <span className={'mr-1'}>{'Restore Viewport'}</span>
+          <TextHelp
+            text={
+              'When switching files, restore to the cursor position'
+            }
+          />
+        </div>
+        <div>
+          <Checkbox
+            checked={core.config.config.restoreRange}
+            onChange={(e) => {
+              core.config.setConfig('restoreRange', e.target.checked)
+            }}
+          />
+        </div>
+      </div>
+      <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>{t('codeTabSize')}</div>
         <div>
           <Radio.Group

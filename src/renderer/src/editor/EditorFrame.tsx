@@ -3,7 +3,7 @@ import {MEditor} from './Editor'
 import {Heading} from './tools/Leading'
 import {Empty} from '../components/Empty'
 import {Tab} from '../types/index'
-import React, {useCallback, useEffect, useLayoutEffect, useMemo} from 'react'
+import React, {useCallback, useEffect, useLayoutEffect, useMemo, useRef} from 'react'
 import {EditorStoreContext} from './store'
 import {FloatBar} from './tools/FloatBar'
 import {TableAttr} from './tools/TableAttr'
@@ -23,6 +23,7 @@ import { useCoreContext } from '../store/core'
 export const EditorFrame = observer(({tab}: {
   tab: Tab
 }) => {
+  const timmer = useRef(0)
   const core = useCoreContext()
   const [state, setState] = useLocalState({
     showLeftPadding: false
@@ -77,6 +78,15 @@ export const EditorFrame = observer(({tab}: {
       <Search />
       <div
         className={'flex-1 h-full overflow-y-auto items-start relative'}
+        onScroll={e => {
+          clearTimeout(timmer.current)
+          if (tab.current) {
+            const note = tab.current
+            timmer.current = window.setTimeout(() => {
+              note.scrollTop = tab.store.container?.scrollTop
+            }, 200)
+          }
+        }}
         ref={(dom) => {
           tab.store.setState((state) => (state.container = dom))
         }}

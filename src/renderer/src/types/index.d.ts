@@ -33,6 +33,7 @@ export type IFileItem = {
   history?: any
   lastOpenTime?: number
   sel?: BaseSelection
+  scrollTop?: number
   hidden?: boolean
   links?: {path: number[], target: string}[]
 }

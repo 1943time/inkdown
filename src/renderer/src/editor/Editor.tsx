@@ -129,6 +129,21 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
         )
         clearAllCodeCache(editor)
         store.docChanged$.next(true)
+        if (note.sel && core.config.config.restoreRange) {
+          try {
+            const sel = note.sel
+            setTimeout(() => {
+              Transforms.select(store.editor, sel)
+              ReactEditor.focus(store.editor)
+              if (note.scrollTop) {
+                store.container?.scroll({
+                  top: note.scrollTop,
+                  behavior: 'instant'
+                })
+              }
+            })
+          } catch (e) {}
+        }
       } catch (e) {
         EditorUtils.deleteAll(editor)
       }

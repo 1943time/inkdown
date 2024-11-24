@@ -24,6 +24,7 @@ export class ConfigStore {
     dark: false,
     locale: 'en' as 'en' | 'zh',
     codeTabSize: 2,
+    restoreRange: false,
     editorTextSize: 16,
     codeTheme: 'auto',
     codeAutoBreak: false,
