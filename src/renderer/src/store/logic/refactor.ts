@@ -4,6 +4,8 @@ import { copy } from '../../utils'
 import { Core } from '../core'
 import { parsePath, toUnixPath } from '../../utils/path'
 import { db } from '../db'
+import { toMarkdown } from '../../editor/utils/toMarkdown'
+import { writeFile } from 'fs/promises'
 
 export class Refactor {
   constructor(
@@ -43,6 +45,8 @@ export class Refactor {
           schema, links: node.links
         })
         node.schema = schema
+        const md = toMarkdown(node.schema)
+        writeFile(node.filePath, md, {encoding: 'utf-8'})
         for (let t of this.core.tree.tabs) {
           if (t.current === node) {
             t.store.saveDoc$.next(node.schema)
@@ -72,6 +76,8 @@ export class Refactor {
               schema, links: node.links
             })
             node.schema = schema
+            const md = toMarkdown(node.schema)
+            writeFile(node.filePath, md, {encoding: 'utf-8'})
             for (let t of this.core.tree.tabs) {
               if (t.current === node) {
                 t.store.saveDoc$.next(node.schema)

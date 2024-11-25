@@ -51,6 +51,7 @@ export const api = {
     watchers.set(path, watcher)
   },
   md5(str: string | Buffer) {
+    // @ts-ignore
     return createHash('md5').update(str).digest('hex')
   },
   offWatcher(path: string) {
