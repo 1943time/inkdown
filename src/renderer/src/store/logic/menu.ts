@@ -119,7 +119,7 @@ export class ContextMenu {
           text: this.core.config.zh ? '分享文件夹' : 'Share Folder',
           click: () => {
             if (!this.core.share.serviceConfig) {
-              return this.core.message.info(this.core.config.zh ? '请先配置分享服务.' : 'Please configure sharing service first.')
+              this.core.message.info(this.core.config.zh ? '请先配置分享服务.' : 'Please configure sharing service first.')
             }
             openEbook$.next({folderPath: node.filePath})
           }
