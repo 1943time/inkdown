@@ -187,6 +187,7 @@ export class ConfigStore {
     this.setConfig('interfaceFont', value)
   }
   async initial() {
+    this.core.share.initial()
     const config = await db.config.toArray()
     return new Promise((resolve) => {
       if (localStorage.getItem('pick-route')) {

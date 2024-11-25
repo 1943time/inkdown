@@ -8,6 +8,7 @@ import { toMarkdown } from '../../editor/utils/toMarkdown'
 import { isMac } from '../../utils'
 import { MainApi } from '../../api/main'
 import { openEditFolderDialog$ } from '../../components/tree/EditFolderDialog'
+import { openEbook$ } from '../../server/ui/Ebook'
 
 export class ContextMenu {
   constructor(
@@ -117,13 +118,10 @@ export class ContextMenu {
         {
           text: this.core.config.zh ? '分享文件夹' : 'Share Folder',
           click: () => {
-            // if (!shareStore.serviceConfig) {
-            //   return message$.next({
-            //     type: 'info',
-            //     content: configStore.zh ? '请先配置分享服务.' : 'Please configure sharing service first.'
-            //   })
-            // }
-            // openEbook$.next({folderPath: node.filePath})
+            if (!this.core.share.serviceConfig) {
+              return this.core.message.info(this.core.config.zh ? '请先配置分享服务.' : 'Please configure sharing service first.')
+            }
+            openEbook$.next({folderPath: node.filePath})
           }
         }
       ])
