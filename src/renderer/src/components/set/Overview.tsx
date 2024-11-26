@@ -76,7 +76,7 @@ export const Overview = observer(() => {
           >
             <Radio.Button value={'system'}>{t('config.theme.system')}</Radio.Button>
             <Radio.Button value={'light'}>{t('config.theme.light')}</Radio.Button>
-            <Radio.Button value={'dark'}>{t('config.theme.system')}</Radio.Button>
+            <Radio.Button value={'dark'}>{t('config.theme.dark')}</Radio.Button>
           </Radio.Group>
         </div>
       </div>

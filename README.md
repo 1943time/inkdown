@@ -1,8 +1,10 @@
+
 <h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
+
 
 Improve markdown reading and editing experience, and facilitate network sharing.
 
-| Mac                                                                                                                                                                                 | Windows                                                                                                                                                                                 | Linux                                                          | Vscode                                                                         |
+| Mac                                                                                                                                                                                 | Windows                                                                                                                                                                                 | Linux                                                          | VsCode                                                                         |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) |   [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)   [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [Release](https://github.com/1943time/inkdown/releases/latest) | [Market](https://marketplace.visualstudio.com/items?itemName=1943time.inkdown) |
 
@@ -77,6 +79,7 @@ Typing `1` or `-` with spaces at the beginning of a paragraph can convert it to 
       ```
 
    3. Nested Items3
+
 
 - [x] Todo1
 - [ ] Todo2
