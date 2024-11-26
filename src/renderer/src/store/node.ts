@@ -55,7 +55,6 @@ export class NodeStore {
             folder: true,
             sort: 0
           }
-          db.file.add(addData)
           this.fileMap.set(filePath, addData)
           addData.children = this.read(filePath)
           tree.push(addData)
@@ -70,7 +69,6 @@ export class NodeStore {
             folder: false,
             sort: i
           }
-          db.file.add(addData)
           this.fileMap.set(filePath, addData)
           if (mediaType(f.name) === 'markdown') {
             this.newNote.push(addData)
@@ -118,7 +116,19 @@ export class NodeStore {
           stack.map((s, i) => {
             try {
               const res = schemas[i]
-              db.file.update(s.cid, {schema: res.schema, links: res.links})
+              // db.file.update(s.cid, {schema: res.schema, links: res.links})
+              db.file.put({
+                cid: s.cid,
+                updated: s.updated,
+                spaceId: this.spaceId,
+                filePath: s.filePath,
+                created: Date.now(),
+                synced: 0,
+                folder: false,
+                links: res.links,
+                schema: res.schema,
+                sort: s.sort
+              })
               s.schema = res.schema
               s.links = res.links
             } catch (e) {
@@ -138,7 +148,6 @@ export class NodeStore {
         db.file.delete(f.cid)
       }
     }
-    // console.log('new', this.newNote.length)
     const nodeTree = this.toNodeTree(files)
     runInAction(() => this.spaceNode.children = nodeTree)
     return {space: this.spaceNode, nodeMap: this.nodeMap}
@@ -182,7 +191,7 @@ export class NodeStore {
           onConfirm: async () => {
             resolve(await this.parser(filesTree))
           },
-          onClose: () => {
+          onCancel: () => {
             db.space.delete(this.spaceId)
             resolve(null)
           }
