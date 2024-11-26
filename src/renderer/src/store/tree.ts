@@ -4,7 +4,7 @@ import {nanoid} from 'nanoid'
 import {basename, join} from 'path'
 import {existsSync, readdirSync} from 'fs'
 import {MainApi} from '../api/main'
-import {isMac, message$, nid, stat} from '../utils'
+import {isMac, message$, nid, sleep, stat} from '../utils'
 import { parsePath } from '../utils/path'
 import {Watcher} from './logic/watch'
 import {Subject} from 'rxjs'
@@ -523,13 +523,12 @@ export class TreeStore {
         }
       }
     }
-    const timer = setTimeout(
-      action(() => (this.loading = true)),
-      100
-    )
+    runInAction(() => {
+      this.loading = true
+    })
+    await sleep(200)
     try {
       const res = await this.core.node.getTree(spaceId)
-      clearTimeout(timer)
       if (res) {
         runInAction(() => {
           this.loading = false
@@ -550,7 +549,6 @@ export class TreeStore {
         content: e.message
       })
     } finally {
-      clearTimeout(timer)
       runInAction(() => {
         this.loading = false
       })

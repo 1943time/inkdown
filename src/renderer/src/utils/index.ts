@@ -125,3 +125,10 @@ toMd.use(gfm.gfm)
 export const htmlToMarkdown = (html: string) => {
   return toMd.turndown(html)
 }
+
+
+export const sleep = (ms: number) => {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
+}

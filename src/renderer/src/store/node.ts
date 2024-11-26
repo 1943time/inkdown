@@ -8,7 +8,6 @@ import { openMdParserHandle, parserMdToSchema } from '../editor/parser/parser'
 import { nid } from '../utils'
 import { mediaType } from '../editor/utils/dom'
 import { readdir, stat, writeFile } from 'fs/promises'
-import { openConfirmDialog$ } from '../components/Dialog/ConfirmDialog'
 import { MainApi } from '../api/main'
 import { EditorUtils } from '../editor/utils/editorUtils'
 import { toMarkdown } from '../editor/utils/toMarkdown'
@@ -181,25 +180,7 @@ export class NodeStore {
     const docs = await db.file.where('spaceId').equals(space.cid).toArray()
     this.fileMap = new Map(docs.map(d => [d.filePath, d]))
     const filesTree = this.read(space.filePath)
-    if (!docs.length && this.fileMap.size > 5000) {
-      return new Promise((resolve, reject) => {
-        openConfirmDialog$.next({
-          title: 'Folder has too many contents',
-          description: 'This folder contains a large number of files, which may affect the application speed. Do you want to still open it?',
-          okText: 'Open',
-          cancelText: 'Delete Space',
-          onConfirm: async () => {
-            resolve(await this.parser(filesTree))
-          },
-          onCancel: () => {
-            db.space.delete(this.spaceId)
-            resolve(null)
-          }
-        })
-      })
-    } else {
-      return this.parser(filesTree)
-    }
+    return await this.parser(filesTree)
   }
 
   findAbsoluteLinks(schema: any[], filePath: string, prePath: number[] = [], links: {path: number[], target: string}[] = []) {
