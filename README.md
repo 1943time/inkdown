@@ -2,11 +2,9 @@
 
 Improve markdown reading and editing experience, and facilitate network sharing.
 
-
-|                                                                               <img src="docs/assets/apple.svg" width="40">                                                                                |                                                                             <img src="docs/assets/windows.svg" width="40"/>                                                                              |                                                                                                                                                                                                                   <img src="docs/assets/linux.svg" width="40"/>                                                                                                                                                                                                                   |
-| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| [mac-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) <br/> [mac-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) | [win-arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)<br/> [win-x64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [linux-amd64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-amd64.deb) \| [linux-x86_64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-x86_64.AppImage) <br/> [linux-arm64.AppImage](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.AppImage) \| [linux-arm64.deb](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-linux-arm64.deb) |
-
+| Mac                                                                                                                                                                                 | Windows                                                                                                                                                                                 | Linux                                                          | Vscode                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) |   [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)   [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [Release](https://github.com/1943time/inkdown/releases/latest) | [Market](https://marketplace.visualstudio.com/items?itemName=1943time.inkdown) |
 
 # Introduction
 
@@ -80,7 +78,6 @@ Typing `1` or `-` with spaces at the beginning of a paragraph can convert it to 
 
    3. Nested Items3
 
-
 - [x] Todo1
 - [ ] Todo2
 
@@ -100,9 +97,9 @@ Click on the language display area in the upper right corner of the code fence t
 
 ```ts
 class Human {
-	public say() {
+  public say() {
     console.log('hello world')
-	}
+  }
 }
 ```
 
@@ -216,11 +213,11 @@ There is a `package.json` file in the bluestone service folder. By default, the 
 
 ```json
 {
-	"scripts": {
-		//"start": "next start -p 80",
-		// Change port to 3000
-		"start": "next start -p 3000"
-	}
+  "scripts": {
+    //"start": "next start -p 80",
+    // Change port to 3000
+    "start": "next start -p 3000"
+  }
 }
 ```
 
@@ -228,10 +225,10 @@ In the inkdown field, there are the following configurations that can be customi
 
 ```json
 {
-	"inkdown": {
-	  "secret": "BLUESTONE",
-	  "home-site": "",
-	  "favicon": "/favicon.png"
+  "inkdown": {
+    "secret": "BLUESTONE",
+    "home-site": "",
+    "favicon": "/favicon.png"
   }
 }
 ```
@@ -283,4 +280,3 @@ server {
     }
 }
 ```
-
