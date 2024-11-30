@@ -57,8 +57,10 @@ linux:
     - AppImage
     - deb
   maintainer: 1943dejavu
-  category: Markdown
+  description: Markdown Editor
+  category: Office;Markdown
   executableName: Inkdown
+  mimeTypes: text/markdown;text/x-markdown;
 npmRebuild: false
 publish:
   provider: github
