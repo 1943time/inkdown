@@ -18,6 +18,12 @@ This document assumes that you have a basic understanding of Markdown. The follo
 
 ![](./docs//assets/d11.png)
 
+### Vs code
+
+![](./resources/d6.png)
+
+![](./resources/d5.png)
+
 ## Features
 
 - The rich text editing mode is used, while also compatible with Markdown syntax conversion and editing habits. When using the search function, Markdown symbols will not be searched.
