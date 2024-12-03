@@ -375,7 +375,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
           match: (n) => Element.isElement(n) && n.type === 'code'
         })
         if (node) {
-          Transforms.insertFragment(
+          Transforms.insertNodes(
             editor,
             text.split(/\r?\n/).map((c) => {
               return { type: 'code-line', children: [{ text: c.replace(/\t/g, core.config.tab) }] }
@@ -390,7 +390,7 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       if (paste) {
         const parsed = new DOMParser().parseFromString(paste, 'text/html').body
         const inner = !!parsed.querySelector('[data-be]')
-        if (inner) {
+        if (!inner) {
           const md = htmlToMarkdown(paste)
           if (md) {
             core.keyboard.insertMarkdown(md)
