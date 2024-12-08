@@ -1,13 +1,14 @@
-import {observer} from 'mobx-react-lite'
-import {useGetSetState} from 'react-use'
-import {useCallback, useEffect, useRef} from 'react'
-import {IFileItem} from '../types/index'
-import {Node} from 'slate'
-import {ReactEditor} from 'slate-react'
-import {SearchOutlined} from '@ant-design/icons'
+import { observer } from 'mobx-react-lite'
+import { useGetSetState } from 'react-use'
+import { useCallback, useEffect, useRef } from 'react'
+import { IFileItem } from '../types/index'
+import { Node } from 'slate'
+import { ReactEditor } from 'slate-react'
+import { SearchOutlined } from '@ant-design/icons'
 import ArrowRight from '../icons/ArrowRight'
 import { useCoreContext } from '../store/core'
 import { useTranslation } from 'react-i18next'
+import { Ace, Range as AceRange } from 'ace-builds'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -19,11 +20,13 @@ const visitSchema = (schema: any[], cb: (node: any) => void) => {
 }
 export const FullSearch = observer(() => {
   const core = useCoreContext()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     unfold: false,
     searchResults: [] as {
-      file: IFileItem, results: { el: any, text: '' }[], fold?: boolean
+      file: IFileItem
+      results: { el: any; text: ''; codeLine?: number }[]
+      fold?: boolean
     }[],
     foldIndex: [] as number[],
     searching: false
@@ -42,13 +45,23 @@ export const FullSearch = observer(() => {
     })
   }, [])
 
-  const toNode = useCallback((res: { el: any, file: IFileItem }) => {
+  const toNode = useCallback((res: { el: any; file: IFileItem, codeLine?: number }) => {
     if (res.el) {
       if (core.tree.openedNote !== res.file) {
         core.tree.openNote(res.file, false)
         setTimeout(() => {
           requestIdleCallback(() => {
             try {
+              if (res.el.type === 'code' && typeof res.codeLine === 'number') {
+                const editor = core.tree.currentTab.store.codes.get(res.el)
+                if (editor) {
+                  const line = editor.container.querySelectorAll<HTMLElement>('.ace_line')[res.codeLine]
+                  if (line) {
+                    toPoint(line)
+                    return
+                  }
+                }
+              }
               const dom = ReactEditor.toDOMNode(core.tree.currentTab.store?.editor!, res.el)
               if (dom) toPoint(dom)
             } catch (e) {
@@ -58,6 +71,16 @@ export const FullSearch = observer(() => {
         }, 200)
       } else {
         try {
+          if (res.el.type === 'code' && typeof res.codeLine === 'number') {
+            const editor = core.tree.currentTab.store.codes.get(res.el)
+            if (editor) {
+              const line = editor.container.querySelectorAll<HTMLElement>('.ace_line')[res.codeLine]
+              if (line) {
+                toPoint(line)
+                return
+              }
+            }
+          }
           const dom = ReactEditor.toDOMNode(core.tree.currentTab.store?.editor!, res.el)
           if (dom) toPoint(dom)
         } catch (e) {
@@ -79,44 +102,73 @@ export const FullSearch = observer(() => {
   const timer = useRef(0)
   const search = useCallback((immediate?: true) => {
     clearTimeout(timer.current)
-    setState({searching: true})
-    timer.current = window.setTimeout(() => {
-      if (!core.tree.searchKeyWord.trim() || !core.tree.nodes.length) {
-        return setState({searchResults: []})
-      }
-      let results: any[] = []
-      for (let f of core.tree.nodes) {
-        let res: { file: IFileItem, results: { el: any, text: string }[] } | null = null
-        let matchText = core.tree.searchKeyWord.toLowerCase()
-        if (f.ext === 'md' && f.filename.toLowerCase().includes(matchText)) {
-          if (!res) res = { file: f, results: [] }
-          res.results.push({
-            el: null,
-            text: f.filename.toLowerCase().replaceAll(
-              matchText,
-              '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
-            )
-          })
+    setState({ searching: true })
+    timer.current = window.setTimeout(
+      () => {
+        if (!core.tree.searchKeyWord.trim() || !core.tree.nodes.length) {
+          return setState({ searchResults: [] })
         }
-        if (f.schema) {
-          visitSchema(f.schema, node => {
-            if (['paragraph', 'table-cell', 'code-line', 'head'].includes(node.type)) {
-              let str = Node.string(node)
-              str = str.toLowerCase()
-              if (str && str.includes(matchText)) {
-                if (!res) res = {file: f, results: []}
-                res.results.push({
-                  el: node,
-                  text: str.replaceAll(matchText, '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>')
-                })
+        let results: any[] = []
+        for (let f of core.tree.nodes) {
+          let res: {
+            file: IFileItem
+            results: { el: any; text: string; codeLine?: number }[]
+          } | null = null
+          let matchText = core.tree.searchKeyWord.toLowerCase()
+          if (f.ext === 'md' && f.filename.toLowerCase().includes(matchText)) {
+            if (!res) res = { file: f, results: [] }
+            res.results.push({
+              el: null,
+              text: f.filename
+                .toLowerCase()
+                .replaceAll(
+                  matchText,
+                  '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
+                )
+            })
+          }
+          if (f.schema) {
+            visitSchema(f.schema, (node) => {
+              if (['paragraph', 'table-cell', 'code', 'head'].includes(node.type)) {
+                if (node.type === 'code') {
+                  const lines = (node.code as string || '').split('\n')
+                  lines.map((l, i) => {
+                    const str = l.toLowerCase()
+                    if (str && str.includes(matchText)) {
+                      if (!res) res = { file: f, results: [] }
+                      res.results.push({
+                        el: node,
+                        text: str.replaceAll(
+                          matchText,
+                          '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
+                        ),
+                        codeLine: i
+                      })
+                    }
+                  })
+                } else {
+                  let str = Node.string(node)
+                  str = str.toLowerCase()
+                  if (str && str.includes(matchText)) {
+                    if (!res) res = { file: f, results: [] }
+                    res.results.push({
+                      el: node,
+                      text: str.replaceAll(
+                        matchText,
+                        '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
+                      )
+                    })
+                  }
+                }
               }
-            }
-          })
+            })
+          }
+          if (res) results.push(res)
         }
-        if (res) results.push(res)
-      }
-      setState({searchResults: results, foldIndex: [], searching: false})
-    }, immediate ? 0 : 300)
+        setState({ searchResults: results, foldIndex: [], searching: false })
+      },
+      immediate ? 0 : 300
+    )
   }, [])
   useEffect(() => {
     if (core.tree.treeTab === 'search') {
@@ -194,7 +246,7 @@ export const FullSearch = observer(() => {
                     {s.results.slice(0, 100).map((r, j) => (
                       <div
                         key={j}
-                        onClick={() => toNode({ el: r.el, file: s.file })}
+                        onClick={() => toNode({ el: r.el, file: s.file, codeLine: r.codeLine })}
                         className={
                           'cursor-pointer dark:hover:text-white hover:text-black group break-all ellipsis-10'
                         }
