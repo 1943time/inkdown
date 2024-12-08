@@ -1,6 +1,6 @@
 import {ReactEditor, useSlate} from 'slate-react'
 import {useCallback, useMemo, useState} from 'react'
-import {BaseElement, Editor, Path, Transforms} from 'slate'
+import {BaseElement, Editor, Path, Range, Transforms} from 'slate'
 import {EditorUtils} from '../editor/utils/editorUtils'
 import {EditorStore, useEditorStore} from '../editor/store'
 import {useSubject} from './subscribe'
@@ -48,7 +48,7 @@ export const useSelStatus = (element: any) => {
     }
     setState({
       path,
-      selected: Path.equals(path, ctx.node?.[1] || [])
+      selected: ctx.sel && !Range.isCollapsed(ctx.sel) ? EditorUtils.include(store.editor.selection!, path) : Path.equals(path, ctx.node?.[1] ? ctx.node[1] : [])
     })
   }, [element])
   return [state().selected, state().path, store] as [boolean, Path, EditorStore]

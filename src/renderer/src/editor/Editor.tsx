@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import { Editable, ReactEditor, Slate } from 'slate-react'
 import { Editor, Element, Node, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements'
-import { clearAllCodeCache, SetNodeToDecorations, useHighlight } from './plugins/useHighlight'
+import { useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
 import { useOnchange } from './plugins/useOnchange'
 import { observer } from 'mobx-react-lite'
@@ -116,9 +116,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
     clearTimeout(saveTimer.current)
     if (note && ['md', 'markdown'].includes(note.ext || '')) {
       nodeRef.current = note
-      store.setState((state) => {
-        state.pauseCodeHighlight = true
-      })
       first.current = true
       store.initializing = true
       try {
@@ -127,7 +124,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
           note.schema?.length ? note.schema : undefined,
           note.history || true
         )
-        clearAllCodeCache(editor)
         store.docChanged$.next(true)
         if (note.sel && core.config.config.restoreRange) {
           try {
@@ -149,10 +145,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
       }
       requestIdleCallback(() => {
         store.initializing = false
-        store.setState((state) => (state.pauseCodeHighlight = false))
-        requestIdleCallback(() => {
-          store.setState((state) => (state.refreshHighlight = !state.refreshHighlight))
-        })
       })
     } else {
       nodeRef.current = undefined
@@ -405,7 +397,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
 
   const compositionStart = useCallback((e: React.CompositionEvent) => {
     store.inputComposition = true
-    runInAction(() => (store.pauseCodeHighlight = true))
     if (editor.selection && Range.isCollapsed(editor.selection)) {
       e.preventDefault()
     }
@@ -413,7 +404,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
 
   const compositionEnd = useCallback((e: React.CompositionEvent) => {
     store.inputComposition = false
-    if (store.pauseCodeHighlight) runInAction(() => (store.pauseCodeHighlight = false))
   }, [])
 
   const onError = useCallback((e: React.SyntheticEvent) => {
@@ -425,7 +415,6 @@ export const MEditor = observer(({ note }: { note: IFileItem }) => {
   return (
     <ErrorBoundary fallback={(e) => <ErrorFallback error={e} />}>
       <Slate editor={editor} initialValue={[EditorUtils.p]} onChange={change}>
-        <SetNodeToDecorations />
         <Title node={note} />
         <Editable
           onError={onError}

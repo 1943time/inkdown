@@ -1,4 +1,5 @@
 import { remove as removeDiacritics } from 'diacritics'
+import xss from 'xss'
 const rControl = /[\u0000-\u001f]/g
 const rSpecial = /[\s~`!@#$%^&*()\-_+=[\]{}|\\;:"'<>,.?/]+/g
 export const getOffsetTop = (dom: HTMLElement, target: HTMLElement = document.body) => {
@@ -58,4 +59,16 @@ export const getSelRect = () => {
   } catch(e) {
     return null
   }
+}
+
+export const filterScript = (str: string) => {
+  return xss(str, {
+    css: false,
+    onIgnoreTagAttr: (_, name, value) => {
+      if (name === 'style') {
+        return `${name}="${value}"`
+      }
+      return ''
+    }
+  })
 }

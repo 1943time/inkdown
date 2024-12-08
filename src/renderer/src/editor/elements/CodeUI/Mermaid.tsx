@@ -1,18 +1,17 @@
-import {CodeLineNode, CodeNode} from '../../../types/el'
-import {ReactEditor, useSlateStatic} from 'slate-react'
-import {useGetSetState, useUpdateEffect} from 'react-use'
-import React, {useCallback, useEffect, useMemo, useRef} from 'react'
-import {Editor, Node, Transforms} from 'slate'
+import { CodeNode } from '../../../types/el'
+import { useGetSetState, useUpdateEffect } from 'react-use'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import mermaid from 'mermaid'
-import {observer} from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import { useCoreContext } from '../../../store/core'
+import { useEditorStore } from '../../store'
+import { EditorUtils } from '../../utils/editorUtils'
 
 export const Mermaid = observer((props: {
-  lines: CodeLineNode[]
   el: CodeNode
 }) => {
   const core = useCoreContext()
-  const editor = useSlateStatic()
+  const store = useEditorStore()
   const [state, setState] = useGetSetState({
     code: '',
     error: ''
@@ -40,7 +39,7 @@ export const Mermaid = observer((props: {
   }, [core.config.state.dark])
 
   useEffect(() => {
-    const code = props.lines.map(c => Node.string(c)).join('\n')
+    const code = props.el.code || ''
     if (state().code !== code) {
       clearTimeout(timer.current)
       timer.current = window.setTimeout(() => {
@@ -53,13 +52,16 @@ export const Mermaid = observer((props: {
       }, !state().code ? 0 : 300)
     }
     return () => window.clearTimeout(timer.current)
-  }, [props.lines])
+  }, [props.el])
   return (
     <div
       className={'mermaid-container'}
       contentEditable={false}
       onClick={() => {
-        Transforms.select(editor, Editor.start(editor, ReactEditor.findPath(editor, props.el)))
+        const editor = store.codes.get(props.el)
+        if (editor) {
+          EditorUtils.focusAceEnd(editor)
+        }
       }}
     >
       <div contentEditable={false} ref={divRef}

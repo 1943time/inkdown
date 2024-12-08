@@ -2,7 +2,6 @@ import { observer } from 'mobx-react-lite'
 import { Button, Checkbox, Input, Radio, Select, Slider, Space } from 'antd'
 import { TextHelp } from './Help'
 import { EditorFont } from './Font'
-import { codeThemes } from '../../editor/utils/highlight'
 import { useEffect } from 'react'
 import { useLocalState } from '../../hooks/useLocalState'
 import { message$ } from '../../utils'
@@ -88,23 +87,6 @@ export const SetEditor = observer(() => {
             <Radio value={2}>2</Radio>
             <Radio value={4}>4</Radio>
           </Radio.Group>
-        </div>
-      </div>
-      <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{t('codeStyle')}</div>
-        <div>
-          <Select
-            value={core.config.config.codeTheme}
-            className={'w-[220px]'}
-            onChange={(e) => {
-              core.config.setConfig('codeTheme', e)
-              core.config.reloadHighlighter(true)
-            }}
-            options={[
-              { label: 'auto', value: 'auto' },
-              ...Array.from(codeThemes).map((v) => ({ label: v, value: v }))
-            ]}
-          />
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>

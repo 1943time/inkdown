@@ -1,11 +1,14 @@
-import {Node, Text} from 'slate'
-import {TableNode} from '../../types/el'
+import { Node, Text } from 'slate'
+import { TableNode } from '../../types/el'
 import stringWidth from 'string-width'
 import { mediaType } from './dom'
 const space = '  '
 const inlineNode = new Set(['inline-katex', 'break'])
 export const isMix = (t: Text) => {
-  return Object.keys(t).filter(key => ['bold', 'code', 'italic', 'strikethrough'].includes(key)).length > 1
+  return (
+    Object.keys(t).filter((key) => ['bold', 'code', 'italic', 'strikethrough'].includes(key))
+      .length > 1
+  )
 }
 const textHtml = (t: Text) => {
   let str = t.text || ''
@@ -19,10 +22,9 @@ const textHtml = (t: Text) => {
 }
 const textStyle = (t: Text) => {
   if (!t.text) return ''
-  let str = t.text
-    .replace(/(?<!\\)\\/g, '\\')
-    .replace(/\n/g, '  \n')
-  let preStr = '', afterStr = ''
+  let str = t.text.replace(/(?<!\\)\\/g, '\\').replace(/\n/g, '  \n')
+  let preStr = '',
+    afterStr = ''
   if (t.code || t.bold || t.strikethrough || t.italic) {
     preStr = str.match(/^\s+/)?.[0] || ''
     afterStr = str.match(/\s+$/)?.[0] || ''
@@ -37,8 +39,8 @@ const textStyle = (t: Text) => {
 const composeText = (t: Text, parent: any[]) => {
   if (!t.text) return ''
   if (t.highColor || (t.strikethrough && (t.bold || t.italic || t.code))) return textHtml(t)
-  const siblings = parent[parent.length -1]?.children
-  const index = siblings?.findIndex(n => n === t)
+  const siblings = parent[parent.length - 1]?.children
+  const index = siblings?.findIndex((n) => n === t)
   let str = textStyle(t)!
   if (t.url) {
     str = `[${t.text}](${encodeURI(t.url)})`
@@ -56,7 +58,7 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
   if (!children.length || !head.length) return ''
   let data: string[][] = []
   for (let c of children) {
-    const row:string[] = []
+    const row: string[] = []
     if (c.type === 'table-row') {
       for (let n of c.children) {
         if (n.type === 'table-cell') {
@@ -66,12 +68,13 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
     }
     data.push(row)
   }
-  let output = '', colLength = new Map<number, number>()
+  let output = '',
+    colLength = new Map<number, number>()
   for (let i = 0; i < data[0].length; i++) {
-    colLength.set(i, data.map(d => stringWidth(d[i])).sort((a, b) => b - a)[0])
+    colLength.set(i, data.map((d) => stringWidth(d[i])).sort((a, b) => b - a)[0])
   }
   for (let i = 0; i < data.length; i++) {
-    let cells:string[] = []
+    let cells: string[] = []
     for (let j = 0; j < data[i].length; j++) {
       let str = data[i][j]
       const strLength = stringWidth(str)
@@ -95,22 +98,24 @@ const table = (el: TableNode, preString = '', parent: any[]) => {
     output += `${preString}| ${cells.join(' | ')} |`
     if (i !== data.length - 1 || data.length === 1) output += '\n'
     if (i === 0) {
-      output += `${preString}| ${cells.map((_, i) => {
-        const removeLength = head[i].align ? head[i].align === 'center' ? 2 : 1 : 0
-        let str = '-'.repeat(Math.max(colLength.get(i)! - removeLength, 2))
-        switch (head[i].align) {
-          case 'left':
-            str = `:${str}`
-            break
-          case 'center':
-            str = `:${str}:`
-            break
-          case 'right':
-            str = `${str}:`
-            break
-        }
-        return str
-      }).join(' | ')} |\n`
+      output += `${preString}| ${cells
+        .map((_, i) => {
+          const removeLength = head[i].align ? (head[i].align === 'center' ? 2 : 1) : 0
+          let str = '-'.repeat(Math.max(colLength.get(i)! - removeLength, 2))
+          switch (head[i].align) {
+            case 'left':
+              str = `:${str}`
+              break
+            case 'center':
+              str = `:${str}:`
+              break
+            case 'right':
+              str = `${str}:`
+              break
+          }
+          return str
+        })
+        .join(' | ')} |\n`
     }
   }
   return output
@@ -127,11 +132,15 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
       str += '#'.repeat(node.level) + ' ' + toMarkdown(node.children, preString, newParent)
       break
     case 'code':
-      const code = node.children
-        .map((c) => {
-          return preString + c.children[0]?.text || ''
-        })
-        .join('\n')
+      let code = (<string>node.code || '').split('\n').map(c => preString + c).join('\n')
+      // @deprecate
+      if (!code) {
+        code = node.children
+          .map((c: any) => {
+            return preString + c.children?.[0]?.text || ''
+          })
+          .join('\n')
+      }
       if (node.katex && (node.language === 'latex' || node.language === 'tex')) {
         str += `${preString}$$\n${code}\n${preString}$$`
       } else if (node.language === 'html' && node.render) {
@@ -205,16 +214,16 @@ const parserNode = (node: any, preString = '', parent: any[]) => {
   return str
 }
 
-export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: true}]) => {
+export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{ root: true }]) => {
   let str = ''
   for (let i = 0; i < tree.length; i++) {
     const node = tree[i]
     const p = parent[parent.length - 1]
     if (p.type === 'list-item') {
       const list = parent[parent.length - 2]
-      let pre = preString + (list.order ? (space + ' ') : space)
-      let index = list.children.findIndex(c => c === p)
-      if (list.start) index += (list.start - 1)
+      let pre = preString + (list.order ? space + ' ' : space)
+      let index = list.children.findIndex((c) => c === p)
+      if (list.start) index += list.start - 1
       if (i === 0) {
         str += preString
         str += list.order ? `${index + 1}. ` : '- '
@@ -223,12 +232,14 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
         const lines = nodeStr.split('\n')
         // 处理table多行组件问题
         if (lines.length > 1) {
-          str += lines.map((l, i) => {
-            if (i > 0) {
-              l = pre + l
-            }
-            return l
-          }).join('\n')
+          str += lines
+            .map((l, i) => {
+              if (i > 0) {
+                l = pre + l
+              }
+              return l
+            })
+            .join('\n')
         } else {
           str += nodeStr
         }
@@ -236,11 +247,16 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
           str += '\n\n'
         }
       } else {
-        if (node.type === 'paragraph' && tree[i - 1]?.type === 'list' && tree[i + 1]?.type === 'list') {
+        if (
+          node.type === 'paragraph' &&
+          tree[i - 1]?.type === 'list' &&
+          tree[i + 1]?.type === 'list'
+        ) {
           if (!Node.string(node)?.replace(/\s|\t/g, '')) {
             str += `\n\n${pre}<br/>\n\n`
           } else {
-            str += '\n\n' + pre + (parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '')) + '\n\n'
+            str +=
+              '\n\n' + pre + parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '') + '\n\n'
           }
         } else {
           str += parserNode(node, pre, parent) + '\n'
@@ -250,18 +266,22 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
         }
       }
     } else if (p.type === 'blockquote') {
-      str += parserNode(node, preString + '> ', parent, )
+      str += parserNode(node, preString + '> ', parent)
       if (node.type && i !== tree.length - 1) {
         str += `\n${preString}> `
         if (p.type !== 'list') {
           str += '\n'
         }
       }
-    } else if (node.type === 'paragraph' && tree[i - 1]?.type === 'list' && tree[i + 1]?.type === 'list') {
+    } else if (
+      node.type === 'paragraph' &&
+      tree[i - 1]?.type === 'list' &&
+      tree[i + 1]?.type === 'list'
+    ) {
       if (!Node.string(node)?.replace(/\s|\t/g, '')) {
         str += '<br/>\n\n'
       } else {
-        str += preString + (parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '')) + '\n\n'
+        str += preString + parserNode(node, preString, parent)?.replace(/^[\s\t]+/g, '') + '\n\n'
       }
     } else {
       str += parserNode(node, preString, parent)
@@ -275,4 +295,3 @@ export const toMarkdown = (tree: any[], preString = '', parent: any[] = [{root: 
   }
   return str
 }
-

@@ -6,7 +6,6 @@ import {runInAction} from 'mobx'
 import { useEditorStore } from '../store'
 import { langIconMap } from './langIconMap'
 import { getOffsetLeft, getOffsetTop } from '../utils/dom'
-import { clearAllCodeCache } from '../plugins/useHighlight'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useSubject} from '../../hooks/subscribe'
 
@@ -94,12 +93,17 @@ export const LangAutocomplete = observer(() => {
   }, [store.openLangCompletion])
 
   const createCodeFence = useCallback((lang: string) => {
-    clearAllCodeCache(store.editor)
     Transforms.delete(store.editor, {at: path.current})
-    Transforms.insertNodes(store.editor, {
-      type: 'code', language: lang, children: [{type: 'code-line', children: [{text: ''}]}]
-    }, {at: path.current, select: true})
+    const el = {
+      type: 'code',
+      language: lang,
+      children: [{ text: '' }]
+    }
+    Transforms.insertNodes(store.editor, el, {at: path.current, select: true})
     runInAction(() => store.openLangCompletion = false)
+    setTimeout(() => {
+      store.codes.get(el)?.focus()
+    }, 30)
     ReactEditor.focus(store.editor)
   }, [])
   return (

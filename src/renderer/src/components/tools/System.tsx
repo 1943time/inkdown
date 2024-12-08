@@ -28,7 +28,7 @@ const actionKeys = (ctx: string[], core: Core):IKeyItem[] => [
   {
     name: 'Select Format',
     key: ['mod', 'e'],
-    disabled: ctx[0] === 'code-line',
+    disabled: ctx[0] === 'code',
     click: () => keyTask$.next({key: 'selectFormat'})
   },
   {type: 'hr'},
@@ -98,70 +98,70 @@ const insertKeys = (ctx: string[]):IKeyItem[] => [
   {
     name: 'Table',
     key: ['mod', 'option', 't'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'insertTable'})
   },
   {
     name: 'Code',
     key: ['mod', 'option', 'c'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'insertCode'})
   },
   {
     name: 'Quote',
     key: ['option', 'q'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'insertQuote'})
   },
   {
     name: 'Formula block',
     key: ['mod', 'K'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'insertCode', args: ['katex']})
   },
   {
     name: 'Formula inline',
     key: ['mod', 'option', 'k'],
-    disabled: ['code-line'].includes(ctx[0]),
+    disabled: ['code'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'inlineKatex'})
   },
   {
     name: 'Mermaid graphics',
     key: ['mod', 'option', 'm'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'insertCode', args: ['mermaid']})
   },
   {type: 'hr'},
   {
     name: 'Insert local image',
     key: ['mod', 'p'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'localImage'})
   },
   {type: 'hr'},
   {
     name: 'Bulleted list',
     key: ['mod', 'option', 'u'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'list', args: ['unordered']})
   },
   {
     name: 'Numbered list',
     key: ['mod', 'option', 'o'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'list', args: ['ordered']})
   },
   {
     name: 'To-do list',
     key: ['mod', 'option', 's'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'list', args: ['task']})
   },
   {type: 'hr'},
   {
     name: 'Horizontal Line',
     key: ['mod', 'option', '/'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'horizontalLine'})
   }
 ]
@@ -170,44 +170,44 @@ const formatKeys = (ctx: string[]):IKeyItem[] => [
   {
     name: 'Heading 1',
     key: ['mod', '1'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'head', args: [1]})
   },
   {
     name: 'Heading 2',
     key: ['mod', '2'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'head', args: [2]})
   },
   {
     name: 'Heading 3',
     key: ['mod', '3'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'head', args: [3]})
   },
   {
     name: 'Heading 4',
     key: ['mod', '4'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'head', args: [4]})
   },
   {
     name: 'Paragraph',
     key: ['mod', '0'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]),
+    disabled: ['code', 'table-cell'].includes(ctx[0]),
     click: () => keyTask$.next({key: 'paragraph'})
   },
   {type: 'hr'},
   {
     name: 'Increase Heading Level',
     key: ['mod', ']'],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'increaseHead'})
   },
   {
     name: 'Decrease Heading Level',
     key: ['mod', '['],
-    disabled: ['code-line', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
+    disabled: ['code', 'table-cell'].includes(ctx[0]) || ctx[1] === 'list-item',
     click: () => keyTask$.next({key: 'decreaseHead'})
   },
   {type: 'hr'},

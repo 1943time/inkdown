@@ -1,22 +1,22 @@
-import React, {useMemo} from 'react'
-import {Editor, Element, Node, Path, Point, Range, Text, Transforms} from 'slate'
-import {TabKey} from './hotKeyCommands/tab'
-import {EnterKey} from './hotKeyCommands/enter'
-import {BackspaceKey} from './hotKeyCommands/backspace'
-import {MatchKey} from './hotKeyCommands/match'
-import {keyArrow} from './hotKeyCommands/arrow'
-import {EditorUtils} from '../utils/editorUtils'
+import React, { useMemo } from 'react'
+import { Editor, Element, Node, Path, Range, Text, Transforms } from 'slate'
+import { TabKey } from './hotKeyCommands/tab'
+import { EnterKey } from './hotKeyCommands/enter'
+import { BackspaceKey } from './hotKeyCommands/backspace'
+import { MatchKey } from './hotKeyCommands/match'
+import { keyArrow } from './hotKeyCommands/arrow'
+import { EditorUtils } from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
-import {MainApi} from '../../api/main'
-import {EditorStore} from '../store'
-import {runInAction} from 'mobx'
+import { MainApi } from '../../api/main'
+import { EditorStore } from '../store'
+import { runInAction } from 'mobx'
 import { Core } from '../../store/core'
 
 export const useKeyboard = (core: Core, store: EditorStore) => {
   return useMemo(() => {
     const tab = new TabKey(core, store)
-    const backspace = new BackspaceKey(core, store)
-    const enter = new EnterKey(core, store, backspace)
+    const backspace = new BackspaceKey(store)
+    const enter = new EnterKey(store, backspace)
     const match = new MatchKey(store.editor)
     return (e: React.KeyboardEvent) => {
       if (store.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {
@@ -127,17 +127,15 @@ export const useKeyboard = (core: Core, store: EditorStore) => {
         }
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
-          if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
-            Transforms.delete(store.editor, {at: node[1]})
-            Transforms.insertNodes(store.editor, {
-              type: 'code', language: 'html', render: true,
-              children: str.split(/\r?\n/).map(s => {
-                return {type: 'code-line', children: [{text: s}]}
-              })
-            }, {select: true, at: node[1]})
-            e.preventDefault()
-            return
-          }
+          // if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
+          //   Transforms.delete(store.editor, {at: node[1]})
+          //   Transforms.insertNodes(store.editor, {
+          //     type: 'code', language: 'html', render: true, code: str,
+          //     children: [{text: ''}]
+          //   }, {select: true, at: node[1]})
+          //   e.preventDefault()
+          //   return
+          // }
           setTimeout(() => {
             const [node] = Editor.nodes<any>(store.editor, {
               match: n => Element.isElement(n) && n.type === 'paragraph',

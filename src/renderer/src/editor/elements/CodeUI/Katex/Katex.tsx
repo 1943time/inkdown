@@ -18,7 +18,7 @@ export const Katex = observer((props: {
   const divRef = useRef<HTMLDivElement>(null)
   const timer = useRef(0)
   useEffect(() => {
-    const code = props.el.children.map(c => Node.string(c)).join('\n')
+    const code = props.el.code || ''
     clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
       setState({
@@ -45,7 +45,7 @@ export const Katex = observer((props: {
       }
     }, !state().code ? 0 : 300)
     return () => window.clearTimeout(timer.current)
-  }, [props.el.children])
+  }, [props.el])
   return (
     <div
       className={'mb-3 cursor-default select-none text-center bg-gray-500/5 py-4 rounded'}

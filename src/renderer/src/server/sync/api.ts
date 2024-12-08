@@ -90,10 +90,6 @@ export class ShareApi {
     name: string
     secret: string
     domain: string
-    preferences: {
-      codeTabSize: number
-      codeTheme: string
-    }
   }) {
     const time = Date.now()
     return ky.post(`${data.domain}/api/bluestone`, {
@@ -101,7 +97,6 @@ export class ShareApi {
         name: data.name,
         machineId: data.machineId,
         time,
-        preferences: data.preferences,
         sign: createHmac('sha1', data.secret).update(data.machineId + time.toString(16)).digest('hex')
       }
     }).json<{deviceId: string}>()

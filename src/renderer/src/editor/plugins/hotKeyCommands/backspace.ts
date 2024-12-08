@@ -2,11 +2,9 @@ import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
 import { Elements } from '../../../types/el'
 import { EditorStore } from '../../store'
-import { Core } from '../../../store/core'
 
 export class BackspaceKey {
   constructor(
-    private readonly core: Core,
     private readonly store: EditorStore
   ) {}
   get editor() {
@@ -84,27 +82,6 @@ export class BackspaceKey {
         return true
       }
     }
-    if (el.type === 'code-line') {
-      let str = el.children[0].text as string
-      str = str.slice(0, sel.anchor.offset)
-      let m = str.match(/\s+$/)
-      str = m?.[0] || ''
-      if (str) {
-        let decrement = str.length % this.core.config.config.codeTabSize
-        if (decrement === 0) decrement = this.core.config.config.codeTabSize
-        let ao = sel.anchor.offset - decrement
-        Transforms.delete(this.editor, {
-          at: {
-            anchor: {
-              path: sel.anchor.path,
-              offset: ao < 0 ? 0 : ao
-            },
-            focus: sel.anchor
-          }
-        })
-        return true
-      }
-    }
     /**
      * 防止删除paragraph与空table-cell混合
      */
@@ -117,7 +94,7 @@ export class BackspaceKey {
       if (el.type === 'paragraph') {
         const pre = Editor.previous<any>(this.editor, {at: path})
         if (pre) {
-          if (['table', 'code'].includes(pre[0].type)) {
+          if (['table'].includes(pre[0].type)) {
             const end = Editor.end(this.editor, pre[1])
             if (!Node.string(Node.get(this.editor, end.path))) {
               Transforms.delete(this.editor, {at: path})
@@ -130,6 +107,14 @@ export class BackspaceKey {
               Transforms.select(this.editor, end)
               return true
             }
+          }
+          if (pre[0].type === 'code' && !Node.string(el)) {
+            Transforms.delete(this.editor, {at: path})
+            const editor = this.store.codes.get(pre[0])
+            if (editor) {
+              EditorUtils.focusAceEnd(editor)
+            }
+            return true
           }
           if (pre[0].type === 'media' || pre[0].type === 'attach') {
             if (!Node.string(el)) {
@@ -190,21 +175,6 @@ export class BackspaceKey {
           }
         }
         return false
-      }
-
-      if (el.type === 'code-line') {
-        const pre = Path.hasPrevious(path)
-        const hasNext = Editor.hasPath(this.editor, Path.next(path))
-        if (!pre && !hasNext) {
-          const str = Node.string(el)
-          const parent = Path.parent(path)
-          Transforms.delete(this.editor, {at: parent})
-          Transforms.insertNodes(this.editor, {
-            type: 'paragraph', children: [{text: str || ''}]
-          }, {at: parent})
-          Transforms.select(this.editor, Editor.start(this.editor, parent))
-          return true
-        }
       }
     }
     return false

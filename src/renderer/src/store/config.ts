@@ -1,9 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { MainApi } from '../api/main'
 import mermaid from 'mermaid'
-import { highlighter } from '../editor/utils/highlight'
 import { db } from './db'
-import { clearAllCodeCache, clearInlineKatex } from '../editor/plugins/useHighlight'
 import { Core } from './core'
 import i18n from '../utils/i18n'
 
@@ -79,42 +77,11 @@ export class ConfigStore {
         darkModePreference.addEventListener('change', (e) => {
           if (this.config.theme === 'system') {
             this.initial()
-            if (this.config.codeTheme === 'auto') {
-              this.reloadHighlighter(true)
-            }
           }
         })
       }, 1000)
     } catch (e) {
       console.error(e)
-    }
-  }
-  async reloadHighlighter(refresh = false) {
-    try {
-      await highlighter.loadTheme(this.curCodeTheme as any)
-      highlighter.setTheme(this.curCodeTheme)
-      if (refresh) {
-        requestIdleCallback(() => {
-          for (const t of this.core.tree.tabs) {
-            clearAllCodeCache(t.store.editor)
-            clearInlineKatex(t.store.editor)
-            t.store.setState((state) => (state.pauseCodeHighlight = true))
-            setTimeout(() => {
-              t.store.setState((state) => {
-                state.pauseCodeHighlight = false
-                state.refreshHighlight = !state.refreshHighlight
-              })
-              runInAction(() => {
-                const theme = highlighter.getTheme(this.curCodeTheme)
-                this.config.codeBackground = theme.bg
-                this.codeDark = theme.type === 'dark'
-              })
-            }, 30)
-          }
-        })
-      }
-    } catch (e) {
-      console.error('reload highlighter', e)
     }
   }
   async setTheme(theme: typeof this.config.theme, broadcast = true) {

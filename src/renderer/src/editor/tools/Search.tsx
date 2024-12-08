@@ -11,6 +11,7 @@ import {Editor, Element, Transforms} from 'slate'
 import {runInAction} from 'mobx'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
+import { EditorUtils } from '../utils/editorUtils'
 
 export const Search = observer(() => {
   const core = useCoreContext()
@@ -33,48 +34,67 @@ export const Search = observer(() => {
   }, [core.tree.tabs.length])
 
   const replace = useCallback(() => {
-    if (!store.highlightCache.size) {
+    if (!store.searchRanges.length) {
       store.matchSearch(true)
     } else {
-      const range = store.searchRanges[store.search.currentIndex]
-      if (range) {
-        const node = Editor.node(store.editor, range.anchor.path)
+      const cur = store.searchRanges[store.search.currentIndex]
+      if (cur?.range) {
+        const node = Editor.node(store.editor, cur.range.anchor.path)
         const text = node[0]?.text as string
         if (text) {
           Transforms.insertText(store.editor, state.replaceText, {
-            at: range
+            at: cur.range
           })
-          store.matchSearch(true)
         }
+      } else if (cur.editor) {
+        cur.editor.session.replace(cur.aceRange!, state.replaceText)
       }
+      store.matchSearch(true)
     }
   }, [])
 
   const replaceAll = useCallback(() => {
     if (!store.search.text) return
-    if (!store.highlightCache.size) {
+    const ranges = store.searchRanges
+    if (!ranges.length) {
       store.matchSearch(true)
     } else {
-      const nodes = Array.from(Editor.nodes<any>(store.editor, {
-        at: [],
-        match: n => Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type),
-      }))
+      const nodes = Array.from(
+        Editor.nodes<any>(store.editor, {
+          at: [],
+          match: (n) =>
+            Element.isElement(n) &&
+            ['paragraph', 'table-cell', 'head'].includes(n.type)
+        })
+      )
       for (let n of nodes) {
         for (let i = 0; i < n[0].children.length; i++) {
           const text = n[0].children[i]?.text as string
           if (text && text.includes(store.search.text)) {
-            Transforms.insertText(store.editor, text.replaceAll(store.search.text, state.replaceText), {
-              at: {
-                anchor: {path: [...n[1], i], offset: 0},
-                focus: {path: [...n[1], i], offset: text.length}
+            Transforms.insertText(
+            // @ts-ignore
+              store.editor, text.replaceAll(store.search.text, state.replaceText),
+              {
+                at: {
+                  anchor: { path: [...n[1], i], offset: 0 },
+                  focus: { path: [...n[1], i], offset: text.length }
+                }
               }
-            })
+            )
           }
         }
       }
+      for (const item of ranges) {
+        if (item.editor) {
+          item.editor.session.replace(item.aceRange!, state.replaceText)
+          EditorUtils.clearAceMarkers(item.editor)
+        }
+      }
       store.highlightCache.clear()
-      store.searchRanges = []
-      runInAction(() => store.refreshHighlight = !store.refreshHighlight)
+      runInAction(() => {
+        store.searchRanges = []
+        store.refreshHighlight = !store.refreshHighlight
+      })
     }
   }, [])
   useEffect(() => {

@@ -4,6 +4,7 @@ import {History} from 'slate-history'
 import {ReactEditor} from 'slate-react'
 import {getOffsetTop} from './dom'
 import {EditorStore} from '../store'
+import { Ace } from 'ace-builds'
 
 export class EditorUtils {
   static get p() {
@@ -118,6 +119,28 @@ export class EditorUtils {
     }
   }
 
+  static focusAceEnd(editor: Ace.Editor) {
+    const row = editor.session.getLength()
+    const lineLength = editor.session.getLine(row - 1).length
+    editor.clearSelection()
+    editor.focus()
+    editor.moveCursorTo(row - 1,  lineLength)
+  }
+
+  static focusAceStart(editor: Ace.Editor) {
+    editor.focus()
+    editor.clearSelection()
+    editor.moveCursorTo(0, 0)
+  }
+
+  static clearAceMarkers(editor: Ace.Editor) {
+    const markers = editor.session.getMarkers()
+    for (let markerId in markers) {
+      if (markers.hasOwnProperty(markerId)) {
+        editor.session.removeMarker(+markerId)
+      }
+    }
+  }
   static moveAfterSpace(editor: Editor, path: Path) {
     const next = Editor.next(editor, {at: path})
     if (!next || !Text.isText(next[0])) {
@@ -179,6 +202,17 @@ export class EditorUtils {
     editor.onChange()
   }
 
+  static include(sel: Range, nodePath: Path) {
+    const [start, end] = Range.edges(sel)
+    Path.compare
+    if (Path.compare(start.path, nodePath) === -1) {
+      return Path.compare(end.path, nodePath) >= 0
+    }
+    if (Path.compare(end.path, nodePath) === 1) {
+      return Path.compare(start.path, nodePath) <= 0
+    }
+    return true
+  }
   static includeAll(editor: Editor, sel: Range, nodePath: Path) {
     const [start, end] = Range.edges(sel)
     return Point.compare(start, Editor.start(editor, nodePath)) !== 1 &&

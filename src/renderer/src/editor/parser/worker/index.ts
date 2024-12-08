@@ -119,13 +119,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
               el = {type: 'paragraph', children: [{text: ''}]}
             } else {
               el = {
-                type: 'code', language: 'html', render: true,
-                children: n.value.split(/\r?\n/).map(s => {
-                  return {
-                    type: 'code-line',
-                    children: [{text: s}]
-                  }
-                })
+                type: 'code', language: 'html', render: true, code: n.value,
+                children: [{text: ''}]
               }
             }
           }
@@ -270,37 +265,23 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         break
       case 'code':
         el = {
-          type: 'code', language: n.lang, render: n.meta === 'render',
-          children: n.value.split(/\r?\n/).map(s => {
-            return {
-              type: 'code-line',
-              children: [{text: s}]
-            }
-          })
+          type: 'code', language: n.lang, render: n.meta === 'render', code: n.value,
+          children: [{text: ''}]
         }
         break
       case 'yaml':
         el = {
-          type: 'code', language: 'yaml', frontmatter: true,
-          children: n.value.split(/\r?\n/).map(s => {
-            return {
-              type: 'code-line',
-              children: [{text: s}]
-            }
-          })
+          type: 'code', language: 'yaml', frontmatter: true, code: n.value,
+          children: [{text: ''}]
         }
         break
       // @ts-ignore
       case 'math':
         el = {
-          type: 'code', language: 'latex', katex: true,
+        // @ts-ignore
+          type: 'code', language: 'latex', katex: true, code: n.value,
           // @ts-ignore
-          children: n.value.split(/\r?\n/).map(s => {
-            return {
-              type: 'code-line',
-              children: [{text: s}]
-            }
-          })
+          children: [{text: ''}]
         }
         break
       case 'blockquote':

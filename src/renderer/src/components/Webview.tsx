@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { SetNodeToDecorations, useHighlight } from '../editor/plugins/useHighlight'
+import { useHighlight } from '../editor/plugins/useHighlight'
 import { Editable, Slate } from 'slate-react'
 import { MElement, MLeaf } from '../editor/elements'
 import { EditorUtils } from '../editor/utils/editorUtils'
@@ -8,7 +8,7 @@ import { observer } from 'mobx-react-lite'
 import { parserMdToSchema } from '../editor/parser/parser'
 import { useLocalState } from '../hooks/useLocalState'
 import { parse } from 'path'
-import { action, runInAction } from 'mobx'
+import { runInAction } from 'mobx'
 import { useCoreContext } from '../store/core'
 
 export const Webview = observer((props: {
@@ -39,18 +39,9 @@ export const Webview = observer((props: {
   }, [])
 
   useEffect(() => {
-    runInAction(() => store.pauseCodeHighlight = true)
     EditorUtils.reset(store.editor, props.value)
     store.webviewFilePath = props.filePath || null
     setState({name: parse(props.filePath || '').name})
-    requestIdleCallback(() => {
-      runInAction(() => {
-        store.pauseCodeHighlight = false
-        setTimeout(action(() => {
-          store.refreshHighlight = !store.refreshHighlight
-        }))
-      })
-    })
   }, [props.value, props.filePath])
 
   if (!state.ready) return null
@@ -61,7 +52,6 @@ export const Webview = observer((props: {
           editor={store.editor}
           initialValue={[]}
         >
-          <SetNodeToDecorations/>
           <input defaultValue={state.name} className={'page-title'}/>
           <Editable
             decorate={high}

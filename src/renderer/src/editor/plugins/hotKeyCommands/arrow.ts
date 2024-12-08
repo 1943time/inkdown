@@ -30,8 +30,22 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
     if (isHotkey('left', e)) {
       e.preventDefault()
       e.stopPropagation()
-      e.preventDefault()
-      e.stopPropagation()
+      if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
+        if (Path.hasPrevious(Path.parent(sel.anchor.path))) {
+          const pre = Node.get(
+            editor,
+            Path.previous(Path.parent(sel.anchor.path))
+          )
+          if (pre?.type === 'code') {
+            const editor = store.codes.get(pre)
+            if (editor) {
+              e.preventDefault()
+              EditorUtils.focusAceEnd(editor)
+            }
+            return
+          }
+        }
+      }
       const leaf = Node.leaf(editor, sel.focus.path)
       const dirt = EditorUtils.isDirtLeaf(leaf)
       const pre = Editor.previous<any>(editor, { at: sel.focus.path })
@@ -68,9 +82,22 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
     }
     if (isHotkey('right', e)) {
       e.preventDefault()
-      e.stopPropagation()
+      const leaf = Node.leaf(editor, sel.focus.path)
+      if (
+        sel.anchor.offset === leaf.text?.length &&
+        !Editor.hasPath(store.editor, Path.next(sel.anchor.path))
+      ) {
+        const next = Node.get(editor, Path.next(Path.parent(sel.anchor.path)))
+        if (next?.type === 'code') {
+          const editor = store.codes.get(next)
+          e.preventDefault()
+          if (editor) {
+            EditorUtils.focusAceStart(editor)
+          }
+          return
+        }
+      }
       if (!isMod(e)) {
-        const leaf = Node.leaf(editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
         const next = Editor.next<any>(editor, {at: sel.focus.path})
         const [node] = Editor.nodes<any>(editor, {
@@ -108,6 +135,14 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
       })
       const [el, path] = node
       const pre = Editor.node(editor, EditorUtils.findPrev(editor, path))
+      if (pre && pre[0].type === 'code') {
+        const editor = store.codes.get(pre[0])
+        if (editor) {
+          e.preventDefault()
+          EditorUtils.focusAceEnd(editor)
+        }
+        return
+      }
       if (!Path.hasPrevious(path) && EditorUtils.isTop(editor, path)) {
         const input = store.container?.querySelector<HTMLInputElement>('.page-title')
         input?.focus()
@@ -157,6 +192,14 @@ export const keyArrow = (store: EditorStore, e: React.KeyboardEvent | KeyboardEv
       })
       const [el, path] = node
       const next = Editor.node(editor, EditorUtils.findNext(editor, path))
+      if (next?.[0].type === 'code') {
+        const editor = store.codes.get(next[0])
+        if (editor) {
+          e.preventDefault()
+          EditorUtils.focusAceStart(editor)
+        }
+        return
+      }
       if (next?.[0].type === 'media' || next?.[0].type === 'attach') {
         e.preventDefault()
         e.stopPropagation()

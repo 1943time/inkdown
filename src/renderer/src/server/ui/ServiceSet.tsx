@@ -37,11 +37,7 @@ export const ServiceSet = observer((props: {
       name: value.name,
       machineId,
       domain: value.domain,
-      secret: value.secret,
-      preferences: {
-        codeTabSize: core.config.config.codeTabSize,
-        codeTheme: core.config.config.codeTheme
-      }
+      secret: value.secret
     }).catch(e => {
       if (e.response?.body) {
         const data = JSON.parse(e.response.body)

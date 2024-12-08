@@ -22,8 +22,10 @@ export const DragHandle = observer((props: {
             parent = parent.parentElement
           }
         }
-        parent.draggable = true
+        store.editor.selection = null
         store.dragEl = parent
+        store.dragStart(e)
+        e.stopPropagation()
       }}
     >
       <Drag

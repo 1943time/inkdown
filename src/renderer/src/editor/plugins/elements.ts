@@ -1,7 +1,6 @@
 import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
 import {Elements, ListNode, TableRowNode} from '../../types/el'
 import {EditorUtils} from '../utils/editorUtils'
-import {clearAllCodeCache} from './useHighlight'
 
 export const insertAfter = (editor: Editor, path: Path, node: Elements = {
   type: 'paragraph',
@@ -85,10 +84,9 @@ export const MdElements: Record<string, MdNode> = {
     reg: /^\s*(```|···)([\w#\-+*]{1,30})?\s*$/,
     run: ({editor, path, match}) => {
       const lang = match[2]
-      clearAllCodeCache(editor)
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
-        type: 'code', language: lang, children: [{type: 'code-line', children: [{text: ''}]}]
+        type: 'code', language: lang, children: [{text: ''}]
       }, {at: path, select: true})
       return true
     }
@@ -98,7 +96,7 @@ export const MdElements: Record<string, MdNode> = {
     run: ({editor, path, match}) => {
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
-        type: 'code', language: 'latex', children: [{type: 'code-line', children: [{text: ''}]}], katex: true
+        type: 'code', language: 'latex', children: [{text: ''}], katex: true
       }, {at: path, select: true})
     }
   },
@@ -238,9 +236,7 @@ export const MdElements: Record<string, MdNode> = {
       Transforms.delete(editor, {at: path})
       Transforms.insertNodes(editor, {
         type: 'code', language: 'yaml', frontmatter: true,
-        children: [{
-          type: 'code-line', children: [{text: ''}]
-        }]
+        children: [{text: ''}]
       }, {select: true, at: path})
     }
   },

@@ -9,7 +9,8 @@ import {
   Path,
   Range,
   Transforms,
-  Selection
+  Selection,
+  BaseRange
 } from 'slate'
 import { ReactEditor, withReact } from 'slate-react'
 import { GetFields } from '../types/index'
@@ -20,7 +21,6 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
 import { isAbsolute, join, parse, relative, sep } from 'path'
 import { getOffsetLeft, getOffsetTop, mediaType, slugify } from './utils/dom'
 import { MainApi } from '../api/main'
-import { clearAllCodeCache, codeCache } from './plugins/useHighlight'
 import { withMarkdown } from './plugins'
 import { withHistory } from 'slate-history'
 import { withErrorReporting } from './plugins/catchError'
@@ -30,6 +30,7 @@ import { EditorUtils } from './utils/editorUtils'
 import { toUnixPath } from '../utils/path'
 import { selChange$ } from './plugins/useOnchange'
 import { Core } from '../store/core'
+import { Ace, Range as AceRange } from 'ace-builds'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -38,13 +39,9 @@ export const useEditorStore = () => {
 
 export class EditorStore {
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
-  search = {
-    text: '',
-    currentIndex: 0,
-    refresh: false
-  }
   // Manually perform editor operations
   manual = false
+  codes = new WeakMap<object, Ace.Editor>()
   openInsertNetworkImage = false
   webview = false
   initializing = false
@@ -66,7 +63,17 @@ export class EditorStore {
   openSearch = false
   focusSearch = false
   docChanged = false
-  searchRanges: Range[] = []
+  startDragging = false
+  search = {
+    text: '',
+    currentIndex: 0
+  }
+  searchRanges: {
+    range?: BaseRange
+    markerId?: number
+    aceRange?: InstanceType<typeof AceRange>
+    editor?: Ace.Editor
+  }[] = []
   openInsertCompletion = false
   insertCompletionText$ = new Subject<string>()
   highlightCache = new Map<object, Range[]>()
@@ -81,9 +88,9 @@ export class EditorStore {
   mediaNode$ = new Subject<NodeEntry<MediaNode> | null>()
   openInsertLink$ = new Subject<Selection>()
   openLinkPanel = false
+  scrolling = false
   tableCellNode: null | NodeEntry<TableCellNode> = null
   refreshHighlight = false
-  pauseCodeHighlight = false
   domRect: DOMRect | null = null
   container: null | HTMLDivElement = null
   history = false
@@ -107,7 +114,8 @@ export class EditorStore {
 
   constructor(
     private readonly core: Core,
-    webview = false, history = false
+    webview = false,
+    history = false
   ) {
     this.webview = webview
     this.history = history
@@ -118,6 +126,7 @@ export class EditorStore {
       editor: false,
       tableCellNode: false,
       inputComposition: false,
+      scrolling: false,
       openFilePath: false,
       container: false,
       highlightCache: false,
@@ -125,11 +134,11 @@ export class EditorStore {
       manual: false,
       openLinkPanel: false,
       initializing: false,
-      clearTimer: false
+      clearTimer: false,
+      codes: false
     })
   }
   clearCodeCache(node: any) {
-    codeCache.delete(node)
     clearTimeout(this.clearTimer)
     this.clearTimer = window.setTimeout(() => {
       runInAction(() => {
@@ -214,6 +223,13 @@ export class EditorStore {
     this.highlightCache.clear()
     this.searchRanges = []
     if (!this.search.text) {
+      if (this.searchRanges) {
+        for (const item of this.searchRanges) {
+          if (item.editor) {
+            EditorUtils.clearAceMarkers(item.editor)
+          }
+        }
+      }
       this.search.currentIndex = 0
       this.refreshHighlight = !this.refreshHighlight
       return
@@ -222,51 +238,90 @@ export class EditorStore {
       Editor.nodes<any>(this.editor, {
         at: [],
         match: (n) =>
-          Element.isElement(n) && ['paragraph', 'table-cell', 'code-line', 'head'].includes(n.type)
+          Element.isElement(n) && ['paragraph', 'table-cell', 'code', 'head'].includes(n.type)
       })
     )
     let matchCount = 0
     const keyWord = this.search.text.toLowerCase()
+    let allRanges: typeof this.searchRanges = []
     for (let n of nodes) {
       const [el, path] = n
-      const str = Node.string(el).toLowerCase()
-      if (!str || /^\s+$/.test(str) || !str.includes(keyWord)) {
-        continue
-      }
-      let ranges: Range[] = []
-      for (let i = 0; i < el.children.length; i++) {
-        const text = el.children[i].text?.toLowerCase()
-        if (text && text.includes(keyWord)) {
-          const sep = text.split(keyWord)
-          let offset = 0
-          for (let j = 0; j < sep.length; j++) {
-            if (j === 0) {
-              offset += sep[j].length
-              continue
+      if (el.type === 'code') {
+        const editor = this.codes.get(el)
+        if (editor) {
+          EditorUtils.clearAceMarkers(editor)
+          const documentText = editor.session.getDocument().getValue()
+          const lines = documentText.split('\n')
+          const regex = new RegExp(keyWord, 'g')
+          for (let i = 0; i < lines.length; i++) {
+            const item = lines[i]
+            const match = item.matchAll(regex)
+            for (const m of match) {
+              const range = new AceRange(i, m.index, i, m.index + m[0].length)
+              const data:(typeof this.searchRanges)[number] = {
+                aceRange: range,
+                editor: editor
+              }
+              const markerId = editor.session.addMarker(
+                range,
+                matchCount === this.search.currentIndex
+                  ? 'match-current'
+                  : 'match-text',
+                'text',
+                false
+              )
+              data.markerId = markerId
+              allRanges.push(data)
+              matchCount++
             }
-            ranges.push({
-              anchor: {
-                path: [...path, i],
-                offset: offset
-              },
-              focus: {
-                path: [...path, i],
-                offset: offset + keyWord.length
-              },
-              current: matchCount === this.search.currentIndex,
-              highlight: true
-            })
-            offset += sep[j].length + keyWord.length
-            matchCount++
           }
         }
+      } else {
+        const str = Node.string(el).toLowerCase()
+        if (!str || /^\s+$/.test(str) || !str.includes(keyWord)) {
+          continue
+        }
+        let ranges: typeof this.searchRanges = []
+        for (let i = 0; i < el.children.length; i++) {
+          const text = el.children[i].text?.toLowerCase()
+          if (text && text.includes(keyWord)) {
+            const sep = text.split(keyWord)
+            let offset = 0
+            for (let j = 0; j < sep.length; j++) {
+              if (j === 0) {
+                offset += sep[j].length
+                continue
+              }
+              ranges.push({
+                range: {
+                  anchor: {
+                    path: [...path, i],
+                    offset: offset
+                  },
+                  focus: {
+                    path: [...path, i],
+                    offset: offset + keyWord.length
+                  },
+                  current: matchCount === this.search.currentIndex,
+                  highlight: true
+                }
+              })
+              offset += sep[j].length + keyWord.length
+              matchCount++
+            }
+          }
+        }
+        allRanges.push(...ranges)
+        this.highlightCache.set(
+          el,
+          ranges.map((r) => r.range!)
+        )
       }
-      this.searchRanges.push(...ranges)
-      this.highlightCache.set(el, ranges)
     }
     if (this.search.currentIndex > matchCount - 1) {
       this.search.currentIndex = 0
     }
+    this.searchRanges = allRanges
     this.refreshHighlight = !this.refreshHighlight
     if (scroll) requestIdleCallback(() => this.toPoint())
   }
@@ -298,9 +353,26 @@ export class EditorStore {
   }
 
   private changeCurrent() {
-    this.searchRanges.forEach((r, i) => {
-      this.searchRanges[i].current = i === this.search.currentIndex
-    })
+    const codes = new Set<Ace.Editor>()
+    this.searchRanges.forEach(action((r, j) => {
+      if (r.range) {
+        r.range.current = j === this.search.currentIndex
+      } else if (r.editor) {
+        codes.add(r.editor)
+        const marker = r.editor.session.getMarkers()[r.markerId!]
+        const cl = j === this.search.currentIndex ? 'match-current' : 'match-text'
+        if (marker && cl !== marker.clazz) {
+          r.editor.session.removeMarker(r.markerId!)
+          const id = r.editor.session.addMarker(
+            marker.range!,
+            cl,
+            'text',
+            false
+          )
+          r.markerId = id
+        }
+      }
+    }))
     this.refreshHighlight = !this.refreshHighlight
   }
 
@@ -346,7 +418,9 @@ export class EditorStore {
           const copyPath = join(imgDir, name)
           cpSync(f.path, copyPath)
           if (this.core.tree.root && this.core.tree.openedNote) {
-            paths.push(toUnixPath(relative(join(this.core.tree.openedNote.filePath, '..'), copyPath)))
+            paths.push(
+              toUnixPath(relative(join(this.core.tree.openedNote.filePath, '..'), copyPath))
+            )
           } else {
             paths.push(copyPath)
           }
@@ -399,7 +473,10 @@ export class EditorStore {
   }
   async getImageDir() {
     if (this.core.tree.root) {
-      let imageDir = join(this.core.tree.root.filePath, this.core.tree.root.imageFolder || '.images')
+      let imageDir = join(
+        this.core.tree.root.filePath,
+        this.core.tree.root.imageFolder || '.images'
+      )
       if (this.core.tree.root.relative) {
         imageDir = join(
           this.core.tree.openedNote!.filePath,
@@ -444,7 +521,10 @@ export class EditorStore {
       if (this.core.tree.root) {
         targetPath = join(imgDir, base)
         mediaUrl = toUnixPath(
-          relative(join(this.core.tree.currentTab.current?.filePath || '', '..'), join(imgDir, base))
+          relative(
+            join(this.core.tree.currentTab.current?.filePath || '', '..'),
+            join(imgDir, base)
+          )
         )
       } else {
         targetPath = join(imgDir, base)
@@ -525,7 +605,9 @@ export class EditorStore {
   insertLink(filePath: string) {
     const p = parse(filePath)
     const insertPath =
-      this.core.tree.root && isAbsolute(filePath) && filePath.startsWith(this.core.tree.root.filePath)
+      this.core.tree.root &&
+      isAbsolute(filePath) &&
+      filePath.startsWith(this.core.tree.root.filePath)
         ? toUnixPath(relative(join(this.core.tree.openedNote!.filePath, '..'), filePath))
         : filePath
     let node = { text: filePath.startsWith('http') ? filePath : p.name, url: insertPath }
@@ -617,11 +699,23 @@ export class EditorStore {
     try {
       const cur = this.searchRanges[this.search.currentIndex]
       if (!cur) return
-      const node = Node.get(this.editor, Path.parent(cur.focus.path))
-      const dom = ReactEditor.toDOMNode(this.editor, node)
+      let dom:null | HTMLElement = null
+      if (cur.range) {
+        const node = Node.get(
+          this.editor,
+          Path.parent(cur.range.focus.path)
+        )
+        dom = ReactEditor.toDOMNode(this.editor, node)
+      } else if (cur.editor && cur.aceRange) {
+        const lines = cur.editor.container.querySelectorAll('.ace_line')
+        dom = lines[cur.aceRange.start.row] as HTMLElement
+      }
       if (dom) {
-        const top = this.offsetTop(dom)
-        if (top > this.container!.scrollTop && top < this.container!.scrollTop + window.innerHeight)
+        const top = getOffsetTop(dom, this.container!) - 80
+        if (
+          top > this.container!.scrollTop + 40 &&
+          top < this.container!.scrollTop + (window.innerHeight - 120)
+        )
           return
         this.container!.scroll({
           top: top - 100
@@ -638,7 +732,7 @@ export class EditorStore {
     return [path, node] as [Path, Node]
   }
 
-  dragStart(e: React.DragEvent) {
+  dragStart(e: React.MouseEvent) {
     e.stopPropagation()
     this.readonly = true
     type MovePoint = {
@@ -697,9 +791,17 @@ export class EditorStore {
         top: top + el.clientHeight + 2
       })
     }
+    this.startDragging = true
     let last: MovePoint | null = null
-    const dragover = (e: DragEvent) => {
+    const dragover = (e: MouseEvent) => {
       e.preventDefault()
+      if ((e.clientY > window.innerHeight - 30 || e.clientY < 70) && !this.scrolling) {
+        this.container?.scrollBy({ top: e.clientY < 70 ? -400 : 400, behavior: 'smooth' })
+        this.scrolling = true
+        setTimeout(() => {
+          this.scrolling = false
+        }, 200)
+      }
       const top = e.clientY - 40 + this.container!.scrollTop
       let distance = 1000000
       let cur: MovePoint | null = null
@@ -728,12 +830,15 @@ export class EditorStore {
         }
       }
     }
-    window.addEventListener('dragover', dragover)
+    window.addEventListener('mousemove', dragover)
     window.addEventListener(
-      'dragend',
+      'mouseup',
       action(() => {
-        window.removeEventListener('dragover', dragover)
+        window.removeEventListener('mousemove', dragover)
         this.readonly = false
+        runInAction(() => {
+          this.startDragging = false
+        })
         if (mark) this.container!.removeChild(mark)
         if (last && this.dragEl) {
           let [dragPath, dragNode] = this.toPath(this.dragEl)
@@ -741,7 +846,6 @@ export class EditorStore {
           let toPath = last.direction === 'top' ? targetPath : Path.next(targetPath)
           if (!Path.equals(targetPath, dragPath)) {
             const parent = Node.parent(this.editor, dragPath)
-            if (dragNode.type === 'code') clearAllCodeCache(this.editor)
             if (dragNode.type === 'table') {
               setTimeout(
                 action(() => {

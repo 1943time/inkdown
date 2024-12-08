@@ -1,7 +1,6 @@
-import {Editor, Element, Node, NodeEntry, Path, Range, Transforms} from 'slate'
-import {EditorUtils} from '../../utils/editorUtils'
+import { Editor, Element, Node, NodeEntry, Range } from 'slate'
 import React from 'react'
-import {TextMatchNodes} from '../elements'
+import { TextMatchNodes } from '../elements'
 
 export class MatchKey {
   constructor(
@@ -25,7 +24,7 @@ export class MatchKey {
       match: n => Element.isElement(n),
       mode: 'lowest'
     })
-    if (!node || ['code', 'code-line'].includes(node[0].type)) return
+    if (!node || ['code'].includes(node[0].type)) return
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     for (let n of TextMatchNodes) {

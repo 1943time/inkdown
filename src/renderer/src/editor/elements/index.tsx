@@ -1,10 +1,9 @@
 import { RenderElementProps, RenderLeafProps } from 'slate-react/dist/components/editable'
 import { Table, TableCell } from './table'
-import { CodeCtx, CodeElement, CodeLine } from './code'
 import { Blockquote } from './blockquote'
 import { List, ListItem } from './list'
 import { Head } from './head'
-import React, { CSSProperties, useContext, useMemo } from 'react'
+import React, { CSSProperties, useMemo } from 'react'
 import { Paragraph } from './paragraph'
 import { InlineChromiumBugfix } from '../utils/InlineChromiumBugfix'
 import { Media } from './media'
@@ -20,6 +19,7 @@ import { openConfirmDialog$ } from '../../components/Dialog/ConfirmDialog'
 import { message$ } from '../../utils'
 import { Attachment } from './attachment'
 import { useCoreContext } from '../../store/core'
+import { AceElement } from './ace'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -52,9 +52,7 @@ export const MElement = (props: RenderElementProps) => {
     case 'list':
       return <List {...props} />
     case 'code':
-      return <CodeElement {...props}>{props.children}</CodeElement>
-    case 'code-line':
-      return <CodeLine {...props} />
+      return <AceElement {...props}>{props.children}</AceElement>
     case 'table':
       return <Table {...props}>{props.children}</Table>
     case 'table-row':
@@ -72,7 +70,6 @@ export const MElement = (props: RenderElementProps) => {
 
 export const MLeaf = (props: RenderLeafProps) => {
   const core = useCoreContext()
-  const code = useContext(CodeCtx)
   const store = useEditorStore()
   return useMemo(() => {
     const leaf = props.leaf
@@ -85,7 +82,7 @@ export const MLeaf = (props: RenderLeafProps) => {
     if (leaf.bold) children = <strong>{children}</strong>
     if (leaf.strikethrough) children = <s>{children}</s>
     if (leaf.italic) children = <i>{children}</i>
-    if (leaf.highlight) className = 'high-text'
+    if (leaf.highlight) className = leaf.current ? 'match-current' : 'match-text'
     if (leaf.html) className += ' dark:text-gray-500 text-gray-400'
     if (leaf.current) {
       style.background = '#f59e0b'
@@ -207,5 +204,5 @@ export const MLeaf = (props: RenderLeafProps) => {
         {!!dirty && !!leaf.text && <InlineChromiumBugfix />}
       </span>
     )
-  }, [props.leaf, props.leaf.text, code.lang])
+  }, [props.leaf, props.leaf.text])
 }

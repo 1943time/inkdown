@@ -6,14 +6,8 @@ import {BlockMathNodes} from '../elements'
 import {BackspaceKey} from './backspace'
 import {EditorStore} from '../../store'
 import {isMod} from '../../../utils'
-import { Core } from '../../../store/core'
 export class EnterKey {
-  bracketsMap = new Map([
-    ['[', ']'],
-    ['{', '}']
-  ])
   constructor(
-    private readonly core: Core,
     private readonly store: EditorStore,
     private readonly backspace: BackspaceKey
   ) {}
@@ -38,11 +32,6 @@ export class EnterKey {
         case 'table-cell':
           e.preventDefault()
           this.table(node, sel, e)
-          break
-        case 'code-line':
-          if (this.codeLine(el, path, sel, e)) {
-            e.preventDefault()
-          }
           break
         case 'media':
           e.preventDefault()
@@ -320,62 +309,6 @@ export class EnterKey {
         }
       }
     }
-  }
-
-  private codeLine(node: CodeLineNode, path: Path, sel: BaseSelection, e: React.KeyboardEvent) {
-    if (isMod(e)) {
-      const parent = Path.parent(path)
-      Transforms.insertNodes(this.editor, {type: 'paragraph', children: [{text: ''}]}, {
-        at: Path.next(parent),
-        select: true
-      })
-      return true
-    }
-    const end = Range.end(sel!)
-    const str = Node.string(node)
-    const space = str.match(/^[\s\t]+/g)?.[0] || ''
-    const remainText = str.slice(end.offset)
-    const next = Path.next(path)
-    if (remainText) {
-      Transforms.delete(this.editor, {
-        at: {
-          anchor: end,
-          focus: {path: end.path, offset: str.length}
-        }
-      })
-    }
-    if (['[', '{'].includes(str[end.offset - 1]) && remainText) {
-      if (this.bracketsMap.get(str[end.offset - 1]) === str[end.offset]) {
-        const line = {type: 'code-line', children: [{text: space + this.core.config.tab}]}
-        Transforms.insertNodes(this.editor, [
-          line,
-          {type: 'code-line', children: [{text: space + remainText}]},
-        ], {at: next})
-        Transforms.select(this.editor, Editor.end(this.editor, Path.next(path)))
-      } else {
-        const text = space + this.core.config.tab + str.slice(end.offset)
-        Transforms.insertNodes(this.editor, [
-          {type: 'code-line', children: [{text}]}
-        ], {at: next})
-        Transforms.select(this.editor, {
-          path: [...Path.next(path), 0],
-          offset: (space + this.core.config.tab).length
-        })
-      }
-    } else if (remainText) {
-      Transforms.insertNodes(this.editor, {
-        type: 'code-line', children: [{text: space + remainText}]
-      }, {at: next})
-      Transforms.select(this.editor, {
-        path: [...next, 0],
-        offset: space.length
-      })
-    } else {
-      this.editor.insertNode({
-        type: 'code-line', children: [{text: space}]
-      })
-    }
-    return true
   }
 }
 

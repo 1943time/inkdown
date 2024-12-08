@@ -5,7 +5,6 @@ import { useSubject } from './hooks/subscribe'
 import { message$, modal$ } from './utils'
 import { Home } from './components/Home'
 import zhCN from 'antd/locale/zh_CN'
-import { codeReady } from './editor/utils/highlight'
 import { db } from './store/db'
 import { Core, CoreContext } from './store/core'
 
@@ -24,13 +23,16 @@ const App = observer(() => {
   const [ready, setReady] = useState(false)
   const initial = useCallback(async () => {
     await core.config.initial()
-    await codeReady(core)
     if (core.config.config.autoOpenSpace) {
       const spaces = await db.space.toArray()
       const lastOpenSpace = spaces.sort((a, b) => (a.lastOpenTime > b.lastOpenTime ? -1 : 1))[0]
       if (lastOpenSpace) {
         await core.tree.initial(lastOpenSpace.cid)
       }
+    }
+    if (!localStorage.getItem('v1.3.0')) {
+      localStorage.setItem('v1.3.0', 'true')
+      await db.file.clear()
     }
     setLocale(core.config.zh ? 'zh' : 'en')
     setReady(true)

@@ -5,7 +5,6 @@ import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo, useState } from 'react'
 import { Webview } from './components/Webview'
 import ReactDOM from 'react-dom/client'
-import { codeReady } from './editor/utils/highlight'
 import { runInAction } from 'mobx'
 import { Core, CoreContext } from './store/core'
 
@@ -14,11 +13,10 @@ const App = observer(() => {
   const [messageApi] = message.useMessage()
   const core = useMemo(() => new Core(messageApi), [])
   useEffect(() => {
-    Promise.allSettled([core.config.initial()]).then(async () => {
+    Promise.allSettled([core.config.initial()]).then(() => {
       runInAction(() => {
         core.config.config.codeAutoBreak = true
       })
-      await codeReady(core)
       setReady(true)
     })
   }, [])

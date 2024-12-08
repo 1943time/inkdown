@@ -94,7 +94,7 @@ export const EditorFrame = observer(({tab}: {
         {tab.current && (
           <>
             <div
-              className={`items-start min-h-[calc(100vh_-_40px)] relative ${
+              className={`items-start min-h-[calc(100vh_-_40px)] relative ${tab.store.startDragging ? 'dragging' : ''} ${
                 mt === 'markdown' ? '' : 'hidden'
               }`}
               onClick={click}

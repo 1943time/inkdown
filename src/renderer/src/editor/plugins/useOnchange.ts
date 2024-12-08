@@ -5,7 +5,7 @@ import {runInAction} from 'mobx'
 import {Subject} from 'rxjs'
 
 export const selChange$ = new Subject<{sel: BaseSelection, node: NodeEntry<any>} | null>()
-const floatBarIgnoreNode = new Set(['code-line', 'inline-katex'])
+const floatBarIgnoreNode = new Set(['code', 'inline-katex'])
 export function useOnchange(editor: Editor, store: EditorStore) {
   const rangeContent = useRef('')
   return useMemo(() => {

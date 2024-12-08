@@ -1,7 +1,6 @@
 import React from 'react'
-import {BasePoint, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms} from 'slate'
-import {CodeLineNode, NodeTypes, ParagraphNode, TableCellNode, TableRowNode} from '../../../types/el'
-import {clearAllCodeCache} from '../useHighlight'
+import { Editor, Element, Node, NodeEntry, Path, Range, Text, Transforms } from 'slate'
+import { NodeTypes, ParagraphNode, TableCellNode } from '../../../types/el'
 import { EditorStore } from '../../store'
 import { Core } from '../../../store/core'
 
@@ -20,7 +19,7 @@ export class TabKey {
     e.preventDefault()
     if (Range.isCollapsed(sel)) {
       const [node] = Editor.nodes<any>(this.editor, {
-        match: n => Element.isElement(n) && ['table-cell', 'paragraph', 'code-line'].includes(n.type),
+        match: n => Element.isElement(n) && ['table-cell', 'paragraph'].includes(n.type),
         mode: 'lowest'
       })
       if (sel) {
@@ -35,9 +34,6 @@ export class TabKey {
               if (parent && parent[0].type === 'list-item') {
                 if (this.listItem(node, e)) return
               }
-              break
-            case 'code-line':
-              if (this.codeLine(e, node, sel)) return
               break
           }
         }
@@ -63,47 +59,7 @@ export class TabKey {
       }
     } else {
       const [start, end] = Range.edges(sel)
-      const [code] = Editor.nodes(this.editor, {
-        match: n => n?.type === 'code'
-      })
-      if (code) {
-        if (
-          Point.compare(Editor.start(this.editor, code[1]), start) !== 1 &&
-          Point.compare(Editor.end(this.editor, code[1]), end) !== -1
-        ) {
-          const nodes = Editor.nodes(this.editor, {
-            match: n => n?.type === 'code-line'
-          })
-          for (let [el, path] of nodes) {
-            const start = Editor.start(this.editor, path)
-            if (e.shiftKey) {
-              const str = Node.string(el)
-              const reg = this.core.config.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
-              const m = str.match(reg)
-              if (m) {
-                const length = m[0].length
-                Transforms.delete(this.editor, {
-                  at: {
-                    anchor: {
-                      path: start.path,
-                      offset: 0
-                    },
-                    focus: {
-                      path: start.path,
-                      offset: length
-                    }
-                  }
-                })
-              }
-            } else {
-              Transforms.insertFragment(this.editor, [{text: this.core.config.tab}], {
-                at: start
-              })
-            }
-          }
-          return
-        }
-      } else if (e.shiftKey) {
+      if (e.shiftKey) {
         const [node] = Editor.nodes<any>(this.editor, {
           match: n => n.type === 'list'
         })
@@ -123,40 +79,6 @@ export class TabKey {
         offset: end.offset
       })
     }
-  }
-
-  private codeLine(e: React.KeyboardEvent, node: NodeEntry<CodeLineNode>, sel: Range) {
-    if (e.shiftKey) {
-      const str = Node.string(node[0])
-      const reg = this.core.config.config.codeTabSize === 2 ? /^(\t|\s{1,2})/ : /^(\t|\s{1,4})/
-      const m = str.match(reg)
-      if (m) {
-        const length = m[0].length
-        Transforms.delete(this.editor, {
-          at: {
-            anchor: {
-              path: sel.anchor.path,
-              offset: 0
-            },
-            focus: {
-              path: sel.anchor.path,
-              offset: length
-            }
-          }
-        })
-        const point: BasePoint = {
-          path: sel.anchor.path,
-          offset: sel.anchor.offset - length
-        }
-        Transforms.select(this.editor, {
-          anchor: point,
-          focus: point
-        })
-      }
-    } else {
-      Transforms.insertText(this.editor, this.core.config.tab)
-    }
-    return true
   }
 
   private tableCell(node: TableCellNode, nodePath: Path, shift = false) {
@@ -220,7 +142,6 @@ export class TabKey {
           at: {anchor: {path: nextPath, offset: 1}, focus: {path: nextPath.slice(0, -1).concat([lastIndex + move]), offset: 0}}
         })
       }
-      clearAllCodeCache(this.editor)
       return true
     } else {
       const listItem = Editor.parent(this.editor, node[1])
