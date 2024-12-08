@@ -8,7 +8,6 @@ import { SearchOutlined } from '@ant-design/icons'
 import ArrowRight from '../icons/ArrowRight'
 import { useCoreContext } from '../store/core'
 import { useTranslation } from 'react-i18next'
-import { Ace, Range as AceRange } from 'ace-builds'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
