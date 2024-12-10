@@ -26,6 +26,7 @@ import { toUnixPath } from '../../utils/path'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
 import { KeyboardTask } from '../../store/logic/keyboard'
+import { IYaml } from '../../icons/IYaml'
 
 type InsertOptions = {
   label: [string, string]
@@ -147,6 +148,13 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
           key: 'mermaid',
           args: ['mermaid'],
           icon: <IMermaid className={'text-sm'} />
+        },
+        {
+          label: ['Front matter', 'Front matter'],
+          task: 'insertCode',
+          key: 'forntmatter',
+          args: ['front-matter'],
+          icon: <IYaml className={'text-sm'} />
         },
         {
           label: ['HTML', 'HTML'],

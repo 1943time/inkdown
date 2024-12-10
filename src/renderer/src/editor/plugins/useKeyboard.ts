@@ -127,15 +127,31 @@ export const useKeyboard = (core: Core, store: EditorStore) => {
         }
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
-          // if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
-          //   Transforms.delete(store.editor, {at: node[1]})
-          //   Transforms.insertNodes(store.editor, {
-          //     type: 'code', language: 'html', render: true, code: str,
-          //     children: [{text: ''}]
-          //   }, {select: true, at: node[1]})
-          //   e.preventDefault()
-          //   return
-          // }
+          if (isHotkey('enter', e) && /^\-{3}$/.test(str) && EditorUtils.isTop(store.editor, node[1])) {
+            const top = Node.get(store.editor, [0])
+            if (!top?.frontmatter) {
+              Transforms.delete(store.editor, { at: [0] })
+              core.keyboard.insertCode('front-matter')
+              e.preventDefault()
+              return
+            }
+          }
+          if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
+            Transforms.delete(store.editor, {at: node[1]})
+            const el = {
+              type: 'code', language: 'html', render: true,
+              code: str, children: [{text: ''}]
+            }
+            Transforms.insertNodes(store.editor, el, {select: true, at: node[1]})
+            setTimeout(() => {
+              const editor = store.codes.get(el)
+              if (editor) {
+                EditorUtils.focusAceEnd(editor)
+              }
+            }, 30)
+            e.preventDefault()
+            return
+          }
           setTimeout(() => {
             const [node] = Editor.nodes<any>(store.editor, {
               match: n => Element.isElement(n) && n.type === 'paragraph',

@@ -174,6 +174,20 @@ export class BackspaceKey {
             return true
           }
         }
+        if (!Node.string(el)) {
+          const prePath = EditorUtils.findPrev(this.editor, path)
+          if (prePath) {
+            const node = Node.get(this.editor, prePath)
+            if (node?.type === 'code') {
+              Transforms.delete(this.editor, {at: path})
+              const ace = this.store.codes.get(node)
+              if (ace) {
+                EditorUtils.focusAceEnd(ace)
+                return true
+              }
+            }
+          }
+        }
         return false
       }
     }

@@ -52,19 +52,84 @@ export class EditorUtils {
     const p = Editor.parent(editor, path)
     return Editor.isEditor(p[0])
   }
-  static findPrev(editor: Editor, path: Path) {
-    while (path.length) {
-      if (Path.hasPrevious(path)) {
-        if (Node.get(editor, Path.previous(path))?.type === 'hr') {
-          path = Path.previous(path)
-        } else {
-          return Path.previous(path)
+  static selectPrev(store: EditorStore, path: Path) {
+    const prePath = EditorUtils.findPrev(store.editor, path)
+    if (prePath) {
+      const node = Node.get(store.editor, prePath)
+      if (node.type === 'code') {
+        const ace = store.codes.get(node)
+        if (ace) {
+          EditorUtils.focusAceEnd(ace)
         }
+        return true
       } else {
-        path = Path.parent(path)
+        Transforms.select(store.editor, Editor.end(store.editor, prePath))
+      }
+      EditorUtils.focus(store.editor)
+      return true
+    } else {
+      return false
+    }
+  }
+  static selectNext(store: EditorStore, path: Path) {
+    const nextPath = EditorUtils.findNext(store.editor, path)
+    if (nextPath) {
+      const node = Node.get(store.editor, nextPath)
+      if (node.type === 'code') {
+        const ace = store.codes.get(node)
+        if (ace) {
+          EditorUtils.focusAceStart(ace)
+        }
+        return true
+      } else {
+        Transforms.select(store.editor, Editor.start(store.editor, nextPath))
+      }
+      EditorUtils.focus(store.editor)
+      return true
+    } else {
+      return false
+    }
+  }
+  static findPrev(editor: Editor, path: Path) {
+    let curPath = path
+    while (curPath) {
+      if (Path.hasPrevious(curPath)) {
+        const pre = Node.get(editor, Path.previous(curPath))
+        if (pre?.type === 'hr') {
+          curPath = Path.previous(path)
+        } else if (['blockquote', 'list', 'list-item', 'table-row', 'table'].includes(pre?.type)) {
+          return Editor.end(editor, Path.previous(curPath)).path.slice(0, -1)
+        } else {
+          return Path.previous(curPath)
+        }
+      } else if (curPath.length > 1) {
+        curPath = curPath.slice(0, -1)
+      } else {
+        return null
       }
     }
-    return []
+    return null
+  }
+  static findNext(editor: Editor, path: Path) {
+    let curPath = path
+    while (curPath) {
+      const nextPath = Path.next(curPath)
+      if (Editor.hasPath(editor, nextPath)) {
+        const next = Node.get(editor, nextPath)
+        if (next?.type === 'hr') {
+          curPath = nextPath
+        } else if (['blockquote', 'list', 'list-item'].includes(next?.type)) {
+          return Editor.start(editor, nextPath).path.slice(0, -1)
+        } else {
+          return nextPath
+        }
+      } else if (curPath.length > 1) {
+        curPath = curPath.slice(0, -1)
+      } else {
+        return null
+      }
+    }
+    return null
   }
   static findMediaInsertPath(editor: Editor) {
     const [cur] = Editor.nodes<any>(editor, {
@@ -86,20 +151,6 @@ export class EditorUtils {
       path = Path.next(cur[1])
     }
     return path
-  }
-  static findNext(editor: Editor, path: Path) {
-    while (path.length) {
-      if (Editor.hasPath(editor, Path.next(path))) {
-        if (Node.get(editor, Path.next(path))?.type === 'hr') {
-          path = Path.next(path)
-        } else {
-          return Path.next(path)
-        }
-      } else {
-        path = Path.parent(path)
-      }
-    }
-    return []
   }
   static moveNodes(store: EditorStore, from: Path, to: Path, index = 1) {
     let count = 0

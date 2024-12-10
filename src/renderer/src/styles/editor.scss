@@ -478,7 +478,7 @@ ul.m-list {
 }
 .inline-code-input{
   line-height: 1.3em;
-  @apply rounded-sm text-gray-400;
+  @apply rounded-sm dark:text-orange-400/80 text-teal-600;
   &:before, &:after{
     content: '$';
     font-size: 1em;

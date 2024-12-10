@@ -257,7 +257,7 @@ export class EditorStore {
             const item = lines[i]
             const match = item.matchAll(regex)
             for (const m of match) {
-              const range = new AceRange(i, m.index, i, m.index + m[0].length)
+              const range = new AceRange(i, m.index!, i, m.index! + m[0].length)
               const data:(typeof this.searchRanges)[number] = {
                 aceRange: range,
                 editor: editor

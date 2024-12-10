@@ -24,7 +24,6 @@ export const Webview = observer((props: {
   const store = useMemo(() => new EditorStore(core, true, props.history), [])
   const renderElement = useCallback((props: any) => <MElement {...props} children={props.children}/>, [])
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children}/>, [])
-  const high = useHighlight(store)
   const print = async (filePath: string) => {
     store.webviewFilePath = filePath
     setState({ready: true, name: parse(filePath).name})
@@ -54,7 +53,6 @@ export const Webview = observer((props: {
         >
           <input defaultValue={state.name} className={'page-title'}/>
           <Editable
-            decorate={high}
             spellCheck={false}
             readOnly={true}
             className={'w-full h-full'}

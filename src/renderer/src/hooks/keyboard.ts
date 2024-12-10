@@ -168,24 +168,18 @@ export const useSystemKeyboard = () => {
         }
       }
       if (!core.tree.currentTab.current || !core.tree.currentTab.store.focus) return
-      if (isHotkey('arrowUp', e) || isHotkey('arrowDown', e)) {
-        const [node] = core.keyboard.curNodes
-        if (node?.[0].type === 'media') {
-          e.preventDefault()
-          if (isHotkey('arrowUp', e)) {
-            Transforms.select(
-              core.curEditor,
-              Editor.end(core.curEditor, EditorUtils.findPrev(core.curEditor, node[1]))
-            )
-          } else {
-            Transforms.select(
-              core.curEditor,
-              Editor.start(core.curEditor, EditorUtils.findNext(core.curEditor, node[1]))
-            )
-          }
-          ReactEditor.focus(core.curEditor)
-        }
-      }
+      // if (isHotkey('arrowUp', e) || isHotkey('arrowDown', e)) {
+      //   const [node] = core.keyboard.curNodes
+      //   if (node?.[0].type === 'media') {
+      //     e.preventDefault()
+      //     if (isHotkey('arrowUp', e)) {
+      //       EditorUtils.selectPrev(store, node[1])
+      //     } else {
+      //       EditorUtils.selectNext(store, node[1])
+      //     }
+      //     ReactEditor.focus(core.curEditor)
+      //   }
+      // }
       for (let key of keyMap) {
         if (isHotkey(key[0], e)) {
           e.preventDefault()

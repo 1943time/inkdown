@@ -366,9 +366,29 @@ export class KeyboardTask {
     }
   }
 
-  insertCode(type?: 'katex' | 'mermaid' | 'html') {
+  insertCode(type?: 'katex' | 'mermaid' | 'html' | 'front-matter') {
     const [node] = this.curNodes
-    if (node && ['paragraph', 'head'].includes(node[0].type)) {
+    if (type === 'front-matter') {
+      const top = Node.get(this.editor, [0])
+      if (!top?.frontmatter) {
+        const el = {
+          type: 'code',
+          language: 'yaml',
+          frontmatter: true,
+          children: [{ text: '' }]
+        }
+        Transforms.insertNodes(this.editor, el, { select: true, at: [0] })
+        setTimeout(() => {
+          this.store.codes.get(el)?.focus()
+        }, 30)
+      } else {
+        const editor = this.store.codes.get(top)
+        if (editor) {
+          EditorUtils.focusAceEnd(editor)
+        }
+      }
+      this.store.container?.scrollTo({top: 0})
+    } else if (node && ['paragraph', 'head'].includes(node[0].type)) {
       const path =
         node[0].type === 'paragraph' && !Node.string(node[0]) ? node[1] : Path.next(node[1])
       let lang = ''
@@ -385,20 +405,25 @@ export class KeyboardTask {
         lang = 'html'
         code = '<div style="text-align:center">text</div>'
       }
+      const el = {
+        type: 'code',
+        code,
+        language: lang ? lang : undefined,
+        children: [{text: ''}],
+        render: type === 'html' ? true : undefined,
+        katex: type === 'katex'
+      }
       Transforms.insertNodes(
         this.editor,
-        {
-          type: 'code',
-          code,
-          language: lang ? lang : undefined,
-          children: [{text: ''}],
-          render: type === 'html' ? true : undefined,
-          katex: type === 'katex'
-        },
+        el,
         { at: path }
       )
-
-      Transforms.select(this.editor, Editor.end(this.editor, path))
+      setTimeout(() => {
+        const editor = this.store.codes.get(el)
+        if (editor) {
+          EditorUtils.focusAceEnd(editor)
+        }
+      }, 30)
     }
   }
 

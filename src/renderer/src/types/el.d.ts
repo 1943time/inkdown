@@ -4,8 +4,7 @@ import { HistoryEditor } from 'slate-history'
 import {RenderElementProps} from 'slate-react/dist/components/editable'
 
 type Align = 'left' | 'center' | 'right'
-export type CodeNode = {type: 'code', children: CodeLineNode[] | [{text: string}], language?: string, katex?: boolean, render?: boolean, frontmatter?: boolean, h?: number, code:string}
-export type CodeLineNode = {type: 'code-line', children: BaseElement['children'], num?: number}
+export type CodeNode = {type: 'code', children: [{text: string}], language?: string, katex?: boolean, render?: boolean, frontmatter?: boolean, h?: number, code:string}
 export type ParagraphNode = {type: 'paragraph', children: BaseElement['children'], h?: number}
 export type TableNode = {type: 'table', children: TableRowNode[]}
 export type TableRowNode = {type: 'table-row', children: TableCellNode[]}
@@ -36,7 +35,7 @@ export type AttachNode = {
   url: string
 }
 export type Elements =
-  CodeNode | CodeLineNode | ParagraphNode | TableNode | TableRowNode | TableCellNode |
+  CodeNode | ParagraphNode | TableNode | TableRowNode | TableCellNode |
   BlockQuoteNode | ListNode | ListItemNode | HeadNode | HrNode | MediaNode | InlineKatexNode | BreakNode | AttachNode
 
 export type CustomLeaf = {

@@ -187,22 +187,11 @@ export function AceElement(props: ElementProps<CodeNode>) {
         return
       }
       if (isHotkey('up', e)) {
-        if (posRef.current.row === 0 && posRef.current.column === 0) {
+        if (posRef.current.row === 0 && posRef.current.column === 0 && !props.element.frontmatter) {
           EditorUtils.focus(store.editor)
           const path = pathRef.current!
           if (Path.hasPrevious(path)) {
-            const pre = Node.get(store.editor, Path.previous(path))
-            if (pre && pre.type === 'code') {
-              const editor = store.codes.get(pre)
-              if (editor) {
-                EditorUtils.focusAceEnd(editor)
-                return
-              }
-            }
-            Transforms.select(
-              store.editor,
-              Editor.end(store.editor, Path.previous(path))
-            )
+            EditorUtils.selectPrev(store, path)
           } else {
             Transforms.insertNodes(store.editor, EditorUtils.p, {
               at: path,
@@ -220,18 +209,7 @@ export function AceElement(props: ElementProps<CodeNode>) {
           EditorUtils.focus(store.editor)
           const path = pathRef.current!
           if (Editor.hasPath(store.editor, Path.next(path))) {
-            const next = Node.get(store.editor, Path.next(path))
-            if (next && next.type === 'code') {
-              const editor = store.codes.get(next)
-              if (editor) {
-                EditorUtils.focusAceStart(editor)
-                return
-              }
-            }
-            Transforms.select(
-              store.editor,
-              Editor.start(store.editor, Path.next(path))
-            )
+            EditorUtils.selectNext(store, path)
           } else {
             Transforms.insertNodes(store.editor, EditorUtils.p, {
               at: Path.next(path),

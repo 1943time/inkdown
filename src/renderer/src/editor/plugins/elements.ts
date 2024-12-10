@@ -227,19 +227,6 @@ export const MdElements: Record<string, MdNode> = {
       insertAfter(editor, path)
     }
   },
-  frontmatter: {
-    reg: /^\s*---\s*/,
-    checkAllow: ctx => {
-      return !Path.hasPrevious(ctx.node[1]) && ctx.node[0].type === 'paragraph' && EditorUtils.isTop(ctx.editor, ctx.node[1])
-    },
-    run: ({editor, path}) => {
-      Transforms.delete(editor, {at: path})
-      Transforms.insertNodes(editor, {
-        type: 'code', language: 'yaml', frontmatter: true,
-        children: [{text: ''}]
-      }, {select: true, at: path})
-    }
-  },
   blockquote: {
     matchKey: ' ',
     reg: /^\s*>\s+([^\n]+)?/,

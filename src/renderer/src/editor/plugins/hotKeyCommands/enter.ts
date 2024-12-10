@@ -1,11 +1,11 @@
 import React from 'react'
-import {BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {CodeLineNode, HeadNode, NodeTypes, ParagraphNode, TableNode} from '../../../types/el'
-import {EditorUtils} from '../../utils/editorUtils'
-import {BlockMathNodes} from '../elements'
-import {BackspaceKey} from './backspace'
-import {EditorStore} from '../../store'
-import {isMod} from '../../../utils'
+import { BaseSelection, Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms } from 'slate'
+import { HeadNode, NodeTypes, ParagraphNode, TableNode } from '../../../types/el'
+import { EditorUtils } from '../../utils/editorUtils'
+import { BlockMathNodes } from '../elements'
+import { BackspaceKey } from './backspace'
+import { EditorStore } from '../../store'
+import { isMod } from '../../../utils'
 export class EnterKey {
   constructor(
     private readonly store: EditorStore,

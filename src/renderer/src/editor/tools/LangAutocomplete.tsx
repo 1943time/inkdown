@@ -8,6 +8,7 @@ import { langIconMap } from './langIconMap'
 import { getOffsetLeft, getOffsetTop } from '../utils/dom'
 import {useLocalState} from '../../hooks/useLocalState'
 import {useSubject} from '../../hooks/subscribe'
+import { EditorUtils } from '../utils/editorUtils'
 
 const list = Array.from(langIconMap).map(item => {
   return {icon: item[1], lang: item[0]}
@@ -93,6 +94,7 @@ export const LangAutocomplete = observer(() => {
   }, [store.openLangCompletion])
 
   const createCodeFence = useCallback((lang: string) => {
+    EditorUtils.blur(store.editor)
     Transforms.delete(store.editor, {at: path.current})
     const el = {
       type: 'code',
@@ -104,7 +106,6 @@ export const LangAutocomplete = observer(() => {
     setTimeout(() => {
       store.codes.get(el)?.focus()
     }, 30)
-    ReactEditor.focus(store.editor)
   }, [])
   return (
     <div

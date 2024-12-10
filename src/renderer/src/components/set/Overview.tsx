@@ -69,9 +69,6 @@ export const Overview = observer(() => {
             value={core.config.config.theme}
             onChange={async (e) => {
               await core.config.setTheme(e.target.value)
-              if (core.config.config.codeTheme === 'auto') {
-                core.config.reloadHighlighter(true)
-              }
             }}
           >
             <Radio.Button value={'system'}>{t('config.theme.system')}</Radio.Button>
