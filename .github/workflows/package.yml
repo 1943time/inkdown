@@ -62,5 +62,5 @@ jobs:
           draft: ''
           prerelease: true
           files: |
-            dist/Bluestone*.*
+            dist/Inkdown*.*
             dist/latest*.yml
