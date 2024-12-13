@@ -95,7 +95,7 @@ export class EditorUtils {
     while (curPath) {
       if (Path.hasPrevious(curPath)) {
         const pre = Node.get(editor, Path.previous(curPath))
-        if (pre?.type === 'hr') {
+        if (['hr', 'break'].includes(pre?.type)) {
           curPath = Path.previous(path)
         } else if (['blockquote', 'list', 'list-item', 'table-row', 'table'].includes(pre?.type)) {
           return Editor.end(editor, Path.previous(curPath)).path.slice(0, -1)
@@ -116,7 +116,7 @@ export class EditorUtils {
       const nextPath = Path.next(curPath)
       if (Editor.hasPath(editor, nextPath)) {
         const next = Node.get(editor, nextPath)
-        if (next?.type === 'hr') {
+        if (['hr', 'break'].includes(next?.type)) {
           curPath = nextPath
         } else if (['blockquote', 'list', 'list-item'].includes(next?.type)) {
           return Editor.start(editor, nextPath).path.slice(0, -1)
