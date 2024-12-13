@@ -28,7 +28,6 @@ This document assumes that you have a basic understanding of Markdown. The follo
 
 - The rich text editing mode is used, while also compatible with Markdown syntax conversion and editing habits. When using the search function, Markdown symbols will not be searched.
 - Automatically record and clear file history, can be viewed and rolled back at any time.
-- Using [shiki](https://github.com/shikijs/shiki) as a code shader to make code highlights more fine-grained and aesthetically pleasing.
 - Provides a sharing program, Linux server required [doc](https://pb.inkdown.me/inkdown/book/docs/offline-version#deployment-publish-program).
 - Enhanced table operations, allowing for easy adjustment of the order and quantity of rows and columns in the table, and the ability to wrap within the table.
 - Support the editing and display of block and inline [Katex](https://katex.org/) formulas
@@ -165,6 +164,8 @@ $$
 In line formula:$\int_{-\infty}^{+\infty} e^{-x^2} dx = \sqrt{\pi}$
 
 ## Deployment Publish Program
+
+> The publishing program is temporarily suspended and is being revised.
 
 Inkdown provides a`Node.js` based network service program, allowing your documents to be easily shared with other readers. He will establish a mapping between the device file path and remote documents, allowing local Markdown documents to be shared to the network with just one click, and will automatically manage image dependencies and link conversions. The usage process is very simple. If you have your own `Linux` server, you can install it in 5 minutes.
 
