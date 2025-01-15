@@ -1,90 +1,31 @@
 import { observer } from 'mobx-react-lite'
-import {
-  CopyOutlined,
-  DatabaseOutlined,
-  LinkOutlined,
-  StopOutlined,
-  SyncOutlined
-} from '@ant-design/icons'
-import { Button, Input, Modal, Popover, Space, Tabs } from 'antd'
-import { useCallback, useEffect, useMemo } from 'react'
-import Net from '../icons/Net'
 import { useLocalState } from '../hooks/useLocalState'
-import { message$ } from '../utils'
-import { mediaType } from '../editor/utils/dom'
-import { BookItem } from './ui/BookItem'
-import { IBook } from './model'
-import { NotLogged } from './ui/NotLogged'
-import { CloseShare } from './ui/CloseShare'
-import { ShareData } from './ui/ShareData'
-import { action, runInAction } from 'mobx'
-import { ServiceSet } from './ui/ServiceSet'
-import { shareSuccessfully$, Successfully } from './ui/Successfully'
-import { Icon } from '@iconify/react'
-import { EBook } from './ui/Ebook'
 import { useCoreContext } from '../store/core'
+import { IPlanet } from '../icons/IPlanet'
+import { PbManage } from './Manage'
 
 export const Share = observer(() => {
   const core = useCoreContext()
   const [state, setState] = useLocalState({
-    popOpen: false,
-    syncing: false,
-    tab: 'doc',
-    refresh: false,
-    books: [] as IBook[],
-    mask: false,
-    showData: false,
-    openSetting: false,
-    upgradeLoading: false
+    open: false
   })
-  const getBooks = useCallback(() => {
-    setState({
-      books: core.share.getBooks(core.tree.root?.filePath || '')
-    })
-  }, [])
 
-  const copyDocUrl = useCallback((url: string) => {
-    window.api.copyToClipboard(url)
-    message$.next({
-      type: 'success',
-      content: core.config.zh ? '已复制到剪贴板' : 'Copied to clipboard'
-    })
-  }, [])
-
-  useEffect(() => {
-    if (state.popOpen) {
-      getBooks()
-      setState({ refresh: !state.refresh })
-    }
-  }, [state.popOpen])
-
-  const curDoc = useMemo(() => {
-    return core.share.docMap.get(core.tree.openedNote?.filePath || '')
-  }, [core.tree.openedNote, state.refresh])
-
-  const closeMask = useCallback(() => {
-    setTimeout(() => {
-      setState({ mask: false })
-    })
-  }, [])
-
-  const share = useCallback(() => {
-    const note = core.tree.openedNote!
-    if (note && mediaType(note.filePath) === 'markdown') {
-      setState({ syncing: true })
-      core.share
-        .shareDoc(note.filePath, core.tree.root?.filePath)
-        .then((res) => {
-          setState({ refresh: !state.refresh })
-          shareSuccessfully$.next(`${core.share.serviceConfig?.domain}/doc/${res.name}`)
-        })
-        .finally(() => setState({ syncing: false }))
-    }
-  }, [])
 
   return (
     <>
-      <Successfully />
+      <div
+        onClick={() => setState({open: true})}
+        className={
+          'flex drag-none items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200'
+        }
+      >
+        <IPlanet className={'text-lg'}/>
+      </div>
+      <PbManage
+        open={state.open}
+        onClose={() => setState({open: false})}
+      />
+      {/* <Successfully />
       <EBook
         onClose={() => {
           closeMask()
@@ -92,8 +33,8 @@ export const Share = observer(() => {
         onSave={(book) => {
           getBooks()
         }}
-      />
-      <Popover
+      /> */}
+      {/* <Popover
         zIndex={100}
         content={
           <div className={'w-[450px] pb-2'}>
@@ -251,30 +192,24 @@ export const Share = observer(() => {
         }}
         arrow={false}
       >
-        <div
-          className={
-            'flex drag-none items-center justify-center w-[30px] h-[27px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200'
-          }
-        >
-          <Icon icon={'majesticons:share-circle-line'} className={'text-xl'} />
-        </div>
-      </Popover>
-      <ServiceSet
+
+      </Popover> */}
+      {/* <ServiceSet
         open={state.openSetting}
         onClose={() => {
           setState({ openSetting: false })
           closeMask()
         }}
-      />
-      <ShareData
+      /> */}
+      {/* <ShareData
         open={state.showData}
         onClose={() => {
           setState({ showData: false, refresh: !state.refresh })
           closeMask()
           getBooks()
         }}
-      />
-      <Modal
+      /> */}
+      {/* <Modal
         title={`Service program update - ${core.share.remoteVersion}`}
         width={700}
         onCancel={action(() => {
@@ -331,7 +266,7 @@ export const Share = observer(() => {
           dangerouslySetInnerHTML={{ __html: core.share.updateTips }}
           className={'whitespace-pre overflow-auto'}
         />
-      </Modal>
+      </Modal> */}
     </>
   )
 })

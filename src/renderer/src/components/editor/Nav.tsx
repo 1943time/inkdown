@@ -187,7 +187,7 @@ export const Nav = observer(() => {
           <Share />
           <div
             className={
-              'flex items-center justify-center h-[27px] w-[30px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'
+              'flex items-center justify-center h-[26px] w-[26px] rounded dark:hover:bg-gray-200/10 hover:bg-gray-200/60 cursor-pointer duration-200 drag-none'
             }
             onClick={(e) => {
               const menus: IMenu[] = [

@@ -7,6 +7,7 @@ import { toUnix } from 'upath'
 import mime from 'mime-types'
 import nodeFetch, { RequestInit } from 'node-fetch'
 const isWindows = process.platform === 'win32'
+import jwt from 'jsonwebtoken'
 let watchers = new Map<string, Watcher>()
 export const api = {
   copyToClipboard(str: string) {
@@ -50,8 +51,10 @@ export const api = {
     watcher!.on('change', cb)
     watchers.set(path, watcher)
   },
-  md5(str: string | Buffer) {
-    // @ts-ignore
+  sha1(str: string) {
+    return createHash('sha1').update(str).digest('hex')
+  },
+  md5(str: string) {
     return createHash('md5').update(str).digest('hex')
   },
   offWatcher(path: string) {
@@ -60,5 +63,8 @@ export const api = {
       return watcher.close()
     }
     return
+  },
+  jwtSign(payload: any, secret: string, expires = '365 days') {
+    return jwt.sign(payload, secret, {expiresIn: expires})
   }
 }

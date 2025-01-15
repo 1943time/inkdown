@@ -9,6 +9,7 @@ import { KeyboardTask } from './logic/keyboard'
 import { FileAssets } from './logic/file'
 import { ContextMenu } from './logic/menu'
 import { ShareStore } from './server'
+import { Publish } from './publish'
 
 export class Core {
   tree: TreeStore
@@ -20,6 +21,7 @@ export class Core {
   file: FileAssets
   menu: ContextMenu
   share: ShareStore
+  pb: Publish
   get curEditor() {
     return this.tree.currentTab.store.editor
   }
@@ -35,6 +37,7 @@ export class Core {
     this.file = new FileAssets(this)
     this.menu = new ContextMenu(this)
     this.share = new ShareStore(this)
+    this.pb = new Publish()
   }
 }
 
