@@ -8,7 +8,6 @@ import { Refactor } from './logic/refactor'
 import { KeyboardTask } from './logic/keyboard'
 import { FileAssets } from './logic/file'
 import { ContextMenu } from './logic/menu'
-import { ShareStore } from './server'
 import { Publish } from './publish'
 
 export class Core {
@@ -20,7 +19,6 @@ export class Core {
   keyboard: KeyboardTask
   file: FileAssets
   menu: ContextMenu
-  share: ShareStore
   pb: Publish
   get curEditor() {
     return this.tree.currentTab.store.editor
@@ -36,7 +34,6 @@ export class Core {
     this.keyboard = new KeyboardTask(this)
     this.file = new FileAssets(this)
     this.menu = new ContextMenu(this)
-    this.share = new ShareStore(this)
     this.pb = new Publish()
   }
 }

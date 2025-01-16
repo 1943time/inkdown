@@ -54,6 +54,12 @@ export class NodeStore {
             folder: true,
             sort: 0
           }
+          try {
+            const s = statSync(join(filePath, '.inkdown/settings.json'))
+            if (s?.isFile()) {
+              addData.published = true
+            }
+          } catch(e) {}
           this.fileMap.set(filePath, addData)
           addData.children = this.read(filePath)
           tree.push(addData)
@@ -227,6 +233,7 @@ export class NodeStore {
       filePath: file.filePath,
       schema: file.schema,
       ghost,
+      published: file.published,
       history: undefined,
       sel: undefined,
       hidden: name?.startsWith('.'),
@@ -377,9 +384,6 @@ export class NodeStore {
       db.file.update(n.cid, {
         filePath: path
       })
-      if (this.core.share.docMap.get(n.filePath)) {
-        changeFiles.push({from: n.filePath, to: path})
-      }
       runInAction(() => {
         n.filePath = path
       })
@@ -520,20 +524,9 @@ export class NodeStore {
           filePath: targetPath,
           updated: s.mtime.valueOf()
         })
-        if (this.core.share.serviceConfig) {
-          if (node.ext === 'md' && this.core.share.docMap.get(oldPath)) {
-            this.core.share.updateRemotePath([{from: oldPath, to: node.filePath}], 'doc')
-          }
-        }
         if (node.folder) {
           try {
-            const changeFiles = this.renameFiles(node.children || [], targetPath)
-            if (changeFiles.length) {
-              await this.core.share.updateRemotePath(changeFiles, 'doc')
-            }
-            if (this.core.share.bookMap.get(oldPath)) {
-              await this.core.share.updateRemotePath([{from: oldPath, to: node.filePath}], 'book')
-            }
+            this.renameFiles(node.children || [], targetPath)
           } catch(e: any) {
             if (e?.message) {
               this.core.message.error(e.message)

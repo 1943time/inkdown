@@ -33,9 +33,6 @@ export const MainApi = {
   saveServerConfig(config: any) {
     return ipcRenderer.invoke('saveServerConfig', config)
   },
-  getMachineId():Promise<string> {
-    return ipcRenderer.invoke('get-machine-id')
-  },
   getPath(type: Parameters<typeof app.getPath>[0]) {
     return ipcRenderer.invoke('get-path', type)
   },

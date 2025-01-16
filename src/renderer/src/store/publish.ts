@@ -1,3 +1,4 @@
+import { join } from 'path'
 import { db } from './db'
 import {IApi} from '@inkdown/client'
 export class Publish {
@@ -5,6 +6,7 @@ export class Publish {
   access_key_secret = ''
   host = ''
   api: InstanceType<typeof IApi> | null = null
+  rootPath = ''
   constructor() {
     this.init()
   }
@@ -21,7 +23,7 @@ export class Publish {
       fetch: window.fetch.bind(window),
       mode: 'inkdown',
       getFileData: async (path) => {
-        const buffer = await window.api.fs.readFile(path)
+        const buffer = await window.api.fs.readFile(join(this.rootPath, path))
         return new File([buffer.buffer as ArrayBuffer], '')
       },
       sha1: (str: string) => {

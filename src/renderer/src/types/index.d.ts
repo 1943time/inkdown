@@ -19,6 +19,7 @@ export type IFileItem = {
   root?: boolean
   ext: string
   filename: string
+  published?: boolean
   spaceId?: string
   folder: boolean
   parent?: IFileItem

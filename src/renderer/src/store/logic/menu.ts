@@ -8,7 +8,7 @@ import { toMarkdown } from '../../editor/utils/toMarkdown'
 import { isMac } from '../../utils'
 import { MainApi } from '../../api/main'
 import { openEditFolderDialog$ } from '../../components/tree/EditFolderDialog'
-import { openEbook$ } from '../../server/ui/Ebook'
+import { openCreateBook$ } from '../../server/Create'
 
 export class ContextMenu {
   constructor(
@@ -116,12 +116,12 @@ export class ContextMenu {
           click: () => MainApi.showInFolder(node.filePath)
         },
         {
-          text: this.core.config.zh ? '分享文件夹' : 'Share Folder',
+          text: this.core.config.zh ? '发布文件夹' : 'Publish Folder',
           click: () => {
-            if (!this.core.share.serviceConfig) {
-              this.core.message.info(this.core.config.zh ? '请先配置分享服务.' : 'Please configure sharing service first.')
+            if (!this.core.pb.api) {
+              this.core.message.info(this.core.config.zh ? '请先配置发布服务.' : 'Please configure publish service first.')
             } else {
-              openEbook$.next({folderPath: node.filePath})
+              openCreateBook$.next(node.filePath)
             }
           }
         }

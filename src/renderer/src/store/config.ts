@@ -135,11 +135,6 @@ export class ConfigStore {
     } else {
       await db.config.add({ key, value })
     }
-    if (['codeTabSize', 'codeTheme', 'codeLineNumber'].includes(key) && this.core.share.serviceConfig) {
-      this.core.share.api.setPreferences({
-        [key]: value
-      })
-    }
     if (key === 'locale') {
       i18n.changeLanguage(this.config.locale)
     }
@@ -154,7 +149,6 @@ export class ConfigStore {
     this.setConfig('interfaceFont', value)
   }
   async initial() {
-    this.core.share.initial()
     const config = await db.config.toArray()
     return new Promise((resolve) => {
       if (localStorage.getItem('pick-route')) {

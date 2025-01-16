@@ -47,6 +47,7 @@ export interface IFile {
   filePath: string
   spaceId?: string
   folder: boolean
+  published?: boolean
   schema?: object
   synced?: 0 | 1
   updated?: number
