@@ -8,7 +8,7 @@ import ace, { Ace } from 'ace-builds'
 import { useCallback, useRef } from 'react'
 import { useCoreContext } from '../store/core'
 import { join } from 'path'
-import { sortTree, Tree } from '@inkdown/client'
+import { sortTree, DataTree } from '@inkdown/client'
 import { readdir } from 'fs/promises'
 import { statSync } from 'fs'
 import { nanoid } from 'nanoid'
@@ -48,7 +48,7 @@ export const CreateBook = observer(() => {
     deleteSettingsFile: false
   })
   const getDocByFolder = useCallback(async (dir: string) => {
-    const tree: Tree[] = []
+    const tree: DataTree[] = []
     const files = await readdir(dir)
     for (const name of files) {
       if (name.startsWith('.') || name.toLocaleLowerCase() === 'node_modules') {
@@ -59,12 +59,15 @@ export const CreateBook = observer(() => {
       if (stat.isDirectory()) {
         tree.push({
           name,
+          realPath: path,
           children: await getDocByFolder(path)
         })
       } else if (name.endsWith('.md') || name.endsWith('.markdown')) {
+        core.pb.curDocPath = path
         const md = await window.api.fs.readFile(path, { encoding: 'utf-8' })
         tree.push({
           name,
+          realPath: path,
           md
         })
       }
@@ -72,17 +75,19 @@ export const CreateBook = observer(() => {
     return sortTree(tree)
   }, [])
   const getDocBySettings = useCallback(async (docs: any[], dir: string) => {
-    const tree: Tree[] = []
+    const tree: DataTree[] = []
     for (const item of docs) {
       if (item.path && (item.path.endsWith('.md') || item.path.endsWith('.markdown'))) {
-        const path = join(dir, item.path.replace(/^\/+/, ''))
+      const path = join(dir, item.path.replace(/^\/+/, ''))
         const stat = window.api.stat(path)
         if (!stat) {
           core.message.warning(`The path ${item.path} does not exist`)
           throw new Error()
         }
+        core.pb.curDocPath = path
         tree.push({
           name: item.name,
+          realPath: path,
           md: await window.api.fs.readFile(path, { encoding: 'utf-8' })
         })
       } else if (item.children) {
@@ -148,7 +153,7 @@ export const CreateBook = observer(() => {
     }, 100)
   })
   const sync = useCallback(
-    async (data: { tree: Tree[]; id: string; name: string; settings: Record<string, any> }) => {
+    async (data: { tree: DataTree[]; id: string; name: string; settings: Record<string, any> }) => {
       const id = await core.pb.api?.syncBook({
         data: data.tree,
         id: data.id,
@@ -197,8 +202,13 @@ export const CreateBook = observer(() => {
         core.message.warning('Please fill in the name field')
         return
       }
+      let tree:DataTree[] = []
+      if (settings.docs instanceof Array) {
+        tree = await getDocBySettings(settings.docs, state.path)
+      } else {
+        tree = await getDocByFolder(state.path)
+      }
       setState({ submitting: true })
-      const tree = await getDocByFolder(state.path)
       if (!window.api.stat(join(state.path, '.inkdown'))) {
         await window.api.fs.mkdir(join(state.path, '.inkdown'))
       }
@@ -206,14 +216,13 @@ export const CreateBook = observer(() => {
         encoding: 'utf-8'
       })
       const book = await core.pb.api?.getBook(settings.id)
-      core.pb.rootPath = state.path
       if (book) {
         modal.confirm({
           title: 'Note',
           content: `Book id "${settings.id}" already exists. Do you want to overwrite the content?`,
           onOk: async () => {
             try {
-              sync({
+              await sync({
                 tree,
                 id: settings.id,
                 name: settings.name,
@@ -222,6 +231,7 @@ export const CreateBook = observer(() => {
                 }
               })
             } catch (e: any) {
+              console.error(e)
               core.message.warning(e.message)
             }
           }
@@ -237,7 +247,10 @@ export const CreateBook = observer(() => {
         })
       }
     } catch (e: any) {
-      core.message.warning(e.message)
+      if (e?.message) {
+        console.error(e)
+        core.message.warning(e.message)
+      }
     } finally {
       setState({ submitting: false })
     }

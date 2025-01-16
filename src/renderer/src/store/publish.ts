@@ -1,13 +1,16 @@
 import { join } from 'path'
 import { db } from './db'
 import {IApi} from '@inkdown/client'
+import { Core } from './core'
 export class Publish {
   access_key_id = ''
   access_key_secret = ''
   host = ''
   api: InstanceType<typeof IApi> | null = null
-  rootPath = ''
-  constructor() {
+  curDocPath = ''
+  constructor(
+    private readonly core: Core
+  ) {
     this.init()
   }
   private createToken(id: string, secret: string, expires = '365 days') {
@@ -23,8 +26,13 @@ export class Publish {
       fetch: window.fetch.bind(window),
       mode: 'inkdown',
       getFileData: async (path) => {
-        const buffer = await window.api.fs.readFile(join(this.rootPath, path))
-        return new File([buffer.buffer as ArrayBuffer], '')
+        try {
+          const buffer = await window.api.fs.readFile(path)
+          return new File([buffer.buffer as ArrayBuffer], '')
+        } catch(e) {
+          this.core.message.warning(`File "${join(this.curDocPath, '..', path)}" does not exist`)
+          return null
+        }
       },
       sha1: (str: string) => {
         return window.api.sha1(str)

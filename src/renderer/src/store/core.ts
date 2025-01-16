@@ -34,7 +34,7 @@ export class Core {
     this.keyboard = new KeyboardTask(this)
     this.file = new FileAssets(this)
     this.menu = new ContextMenu(this)
-    this.pb = new Publish()
+    this.pb = new Publish(this)
   }
 }
 
