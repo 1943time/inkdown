@@ -42,7 +42,6 @@ export class TreeStore {
   recordTimer = 0
   blankMode = isMac
   externalChange$ = new Subject<IFileItem>()
-
   get nodes() {
     return Array.from(this.nodeMap.values())
   }
@@ -554,6 +553,7 @@ export class TreeStore {
       })
     }
   }
+
 
   createTab() {
     return observable(

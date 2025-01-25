@@ -1,16 +1,16 @@
-import {observer} from 'mobx-react-lite'
-import {Button, Checkbox, Form, Input, Modal, Space} from 'antd'
-import {useLocalState} from '../../hooks/useLocalState'
-import {FolderOpenOutlined} from '@ant-design/icons'
-import {Subject} from 'rxjs'
-import {useSubject} from '../../hooks/subscribe'
-import {MainApi} from '../../api/main'
-import {useCallback} from 'react'
-import {db} from '../../store/db'
-import {nid} from '../../utils'
-import {Icon} from '@iconify/react'
-import {openConfirmDialog$} from '../Dialog/ConfirmDialog'
-import {runInAction} from 'mobx'
+import { observer } from 'mobx-react-lite'
+import { Button, Checkbox, Form, Input, Modal, Select, Space } from 'antd'
+import { useLocalState } from '../../hooks/useLocalState'
+import { FolderOpenOutlined } from '@ant-design/icons'
+import { Subject } from 'rxjs'
+import { useSubject } from '../../hooks/subscribe'
+import { MainApi } from '../../api/main'
+import { useCallback } from 'react'
+import { db } from '../../store/db'
+import { nid } from '../../utils'
+import { Icon } from '@iconify/react'
+import { openConfirmDialog$ } from '../Dialog/ConfirmDialog'
+import { runInAction } from 'mobx'
 import { useCoreContext } from '../../store/core'
 import { useTranslation } from 'react-i18next'
 
@@ -20,7 +20,7 @@ export const spaceChange$ = new Subject()
 
 export const EditSpace = observer(() => {
   const core = useCoreContext()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     open: false,
     spaceId: '',
@@ -31,42 +31,53 @@ export const EditSpace = observer(() => {
   const [form] = Form.useForm()
   useSubject(editSpace$, (spaceId) => {
     if (spaceId) {
-      db.space.get(spaceId).then(res => {
+      db.space.get(spaceId).then((res) => {
         if (res) {
           form.resetFields()
           form.setFieldsValue({
             name: res.name,
             filePath: res.filePath,
-            imageFolder: res.imageFolder,
-            relative: res.relative
+            saveFolder: res.saveFolder,
+            savePath: res.savePath
           })
-          setState({spaceName: res.name, spaceId, open: true, background: res.background || 'sky'})
+          setState({
+            spaceName: res.name,
+            spaceId,
+            open: true,
+            background: res.background || 'sky'
+          })
         }
       })
     } else {
-      setState({open: true, spaceId: '', spaceName: ''})
+      setState({ open: true, spaceId: '', spaceName: '' })
       form.resetFields()
     }
   })
 
   const validate = useCallback(async (filePath: string, spaceId?: string) => {
-    const includeSpace = await db.space.filter(s => filePath.startsWith(s.filePath)).first()
+    const includeSpace = await db.space.filter((s) => filePath.startsWith(s.filePath)).first()
     if (includeSpace && (!spaceId || includeSpace.cid !== spaceId)) {
-      form.setFields([{name: 'filePath', errors: ['The folder is already included in another space'], validated: false}])
+      form.setFields([
+        {
+          name: 'filePath',
+          errors: ['The folder is already included in another space'],
+          validated: false
+        }
+      ])
       return false
     }
     return true
   }, [])
 
   const save = useCallback(() => {
-    form.validateFields().then(async v => {
+    form.validateFields().then(async (v) => {
       if (state.spaceId) {
         if (!(await validate(v.filePath, state.spaceId))) return
         await db.space.update(state.spaceId, {
           name: v.name,
           filePath: v.filePath,
-          relative: v.relative,
-          imageFolder: v.imageFolder,
+          saveFolder: v.saveFolder,
+          savePath: v.savePath,
           background: state.background
         })
         const oldPath = core.tree.root?.filePath
@@ -74,8 +85,8 @@ export const EditSpace = observer(() => {
           runInAction(() => {
             core.tree.root!.filePath = v.filePath
             core.tree.root!.name = v.name
-            core.tree.root!.imageFolder = v.imageFolder
-            core.tree.root!.relative = v.relative
+            core.tree.root!.saveFolder = v.saveFolder
+            core.tree.root!.savePath = v.savePath
             core.tree.root!.background = state.background
           })
         }
@@ -85,16 +96,26 @@ export const EditSpace = observer(() => {
         }
         setState({ open: false })
       } else {
-        const exist = await db.space.filter(s => s.name === v.name || s.filePath === v.filePath).first()
+        const exist = await db.space
+          .filter((s) => s.name === v.name || s.filePath === v.filePath)
+          .first()
         if (exist) {
           if (exist.name === v.name) {
-            form.setFields([{name: 'name', errors: ['Space name already exists'], validated: false}])
+            form.setFields([
+              { name: 'name', errors: ['Space name already exists'], validated: false }
+            ])
           }
           if (exist.filePath === v.filePath) {
-            form.setFields([{name: 'filePath', errors: ['The folder is already used by another space'], validated: false}])
+            form.setFields([
+              {
+                name: 'filePath',
+                errors: ['The folder is already used by another space'],
+                validated: false
+              }
+            ])
           }
         } else {
-          if (!await validate(v.filePath)) return
+          if (!(await validate(v.filePath))) return
           const count = await db.space.count()
           const now = Date.now()
           const id = nid()
@@ -105,11 +126,11 @@ export const EditSpace = observer(() => {
             sort: count,
             lastOpenTime: now,
             created: now,
-            relative: v.relative,
-            imageFolder: v.imageFolder,
+            saveFolder: v.saveFolder,
+            savePath: v.savePath,
             background: state.background
           })
-          setState({open: false})
+          setState({ open: false })
           core.tree.initial(id)
           spaceChange$.next(null)
         }
@@ -133,20 +154,13 @@ export const EditSpace = observer(() => {
         {t('parseTip')}
       </div>
       <Form layout={'vertical'} className={'pt-2'} form={form}>
-        <Form.Item
-          label={t('spaceName')}
-          rules={[{ required: true }]}
-          name={'name'}
-        >
+        <Form.Item label={t('spaceName')} rules={[{ required: true }]} name={'name'}>
           <Input placeholder={t('enterName')} />
         </Form.Item>
         <Form.Item label={t('folder')}>
           <Space.Compact className={'w-full'}>
             <Form.Item rules={[{ required: true }]} name={'filePath'} noStyle={true}>
-              <Input
-                disabled={true}
-                placeholder={t('selectFolder')}
-              />
+              <Input disabled={true} placeholder={t('selectFolder')} />
             </Form.Item>
             <Button
               icon={<FolderOpenOutlined />}
@@ -181,24 +195,39 @@ export const EditSpace = observer(() => {
             })}
           </div>
         </Form.Item>
-        <Form.Item
-          label={t('storageFolder')}
-          tooltip={t('storageFolderTip')}
-        >
-          <Form.Item noStyle={true} name={'imageFolder'} initialValue={'.images'}>
+        <Form.Item label={t('storageFolder')} tooltip={t('storageFolderTip')}>
+          <Space.Compact style={{ width: '100%' }} className={'flex'}>
+            <Form.Item noStyle={true} name={'saveFolder'} initialValue={'docWorkspaceFolder'}>
+              <Select
+                className={'w-44'}
+                dropdownStyle={{ zIndex: 2200 }}
+                options={[
+                  {
+                    label: 'DocWorkspaceFolder',
+                    value: 'docWorkspaceFolder'
+                  },
+                  { label: 'DocDirFolder', value: 'docDirFolder' }
+                ]}
+              />
+            </Form.Item>
+            <Form.Item noStyle={true} name={'savePath'}>
+              <Input
+                placeholder={'.images is used by default'}
+              />
+            </Form.Item>
+          </Space.Compact>
+          {/* <Form.Item noStyle={true} name={'imageFolder'} initialValue={'.images'}>
             <Input placeholder={'.images'} />
-          </Form.Item>
-          <div className={'flex justify-end mt-1'}>
+          </Form.Item> */}
+          {/* <div className={'flex justify-end mt-1'}>
             <Form.Item noStyle={true} name={'relative'} valuePropName={'checked'}>
               <Checkbox>{t('relativePath')}</Checkbox>
             </Form.Item>
-          </div>
+          </div> */}
         </Form.Item>
         <div className={'space-y-3'}>
           <Button block={true} type={'primary'} onClick={save}>
-            {state.spaceId
-              ? t('save')
-              : t('create')}
+            {state.spaceId ? t('save') : t('create')}
           </Button>
           {!!state.spaceId && (
             <Button

@@ -5,7 +5,7 @@ import { db, IFile } from './db'
 import { observable, runInAction } from 'mobx'
 import { cpSync, existsSync, mkdirSync, readdirSync, renameSync, statSync, writeFileSync } from 'fs'
 import { openMdParserHandle, parserMdToSchema } from '../editor/parser/parser'
-import { nid } from '../utils'
+import { nid, sleep } from '../utils'
 import { mediaType } from '../editor/utils/dom'
 import { readdir, stat, writeFile } from 'fs/promises'
 import { MainApi } from '../api/main'
@@ -57,7 +57,8 @@ export class NodeStore {
           try {
             const s = statSync(join(filePath, '.inkdown/settings.json'))
             if (s?.isFile()) {
-              addData.published = true
+              const code = window.api.readFileSync(join(filePath, '.inkdown/settings.json'))
+              addData.pb_id = JSON.parse(code).id
             }
           } catch(e) {}
           this.fileMap.set(filePath, addData)
@@ -179,8 +180,8 @@ export class NodeStore {
       root: true,
       filePath: space.filePath,
       name: space.name,
-      imageFolder: space.imageFolder,
-      relative: space.relative,
+      saveFolder: space.saveFolder,
+      savePath: space.savePath,
       background: space.background
     } as ISpaceNode)
     const docs = await db.file.where('spaceId').equals(space.cid).toArray()
@@ -233,7 +234,7 @@ export class NodeStore {
       filePath: file.filePath,
       schema: file.schema,
       ghost,
-      published: file.published,
+      pb_id: file.pb_id,
       history: undefined,
       sel: undefined,
       hidden: name?.startsWith('.'),
@@ -469,20 +470,19 @@ export class NodeStore {
   }
 
  async deepCreateDoc(filePath: string) {
-    const core = useCoreContext()
-    if (!core.tree.root) {
+    if (!this.core.tree.root) {
       return
     }
     const parent = join(filePath, '..')
-    const nodeMap = new Map(core.tree.nodes.map(n => [n.filePath, n]))
-    let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || core.tree.root
+    const nodeMap = new Map(this.core.tree.nodes.map(n => [n.filePath, n]))
+    let parentNode: ISpaceNode | IFileItem = nodeMap.get(parent) || this.core.tree.root
     if (!existsSync(parent)) {
       mkdirSync(parent, {recursive: true})
-      const stack = parent.replace(core.tree.root.filePath + sep, '').split(sep)
+      const stack = parent.replace(this.core.tree.root.filePath + sep, '').split(sep)
       let curPaths: string[] = []
       for (const item of stack) {
         curPaths.push(item)
-        const path = join(core.tree.root.filePath, curPaths.join(sep))
+        const path = join(this.core.tree.root.filePath, curPaths.join(sep))
         if (nodeMap.get(path)) {
           parentNode = nodeMap.get(path)!
         } else {
@@ -491,7 +491,7 @@ export class NodeStore {
           const data: IFile = {
             cid: id,
             filePath: path,
-            spaceId: core.tree.root!.cid,
+            spaceId: this.core.tree.root!.cid,
             updated: now,
             sort: 0,
             folder: true,

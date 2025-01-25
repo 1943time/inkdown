@@ -237,7 +237,7 @@ const RenderItem = observer(({items, level}: { items: IFileItem[], level: number
   const core = useCoreContext()
   return (
     <>
-      {items.filter(c => core.config.config.showHiddenFiles || !c.hidden || c.filename === (core.tree.root?.imageFolder || '.images')).map(c =>
+      {items.filter(c => core.config.config.showHiddenFiles || !c.hidden || c.filename === (core.tree.root?.savePath?.split('/').pop() || '.images')).map(c =>
         <Item
           key={c.cid}
           item={c}

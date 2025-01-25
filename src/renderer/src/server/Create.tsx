@@ -78,7 +78,7 @@ export const CreateBook = observer(() => {
     const tree: DataTree[] = []
     for (const item of docs) {
       if (item.path && (item.path.endsWith('.md') || item.path.endsWith('.markdown'))) {
-      const path = join(dir, item.path.replace(/^\/+/, ''))
+        const path = join(dir, item.path.replace(/^\/+/, ''))
         const stat = window.api.stat(path)
         if (!stat) {
           core.message.warning(`The path ${item.path} does not exist`)
@@ -95,6 +95,9 @@ export const CreateBook = observer(() => {
           name: item.name,
           children: await getDocBySettings(item.children, dir)
         })
+      } else if (item.path) {
+        core.message.warning(`Path ${item.path} is not a markdown file.`)
+        throw new Error()
       }
     }
     return tree

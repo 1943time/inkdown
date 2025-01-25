@@ -18,7 +18,7 @@ import React, { createContext, useContext } from 'react'
 import { MediaNode, TableCellNode } from '../types/el'
 import { Subject } from 'rxjs'
 import { existsSync, mkdirSync, readFileSync, writeFileSync, cpSync } from 'fs'
-import { isAbsolute, join, parse, relative, sep } from 'path'
+import { basename, isAbsolute, join, parse, relative, sep } from 'path'
 import { getOffsetLeft, getOffsetTop, mediaType, slugify } from './utils/dom'
 import { MainApi } from '../api/main'
 import { withMarkdown } from './plugins'
@@ -31,6 +31,7 @@ import { toUnixPath } from '../utils/path'
 import { selChange$ } from './plugins/useOnchange'
 import { Core } from '../store/core'
 import { Ace, Range as AceRange } from 'ace-builds'
+import { db, IFile } from '../store/db'
 
 export const EditorStoreContext = createContext<EditorStore | null>(null)
 export const useEditorStore = () => {
@@ -258,15 +259,13 @@ export class EditorStore {
             const match = item.matchAll(regex)
             for (const m of match) {
               const range = new AceRange(i, m.index!, i, m.index! + m[0].length)
-              const data:(typeof this.searchRanges)[number] = {
+              const data: (typeof this.searchRanges)[number] = {
                 aceRange: range,
                 editor: editor
               }
               const markerId = editor.session.addMarker(
                 range,
-                matchCount === this.search.currentIndex
-                  ? 'match-current'
-                  : 'match-text',
+                matchCount === this.search.currentIndex ? 'match-current' : 'match-text',
                 'text',
                 false
               )
@@ -354,25 +353,22 @@ export class EditorStore {
 
   private changeCurrent() {
     const codes = new Set<Ace.Editor>()
-    this.searchRanges.forEach(action((r, j) => {
-      if (r.range) {
-        r.range.current = j === this.search.currentIndex
-      } else if (r.editor) {
-        codes.add(r.editor)
-        const marker = r.editor.session.getMarkers()[r.markerId!]
-        const cl = j === this.search.currentIndex ? 'match-current' : 'match-text'
-        if (marker && cl !== marker.clazz) {
-          r.editor.session.removeMarker(r.markerId!)
-          const id = r.editor.session.addMarker(
-            marker.range!,
-            cl,
-            'text',
-            false
-          )
-          r.markerId = id
+    this.searchRanges.forEach(
+      action((r, j) => {
+        if (r.range) {
+          r.range.current = j === this.search.currentIndex
+        } else if (r.editor) {
+          codes.add(r.editor)
+          const marker = r.editor.session.getMarkers()[r.markerId!]
+          const cl = j === this.search.currentIndex ? 'match-current' : 'match-text'
+          if (marker && cl !== marker.clazz) {
+            r.editor.session.removeMarker(r.markerId!)
+            const id = r.editor.session.addMarker(marker.range!, cl, 'text', false)
+            r.markerId = id
+          }
         }
-      }
-    }))
+      })
+    )
     this.refreshHighlight = !this.refreshHighlight
   }
 
@@ -473,26 +469,59 @@ export class EditorStore {
   }
   async getImageDir() {
     if (this.core.tree.root) {
-      let imageDir = join(
-        this.core.tree.root.filePath,
-        this.core.tree.root.imageFolder || '.images'
-      )
-      if (this.core.tree.root.relative) {
-        imageDir = join(
-          this.core.tree.openedNote!.filePath,
-          '..',
-          this.core.tree.root.imageFolder || '.images'
+      let path = this.core.tree.root.savePath || '.images'
+      path = path
+        .split('/')
+        .map((p) =>
+          p.replace(
+            /\[docName\]/gi,
+            basename(this.core.tree.openedNote!.filePath).replace(/\.(md|markdown)$/, '')
+          )
         )
+        .join('/')
+
+      const dir =
+        this.core.tree.root.saveFolder !== 'docWorkspaceFolder'
+          ? join(this.core.tree.openedNote!.filePath, '..', path)
+          : join(this.core.tree.root.filePath, path)
+      if (!existsSync(dir)) {
+        await window.api.fs.mkdir(dir, { recursive: true })
+        let p = dir
+        const nodeMap = new Map(Array.from(this.core.tree.nodeMap).map(n => [n[1].filePath, n[1]]))
+        const stack = p.replace(this.core.tree.root.filePath + sep, '').split(sep)
+        let curPath = this.core.tree.root.filePath
+        while(stack.length) {
+          const name = stack.shift()!
+          curPath = join(curPath, name)
+          if (!nodeMap.get(curPath)) {
+            const id = nid()
+            const now = Date.now()
+            const data: IFile = {
+              cid: id,
+              filePath: curPath,
+              spaceId: this.core.tree.root!.cid,
+              updated: now,
+              sort: 0,
+              folder: true,
+              created: now
+            }
+            await db.file.add(data)
+            const parent = nodeMap.get(join(curPath, '..')) || this.core.tree.root!
+            if (parent) {
+              runInAction(() => {
+                const node = this.core.node.createFileNode(data, parent)
+                parent.children?.unshift(node)
+                parent.children?.map((s, i) => {
+                  db.file.update(s.cid, { sort: i })
+                })
+                this.core.tree.nodeMap.set(node.cid, node)
+                nodeMap.set(node.filePath, node)
+              })
+            }
+          }
+        }
       }
-      if (!existsSync(imageDir)) {
-        await this.createDir(imageDir)
-        await this.core.node.insertFileNode({
-          filePath: imageDir,
-          folder: true,
-          spaceId: this.core.tree.root.cid
-        })
-      }
-      return imageDir
+      return dir
     } else {
       const path = await MainApi.getCachePath()
       const imageDir = join(path, 'assets')
@@ -551,7 +580,7 @@ export class EditorStore {
         files.map((f) => {
           const p = parse(f)
           const name = nid() + p.ext
-          return { data: readFileSync(f).buffer, name }
+          return { data: readFileSync(f).buffer as ArrayBuffer, name }
         })
       )
       if (urls) {
@@ -699,12 +728,9 @@ export class EditorStore {
     try {
       const cur = this.searchRanges[this.search.currentIndex]
       if (!cur) return
-      let dom:null | HTMLElement = null
+      let dom: null | HTMLElement = null
       if (cur.range) {
-        const node = Node.get(
-          this.editor,
-          Path.parent(cur.range.focus.path)
-        )
+        const node = Node.get(this.editor, Path.parent(cur.range.focus.path))
         dom = ReactEditor.toDOMNode(this.editor, node)
       } else if (cur.editor && cur.aceRange) {
         const lines = cur.editor.container.querySelectorAll('.ace_line')

@@ -106,7 +106,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           return store
             .saveFile({
               name: nid() + '.' + ext![1],
-              buffer: buffer.buffer
+              buffer: buffer.buffer as ArrayBuffer
             })
             .then((res) => {
               updateElement({

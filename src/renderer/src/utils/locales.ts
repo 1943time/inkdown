@@ -33,7 +33,7 @@ const en = {
   colorIndentifer: 'Color Indentifer',
   storageFolder: 'Image storage Folder',
   storageFolderTip:
-    "The save location for pasting images when opening a space, if using a relative path, the path is relative to the current document's path",
+    "In the file path, you can use [docName] to represent the document name, for example: [docName]/assets",
   relativePath: 'Relative path',
   save: 'Save',
   create: 'Create',
@@ -117,7 +117,7 @@ const zh: Local = {
   colorIndentifer: '定义颜色',
   storageFolder: '图片存储文件夹',
   storageFolderTip:
-    '在打开空间的情况下，黏贴图片的保存位置，如果使用相对路径，则路径相对于当前文档的路径',
+    '在文件路径中，可以使用[docName]来表示文档名称，例如：[docName]/assets',
   relativePath: '相对路径',
   save: '保存',
   create: '创建',

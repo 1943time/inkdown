@@ -38,8 +38,8 @@ export interface ISpace {
   created?: number
   sort: number
   lastOpenTime: number
-  imageFolder?: string
-  relative?: boolean
+  saveFolder?: 'docWorkspaceFolder' | 'documentWorkspaceFolder'
+  savePath?: string
   background?: string
 }
 export interface IFile {
@@ -47,7 +47,7 @@ export interface IFile {
   filePath: string
   spaceId?: string
   folder: boolean
-  published?: boolean
+  pb_id?: string
   schema?: object
   synced?: 0 | 1
   updated?: number
@@ -71,7 +71,7 @@ class Db extends Dexie {
   public config!: Table<IConfig, string>
   public constructor() {
     super('db')
-    this.version(10).stores({
+    this.version(11).stores({
       space: '&cid,name,filePath,sort',
       file: '&cid,filePath,sort,folder,synced,spaceId',
       recent: '&id,filePath,spaceId,sort',

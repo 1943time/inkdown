@@ -8,7 +8,7 @@ import mime from 'mime-types'
 import nodeFetch, { RequestInit } from 'node-fetch'
 const isWindows = process.platform === 'win32'
 import jwt from 'jsonwebtoken'
-import { statSync } from 'fs'
+import { readFileSync, statSync } from 'fs'
 let watchers = new Map<string, Watcher>()
 export const api = {
   copyToClipboard(str: string) {
@@ -41,6 +41,9 @@ export const api = {
     return mime.lookup(file) || ''
   },
   fs,
+  readFileSync(path: string) {
+    return readFileSync(path, {encoding: 'utf-8'})
+  },
   stat(path: string) {
     try {
       return statSync(path)

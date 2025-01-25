@@ -1,12 +1,11 @@
-import {TreeStore} from '../tree'
-import {join} from 'path'
-import {IFileItem, ISpaceNode} from '../../types/index'
-import {openMdParserHandle} from '../../editor/parser/parser'
-import {existsSync, statSync} from 'fs'
-import {db, IFile} from '../db'
-import {nid} from '../../utils'
-import {mediaType} from '../../editor/utils/dom'
-import {runInAction} from 'mobx'
+import { join } from 'path'
+import { IFileItem, ISpaceNode } from '../../types/index'
+import { openMdParserHandle } from '../../editor/parser/parser'
+import { statSync } from 'fs'
+import { db, IFile } from '../db'
+import { nid } from '../../utils'
+import { mediaType } from '../../editor/utils/dom'
+import { runInAction } from 'mobx'
 import { Core } from '../core'
 
 export class Watcher {
@@ -58,7 +57,6 @@ export class Watcher {
         this.store.moveToTrash(node, true)
       }
       if (e === 'update') {
-        if (!existsSync(op.path)) continue
         if (node && node.ext === 'md') {
           const [res] = await parser([{filePath: path}])
           node.schema = res.schema
@@ -79,7 +77,7 @@ export class Watcher {
         if (!node) {
           const parentPath = join(path, '..')
           let parent: IFileItem | ISpaceNode | undefined = this.fileMap.get(join(path, '..'))
-          if (!parent) parent = this.store.root?.filePath === parentPath ? this.store.root :undefined
+          if (!parent) parent = this.store.root?.filePath === parentPath ? this.store.root : Array.from(this.store.nodeMap).find(n => n[1].filePath === parentPath)?.[1]
           if (!parent) return
           try {
             const s = statSync(path)

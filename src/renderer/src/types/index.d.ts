@@ -8,8 +8,8 @@ export type ISpaceNode = {
   root: true
   filePath: string
   name: string
-  imageFolder?: string
-  relative?: boolean
+  saveFolder?: 'docWorkspaceFolder' | 'documentWorkspaceFolder'
+  savePath?: string
   background?: string
   children?: IFileItem[]
 }
@@ -19,7 +19,7 @@ export type IFileItem = {
   root?: boolean
   ext: string
   filename: string
-  published?: boolean
+  pb_id?: string
   spaceId?: string
   folder: boolean
   parent?: IFileItem
