@@ -1,5 +1,0 @@
-sdsdfsdf
-
-```ts
-sdfsdf
-```
