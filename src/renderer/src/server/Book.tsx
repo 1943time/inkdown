@@ -33,24 +33,24 @@ export const Book = observer((props: { visible: boolean }) => {
         setState({ loading: false })
       })
   }, [])
+  useEffect(() => {
+    if (props.visible) {
+      getBooks()
+    }
+  }, [props.visible])
   if (!core.pb.host) {
     return (
       <div className={'py-5'}>
         <div className={'text-center px-5'}>
           After configuring the service program, any folder can be published as online
           documentation.{' '}
-          <a href={''} className={'text-blue-500 underline hover:underline'}>
+          <a href={`https://docs.inkdown.cn/doc/${core.config.zh ? 'zh' : 'en'}`} className={'text-blue-500 underline hover:underline'} target={'_blank'}>
             Details
           </a>
         </div>
       </div>
     )
   }
-  useEffect(() => {
-    if (props.visible) {
-      getBooks()
-    }
-  }, [props.visible])
   return (
     <>
       {context}

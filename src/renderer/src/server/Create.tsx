@@ -292,7 +292,7 @@ export const CreateBook = observer(() => {
       {nctx}
       <div className={'text-sm dark:text-white/60 mb-2'}>
         Fill in the settings file,{' '}
-        <a className={'underline hover:underline text-blue-500'}>details</a>.
+        <a className={'underline hover:underline text-blue-500'} href={`https://docs.inkdown.cn/doc/${core.config.zh ? 'zh' : 'en'}`} target={'_blank'}>details</a>.
       </div>
       <div className={'border rounded-sm dark:border-white/10 border-black/10 py-2'}>
         <div style={{ lineHeight: '22px', height: 300 }} ref={dom}></div>
@@ -306,7 +306,7 @@ export const CreateBook = observer(() => {
                 Unpublish
               </Button>
             )}
-            <Button type={'primary'} onClick={publish}>
+            <Button type={'primary'} onClick={publish} loading={state.submitting}>
               Publish
             </Button>
           </>
