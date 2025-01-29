@@ -56,8 +56,8 @@ devDependencies:
     specifier: ^4.1.1
     version: 4.1.1(react@18.2.0)
   '@inkdown/client':
-    specifier: 0.1.6
-    version: 0.1.6
+    specifier: 0.1.7
+    version: 0.1.7
   '@types/array-move':
     specifier: ^2.0.0
     version: 2.0.0
@@ -1113,8 +1113,8 @@ packages:
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
     dev: true
 
-  /@inkdown/client@0.1.6:
-    resolution: {integrity: sha512-8U4+S1qjokzjTAyUglKes6WyzFQrACWWE3I4ajG1rEwLu6bISQXejqb6/WIzYS6SVLjFKK3p2zpUY7r8Uv0iBQ==}
+  /@inkdown/client@0.1.7:
+    resolution: {integrity: sha512-uh1k+IjXYpbP+3mMSID8mHDDcJi/E6ccn9owkcfE+vFHmPRNlKhX7KVvAQnfkBTUDfMKpf8m5u8DxNcNKtftrA==}
     engines: {node: '>=20.0.0'}
     dependencies:
       diacritics: 1.3.0
