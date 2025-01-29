@@ -2,6 +2,7 @@ import { join } from 'path'
 import { db } from './db'
 import {IApi} from '@inkdown/client'
 import { Core } from './core'
+import { isWindows } from '../utils'
 export class Publish {
   access_key_id = ''
   access_key_secret = ''
@@ -25,6 +26,7 @@ export class Publish {
     return new IApi({
       fetch: window.fetch.bind(window),
       mode: 'inkdown',
+      os: isWindows ? 'windows' : 'other',
       getFileData: async (path) => {
         try {
           const buffer = await window.api.fs.readFile(path)

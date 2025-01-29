@@ -238,13 +238,13 @@ export const Nav = observer(() => {
                     core.file.convertRemoteImages(core.tree.openedNote!)
                   }
                 },
-                {
-                  text: t('claerImage'),
-                  disabled: !core.tree.root,
-                  click: () => {
-                    core.file.clear()
-                  }
-                },
+                // {
+                //   text: t('claerImage'),
+                //   disabled: !core.tree.root,
+                //   click: () => {
+                //     core.file.clear()
+                //   }
+                // },
                 { hr: true },
                 {
                   text: isMac ? 'Reveal in Finder' : 'Reveal in File Explorer',

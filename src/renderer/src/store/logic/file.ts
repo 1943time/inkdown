@@ -31,68 +31,68 @@ export class FileAssets {
     }
   }
 
-  clear() {
-    if (!this.core.tree.root) return
-    openConfirmDialog$.next({
-      title: i18n.t('note'),
-      description: i18n.t('clearImageTip'),
-      onConfirm: async () => {
-        let imgDirs: (IFileItem | ISpaceNode)[] = []
-        const base = basename(this.core.tree.root!.imageFolder || '')
-        if (this.core.tree.root?.relative) {
-          const stack = this.core.tree.root?.children!.slice() || []
-          while (stack.length) {
-            const item = stack.shift()!
-            if (item.folder && item.children) {
-              stack.unshift(...item.children)
-              if (item.filename === base || !base || base === './' || base === '.') {
-                imgDirs.push(item)
-              }
-            }
-          }
-        } else {
-          const item = this.core.tree.root?.children?.find(item => item.filePath === join(this.core.tree.root?.filePath || '', this.core.tree.root?.imageFolder || '.images'))
-          if (item) imgDirs.push(item)
-        }
+  // clear() {
+  //   if (!this.core.tree.root) return
+  //   openConfirmDialog$.next({
+  //     title: i18n.t('note'),
+  //     description: i18n.t('clearImageTip'),
+  //     onConfirm: async () => {
+  //       let imgDirs: (IFileItem | ISpaceNode)[] = []
+  //       const base = basename(this.core.tree.root!.imageFolder || '')
+  //       if (this.core.tree.root?.relative) {
+  //         const stack = this.core.tree.root?.children!.slice() || []
+  //         while (stack.length) {
+  //           const item = stack.shift()!
+  //           if (item.folder && item.children) {
+  //             stack.unshift(...item.children)
+  //             if (item.filename === base || !base || base === './' || base === '.') {
+  //               imgDirs.push(item)
+  //             }
+  //           }
+  //         }
+  //       } else {
+  //         const item = this.core.tree.root?.children?.find(item => item.filePath === join(this.core.tree.root?.filePath || '', this.core.tree.root?.imageFolder || '.images'))
+  //         if (item) imgDirs.push(item)
+  //       }
 
-        if (!base || base === '.') {
-          imgDirs.push(this.core.tree.root!)
-        }
+  //       if (!base || base === '.') {
+  //         imgDirs.push(this.core.tree.root!)
+  //       }
 
-        if (imgDirs.length) {
-          const usedImages = new Set<string>()
-          const stack = this.core.tree.root?.children!.slice() || []
-          while (stack.length) {
-            const item = stack.pop()!
-            if (item.folder) {
-              stack.push(...item.children!.slice())
-            } else {
-              if (item.ext === 'md') {
-                this.findMedia(item.filePath, item.schema || [], usedImages)
-              }
-            }
-          }
-          for (let dir of imgDirs) {
-            const images = await readdir(dir.filePath)
-            const remove = new Set<string>()
-            for (let img of images) {
-              const path = join(dir.filePath, img)
-              if (!usedImages.has(path)) {
-                remove.add(path)
-                MainApi.moveToTrash(path)
-              }
-            }
-            runInAction(() => {
-              dir.children = dir.children?.filter(img => {
-                return !remove.has(img.filePath)
-              })
-            })
-          }
-          this.core.message.success(i18n.t('clearSuccess'))
-        }
-      }
-    })
-  }
+  //       if (imgDirs.length) {
+  //         const usedImages = new Set<string>()
+  //         const stack = this.core.tree.root?.children!.slice() || []
+  //         while (stack.length) {
+  //           const item = stack.pop()!
+  //           if (item.folder) {
+  //             stack.push(...item.children!.slice())
+  //           } else {
+  //             if (item.ext === 'md') {
+  //               this.findMedia(item.filePath, item.schema || [], usedImages)
+  //             }
+  //           }
+  //         }
+  //         for (let dir of imgDirs) {
+  //           const images = await readdir(dir.filePath)
+  //           const remove = new Set<string>()
+  //           for (let img of images) {
+  //             const path = join(dir.filePath, img)
+  //             if (!usedImages.has(path)) {
+  //               remove.add(path)
+  //               MainApi.moveToTrash(path)
+  //             }
+  //           }
+  //           runInAction(() => {
+  //             dir.children = dir.children?.filter(img => {
+  //               return !remove.has(img.filePath)
+  //             })
+  //           })
+  //         }
+  //         this.core.message.success(i18n.t('clearSuccess'))
+  //       }
+  //     }
+  //   })
+  // }
   async convertRemoteImages(node: IFileItem) {
     if (node.ext === 'md') {
       const schema = node.schema
