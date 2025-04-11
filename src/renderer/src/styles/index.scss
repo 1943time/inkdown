@@ -1,0 +1,40 @@
+@use 'tailwind';
+@use 'animate';
+@use 'color';
+@use 'chat';
+@use 'cover';
+.ant-tabs-tab {
+  margin-block: 0 !important;
+}
+body,
+html {
+  overscroll-behavior: none;
+  background-color: transparent !important;
+  background-color: var(--primary-bg-color) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.action {
+  @apply rounded duration-200 hover:bg-white/10 cursor-pointer;
+}
+
+.panel-bg {
+  @apply dark:bg-[rgba(105,81,81,0.95)] bg-white/95 backdrop-blur;
+}
+
+.context-menu {
+  @extend .panel-bg;
+  @apply absolute p-1 rounded-lg
+   border border-gray-200 dark:border-gray-200/20 text-[13px];
+}
+
+.action-icon {
+  @apply rounded-full duration-150 dark:hover:bg-white/15 cursor-pointer dark:bg-white/10;
+}
+.drag-nav {
+  app-region: drag;
+}
+
+.drag-none {
+  app-region: no-drag;
+}

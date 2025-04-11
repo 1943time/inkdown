@@ -1,26 +1,34 @@
+# app
 
-<h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
+An Electron application with React and TypeScript
 
+## Recommended IDE Setup
 
-Improve markdown reading and editing experience, and facilitate network sharing.
+- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
-[Documentation](https://docs.inkdown.cn/doc/en)  |  [中文文档](https://docs.inkdown.cn/doc/zh)
+## Project Setup
 
-| Mac                                                                                                                                                                                 | Windows                                                                                                                                                                                 | Linux                                                          | VsCode                                                                         |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-arm64.dmg) [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-mac-x64.dmg) |   [Arm64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-arm64.exe)   [X64](https://github.com/1943time/inkdown/releases/latest/download/Inkdown-win-x64.exe) | [Release](https://github.com/1943time/inkdown/releases/latest) | [Market](https://marketplace.visualstudio.com/items?itemName=1943time.inkdown) |
+### Install
 
-# Introduction
+```bash
+$ pnpm install
+```
 
-Inkdown is a WYSIWYG Markdown editor that aims to improve the markdown reading and editing experience and add the ability to share freely.
+### Development
 
-![](./docs//assets/d10.png)
+```bash
+$ pnpm dev
+```
 
-![](./docs//assets/d11.png)
+### Build
 
-### Vs code
+```bash
+# For windows
+$ pnpm build:win
 
-![](./resources/d6.png)
+# For macOS
+$ pnpm build:mac
 
-![](./resources/d5.png)
-
+# For Linux
+$ pnpm build:linux
+```

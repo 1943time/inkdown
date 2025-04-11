@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html class="dark">
   <head>
     <meta charset="UTF-8" />
-    <title>Inkdown</title>
+    <title>Electron</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src *;font-src 'self' file: data:; img-src data: *;media-src data: *; script-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:;"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <script>
-      const theme = localStorage.getItem('theme')
-      if (theme === 'dark' || (!theme && window.matchMedia && window.matchMedia?.('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark')
-    </script>
   </head>
 
   <body>
