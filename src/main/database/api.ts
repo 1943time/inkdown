@@ -68,7 +68,8 @@ ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
         ...m,
         files: m.files ? JSON.stringify(m.files) : null,
         images: m.images ? JSON.stringify(m.images) : null,
-        error: m.error ? JSON.stringify(m.error) : null
+        error: m.error ? JSON.stringify(m.error) : null,
+        docs: m.docs ? JSON.stringify(m.docs) : null
       }
     })
   )
@@ -87,6 +88,9 @@ ipcMain.handle('updateMessage', async (_, id: string, message: Partial<IMessage>
   if (message.error) {
     updateData.error = JSON.stringify(message.error)
   }
+  if (message.docs) {
+    updateData.docs = JSON.stringify(message.docs)
+  }
   const updatedMessage = await knex('message').where({ id }).update(updateData)
   return updatedMessage
 })
@@ -102,7 +106,8 @@ ipcMain.handle('getMessages', async (_, chatId: string) => {
       ...m,
       files: m.files ? JSON.parse(m.files) : null,
       images: m.images ? JSON.parse(m.images) : null,
-      error: m.error ? JSON.parse(m.error) : null
+      error: m.error ? JSON.parse(m.error) : null,
+      docs: m.docs ? JSON.parse(m.docs) : null
     }
   })
 })

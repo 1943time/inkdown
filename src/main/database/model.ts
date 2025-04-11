@@ -56,8 +56,10 @@ export const initModel = () => {
           t.integer('duration').defaultTo(0)
           t.boolean('terminated').defaultTo(false)
           t.string('model').nullable()
+          t.integer('height').nullable()
           t.string('error').nullable()
           t.string('files').nullable()
+          t.string('docs').nullable()
           t.string('images').nullable()
           t.foreign('chatId').references('id').inTable('chat').onDelete('CASCADE')
         })
@@ -132,10 +134,31 @@ export const initModel = () => {
           t.string('docId')
           t.text('schema')
           t.string('spaceId')
-          t.integer('updated').defaultTo(Date.now())
+          t.integer('created').defaultTo(Date.now())
           t.text('depFiles').nullable()
           t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
           t.foreign('docId').references('id').inTable('doc').onDelete('CASCADE')
+        })
+      }
+    }),
+    knex.schema.hasTable('tag').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('tag', (t) => {
+          t.string('id').primary()
+          t.string('name')
+          t.integer('created').defaultTo(Date.now())
+        })
+      }
+    }),
+    knex.schema.hasTable('docTag').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('docTag', (t) => {
+          t.string('id').primary()
+          t.string('docId')
+          t.string('tagId')
+          t.integer('created').defaultTo(Date.now())
+          t.foreign('docId').references('id').inTable('doc').onDelete('CASCADE')
+          t.foreign('tagId').references('id').inTable('tag').onDelete('CASCADE')
         })
       }
     })

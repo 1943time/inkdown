@@ -30,6 +30,7 @@ export interface IMessage extends IMessageModel {
   error?: { code: string; message: string }
   files?: IMessageFile[]
   images?: IMessageFile[]
+  docs?: IMessageDoc[]
 }
 
 export interface IChat {
@@ -81,6 +82,11 @@ export interface IMessageFile {
   content?: string
   path?: string
   status?: 'pending' | 'success' | 'error'
+}
+
+export interface IMessageDoc {
+  id: string
+  content: string
 }
 
 export type IChatTable = Pick<
@@ -135,4 +141,10 @@ export interface IFile {
   created: number
   size: number
   spaceId: string
+}
+
+export interface ITag {
+  id: string
+  name: string
+  created: number
 }
