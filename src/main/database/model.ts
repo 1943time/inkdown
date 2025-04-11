@@ -25,7 +25,6 @@ export const initModel = () => {
           t.string('options').nullable()
         })
       }
-      return Promise.resolve()
     }),
     knex.schema.hasTable('chat').then((exists) => {
       if (!exists) {
@@ -42,7 +41,6 @@ export const initModel = () => {
           t.text('summary').nullable()
         })
       }
-      return Promise.resolve()
     }),
     knex.schema.hasTable('message').then((exists) => {
       if (!exists) {
@@ -64,7 +62,6 @@ export const initModel = () => {
           t.foreign('chatId').references('id').inTable('chat').onDelete('CASCADE')
         })
       }
-      return Promise.resolve()
     }),
     knex.schema.hasTable('prompt').then((exists) => {
       if (!exists) {
@@ -75,7 +72,6 @@ export const initModel = () => {
           t.integer('sort').defaultTo(0)
         })
       }
-      return Promise.resolve()
     }),
     knex.schema.hasTable('setting').then((exists) => {
       if (!exists) {
@@ -84,7 +80,64 @@ export const initModel = () => {
           t.text('value')
         })
       }
-      return Promise.resolve()
+    }),
+    // Editor
+    knex.schema.hasTable('space').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('space', (t) => {
+          t.string('id').primary()
+          t.text('name')
+          t.integer('created').defaultTo(Date.now())
+          t.integer('lastOpenTime').defaultTo(Date.now())
+          t.integer('sort').defaultTo(0)
+          t.string('writeFolderPath').nullable()
+          t.text('background').nullable()
+          t.string('opt').nullable()
+        })
+      }
+    }),
+    knex.schema.hasTable('doc').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('doc', (t) => {
+          t.string('id').primary()
+          t.text('name')
+          t.string('spaceId')
+          t.string('parentId').nullable()
+          t.boolean('folder').defaultTo(false)
+          t.text('schema').nullable()
+          t.integer('updated').defaultTo(Date.now())
+          t.integer('deleted').defaultTo(0)
+          t.integer('created').defaultTo(Date.now())
+          t.integer('sort').defaultTo(0)
+          t.text('links').nullable()
+          t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
+        })
+      }
+    }),
+    knex.schema.hasTable('file').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('file', (t) => {
+          t.string('name').primary()
+          t.integer('created').defaultTo(Date.now())
+          t.integer('size').defaultTo(0)
+          t.string('spaceId')
+          t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
+        })
+      }
+    }),
+    knex.schema.hasTable('history').then((exists) => {
+      if (!exists) {
+        return knex.schema.createTable('history', (t) => {
+          t.string('id').primary()
+          t.string('docId')
+          t.text('schema')
+          t.string('spaceId')
+          t.integer('updated').defaultTo(Date.now())
+          t.text('depFiles').nullable()
+          t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
+          t.foreign('docId').references('id').inTable('doc').onDelete('CASCADE')
+        })
+      }
     })
   ])
 }

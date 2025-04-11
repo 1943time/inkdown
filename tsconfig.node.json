@@ -4,6 +4,7 @@
   "compilerOptions": {
     "composite": true,
     "types": ["electron-vite/node"],
+    "noImplicitReturns": false,
     "paths": {
       "types/*": ["./src/types/*"]
     }

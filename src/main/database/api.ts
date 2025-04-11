@@ -14,11 +14,17 @@ ipcMain.handle('getPrompts', async () => {
 
 ipcMain.handle('getChats', async () => {
   const chats = await knex.select('*').from('chat')
-  return chats
+  return chats.map((chat) => {
+    return {
+      ...chat,
+      websearch: chat.websearch === 1,
+      messages: []
+    }
+  })
 })
 
 ipcMain.handle('getChat', async (_, id: string) => {
-  const chat = await knex.select('*').from('chat').where('id', id).first<IChat>()
+  const chat = await knex.select('*').from('chat').where('id', id).first()
   if (chat) {
     const messages = await knex.select('*').from('message').where('chatId', id)
     chat.messages = messages.map((m) => {
@@ -30,7 +36,10 @@ ipcMain.handle('getChat', async (_, id: string) => {
       }
     })
   }
-  return chat
+  return {
+    ...chat,
+    websearch: chat.websearch === 1
+  }
 })
 
 ipcMain.handle('createChat', async (_, chat: IChat) => {

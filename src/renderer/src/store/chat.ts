@@ -29,6 +29,8 @@ export class ChatStore {
   }
   init() {
     this.store.model.getChats().then((chats) => {
+      console.log('chats', chats)
+
       this.useState.setState((state) => {
         state.chats = chats
       })

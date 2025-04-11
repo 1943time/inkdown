@@ -1,5 +1,3 @@
-import { ChatMessage } from '@lobehub/ui'
-
 export type MessageRole = 'user' | 'assistant' | 'system'
 export type AiMode =
   | 'qwen'
@@ -12,11 +10,6 @@ export type AiMode =
   | 'mowen'
   | 'gemini'
 
-export type IMessageProps = ChatMessage & {
-  editableContent: ReactNode
-  reasoning?: string
-  duration?: number
-}
 export interface IMessageModel {
   role: MessageRole
   content: string
@@ -103,3 +96,43 @@ export type IChatTable = Pick<
   | 'summaryIndex'
   | 'summary'
 >
+
+export interface ISpace {
+  id: string
+  name: string
+  created: number
+  lastOpenTime: number
+  sort: number
+  writeFolderPath?: string
+  background?: string
+  opt?: Record<string, any>
+}
+
+export interface IDoc {
+  id: string
+  name: string
+  spaceId: string
+  parentId?: string
+  folder: boolean
+  schema?: any[]
+  updated: number
+  deleted: boolean
+  created: number
+  sort: number
+  links?: string[]
+}
+
+export interface IHistory {
+  id: string
+  docId: string
+  schema: any[]
+  spaceId: string
+  updated: number
+  depFiles?: string[]
+}
+export interface IFile {
+  name: string
+  created: number
+  size: number
+  spaceId: string
+}
