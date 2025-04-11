@@ -26,7 +26,6 @@ export function Settings() {
       <div className={'pt-10'}>
         <Tabs
           size={'small'}
-          tabPosition={'left'}
           accessKey={activeTab}
           onChange={(key) => {
             store.settings.useState.setState({ tab: key })

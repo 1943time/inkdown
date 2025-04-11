@@ -11,7 +11,6 @@ export type Bound = {
 }
 export let lastCloseWindow: Bound | null = null
 export const winMap = new WeakMap<BrowserWindow, string>()
-console.log('dir2', __dirname)
 
 export function createWindow(bound?: Bound | null) {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize

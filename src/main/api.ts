@@ -1,0 +1,1 @@
+import { ipcMain } from 'electron'

@@ -1,9 +1,9 @@
-import { Form, Select, Popconfirm, Button } from 'antd'
+import { Form, Select, Popconfirm, Button, Input } from 'antd'
 import { useStore } from '@/store/store'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useGetSetState } from 'react-use'
 import { IClient } from 'types/model'
-import { Collapse, Input } from '@lobehub/ui'
+import { Collapse, SortableList } from '@lobehub/ui'
 import { AiModeLabel, openAiModels } from '@/store/model/data/data'
 import { ModelIcon } from '../chat/ModelIcon'
 import { CircleCheckBig, CircleX } from 'lucide-react'
@@ -222,7 +222,7 @@ export function ModelSettings() {
     editModels: store.settings.useState
       .getState()
       .models.map((m) => ({ id: m.id, model: copy(m), create: false })) as {
-      id?: string
+      id: string
       model?: IClient
       create: boolean
     }[],

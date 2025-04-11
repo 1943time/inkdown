@@ -77,7 +77,14 @@ export const AiMessage = memo<{ msg: IMessage }>(({ msg }) => {
                 <div className={'duration-150 dark:hover:bg-white/10 flex'} onClick={copy}>
                   {state().copied ? <Check size={16} /> : <Clipboard size={16} />}
                 </div>
-                <div className={'duration-150 dark:hover:bg-white/10 flex'}>
+                <div
+                  className={'duration-150 dark:hover:bg-white/10 flex'}
+                  onClick={() => {
+                    window.speechSynthesis.speak(
+                      new SpeechSynthesisUtterance('你好啊，我是来自Inkdown的机器人助手，你是谁')
+                    )
+                  }}
+                >
                   <Volume2 size={17} />
                 </div>
               </div>

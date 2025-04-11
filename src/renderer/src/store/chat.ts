@@ -248,7 +248,6 @@ export class ChatStore {
       id: msgId,
       content: '...',
       tokens: 0,
-      pending: true,
       model: activeChat.model!
     }
     this.useState.setState((state) => {

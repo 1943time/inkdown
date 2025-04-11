@@ -31,7 +31,6 @@ export interface IMessage extends IMessageModel {
   updated: number
   reasoning?: string
   duration?: number
-  pending?: boolean
   // 提前终止
   terminated?: boolean
   model?: string

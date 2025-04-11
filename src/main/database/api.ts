@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { initModel, knex } from './model'
 import { IChat, IMessage, ISetting, IClient } from 'types/model'
+import { omit } from '../utils'
 
 export const modelReady = () => {
   return initModel()
@@ -17,20 +18,30 @@ ipcMain.handle('getChats', async () => {
 })
 
 ipcMain.handle('getChat', async (_, id: string) => {
-  const chat = await knex.select('*').from('chat').where('id', id).first()
+  const chat = await knex.select('*').from('chat').where('id', id).first<IChat>()
   if (chat) {
-    chat.messages = await knex.select('*').from('message').where('chatId', id)
+    const messages = await knex.select('*').from('message').where('chatId', id)
+    chat.messages = messages.map((m) => {
+      return {
+        ...m,
+        files: m.files ? JSON.parse(m.files) : null,
+        images: m.images ? JSON.parse(m.images) : null,
+        error: m.error ? JSON.parse(m.error) : null
+      }
+    })
   }
   return chat
 })
 
 ipcMain.handle('createChat', async (_, chat: IChat) => {
-  const newChat = await knex.insert(chat).into('chat')
+  const newChat = await knex.insert(omit(chat, ['messages', 'pending'])).into('chat')
   return newChat
 })
 
 ipcMain.handle('updateChat', async (_, id: string, chat: Partial<IChat>) => {
-  const updatedChat = await knex('chat').where({ id }).update(chat)
+  const updatedChat = await knex('chat')
+    .where({ id })
+    .update(omit(chat, ['messages', 'pending']))
   return updatedChat
 })
 
@@ -42,12 +53,32 @@ ipcMain.handle('deleteChat', async (_, id: string) => {
 })
 
 ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
-  const newMessages = await knex.batchInsert('message', messages)
-  return newMessages
+  return knex('message').insert(
+    messages.map((m) => {
+      return {
+        ...m,
+        files: m.files ? JSON.stringify(m.files) : null,
+        images: m.images ? JSON.stringify(m.images) : null,
+        error: m.error ? JSON.stringify(m.error) : null
+      }
+    })
+  )
 })
 
 ipcMain.handle('updateMessage', async (_, id: string, message: Partial<IMessage>) => {
-  const updatedMessage = await knex('message').where({ id }).update(message)
+  const updateData: any = {
+    ...message
+  }
+  if (message.files) {
+    updateData.files = JSON.stringify(message.files)
+  }
+  if (message.images) {
+    updateData.images = JSON.stringify(message.images)
+  }
+  if (message.error) {
+    updateData.error = JSON.stringify(message.error)
+  }
+  const updatedMessage = await knex('message').where({ id }).update(updateData)
   return updatedMessage
 })
 
@@ -57,9 +88,15 @@ ipcMain.handle('deleteMessages', async (_, ids: string[]) => {
 
 ipcMain.handle('getMessages', async (_, chatId: string) => {
   const messages = await knex.select('*').from('message').where('chatId', chatId)
-  return messages
+  return messages.map((m) => {
+    return {
+      ...m,
+      files: m.files ? JSON.parse(m.files) : null,
+      images: m.images ? JSON.parse(m.images) : null,
+      error: m.error ? JSON.parse(m.error) : null
+    }
+  })
 })
-
 ipcMain.handle('putSetting', async (_, setting: ISetting) => {
   const row = await knex('setting').where('key', setting.key).first()
   if (row) {
@@ -86,21 +123,47 @@ ipcMain.handle('getSettings', async (_, keys?: string[]) => {
 
 ipcMain.handle('getClients', async () => {
   const clients = await knex.select('*').from('client')
-  return clients
+  return clients.map((client) => {
+    return {
+      ...client,
+      models: client.models ? JSON.parse(client.models) : [],
+      options: client.options ? JSON.parse(client.options) : {}
+    }
+  })
 })
 
 ipcMain.handle('getClient', async (_, id: string) => {
   const client = await knex.select('*').from('client').where('id', id).first()
-  return client
+  if (client) {
+    return {
+      ...client,
+      models: client.models ? JSON.parse(client.models) : [],
+      options: client.options ? JSON.parse(client.options) : {}
+    }
+  }
+  return null
 })
 
 ipcMain.handle('createClient', async (_, client: IClient) => {
-  const newClient = await knex.insert(client).into('client')
-  return newClient
+  return knex('client').insert({
+    ...client,
+    models: JSON.stringify(client.models || []),
+    options: JSON.stringify(client.options || {})
+  })
 })
 
 ipcMain.handle('updateClient', async (_, id: string, client: Partial<IClient>) => {
   const updatedClient = await knex('client').where({ id }).update(client)
+  const updateData: any = {
+    ...client
+  }
+  if (client.models) {
+    updateData.models = JSON.stringify(client.models)
+  }
+  if (client.options) {
+    updateData.options = JSON.stringify(client.options)
+  }
+  knex('client').where({ id }).update(updateData)
   return updatedClient
 })
 

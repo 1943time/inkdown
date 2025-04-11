@@ -1,7 +1,7 @@
 import { MessageInput, MessageInputProps, MessageModalProps } from '@lobehub/ui'
-import { memo, useState, lazy, Suspense } from 'react'
+import { memo, useState } from 'react'
 import BubblesLoading from '../../message/BubbleLoading'
-const Markdown = lazy(() => import('@/ui/markdown/Markdown'))
+import Markdown from '@/ui/markdown/Markdown'
 export interface EditableMessageProps {
   /**
    * @title The class name for the Markdown and MessageInput component
@@ -45,7 +45,18 @@ export interface EditableMessageProps {
 }
 
 const EditableMessage = memo<EditableMessageProps>(
-  ({ value, classNames = {}, placeholder, showEditWhenEmpty = false, height, inputType, editButtonSize, text, fullFeaturedCodeBlock, fontSize }) => {
+  ({
+    value,
+    classNames = {},
+    placeholder,
+    showEditWhenEmpty = false,
+    height,
+    inputType,
+    editButtonSize,
+    text,
+    fullFeaturedCodeBlock,
+    fontSize
+  }) => {
     const [isEdit, setTyping] = useState(false)
     const isAutoSize = height === 'auto'
     if (value === '...') return <BubblesLoading />
@@ -75,19 +86,17 @@ const EditableMessage = memo<EditableMessageProps>(
         {isEdit ? (
           input
         ) : (
-          <Suspense fallback={<BubblesLoading />}>
-            <Markdown
-              className={classNames?.markdown}
-              fontSize={fontSize}
-              fullFeaturedCodeBlock={fullFeaturedCodeBlock}
-              style={{
-                height: isAutoSize ? 'unset' : height
-              }}
-              variant={'chat'}
-            >
-              {value || placeholder || ''}
-            </Markdown>
-          </Suspense>
+          <Markdown
+            className={classNames?.markdown}
+            fontSize={fontSize}
+            fullFeaturedCodeBlock={fullFeaturedCodeBlock}
+            style={{
+              height: isAutoSize ? 'unset' : height
+            }}
+            variant={'chat'}
+          >
+            {value || placeholder || ''}
+          </Markdown>
         )}
       </>
     )
