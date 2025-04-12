@@ -19,3 +19,13 @@ export function getAllProperties(obj: any): Map<string, any> {
   gatherProperties(obj)
   return properties
 }
+
+export function os() {
+  if (/macintosh|mac os x/i.test(navigator.userAgent)) {
+    return 'mac'
+  }
+  if (/Linux/i.test(navigator.userAgent)) {
+    return 'linux'
+  }
+  return 'windows'
+}

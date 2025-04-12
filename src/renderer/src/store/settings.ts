@@ -15,6 +15,8 @@ export class SettingsStore {
   useState = create(
     immer(() => ({
       open: false,
+      fold: false,
+      window: 'chat' as 'chat' | 'note',
       defaultModel: null as ClientModel | null,
       models: [] as IClient[],
       ready: false,

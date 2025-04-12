@@ -38,3 +38,13 @@ html {
 .drag-none {
   app-region: no-drag;
 }
+
+.side-move-transition {
+  transition: 0.2s ease-in-out;
+}
+body.drag-sidebar {
+  user-select: none;
+  .side-move-transition {
+    transition: none;
+  }
+}

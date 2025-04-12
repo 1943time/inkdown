@@ -1,7 +1,21 @@
-import { ipcMain } from 'electron'
+import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
-import { IChat, IMessage, ISetting, IClient } from 'types/model'
+import {
+  IChat,
+  IMessage,
+  ISetting,
+  IClient,
+  ISpace,
+  IDoc,
+  IDocTag,
+  ITag,
+  IHistory,
+  IFile
+} from 'types/model'
 import { omit } from '../utils'
+import { join } from 'path'
+import { existsSync } from 'fs'
+import { unlink } from 'fs/promises'
 
 export const modelReady = () => {
   return initModel()
@@ -183,4 +197,161 @@ ipcMain.handle('updateClient', async (_, id: string, client: Partial<IClient>) =
 
 ipcMain.handle('deleteClient', async (_, id: string) => {
   return knex.delete().from('client').where('id', id)
+})
+
+ipcMain.handle('getSpaces', async () => {
+  const spaces = await knex.select('*').from('space')
+  return spaces
+})
+
+ipcMain.handle('getSpace', async (_, id: string) => {
+  const space = await knex.select('*').from('space').where('id', id).first()
+  return space
+})
+
+ipcMain.handle('createSpace', async (_, space: ISpace) => {
+  return knex('space').insert(space)
+})
+
+ipcMain.handle('updateSpace', async (_, id: string, space: Partial<ISpace>) => {
+  return knex('space').where('id', id).update(space)
+})
+
+ipcMain.handle('deleteSpace', async (_, id: string) => {
+  return knex.transaction(async (trx) => {
+    const docs = await trx('doc').where('spaceId', id).select(['id'])
+    await trx('docTag')
+      .whereIn(
+        'docId',
+        docs.map((d) => d.id)
+      )
+      .delete()
+    await trx('history')
+      .whereIn(
+        'docId',
+        docs.map((d) => d.id)
+      )
+      .delete()
+    await trx('doc').where('spaceId', id).delete()
+    await trx('space').where('id', id).delete()
+    const files = await trx('file').where('spaceId', id).select(['name'])
+    // 删除缓存区
+    const assetsPath = join(app.getPath('userData'), 'assets')
+    for (const file of files) {
+      try {
+        const filePath = join(assetsPath, file.name)
+        if (existsSync(filePath)) {
+          await unlink(filePath)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    await trx('file').where('spaceId', id).delete()
+  })
+})
+
+ipcMain.handle('getDocs', async (_, spaceId: string) => {
+  const docs = await knex.select('*').from('doc').where('spaceId', spaceId)
+  return docs
+})
+
+ipcMain.handle('createDoc', async (_, doc: IDoc) => {
+  return knex('doc').insert(doc)
+})
+
+ipcMain.handle('updateDoc', async (_, id: string, doc: Partial<IDoc>) => {
+  return knex('doc').where('id', id).update(doc)
+})
+
+ipcMain.handle('deleteDoc', async (_, id: string) => {
+  return knex('doc').where('id', id).update({ deleted: 1 })
+})
+
+ipcMain.handle('getDoc', async (_, id: string) => {
+  const doc = await knex('doc').where('id', id).first()
+  return doc
+})
+
+ipcMain.handle('createDocTag', async (_, docTag: IDocTag) => {
+  return knex('docTag').insert(docTag)
+})
+
+ipcMain.handle('deleteDocTag', async (_, id: string) => {
+  return knex('docTag').where('id', id).delete()
+})
+
+ipcMain.handle('getDocTags', async (_, docId: string) => {
+  const docTags = await knex('docTag')
+    .join('tag', 'docTag.tagId', '=', 'tag.id')
+    .where('docId', docId)
+    .select(['tag.id', 'tag.name'])
+  return docTags
+})
+
+ipcMain.handle('createTag', async (_, tag: ITag) => {
+  return knex('tag').insert(tag)
+})
+
+ipcMain.handle('deleteTag', async (_, id: string) => {
+  return knex.transaction(async (trx) => {
+    await trx('docTag').where('tagId', id).delete()
+    await trx('tag').where('id', id).delete()
+  })
+})
+
+ipcMain.handle('getTags', async () => {
+  const tags = await knex('tag').select('*')
+  return tags
+})
+
+ipcMain.handle('getHistory', async (_, docId: string) => {
+  const history = await knex('history').where('docId', docId).select(['id', 'created'])
+  return history
+})
+
+ipcMain.handle('createHistory', async (_, history: IHistory) => {
+  return knex('history').insert(history)
+})
+
+ipcMain.handle('clearHistory', async (_, docId: string) => {
+  return knex('history').where('docId', docId).delete()
+})
+
+ipcMain.handle('getFiles', async (_, spaceId: string) => {
+  const files = await knex('file')
+    .where('spaceId', spaceId)
+    .select(['id', 'name', 'created', 'size'])
+  return files
+})
+
+ipcMain.handle('createFile', async (_, file: IFile) => {
+  return knex('file').insert(file)
+})
+
+ipcMain.handle('deleteFiles', async (_, ids: string[]) => {
+  const files = await knex('file').whereIn('id', ids).select(['name'])
+  const assetsPath = join(app.getPath('userData'), 'assets')
+  for (const file of files) {
+    try {
+      const filePath = join(assetsPath, file.name)
+      if (existsSync(filePath)) {
+        await unlink(filePath)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  return knex('file').whereIn('id', ids).delete()
+})
+
+ipcMain.handle('getFiles', async (_, spaceId: string) => {
+  const files = await knex('file')
+    .where('spaceId', spaceId)
+    .select(['id', 'name', 'created', 'size'])
+  return files
+})
+
+ipcMain.handle('getFileAssetPath', async (_) => {
+  return join(app.getPath('userData'), 'assets')
 })

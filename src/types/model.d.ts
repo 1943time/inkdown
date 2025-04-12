@@ -148,3 +148,9 @@ export interface ITag {
   name: string
   created: number
 }
+
+export interface IDocTag {
+  id: string
+  docId: string
+  tagId: string
+}
