@@ -42,10 +42,10 @@ export function SideBar() {
       }
       style={{ width: fold ? 0 : sidePanelWidth }}
     >
-      <div className={'h-[30px] px-4 mb-4 mt-1'}>
+      <div className={'h-[30px] px-4 mb-4 mt-1'} style={{ width: sidePanelWidth }}>
         <div
           className={
-            'flex items-center justify-around dark:bg-black/20 h-full rounded-lg text-white/60 relative *:cursor-pointer *:h-full'
+            'flex items-center justify-around dark:bg-black/20 h-full rounded-lg text-white/60 relative *:cursor-pointer *:h-full font-medium'
           }
         >
           <div

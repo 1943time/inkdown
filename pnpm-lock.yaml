@@ -46,6 +46,9 @@ devDependencies:
   '@lobehub/ui':
     specifier: ^1.165.5
     version: 1.170.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+  '@types/diacritics':
+    specifier: ^1.3.3
+    version: 1.3.3
   '@types/is-hotkey':
     specifier: ^0.1.10
     version: 0.1.10
@@ -79,6 +82,9 @@ devDependencies:
   dayjs:
     specifier: ^1.11.13
     version: 1.11.13
+  diacritics:
+    specifier: ^1.3.0
+    version: 1.3.0
   docx:
     specifier: ^9.3.0
     version: 9.3.0
@@ -3350,6 +3356,10 @@ packages:
       '@types/ms': 2.1.0
     dev: true
 
+  /@types/diacritics@1.3.3:
+    resolution: {integrity: sha512-wt0tBItmBsOUVZ8+MCrkBMoVfH/EUZeTXwYSekVVYilZlGDYssREUR+sX72mHvl2IrbdCKgpYARXKh3awD2how==}
+    dev: true
+
   /@types/eslint-scope@3.7.7:
     resolution: {integrity: sha512-MzMFlSLBqNF2gcHWO0G1vP/YQyfvrxZ0bF+u7mzUdZ1/xK4A4sru+nraZz5i3iEIk1l1uyicaDVTB4QbbEkAYg==}
     dependencies:
@@ -5351,6 +5361,10 @@ packages:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
     dependencies:
       dequal: 2.0.3
+    dev: true
+
+  /diacritics@1.3.0:
+    resolution: {integrity: sha512-wlwEkqcsaxvPJML+rDh/2iS824jbREk6DUMUKkEaSlxdYHeS43cClJtsWglvw2RfeXGm6ohKDqsXteJ5sP5enA==}
     dev: true
 
   /didyoumean@1.2.2:

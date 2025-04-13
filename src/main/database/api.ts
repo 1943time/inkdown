@@ -200,7 +200,7 @@ ipcMain.handle('deleteClient', async (_, id: string) => {
 })
 
 ipcMain.handle('getSpaces', async () => {
-  const spaces = await knex.select('*').from('space')
+  const spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
   return spaces
 })
 
@@ -252,7 +252,7 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
 })
 
 ipcMain.handle('getDocs', async (_, spaceId: string) => {
-  const docs = await knex.select('*').from('doc').where('spaceId', spaceId)
+  const docs = await knex('doc').where('spaceId', spaceId).orderBy('sort', 'asc').select('*')
   return docs
 })
 
@@ -321,6 +321,7 @@ ipcMain.handle('clearHistory', async (_, docId: string) => {
 ipcMain.handle('getFiles', async (_, spaceId: string) => {
   const files = await knex('file')
     .where('spaceId', spaceId)
+    .orderBy('created', 'desc')
     .select(['id', 'name', 'created', 'size'])
   return files
 })
@@ -345,13 +346,26 @@ ipcMain.handle('deleteFiles', async (_, ids: string[]) => {
   return knex('file').whereIn('id', ids).delete()
 })
 
-ipcMain.handle('getFiles', async (_, spaceId: string) => {
-  const files = await knex('file')
-    .where('spaceId', spaceId)
-    .select(['id', 'name', 'created', 'size'])
-  return files
-})
-
 ipcMain.handle('getFileAssetPath', async (_) => {
   return join(app.getPath('userData'), 'assets')
 })
+
+ipcMain.handle(
+  'findDocName',
+  async (
+    _,
+    data: {
+      spaceId: string
+      name: string
+      parentId?: string
+    }
+  ) => {
+    return await knex('doc')
+      .where({
+        spaceId: data.spaceId,
+        parentId: data.parentId,
+        name: data.name
+      })
+      .count()
+  }
+)

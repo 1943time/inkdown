@@ -188,4 +188,7 @@ export class ModelApi {
   async getFileAssetPath(): Promise<string> {
     return ipcRenderer.invoke('getFileAssetPath')
   }
+  async findDocName(data: { spaceId: string; name: string; parentId?: string }): Promise<number> {
+    return ipcRenderer.invoke('findDocName', data)
+  }
 }

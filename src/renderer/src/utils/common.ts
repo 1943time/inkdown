@@ -29,3 +29,22 @@ export function os() {
   }
   return 'windows'
 }
+
+export const isMod = (e: MouseEvent | KeyboardEvent | React.KeyboardEvent | React.MouseEvent) => {
+  return e.metaKey || e.ctrlKey
+}
+
+export function base64ToArrayBuffer(base64: string) {
+  const binaryString = window.atob(base64.replace(/^base64,/, ''))
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+  return bytes.buffer
+}
+
+export const delay = (time: number) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
+}

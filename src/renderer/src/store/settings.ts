@@ -20,8 +20,12 @@ export class SettingsStore {
       defaultModel: null as ClientModel | null,
       models: [] as IClient[],
       ready: false,
+      reduceFileName: 'false',
       sidePanelWidth: 300,
-      tab: 'model'
+      tab: 'model',
+      editorWidth: '720',
+      editorFontSize: '16',
+      spellCheck: 'false'
     }))
   )
   constructor(private readonly store: Store) {

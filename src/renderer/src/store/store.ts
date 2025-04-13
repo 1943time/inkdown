@@ -3,10 +3,12 @@ import { ChatStore } from './chat'
 import { ModelApi } from './api/api'
 import { MessageInstance } from 'antd/es/message/interface'
 import { SettingsStore } from './settings'
+import { NoteStore } from './note/note'
 export class Store {
   public readonly model = new ModelApi()
   public readonly chat = new ChatStore(this)
   public readonly settings = new SettingsStore(this)
+  public readonly note = new NoteStore(this)
   constructor(public readonly msg: MessageInstance) {}
 }
 

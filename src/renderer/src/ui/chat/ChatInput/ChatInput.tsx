@@ -1,5 +1,4 @@
 import { useStore } from '@/store/store'
-import { EditorUtils } from '@/ui/editor/utils/editorUtils'
 import { Tooltip } from '@lobehub/ui'
 import { Popover } from 'antd'
 import isHotkey from 'is-hotkey'
@@ -16,6 +15,7 @@ import { useGetImmer } from '@/hooks/useImmer'
 import { copyToClipboard } from '@/utils/clipboard'
 import { IStop } from '@/icons/IStop'
 import { getFileExtension } from '@/utils/string'
+import { EditorUtils } from '@/editor/utils/editorUtils'
 export function ChatInput() {
   const store = useStore()
   const [activeChat, webSearch] = store.chat.useState(

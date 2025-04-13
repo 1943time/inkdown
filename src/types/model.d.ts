@@ -1,3 +1,4 @@
+import { Range as SlateRange } from 'slate'
 export type MessageRole = 'user' | 'assistant' | 'system'
 export type AiMode =
   | 'qwen'
@@ -122,10 +123,11 @@ export interface IDoc {
   folder: boolean
   schema?: any[]
   updated: number
-  deleted: boolean
+  deleted?: boolean
   created: number
   sort: number
   links?: string[]
+  children?: string[]
 }
 
 export interface IHistory {
