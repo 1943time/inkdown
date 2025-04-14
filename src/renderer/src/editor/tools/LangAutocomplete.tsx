@@ -57,7 +57,7 @@ export const LangAutocomplete = memo(({ tab }: { tab: TabStore }) => {
     [openLangCompletion]
   )
   useEffect(() => {
-    return tab.useStatus.subscribe(
+    return tab.useState.subscribe(
       (state) => state.langCompletionText,
       (text) => {
         text = text || ''
@@ -106,16 +106,16 @@ export const LangAutocomplete = memo(({ tab }: { tab: TabStore }) => {
 
   const createCodeFence = useCallback(
     (lang: string) => {
-      EditorUtils.insertCodeFence(
-        { editor: tab.editor, codes: tab.codeMap },
-        {
+      EditorUtils.insertCodeFence({
+        editor: tab.editor,
+        codes: tab.codeMap,
+        opt: {
           language: lang,
           children: [{ text: '' }],
           code: ''
         },
-        path.current
-      )
-      tab.useState.setState({ openLangCompletion: false })
+        path: path.current
+      })
     },
     [tab]
   )

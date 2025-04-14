@@ -22,8 +22,7 @@ import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
 
 export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
-  const store = useStore()
-  const [fontSize, spellCheck] = store.settings.useState(
+  const [fontSize, spellCheck] = tab.store.settings.useState(
     useShallow((state) => [state.editorFontSize, state.spellCheck])
   )
   const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
@@ -33,10 +32,10 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
       state.openQuickLinkComplete
     ])
   )
-  const readonly = tab.useStatus((state) => state.readonly)
+  const readonly = tab.useState((state) => state.readonly)
   const changedMark = useRef(false)
   const value = useRef<any[]>([EditorUtils.p])
-  const high = useHighlight(store)
+  const high = useHighlight(tab)
   const saveTimer = useRef(0)
   const nodeRef = useRef<IDoc | undefined>(doc)
   const renderElement = useCallback(
@@ -44,8 +43,8 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
     []
   )
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children} />, [])
-  const keydown = useKeyboard(store.note)
-  const onChange = useOnchange(store.note, tab.editor)
+  const keydown = useKeyboard(tab)
+  const onChange = useOnchange(tab)
   const first = useRef(true)
 
   const save = useCallback(
@@ -54,7 +53,7 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
       const node = nodeRef.current
       changedMark.current = false
       if (node?.schema && docChanged) {
-        store.note.useState.setState((state) => {
+        tab.note.useState.setState((state) => {
           state.nodes[node.id].schema = node.schema
         })
         tab.useState.setState((state) => {
@@ -108,11 +107,11 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
       value.current = v
       onChange()
       if (doc) {
-        store.note.docStatus.set(doc.id, {
+        tab.note.docStatus.set(doc.id, {
           history: tab.editor.history,
           sel: tab.editor.selection
         })
-        store.note.useState.setState((state) => {
+        tab.note.useState.setState((state) => {
           const target = state.nodes[doc?.id]
           if (target) {
             target.schema = v
@@ -156,7 +155,7 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
         EditorUtils.reset(
           tab.editor,
           doc.schema?.length ? doc.schema : undefined,
-          store.note.docStatus.get(doc.id)?.history || true
+          tab.note.docStatus.get(doc.id)?.history || true
         )
       } catch (e) {
         EditorUtils.deleteAll(tab.editor)

@@ -2,57 +2,63 @@ import { Editor, Element, Node, Path, Range, Text, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
 import React from 'react'
 import isHotkey from 'is-hotkey'
-import { isMod } from '../../../utils'
-import { EditorStore } from '../../../store/editor'
+import { TabStore } from '@/store/note/tab'
+import { isMod } from '@/utils/common'
 
-export const keyArrow = (
-  store: EditorStore,
-  e: React.KeyboardEvent | KeyboardEvent
-) => {
-  const editor = store.editor
-  const sel = editor.selection
+export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) => {
+  const sel = tab.editor.selection
   if (sel && Range.isCollapsed(sel)) {
     if (isHotkey('left', e)) {
       e.preventDefault()
       e.stopPropagation()
       if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
         e.preventDefault()
-        EditorUtils.selectPrev(store, sel.anchor.path.slice(0, -1))
+        EditorUtils.selectPrev({
+          editor: tab.editor,
+          codes: tab.codeMap,
+          path: sel.anchor.path.slice(0, -1),
+          container: tab.container
+        })
         return
       }
-      const leaf = Node.leaf(editor, sel.focus.path)
+      const leaf = Node.leaf(tab.editor, sel.focus.path)
       const dirt = EditorUtils.isDirtLeaf(leaf)
-      const pre = Editor.previous<any>(editor, { at: sel.focus.path })
-      const [node] = Editor.nodes<any>(editor, {
+      const pre = Editor.previous<any>(tab.editor, { at: sel.focus.path })
+      const [node] = Editor.nodes<any>(tab.editor, {
         match: (n) => n.type === 'inline-katex'
       })
       if (node) {
-        EditorUtils.moveBeforeSpace(editor, node[1])
+        EditorUtils.moveBeforeSpace(tab.editor, node[1])
       } else if (
         sel.focus.offset === 0 &&
         pre &&
         (pre[0].type === 'media' || pre[0].type === 'attach')
       ) {
-        Transforms.select(editor, pre[1])
+        Transforms.select(tab.editor, pre[1])
       } else if (sel.focus.offset === 0 && dirt) {
-        EditorUtils.moveBeforeSpace(editor, sel.focus.path)
+        EditorUtils.moveBeforeSpace(tab.editor, sel.focus.path)
       } else {
         if (
           sel.focus.offset === 0 &&
           Path.hasPrevious(sel.focus.path) &&
-          Editor.isVoid(editor, Node.get(editor, Path.previous(sel.focus.path)))
+          Editor.isVoid(tab.editor, Node.get(tab.editor, Path.previous(sel.focus.path)))
         ) {
           if (Path.hasPrevious(Path.previous(sel.focus.path))) {
             Transforms.select(
-              editor,
-              Editor.end(editor, Path.previous(Path.previous(sel.focus.path)))
+              tab.editor,
+              Editor.end(tab.editor, Path.previous(Path.previous(sel.focus.path)))
             )
           }
         } else {
           if (sel.focus.offset === 0) {
-            EditorUtils.selectPrev(store, sel.focus.path)
+            EditorUtils.selectPrev({
+              editor: tab.editor,
+              codes: tab.codeMap,
+              path: sel.focus.path,
+              container: tab.container
+            })
           } else {
-            Transforms.move(editor, { unit: 'offset', reverse: true })
+            Transforms.move(tab.editor, { unit: 'offset', reverse: true })
           }
         }
       }
@@ -61,52 +67,53 @@ export const keyArrow = (
     if (isHotkey('right', e)) {
       e.preventDefault()
       if (!isMod(e)) {
-        const leaf = Node.leaf(editor, sel.focus.path)
+        const leaf = Node.leaf(tab.editor, sel.focus.path)
         const dirt = EditorUtils.isDirtLeaf(leaf)
-        const next = Editor.next<any>(editor, { at: sel.focus.path })
-        const [node] = Editor.nodes<any>(editor, {
+        const next = Editor.next<any>(tab.editor, { at: sel.focus.path })
+        const [node] = Editor.nodes<any>(tab.editor, {
           match: (n) => n.type === 'inline-katex'
         })
         if (node) {
-          EditorUtils.moveAfterSpace(editor, node[1])
+          EditorUtils.moveAfterSpace(tab.editor, node[1])
         } else if (
           sel.focus.offset === leaf.text?.length &&
           next &&
           (next[0].type === 'media' || next[0].type === 'attach')
         ) {
-          Transforms.select(editor, next[1])
+          Transforms.select(tab.editor, next[1])
         } else if (
           sel.focus.offset === leaf.text?.length &&
           dirt &&
-          !Editor.next(editor, { at: sel.focus.path })
+          !Editor.next(tab.editor, { at: sel.focus.path })
         ) {
-          EditorUtils.moveAfterSpace(editor, sel.focus.path)
+          EditorUtils.moveAfterSpace(tab.editor, sel.focus.path)
         } else {
-          const leaf = Node.leaf(editor, sel.focus.path)
+          const leaf = Node.leaf(tab.editor, sel.focus.path)
           if (
             sel.focus.offset === leaf.text?.length &&
-            Editor.hasPath(editor, Path.next(sel.focus.path)) &&
-            Editor.isVoid(editor, Node.get(editor, Path.next(sel.focus.path)))
+            Editor.hasPath(tab.editor, Path.next(sel.focus.path)) &&
+            Editor.isVoid(tab.editor, Node.get(tab.editor, Path.next(sel.focus.path)))
           ) {
-            if (Editor.hasPath(editor, Path.next(Path.next(sel.focus.path)))) {
+            if (Editor.hasPath(tab.editor, Path.next(Path.next(sel.focus.path)))) {
               Transforms.select(
-                editor,
-                Editor.start(editor, Path.next(Path.next(sel.focus.path)))
+                tab.editor,
+                Editor.start(tab.editor, Path.next(Path.next(sel.focus.path)))
               )
             }
           } else {
             if (sel.focus.offset === leaf.text?.length) {
-              EditorUtils.selectNext(store, sel.focus.path)
+              EditorUtils.selectNext({
+                editor: tab.editor,
+                codes: tab.codeMap,
+                path: sel.focus.path
+              })
             } else {
-              Transforms.move(editor, { unit: 'offset' })
+              Transforms.move(tab.editor, { unit: 'offset' })
             }
           }
         }
       } else {
-        Transforms.select(
-          editor,
-          Editor.end(editor, Path.parent(sel.focus.path))
-        )
+        Transforms.select(tab.editor, Editor.end(tab.editor, Path.parent(sel.focus.path)))
       }
       return
     }
@@ -192,20 +199,28 @@ export const keyArrow = (
     // }
     if (isHotkey('up', e)) {
       e.preventDefault()
-      const [node] = Editor.nodes<any>(editor, {
-        match: n => Element.isElement(n),
+      const [node] = Editor.nodes<any>(tab.editor, {
+        match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
       const [el, path] = node
       if (el.type === 'table-cell') {
         const row = Path.parent(path)
         if (Path.hasPrevious(row)) {
-          Transforms.select(editor, Editor.end(editor, [...Path.previous(row), path[path.length - 1]]))
+          Transforms.select(
+            tab.editor,
+            Editor.end(tab.editor, [...Path.previous(row), path[path.length - 1]])
+          )
           e.preventDefault()
           return
         }
       }
-      EditorUtils.selectPrev(store, path)
+      EditorUtils.selectPrev({
+        editor: tab.editor,
+        codes: tab.codeMap,
+        path: path,
+        container: tab.container
+      })
       // const [node] = Editor.nodes<any>(editor, {
       //   match: (n) => Element.isElement(n),
       //   mode: 'lowest'
@@ -260,22 +275,30 @@ export const keyArrow = (
     }
     if (isHotkey('down', e)) {
       e.preventDefault()
-      const [node] = Editor.nodes<any>(editor, {
-        match: n => Element.isElement(n),
+      const [node] = Editor.nodes<any>(tab.editor, {
+        match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
       const [el, path] = node
       if (el.type === 'table-cell') {
         const row = Path.parent(path)
-        if (Editor.hasPath(editor, Path.next(row))) {
-          Transforms.select(editor, Editor.end(editor, [...Path.next(row), path[path.length - 1], 0]))
+        if (Editor.hasPath(tab.editor, Path.next(row))) {
+          Transforms.select(
+            tab.editor,
+            Editor.end(tab.editor, [...Path.next(row), path[path.length - 1], 0])
+          )
           return
         }
       }
-      const next = EditorUtils.selectNext(store, path)
+      const next = EditorUtils.selectNext({
+        editor: tab.editor,
+        codes: tab.codeMap,
+        path: path
+      })
       if (!next && (el.type !== 'paragraph' || !!Node.string(el))) {
-        Transforms.insertNodes(editor, EditorUtils.p, {
-          at: Path.next([path[0]]), select: true
+        Transforms.insertNodes(tab.editor, EditorUtils.p, {
+          at: Path.next([path[0]]),
+          select: true
         })
       }
       // const [node] = Editor.nodes<any>(editor, {

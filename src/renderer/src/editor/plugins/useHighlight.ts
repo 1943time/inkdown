@@ -1,26 +1,21 @@
 import { useCallback } from 'react'
 import { Element, Node, NodeEntry, Path, Range } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
-import { EditorStore } from '../../store/editor'
+import { TabStore } from '@/store/note/tab'
 
 const htmlReg = /<[a-z]+[\s"'=:;()\w\-\[\]\/.]*\/?>(.*<\/[a-z]+>:?)?/g
 const linkReg = /(https?|ftp):\/\/[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|.]/gi
 
 export const cacheTextNode = new WeakMap<object, { path: Path; range: Range[] }>()
 
-const highlightNodes = new Set([
-  'paragraph',
-  'table-cell',
-  'head',
-  'inline-katex'
-])
+const highlightNodes = new Set(['paragraph', 'table-cell', 'head', 'inline-katex'])
 
-
-export function useHighlight(store?: EditorStore) {
+export function useHighlight(tab: TabStore) {
+  const refreshHighlight = tab.useState((state) => state.refreshHighlight)
   return useCallback(
     ([node, path]: NodeEntry): Range[] => {
       if (Element.isElement(node) && highlightNodes.has(node.type)) {
-        const ranges = store?.highlightCache.get(node) || []
+        const ranges = tab.highlightCache.get(node) || []
         const cacheText = cacheTextNode.get(node)
         // footnote
         if (['paragraph', 'table-cell'].includes(node.type)) {
@@ -110,6 +105,6 @@ export function useHighlight(store?: EditorStore) {
       }
       return []
     },
-    [store?.refreshHighlight]
+    [refreshHighlight]
   )
 }

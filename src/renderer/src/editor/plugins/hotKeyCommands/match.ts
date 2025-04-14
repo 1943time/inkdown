@@ -1,14 +1,13 @@
 import { Editor, Element, Node, NodeEntry, Range } from 'slate'
 import React from 'react'
 import { TextMatchNodes } from '../elements'
-import { CoreStore } from '../../../store/core'
+import { TabStore } from '@/store/note/tab'
 
 export class MatchKey {
-  constructor(
-    private readonly editor: Editor,
-    private readonly core: CoreStore
-  ) {
+  get editor() {
+    return this.tab.editor
   }
+  constructor(private readonly tab: TabStore) {}
 
   private createParams(node: NodeEntry, match: RegExpMatchArray) {
     return {
@@ -23,19 +22,21 @@ export class MatchKey {
 
   run(e: React.KeyboardEvent) {
     const [node] = Editor.nodes<Element>(this.editor, {
-      match: n => Element.isElement(n),
+      match: (n) => Element.isElement(n),
       mode: 'lowest'
     })
     if (!node || ['code'].includes(node[0].type)) return
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
     for (let n of TextMatchNodes) {
-      if (n.config && this.core.config.config[n.config] !== 'true') {
-        continue
-      }
+      // 配置开启
+      // if (n.type === 'inlineKatex') {
+
+      // }
       if (typeof n.matchKey === 'object' ? n.matchKey.test(e.key) : n.matchKey === e.key) {
-        if (n.checkAllow && !n.checkAllow({editor: this.editor, node, sel})) continue
-        const str = Node.string(Node.leaf(this.editor, sel.anchor.path)).slice(0, sel.anchor.offset) + e.key
+        if (n.checkAllow && !n.checkAllow({ editor: this.editor, node, sel })) continue
+        const str =
+          Node.string(Node.leaf(this.editor, sel.anchor.path)).slice(0, sel.anchor.offset) + e.key
         const m = str.match(n.reg)
         if (m) {
           if (n.run(this.createParams(node, m))) {

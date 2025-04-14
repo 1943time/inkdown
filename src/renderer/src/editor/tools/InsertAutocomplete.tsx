@@ -430,7 +430,7 @@ export const InsertAutocomplete = memo(() => {
     [openInsertCompletion, tab]
   )
   useEffect(() => {
-    tab.useStatus.subscribe(
+    tab.useState.subscribe(
       (state) => state.insertCompletionText,
       (text) => {
         text = text || ''

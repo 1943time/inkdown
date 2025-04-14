@@ -1,34 +1,39 @@
-import {Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms} from 'slate'
-import {EditorUtils} from '../utils/editorUtils'
-import {Elements, ListNode, TableRowNode} from '../../types/el'
+import { Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms } from 'slate'
+import { EditorUtils } from '../utils/editorUtils'
+import { Elements, ListNode, TableRowNode } from '..'
 
-const insertAfter = (editor: Editor, path: Path, node: Elements = {
-  type: 'paragraph',
-  children: [{text: ''}]
-}) => {
+const insertAfter = (
+  editor: Editor,
+  path: Path,
+  node: Elements = {
+    type: 'paragraph',
+    children: [{ text: '' }]
+  }
+) => {
   const nextPath = Path.next(path)
-  Transforms.insertNodes(editor, node, {select: true, at: nextPath})
+  Transforms.insertNodes(editor, node, { select: true, at: nextPath })
 }
 
 export type CheckMdParams = {
   sel: Range
-  editor: Editor, path: Path,
-  match: RegExpMatchArray,
+  editor: Editor
+  path: Path
+  match: RegExpMatchArray
   el: Element
   startText: string
 }
 
 interface MdNode {
-  reg: RegExp,
+  reg: RegExp
   config?: string
   matchKey?: string | RegExp
-  checkAllow?: (ctx: { editor: Editor, node: NodeEntry<Element>, sel: Range }) => boolean
+  checkAllow?: (ctx: { editor: Editor; node: NodeEntry<Element>; sel: Range }) => boolean
   run: (ctx: CheckMdParams) => void | boolean
 }
 
 const matchText = (insert: (ctx: CheckMdParams) => void, matchString?: string) => {
   return (ctx: CheckMdParams) => {
-    const {sel, editor, match, startText} = ctx
+    const { sel, editor, match, startText } = ctx
     const leaf = Node.leaf(editor, sel.anchor.path)
     if (EditorUtils.isDirtLeaf(leaf)) return false
     if (matchString) {
@@ -37,8 +42,8 @@ const matchText = (insert: (ctx: CheckMdParams) => void, matchString?: string) =
       if (prev === matchString) return false
     }
     Transforms.select(editor, {
-      anchor: {path: sel.anchor.path, offset: match.index!},
-      focus: {path: sel.anchor.path, offset: match.index! + startText.length - 1}
+      anchor: { path: sel.anchor.path, offset: match.index! },
+      focus: { path: sel.anchor.path, offset: match.index! + startText.length - 1 }
     })
     insert(ctx)
     const addSel = editor.selection
@@ -79,7 +84,6 @@ const MdElements: Record<string, MdNode> = {
   inlineKatex: {
     reg: /\$([^\n$]+)\$$/,
     matchKey: '$',
-    config: 'autoConvertInlineFormula',
     checkAllow: (ctx) => {
       return ['paragraph', 'table-cell'].includes(ctx.node[0].type)
     },
@@ -318,5 +322,9 @@ const MdElements: Record<string, MdNode> = {
     })
   }
 }
-export const BlockMathNodes = Object.entries(MdElements).filter(c => !c[1].matchKey).map(c => Object.assign(c[1], {type: c[0]}))
-export const TextMatchNodes = Object.entries(MdElements).filter(c => !!c[1].matchKey).map(c => Object.assign(c[1], {type: c[0]}))
+export const BlockMathNodes = Object.entries(MdElements)
+  .filter((c) => !c[1].matchKey)
+  .map((c) => Object.assign(c[1], { type: c[0] }))
+export const TextMatchNodes = Object.entries(MdElements)
+  .filter((c) => !!c[1].matchKey)
+  .map((c) => Object.assign(c[1], { type: c[0] }))

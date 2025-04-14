@@ -8,31 +8,33 @@ import { keyArrow } from './hotKeyCommands/arrow'
 import { EditorUtils } from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
 import { NoteStore } from '@/store/note/note'
+import { TabStore } from '@/store/note/tab'
 
-export const useKeyboard = (note: NoteStore) => {
+export const useKeyboard = (tab: TabStore) => {
   return useMemo(() => {
-    const tab = new TabKey(core, store.editor)
-    const backspace = new BackspaceKey(store)
-    const enter = new EnterKey(store, backspace)
-    const match = new MatchKey(store.editor, core)
+    const tabKey = new TabKey(tab)
+    const backspace = new BackspaceKey(tab)
+    const enter = new EnterKey(tab, backspace)
+    const match = new MatchKey(tab)
     return (e: React.KeyboardEvent) => {
-      if (store.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {
+      const state = tab.useState.getState()
+      if (state.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {
         e.preventDefault()
         return
       }
       if (isHotkey('mod+z', e) || isHotkey('mod+shift+z', e)) {
-        store.doManual()
+        tab.doManual()
       }
       if (isHotkey('mod+ArrowDown', e)) {
         e.preventDefault()
-        Transforms.select(store.editor, Editor.end(store.editor, []))
+        Transforms.select(tab.editor, Editor.end(tab.editor, []))
       }
       if (isHotkey('mod+ArrowUp', e)) {
         e.preventDefault()
-        Transforms.select(store.editor, Editor.start(store.editor, []))
+        Transforms.select(tab.editor, Editor.start(tab.editor, []))
       }
-      if (isHotkey('backspace', e) && store.editor.selection) {
-        if (Range.isCollapsed(store.editor.selection)) {
+      if (isHotkey('backspace', e) && tab.editor.selection) {
+        if (Range.isCollapsed(tab.editor.selection)) {
           if (backspace.run()) {
             e.stopPropagation()
             e.preventDefault()
@@ -45,132 +47,102 @@ export const useKeyboard = (note: NoteStore) => {
       if (isHotkey('mod+backspace', e)) {
         if (e.metaKey) {
           setTimeout(() => {
-            EditorUtils.clearMarks(store.editor)
+            EditorUtils.clearMarks(tab.editor)
           })
         }
-        const [inlineKatex] = Editor.nodes<any>(store.editor, {
+        const [inlineKatex] = Editor.nodes<any>(tab.editor, {
           match: (n) => Element.isElement(n) && n.type === 'inline-katex'
         })
         if (inlineKatex && Node.string(inlineKatex[0])) {
           e.preventDefault()
-          Transforms.delete(store.editor, {
+          Transforms.delete(tab.editor, {
             at: {
-              anchor: Editor.start(store.editor, inlineKatex[1]),
-              focus: Editor.end(store.editor, inlineKatex[1])
+              anchor: Editor.start(tab.editor, inlineKatex[1]),
+              focus: Editor.end(tab.editor, inlineKatex[1])
             },
             unit: 'character'
           })
         } else {
-          EditorUtils.clearMarks(store.editor)
+          EditorUtils.clearMarks(tab.editor)
         }
       }
 
       if (e.key.toLowerCase().startsWith('arrow')) {
-        if (store.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
-        keyArrow(store, e)
+        if (state.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
+        keyArrow(tab, e)
       } else {
-        if (e.key === 'Tab') tab.run(e)
+        if (e.key === 'Tab') tabKey.run(e)
         if (e.key === 'Enter') {
-          if (store.openLangCompletion) {
+          if (state.openLangCompletion) {
             setTimeout(() => {
-              runInAction(() => (store.openLangCompletion = false))
+              tab.useState.setState({ openLangCompletion: false })
             })
           } else {
             enter.run(e)
           }
         }
-        const [node] = Editor.nodes<any>(store.editor, {
+        const [node] = Editor.nodes<any>(tab.editor, {
           match: (n) => Element.isElement(n),
           mode: 'lowest'
         })
         if (!node) return
-        const [text] = Editor.nodes<any>(store.editor, {
+        const [text] = Editor.nodes<any>(tab.editor, {
           match: Text.isText,
           mode: 'lowest'
         })
-        if (e.key === '@' && ['paragraph', 'head', 'table-cell'].includes(node[0].type)) {
-          if (text) {
-            const dirt = EditorUtils.isDirtLeaf(text[0])
-            if (!dirt) {
-              runInAction(() => (store.openQuickLinkComplete = true))
-            }
-          }
-        } else if (store.openQuickLinkComplete && text) {
-          setTimeout(() => {
-            const [text] = Editor.nodes<any>(store.editor, {
-              match: Text.isText,
-              mode: 'lowest'
-            })
-            const str = Node.string(text[0])
-            const startStr = str.slice(0, store.editor.selection?.anchor.offset)
-            const quickMatch = startStr.match(/@([^\n@]+)$/)
-            store.quickLinkText$.next({
-              text: quickMatch?.[1]
-            })
-          })
-        }
-        if (e.key.toLowerCase() === 'backspace' && store.openQuickLinkComplete && text) {
-          if (e.metaKey) {
-            runInAction(() => (store.openQuickLinkComplete = false))
-          } else {
-            const str = Node.string(text[0])
-            const startStr = str.slice(0, store.editor.selection?.anchor.offset)
-            const quickMatch = startStr.match(/@$/)
-            if (quickMatch) {
-              runInAction(() => (store.openQuickLinkComplete = false))
-            }
-          }
-        }
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
           if (
             isHotkey('enter', e) &&
             /^\s*---\s*$/.test(str) &&
             !Path.hasPrevious(node[1]) &&
-            EditorUtils.isTop(store.editor, node[1])
+            EditorUtils.isTop(tab.editor, node[1])
           ) {
-            EditorUtils.insertCodeFence(
-              store,
-              {
+            EditorUtils.insertCodeFence({
+              editor: tab.editor,
+              codes: tab.codeMap,
+              opt: {
                 language: 'yaml',
                 children: [{ text: '' }],
                 code: '',
                 frontmatter: true
               },
-              node[1]
-            )
+              path: node[1]
+            })
             e.preventDefault()
             return
           }
           if (isHotkey('enter', e) && /^```\s*$/.test(str)) {
-            EditorUtils.insertCodeFence(
-              store,
-              {
+            EditorUtils.insertCodeFence({
+              editor: tab.editor,
+              codes: tab.codeMap,
+              opt: {
                 language: '',
                 children: [{ text: '' }],
                 code: ''
               },
-              node[1]
-            )
+              path: node[1]
+            })
             e.preventDefault()
             return
           }
           if (e.key === 'Enter' && /^<[a-z]+[\s"'=:;()\w\-\[\]]*>/.test(str)) {
-            EditorUtils.insertCodeFence(
-              store,
-              {
+            EditorUtils.insertCodeFence({
+              editor: tab.editor,
+              codes: tab.codeMap,
+              opt: {
                 language: 'html',
                 render: true,
                 code: str,
                 children: [{ text: '' }]
               },
-              node[1]
-            )
+              path: node[1]
+            })
             e.preventDefault()
             return
           }
           setTimeout(() => {
-            const [node] = Editor.nodes<any>(store.editor, {
+            const [node] = Editor.nodes<any>(tab.editor, {
               match: (n) => Element.isElement(n) && n.type === 'paragraph',
               mode: 'lowest'
             })
@@ -183,9 +155,9 @@ export const useKeyboard = (note: NoteStore) => {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {
-                runInAction(() => (store.openLangCompletion = true))
-                setTimeout(() => {
-                  store.langCompletionText.next(codeMatch[1])
+                tab.useState.setState({
+                  openLangCompletion: true,
+                  langCompletionText: codeMatch[1]
                 })
               } else {
                 const insertMatch = str.match(/^\/([^\n]+)?$/i)
@@ -193,28 +165,28 @@ export const useKeyboard = (note: NoteStore) => {
                   insertMatch &&
                   !(
                     !Path.hasPrevious(node[1]) &&
-                    Node.parent(store.editor, node[1]).type === 'list-item'
+                    Node.parent(tab.editor, node[1]).type === 'list-item'
                   )
                 ) {
-                  runInAction(() => (store.openInsertCompletion = true))
-                  setTimeout(() => {
-                    store.insertCompletionText$.next(insertMatch[1])
+                  tab.useState.setState({
+                    openInsertCompletion: true,
+                    insertCompletionText: insertMatch[1]
                   })
                 } else {
-                  if (store.openInsertCompletion || store.openLangCompletion) {
-                    runInAction(() => {
-                      store.openLangCompletion = false
-                      store.openInsertCompletion = false
+                  if (state.openInsertCompletion || state.openLangCompletion) {
+                    tab.useState.setState({
+                      openLangCompletion: false,
+                      openInsertCompletion: false
                     })
                   }
                 }
               }
             } else {
-              runInAction(() => (store.openLangCompletion = false))
+              tab.useState.setState({ openLangCompletion: false })
             }
           })
         }
       }
     }
-  }, [store.editor])
+  }, [tab.editor])
 }

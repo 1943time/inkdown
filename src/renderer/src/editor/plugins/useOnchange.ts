@@ -1,16 +1,16 @@
 import { BaseOperation, BaseSelection, Editor, Element, NodeEntry, Path, Range } from 'slate'
 import { useMemo, useRef } from 'react'
 import { Subject } from 'rxjs'
-import { NoteStore } from '@/store/note/note'
+import { TabStore } from '@/store/note/tab'
 
 export const selChange$ = new Subject<Path | null>()
 const floatBarIgnoreNode = new Set(['code', 'inline-katex'])
-export function useOnchange(note: NoteStore, editor: Editor) {
+export function useOnchange(tab: TabStore) {
   const rangeContent = useRef('')
   return useMemo(() => {
     return () => {
-      const sel = editor.selection
-      const [node] = Editor.nodes<Element>(editor, {
+      const sel = tab.editor.selection
+      const [node] = Editor.nodes<Element>(tab.editor, {
         match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
@@ -62,5 +62,5 @@ export function useOnchange(note: NoteStore, editor: Editor) {
       //   })
       // }
     }
-  }, [editor])
+  }, [tab.editor])
 }

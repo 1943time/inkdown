@@ -40,42 +40,40 @@ export class TabStore {
     'media',
     'attach'
   ])
-  useStatus = create(
-    subscribeWithSelector(() => ({
-      path: null as null | Path,
-      langCompletionText: '',
-      startDragging: false,
-      showFloatBar: false,
-      readonly: false,
-      insertCompletionText: '',
-      domRect: null as null | DOMRect
-    }))
-  )
   useState = create(
-    immer(() => ({
-      docIds: [] as string[],
-      openSearch: false,
-      openReplace: false,
-      currentIndex: 0,
-      focusSearch: false,
-      docChanged: false,
-      openLangCompletion: false,
-      openQuickLinkComplete: false,
-      openInsertCompletion: false,
-      domRect: null as null | DOMRect,
-      search: {
-        replace: false,
-        index: 0,
-        keyword: '',
-        replaceText: '',
-        searchRanges: [] as {
-          range?: SlateRange
-          markerId?: number
-          aceRange?: InstanceType<typeof AceRange>
-          editorPath?: number[]
-        }[]
-      }
-    }))
+    subscribeWithSelector(
+      immer(() => ({
+        path: null as null | Path,
+        langCompletionText: '',
+        startDragging: false,
+        showFloatBar: false,
+        readonly: false,
+        insertCompletionText: '',
+        docIds: [] as string[],
+        openSearch: false,
+        openReplace: false,
+        currentIndex: 0,
+        focusSearch: false,
+        docChanged: false,
+        openLangCompletion: false,
+        openQuickLinkComplete: false,
+        openInsertCompletion: false,
+        domRect: null as null | DOMRect,
+        refreshHighlight: false,
+        search: {
+          replace: false,
+          index: 0,
+          keyword: '',
+          replaceText: '',
+          searchRanges: [] as {
+            range?: SlateRange
+            markerId?: number
+            aceRange?: InstanceType<typeof AceRange>
+            editorPath?: number[]
+          }[]
+        }
+      }))
+    )
   )
   get doc() {
     const { currentIndex, docIds } = this.useState.getState()
@@ -85,11 +83,20 @@ export class TabStore {
     const docId = this.useState((state) => state.docIds[state.currentIndex])
     return this.store.note.useState((state) => state.nodes[docId])
   }
+  doManual() {
+    this.manual = true
+    setTimeout(() => (this.manual = false), 30)
+  }
+  refreshHighlight() {
+    this.useState.setState((state) => {
+      state.refreshHighlight = !state.refreshHighlight
+    })
+  }
   setOpenSearch(open: boolean) {
     this.useState.setState((state) => {
       state.openSearch = open
     })
-    this.useStatus.setState({ domRect: null })
+    this.useState.setState({ domRect: null })
     if (!open) {
       this.clearDocAllMarkers()
       this.highlightCache.clear()
@@ -377,7 +384,7 @@ export class TabStore {
       })
     }
     let last: MovePoint | null = null
-    this.useStatus.setState({ readonly: true, startDragging: true })
+    this.useState.setState({ readonly: true, startDragging: true })
     const dragover = (e: MouseEvent) => {
       e.preventDefault()
       if ((e.clientY > window.innerHeight - 30 || e.clientY < 70) && !this.scrolling) {
@@ -426,7 +433,7 @@ export class TabStore {
       'mouseup',
       () => {
         window.removeEventListener('mousemove', dragover)
-        this.useStatus.setState({ readonly: false, startDragging: false })
+        this.useState.setState({ readonly: false, startDragging: false })
         if (mark) this.container!.removeChild(mark)
         if (last && this.dragEl) {
           let [dragPath, dragNode] = this.toPath(this.dragEl)

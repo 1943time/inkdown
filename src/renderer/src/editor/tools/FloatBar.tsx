@@ -91,7 +91,7 @@ export const FloatBar = memo(() => {
     hoverSelectColor: false,
     openSelectColor: false
   })
-  const showFloatBar = tab.useStatus((state) => state.showFloatBar)
+  const showFloatBar = tab.useState((state) => state.showFloatBar)
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
 
@@ -108,11 +108,11 @@ export const FloatBar = memo(() => {
   useEffect(() => {
     if (showFloatBar) {
       setState({ open: true })
-      const react = tab.useStatus.getState().domRect
+      const react = tab.useState.getState().domRect
       if (react) {
         resize(react)
       }
-      return tab.useStatus.subscribe(
+      return tab.useState.subscribe(
         (state) => state.domRect,
         (domRect) => {
           if (domRect) {
@@ -204,7 +204,7 @@ export const FloatBar = memo(() => {
       if (state().open) {
         const rect = getSelRect()
         if (rect) {
-          tab.useStatus.setState({ domRect: rect })
+          tab.useState.setState({ domRect: rect })
         }
         // resize(true)
       }

@@ -147,8 +147,13 @@ export class EditorUtils {
     // }
   }
 
-  static selectPrev(ctx: EditorCtx, path: Path) {
-    const prePath = EditorUtils.findPrev(ctx.editor, path)
+  static selectPrev(ctx: {
+    editor: Editor
+    codes: Map<object, Ace.Editor>
+    container?: HTMLDivElement
+    path: Path
+  }) {
+    const prePath = EditorUtils.findPrev(ctx.editor, ctx.path)
     if (prePath) {
       const node = Node.get(ctx.editor, prePath)
       if (node.type === 'code') {
@@ -168,20 +173,25 @@ export class EditorUtils {
     }
   }
 
-  static insertCodeFence(ctx: EditorCtx, opt: Partial<CodeNode>, path: Path) {
+  static insertCodeFence(ctx: {
+    editor: Editor
+    codes: Map<object, Ace.Editor>
+    opt?: Partial<CodeNode>
+    path: Path
+  }) {
     EditorUtils.blur(ctx.editor)
-    Transforms.delete(ctx.editor, { at: path })
+    Transforms.delete(ctx.editor, { at: ctx.path })
     const el = {
       type: 'code',
-      ...opt
+      ...ctx.opt
     }
-    Transforms.insertNodes(ctx.editor, el, { select: true, at: path })
+    Transforms.insertNodes(ctx.editor, el, { select: true, at: ctx.path })
     setTimeout(() => {
       ctx.codes.get(el)?.focus()
     }, 30)
   }
-  static selectNext(ctx: EditorCtx, path: Path) {
-    const nextPath = EditorUtils.findNext(ctx.editor, path)
+  static selectNext(ctx: { editor: Editor; codes: Map<object, Ace.Editor>; path: Path }) {
+    const nextPath = EditorUtils.findNext(ctx.editor, ctx.path)
     if (nextPath) {
       const node = Node.get(ctx.editor, nextPath)
       if (node.type === 'code') {
