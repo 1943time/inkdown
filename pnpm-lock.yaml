@@ -17,6 +17,9 @@ dependencies:
   knex:
     specifier: ^3.1.0
     version: 3.1.0(sqlite3@5.1.7)
+  mime-types:
+    specifier: ^2.1.35
+    version: 2.1.35
   sqlite3:
     specifier: ^5.1.7
     version: 5.1.7
@@ -37,6 +40,9 @@ devDependencies:
   '@google/genai':
     specifier: ^0.7.0
     version: 0.7.0
+  '@iconify/react':
+    specifier: ^5.2.1
+    version: 5.2.1(react@19.1.0)
   '@lobehub/chat-plugin-sdk':
     specifier: ^1.32.4
     version: 1.32.4(react-dom@19.1.0)(react@19.1.0)
@@ -55,6 +61,9 @@ devDependencies:
   '@types/node':
     specifier: ^22.13.13
     version: 22.14.0
+  '@types/path-browserify':
+    specifier: ^1.0.3
+    version: 1.0.3
   '@types/react':
     specifier: ^19.1.0
     version: 19.1.0
@@ -136,6 +145,9 @@ devDependencies:
   openai:
     specifier: ^4.87.3
     version: 4.93.0
+  path-browserify:
+    specifier: ^1.0.1
+    version: 1.0.1
   pdfjs-dist:
     specifier: ^5.0.375
     version: 5.1.91
@@ -1425,6 +1437,15 @@ packages:
   /@humanwhocodes/retry@0.4.2:
     resolution: {integrity: sha512-xeO57FpIu4p1Ri3Jq/EXq4ClRm86dVF2z/+kvFnyqVYRavTZmaFaUBbWCOuuTh0o/g7DSsk6kc2vrS4Vl5oPOQ==}
     engines: {node: '>=18.18'}
+    dev: true
+
+  /@iconify/react@5.2.1(react@19.1.0):
+    resolution: {integrity: sha512-37GDR3fYDZmnmUn9RagyaX+zca24jfVOMY8E1IXTqJuE8pxNtN51KWPQe3VODOWvuUurq7q9uUu3CFrpqj5Iqg==}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      '@iconify/types': 2.0.0
+      react: 19.1.0
     dev: true
 
   /@iconify/types@2.0.0:
@@ -3458,6 +3479,10 @@ packages:
 
   /@types/parse-json@4.0.2:
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
+    dev: true
+
+  /@types/path-browserify@1.0.3:
+    resolution: {integrity: sha512-ZmHivEbNCBtAfcrFeBCiTjdIc2dey0l7oCGNGpSuRTy8jP6UVND7oUowlvDujBy8r2Hoa8bfFUOCiPWfmtkfxw==}
     dev: true
 
   /@types/plist@3.0.5:
@@ -8327,14 +8352,12 @@ packages:
   /mime-db@1.52.0:
     resolution: {integrity: sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==}
     engines: {node: '>= 0.6'}
-    dev: true
 
   /mime-types@2.1.35:
     resolution: {integrity: sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==}
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.52.0
-    dev: true
 
   /mime@2.6.0:
     resolution: {integrity: sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg==}
@@ -8950,6 +8973,10 @@ packages:
     resolution: {integrity: sha512-BuBYQYlv1ckiPdQi/ohiivi9Sagc9JG+Ozs0r7b/0iK3sKmrb0b9FdWdBbOdx6hBCM/F9Ir82ofnBhtZOjCRPQ==}
     dependencies:
       entities: 4.5.0
+    dev: true
+
+  /path-browserify@1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
     dev: true
 
   /path-data-parser@0.1.0:

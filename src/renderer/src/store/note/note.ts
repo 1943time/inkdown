@@ -58,13 +58,31 @@ export class NoteStore {
     })
     this.getDocs(spaceId)
   }
-  createTab(docId: string) {
+  createTab(docId?: string) {
     this.useState.setState((state) => {
       const id = nanoid()
       state.tabs.push(id)
       const store = new TabStore(this.store)
+      if (docId) {
+        store.useState.setState((state) => {
+          state.docIds.push(docId)
+          state.currentIndex = 0
+        })
+      }
       this.tabStoreMap.set(id, store)
     })
+  }
+  removeTab(i: number) {
+    const { tabs } = this.useState.getState()
+    if (tabs.length < 2) return
+    this.useState.setState((state) => {
+      state.tabs.splice(i, 1)
+      if (i > 0) {
+        state.tabIndex--
+      }
+    })
+    this.tabStoreMap.delete(tabs[i])
+    // this.recordTabs()
   }
   getDocs(spaceId: string) {
     this.store.model.getDocs(spaceId).then((docs) => {

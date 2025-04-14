@@ -1,25 +1,20 @@
-import { observer } from 'mobx-react-lite'
-import { ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
+import { memo, ReactNode, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Editor, Element, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
-import { Icon } from '@iconify/react'
-import { runInAction } from 'mobx'
 import isHotkey from 'is-hotkey'
-import { keyTask$ } from '../../hooks/keyboard'
-import { useLocalState } from '../../hooks/useLocalState'
-import { useSubject } from '../../hooks/subscribe'
+import { Icon } from '@iconify/react'
 import { EditorUtils } from '../utils/editorUtils'
-import IMermaid from '../../icons/IMermaid'
-import { Methods } from '../../types'
-import { useEditorStore } from '../../store/editor'
 import { getOffsetLeft, getOffsetTop } from '../../utils/dom'
-import { useCoreContext } from '../../utils/env'
-import { KeyboardTask } from '../../store/logic/keyboard'
 import { Button, Input, Tabs, Tag, Tooltip } from 'antd'
-import { IPlanet } from '../../icons/IPlanet'
-import { TextHelp } from '../../components/set/Help'
 import { selChange$ } from '../plugins/useOnchange'
 import { fileOpen } from 'browser-fs-access'
+import { TabStore } from '@/store/note/tab'
+import { IPlanet } from '../icons/IPlanet'
+import { TextHelp } from '@/ui/common/HelpText'
+import { useGetSetState } from 'react-use'
+import { useTab } from '@/store/note/TabCtx'
+import { useShallow } from 'zustand/react/shallow'
+import IMermaid from '../icons/IMermaid'
 
 type InsertOptions = {
   label: [string, string]
@@ -27,7 +22,7 @@ type InsertOptions = {
   children: {
     label: [string, string]
     key: string
-    task: Methods<KeyboardTask>
+    run?: () => void
     args?: any[]
     icon?: ReactNode
   }[]
@@ -53,8 +48,7 @@ const replaceUrl = [
     }
   }
 ]
-
-const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => {
+const getInsertOptions = ({ isTop, tab }: { isTop: boolean; tab: TabStore }) => {
   const options: InsertOptions[] = [
     {
       label: ['元素', 'Elements'],
@@ -63,25 +57,33 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
         {
           label: ['表格', 'Table'],
           key: 'table',
-          task: 'insertTable',
+          run: () => {
+            tab.keyboard.insertTable()
+          },
           icon: <Icon icon={'material-symbols:table'} className={'text-base'} />
         },
         {
           label: ['引用', 'Quote'],
           key: 'quote',
-          task: 'insertQuote',
+          run() {
+            tab.keyboard.insertQuote()
+          },
           icon: <Icon icon={'iconoir:quote-solid'} className={'text-base'} />
         },
         {
           label: ['代码', 'Code'],
           key: 'code',
-          task: 'insertCode',
+          run() {
+            tab.keyboard.insertCode()
+          },
           icon: <Icon icon={'ic:sharp-code'} className={'text-base'} />
         },
         {
           label: ['分割线', 'Horizontal line'],
           key: 'horizontal-line',
-          task: 'horizontalLine',
+          run() {
+            tab.keyboard.horizontalLine()
+          },
           icon: <Icon icon={'radix-icons:divider-horizontal'} className={'text-base'} />
         }
       ]
@@ -93,26 +95,25 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
         {
           label: ['图片', 'Image'],
           key: 'local-image',
-          task: 'localImage',
+          run() {
+            tab.keyboard.localImage()
+          },
           icon: <Icon icon={'material-symbols:image-outline'} className={'text-base'} />
         },
         {
           label: ['视频', 'Video'],
           key: 'video',
-          task: 'localImage',
-          args: ['video'],
+          run() {
+            tab.keyboard.localImage('video')
+          },
           icon: <Icon icon={'ri:video-line'} className={'text-base'} />
         },
         {
-          label: ['附件', 'Attachment'],
-          key: 'Attachment',
-          task: 'attach',
-          icon: <Icon icon={'hugeicons:attachment-square'} className={'text-base'} />
-        },
-        {
           label: ['远程媒体', 'Media link'],
-          task: 'media',
           key: 'media-link',
+          run() {
+            // tab.keyboard.media()
+          },
           args: ['', true],
           icon: <Icon icon={'ic:round-perm-media'} className={'text-base'} />
         }
@@ -124,27 +125,35 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
       children: [
         {
           label: ['公式块', 'Formula block'],
-          task: 'insertCode',
           key: 'formula-block',
           args: ['katex'],
+          run: () => {
+            tab.keyboard.insertCode('katex')
+          },
           icon: <Icon icon={'pajamas:formula'} className={'text-base'} />
         },
         {
           label: ['行内公式', 'Formula inline'],
           key: 'formula-inline',
-          task: 'inlineKatex',
+          run: () => {
+            tab.keyboard.inlineKatex()
+          },
           icon: <Icon icon={'pajamas:formula'} className={'text-base'} />
         },
         {
           label: ['Mermaid 图形', 'Mermaid graphics'],
-          task: 'insertCode',
           key: 'mermaid',
           args: ['mermaid'],
+          run: () => {
+            tab.keyboard.insertCode('mermaid')
+          },
           icon: <IMermaid className={'text-sm'} />
         },
         {
           label: ['HTML', 'HTML'],
-          task: 'insertCode',
+          run: () => {
+            tab.keyboard.insertCode('html')
+          },
           key: 'html',
           args: ['html'],
           icon: <Icon icon={'icon-park-outline:html-five'} className={'text-base'} />
@@ -157,58 +166,72 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
       children: [
         {
           label: ['无序列表', 'Bulleted list'],
-          task: 'list',
           key: 'b-list',
+          run: () => {
+            tab.keyboard.list('unordered')
+          },
           args: ['unordered'],
           icon: <Icon icon={'ion:list-sharp'} className={'text-base'} />
         },
         {
           label: ['有序列表', 'Numbered list'],
-          task: 'list',
           key: 'n-list',
+          run: () => {
+            tab.keyboard.list('ordered')
+          },
           args: ['ordered'],
           icon: <Icon icon={'ph:list-numbers-bold'} className={'text-base'} />
         },
         {
           label: ['任务列表', 'Todo list'],
-          task: 'list',
           key: 't-list',
+          run: () => {
+            tab.keyboard.list('task')
+          },
           args: ['task'],
           icon: <Icon icon={'lucide:list-todo'} className={'text-base'} />
         }
       ]
     }
   ]
-  if (ctx.isTop) {
+  if (isTop) {
     options.splice(2, 0, {
       label: ['标题', 'Heading'],
       key: 'head',
       children: [
         {
           label: ['标题 1', 'Heading 1'],
-          task: 'head',
           key: 'head1',
+          run: () => {
+            tab.keyboard.head(1)
+          },
           args: [1],
           icon: <Icon icon={'gravity-ui:heading-1'} className={'text-base'} />
         },
         {
           label: ['标题2', 'Heading 2'],
-          task: 'head',
           key: 'head2',
+          run: () => {
+            tab.keyboard.head(2)
+          },
           icon: <Icon icon={'gravity-ui:heading-2'} className={'text-base'} />,
           args: [2]
         },
         {
           label: ['标题3', 'Heading 3'],
-          task: 'head',
           key: 'head3',
+          run: () => {
+            tab.keyboard.head(3)
+          },
           icon: <Icon icon={'gravity-ui:heading-3'} className={'text-base'} />,
           args: [3]
         },
         {
           label: ['标题4', 'Heading 4'],
-          task: 'head',
           key: 'head4',
+          run: () => {
+            tab.keyboard.head(4)
+          },
           icon: <Icon icon={'gravity-ui:heading-4'} className={'text-base'} />,
           args: [4]
         }
@@ -218,15 +241,15 @@ const getInsertOptions: (ctx: { isTop: boolean }) => InsertOptions[] = (ctx) => 
   return options
 }
 
-export const InsertAutocomplete = observer(() => {
-  const core = useCoreContext()
-  const store = useEditorStore()
+export const InsertAutocomplete = memo(() => {
   const dom = useRef<HTMLDivElement>(null)
+  const tab = useTab()
   const ctx = useRef<{
     path: number[]
     isTop: boolean
   }>({ path: [], isTop: true })
-  const [state, setState] = useLocalState({
+  const [openInsertCompletion] = tab.useState(useShallow((state) => [state.openInsertCompletion]))
+  const [state, setState] = useGetSetState({
     index: 0,
     filterOptions: [] as InsertOptions[],
     options: [] as InsertOptions['children'],
@@ -240,8 +263,8 @@ export const InsertAutocomplete = observer(() => {
     text: ''
   })
   const selectedKey = useMemo(() => {
-    return state.options[state.index]?.key
-  }, [state.index, state.options, state.text])
+    return state().options[state().index]?.key
+  }, [state().index, state().options, state().text])
 
   const clickClose = useCallback((e: Event) => {
     if (!dom.current?.contains(e.target as HTMLElement)) {
@@ -250,9 +273,7 @@ export const InsertAutocomplete = observer(() => {
   }, [])
 
   const close = useCallback(() => {
-    runInAction(() => {
-      store.openInsertCompletion = false
-    })
+    tab.useState.setState({ openInsertCompletion: false })
     setState({
       filterOptions: [],
       options: [],
@@ -263,12 +284,12 @@ export const InsertAutocomplete = observer(() => {
       insertUrl: ''
     })
     window.removeEventListener('click', clickClose)
-  }, [])
+  }, [tab])
 
   const insertMedia = useCallback(async () => {
     setState({ loading: true })
     try {
-      let url = state.insertUrl
+      let url = state().insertUrl
       for (const r of replaceUrl) {
         const m = url.match(r.reg)
         if (m) {
@@ -277,24 +298,24 @@ export const InsertAutocomplete = observer(() => {
         }
       }
       if (!/^(\w+\:)?\/\//.test(url)) {
-        core.message.info('Please enter a valid link.')
+        tab.store.msg.info('Please enter a valid link.')
         throw new Error()
       }
-      const type = await core.getRemoteMediaType(url)
-      if (!type) {
-        core.message.info('The resource could not be loaded.')
-        throw new Error()
-      }
-      Transforms.insertText(store.editor, '', {
-        at: {
-          anchor: Editor.start(store.editor, ctx.current.path),
-          focus: Editor.end(store.editor, ctx.current.path)
-        }
-      })
-      const node = { type: 'media', url, children: [{ text: '' }], mediaType: type }
-      Transforms.setNodes(store.editor, node, { at: ctx.current.path })
-      EditorUtils.focus(store.editor)
-      selChange$.next(ctx.current.path)
+      // const type = await core.getRemoteMediaType(url)
+      // if (!type) {
+      //   core.message.info('The resource could not be loaded.')
+      //   throw new Error()
+      // }
+      // Transforms.insertText(store.editor, '', {
+      //   at: {
+      //     anchor: Editor.start(store.editor, ctx.current.path),
+      //     focus: Editor.end(store.editor, ctx.current.path)
+      //   }
+      // })
+      // const node = { type: 'media', url, children: [{ text: '' }], mediaType: type }
+      // Transforms.setNodes(store.editor, node, { at: ctx.current.path })
+      // EditorUtils.focus(store.editor)
+      // selChange$.next(ctx.current.path)
       close()
     } finally {
       setState({ loading: false })
@@ -304,171 +325,180 @@ export const InsertAutocomplete = observer(() => {
   const insertAttachByLink = useCallback(async () => {
     setState({ loading: true })
     try {
-      let url = state.insertUrl
+      let url = state().insertUrl
       if (!/^(\w+\:)?\/\//.test(url)) {
-        core.message.info('Please enter a valid link.')
+        tab.store.msg.info('Please enter a valid link.')
         throw new Error()
       }
-      const res = await core.api.getAttachmentHead.query({ url })
-      if (!res) {
-        core.message.info('The resource could not be loaded.')
-        throw new Error()
-      }
-      const size = Number(res['content-length'] || 0)
-      const name = url.match(/([\w\_\-]+)\.\w+$/)
-      Transforms.insertText(store.editor, '', {
+      // const res = await core.api.getAttachmentHead.query({ url })
+      // if (!res) {
+      //   tab.store.msg.info('The resource could not be loaded.')
+      //   throw new Error()
+      // }
+      // const size = Number(res['content-length'] || 0)
+      // const name = url.match(/([\w\_\-]+)\.\w+$/)
+      Transforms.insertText(tab.editor, '', {
         at: {
-          anchor: Editor.start(store.editor, ctx.current.path),
-          focus: Editor.end(store.editor, ctx.current.path)
+          anchor: Editor.start(tab.editor, ctx.current.path),
+          focus: Editor.end(tab.editor, ctx.current.path)
         }
       })
-      const node = {
-        type: 'attach',
-        name: name ? name[1] : url,
-        url,
-        size,
-        children: [{ text: '' }]
-      }
-      Transforms.setNodes(store.editor, node, { at: ctx.current.path })
-      EditorUtils.focus(store.editor)
-      selChange$.next(ctx.current.path)
+      // const node = {
+      //   type: 'attach',
+      //   name: name ? name[1] : url,
+      //   url,
+      //   size,
+      //   children: [{ text: '' }]
+      // }
+      // Transforms.setNodes(tab.editor, node, { at: ctx.current.path })
+      // EditorUtils.focus(tab.editor)
+      // selChange$.next(ctx.current.path)
       close()
     } finally {
       setState({ loading: false })
     }
   }, [])
 
-  const insert = useCallback((op: InsertOptions['children'][number]) => {
-    if (op.task === 'media' || op.task === 'attach') {
-      if (op.task === 'media') {
-        setState({ insertLink: true })
-        setTimeout(() => {
-          dom.current?.querySelector('input')?.focus()
-        }, 30)
+  const run = useCallback(
+    (op: InsertOptions['children'][number]) => {
+      if (op.key === 'media' || op.key === 'attach') {
+        if (op.key === 'media') {
+          setState({ insertLink: true })
+          setTimeout(() => {
+            dom.current?.querySelector('input')?.focus()
+          }, 30)
+        } else {
+          setState({ insertAttach: true })
+        }
       } else {
-        setState({ insertAttach: true })
+        if (op) {
+          Transforms.insertText(tab.editor, '', {
+            at: {
+              anchor: Editor.start(tab.editor, ctx.current.path),
+              focus: Editor.end(tab.editor, ctx.current.path)
+            }
+          })
+          op.run?.()
+        }
+        close()
       }
-    } else {
-      if (op) {
-        Transforms.insertText(store.editor, '', {
-          at: {
-            anchor: Editor.start(store.editor, ctx.current.path),
-            focus: Editor.end(store.editor, ctx.current.path)
-          }
-        })
-        keyTask$.next({
-          key: op.task,
-          args: op.args
-        })
-      }
-      close()
-    }
-  }, [])
+    },
+    [tab]
+  )
 
-  const keydown = useCallback((e: KeyboardEvent) => {
-    if (state.options.length && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-      e.preventDefault()
-      if (e.key === 'ArrowUp' && state.index > 0) {
-        setState({ index: state.index - 1 })
-        const key = state.options[state.index].key
-        const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
-        if (target && dom.current!.scrollTop > target.offsetTop) {
-          dom.current!.scroll({
-            top: dom.current!.scrollTop - 160 + 30
-          })
-        }
-      }
-      if (e.key === 'ArrowDown' && state.index < state.options.length - 1) {
-        setState({ index: state.index + 1 })
-        const key = state.options[state.index].key
-        const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
-        if (target && target.offsetTop > dom.current!.scrollTop + dom.current!.clientHeight - 30) {
-          dom.current!.scroll({
-            top: target.offsetTop - 30
-          })
-        }
-      }
-    }
-    if (e.key === 'Enter' && store.openInsertCompletion) {
-      const op = state.options[state.index]
-      if (op) {
+  const keydown = useCallback(
+    (e: KeyboardEvent) => {
+      if (state().options.length && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
         e.preventDefault()
-        e.stopPropagation()
-        insert(op)
-      }
-    }
-    if (isHotkey('esc', e)) {
-      runInAction(() => {
-        store.openInsertCompletion = false
-      })
-      EditorUtils.focus(store.editor)
-    }
-  }, [])
-
-  useSubject(store.insertCompletionText$, (text) => {
-    text = text || ''
-    const insertOptions = getInsertOptions({
-      isTop: ctx.current.isTop
-    })
-    let filterOptions: InsertOptions[] = []
-    let options: InsertOptions['children'] = []
-    if (text) {
-      for (let item of insertOptions) {
-        const ops = item.children.filter((op) => {
-          return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
-        })
-        options.push(...ops)
-        if (ops.length) {
-          filterOptions.push({
-            ...item,
-            children: ops
-          })
+        if (e.key === 'ArrowUp' && state().index > 0) {
+          setState({ index: state().index - 1 })
+          const key = state().options[state().index].key
+          const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
+          if (target && dom.current!.scrollTop > target.offsetTop) {
+            dom.current!.scroll({
+              top: dom.current!.scrollTop - 160 + 30
+            })
+          }
+        }
+        if (e.key === 'ArrowDown' && state().index < state().options.length - 1) {
+          setState({ index: state().index + 1 })
+          const key = state().options[state().index].key
+          const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
+          if (
+            target &&
+            target.offsetTop > dom.current!.scrollTop + dom.current!.clientHeight - 30
+          ) {
+            dom.current!.scroll({
+              top: target.offsetTop - 30
+            })
+          }
         }
       }
-    } else {
-      filterOptions = insertOptions
-      options = insertOptions.reduce(
-        (a, b) => a.concat(b.children),
-        [] as InsertOptions['children']
-      )
-    }
-    setState({
-      index: 0,
-      text,
-      options,
-      filterOptions,
-      insertLink: false
-    })
-  })
+      if (e.key === 'Enter' && openInsertCompletion) {
+        const op = state().options[state().index]
+        if (op) {
+          e.preventDefault()
+          e.stopPropagation()
+          run(op)
+        }
+      }
+      if (isHotkey('esc', e)) {
+        tab.useState.setState({ openInsertCompletion: false })
+        EditorUtils.focus(tab.editor)
+      }
+    },
+    [openInsertCompletion, tab]
+  )
+  useEffect(() => {
+    tab.useStatus.subscribe(
+      (state) => state.insertCompletionText,
+      (text) => {
+        text = text || ''
+        const insertOptions = getInsertOptions({
+          isTop: ctx.current.isTop,
+          tab
+        })
+        let filterOptions: InsertOptions[] = []
+        let options: InsertOptions['children'] = []
+        if (text) {
+          for (let item of insertOptions) {
+            const ops = item.children.filter((op) => {
+              return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
+            })
+            options.push(...ops)
+            if (ops.length) {
+              filterOptions.push({
+                ...item,
+                children: ops
+              })
+            }
+          }
+        } else {
+          filterOptions = insertOptions
+          options = insertOptions.reduce(
+            (a, b) => a.concat(b.children),
+            [] as InsertOptions['children']
+          )
+        }
+        setState({
+          index: 0,
+          text,
+          options,
+          filterOptions,
+          insertLink: false
+        })
+      }
+    )
+  }, [tab])
 
   useEffect(() => {
-    if (store.openInsertCompletion) {
+    if (openInsertCompletion) {
       setState({ insertLink: false })
-      const [node] = Editor.nodes<any>(store.editor, {
+      const [node] = Editor.nodes<any>(tab.editor, {
         match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
       ctx.current = {
         path: node[1],
-        isTop: EditorUtils.isTop(store.editor, node[1])
+        isTop: EditorUtils.isTop(tab.editor, node[1])
       }
       window.addEventListener('keydown', keydown)
       if (node[0].type === 'paragraph') {
-        const el = ReactEditor.toDOMNode(store.editor, node[0])
+        const el = ReactEditor.toDOMNode(tab.editor, node[0])
         if (el) {
-          let top = getOffsetTop(el, store.container!)
+          let top = getOffsetTop(el, tab.container!)
           if (
             top >
-            store.container!.scrollTop + store.container!.clientHeight - 212 - el.clientHeight
+            tab.container!.scrollTop + tab.container!.clientHeight - 212 - el.clientHeight
           ) {
             setState({
               top: undefined,
-              bottom: -(top - store.container!.clientHeight),
-              left: getOffsetLeft(el, store.container!)
+              bottom: -(top - tab.container!.clientHeight),
+              left: getOffsetLeft(el, tab.container!)
             })
           } else {
             setState({
-              left: getOffsetLeft(el, store.container!),
+              left: getOffsetLeft(el, tab.container!),
               top: top + el.clientHeight,
               bottom: undefined
             })
@@ -483,29 +513,29 @@ export const InsertAutocomplete = observer(() => {
       window.removeEventListener('keydown', keydown)
       close()
     }
-  }, [store.openInsertCompletion])
+  }, [openInsertCompletion, tab])
   return (
     <div
       ref={dom}
       className={`
-      ${!store.openInsertCompletion || !state.filterOptions.length ? 'hidden' : ''}
-      absolute z-50 ${state.insertLink || state.insertAttach ? 'w-80' : 'w-44'} max-h-52 overflow-y-auto p-1.5 ctx-panel rounded-lg py-1 text-black/80 card-bg dark:text-white/90
+      ${!openInsertCompletion || !state().filterOptions.length ? 'hidden' : ''}
+      absolute z-50 ${state().insertLink || state().insertAttach ? 'w-80' : 'w-44'} max-h-52 overflow-y-auto p-1.5 ctx-panel rounded-lg py-1 text-black/80 card-bg dark:text-white/90
       `}
       onMouseDown={(e) => {
         e.preventDefault()
       }}
       style={{
-        left: state.left,
-        top: state.top,
-        bottom: state.bottom
+        left: state().left,
+        top: state().top,
+        bottom: state().bottom
       }}
     >
-      {!state.insertLink && !state.insertAttach && (
+      {!state().insertLink && !state().insertAttach && (
         <>
           <div className={'text-xs leading-6 pl-1 dark:text-white/60 text-black/60 mb-1'}>
-            {core.config.zh ? '快速插入' : 'Quick Actions'}
+            {'Quick Actions'}
           </div>
-          {state.filterOptions.map((l, i) => (
+          {state().filterOptions.map((l, i) => (
             <div key={l.key}>
               {i !== 0 && <div className={'my-1 h-[1px] dark:bg-gray-200/10 bg-gray-200/70'}></div>}
               <div>
@@ -515,11 +545,11 @@ export const InsertAutocomplete = observer(() => {
                     data-action={el.key}
                     onClick={(e) => {
                       e.stopPropagation()
-                      insert(state.options[state.index])
+                      run(el)
                     }}
                     onMouseEnter={() => {
                       setState({
-                        index: state.options.findIndex((op) => op.key === el.key)
+                        index: state().options.findIndex((op) => op.key === el.key)
                       })
                     }}
                     className={`h-7 rounded px-2 cursor-pointer flex items-center text-[13px] space-x-1.5
@@ -527,7 +557,7 @@ export const InsertAutocomplete = observer(() => {
                 `}
                   >
                     {el.icon}
-                    <span>{core.config.zh ? el.label[0] : el.label[1]}</span>
+                    <span>{el.label[0]}</span>
                   </div>
                 ))}
               </div>
@@ -535,7 +565,7 @@ export const InsertAutocomplete = observer(() => {
           ))}
         </>
       )}
-      {state.insertLink && (
+      {state().insertLink && (
         <div className={'py-3 px-1'}>
           <div className={'text-sm flex items-center mb-2 dark:text-white/70 text-black/70'}>
             <IPlanet className={'text-sm'} />
@@ -545,7 +575,7 @@ export const InsertAutocomplete = observer(() => {
           <Input
             placeholder={'Paste media link'}
             onMouseDown={(e) => e.stopPropagation()}
-            value={state.insertUrl}
+            value={state().insertUrl}
             onKeyDown={(e) => {
               if (isHotkey('enter', e)) {
                 insertMedia()
@@ -555,18 +585,18 @@ export const InsertAutocomplete = observer(() => {
           />
           <Button
             block={true}
-            loading={state.loading}
+            loading={state().loading}
             type={'primary'}
             className={'mt-4'}
             size={'small'}
             onClick={insertMedia}
-            disabled={!state.insertUrl}
+            disabled={!state().insertUrl}
           >
             Embed
           </Button>
         </div>
       )}
-      {state.insertAttach && (
+      {state().insertAttach && (
         <div className={'px-1 pb-2'}>
           <Tabs
             size={'small'}
@@ -581,67 +611,28 @@ export const InsertAutocomplete = observer(() => {
                       size={'small'}
                       type={'primary'}
                       onClick={() => {
-                        if (core.desktop) {
-                          window.api.dialog
-                            .showOpenDialog({
-                              properties: ['openFile']
-                            })
-                            .then(async (res) => {
-                              if (res.filePaths.length && core.service.user) {
-                                Transforms.insertText(store.editor, '', {
-                                  at: {
-                                    anchor: Editor.start(store.editor, ctx.current.path),
-                                    focus: Editor.end(store.editor, ctx.current.path)
-                                  }
-                                })
-                                core.keyboard.attach({
-                                  filePath: res.filePaths[0]
-                                })
-                                close()
-                              }
-                            })
-                        } else {
-                          fileOpen().then((res) => {
-                            Transforms.insertText(store.editor, '', {
-                              at: {
-                                anchor: Editor.start(store.editor, ctx.current.path),
-                                focus: Editor.end(store.editor, ctx.current.path)
-                              }
-                            })
-                            core.keyboard.attach({
-                              file: res
-                            })
-                            close()
+                        window.api.dialog
+                          .showOpenDialog({
+                            properties: ['openFile']
                           })
-                        }
+                          .then(async (res) => {
+                            if (res.filePaths.length) {
+                              Transforms.insertText(tab.editor, '', {
+                                at: {
+                                  anchor: Editor.start(tab.editor, ctx.current.path),
+                                  focus: Editor.end(tab.editor, ctx.current.path)
+                                }
+                              })
+                              tab.keyboard.attach({
+                                filePath: res.filePaths[0]
+                              })
+                              close()
+                            }
+                          })
                       }}
                     >
                       Choose a file
                     </Button>
-                    {core.service.user?.level === 0 && (
-                      <Tooltip
-                        title={'Upgrade to a plus account to upload files up to 500mb.'}
-                        mouseEnterDelay={0.5}
-                        placement={'bottom'}
-                      >
-                        <div
-                          className={
-                            'text-xs dark:text-white/60 text-black/60 mt-4 text-center select-none cursor-default'
-                          }
-                        >
-                          The maximum size per file is 5 MB.
-                        </div>
-                      </Tooltip>
-                    )}
-                    {core.service.user?.level === 1 && (
-                      <div
-                        className={
-                          'text-xs dark:text-white/60 text-black/60 mt-4 text-center select-none cursor-default'
-                        }
-                      >
-                        The maximum size per file is 500 MB.
-                      </div>
-                    )}
                   </div>
                 )
               },
@@ -653,7 +644,7 @@ export const InsertAutocomplete = observer(() => {
                     <Input
                       placeholder={'Paste attachment link'}
                       onMouseDown={(e) => e.stopPropagation()}
-                      value={state.insertUrl}
+                      value={state().insertUrl}
                       onKeyDown={(e) => {
                         if (isHotkey('enter', e)) {
                           insertAttachByLink()
@@ -663,12 +654,12 @@ export const InsertAutocomplete = observer(() => {
                     />
                     <Button
                       block={true}
-                      loading={state.loading}
+                      loading={state().loading}
                       type={'primary'}
                       className={'mt-4'}
                       size={'small'}
                       onClick={insertAttachByLink}
-                      disabled={!state.insertUrl}
+                      disabled={!state().insertUrl}
                     >
                       Embed
                     </Button>

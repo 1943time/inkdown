@@ -11,9 +11,15 @@ import { Store } from '../store'
 import { IDoc } from 'types/model'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
+import { KeyboardTask } from './keyboard'
 export class TabStore {
-  constructor(private readonly store: Store) {
+  keyboard: KeyboardTask
+  constructor(public readonly store: Store) {
     this.dragStart = this.dragStart.bind(this)
+    this.keyboard = new KeyboardTask(this)
+  }
+  get note() {
+    return this.store.note
   }
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
   manual = false
@@ -39,7 +45,10 @@ export class TabStore {
       path: null as null | Path,
       langCompletionText: '',
       startDragging: false,
-      readonly: false
+      showFloatBar: false,
+      readonly: false,
+      insertCompletionText: '',
+      domRect: null as null | DOMRect
     }))
   )
   useState = create(
@@ -68,6 +77,10 @@ export class TabStore {
       }
     }))
   )
+  get doc() {
+    const { currentIndex, docIds } = this.useState.getState()
+    return this.store.note.useState.getState().nodes[docIds[currentIndex]]
+  }
   useDoc(): IDoc | undefined {
     const docId = this.useState((state) => state.docIds[state.currentIndex])
     return this.store.note.useState((state) => state.nodes[docId])
@@ -75,8 +88,8 @@ export class TabStore {
   setOpenSearch(open: boolean) {
     this.useState.setState((state) => {
       state.openSearch = open
-      state.domRect = null
     })
+    this.useStatus.setState({ domRect: null })
     if (!open) {
       this.clearDocAllMarkers()
       this.highlightCache.clear()

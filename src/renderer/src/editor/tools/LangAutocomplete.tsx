@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import { Editor, Element, Transforms } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { langIconMap } from './langIconMap'
@@ -13,7 +13,7 @@ const list = Array.from(langIconMap)
     return { icon: item[1], lang: item[0] }
   })
   .sort((a, b) => (a.lang > b.lang ? 1 : -1))
-export function LangAutocomplete({ tab }: { tab: TabStore }) {
+export const LangAutocomplete = memo(({ tab }: { tab: TabStore }) => {
   const dom = useRef<HTMLDivElement>(null)
   const path = useRef<number[]>([])
   const [openLangCompletion] = tab.useState(useShallow((state) => [state.openLangCompletion]))
@@ -150,4 +150,4 @@ export function LangAutocomplete({ tab }: { tab: TabStore }) {
       ))}
     </div>
   )
-}
+})
