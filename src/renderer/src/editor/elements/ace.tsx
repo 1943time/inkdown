@@ -1,24 +1,22 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { CodeNode, ElementProps } from '../../types/el'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import ace, { Ace } from 'ace-builds'
 import isHotkey from 'is-hotkey'
 import { ReactEditor } from 'slate-react'
 import { Editor, Path, Transforms } from 'slate'
-import { useSelStatus } from '../../hooks/editor'
 import { EditorUtils } from '../utils/editorUtils'
 import { useGetSetState } from 'react-use'
 import { langIconMap } from '../tools/langIconMap'
 import { AutoComplete, Input, Popover } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
-import { IArrowRight } from '../../icons/IArrowRight'
-import { ICopy } from '../../icons/ICopy'
 import { DragHandle } from '../tools/DragHandle'
 import { aceLangs, modeMap } from '../utils/ace'
 import { filterScript } from '../utils/dom'
-import { useCoreContext } from '../../utils/env'
-import { useEditorStore } from '../../store/editor'
 import Mermaid from './CodeUI/Mermaid'
 import Katex from './CodeUI/Katex/Katex'
+import { CodeNode, ElementProps } from '..'
+import { useTab } from '@/store/note/TabCtx'
+import { ChevronDown, Copy } from 'lucide-react'
+import { useSelStatus } from '../utils'
 
 const langOptions = Array.from(langIconMap).map(([lang, icon]) => {
   return {
@@ -47,43 +45,42 @@ const findLink = (dom: HTMLElement) => {
   return null
 }
 
-export function AceElement(props: ElementProps<CodeNode>) {
-  const core = useCoreContext()
-  const store = useEditorStore()
+export const AceElement = memo(({ element, attributes, children }: ElementProps<CodeNode>) => {
+  const tab = useTab()
   const [state, setState] = useGetSetState({
     showBorder: false,
     htmlStr: '',
-    hide: !!props.element.render || !!props.element.katex || props.element.language === 'mermaid',
-    lang: (props.element.language || '').toLowerCase(),
+    hide: !!element.render || !!element.katex || element.language === 'mermaid',
+    lang: (element.language || '').toLowerCase(),
     openSelectMenu: false
   })
-  const codeRef = useRef(props.element.code || '')
-  const pathRef = useRef<Path>()
+  const [selected, path] = useSelStatus(element)
+  const codeRef = useRef(element.code || '')
+  const pathRef = useRef<Path>(path)
+  pathRef.current = path
   const posRef = useRef({ row: 0, column: 0 })
   const pasted = useRef(false)
   const timmer = useRef(0)
-  const [selected, path] = useSelStatus(props.element)
-  pathRef.current = path
-  const editorRef = useRef<Ace.Editor>()
+  const editorRef = useRef<Ace.Editor>(null)
   const dom = useRef<HTMLDivElement>(null)
   const update = useCallback(
     (data: Partial<CodeNode>) => {
       const code = editorRef.current?.getValue() || ''
       codeRef.current = code
-      Transforms.setNodes(store.editor, data, { at: path })
+      Transforms.setNodes(tab.editor, data, { at: path })
     },
     [path]
   )
 
   useEffect(() => {
-    if (selected && !editorRef.current?.isFocused() && ReactEditor.isFocused(store.editor)) {
+    if (selected && !editorRef.current?.isFocused() && ReactEditor.isFocused(tab.editor)) {
       setState({ showBorder: true })
     } else if (state().showBorder) {
       setState({ showBorder: false })
     }
-  }, [selected, path])
+  }, [selected])
   const setLanguage = useCallback(() => {
-    if (props.element.language?.toLowerCase() === state().lang) return
+    if (element.language?.toLowerCase() === state().lang) return
     let lang = state().lang
     update({ language: state().lang })
     if (modeMap.has(lang)) {
@@ -94,44 +91,41 @@ export function AceElement(props: ElementProps<CodeNode>) {
     } else {
       editorRef.current?.session.setMode(`ace/mode/text`)
     }
-  }, [props.element, props.element.children, state().lang])
+  }, [element, state().lang])
 
   useEffect(() => {
-    let code = props.element.code || ''
+    let code = element.code || ''
+    const settings = tab.store.settings.useNoteSettings.getState()
     const editor = ace.edit(dom.current!, {
       useWorker: false,
       value: code,
       fontSize: 13,
       maxLines: Infinity,
-      wrap: core.config.config.codeAutoBreak === 'true' ? true : 'off',
-      tabSize: +core.config.config.codeTabSize,
+      wrap: settings.codeAutoBreak ? true : 'off',
+      tabSize: settings.codeTabSize,
       showPrintMargin: false,
-      readOnly: store.history
+      readOnly: tab.useState.getState().historyView
     })
     editor.commands.addCommand({
       name: 'disableFind',
       bindKey: { win: 'Ctrl-F', mac: 'Command-F' },
       exec: () => {}
     })
-
     const t = dom.current!.querySelector('textarea')
     editor.on('focus', (e) => {
-      ReactEditor.blur(store.editor)
-      store.editor.selection = null
-      store.hideRanges()
+      ReactEditor.blur(tab.editor)
+      tab.editor.selection = null
+      tab.hideRanges()
       setState({ showBorder: false, hide: false })
     })
     editor.on('blur', () => {
       editor.selection.clearSelection()
       const lang = state().lang
       setState({
-        hide:
-          props.element.katex ||
-          (props.element.render && lang !== 'html') ||
-          lang === 'mermaid'
+        hide: element.katex || (element.render && lang !== 'html') || lang === 'mermaid'
       })
     })
-    editor.selection.on('changeCursor', (e: any) => {
+    editor.selection.on('changeCursor', () => {
       setTimeout(() => {
         const pos = editor.getCursorPosition()
         posRef.current = { row: pos.row, column: pos.column }
@@ -147,7 +141,7 @@ export function AceElement(props: ElementProps<CodeNode>) {
         }, 60)
       }
     })
-    editor.container?.addEventListener('mousedown', e => {
+    editor.container?.addEventListener('mousedown', (e) => {
       e.stopPropagation()
       setTimeout(() => {
         if (!editor.isFocused()) {
@@ -158,24 +152,24 @@ export function AceElement(props: ElementProps<CodeNode>) {
     t?.addEventListener('keydown', (e) => {
       if (isHotkey('backspace', e)) {
         if (!codeRef.current) {
-          const path = ReactEditor.findPath(store.editor, props.element)
-          Transforms.delete(store.editor, { at: path })
+          const path = ReactEditor.findPath(tab.editor, element)
+          Transforms.delete(tab.editor, { at: path })
           Transforms.insertNodes(
-            store.editor,
+            tab.editor,
             {
               type: 'paragraph',
               children: [{ text: '' }]
             },
             { at: path }
           )
-          Transforms.select(store.editor, Editor.start(store.editor, path))
-          ReactEditor.focus(store.editor)
+          Transforms.select(tab.editor, Editor.start(tab.editor, path))
+          ReactEditor.focus(tab.editor)
         }
       }
       if (isHotkey('mod+enter', e) && pathRef.current) {
-        EditorUtils.focus(store.editor)
+        EditorUtils.focus(tab.editor)
         Transforms.insertNodes(
-          store.editor,
+          tab.editor,
           { type: 'paragraph', children: [{ text: '' }] },
           {
             at: Path.next(pathRef.current),
@@ -186,13 +180,13 @@ export function AceElement(props: ElementProps<CodeNode>) {
         return
       }
       if (isHotkey('up', e)) {
-        if (posRef.current.row === 0 && posRef.current.column === 0 && !props.element.frontmatter) {
-          EditorUtils.focus(store.editor)
+        if (posRef.current.row === 0 && posRef.current.column === 0 && !element.frontmatter) {
+          EditorUtils.focus(tab.editor)
           const path = pathRef.current!
           if (Path.hasPrevious(path)) {
-            EditorUtils.selectPrev(store, path)
+            tab.selectPrev(path)
           } else {
-            Transforms.insertNodes(store.editor, EditorUtils.p, {
+            Transforms.insertNodes(tab.editor, EditorUtils.p, {
               at: path,
               select: true
             })
@@ -205,12 +199,12 @@ export function AceElement(props: ElementProps<CodeNode>) {
           posRef.current.row === length - 1 &&
           posRef.current.column === editor.session.getLine(length - 1)?.length
         ) {
-          EditorUtils.focus(store.editor)
+          EditorUtils.focus(tab.editor)
           const path = pathRef.current!
-          if (Editor.hasPath(store.editor, Path.next(path))) {
-            EditorUtils.selectNext(store, path)
+          if (Editor.hasPath(tab.editor, Path.next(path))) {
+            tab.selectNext(path)
           } else {
-            Transforms.insertNodes(store.editor, EditorUtils.p, {
+            Transforms.insertNodes(tab.editor, EditorUtils.p, {
               at: Path.next(path),
               select: true
             })
@@ -222,7 +216,7 @@ export function AceElement(props: ElementProps<CodeNode>) {
     })
     let lang = state().lang as string
     setTimeout(() => {
-      if (core.config.dark) {
+      if (tab.store.settings.useState.getState().dark) {
         editor.setTheme(`ace/theme/cloud_editor_dark`)
       } else {
         editor.setTheme('ace/theme/cloud_editor')
@@ -248,42 +242,42 @@ export function AceElement(props: ElementProps<CodeNode>) {
     }
   }, [])
   useEffect(() => {
-    store.codes.set(props.element, editorRef.current!)
-    if (props.element.language === 'html' && !!props.element.render) {
+    tab.codeMap.set(element, editorRef.current!)
+    if (element.language === 'html' && !!element.render) {
       setState({
-        htmlStr: filterScript(props.element.code)
+        htmlStr: filterScript(element.code)
       })
     }
-    if (props.element.code !== codeRef.current) {
-      editorRef.current?.setValue(props.element.code)
+    if (element.code !== codeRef.current) {
+      editorRef.current?.setValue(element.code)
     }
-  }, [props.element])
+  }, [element, tab])
   return (
     <div
-      {...props.attributes}
+      {...attributes}
       contentEditable={false}
       className={'ace-el drag-el'}
       data-be={'code'}
-      data-lang={props.element.language}
+      data-lang={element.language}
     >
-      {!props.element.frontmatter && <DragHandle />}
+      {!element.frontmatter && <DragHandle />}
       <div
         style={{
           padding: state().hide ? 0 : undefined,
           marginBottom: state().hide ? 0 : undefined
         }}
         className={`ace-container drag-el ${
-          props.element.frontmatter ? 'frontmatter' : ''
+          element.frontmatter ? 'frontmatter' : ''
         } ${!state().hide ? 'border-2' : 'h-0 opacity-0'} ${
           state().showBorder
             ? 'bg-blue-500/10 dark:bg-blue-500/10'
             : 'bg-[rgb(253,253,253)] dark:bg-[rgba(36,38,41,.4)]'
         }`}
       >
-        {!props.element.frontmatter && (
+        {!element.frontmatter && (
           <div
             contentEditable={false}
-            onMouseDown={e => {
+            onMouseDown={(e) => {
               e.stopPropagation()
             }}
             onClick={(e) => {
@@ -303,7 +297,7 @@ export function AceElement(props: ElementProps<CodeNode>) {
               arrow={false}
               open={state().openSelectMenu}
               onOpenChange={(v) => {
-                if (props.element.katex || props.element.render) {
+                if (element.katex || element.render) {
                   return
                 }
                 setState({ openSelectMenu: v })
@@ -321,7 +315,7 @@ export function AceElement(props: ElementProps<CodeNode>) {
                   placeholder={'Search'}
                   autoFocus={true}
                   style={{ width: 200 }}
-                  onClick={e => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
                   filterOption={(text, item) => {
                     return item?.value.includes(text) || false
                   }}
@@ -348,31 +342,28 @@ export function AceElement(props: ElementProps<CodeNode>) {
                   'flex items-center cursor-pointer hover:text-black/80 dark:hover:text-white/80'
                 }
               >
-                {langIconMap.get(props.element.language?.toLowerCase()!) &&
-                  !props.element.katex && (
-                    <div className={'h-4 w-4 flex items-center justify-center mr-1'}>
-                      <img
-                        className={'w-4 h-4'}
-                        src={langIconMap.get(props.element.language?.toLowerCase()!)}
-                      />
-                    </div>
-                  )}
+                {langIconMap.get(element.language?.toLowerCase()!) && !element.katex && (
+                  <div className={'h-4 w-4 flex items-center justify-center mr-1'}>
+                    <img
+                      className={'w-4 h-4'}
+                      src={langIconMap.get(element.language?.toLowerCase()!)}
+                    />
+                  </div>
+                )}
                 <div>
-                  {props.element.language ? (
+                  {element.language ? (
                     <span>
-                      {props.element.katex
+                      {element.katex
                         ? 'Formula'
-                        : props.element.language === 'html' && props.element.render
+                        : element.language === 'html' && element.render
                           ? 'Html Renderer'
-                          : props.element.language}
+                          : element.language}
                     </span>
                   ) : (
                     <span>{'plain text'}</span>
                   )}
                 </div>
-                {!props.element.katex && !props.element.render && (
-                  <IArrowRight className={'rotate-90 text-lg ml-0.5'} />
-                )}
+                {!element.katex && !element.render && <ChevronDown className={'text-lg ml-0.5'} />}
               </div>
             </Popover>
             <div>
@@ -383,21 +374,21 @@ export function AceElement(props: ElementProps<CodeNode>) {
                 }}
                 onClick={(e) => {
                   e.stopPropagation()
-                  const code = props.element.code || ''
-                  core.copySuccessfully(code)
+                  const code = element.code || ''
+                  tab.store.copySuccessfully(code)
                 }}
               >
-                <ICopy />
+                <Copy />
               </div>
             </div>
           </div>
         )}
         <div ref={dom} style={{ height: 20, lineHeight: '22px' }}></div>
-        <div className={'hidden'}>{props.children}</div>
+        <div className={'hidden'}>{children}</div>
       </div>
-      {props.element.language === 'mermaid' && <Mermaid el={props.element} />}
-      {!!props.element.katex && <Katex el={props.element} />}
-      {props.element.language === 'html' && !!props.element.render && (
+      {element.language === 'mermaid' && <Mermaid el={element} />}
+      {!!element.katex && <Katex el={element} />}
+      {element.language === 'html' && !!element.render && (
         <div
           className={'bg-gray-500/5 p-3 mb-3 whitespace-nowrap rounded leading-5 overflow-auto'}
           onClick={(e) => {
@@ -413,4 +404,4 @@ export function AceElement(props: ElementProps<CodeNode>) {
       )}
     </div>
   )
-}
+})

@@ -58,6 +58,9 @@ devDependencies:
   '@types/is-hotkey':
     specifier: ^0.1.10
     version: 0.1.10
+  '@types/katex':
+    specifier: ^0.16.7
+    version: 0.16.7
   '@types/node':
     specifier: ^22.13.13
     version: 22.14.0

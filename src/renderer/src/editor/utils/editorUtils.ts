@@ -36,19 +36,6 @@ export class EditorUtils {
       console.error(e)
     }
   }
-  static selectMedia(ctx: EditorCtx, path: Path) {
-    Transforms.select(ctx.editor, path)
-    try {
-      const top = ctx.container!.scrollTop
-      const dom = ReactEditor.toDOMNode(ctx.editor, Node.get(ctx.editor, path))
-      const offsetTop = getOffsetTop(dom, ctx.container!)
-      if (top > offsetTop) {
-        ctx.container!.scroll({
-          top: offsetTop - 10
-        })
-      }
-    } catch (e) {}
-  }
   static isPrevious(firstPath: Path, nextPath: Path) {
     return (
       Path.equals(Path.parent(firstPath), Path.parent(nextPath)) &&
@@ -147,32 +134,6 @@ export class EditorUtils {
     // }
   }
 
-  static selectPrev(ctx: {
-    editor: Editor
-    codes: Map<object, Ace.Editor>
-    container?: HTMLDivElement
-    path: Path
-  }) {
-    const prePath = EditorUtils.findPrev(ctx.editor, ctx.path)
-    if (prePath) {
-      const node = Node.get(ctx.editor, prePath)
-      if (node.type === 'code') {
-        const ace = ctx.codes.get(node)
-        if (ace) {
-          EditorUtils.focusAceEnd(ace)
-        }
-        return true
-      } else {
-        Transforms.select(ctx.editor, Editor.end(ctx.editor, prePath))
-      }
-      EditorUtils.focus(ctx.editor)
-      return true
-    } else {
-      ctx.container?.querySelector<HTMLInputElement>('.page-title')?.focus()
-      return
-    }
-  }
-
   static insertCodeFence(ctx: {
     editor: Editor
     codes: Map<object, Ace.Editor>
@@ -189,25 +150,6 @@ export class EditorUtils {
     setTimeout(() => {
       ctx.codes.get(el)?.focus()
     }, 30)
-  }
-  static selectNext(ctx: { editor: Editor; codes: Map<object, Ace.Editor>; path: Path }) {
-    const nextPath = EditorUtils.findNext(ctx.editor, ctx.path)
-    if (nextPath) {
-      const node = Node.get(ctx.editor, nextPath)
-      if (node.type === 'code') {
-        const ace = ctx.codes.get(node)
-        if (ace) {
-          EditorUtils.focusAceStart(ace)
-        }
-        return true
-      } else {
-        Transforms.select(ctx.editor, Editor.start(ctx.editor, nextPath))
-      }
-      EditorUtils.focus(ctx.editor)
-      return true
-    } else {
-      return false
-    }
   }
   static findPrev(editor: Editor, path: Path) {
     let curPath = path

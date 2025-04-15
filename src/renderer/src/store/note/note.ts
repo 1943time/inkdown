@@ -21,7 +21,6 @@ export class NoteStore {
       dragDocId: null as null | string,
       tabs: [] as string[],
       tabIndex: 0,
-      dragStatus: null,
       selectedDocId: null as null | string,
       searchKeyWord: '',
       selectedSpaceId: null as null | string
@@ -128,5 +127,23 @@ export class NoteStore {
         state.nodes = nodes
       })
     })
+  }
+  findFirstChildNote(doc: IDoc) {
+    if (!doc.folder) {
+      return doc
+    }
+    const { nodes } = this.useState.getState()
+    const stack = doc.children?.slice().map((id) => nodes[id]) || []
+    let note: IDoc | undefined = undefined
+    while (stack.length) {
+      const item = stack.shift()!
+      if (!item.folder) {
+        note = item
+        break
+      } else if (item.children?.length) {
+        stack.unshift(...item.children.map((id) => nodes[id]))
+      }
+    }
+    return note
   }
 }

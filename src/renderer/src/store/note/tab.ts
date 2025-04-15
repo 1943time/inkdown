@@ -12,16 +12,22 @@ import { IDoc } from 'types/model'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
 import { KeyboardTask } from './keyboard'
+import { Subject } from 'rxjs'
+import { TableLogic } from './table'
 export class TabStore {
   keyboard: KeyboardTask
+  table: TableLogic
   constructor(public readonly store: Store) {
     this.dragStart = this.dragStart.bind(this)
     this.keyboard = new KeyboardTask(this)
+    this.table = new TableLogic(this)
   }
   get note() {
     return this.store.note
   }
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
+  selChange$ = new Subject<Path | null>()
+  uploadFileCache = new WeakMap<object, File>()
   manual = false
   dragEl: null | HTMLElement = null
   range?: Range
@@ -47,11 +53,14 @@ export class TabStore {
         langCompletionText: '',
         startDragging: false,
         showFloatBar: false,
+        historyView: false,
         readonly: false,
         insertCompletionText: '',
         docIds: [] as string[],
+        inputComposition: false,
         openSearch: false,
         openReplace: false,
+        focus: false,
         currentIndex: 0,
         focusSearch: false,
         docChanged: false,
@@ -330,7 +339,15 @@ export class TabStore {
       console.error('toPoint', e)
     }
   }
-
+  hideRanges() {
+    this.clearDocAllMarkers()
+    if (this.highlightCache.size) {
+      setTimeout(() => {
+        this.highlightCache.clear()
+        this.refreshHighlight()
+      }, 60)
+    }
+  }
   dragStart(e: React.MouseEvent) {
     e.stopPropagation()
     type MovePoint = {
@@ -507,5 +524,58 @@ export class TabStore {
     const node = ReactEditor.toSlateNode(this.editor, el)
     const path = ReactEditor.findPath(this.editor, node)
     return [path, node] as [Path, Node]
+  }
+
+  selectPrev(path: Path) {
+    const prePath = EditorUtils.findPrev(this.editor, path)
+    if (prePath) {
+      const node = Node.get(this.editor, prePath)
+      if (node.type === 'code') {
+        const ace = this.codeMap.get(node)
+        if (ace) {
+          EditorUtils.focusAceEnd(ace)
+        }
+        return true
+      } else {
+        Transforms.select(this.editor, Editor.end(this.editor, prePath))
+      }
+      EditorUtils.focus(this.editor)
+      return true
+    } else {
+      this.container?.querySelector<HTMLInputElement>('.page-title')?.focus()
+      return
+    }
+  }
+  selectNext(path: Path) {
+    const nextPath = EditorUtils.findNext(this.editor, path)
+    if (nextPath) {
+      const node = Node.get(this.editor, nextPath)
+      if (node.type === 'code') {
+        const ace = this.codeMap.get(node)
+        if (ace) {
+          EditorUtils.focusAceStart(ace)
+        }
+        return true
+      } else {
+        Transforms.select(this.editor, Editor.start(this.editor, nextPath))
+      }
+      EditorUtils.focus(this.editor)
+      return true
+    } else {
+      return false
+    }
+  }
+  selectMedia(path: Path) {
+    Transforms.select(this.editor, path)
+    try {
+      const top = this.container!.scrollTop
+      const dom = ReactEditor.toDOMNode(this.editor, Node.get(this.editor, path))
+      const offsetTop = getOffsetTop(dom, this.container!)
+      if (top > offsetTop) {
+        this.container!.scroll({
+          top: offsetTop - 10
+        })
+      }
+    } catch (e) {}
   }
 }

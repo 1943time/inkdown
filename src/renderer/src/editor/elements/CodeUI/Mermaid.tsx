@@ -1,16 +1,12 @@
 import { useGetSetState, useUpdateEffect } from 'react-use'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { observer } from 'mobx-react-lite'
-import { CodeNode } from '../../../types/el'
-import { useCoreContext } from '../../../utils/env'
-import { useEditorStore } from '../../../store/editor'
 import { EditorUtils } from '../../utils/editorUtils'
+import { CodeNode } from '@/editor'
+import { useTab } from '@/store/note/TabCtx'
 
-export default observer((props: {
-  el: CodeNode
-}) => {
-  const core = useCoreContext()
-  const store = useEditorStore()
+export default function Mermaid(props: { el: CodeNode }) {
+  const tab = useTab()
+  const dark = tab.store.settings.useState((state) => state.dark)
   const [state, setState] = useGetSetState({
     code: '',
     error: ''
@@ -19,7 +15,7 @@ export default observer((props: {
   const timer = useRef(0)
   const id = useMemo(() => 'm' + (Date.now() + Math.ceil(Math.random() * 1000)), [])
   const render = useCallback(() => {
-    import('mermaid').then(res => {
+    import('mermaid').then((res) => {
       res.default
         .render(id, state().code)
         .then((res) => {
@@ -41,20 +37,23 @@ export default observer((props: {
     setTimeout(() => {
       render()
     })
-  }, [core.config.dark])
+  }, [dark])
 
   useEffect(() => {
     const code = props.el.code || ''
     if (state().code !== code) {
       clearTimeout(timer.current)
-      timer.current = window.setTimeout(() => {
-        setState({code: code})
-        if (state().code) {
-          render()
-        } else {
-          setState({error: ''})
-        }
-      }, !state().code ? 0 : 300)
+      timer.current = window.setTimeout(
+        () => {
+          setState({ code: code })
+          if (state().code) {
+            render()
+          } else {
+            setState({ error: '' })
+          }
+        },
+        !state().code ? 0 : 300
+      )
     }
     return () => window.clearTimeout(timer.current)
   }, [props.el])
@@ -63,20 +62,19 @@ export default observer((props: {
       className={'mermaid-container'}
       contentEditable={false}
       onClick={() => {
-        const editor = store.codes.get(props.el)
+        const editor = tab.codeMap.get(props.el)
         if (editor) {
           EditorUtils.focusAceEnd(editor)
         }
       }}
     >
-      <div contentEditable={false} ref={divRef}
-           className={`w-full flex justify-center ${state().code && !state().error ? '' : 'hidden'}`}></div>
-      {state().error &&
-        <div className={'text-center text-red-500/80'}>{state().error}</div>
-      }
-      {!state().code && !state().error &&
-        <div className={'text-center text-gray-500'}>Empty</div>
-      }
+      <div
+        contentEditable={false}
+        ref={divRef}
+        className={`w-full flex justify-center ${state().code && !state().error ? '' : 'hidden'}`}
+      ></div>
+      {state().error && <div className={'text-center text-red-500/80'}>{state().error}</div>}
+      {!state().code && !state().error && <div className={'text-center text-gray-500'}>Empty</div>}
     </div>
   )
-})
+}

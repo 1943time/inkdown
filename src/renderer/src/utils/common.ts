@@ -48,3 +48,80 @@ export const delay = (time: number) => {
     setTimeout(resolve, time)
   })
 }
+
+export const dataTransform = (value: string) => {
+  switch (value) {
+    case 'true':
+      return true
+    case 'false':
+      return false
+    case 'null':
+      return null
+    case 'undefined':
+      return undefined
+    default:
+      if (/^[\[{]/.test(value)) {
+        try {
+          return JSON.parse(value)
+        } catch {
+          return value
+        }
+      }
+      if (/^\d+$/.test(value)) {
+        return Number(value)
+      }
+      return value
+  }
+}
+
+export const stringTransform = (value: any): string => {
+  if (value == null) {
+    return String(value)
+  }
+  switch (typeof value) {
+    case 'boolean':
+      return value ? 'true' : 'false'
+    case 'number':
+      return value.toString()
+    case 'object':
+      return JSON.stringify(value)
+    default:
+      return String(value)
+  }
+}
+
+export const isValidUrl = (url: string): boolean => {
+  try {
+    if (url.match(/^[a-zA-Z]:\\/)) {
+      return false
+    }
+    if (url.startsWith('./') || url.startsWith('../')) {
+      return false
+    }
+    if (url.startsWith('/')) {
+      return false
+    }
+    if (url.startsWith('\\\\')) {
+      return false
+    }
+    if (url.startsWith('file://')) {
+      return false
+    }
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export const kb = 1024
+export const mb = kb * 1024
+export const gb = mb * 1024
+export const sizeUnit = (size: number) => {
+  const symbol = size >= 0 ? '' : '-'
+  const abSize = Math.abs(size)
+  if (abSize > gb) return symbol + (abSize / gb).toFixed(2) + ' GB'
+  if (abSize > mb) return symbol + (abSize / mb).toFixed(2) + ' MB'
+  if (abSize > kb) return symbol + (abSize / kb).toFixed(2) + ' KB'
+  return symbol + abSize + ' B'
+}

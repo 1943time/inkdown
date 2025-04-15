@@ -1,39 +1,34 @@
-import {observer} from 'mobx-react-lite'
-import React, {useEffect, useMemo, useRef} from 'react'
-import {InlineChromiumBugfix} from '../../../utils/InlineChromiumBugfix'
-import {useSelStatus} from '../../../../hooks/editor'
-import {Editor, Node, Transforms} from 'slate'
-import {ElementProps, InlineKatexNode} from '../../../../types/el'
-import { getKatex } from '../../../../utils'
-
-export default observer(({children, element, attributes}: ElementProps<InlineKatexNode>) => {
+import React, { useEffect, useMemo, useRef } from 'react'
+import { InlineChromiumBugfix } from '../../../utils/InlineChromiumBugfix'
+import { Editor, Node, Transforms } from 'slate'
+import { ElementProps, InlineKatexNode } from '../../..'
+import { useSelStatus } from '@/editor/utils'
+import katex from 'katex'
+export default function ({ children, element, attributes }: ElementProps<InlineKatexNode>) {
   const renderEl = useRef<HTMLElement>(null)
   const [selected, path, store] = useSelStatus(element)
   useEffect(() => {
     if (!selected) {
       const value = Node.string(element)
-      getKatex().then((res) => {
-        res.render(value, renderEl.current!, {
-          strict: false,
-          output: 'html',
-          throwOnError: false,
-          macros: {
-            '\\f': '#1f(#2)'
-          }
-        })
+      katex.render(value, renderEl.current!, {
+        strict: false,
+        output: 'html',
+        throwOnError: false,
+        macros: {
+          '\\f': '#1f(#2)'
+        }
       })
     }
   }, [selected])
-  return useMemo(() => (
-      <span
-        {...attributes}
-        data-be={'inline-katex'}
-        className={`relative`}
-      >
-        <span className={`inline-code-input ${selected ? 'px-1' : 'inline-flex invisible w-0 h-0 overflow-hidden absolute'}`}>
-          <InlineChromiumBugfix/>
+  return useMemo(
+    () => (
+      <span {...attributes} data-be={'inline-katex'} className={`relative`}>
+        <span
+          className={`inline-code-input ${selected ? 'px-1' : 'inline-flex invisible w-0 h-0 overflow-hidden absolute'}`}
+        >
+          <InlineChromiumBugfix />
           {children}
-          <InlineChromiumBugfix/>
+          <InlineChromiumBugfix />
         </span>
         <span
           contentEditable={false}
@@ -45,5 +40,6 @@ export default observer(({children, element, attributes}: ElementProps<InlineKat
         />
       </span>
     ),
-    [element, element.children, selected])
-})
+    [element, element.children, selected]
+  )
+}

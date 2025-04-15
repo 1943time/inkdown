@@ -1,12 +1,11 @@
 import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
-import { Elements } from '../../../types/el'
-import { EditorStore } from '../../../store/editor'
-
+import { Elements } from '../..'
+import { TabStore } from '@/store/note/tab'
 export class BackspaceKey {
-  constructor(private readonly store: EditorStore) {}
+  constructor(private readonly tab: TabStore) {}
   get editor() {
-    return this.store.editor
+    return this.tab.editor
   }
   range() {
     const sel = this.editor.selection
@@ -204,7 +203,7 @@ export class BackspaceKey {
             const node = Node.get(this.editor, prePath)
             if (node?.type === 'code') {
               Transforms.delete(this.editor, { at: path })
-              const ace = this.store.codes.get(node)
+              const ace = this.tab.codeMap.get(node)
               if (ace) {
                 EditorUtils.focusAceEnd(ace)
                 return true

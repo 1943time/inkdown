@@ -143,4 +143,5 @@ declare module 'slate' {
 
 export interface ElementProps<T = Element> extends RenderElementProps {
   element: T
+  refreshHighlight: boolean
 }

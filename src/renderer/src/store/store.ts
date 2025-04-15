@@ -4,12 +4,47 @@ import { ModelApi } from './api/api'
 import { MessageInstance } from 'antd/es/message/interface'
 import { SettingsStore } from './settings'
 import { NoteStore } from './note/note'
+import { mediaType } from '@/editor/utils/dom'
 export class Store {
   public readonly model = new ModelApi()
   public readonly chat = new ChatStore(this)
   public readonly settings = new SettingsStore(this)
   public readonly note = new NoteStore(this)
   constructor(public readonly msg: MessageInstance) {}
+  copySuccessfully(str: string, message?: string) {
+    this.copy(str)
+    this.msg.open({
+      type: 'success',
+      content: message || 'Copied to clipboard'
+    })
+  }
+  copy(text: string) {
+    window.api.copyToClipboard(text)
+  }
+  async getRemoteMediaType(url: string) {
+    if (!url) return 'other'
+    try {
+      const type = mediaType(url)
+      if (type !== 'other') return type
+      let contentType = ''
+      const controller = new AbortController()
+      const res = await fetch(url, {
+        method: 'HEAD',
+        signal: controller.signal,
+        mode: 'cors'
+      })
+      if (!res.ok) {
+        throw new Error()
+      }
+      setTimeout(() => {
+        controller.abort()
+      }, 1000)
+      contentType = res.headers.get('content-type') || ''
+      return contentType.split('/')[0]
+    } catch (e) {
+      return null
+    }
+  }
 }
 
 export const StoreContext = createContext<Store>({} as any)

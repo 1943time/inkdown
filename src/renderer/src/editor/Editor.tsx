@@ -22,7 +22,7 @@ import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
 
 export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
-  const [fontSize, spellCheck] = tab.store.settings.useState(
+  const [fontSize, spellCheck] = tab.store.settings.useNoteSettings(
     useShallow((state) => [state.editorFontSize, state.spellCheck])
   )
   const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
@@ -383,11 +383,11 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
         <Editable
           decorate={high}
           onDragOver={(e) => e.preventDefault()}
-          spellCheck={spellCheck === 'true'}
+          spellCheck={spellCheck}
           readOnly={readonly}
           className={`edit-area`}
           style={{
-            fontSize: +fontSize || 16
+            fontSize: fontSize || 16
           }}
           onContextMenu={(e) => e.stopPropagation()}
           onMouseDown={checkEnd}

@@ -1,6 +1,7 @@
 import { Store } from './store'
 import { AiMode, IClient } from 'types/model'
 import { create } from 'zustand'
+import { subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
 export type ClientModel = {
@@ -23,10 +24,19 @@ export class SettingsStore {
       reduceFileName: 'false',
       sidePanelWidth: 300,
       tab: 'model',
-      editorWidth: '720',
-      editorFontSize: '16',
-      spellCheck: 'false'
+      dark: false
     }))
+  )
+  useNoteSettings = create(
+    subscribeWithSelector(
+      immer(() => ({
+        editorFontSize: 16,
+        editorWidth: 720,
+        spellCheck: false,
+        codeAutoBreak: false,
+        codeTabSize: 2
+      }))
+    )
   )
   constructor(private readonly store: Store) {
     this.init()
