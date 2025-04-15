@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync, existsSync, cpSync, renameSync, mkdirSync } from 'fs'
+import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync } from 'fs'
 import { writeFile, readFile, cp } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
 import { app } from 'electron'

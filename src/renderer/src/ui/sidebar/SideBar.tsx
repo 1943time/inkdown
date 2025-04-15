@@ -42,21 +42,12 @@ export function SideBar() {
       }
       style={{ width: fold ? 0 : sidePanelWidth }}
     >
-      <div className={'h-[30px] px-4 mb-4 mt-1'} style={{ width: sidePanelWidth }}>
+      <div className={'h-7 px-4 mb-4 mt-1'} style={{ width: sidePanelWidth }}>
         <div
           className={
-            'flex items-center justify-around dark:bg-black/20 h-full rounded-lg text-white/60 relative *:cursor-pointer *:h-full font-medium'
+            'flex items-center justify-around dark:bg-black/30 h-full rounded-lg text-white/60 relative *:cursor-pointer *:h-full font-medium'
           }
         >
-          <div
-            className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${win === 'chat' ? 'text-black' : 'text-white/70'}`}
-            onClick={() => {
-              store.settings.useState.setState({ window: 'chat' })
-            }}
-          >
-            <Bot size={20} />
-            <span className={'ml-2 text-sm'}>Chat</span>
-          </div>
           <div
             className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${win === 'note' ? 'text-black' : 'text-white/70'}`}
             onClick={() => {
@@ -67,7 +58,16 @@ export function SideBar() {
             <span className={'ml-2 text-sm'}>Note</span>
           </div>
           <div
-            className={`duration-150 w-1/2 h-full bg-white/80 absolute rounded-lg left-0 top-0 ${win === 'chat' ? '' : 'translate-x-full'}`}
+            className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${win === 'chat' ? 'text-black' : 'text-white/70'}`}
+            onClick={() => {
+              store.settings.useState.setState({ window: 'chat' })
+            }}
+          >
+            <Bot size={20} />
+            <span className={'ml-2 text-sm'}>Chat</span>
+          </div>
+          <div
+            className={`duration-150 w-1/2 h-full bg-white/80 absolute rounded-lg left-0 top-0 ${win === 'note' ? '' : 'translate-x-full'}`}
           />
         </div>
       </div>

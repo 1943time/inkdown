@@ -13,12 +13,7 @@ export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) 
       e.stopPropagation()
       if (sel.anchor.offset === 0 && !Path.hasPrevious(sel.anchor.path)) {
         e.preventDefault()
-        EditorUtils.selectPrev({
-          editor: tab.editor,
-          codes: tab.codeMap,
-          path: sel.anchor.path.slice(0, -1),
-          container: tab.container
-        })
+        tab.selectPrev(sel.anchor.path.slice(0, -1))
         return
       }
       const leaf = Node.leaf(tab.editor, sel.focus.path)
@@ -51,12 +46,7 @@ export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) 
           }
         } else {
           if (sel.focus.offset === 0) {
-            EditorUtils.selectPrev({
-              editor: tab.editor,
-              codes: tab.codeMap,
-              path: sel.focus.path,
-              container: tab.container
-            })
+            tab.selectPrev(sel.focus.path)
           } else {
             Transforms.move(tab.editor, { unit: 'offset', reverse: true })
           }
@@ -102,11 +92,7 @@ export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) 
             }
           } else {
             if (sel.focus.offset === leaf.text?.length) {
-              EditorUtils.selectNext({
-                editor: tab.editor,
-                codes: tab.codeMap,
-                path: sel.focus.path
-              })
+              tab.selectNext(sel.focus.path)
             } else {
               Transforms.move(tab.editor, { unit: 'offset' })
             }
@@ -215,12 +201,7 @@ export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) 
           return
         }
       }
-      EditorUtils.selectPrev({
-        editor: tab.editor,
-        codes: tab.codeMap,
-        path: path,
-        container: tab.container
-      })
+      tab.selectPrev(path)
       // const [node] = Editor.nodes<any>(editor, {
       //   match: (n) => Element.isElement(n),
       //   mode: 'lowest'
@@ -290,11 +271,7 @@ export const keyArrow = (tab: TabStore, e: React.KeyboardEvent | KeyboardEvent) 
           return
         }
       }
-      const next = EditorUtils.selectNext({
-        editor: tab.editor,
-        codes: tab.codeMap,
-        path: path
-      })
+      const next = tab.selectNext(path)
       if (!next && (el.type !== 'paragraph' || !!Node.string(el))) {
         Transforms.insertNodes(tab.editor, EditorUtils.p, {
           at: Path.next([path[0]]),

@@ -1,12 +1,12 @@
+import { nanoid } from 'nanoid'
 import Worker from './worker?worker'
-import {nid} from '../../utils'
 
-export const parserMdToSchema = (codes: string[]):Promise<any[][]> => {
+export const parserMdToSchema = (codes: string[]): Promise<any[][]> => {
   return new Promise((resolve, reject) => {
     const w = new Worker()
-    const id = nid()
-    w.postMessage({files: codes, id})
-    w.onmessage = e => {
+    const id = nanoid()
+    w.postMessage({ files: codes, id })
+    w.onmessage = (e) => {
       if (e.data.id === id) {
         w.terminate()
         resolve(e.data.results)
@@ -25,9 +25,9 @@ export const openMdParserHandle = () => {
   const w = new Worker()
   const parser = (codes: string[]): Promise<any[][]> => {
     return new Promise((resolve, reject) => {
-      const id = nid()
-      w.postMessage({files: codes, id})
-      w.onmessage = e => {
+      const id = nanoid()
+      w.postMessage({ files: codes, id })
+      w.onmessage = (e) => {
         if (e.data.id === id) {
           resolve(e.data.results)
         }
@@ -36,5 +36,5 @@ export const openMdParserHandle = () => {
     })
   }
   const terminate = () => w.terminate()
-  return {parser, terminate}
+  return { parser, terminate }
 }

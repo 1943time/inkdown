@@ -16,9 +16,9 @@ export function EditorFrame({ id }: { id: string }) {
   const timer = useRef(0)
   const store = useStore()
   const tab = useMemo(() => store.note.tabStoreMap.get(id)!, [id])
-  const startDragging = tab.useStatus((state) => state.startDragging)
+  const startDragging = tab.useState((state) => state.startDragging)
   const doc = tab.useDoc()
-  const [editorWidth] = store.settings.useState(useShallow((state) => [state.editorWidth]))
+  const [editorWidth] = store.settings.useNoteSettings(useShallow((state) => [state.editorWidth]))
   const click = useCallback((e: React.MouseEvent) => {
     if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement

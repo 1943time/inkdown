@@ -61,6 +61,9 @@ devDependencies:
   '@types/katex':
     specifier: ^0.16.7
     version: 0.16.7
+  '@types/mdast':
+    specifier: ^4.0.4
+    version: 4.0.4
   '@types/node':
     specifier: ^22.13.13
     version: 22.14.0

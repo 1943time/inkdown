@@ -21,7 +21,7 @@ export class KeyboardTask {
         const domRange = window.getSelection()?.getRangeAt(0)
         const rect = domRange?.getBoundingClientRect()
         if (rect) {
-          this.tab.useStatus.setState({ domRect: rect })
+          this.tab.useState.setState({ domRect: rect })
         }
       } catch (e) {}
     })
@@ -587,7 +587,7 @@ export class KeyboardTask {
         })
         if (node) {
           this.tab.editor.selection = null
-          this.tab.useStatus.setState({ domRect: null })
+          this.tab.useState.setState({ domRect: null })
         }
       }
     } catch (e) {}
