@@ -1,3 +1,4 @@
+import { dataTransform, stringTransform } from '@/utils/common'
 import {
   IChat,
   IChatTable,
@@ -56,19 +57,33 @@ export class ModelApi {
   }
 
   async putSetting(setting: ISetting): Promise<void> {
-    return ipcRenderer.invoke('putSetting', setting)
+    return ipcRenderer.invoke('putSetting', {
+      ...setting,
+      value: stringTransform(setting.value)
+    })
   }
 
   async getSetting(key: string): Promise<ISetting | null> {
-    return ipcRenderer.invoke('getSetting', key)
+    return ipcRenderer.invoke('getSetting', key).then((setting) => {
+      if (setting) {
+        return { ...setting, value: dataTransform(setting.value) }
+      }
+      return null
+    })
   }
 
   async deleteSetting(key: string): Promise<void> {
     return ipcRenderer.invoke('deleteSetting', key)
   }
 
-  async getSettings(keys?: string[]): Promise<ISetting[]> {
-    return ipcRenderer.invoke('getSettings', keys)
+  async getSettings(keys?: string[]): Promise<any> {
+    return ipcRenderer.invoke('getSettings', keys).then((settings: ISetting[]) => {
+      return Object.fromEntries(
+        settings.map((s) => {
+          return [s.key, dataTransform(s.value)]
+        })
+      )
+    })
   }
   async getClients(): Promise<IClient[]> {
     return ipcRenderer.invoke('getClients')

@@ -10,6 +10,7 @@ import { BaseSelection, Path } from 'slate'
 export class NoteStore {
   docStatus = new Map<string, { history: History | null; sel: BaseSelection | null }>()
   tabStoreMap = new Map<string, TabStore>()
+  recordTimer = 0
   useState = create(
     immer(() => ({
       view: 'folder' as 'folder' | 'search',
@@ -23,12 +24,27 @@ export class NoteStore {
       tabIndex: 0,
       selectedDocId: null as null | string,
       searchKeyWord: '',
-      selectedSpaceId: null as null | string
+      selectedSpaceId: null as null | string,
+      dragStatus: null as null | {
+        mode: 'enter' | 'top' | 'bottom'
+        dropNodeId: string
+      }
     }))
   )
   get currentTab() {
     const state = this.useState.getState()
     return state.tabs[state.tabIndex]
+  }
+  get currentTabStore() {
+    const state = this.useState.getState()
+    return this.tabStoreMap.get(state.tabs[state.tabIndex])!
+  }
+  get currentSpace() {
+    const state = this.useState.getState()
+    return state.spaces.find((space) => space.id === state.selectedSpaceId)
+  }
+  useSpace() {
+    return this.useState((state) => state.spaces.find((s) => s.id === state.selectedSpaceId))
   }
   constructor(private readonly store: Store) {
     this.init()
@@ -127,6 +143,78 @@ export class NoteStore {
         state.nodes = nodes
       })
     })
+  }
+  checkOtherTabsShouldUpdate() {
+    const { tabs, tabIndex } = this.useState.getState()
+    const currentTab = this.currentTabStore
+    const doc = currentTab.doc
+    if (tabs.length > 1 && doc) {
+      tabs.forEach((t, i) => {
+        if (i !== tabIndex && this.tabStoreMap.get(t)?.doc.id === doc.id) {
+          this.tabStoreMap.get(t)?.externalChange$.next(null)
+        }
+      })
+    }
+  }
+  selectTab(i: number) {
+    const currentTab = this.currentTabStore
+    currentTab.saveDoc$.next(null)
+    this.checkOtherTabsShouldUpdate()
+    this.useState.setState((state) => {
+      state.tabIndex = i
+      state.selectedDocId = null
+    })
+    setTimeout(() => {
+      const currentTab = this.currentTabStore
+      const backRange = currentTab.range
+      if (backRange) {
+        const selection = window.getSelection()!
+        selection.removeAllRanges()
+        selection.addRange(backRange)
+      }
+    })
+    this.recordTabs()
+  }
+  async recordTabs() {
+    clearTimeout(this.recordTimer)
+    this.recordTimer = window.setTimeout(async () => {
+      const { tabs, tabIndex, selectedSpaceId } = this.useState.getState()
+      await this.store.model.putSetting({
+        key: `tab-${selectedSpaceId}`,
+        value: {
+          tabs,
+          tabIndex
+        }
+      })
+    }, 300)
+  }
+  openDoc(doc: IDoc, scroll: boolean = false) {
+    const tab = this.currentTabStore
+    const state = this.useState.getState()
+    const index = state.tabs.findIndex((t) => t === doc.id)
+    if (index !== -1) {
+      if (index === state.tabIndex) return
+      return this.selectTab(index)
+    }
+    const tabState = tab.useState.getState()
+    const history = tabState.docIds.filter((t) => t !== doc.id)
+    tabState.docIds.push(doc.id)
+    tab.useState.setState((state) => {
+      state.docIds = history
+      state.currentIndex = history.length - 1
+      state.domRect = null
+    })
+    const now = Date.now()
+    this.store.model.updateDoc(doc.id, {
+      lastOpenTime: now
+    })
+    this.recordTabs()
+    if (scroll) {
+      tab.container?.scroll({
+        top: 0,
+        behavior: 'auto'
+      })
+    }
   }
   findFirstChildNote(doc: IDoc) {
     if (!doc.folder) {

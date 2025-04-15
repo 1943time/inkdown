@@ -27,6 +27,8 @@ export class TabStore {
   }
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
   selChange$ = new Subject<Path | null>()
+  saveDoc$ = new Subject()
+  externalChange$ = new Subject<null | any[]>()
   uploadFileCache = new WeakMap<object, File>()
   manual = false
   dragEl: null | HTMLElement = null

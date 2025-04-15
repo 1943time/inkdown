@@ -128,6 +128,7 @@ export interface IDoc {
   sort: number
   links?: string[]
   children?: string[]
+  lastOpenTime?: number
 }
 
 export interface IHistory {

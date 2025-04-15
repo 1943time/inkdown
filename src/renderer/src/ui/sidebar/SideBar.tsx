@@ -3,11 +3,12 @@ import { useCallback } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { Chats } from './Chats'
 import { Bot, PenLine } from 'lucide-react'
+import { Docs } from './Docs'
 
 export function SideBar() {
   const store = useStore()
   const [sidePanelWidth, fold, win] = store.settings.useState(
-    useShallow((state) => [state.sidePanelWidth, state.fold, state.window])
+    useShallow((state) => [state.sidePanelWidth, state.fold, state.view])
   )
   const move = useCallback((e: React.MouseEvent) => {
     const startX = e.clientX
@@ -38,11 +39,11 @@ export function SideBar() {
   return (
     <div
       className={
-        'border-r dark:border-white/10 h-full bg-[var(--side-panel-bg-color)] pt-10 overflow-hidden side-move-transition'
+        'border-r dark:border-white/10 h-full bg-[var(--side-panel-bg-color)] pt-10 overflow-hidden side-move-transition flex flex-col'
       }
       style={{ width: fold ? 0 : sidePanelWidth }}
     >
-      <div className={'h-7 px-4 mb-4 mt-1'} style={{ width: sidePanelWidth }}>
+      <div className={'h-7 px-4 mb-4 mt-1 flex-shrink-0'} style={{ width: sidePanelWidth }}>
         <div
           className={
             'flex items-center justify-around dark:bg-black/30 h-full rounded-lg text-white/60 relative *:cursor-pointer *:h-full font-medium'
@@ -51,19 +52,19 @@ export function SideBar() {
           <div
             className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${win === 'note' ? 'text-black' : 'text-white/70'}`}
             onClick={() => {
-              store.settings.useState.setState({ window: 'note' })
+              store.settings.useState.setState({ view: 'note' })
             }}
           >
-            <PenLine size={20} />
+            <PenLine size={18} />
             <span className={'ml-2 text-sm'}>Note</span>
           </div>
           <div
             className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${win === 'chat' ? 'text-black' : 'text-white/70'}`}
             onClick={() => {
-              store.settings.useState.setState({ window: 'chat' })
+              store.settings.useState.setState({ view: 'chat' })
             }}
           >
-            <Bot size={20} />
+            <Bot size={18} />
             <span className={'ml-2 text-sm'}>Chat</span>
           </div>
           <div
@@ -78,7 +79,10 @@ export function SideBar() {
         }}
         onMouseDown={move}
       />
-      <div style={{ width: sidePanelWidth }}>{win === 'chat' && <Chats />}</div>
+      <div style={{ width: sidePanelWidth }} className={'flex-1'}>
+        {win === 'chat' && <Chats />}
+        {win === 'note' && <Docs />}
+      </div>
     </div>
   )
 }

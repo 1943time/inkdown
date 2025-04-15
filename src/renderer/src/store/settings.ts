@@ -1,9 +1,22 @@
+import { dataTransform, stringTransform } from '@/utils/common'
 import { Store } from './store'
 import { AiMode, IClient } from 'types/model'
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 
+const store = {
+  open: false,
+  fold: false,
+  view: 'chat' as 'chat' | 'note',
+  defaultModel: null as ClientModel | null,
+  models: [] as IClient[],
+  ready: false,
+  reduceFileName: 'false',
+  sidePanelWidth: 300,
+  tab: 'model',
+  dark: false
+}
 export type ClientModel = {
   id: string
   mode: AiMode
@@ -13,20 +26,7 @@ export type ClientModel = {
   options?: Record<string, any>
 }
 export class SettingsStore {
-  useState = create(
-    immer(() => ({
-      open: false,
-      fold: false,
-      window: 'chat' as 'chat' | 'note',
-      defaultModel: null as ClientModel | null,
-      models: [] as IClient[],
-      ready: false,
-      reduceFileName: 'false',
-      sidePanelWidth: 300,
-      tab: 'model',
-      dark: false
-    }))
-  )
+  useState = create(immer(() => store))
   useNoteSettings = create(
     subscribeWithSelector(
       immer(() => ({
@@ -43,10 +43,15 @@ export class SettingsStore {
   }
   async init() {
     await this.getModels()
-    const settings = await this.store.model.getSettings(['sidePanelWidth'])
-    if (settings.length) {
-      this.useState.setState({ sidePanelWidth: +settings[0].value || 300 })
-    }
+    const settings = await this.store.model.getSettings()
+    this.useState.setState((state) => {
+      for (const key of Object.keys(state)) {
+        const value = settings[key]
+        if (value) {
+          state[key] = value
+        }
+      }
+    })
     this.useState.setState({ ready: true })
   }
   close() {
@@ -54,6 +59,15 @@ export class SettingsStore {
   }
   open(opts?: { tab?: 'model'; clientId?: string }) {
     this.useState.setState({ open: true })
+  }
+  async setSetting<T extends typeof store, U extends keyof T>(key: U, value: T[U]) {
+    await this.store.model.putSetting({ key: key as string, value })
+    this.useState.setState((state) => {
+      if (key in state) {
+        // @ts-ignore
+        state[key] = value
+      }
+    })
   }
   async getModels() {
     const models = await this.store.model.getClients()
