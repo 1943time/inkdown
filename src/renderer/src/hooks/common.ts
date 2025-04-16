@@ -1,4 +1,5 @@
-import { useLayoutEffect } from 'react'
+import { IObjectDidChange, IValueDidChange, observe } from 'mobx'
+import { useEffect, useLayoutEffect } from 'react'
 import { Observable, Subject } from 'rxjs'
 
 export const useSubject = <T>(
@@ -10,4 +11,26 @@ export const useSubject = <T>(
     const cancel = subject.subscribe(fn)
     return () => cancel.unsubscribe()
   }, deps)
+}
+
+export const useObserveKey = <T extends object, K extends keyof T>(
+  data: T,
+  key: K,
+  fn: (value: IValueDidChange<T[K]>) => void
+) => {
+  useEffect(() => {
+    const cancel = observe(data, key, fn)
+    return () => cancel()
+  }, [])
+}
+
+export const useObserve = <T extends object>(
+  data: T,
+  fn: (value: IObjectDidChange<T> & { newValue: any; oldValue: any }) => void
+) => {
+  useEffect(() => {
+    // @ts-ignore
+    const cancel = observe(data, fn)
+    return () => cancel()
+  }, [])
 }

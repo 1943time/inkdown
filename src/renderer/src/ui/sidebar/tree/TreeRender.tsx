@@ -2,22 +2,18 @@ import { observer } from 'mobx-react-lite'
 import { MoreOutlined } from '@ant-design/icons'
 import { Fragment, useRef } from 'react'
 import { action, runInAction } from 'mobx'
-import INote from '../../icons/INote.tsx'
-import ArrowRight from '../../icons/ArrowRight.tsx'
-import { IFileItem } from '../../types'
-import IPlus from '../../icons/Iplus.tsx'
-import { useCoreContext } from '../../utils/env.ts'
-import { TreeStore } from '../../store/tree.ts'
-import { IFolder } from '../../icons/IFolder.tsx'
-export const getClass = (tree: TreeStore, c: IFileItem) => {
-  if (tree.selectItem === c) return 'dark:bg-blue-500/20 bg-blue-500/20'
-  if (tree.openedNote === c) return 'dark:bg-gray-200/10 bg-gray-200'
-  if (tree.ctxNode === c) return `dark:bg-gray-400/5 bg-gray-400/10`
+import { Store, useStore } from '@/store/store'
+import { IDoc } from 'types/model'
+import { ChevronRight, FileText, FolderClosed, Plus } from 'lucide-react'
+export const getClass = (tree: Store, c: IDoc) => {
+  if (tree.note.state.selectedDoc?.id === c.id) return 'dark:bg-blue-500/20 bg-blue-500/20'
+  if (tree.note.state.opendDoc?.id === c.id) return 'dark:bg-gray-200/10 bg-gray-200'
+  if (tree.note.state.ctxNode?.id === c.id) return `dark:bg-gray-400/5 bg-gray-400/10`
   return 'dark:hover:bg-gray-400/10 hover:bg-gray-400/10'
 }
 
 export const TreeRender = observer(() => {
-  const core = useCoreContext()
+  const store = useStore()
   return (
     <>
       <div
@@ -29,29 +25,29 @@ export const TreeRender = observer(() => {
         </span>
         <div
           className={`duration-100 p-1 rounded dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer ${
-            core.tree.ctxNode?.root
+            store.note.state.ctxNode?.id === 'root'
               ? 'dark:bg-gray-300/10 bg-gray-200/70'
               : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
           }`}
           onClick={(e) => {
-            core.menu.openContextMenu(e, core.tree.root!)
+            // core.menu.openContextMenu(e, core.tree.root!)
           }}
         >
-          <IPlus className={'text-base'} />
+          <Plus className={'text-base'} />
         </div>
       </div>
       <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
-        {!!core.tree.root && <RenderItem items={core.tree.root.children || []} level={0} />}
-        {!core.tree.root && core.tree.initialized && (
+        <RenderItem items={store.note.state.root.children || []} level={0} />
+        {!store.note.state.root.children?.length && (
           <div className={'mt-20  text-sm'}>
             <div className={'text-gray-400 text-center'}>No space document yet</div>
             <div
               className={'mt-2 flex justify-center items-center link cursor-pointer'}
               onClick={() => {
-                core.menu.createDoc({ parent: core.tree.root })
+                // core.menu.createDoc({ parent: core.tree.root })
               }}
             >
-              <INote />
+              <FileText />
               <span className={'ml-1'}>New doc</span>
             </div>
           </div>
@@ -61,26 +57,26 @@ export const TreeRender = observer(() => {
   )
 })
 
-const checkChildren = (node: IFileItem, targetNode: IFileItem) => {
+const checkChildren = (node: IDoc, targetNode: IDoc | undefined, nodes: Record<string, IDoc>) => {
   while (targetNode) {
-    if (targetNode.parent.root) {
+    if (targetNode.id === 'root') {
       return true
     }
-    if (targetNode.parent.cid === node.cid) {
+    if (targetNode.parentId === node.id) {
       return false
     }
-    targetNode = targetNode.parent
+    targetNode = targetNode.id === 'root' ? undefined : nodes[targetNode.parentId || 'root']
   }
   return true
 }
-const Item = observer(({ item, level }: { item: IFileItem; level: number }) => {
-  const core = useCoreContext()
+const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
+  const store = useStore()
   const el = useRef<HTMLDivElement>(null)
   return (
     <Fragment>
       <div
         ref={el}
-        data-fid={item.cid}
+        data-fid={item.id}
         className={'py-[1px]'}
         onDragLeave={(e) => e.stopPropagation()}
         onDragOver={action((e) => {
@@ -89,23 +85,23 @@ const Item = observer(({ item, level }: { item: IFileItem; level: number }) => {
           const scrollTop = document.querySelector('#tree-container')?.scrollTop || 0
           const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
           let mode: 'top' | 'bottom' | 'enter' = 'top'
-
+          const state = store.note.state
           if (item.folder) {
             mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
           } else {
             mode = offsetY < 24 ? 'top' : 'bottom'
           }
-          if (mode === 'enter' && !item.folder && core.tree.dragStatus) {
-            core.tree.dragStatus = null
+          if (mode === 'enter' && !item.folder && store.note.state.dragStatus) {
+            state.dragStatus = null
             return
           }
-          const dragNode = core.tree.dragNode
-          if (dragNode && !checkChildren(dragNode, item)) {
-            core.tree.dragStatus = null
+          const dragNode = state.dragNode
+          if (dragNode && !checkChildren(dragNode, item, state.nodes)) {
+            state.dragStatus = null
             return
           }
-          if (core.tree.dragStatus?.dropNode !== item || core.tree.dragStatus.mode !== mode) {
-            core.tree.dragStatus = {
+          if (state.dragStatus?.dropNode !== item || state.dragStatus.mode !== mode) {
+            state.dragStatus = {
               dropNode: item,
               mode
             }
@@ -116,38 +112,36 @@ const Item = observer(({ item, level }: { item: IFileItem; level: number }) => {
           style={{
             paddingLeft: level * 15
           }}
-          className={`rounded group relative ${getClass(core.tree, item)}`}
+          className={`rounded group relative ${getClass(store, item)}`}
         >
           <div
-            className={`${core.tree.openedNote === item ? 'dark:text-zinc-100 text-zinc-900' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+            className={`${store.note.state.opendDoc?.id === item.id ? 'dark:text-zinc-100 text-zinc-900' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
            text-sm cursor-default select-none h-7 pr-2 group`}
             style={{ paddingLeft: item.folder ? 2 : 17 }}
             onDragEnd={() => {
-              core.tree.moveNode()
+              store.note.moveNode()
               el.current!.style.opacity = ''
             }}
             draggable={'true'}
             onDragStart={action((e) => {
-              core.tree.dragNode = item
+              store.note.state.dragNode = item
               el.current!.style.opacity = '0.5'
-              if (item === core.tree.openedNote && core.tree.currentTab.store.docChanged) {
-                core.tree.currentTab.store.saveDoc$.next(null)
-              }
+              // if (item === store.note.state.opendDoc && store.note.state.currentTab.store.docChanged) {
+              //   store.note.state.currentTab.store.saveDoc$.next(null)
+              // }
             })}
             onContextMenu={(e) => {
               e.preventDefault()
-              core.menu.openContextMenu(e, item)
+              // core.menu.openContextMenu(e, item)
             }}
             onClick={action((e) => {
               e.stopPropagation()
-              runInAction(() => {
-                core.tree.selectItem = item
-              })
+              store.note.state.selectedDoc = item
               if (!item.folder) {
                 if (e.metaKey || e.ctrlKey) {
-                  core.tree.appendTab(item)
+                  store.note.createTab(item)
                 } else {
-                  core.tree.openNote(item)
+                  store.note.openDoc(item)
                 }
               } else {
                 item.expand = !item.expand
@@ -156,42 +150,42 @@ const Item = observer(({ item, level }: { item: IFileItem; level: number }) => {
           >
             <div
               className={`
-            ${item.folder && core.tree.dragNode !== item && core.tree.dragStatus?.dropNode === item && core.tree.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
+            ${item.folder && store.note.state.dragNode?.id !== item.id && store.note.state.dragStatus?.dropNode === item && store.note.state.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
             flex items-center h-full rounded pr-2 border
             `}
             >
               {item.folder && (
                 <div className={'w-4 h-full flex items-center justify-center'}>
-                  <ArrowRight
+                  <ChevronRight
                     className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}
                   />
                 </div>
               )}
               <div
-                className={`flex items-center flex-1 h-full relative max-w-full ${core.tree.openedNote === item ? 'dark:text-white text-black' : ''}`}
+                className={`flex items-center flex-1 h-full relative max-w-full ${store.note.state.opendDoc?.id === item.id ? 'dark:text-white text-black' : ''}`}
                 data-entity={'true'}
               >
-                <div className={`relative flex-shrink-0 ${core.service.isPublished(item) ? 'text-sky-500' : ''}`}>
-                  {!!item.folder && <IFolder className={'flex-shrink-0'} />}
-                  {!item.folder && <INote className={'flex-shrink-0'} />}
+                <div className={`relative flex-shrink-0`}>
+                  {!!item.folder && <FolderClosed />}
+                  {!item.folder && <FileText />}
                 </div>
                 <div className={'truncate max-w-full ml-1'}>{item.name || 'Untitled'}</div>
-                {core.tree.dragStatus?.dropNode === item &&
-                  core.tree.dragNode !== item &&
-                  core.tree.dragStatus.mode !== 'enter' && (
+                {store.note.state.dragStatus?.dropNode?.id === item.id &&
+                  store.note.state.dragNode?.id !== item?.id &&
+                  store.note.state.dragStatus?.mode !== 'enter' && (
                     <div
-                      className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${core.tree.dragStatus.mode === 'top' ? 'top-0' : 'bottom-0'}`}
+                      className={`w-full h-0.5 rounded dark:bg-white/30 bg-black/30 absolute right-0 ${store.note.state.dragStatus?.mode === 'top' ? 'top-0' : 'bottom-0'}`}
                     />
                   )}
               </div>
             </div>
           </div>
-          {core.tree.dragNode !== item && (
+          {store.note.state.dragNode !== item && (
             <div
               onClick={(e) => {
-                core.menu.openContextMenu(e, item)
+                // core.menu.openContextMenu(e, item)
               }}
-              className={`h-6 rounded top-1/2 -mt-3 ${core.tree.ctxNode === item ? 'flex dark:bg-gray-200/20 bg-gray-400/30' : 'hidden group-hover:flex dark:hover:bg-gray-200/20 hover:bg-gray-400/30'}
+              className={`h-6 rounded top-1/2 -mt-3 ${store.note.state.ctxNode?.id === item.id ? 'flex dark:bg-gray-200/20 bg-gray-400/30' : 'hidden group-hover:flex dark:hover:bg-gray-200/20 hover:bg-gray-400/30'}
             absolute right-1 w-[14px] justify-center items-center dark:text-gray-200 text-lg`}
             >
               <MoreOutlined />
@@ -206,11 +200,11 @@ const Item = observer(({ item, level }: { item: IFileItem; level: number }) => {
   )
 })
 
-const RenderItem = observer(({ items, level }: { items: IFileItem[]; level: number }) => {
+const RenderItem = observer(({ items, level }: { items: IDoc[]; level: number }) => {
   return (
     <>
       {items.map((c) => (
-        <Item key={c.cid} item={c} level={level} />
+        <Item key={c.id} item={c} level={level} />
       ))}
     </>
   )

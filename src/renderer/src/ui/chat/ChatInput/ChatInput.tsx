@@ -16,11 +16,11 @@ import { copyToClipboard } from '@/utils/clipboard'
 import { IStop } from '@/icons/IStop'
 import { getFileExtension } from '@/utils/string'
 import { EditorUtils } from '@/editor/utils/editorUtils'
-export function ChatInput() {
+import { observer } from 'mobx-react-lite'
+
+export const ChatInput = observer(() => {
   const store = useStore()
-  const [activeChat, webSearch] = store.chat.useState(
-    useShallow((state) => [state.activeChat, state.webSearch])
-  )
+  const { activeChat, webSearch } = store.chat.state
 
   const ableWebSearch = useMemo(() => {
     return (activeChat && activeChat?.websearch) || (!activeChat && webSearch)
@@ -263,7 +263,7 @@ export function ChatInput() {
       </div>
     </div>
   )
-}
+})
 
 const Elements = memo<RenderElementProps>(({ children, ...props }) => {
   switch (props.element.type) {

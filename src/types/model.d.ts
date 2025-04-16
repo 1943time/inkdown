@@ -46,7 +46,6 @@ export interface IChat {
   model?: string // 对话正在使用的模型
   clientId?: string // 对话正在使用的模型配置id
   model?: string
-  clientId?: string
   summaryIndex?: number
   summary?: string
 }
@@ -124,10 +123,11 @@ export interface IDoc {
   schema?: any[]
   updated: number
   deleted?: boolean
+  expand?: boolean
   created: number
   sort: number
   links?: string[]
-  children?: string[]
+  children?: IDoc[]
   lastOpenTime?: number
 }
 

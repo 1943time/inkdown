@@ -82,8 +82,8 @@ ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
         ...m,
         files: m.files ? JSON.stringify(m.files) : null,
         images: m.images ? JSON.stringify(m.images) : null,
-        error: m.error ? JSON.stringify(m.error) : null,
-        docs: m.docs ? JSON.stringify(m.docs) : null
+        error: m.error ? JSON.stringify(m.error) : null
+        // docs: m.docs ? JSON.stringify(m.docs) : null
       }
     })
   )
@@ -251,17 +251,42 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
   })
 })
 
-ipcMain.handle('getDocs', async (_, spaceId: string) => {
-  const docs = await knex('doc').where('spaceId', spaceId).orderBy('sort', 'asc').select('*')
+ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
+  const handle = knex('doc').where('spaceId', spaceId)
+  if (deleted) {
+    handle.andWhere('deleted', 1)
+  }
+  const docs = await handle.orderBy('sort', 'asc').select('*')
+  return docs
+})
+
+ipcMain.handle('clearDocs', async (_, spaceId: string, ids: string[]) => {
+  return knex('doc').where('spaceId', spaceId).whereIn('id', ids).delete()
+})
+
+ipcMain.handle('getDocsByParentId', async (_, parentId: string) => {
+  const docs = await knex('doc').where('parentId', parentId).orderBy('sort', 'asc').select('*')
   return docs
 })
 
 ipcMain.handle('createDoc', async (_, doc: IDoc) => {
-  return knex('doc').insert(doc)
+  return knex('doc').insert(omit(doc, ['expand', 'children']))
 })
 
 ipcMain.handle('updateDoc', async (_, id: string, doc: Partial<IDoc>) => {
-  return knex('doc').where('id', id).update(doc)
+  return knex('doc')
+    .where('id', id)
+    .update(omit(doc, ['expand', 'children', 'id']))
+})
+
+ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
+  return Promise.all(
+    docs.map((d) => {
+      return knex('doc')
+        .where('id', d.id!)
+        .update(omit(d, ['id', 'expand', 'children']))
+    })
+  )
 })
 
 ipcMain.handle('deleteDoc', async (_, id: string) => {

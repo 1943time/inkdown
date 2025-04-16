@@ -1,107 +1,71 @@
-import { observer } from 'mobx-react-lite'
 import { Empty, Popconfirm, Popover } from 'antd'
 import { Fragment, useCallback } from 'react'
-import { runInAction } from 'mobx'
-import { db, IDoc } from '../../store/db.ts'
-import INote from '../../icons/INote.tsx'
-import { useLocalState } from '../../hooks/useLocalState.ts'
-import { IFileItem } from '../../types'
-import ArrowRight from '../../icons/ArrowRight.tsx'
-import { useCoreContext } from '../../utils/env.ts'
-import { IDelete } from '../../icons/IDelete.tsx'
-import { IClaer } from '../../icons/IClear.tsx'
-import { IRestore } from '../../icons/IRestore.tsx'
-import { openConfirmDialog$ } from '../dialog/ConfirmDialog.tsx'
-import { useSubject } from '../../hooks/subscribe.ts'
-import { IFolder } from '../../icons/IFolder.tsx'
+import { IDoc } from 'types/model'
+import { useGetSetState } from 'react-use'
+import { useStore } from '@/store/store'
+import { ChevronRight, FileText, FolderClosed, TicketSlash, Trash2, Undo2 } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
+interface DocTree extends Omit<IDoc, 'children'> {
+  children?: DocTree[]
+  expand?: boolean
+}
 export const Trash = observer(() => {
-  const core = useCoreContext()
-  const [state, setState] = useLocalState({
-    removeDocs: [] as IDoc[],
+  const store = useStore()
+  const [state, setState] = useGetSetState({
+    removeDocs: [] as DocTree[],
     open: false,
-    loading: false
+    loading: false,
+    expands: [] as string[]
   })
 
-  const getTree = useCallback(async (docs: IDoc[], docMap: Map<string, IDoc>) => {
+  const getTree = useCallback(async (docs: DocTree[], docMap: Map<string, DocTree>) => {
     for (const d of docs) {
-      docMap.set(d.cid, d)
+      docMap.set(d.id, d)
       if (d.folder) {
-        d.children = await getTree(
-          core.node.sortNodes(await db.doc.where('parentCid').equals(d.cid).toArray()),
-          docMap
-        )
+        const children = await store.model.getDocsByParentId(d.id)
+        d.children = await getTree(children as DocTree[], docMap)
       }
     }
     return docs
   }, [])
 
   const getDocs = useCallback(() => {
-    db.doc
-      .where('spaceId')
-      .equals(core.tree.root.cid)
-      .and((x) => x.deleted === 1)
-      .toArray()
-      .then(async (res) => {
-        const docs = res.sort((a, b) => (a.updated! < b.updated! ? 1 : -1))
-        const map = new Map(docs.map((d) => [d.cid, d]))
-        const tree = await getTree(docs.filter(d => !d.parentCid || !map.get(d.parentCid)), map)
-        setState({
-          removeDocs: tree
-        })
+    store.model.getDocs(store.note.currentSpace!.id, true).then(async (res) => {
+      const docs = res.sort((a, b) => (a.updated! < b.updated! ? 1 : -1))
+      const map = new Map(docs.map((d) => [d.id, d as DocTree]))
+      const tree = await getTree(
+        docs.filter((d) => !d.parentId || !map.get(d.parentId)) as DocTree[],
+        map
+      )
+      setState({
+        removeDocs: tree
       })
+    })
   }, [])
 
-  const getAllIds = useCallback(async (docs: IDoc[]) => {
+  const getAllIds = useCallback(async (docs: DocTree[]) => {
     const ids: string[] = []
     for (let d of docs) {
-      ids.push(d.cid)
+      ids.push(d.id)
       if (d.folder) {
-        ids.push(...(await db.getChildrenIds(d)))
+        ids.push(...(await store.model.getDocsByParentId(d.id)).map((d) => d.id))
       }
     }
     return ids
   }, [])
 
   const clearDocs = useCallback(async () => {
-    if (state.removeDocs) {
+    if (state().removeDocs) {
       try {
         setState({ loading: true })
-        const ids = await getAllIds(state.removeDocs)
+        const ids = await getAllIds(state().removeDocs)
         if (!ids.length) return
-        const shareRecord = await core.api.checkSharedFile.mutate({docs: ids})
-        if (shareRecord.shared) {
-          openConfirmDialog$.next({
-            title: 'Note',
-            description:
-              'The deleted documents contain published documents. The published documents will be inaccessible after deletion. Do you want to continue?',
-            okText: 'Delete',
-            onConfirm: async () => {
-              await core.local.deleteDocByIds(
-                state.removeDocs.map((r) => r.cid),
-                core.tree.root.cid
-              )
-              await core.api.deleteDocs.mutate({
-                docs: ids
-              })
-              await db.clearDocs(Array.from(ids))
-              setState({ removeDocs: [] })
-            }
-          })
-        } else {
-          await core.local.deleteDocByIds(
-            state.removeDocs.map((r) => r.cid),
-            core.tree.root.cid
-          )
-          await core.api.deleteDocs.mutate({
-            docs: ids
-          })
-          await db.clearDocs(Array.from(ids))
-          setState({ removeDocs: [] })
-        }
+        await store.model.clearDocs(store.note.currentSpace!.id, ids)
+        setState({ removeDocs: [] })
       } catch (e) {
         console.error('e')
-        core.message.warning('Deletion failed, please try again later')
+        store.msg.warning('Deletion failed, please try again later')
       } finally {
         setState({ loading: false })
       }
@@ -109,127 +73,103 @@ export const Trash = observer(() => {
   }, [])
 
   const doDelete = useCallback(async (ids: string[]) => {
-    await db.clearDocs(ids)
-    await core.api.deleteDocs.mutate({
-      docs: ids
-    })
+    await store.model.clearDocs(store.note.currentSpace!.id, ids)
   }, [])
 
-  const deleteDoc = useCallback(async (doc: IDoc) => {
-    const ids = [doc.cid]
-    if (doc.folder) {
-      ids.push(...(await db.getChildrenIds(doc)))
-    }
-    const shareRecord = await core.api.checkSharedFile.mutate({docs: ids})
-    if (shareRecord.shared) {
-      openConfirmDialog$.next({
-        title: 'Note',
-        description:
-          'The deleted documents contain published documents. The published documents will be inaccessible after deletion. Do you want to continue?',
-          okText: 'Delete',
-          onConfirm: async () => {
-            await core.local.deleteDocByIds([doc.cid], core.tree.root.cid)
-            await doDelete(ids)
-            setState({
-              removeDocs: state.removeDocs.filter((d) => d.cid !== doc.cid)
-            })
-          },
-      })
-    } else {
-      await core.local.deleteDocByIds([doc.cid], core.tree.root.cid)
-      await doDelete(ids)
-      setState({
-        removeDocs: state.removeDocs.filter((d) => d.cid !== doc.cid)
-      })
-    }
-  }, [])
-  useSubject(core.ipc.restoreDoc$, data => {
-    db.doc.get(data).then(res => {
-      if (res) {
-        setState({ open: false })
-        restore(res, true)
-      }
+  const deleteDoc = useCallback(async (doc: DocTree) => {
+    const ids = await getAllIds([doc])
+    await doDelete(ids)
+    setState({
+      removeDocs: state().removeDocs.filter((d) => d.id !== doc.id)
     })
-  })
-  const restore = useCallback(async (doc: IDoc, ipc = false) => {
-    let parent = doc.parentCid ? core.tree.nodeMap.get(doc.parentCid)! : core.tree.root
-    let node: IFileItem
-    let restoreCids: string[] = []
+  }, [])
+  const restore = useCallback(async (doc: DocTree, ipc = false) => {
+    const { nodes } = store.note.useState.getState()
+    let parent = nodes[doc.parentId || 'root']
+    let node: IDoc = {
+      ...doc,
+      children: []
+    }
+    const items: IDoc[] = [node]
+    let restoreIds: string[] = []
     if (!doc.folder) {
-      node = await core.node.createFileNode(doc, parent)
-      restoreCids.push(doc.cid)
+      restoreIds.push(doc.id)
     } else {
-      const restoreChildren = async (node: IFileItem) => {
-        const docs = await db.doc.where('parentCid').equals(node.cid).toArray()
-        const items: IFileItem[] = []
+      const items: IDoc[] = []
+      const restoreChildren = async (node: IDoc) => {
+        const docs = await store.model.getDocsByParentId(node.id)
         for (let d of docs) {
-          const item = await core.node.createFileNode(d, node)
-          if (item.folder) {
+          const item: IDoc = {
+            ...d,
+            children: []
+          }
+          if (d.folder) {
             const children = await restoreChildren(item)
-            runInAction(() => {
-              item.children = children
-            })
+            item.children = children
           }
           items.push(item)
-          core.tree.nodeMap.set(item.cid, item)
-          restoreCids.push(d.cid)
+          restoreIds.push(d.id)
         }
-        return core.node.sortNodes(items)
+        return items.map((item) => item.id)
       }
-      node = await core.node.createFileNode(doc, parent)
-      restoreCids.push(doc.cid)
+      restoreIds.push(doc.id)
       const children = await restoreChildren(node)
-      runInAction(() => {
-        node.children = children
-      })
+      node.children = children
     }
     const now = Date.now()
-    await db.doc.where('cid').anyOf(restoreCids).modify({
-      deleted: 0,
-      updated: now,
-      synced: 0
+    await store.model.updateDocs(
+      restoreIds.map((id) => ({
+        id,
+        deleted: false,
+        updated: now
+      }))
+    )
+    store.note.useState.setState((draft) => {
+      items.forEach((item) => {
+        draft.nodes[item.id] = item
+      })
+      draft.nodes[doc.parentId || 'root'].children?.push(node.id)
+      draft.nodes[doc.parentId || 'root'].children = draft.nodes[doc.parentId || 'root'].children
+        ?.map((d) => draft.nodes[d])
+        .sort((a, b) => (a.sort! > b.sort! ? 1 : -1))
+        .map((d) => d.id)
     })
-    runInAction(() => {
-      core.tree.nodeMap.set(node.cid, node)
-      parent.children?.push(node)
-      parent.children = core.node.sortNodes(parent.children!)
-    })
-    const removeDocs = state.removeDocs.filter((d) => d.cid !== doc.cid)
+    const removeDocs = state().removeDocs.filter((d) => d.id !== doc.id)
     setState({
       removeDocs: removeDocs
     })
     if (!node.folder) {
-      core.tree.openNote(node)
+      store.note.openDoc(node, true)
     }
-    if (!ipc) {
-      core.ipc.sendMessage({
-        type: 'restoreDoc',
-        data: {cid: doc.cid, spaceCid: doc.spaceId}
-      })
-      await core.service
-        .bulkDocs(
-          restoreCids.map((c) => {
-            return {
-              cid: c,
-              updated: now,
-              deleted: 0
-            }
-          }),
-          core.tree.root.cid,
-          'update'
-        )
-        .then(() => {
-          db.doc.where('cid').anyOf(restoreCids).modify({
-            synced: 1
-          })
-        })
-    }
+    // if (!ipc) {
+    //   core.ipc.sendMessage({
+    //     type: 'restoreDoc',
+    //     data: { cid: doc.cid, spaceCid: doc.spaceId }
+    //   })
+    //   await core.service
+    //     .bulkDocs(
+    //       restoreIds.map((c) => {
+    //         return {
+    //           cid: c,
+    //           updated: now,
+    //           deleted: 0
+    //         }
+    //       }),
+    //       core.tree.root.cid,
+    //       'update'
+    //     )
+    //     .then(() => {
+    //       db.doc.where('cid').anyOf(restoreIds).modify({
+    //         synced: 1
+    //       })
+    //     })
+    // }
   }, [])
   return (
     <Popover
       trigger={['click']}
       arrow={false}
-      open={state.open}
+      open={state().open}
       onOpenChange={(v) => {
         setState({
           open: v
@@ -241,25 +181,25 @@ export const Trash = observer(() => {
       overlayInnerStyle={{ padding: 0 }}
       content={
         <div className={'relative h-[300px] pt-2 pb-8 flex flex-col'}>
-          {!!state.removeDocs.length && (
+          {!!state().removeDocs.length && (
             <Popconfirm
-              title={core.config.zh ? '提示' : 'Note'}
+              title={true ? '提示' : 'Note'}
               description={
-                core.config.zh
+                true
                   ? '是否确定要永久删除所有文档？'
                   : 'Are you sure you want to permanently empty the Trash?'
               }
               okButtonProps={{ danger: true, type: 'default' }}
               overlayStyle={{ width: 260 }}
               onConfirm={clearDocs}
-              disabled={state.loading}
+              disabled={state().loading}
             >
               <div
                 className={
                   'ml-2 p-1 right-1 bottom-1 absolute rounded hover:bg-gray-100 cursor-pointer text-gray-600 dark:text-gray-300 dark:hover:bg-gray-100/10'
                 }
               >
-                <IClaer className={'text-lg'} />
+                <TicketSlash className={'text-lg'} />
               </div>
             </Popconfirm>
           )}
@@ -268,10 +208,18 @@ export const Trash = observer(() => {
               'w-[380px] overflow-y-auto px-2 pt-2 text-gray-600 dark:text-gray-300 flex-1'
             }
           >
-            {!state.removeDocs.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+            {!state().removeDocs.length && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />}
             <RenderItem
-              docs={state.removeDocs}
+              docs={state().removeDocs}
               top={true}
+              expands={state().expands}
+              onExpand={(id) => {
+                setState({
+                  expands: state().expands.includes(id)
+                    ? state().expands.filter((i) => i !== id)
+                    : [...state().expands, id]
+                })
+              }}
               onRestore={restore}
               onDelete={deleteDoc}
             />
@@ -293,9 +241,9 @@ export const Trash = observer(() => {
             'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1.5 px-2 cursor-pointer duration-200'
           }
         >
-          <IDelete />
+          <Trash2 />
           <span className={'ml-2 text-[13px] leading-5 select-none'}>
-            {core.config.zh ? '废纸篓' : 'Trash'}
+            {true ? '废纸篓' : 'Trash'}
           </span>
         </div>
       </div>
@@ -305,20 +253,22 @@ export const Trash = observer(() => {
 
 const RenderItem = observer(
   (props: {
-    docs: IDoc[]
-    onRestore?: (doc: IDoc) => void
-    onDelete?: (doc: IDoc) => void
+    docs: DocTree[]
+    onRestore?: (doc: DocTree) => void
+    onDelete?: (doc: DocTree) => void
     top: boolean
+    expands: string[]
+    onExpand: (id: string) => void
   }) => {
     return (
       <>
         {props.docs.map((d) => (
-          <Fragment key={d.cid}>
+          <Fragment key={d.id}>
             <div
               onClick={(e) => {
                 e.stopPropagation()
                 if (d.folder) {
-                  runInAction(() => (d.expand = !d.expand))
+                  props.onExpand(d.id)
                 }
               }}
               className={
@@ -328,15 +278,15 @@ const RenderItem = observer(
               <div className={'flex items-center text-sm max-w-[236px]'}>
                 {d.folder ? (
                   <>
-                    <ArrowRight
+                    <ChevronRight
                       className={`w-[11px] h-[11px] mr-1 dark:text-gray-500 text-gray-400 duration-200 ${
-                        d.folder && d.expand ? 'rotate-90' : ''
+                        d.folder && props.expands.includes(d.id) ? 'rotate-90' : ''
                       }`}
                     />
-                    <IFolder />
+                    <FolderClosed />
                   </>
                 ) : (
-                  <INote />
+                  <FileText />
                 )}
                 <span className={'ml-1 flex-1 truncate'}>{d.name}</span>
               </div>
@@ -353,7 +303,7 @@ const RenderItem = observer(
                       'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
                     }
                   >
-                    <IRestore />
+                    <Undo2 />
                   </div>
                   <Popconfirm
                     title={'Note'}
@@ -371,15 +321,20 @@ const RenderItem = observer(
                         'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
                       }
                     >
-                      <IDelete />
+                      <Trash2 />
                     </div>
                   </Popconfirm>
                 </div>
               )}
             </div>
-            {!!d.children?.length && d.expand && (
+            {!!d.children?.length && props.expands.includes(d.id) && (
               <div className={'pl-5'}>
-                <RenderItem docs={d.children} top={false} />
+                <RenderItem
+                  docs={d.children}
+                  top={false}
+                  expands={props.expands}
+                  onExpand={props.onExpand}
+                />
               </div>
             )}
           </Fragment>

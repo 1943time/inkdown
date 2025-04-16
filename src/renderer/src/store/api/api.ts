@@ -124,8 +124,8 @@ export class ModelApi {
     return ipcRenderer.invoke('deleteSpace', id)
   }
 
-  async getDocs(spaceId: string): Promise<IDoc[]> {
-    return ipcRenderer.invoke('getDocs', spaceId).then((docs: IDoc[]) => {
+  async getDocs(spaceId: string, deleted?: boolean): Promise<IDoc[]> {
+    return ipcRenderer.invoke('getDocs', spaceId, deleted).then((docs: IDoc[]) => {
       return docs.map((d) => {
         return {
           ...d,
@@ -136,12 +136,24 @@ export class ModelApi {
     })
   }
 
+  async getDocsByParentId(parentId: string): Promise<IDoc[]> {
+    return ipcRenderer.invoke('getDocsByParentId', parentId)
+  }
+
+  async clearDocs(spaceId: string, ids: string[]): Promise<void> {
+    return ipcRenderer.invoke('clearDocs', spaceId, ids)
+  }
+
   async createDoc(doc: IDoc): Promise<void> {
     return ipcRenderer.invoke('createDoc', doc)
   }
 
   async updateDoc(id: string, doc: Partial<IDoc>): Promise<void> {
     return ipcRenderer.invoke('updateDoc', id, doc)
+  }
+
+  async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
+    return ipcRenderer.invoke('updateDocs', docs)
   }
 
   async deleteDoc(id: string): Promise<void> {

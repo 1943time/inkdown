@@ -3,12 +3,17 @@ import { IChat, IMessage, IMessageFile, IMessageModel } from 'types/model'
 import { nanoid } from 'nanoid'
 import { AiClient } from './model/client'
 import { getTokens } from '../utils/ai'
-import { create } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
 import { ClientModel } from './settings'
 import { openAiModels } from './model/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
-export class ChatStore {
+import { StructStore } from './struct'
+
+const state = {
+  chats: [] as IChat[],
+  activeChat: null as null | IChat,
+  webSearch: false
+}
+export class ChatStore extends StructStore<typeof state> {
   private maxTokens = 32000
   // 触发压缩的阈值
   private warningThreshold = 25000
@@ -16,20 +21,14 @@ export class ChatStore {
   private recentMessagesCount = 6 // 保留最近的消息数
   private activeClient: AiClient | null = null
   private chatAbort = new Map<string, AbortController>()
-  useState = create(
-    immer(() => ({
-      chats: [] as IChat[],
-      activeChat: null as null | IChat,
-      webSearch: false
-    }))
-  )
   generateTopicChat = new Set<string>()
   constructor(private readonly store: Store) {
+    super(state)
     this.init()
   }
   init() {
     this.store.model.getChats().then((chats) => {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.chats = chats
       })
     })
@@ -67,7 +66,7 @@ export class ChatStore {
         created: now,
         updated: now,
         pending: true,
-        websearch: this.useState.getState().webSearch
+        websearch: this.state.webSearch
       }
     }
     const model = this.store.settings.getAvailableUseModel(obj?.clientId, obj?.model)
@@ -80,17 +79,17 @@ export class ChatStore {
     })
     if (!id) {
       await this.store.model.createChat(obj!)
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.chats.unshift(obj!)
       })
     }
-    this.useState.setState({ activeChat: obj! })
+    this.setState({ activeChat: obj! })
     return obj!
   }
 
   setChatModel(id: string, model: string) {
-    const { models } = this.store.settings.useState.getState()
-    const activeChat = this.useState.getState().activeChat
+    const { models } = this.store.settings.state
+    const activeChat = this.state.activeChat
     const config = models.find((item) => item.id === id)
     if (config) {
       const useModel = config.models.includes(model) ? model : config.models[0]
@@ -103,7 +102,7 @@ export class ChatStore {
         options: config.options
       })
       if (activeChat) {
-        this.useState.setState((state) => {
+        this.setState((state) => {
           if (state.activeChat) {
             state.activeChat.model = useModel
             state.activeChat.clientId = id
@@ -138,7 +137,7 @@ export class ChatStore {
     if (controller) {
       controller.abort()
       this.chatAbort.delete(id)
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.activeChat!.pending = false
         state.activeChat!.updated = Date.now()
         const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]
@@ -157,7 +156,7 @@ export class ChatStore {
   }
   updateChat(id: string, chat: Partial<IChat>) {
     this.store.model.updateChat(id, chat)
-    this.useState.setState((state) => {
+    this.setState((state) => {
       if (state.activeChat?.id === id) {
         state.activeChat = {
           ...state.activeChat,
@@ -170,15 +169,15 @@ export class ChatStore {
     })
   }
   async regenrate() {
-    const { activeChat } = this.useState.getState()
+    const { activeChat } = this.state
     if (activeChat) {
       const aiMsg = activeChat?.messages![activeChat?.messages!.length - 1]
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.activeChat!.pending = true
         state.activeChat!.messages?.pop()
       })
-      const sendMessages = await this.getHistoryMessages(this.useState.getState().activeChat!)
-      this.useState.setState((state) => {
+      const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
+      this.setState((state) => {
         const msg = {
           ...aiMsg,
           reasoning: undefined,
@@ -200,11 +199,11 @@ export class ChatStore {
     }
   ) {
     const now = Date.now()
-    let { activeChat } = this.useState.getState()
+    let { activeChat } = this.state
     if (!activeChat) {
       activeChat = await this.createChat()
     }
-    const model = this.store.settings.getAvailableUseModel(activeChat.clientId)
+    const model = this.store.settings.getAvailableUseModel(activeChat.clientId, activeChat.model)
     if (!model) {
       this.store.msg.error('请先设置模型')
       return
@@ -216,7 +215,7 @@ export class ChatStore {
     if (activeChat.messages?.[activeChat.messages.length - 1]?.error) {
       const lastChat = activeChat!.messages!.slice(-2)
       this.store.model.deleteMessages(lastChat.map((m) => m.id))
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.activeChat!.messages = state.activeChat!.messages!.slice(0, -2)
       })
     }
@@ -231,14 +230,14 @@ export class ChatStore {
       tokens: tokens
     }
 
-    this.useState.setState((state) => {
+    this.setState((state) => {
       if (activeChat.id !== state.activeChat?.id) {
         state.activeChat = activeChat
       }
       state.activeChat.pending = true
       state.activeChat.messages?.push(userMsg)
     })
-    const sendMessages = await this.getHistoryMessages(this.useState.getState().activeChat!)
+    const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     const msgId = nanoid()
     const aiMsg: IMessage = {
       chatId: activeChat!.id,
@@ -250,7 +249,7 @@ export class ChatStore {
       tokens: 0,
       model: activeChat.model!
     }
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.activeChat!.messages!.push(aiMsg)
       this.store.model.createMessages([userMsg, aiMsg])
     })
@@ -265,7 +264,7 @@ export class ChatStore {
     this.activeClient!.completionStream(sendMessages, {
       enable_search: activeChat.websearch,
       onChunk: (fullText) => {
-        this.useState.setState((state) => {
+        this.setState((state) => {
           const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]
           if (msg.terminated) {
             return
@@ -288,7 +287,7 @@ export class ChatStore {
         })
       },
       onReasoning: (reasoning) => {
-        this.useState.setState((state) => {
+        this.setState((state) => {
           const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]
           if (msg.terminated) {
             return
@@ -300,7 +299,7 @@ export class ChatStore {
         console.error(e)
         const now = Date.now()
         this.chatAbort.delete(activeChat.id)
-        this.useState.setState((state) => {
+        this.setState((state) => {
           state.activeChat!.pending = false
           state.activeChat!.updated = Date.now()
           const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]
@@ -326,7 +325,7 @@ export class ChatStore {
         const now = Date.now()
         this.chatAbort.delete(activeChat.id)
         // 如果是首个message需要获取topic
-        this.useState.setState((state) => {
+        this.setState((state) => {
           const tokens = getTokens(content)
           const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]
           if (state.activeChat?.id === activeChat.id) {
@@ -371,7 +370,7 @@ export class ChatStore {
       await this.activeClient!.completionStream(smMessages, {
         onFinish: (content: string) => {
           if (content) {
-            this.useState.setState((state) => {
+            this.setState((state) => {
               const c = state.chats.find((item) => item.id === id)
               if (c) {
                 c.topic = content!
@@ -411,7 +410,7 @@ export class ChatStore {
           const [content] = await this.activeClient!.client.completion(summaryMessages)
           if (content) {
             summaryText = content!
-            this.useState.setState((state) => {
+            this.setState((state) => {
               if (state.activeChat?.id === chat.id) {
                 state.activeChat!.summaryIndex = start + compressedMessages.length
                 start = start + compressedMessages.length
@@ -500,7 +499,7 @@ export class ChatStore {
 
   async deleteChat(id: string) {
     await this.store.model.deleteChat(id)
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.chats = state.chats.filter((item) => item.id !== id)
       if (state.activeChat?.id === id) {
         state.activeChat = null
@@ -508,13 +507,13 @@ export class ChatStore {
     })
   }
   setWebSearch(webSearch: boolean) {
-    const { activeChat } = this.useState.getState()
+    const { activeChat } = this.state
     if (activeChat) {
       this.store.model.updateChat(activeChat.id, {
         websearch: webSearch
       })
     }
-    this.useState.setState((state) => {
+    this.setState((state) => {
       if (state.activeChat) {
         state.activeChat!.websearch = webSearch
       }

@@ -1,7 +1,18 @@
-import { Claude, DeepSeek, Gemini, LmStudio, Ollama, OpenAI, OpenRouter, Qwen } from '@lobehub/icons'
+import {
+  Claude,
+  DeepSeek,
+  Gemini,
+  LmStudio,
+  Ollama,
+  OpenAI,
+  OpenRouter,
+  Qwen
+} from '@lobehub/icons'
 import { memo } from 'react'
 
-export const ModelIcon = memo(({ mode, size }: { mode: string, size: number }) => {
+export const ModelIcon = memo(({ mode, size }: { mode: string; size: number }) => {
+  console.log('1', mode)
+
   if (mode === 'openai') {
     return <OpenAI.Avatar size={size} />
   }

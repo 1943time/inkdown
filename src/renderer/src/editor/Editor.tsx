@@ -20,19 +20,18 @@ import { useShallow } from 'zustand/react/shallow'
 import { IDoc } from 'types/model'
 import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
+import { observer } from 'mobx-react-lite'
 
-export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
-  const [fontSize, spellCheck] = tab.store.settings.useNoteSettings(
-    useShallow((state) => [state.editorFontSize, state.spellCheck])
-  )
-  const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
-    useShallow((state) => [
-      state.docChanged,
-      state.openInsertCompletion,
-      state.openQuickLinkComplete
-    ])
-  )
-  const readonly = tab.useState((state) => state.readonly)
+export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
+  const store = useStore()
+  // const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
+  //   useShallow((state) => [
+  //     state.docChanged,
+  //     state.openInsertCompletion,
+  //     state.openQuickLinkComplete
+  //   ])
+  // )
+  // const readonly = tab.useState((state) => state.readonly)
   const changedMark = useRef(false)
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
@@ -47,31 +46,28 @@ export const MEditor = memo(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
   const onChange = useOnchange(tab)
   const first = useRef(true)
 
-  const save = useCallback(
-    async (ipc = false) => {
-      clearTimeout(saveTimer.current)
-      const node = nodeRef.current
-      changedMark.current = false
-      if (node?.schema && docChanged) {
-        tab.note.useState.setState((state) => {
-          state.nodes[node.id].schema = node.schema
-        })
-        tab.useState.setState((state) => {
-          state.docChanged = false
-        })
-        // core.service.updateNode(node, {
-        //   schema: node.schema
+  const save = useCallback(async (ipc = false) => {
+    clearTimeout(saveTimer.current)
+    const node = nodeRef.current
+    changedMark.current = false
+    if (node?.schema && tab.state.docChanged) {
+      store.note.setState((state) => {
+        state.nodes[node.id].schema = node.schema
+      })
+      tab.setState((state) => {
+        state.docChanged = false
+      })
+      // core.service.updateNode(node, {
+      //   schema: node.schema
+      // })
+      if (!ipc) {
+        // core.ipc.sendMessage({
+        //   type: 'updateDoc',
+        //   data: { cid: node.cid, schema: node.schema }
         // })
-        if (!ipc) {
-          // core.ipc.sendMessage({
-          //   type: 'updateDoc',
-          //   data: { cid: node.cid, schema: node.schema }
-          // })
-        }
       }
-    },
-    [tab, docChanged]
-  )
+    }
+  }, [])
 
   const reset = useCallback((data: any[] | null, ipc = false) => {
     // if (data && nodeRef.current) {

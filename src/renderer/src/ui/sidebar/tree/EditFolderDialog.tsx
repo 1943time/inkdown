@@ -1,98 +1,89 @@
-import { observer } from 'mobx-react-lite'
 import { Button, Input } from 'antd'
 import { useCallback } from 'react'
 import { Subject } from 'rxjs'
 import isHotkey from 'is-hotkey'
-import { Dialog } from '../dialog/Dialog.tsx'
-import { useLocalState } from '../../hooks/useLocalState.ts'
-import { useSubject } from '../../hooks/subscribe.ts'
-import { nid } from '../../utils'
-import { db, IDoc } from '../../store/db.ts'
-import { runInAction } from 'mobx'
-import { IFileItem } from '../../types/index'
-import { useCoreContext } from '../../utils/env.ts'
-import { IFolder } from '../../icons/IFolder.tsx'
+import { useStore } from '@/store/store'
+import { useGetSetState } from 'react-use'
+import { IDoc } from 'types/model'
+import { nanoid } from 'nanoid'
+import { useSubject } from '@/hooks/common'
+import { Dialog } from '@/ui/dialog/Dialog'
+import { FolderClosed } from 'lucide-react'
 
 export const openEditFolderDialog$ = new Subject<{
-  ctxNode?: IFileItem
+  ctxNode?: IDoc
   mode: 'create' | 'update'
 }>()
-export const EditFolderDialog = observer(() => {
-  const core = useCoreContext()
-  const [state, setState] = useLocalState({
+export function EditFolderDialog() {
+  const store = useStore()
+  const [state, setState] = useGetSetState({
     open: false,
     name: '',
     color: '',
     mode: 'create' as 'create' | 'update',
     message: '',
-    ctxNode: null as null | IFileItem
+    ctxNode: null as null | IDoc
   })
 
   const confirm = useCallback(async () => {
-    const name = state.name.trim()
+    const name = state().name.trim()
+    const nodes = store.note.useState.getState().nodes
     if (name) {
       if (/[.\/\\]/.test(name)) {
         return setState({ message: 'Please do not include special characters' })
       }
-      if (state.mode === 'create') {
-        const stack = state.ctxNode ? state.ctxNode.children! : core.tree.root!.children!
+      if (state().mode === 'create') {
+        const stack = state().ctxNode
+          ? state().ctxNode!.children!.map((s) => nodes[s])
+          : nodes['root']!.children!.map((s) => nodes[s])
         if (stack.some((s) => s.name === name && s.folder)) {
           return setState({ message: 'The folder already exists' })
         }
-        const id = nid()
+        const id = nanoid()
         const now = Date.now()
+        const spaceId = store.note.currentSpace!.id
         const data: IDoc = {
-          cid: id,
+          id,
           name,
-          deleted: 0,
-          spaceId: core.tree.root!.cid,
+          deleted: false,
+          spaceId,
           updated: now,
-          synced: 0,
           sort: 0,
-          parentCid: state.ctxNode?.cid,
+          parentId: state().ctxNode?.id,
           folder: true,
           created: now
         }
-        await db.doc.add(data)
-        core.ipc.sendMessage({
-          type: 'createFolder',
-          data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state.ctxNode?.cid }
-        })
-        const node = await core.node.createFileNode(data, state.ctxNode || core.tree.root!)
-        runInAction(() => {
-          core.tree.nodeMap.set(node.cid, node)
-          stack.unshift(node)
-          stack.map((s, i) => {
-            db.doc.update(s.cid, { sort: i, updated: now })
+        store.model.createDoc(data)
+        // core.ipc.sendMessage({
+        //   type: 'createFolder',
+        //   data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state().ctxNode?.cid }
+        // })
+        store.note.useState.setState((draft) => {
+          draft.nodes[id] = data
+          const parentId = state().ctxNode ? state().ctxNode!.id : 'root'
+          draft.nodes[parentId]!.children!.unshift(data.id)
+          const updateData: Partial<IDoc>[] = []
+          draft.nodes[parentId]!.children!.map((s, i) => {
+            draft.nodes[s]!.sort = i
+            draft.nodes[s]!.updated = now
+            updateData.push({ id: s, sort: i, updated: now })
           })
-          core.local.localWriteNode(node)
-          core.api.creatDoc
-            .mutate({
-              doc: {
-                cid: id,
-                name,
-                spaceCid: core.tree.root!.cid,
-                parentCid: state.ctxNode?.cid,
-                updated: now,
-                sort: 0,
-                folder: true
-              },
-              sort: stack.map((s) => s.cid)
-            })
-            .then((res) => {
-              if (res.ok) {
-                db.doc.update(data.cid, { synced: 1 })
-              }
-            })
-            .catch(core.pay.catchLimit())
+          store.model.updateDocs(updateData)
         })
-      } else if (state.ctxNode) {
-        const ctx = state.ctxNode
-        const stack = ctx.parent ? ctx.parent.children! : core.tree.root!.children!
-        if (stack.some((s) => s.name === name && s.folder && s.cid !== ctx.cid)) {
+        // core.local.localWriteNode(node)
+      } else if (state().ctxNode) {
+        const ctx = state().ctxNode!
+        const stack = ctx.parentId
+          ? nodes[ctx.parentId]!.children!.map((s) => nodes[s])
+          : nodes['root']!.children!.map((s) => nodes[s])
+        if (stack.some((s) => s.name === name && s.folder && s.id !== ctx.id)) {
           return setState({ message: 'The folder already exists' })
         }
-        core.service.rename(ctx, name)
+        store.model.updateDoc(ctx.id, { name })
+        store.note.useState.setState((draft) => {
+          draft.nodes[ctx.id]!.name = name
+          draft.nodes[ctx.id]!.updated = Date.now()
+        })
       }
       close()
     }
@@ -109,7 +100,7 @@ export const EditFolderDialog = observer(() => {
     setState({ open: false })
   }, [])
 
-  useSubject(openEditFolderDialog$, (params) => {
+  useSubject(store.note.openEditFolderDialog$, (params) => {
     setState({
       open: true,
       mode: params.mode,
@@ -124,12 +115,14 @@ export const EditFolderDialog = observer(() => {
   })
   return (
     <Dialog
-      open={state.open}
+      open={state().open}
       onClose={close}
       title={
         <div className={'flex items-center'}>
-          <IFolder className={'text-lg'}/>
-          <span className={'ml-1'}>{state.mode === 'create' ? 'Create New Folder' : 'Update'}</span>
+          <FolderClosed className={'text-lg'} />
+          <span className={'ml-1'}>
+            {state().mode === 'create' ? 'Create New Folder' : 'Update'}
+          </span>
         </div>
       }
     >
@@ -137,7 +130,7 @@ export const EditFolderDialog = observer(() => {
         <Input
           placeholder={'Folder Name'}
           data-type={'folderInputName'}
-          value={state.name}
+          value={state().name}
           onChange={(e) => {
             setState({ name: e.target.value })
             if (!e.target.value) {
@@ -145,19 +138,19 @@ export const EditFolderDialog = observer(() => {
             }
           }}
         />
-        {state.message && (
-          <div className={'text-amber-500 pt-1 text-[13px] w-full'}>{state.message}</div>
+        {state().message && (
+          <div className={'text-amber-500 pt-1 text-[13px] w-full'}>{state().message}</div>
         )}
         <Button
           type={'primary'}
           block={true}
-          disabled={!state.name}
+          disabled={!state().name}
           className={'mt-4'}
           onClick={confirm}
         >
-          {state.mode === 'create' ? 'Create' : 'Update'}
+          {state().mode === 'create' ? 'Create' : 'Update'}
         </Button>
       </div>
     </Dialog>
   )
-})
+}

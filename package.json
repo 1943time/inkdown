@@ -71,6 +71,8 @@
     "mammoth": "^1.9.0",
     "mermaid": "^11.5.0",
     "mime-types": "^3.0.1",
+    "mobx": "^6.13.7",
+    "mobx-react-lite": "^4.1.0",
     "nanoid": "^5.1.4",
     "openai": "^4.87.3",
     "path-browserify": "^1.0.1",

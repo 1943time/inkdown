@@ -5,10 +5,10 @@ import { Button } from 'antd'
 import { useTheme } from 'antd-style'
 import isHotkey from 'is-hotkey'
 import { Check, Copy, Pencil } from 'lucide-react'
-import { memo, useCallback } from 'react'
+import { useCallback } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
-
+import { observer } from 'mobx-react-lite'
 const fileTypeIconMap = [
   [/\.pdf$/i, 'pdf', '#F54838'],
   [/\.docx$/i, 'doc', '#0078D4'],
@@ -18,7 +18,7 @@ const fileTypeIconMap = [
   [/\.md$/i, 'md', '#f59e0b']
 ] as [RegExp, string, string][]
 
-export const UserMessage = memo<{ msg: IMessage }>(({ msg }) => {
+export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const { themeMode } = useTheme()
   const store = useStore()
   const [state, setState] = useGetSetState({
@@ -61,7 +61,7 @@ export const UserMessage = memo<{ msg: IMessage }>(({ msg }) => {
   const update = useCallback(() => {
     if (state().inputText) {
       setState({ isEditing: false })
-      store.chat.useState.setState((draft) => {
+      store.chat.setState((draft) => {
         if (draft.activeChat) {
           const remove = draft.activeChat.messages!.slice(-2)!
           store.model.deleteMessages(remove.map((m) => m.id))

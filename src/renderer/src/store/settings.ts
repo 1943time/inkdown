@@ -1,21 +1,52 @@
-import { dataTransform, stringTransform } from '@/utils/common'
 import { Store } from './store'
 import { AiMode, IClient } from 'types/model'
-import { create } from 'zustand'
-import { subscribeWithSelector } from 'zustand/middleware'
-import { immer } from 'zustand/middleware/immer'
+import { StructStore } from './struct'
 
-const store = {
+const state = {
   open: false,
   fold: false,
   view: 'chat' as 'chat' | 'note',
-  defaultModel: null as ClientModel | null,
+  defaultModel: null as { providerId: string; model: string } | null,
   models: [] as IClient[],
   ready: false,
-  reduceFileName: 'false',
+  reduceFileName: false,
   sidePanelWidth: 300,
   tab: 'model',
-  dark: false
+  dark: false,
+  editorFontSize: 16,
+  editorWidth: 720,
+  spellCheck: false,
+  codeAutoBreak: false,
+  codeTabSize: 2,
+  get model() {
+    if (this.defaultModel) {
+      const model = this.models.find((item) => item.id === this.defaultModel!.providerId)
+      if (model) {
+        return {
+          id: model.id,
+          mode: model.mode as AiMode,
+          model: model.models?.includes(this.defaultModel!.model)
+            ? this.defaultModel!.model
+            : model.models[0],
+          apiKey: model.apiKey,
+          baseUrl: model.baseUrl,
+          options: model.options
+        } as ClientModel
+      }
+    }
+    const data = this.models[0]
+    if (data) {
+      return {
+        id: data.id,
+        mode: data.mode as AiMode,
+        model: data.models[0],
+        apiKey: data.apiKey,
+        baseUrl: data.baseUrl,
+        options: data.options
+      } as ClientModel
+    }
+    return null
+  }
 }
 export type ClientModel = {
   id: string
@@ -25,44 +56,41 @@ export type ClientModel = {
   baseUrl?: string
   options?: Record<string, any>
 }
-export class SettingsStore {
-  useState = create(immer(() => store))
-  useNoteSettings = create(
-    subscribeWithSelector(
-      immer(() => ({
-        editorFontSize: 16,
-        editorWidth: 720,
-        spellCheck: false,
-        codeAutoBreak: false,
-        codeTabSize: 2
-      }))
-    )
-  )
+export class SettingsStore extends StructStore<typeof state> {
+  private scallback: Function[] = []
   constructor(private readonly store: Store) {
+    super(state)
     this.init()
   }
   async init() {
     await this.getModels()
     const settings = await this.store.model.getSettings()
-    this.useState.setState((state) => {
+    await this.getModels()
+    this.setState((state) => {
       for (const key of Object.keys(state)) {
         const value = settings[key]
-        if (value) {
+        if (value !== undefined) {
           state[key] = value
         }
       }
     })
-    this.useState.setState({ ready: true })
+    this.setState({ ready: true })
+    if (this.scallback.length) {
+      for (const callback of this.scallback) {
+        callback()
+      }
+      this.scallback = []
+    }
   }
   close() {
-    this.useState.setState({ open: false })
+    this.setState({ open: false })
   }
   open(opts?: { tab?: 'model'; clientId?: string }) {
-    this.useState.setState({ open: true })
+    this.setState({ open: true })
   }
-  async setSetting<T extends typeof store, U extends keyof T>(key: U, value: T[U]) {
+  async setSetting<T extends typeof state, U extends keyof T>(key: U, value: T[U]) {
     await this.store.model.putSetting({ key: key as string, value })
-    this.useState.setState((state) => {
+    this.setState((state) => {
       if (key in state) {
         // @ts-ignore
         state[key] = value
@@ -71,55 +99,15 @@ export class SettingsStore {
   }
   async getModels() {
     const models = await this.store.model.getClients()
-    this.useState.setState({ models })
-    await this.getDefaultModel()
+    this.setState({ models })
     return models
   }
-  async getDefaultModel(force = false) {
-    const { defaultModel, models } = this.useState.getState()
-    const setState = this.useState.setState
-    if (defaultModel && !force) {
-      return defaultModel
-    }
-    const data = await this.store.model.getSettings(['defaultModel'])
-    if (data.length) {
-      const [id, model] = (data[0].value as string).split('::')
-      const config = this.useState.getState().models.find((item) => item.id === id)
-      if (config) {
-        setState({
-          defaultModel: {
-            id,
-            mode: config.mode as AiMode,
-            model: model,
-            apiKey: config.apiKey,
-            baseUrl: config.baseUrl,
-            options: config.options
-          }
-        })
-        return this.useState.getState().defaultModel
-      }
-    }
-    if (models.length) {
-      const first = models[0]
-      setState({
-        defaultModel: {
-          id: first.id,
-          mode: first.mode as AiMode,
-          model: first.models[0],
-          apiKey: first.apiKey,
-          baseUrl: first.baseUrl,
-          options: first.options
-        }
-      })
-    }
-    return this.useState.getState().defaultModel
-  }
   async removeModel(id: string) {
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.models = state.models.filter((item) => item.id !== id)
     })
     await this.store.model.deleteClient(id)
-    const activeChat = this.store.chat.useState.getState().activeChat
+    const activeChat = this.store.chat.state.activeChat
     if (activeChat?.clientId === id) {
       const data = this.getAvailableUseModel()
       if (data) {
@@ -129,7 +117,7 @@ export class SettingsStore {
   }
 
   getAvailableUseModel(id?: string, model?: string): ClientModel {
-    const { models, defaultModel } = this.useState.getState()
+    const { models } = this.state
     if (id) {
       const config = models.find((item) => item.id === id)
       if (config) {
@@ -143,10 +131,17 @@ export class SettingsStore {
         }
       }
     }
-    return defaultModel!
+    return this.state.model!
   }
   async setDefaultModel(id: string, model: string) {
-    await this.store.model.putSetting({ key: 'defaultModel', value: `${id}::${model}` })
-    return this.getDefaultModel(true)
+    this.setState({ defaultModel: { providerId: id, model } })
+    await this.store.model.putSetting({ key: 'defaultModel', value: { providerId: id, model } })
+  }
+  async ready(callback: Function) {
+    if (this.state.ready) {
+      callback()
+    } else {
+      this.scallback.push(callback)
+    }
   }
 }

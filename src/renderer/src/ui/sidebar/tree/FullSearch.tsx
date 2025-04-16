@@ -5,6 +5,8 @@ import { ReactEditor } from 'slate-react'
 import { SearchOutlined } from '@ant-design/icons'
 import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
+import { ArrowLeft, ChevronRight } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -18,6 +20,9 @@ const visitSchema = (schema: any[], cb: (node: any) => void) => {
 export function FullSearch() {
   const store = useStore()
   const input = useRef<HTMLInputElement>(null)
+  const [view, searchKeyWord] = store.note.useState(
+    useShallow((state) => [state.view, state.searchKeyWord])
+  )
   const [state, setState] = useGetSetState({
     unfold: false,
     searchResults: [] as {
@@ -106,16 +111,17 @@ export function FullSearch() {
     setState({ searching: true })
     timer.current = window.setTimeout(
       () => {
-        if (!core.tree.searchKeyWord.trim() || !core.tree.nodes.length) {
+        const state = store.note.useState.getState()
+        if (!state.searchKeyWord.trim() || !state.nodes['root'].children?.length) {
           return setState({ searchResults: [] })
         }
         let results: any[] = []
-        for (let f of core.tree.nodes) {
+        for (let f of Object.values(state.nodes)) {
           let res: {
-            file: IFileItem
+            file: IDoc
             results: { el: any; text: string; codeLine?: number }[]
           } | null = null
-          let matchText = core.tree.searchKeyWord.toLowerCase()
+          let matchText = state.searchKeyWord.toLowerCase()
           if (!f.folder && f.name.toLowerCase().includes(matchText)) {
             if (!res) res = { file: f, results: [] }
             res.results.push({
@@ -172,23 +178,24 @@ export function FullSearch() {
     )
   }, [])
   useEffect(() => {
-    if (core.tree.treeTab === 'search') {
+    if (view === 'search') {
       input.current?.focus()
-      if (core.tree.searchKeyWord) {
+      const { searchKeyWord } = store.note.useState.getState()
+      if (searchKeyWord) {
         search()
       }
     }
-  }, [core.tree.treeTab])
+  }, [view])
   return (
     <div className={'h-full flex flex-col'}>
       <div className={'flex mb-2 px-4'}>
         <div
-          onClick={action(() => (core.tree.treeTab = 'folder'))}
+          onClick={() => store.note.useState.setState({ view: 'folder' })}
           className={
             'text-sm flex px-2 py-1 items-center text-black/70 dark:text-white/70 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 duration-200 cursor-pointer'
           }
         >
-          <IArrowBack className={'text-base'} />
+          <ArrowLeft className={'text-base'} />
           <span className={'ml-1'}>Return</span>
         </div>
       </div>
@@ -200,24 +207,22 @@ export function FullSearch() {
         />
         <input
           ref={input}
-          value={core.tree.searchKeyWord}
+          value={searchKeyWord}
           autoFocus={true}
           className={'input h-8 w-full pl-7'}
           onChange={(e) => {
-            runInAction(() => {
-              core.tree.searchKeyWord = e.target.value
-            })
+            store.note.useState.setState({ searchKeyWord: e.target.value })
             search()
           }}
-          placeholder={core.config.zh ? '搜索' : 'Search'}
+          placeholder={true ? '搜索' : 'Search'}
         />
       </div>
       <div className={'pt-3 pb-10 px-5 space-y-3 flex-1 h-0 flex-shrink-0 overflow-y-auto'}>
-        {!state().searching && !state().searchResults.length && core.tree.searchKeyWord && (
+        {!state().searching && !state().searchResults.length && searchKeyWord && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
-              {core.config.zh ? '未找到相关内容' : 'No content found for'}{' '}
-              <span className={'text-blue-500 inline'}>{core.tree.searchKeyWord}</span>
+              {true ? '未找到相关内容' : 'No content found for'}{' '}
+              <span className={'text-blue-500 inline'}>{searchKeyWord}</span>
             </span>
           </div>
         )}
@@ -242,13 +247,13 @@ export function FullSearch() {
                 >
                   <div className={'flex flex-1 w-0 items-center'}>
                     <div className={'p-1'}>
-                      <ArrowRight
+                      <ChevronRight
                         className={`w-3 h-3 cursor-pointer duration-200 dark:text-gray-500 text-gray-400 ${
                           state().foldIndex.includes(i) ? '' : 'rotate-90'
                         }`}
                       />
                     </div>
-                    <div className={'flex-1 w-full truncate'}>{getNodePath(s.file)?.pop()}</div>
+                    <div className={'flex-1 w-full truncate'}>{s.doc.name}</div>
                   </div>
                   <span className={'ml-2 dark:text-gray-500 pr-1 text-gray-600'}>
                     {s.results.length}
@@ -263,7 +268,7 @@ export function FullSearch() {
                     {s.results.slice(0, 100).map((r, j) => (
                       <div
                         key={j}
-                        onClick={() => toNode({ el: r.el, file: s.file, codeLine: r.codeLine })}
+                        onClick={() => toNode({ el: r.el, doc: s.doc, codeLine: r.codeLine })}
                         className={
                           'cursor-pointer dark:hover:text-white hover:text-black group break-all ellipsis-10'
                         }

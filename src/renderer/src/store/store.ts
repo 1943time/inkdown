@@ -7,8 +7,8 @@ import { NoteStore } from './note/note'
 import { mediaType } from '@/editor/utils/dom'
 export class Store {
   public readonly model = new ModelApi()
-  public readonly chat = new ChatStore(this)
   public readonly settings = new SettingsStore(this)
+  public readonly chat = new ChatStore(this)
   public readonly note = new NoteStore(this)
   constructor(public readonly msg: MessageInstance) {}
   copySuccessfully(str: string, message?: string) {

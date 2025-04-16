@@ -4,13 +4,11 @@ import { openMenus } from '@/ui/common/Menu'
 import dayjs from 'dayjs'
 import { Ellipsis, MessageSquarePlus, Search } from 'lucide-react'
 import { useMemo } from 'react'
-import { useShallow } from 'zustand/react/shallow'
+import { observer } from 'mobx-react-lite'
 
-export function Chats() {
+export const Chats = observer(() => {
   const store = useStore()
-  const [chats, activeChat] = store.chat.useState(
-    useShallow((state) => [state.chats, state.activeChat])
-  )
+  const { chats, activeChat } = store.chat.state
   const data = useMemo(() => {
     const chatsMap = new Map<string, IChat[]>()
     for (const c of chats) {
@@ -69,7 +67,7 @@ export function Chats() {
             'flex items-center rounded-lg px-3 h-8 cursor-pointer hover:dark:bg-white/5 duration-200'
           }
           onClick={() => {
-            store.chat.useState.setState({ activeChat: null })
+            store.chat.setState({ activeChat: null })
           }}
         >
           <MessageSquarePlus className={'w-4 h-4 mr-2'} />
@@ -126,4 +124,4 @@ export function Chats() {
       </div>
     </div>
   )
-}
+})

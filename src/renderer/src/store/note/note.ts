@@ -1,58 +1,96 @@
 import { IDoc, ISpace } from 'types/model'
-import { create } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
 import { Store } from '../store'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { History } from 'slate-history'
-import { nanoid } from 'nanoid'
 import { TabStore } from './tab'
-import { BaseSelection, Path } from 'slate'
-export class NoteStore {
-  docStatus = new Map<string, { history: History | null; sel: BaseSelection | null }>()
-  tabStoreMap = new Map<string, TabStore>()
-  recordTimer = 0
-  useState = create(
-    immer(() => ({
-      view: 'folder' as 'folder' | 'search',
-      nodes: {} as Record<string, IDoc>,
-      spaces: [] as ISpace[],
-      initialized: false,
-      foldStars: false,
-      ctxNodeId: null as null | string,
-      dragDocId: null as null | string,
-      tabs: [] as string[],
-      tabIndex: 0,
-      selectedDocId: null as null | string,
-      searchKeyWord: '',
-      selectedSpaceId: null as null | string,
-      dragStatus: null as null | {
-        mode: 'enter' | 'top' | 'bottom'
-        dropNodeId: string
-      }
-    }))
-  )
+import { BaseSelection } from 'slate'
+import { Subject } from 'rxjs'
+import { ReactNode } from 'react'
+import { StructStore } from '../struct'
+import { observable } from 'mobx'
+
+const state = {
+  view: 'folder' as 'folder' | 'search',
+  nodes: {} as Record<string, IDoc>,
+  spaces: [] as ISpace[],
+  initialized: false,
+  foldStars: false,
+  ctxNode: null as null | IDoc,
+  dragNode: null as null | IDoc,
+  tabs: [] as TabStore[],
+  tabIndex: 0,
+  selectedDoc: null as null | IDoc,
+  searchKeyWord: '',
+  selectedSpaceId: null as null | string,
+  selectedSpace: null as null | ISpace,
+  dragStatus: null as null | {
+    mode: 'enter' | 'top' | 'bottom'
+    dropNode: null | IDoc
+  },
   get currentTab() {
-    const state = this.useState.getState()
-    return state.tabs[state.tabIndex]
-  }
+    return this.tabs[this.tabIndex]
+  },
   get currentTabStore() {
-    const state = this.useState.getState()
-    return this.tabStoreMap.get(state.tabs[state.tabIndex])!
-  }
+    return this.tabs[this.tabIndex]
+  },
   get currentSpace() {
-    const state = this.useState.getState()
-    return state.spaces.find((space) => space.id === state.selectedSpaceId)
+    return this.spaces.find((space) => space.id === this.selectedSpaceId)
+  },
+  get opendDoc() {
+    return this.currentTab.state.doc
+  },
+  get root() {
+    return this.nodes['root']
   }
-  useSpace() {
-    return this.useState((state) => state.spaces.find((s) => s.id === state.selectedSpaceId))
+}
+
+export class NoteStore extends StructStore<typeof state> {
+  docStatus = new Map<string, { history: History | null; sel: BaseSelection | null }>()
+  recordTimer = 0
+  openEditFolderDialog$ = new Subject<{
+    ctxNode?: IDoc
+    mode: 'create' | 'update'
+  }>()
+  openConfirmDialog$ = new Subject<{
+    onClose?: () => void
+    title: string
+    okText?: string
+    okType?: 'danger' | 'primary'
+    cancelText?: string
+    hideCancelButton?: boolean
+    allowClose?: false
+    width?: number
+    description?: ReactNode
+    onCancel?: () => void
+    onConfirm?: () => void | Promise<any>
+    footer?: ReactNode
+  }>()
+  deleteDialog(item: IDoc) {
+    this.openConfirmDialog$.next({
+      title: true
+        ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.name}'`
+        : `Are you sure you want to delete '${item.name}' ${item.folder ? 'and its contents?' : '?'}`,
+      description: true
+        ? '您可以从垃圾箱中恢复此文件。'
+        : 'You can restore this file from the Trash.',
+      onConfirm: async () => {
+        this.moveToTrash(item, false)
+      },
+      okText: true ? '移入垃圾箱' : 'Move To Trash'
+    })
   }
+
   constructor(private readonly store: Store) {
+    super(
+      observable(state, {
+        tabs: observable.shallow
+      })
+    )
     this.init()
   }
   init() {
     this.store.model.getSpaces().then((spaces) => {
-      console.log('space', spaces)
-      this.useState.setState((state) => {
+      this.setState((state) => {
         const lastOpenSpaceId = localStorage.getItem('lastOpenSpaceId')
         state.spaces = spaces
         state.selectedSpaceId =
@@ -67,63 +105,63 @@ export class NoteStore {
   }
   selectSpace(spaceId: string) {
     this.docStatus.clear()
-    this.tabStoreMap.clear()
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.selectedSpaceId = spaceId
     })
     this.getDocs(spaceId)
   }
-  createTab(docId?: string) {
-    this.useState.setState((state) => {
-      const id = nanoid()
-      state.tabs.push(id)
+  createTab(doc?: IDoc) {
+    this.setState((state) => {
       const store = new TabStore(this.store)
-      if (docId) {
-        store.useState.setState((state) => {
-          state.docIds.push(docId)
+      state.tabs.push(store)
+      if (doc) {
+        store.setState((state) => {
+          state.docs.push(doc)
           state.currentIndex = 0
         })
       }
-      this.tabStoreMap.set(id, store)
     })
   }
   removeTab(i: number) {
-    const { tabs } = this.useState.getState()
-    if (tabs.length < 2) return
-    this.useState.setState((state) => {
+    if (this.state.tabs.length < 2) return
+    this.setState((state) => {
       state.tabs.splice(i, 1)
       if (i > 0) {
         state.tabIndex--
       }
     })
-    this.tabStoreMap.delete(tabs[i])
-    // this.recordTabs()
+    this.recordTabs()
   }
   getDocs(spaceId: string) {
     this.store.model.getDocs(spaceId).then((docs) => {
       const nodes: Record<string, IDoc> = {}
-      const foldersMap = new Map<string, string[]>()
+      const foldersMap = new Map<string, IDoc[]>()
       for (const doc of docs) {
         if (doc.folder) {
-          nodes[doc.id] = {
+          nodes[doc.id] = observable({
             ...doc,
             children: []
-          }
+          })
         } else {
           const parent = doc.parentId || 'root'
           if (!foldersMap.has(parent)) {
             foldersMap.set(parent, [])
           }
-          foldersMap.get(parent)?.push(doc.id)
-          nodes[doc.id] = {
-            ...doc,
-            schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : EditorUtils.p,
-            links: doc.links ? JSON.parse(doc.links as unknown as string) : []
-          }
+          foldersMap.get(parent)?.push(doc)
+          nodes[doc.id] = observable(
+            {
+              ...doc,
+              schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : EditorUtils.p,
+              links: doc.links ? JSON.parse(doc.links as unknown as string) : []
+            },
+            {
+              schema: observable.ref
+            }
+          )
         }
       }
       const now = Date.now()
-      nodes['root'] = {
+      nodes['root'] = observable({
         id: 'root',
         name: 'root',
         children: foldersMap.get('root') || [],
@@ -132,40 +170,38 @@ export class NoteStore {
         spaceId,
         folder: true,
         sort: 0
-      }
+      })
       for (const [id, children] of foldersMap.entries()) {
         if (id === 'root') continue
         if (nodes[id]) {
           nodes[id].children = children
         }
       }
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.nodes = nodes
       })
     })
   }
   checkOtherTabsShouldUpdate() {
-    const { tabs, tabIndex } = this.useState.getState()
-    const currentTab = this.currentTabStore
-    const doc = currentTab.doc
+    const { tabs, tabIndex, currentTab } = this.state
+    const doc = currentTab.state.doc
     if (tabs.length > 1 && doc) {
       tabs.forEach((t, i) => {
-        if (i !== tabIndex && this.tabStoreMap.get(t)?.doc.id === doc.id) {
-          this.tabStoreMap.get(t)?.externalChange$.next(null)
+        if (i !== tabIndex && t.state.doc.id === doc.id) {
+          t.externalChange$.next(null)
         }
       })
     }
   }
   selectTab(i: number) {
-    const currentTab = this.currentTabStore
-    currentTab.saveDoc$.next(null)
+    this.state.currentTab.saveDoc$.next(null)
     this.checkOtherTabsShouldUpdate()
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.tabIndex = i
-      state.selectedDocId = null
+      state.selectedDoc = null
     })
     setTimeout(() => {
-      const currentTab = this.currentTabStore
+      const currentTab = this.state.currentTab
       const backRange = currentTab.range
       if (backRange) {
         const selection = window.getSelection()!
@@ -178,7 +214,7 @@ export class NoteStore {
   async recordTabs() {
     clearTimeout(this.recordTimer)
     this.recordTimer = window.setTimeout(async () => {
-      const { tabs, tabIndex, selectedSpaceId } = this.useState.getState()
+      const { tabs, tabIndex, selectedSpaceId } = this.state
       await this.store.model.putSetting({
         key: `tab-${selectedSpaceId}`,
         value: {
@@ -189,19 +225,16 @@ export class NoteStore {
     }, 300)
   }
   openDoc(doc: IDoc, scroll: boolean = false) {
-    const tab = this.currentTabStore
-    const state = this.useState.getState()
-    const index = state.tabs.findIndex((t) => t === doc.id)
+    const tab = this.state.currentTab
+    const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
     if (index !== -1) {
       if (index === state.tabIndex) return
       return this.selectTab(index)
     }
-    const tabState = tab.useState.getState()
-    const history = tabState.docIds.filter((t) => t !== doc.id)
-    tabState.docIds.push(doc.id)
-    tab.useState.setState((state) => {
-      state.docIds = history
-      state.currentIndex = history.length - 1
+    tab.setState((state) => {
+      state.docs = state.docs.filter((t) => t.id !== doc.id)
+      state.docs.push(doc)
+      state.currentIndex = state.docs.length - 1
       state.domRect = null
     })
     const now = Date.now()
@@ -220,8 +253,7 @@ export class NoteStore {
     if (!doc.folder) {
       return doc
     }
-    const { nodes } = this.useState.getState()
-    const stack = doc.children?.slice().map((id) => nodes[id]) || []
+    const stack = doc.children?.slice() || []
     let note: IDoc | undefined = undefined
     while (stack.length) {
       const item = stack.shift()!
@@ -229,9 +261,160 @@ export class NoteStore {
         note = item
         break
       } else if (item.children?.length) {
-        stack.unshift(...item.children.map((id) => nodes[id]))
+        stack.unshift(...item.children)
       }
     }
     return note
+  }
+  moveToTrash(item: IDoc, ipc = false) {
+    this.setState((state) => {
+      state.selectedDoc = null
+    })
+    this.removeSelf(item)
+    this.store.model.updateDoc(item.id, { deleted: true })
+    if (!ipc) {
+      // this.store.ipc.sendMessage({
+      //   type: 'deleteNode',
+      //   data: { cid: item.id }
+      // })
+    }
+  }
+  async moveNode(ipc = false) {
+    const { dragNode: dragDoc, dragStatus, ctxNode, nodes } = this.state
+    if (!dragStatus) return
+    if (
+      !dragDoc ||
+      !dragStatus?.dropNode ||
+      dragStatus.dropNode === dragDoc ||
+      (dragStatus.dropNode.id === dragDoc.parentId && dragStatus.mode === 'enter')
+    ) {
+      this.setState((state) => {
+        state.dragNode = null
+        state.dragStatus = null
+      })
+    } else {
+      this.setState((draft) => {
+        const { dropNode, mode } = draft.dragStatus!
+        const dragNode = draft.dragNode!
+        let targetList = draft.nodes[dropNode!.parentId || 'root'].children!
+        const oldList = draft.nodes[dragNode.parentId || 'root'].children!
+        let index = targetList.findIndex((l) => l === dropNode)
+        draft.dragNode = null
+        draft.dragStatus = null
+        if (
+          ((mode === 'bottom' || mode === 'top') &&
+            dragNode.parentId !== dropNode?.parentId &&
+            targetList.find((c) => c.name === dragNode.name)) ||
+          (mode === 'enter' && dropNode!.children?.find((c) => c.name === dragNode.name))
+        ) {
+          this.store.msg.info('A file with the same name exists in the target folder')
+          return
+        }
+        if (mode === 'top' && targetList[index - 1] === dragNode) return
+        if (mode === 'bottom' && targetList[index + 1] === dragNode) return
+        draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
+          (c) => c.id !== dragNode.id
+        )
+        if (dragNode.parentId === dropNode?.parentId) {
+          targetList = targetList.filter((c) => c.id !== dragNode.id)
+          index = targetList.findIndex((l) => l.id === dropNode!.id)
+        }
+        const updated = Date.now()
+        if (mode === 'bottom' || mode === 'top') {
+          targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
+          draft.nodes[dropNode!.parentId || 'root'].children = targetList
+          if (dragNode.parentId !== dropNode?.parentId) {
+            draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
+              (c) => c.id !== dragNode.id
+            )
+            if (!ipc) {
+              this.store.model.updateDoc(dragNode.id, {
+                parentId: dropNode?.parentId
+              })
+              this.store.model.updateDocs(
+                targetList.map((n) => ({ id: n.id, sort: index, updated }))
+              )
+            }
+          } else if (!ipc) {
+            const updated = Date.now()
+            this.store.model.updateDocs(targetList.map((n) => ({ id: n.id, sort: index, updated })))
+          }
+        }
+        if (mode === 'enter' && dropNode!.folder) {
+          dropNode!.children!.unshift(dragNode)
+          draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
+            (c) => c.id !== dragNode.id
+          )
+          if (!ipc) {
+            this.store.model.updateDoc(dragNode.id, {
+              parentId: dropNode?.parentId
+            })
+            this.store.model.updateDocs(
+              dropNode!.children!.map((n, i) => ({ id: n.id, sort: i, updated }))
+            )
+          }
+        }
+        if (!ipc) {
+          // this.core.ipc.sendMessage({
+          //   type: 'moveNode',
+          //   data: {
+          //     dragNode: dragNode.cid,
+          //     dropNode: dropNode.cid,
+          //     mode: mode,
+          //     spaceCid: this.root.cid
+          //   }
+          // })
+        }
+      })
+    }
+  }
+  private removeSelf(node: IDoc) {
+    if (!node.folder) this.removeNodeFromHistory(node)
+    const parentId = node.parentId || 'root'
+    const nodes = this.state.nodes
+    if (parent) {
+      this.setState((state) => {
+        state.nodes[parentId].children = state.nodes[parentId].children!.filter(
+          (c) => c.id !== node.id
+        )
+        delete state.nodes[node.id]
+      })
+    }
+    if (node.folder) {
+      const stack = node.children!.slice()
+      const deletedIds: string[] = []
+      while (stack.length) {
+        const item = stack.pop()!
+        if (item.folder) {
+          stack.push(...item.children!)
+        } else {
+          this.removeNodeFromHistory(item)
+        }
+        deletedIds.push(item.id)
+      }
+      this.setState((state) => {
+        deletedIds.forEach((id) => {
+          delete state.nodes[id]
+        })
+      })
+    }
+  }
+  private removeNodeFromHistory(doc: IDoc) {
+    const { tabs } = this.state
+    for (let t of tabs) {
+      if (t.state.doc.id === doc.id) {
+        t.editor.selection = null
+      }
+      if (t.state.docs.length) {
+        t.setState((state) => {
+          state.docs = state.docs.filter((d) => d.id !== doc.id)
+          if (state.docs.length > 0 && state.currentIndex > state.docs.length - 1) {
+            state.currentIndex = state.docs.length - 1
+          } else if (!state.docs.length) {
+            state.currentIndex = 0
+          }
+        })
+      }
+    }
   }
 }

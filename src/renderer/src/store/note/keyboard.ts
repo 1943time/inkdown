@@ -21,7 +21,7 @@ export class KeyboardTask {
         const domRange = window.getSelection()?.getRangeAt(0)
         const rect = domRange?.getBoundingClientRect()
         if (rect) {
-          this.tab.useState.setState({ domRect: rect })
+          this.tab.setState({ domRect: rect })
         }
       } catch (e) {}
     })
@@ -479,7 +479,7 @@ export class KeyboardTask {
   media() {}
 
   localImage(type: 'image' | 'video' = 'image') {
-    const doc = this.tab.doc
+    const doc = this.tab.state.doc
     if (doc) {
       window.api.dialog
         .showOpenDialog({
@@ -550,7 +550,7 @@ export class KeyboardTask {
   }
 
   closeCurrentTab() {
-    const { tabs, tabIndex } = this.tab.note.useState.getState()
+    const { tabs, tabIndex } = this.tab.note.state
     if (tabs.length > 1) {
       this.tab.note.removeTab(tabIndex)
     } else {
@@ -579,7 +579,7 @@ export class KeyboardTask {
     // this.core.menu.createDoc({ parent })
   }
   blur() {
-    const doc = this.tab.doc
+    const doc = this.tab.state.doc
     try {
       if (doc) {
         const [node] = Editor.nodes(this.tab.editor, {
@@ -587,7 +587,7 @@ export class KeyboardTask {
         })
         if (node) {
           this.tab.editor.selection = null
-          this.tab.useState.setState({ domRect: null })
+          this.tab.setState({ domRect: null })
         }
       }
     } catch (e) {}

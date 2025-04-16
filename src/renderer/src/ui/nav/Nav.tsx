@@ -5,10 +5,10 @@ import { IFold } from '@/icons/IFold'
 import { useShallow } from 'zustand/react/shallow'
 import { os } from '@/utils/common'
 import { useMemo } from 'react'
-
-export function Nav() {
+import { observer } from 'mobx-react-lite'
+export const Nav = observer(() => {
   const store = useStore()
-  const [fold] = store.settings.useState(useShallow((state) => [state.fold]))
+  const { fold } = store.settings.state
   const [iconLeft, navLeft] = useMemo(() => {
     const osType = os()
     if (!fold) {
@@ -36,7 +36,7 @@ export function Nav() {
         <div
           className={'p-1 rounded hover:bg-white/10 cursor-pointer'}
           onClick={() => {
-            store.settings.useState.setState((state) => {
+            store.settings.setState((state) => {
               state.fold = !state.fold
             })
           }}
@@ -51,7 +51,7 @@ export function Nav() {
             'flex items-center justify-center w-7 h-7 rounded hover:bg-white/10 duration-200 cursor-pointer'
           }
           onClick={() => {
-            store.settings.useState.setState({ open: true })
+            store.settings.setState({ open: true })
           }}
         >
           <Ellipsis />
@@ -59,4 +59,4 @@ export function Nav() {
       </div>
     </div>
   )
-}
+})

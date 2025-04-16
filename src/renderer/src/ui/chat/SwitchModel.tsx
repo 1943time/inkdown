@@ -5,15 +5,14 @@ import { useStore } from '@/store/store'
 import { ModelIcon } from './ModelIcon'
 import { Tooltip } from '@lobehub/ui'
 import { useMemo } from 'react'
-import { useShallow } from 'zustand/react/shallow'
 import { OpenAI } from '@lobehub/icons'
 import { useSetState } from 'react-use'
-export function SwitchModel() {
+import { observer } from 'mobx-react-lite'
+export const SwitchModel = observer(() => {
   const store = useStore()
-  const chat = store.chat.useState((state) => state.activeChat)
-  const [defModel, models, ready] = store.settings.useState(
-    useShallow((state) => [state.defaultModel, state.models, state.ready])
-  )
+  const chat = store.chat.state.activeChat
+  const { model, models, ready } = store.settings.state
+
   const chatModel = useMemo(() => {
     if (chat?.clientId) {
       const config = models.find((item) => item.id === chat.clientId)
@@ -24,16 +23,10 @@ export function SwitchModel() {
           mode: config.mode
         }
       }
-    } else if (defModel) {
-      return {
-        id: defModel.id,
-        model: defModel.model,
-        mode: defModel.mode
-      }
+    } else {
+      return model
     }
-    return null
-  }, [chat, defModel, models])
-
+  }, [chat, model, models, ready])
   const [state, setState] = useSetState({
     open: false
   })
@@ -69,7 +62,7 @@ export function SwitchModel() {
                 <div
                   className={'action p-1'}
                   onClick={() => {
-                    store.settings.useState.setState({ open: true })
+                    store.settings.setState({ open: true })
                     setState({ open: false })
                   }}
                 >
@@ -105,4 +98,4 @@ export function SwitchModel() {
       </div>
     </Dropdown>
   )
-}
+})

@@ -8,7 +8,8 @@ import { useGetSetState } from 'react-use'
 import { copyRichTextToClipboard, copyToClipboard } from '@/utils/clipboard'
 import { useStore } from '@/store/store'
 import { markdownToHtml } from '@/output/markdownToHtml'
-export const AiMessage = memo<{ msg: IMessage }>(({ msg }) => {
+import { observer } from 'mobx-react-lite'
+export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const store = useStore()
   const [state, setState] = useGetSetState({
     copied: false,

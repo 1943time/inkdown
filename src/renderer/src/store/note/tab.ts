@@ -2,9 +2,6 @@ import { withMarkdown } from '@/editor/plugins'
 import { createEditor, Editor, Element, Node, Path, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { ReactEditor, withReact } from 'slate-react'
-import { create } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
-import { subscribeWithSelector } from 'zustand/middleware'
 import { Ace, Range as AceRange } from 'ace-builds'
 import { Range as SlateRange } from 'slate'
 import { Store } from '../store'
@@ -14,10 +11,52 @@ import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
 import { KeyboardTask } from './keyboard'
 import { Subject } from 'rxjs'
 import { TableLogic } from './table'
-export class TabStore {
+import { StructStore } from '../struct'
+import { observable } from 'mobx'
+
+const state = {
+  path: null as null | Path,
+  langCompletionText: '',
+  startDragging: false,
+  showFloatBar: false,
+  historyView: false,
+  readonly: false,
+  insertCompletionText: '',
+  docs: [] as IDoc[],
+  inputComposition: false,
+  openSearch: false,
+  openReplace: false,
+  focus: false,
+  currentIndex: 0,
+  focusSearch: false,
+  docChanged: false,
+  openLangCompletion: false,
+  openQuickLinkComplete: false,
+  openInsertCompletion: false,
+  domRect: null as null | DOMRect,
+  refreshHighlight: false,
+  search: {
+    replace: false,
+    index: 0,
+    keyword: '',
+    replaceText: '',
+    searchRanges: [] as {
+      range?: SlateRange
+      markerId?: number
+      aceRange?: InstanceType<typeof AceRange>
+      editorPath?: number[]
+    }[]
+  },
+  get doc() {
+    return this.docs[this.currentIndex]
+  }
+}
+
+export class TabStore extends StructStore<typeof state> {
   keyboard: KeyboardTask
   table: TableLogic
   constructor(public readonly store: Store) {
+    super(state)
     this.dragStart = this.dragStart.bind(this)
     this.keyboard = new KeyboardTask(this)
     this.table = new TableLogic(this)
@@ -48,74 +87,28 @@ export class TabStore {
     'media',
     'attach'
   ])
-  useState = create(
-    subscribeWithSelector(
-      immer(() => ({
-        path: null as null | Path,
-        langCompletionText: '',
-        startDragging: false,
-        showFloatBar: false,
-        historyView: false,
-        readonly: false,
-        insertCompletionText: '',
-        docIds: [] as string[],
-        inputComposition: false,
-        openSearch: false,
-        openReplace: false,
-        focus: false,
-        currentIndex: 0,
-        focusSearch: false,
-        docChanged: false,
-        openLangCompletion: false,
-        openQuickLinkComplete: false,
-        openInsertCompletion: false,
-        domRect: null as null | DOMRect,
-        refreshHighlight: false,
-        search: {
-          replace: false,
-          index: 0,
-          keyword: '',
-          replaceText: '',
-          searchRanges: [] as {
-            range?: SlateRange
-            markerId?: number
-            aceRange?: InstanceType<typeof AceRange>
-            editorPath?: number[]
-          }[]
-        }
-      }))
-    )
-  )
-  get doc() {
-    const { currentIndex, docIds } = this.useState.getState()
-    return this.store.note.useState.getState().nodes[docIds[currentIndex]]
-  }
-  useDoc(): IDoc | undefined {
-    const docId = this.useState((state) => state.docIds[state.currentIndex])
-    return this.store.note.useState((state) => state.nodes[docId])
-  }
   doManual() {
     this.manual = true
     setTimeout(() => (this.manual = false), 30)
   }
   refreshHighlight() {
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.refreshHighlight = !state.refreshHighlight
     })
   }
   setOpenSearch(open: boolean) {
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.openSearch = open
     })
-    this.useState.setState({ domRect: null })
+    this.setState({ domRect: null })
     if (!open) {
       this.clearDocAllMarkers()
       this.highlightCache.clear()
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.searchRanges = []
       })
     } else {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.focusSearch = !state.focusSearch
         if (state.search.keyword) {
           this.matchSearch()
@@ -126,7 +119,7 @@ export class TabStore {
   }
 
   clearDocAllMarkers() {
-    const ranges = this.useState.getState().search.searchRanges
+    const ranges = this.state.search.searchRanges
     if (ranges.length) {
       for (const item of ranges) {
         if (item.editorPath) {
@@ -140,7 +133,7 @@ export class TabStore {
   }
 
   setSearchText(text?: string) {
-    this.useState.setState((state) => {
+    this.setState((state) => {
       state.search.keyword = text || ''
       state.search.index = 0
       state.search.searchRanges = []
@@ -152,7 +145,7 @@ export class TabStore {
   }
 
   private changeCurrent() {
-    const { search } = this.useState.getState()
+    const { search } = this.state
     search.searchRanges.forEach((r, j) => {
       if (r.range) {
         r.range.current = j === search.index
@@ -172,13 +165,13 @@ export class TabStore {
   }
 
   nextSearch() {
-    const { search } = this.useState.getState()
+    const { search } = this.state
     if (search.index === search.searchRanges.length - 1) {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.index = 0
       })
     } else {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.index++
       })
     }
@@ -187,13 +180,13 @@ export class TabStore {
   }
 
   prevSearch() {
-    const { search } = this.useState.getState()
+    const { search } = this.state
     if (search.index === 0) {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.index = search.searchRanges.length - 1
       })
     } else {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.index--
       })
     }
@@ -202,12 +195,12 @@ export class TabStore {
   }
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
-    const { search } = this.useState.getState()
-    this.useState.setState((state) => {
+    const { search } = this.state
+    this.setState((state) => {
       state.search.searchRanges = []
     })
     if (!search.keyword) {
-      this.useState.setState((state) => {
+      this.setState((state) => {
         state.search.index = 0
       })
       return
@@ -297,7 +290,7 @@ export class TabStore {
     if (search.index > matchCount - 1) {
       search.index = 0
     }
-    this.useState((state) => {
+    this.setState((state) => {
       state.search.searchRanges = allRanges
     })
     if (scroll) setTimeout(() => this.toPoint(), 30)
@@ -310,7 +303,7 @@ export class TabStore {
     return null
   }
   private toPoint() {
-    const { search } = this.useState.getState()
+    const { search } = this.state
     try {
       const cur = search.searchRanges[search.index]
       if (!cur) return
@@ -403,7 +396,7 @@ export class TabStore {
       })
     }
     let last: MovePoint | null = null
-    this.useState.setState({ readonly: true, startDragging: true })
+    this.setState({ readonly: true, startDragging: true })
     const dragover = (e: MouseEvent) => {
       e.preventDefault()
       if ((e.clientY > window.innerHeight - 30 || e.clientY < 70) && !this.scrolling) {
@@ -452,7 +445,7 @@ export class TabStore {
       'mouseup',
       () => {
         window.removeEventListener('mousemove', dragover)
-        this.useState.setState({ readonly: false, startDragging: false })
+        this.setState({ readonly: false, startDragging: false })
         if (mark) this.container!.removeChild(mark)
         if (last && this.dragEl) {
           let [dragPath, dragNode] = this.toPath(this.dragEl)
