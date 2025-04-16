@@ -1,20 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { Tooltip } from 'antd'
 import isHotkey from 'is-hotkey'
 import { ArrowRightOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
 import { Replace, X } from 'lucide-react'
-import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
 import { TabStore } from '@/store/note/tab'
-import { IDoc } from 'types/model'
-import { useShallow } from 'zustand/react/shallow'
+import { observer } from 'mobx-react-lite'
 
-export function Search({ tab }: { tab: TabStore }) {
-  const [openSearch, openReplace, focusSearch, search] = tab.useState(
-    useShallow((state) => [state.openSearch, state.openReplace, state.focusSearch, state.search])
-  )
+export const Search = observer(({ tab }: { tab: TabStore }) => {
   const [state, setState] = useGetSetState({
     replaceText: '',
     openReplace: false
@@ -22,13 +17,13 @@ export function Search({ tab }: { tab: TabStore }) {
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus())
-  }, [openSearch, focusSearch])
+  }, [tab.state.openSearch, tab.state.focusSearch])
 
   const replace = useCallback(() => {
-    if (!search.searchRanges.length) {
+    if (!tab.state.search.searchRanges.length) {
       tab.matchSearch(true)
     } else {
-      const cur = search.searchRanges[search.index]
+      const cur = tab.state.search.searchRanges[tab.state.search.index]
       if (cur?.range) {
         const node = Editor.node(tab.editor, cur.range.anchor.path)
         const text = node[0]?.text as string
@@ -45,11 +40,11 @@ export function Search({ tab }: { tab: TabStore }) {
       }
       tab.matchSearch(true)
     }
-  }, [search, tab])
+  }, [])
 
   const replaceAll = useCallback(() => {
-    if (!search.keyword) return
-    const ranges = search.searchRanges
+    if (!tab.state.search.keyword) return
+    const ranges = tab.state.search.searchRanges
     if (!ranges.length) {
       tab.matchSearch(true)
     } else {
@@ -62,13 +57,17 @@ export function Search({ tab }: { tab: TabStore }) {
       for (let n of nodes) {
         for (let i = 0; i < n[0].children.length; i++) {
           const text = n[0].children[i]?.text as string
-          if (text && text.includes(search.keyword)) {
-            Transforms.insertText(tab.editor, text.replaceAll(search.keyword, search.replaceText), {
-              at: {
-                anchor: { path: [...n[1], i], offset: 0 },
-                focus: { path: [...n[1], i], offset: text.length }
+          if (text && text.includes(tab.state.search.keyword)) {
+            Transforms.insertText(
+              tab.editor,
+              text.replaceAll(tab.state.search.keyword, tab.state.search.replaceText),
+              {
+                at: {
+                  anchor: { path: [...n[1], i], offset: 0 },
+                  focus: { path: [...n[1], i], offset: text.length }
+                }
               }
-            })
+            )
           }
         }
       }
@@ -77,27 +76,29 @@ export function Search({ tab }: { tab: TabStore }) {
           const el = Node.get(tab.editor, item.editorPath)
           const code = tab.codeMap.get(el)
           if (code) {
-            code.session.replace(item.aceRange!, search.replaceText)
+            code.session.replace(item.aceRange!, tab.state.search.replaceText)
             EditorUtils.clearAceMarkers(code)
           }
         }
       }
       tab.highlightCache.clear()
-      tab.useState.setState((state) => {
+      tab.setState((state) => {
         state.search.searchRanges = []
         state.search.index = 0
       })
     }
-  }, [tab, search])
-  if (!openSearch) return null
+  }, [])
+  if (!tab.state.openSearch) return null
   return (
     <div className={`items-center z-30 def-bg overflow-hidden`}>
-      <div className={`mx-auto ${openReplace ? 'max-w-[900px]' : 'max-w-[700px]'} overflow-x-auto`}>
+      <div
+        className={`mx-auto ${tab.state.openReplace ? 'max-w-[900px]' : 'max-w-[700px]'} overflow-x-auto`}
+      >
         <div className={'flex items-center py-2 h-[45px] justify-between px-14 min-w-[650px]'}>
           <div className={'flex-1 flex items-center'}>
             <div className={'flex-1 relative'}>
               <input
-                value={search.keyword}
+                value={tab.state.search.keyword}
                 placeholder={'查找'}
                 autoFocus={true}
                 ref={inputRef}
@@ -113,17 +114,17 @@ export function Search({ tab }: { tab: TabStore }) {
                 onChange={(e) => tab.setSearchText(e.target.value)}
               />
               <div
-                className={`absolute right-1 top-1/2 -mt-[10px] p-0.5 rounded-sm cursor-pointer ${openReplace ? 'bg-black/10 dark:bg-white/20' : ''}`}
-                onClick={() => setState({ openReplace: !openReplace })}
+                className={`absolute right-1 top-1/2 -mt-[10px] p-0.5 rounded-sm cursor-pointer ${tab.state.openReplace ? 'bg-black/10 dark:bg-white/20' : ''}`}
+                onClick={() => setState({ openReplace: !tab.state.openReplace })}
               >
                 <Replace className={'w-4 h-4 dark:text-gray-200 text-gray-700'} />
               </div>
             </div>
-            {openReplace && (
+            {tab.state.openReplace && (
               <div className={'flex-1 flex items-center'}>
                 <ArrowRightOutlined className={'px-2 text-sm text-gray-500 dark:text-gray-300'} />
                 <input
-                  value={search.replaceText}
+                  value={tab.state.search.replaceText}
                   placeholder={'替换'}
                   className={'w-full input px-2'}
                   onChange={(e) => setState({ replaceText: e.target.value })}
@@ -132,10 +133,10 @@ export function Search({ tab }: { tab: TabStore }) {
             )}
           </div>
           <div
-            className={`${openReplace ? 'ml-2' : 'ml-4'} flex justify-end dark:text-gray-400 text-gray-500 items-center select-none`}
+            className={`${tab.state.openReplace ? 'ml-2' : 'ml-4'} flex justify-end dark:text-gray-400 text-gray-500 items-center select-none`}
           >
             <div className={'space-x-3 text-[13px] leading-5 flex items-center mr-2'}>
-              {!openReplace && (
+              {!tab.state.openReplace && (
                 <>
                   <div
                     className={
@@ -155,7 +156,7 @@ export function Search({ tab }: { tab: TabStore }) {
                   </div>
                 </>
               )}
-              {openReplace && (
+              {tab.state.openReplace && (
                 <>
                   <div className={'flex space-x-2'}>
                     <div
@@ -195,14 +196,14 @@ export function Search({ tab }: { tab: TabStore }) {
               )}
             </div>
             <div className={'w-16 text-right'}>
-              {!!search.searchRanges.length && (
+              {!!tab.state.search.searchRanges.length && (
                 <div className={'space-x-0.5 text-sm'}>
-                  <span>{search.index + 1}</span>
+                  <span>{tab.state.search.index + 1}</span>
                   <span>/</span>
-                  <span>{search.searchRanges.length}</span>
+                  <span>{tab.state.search.searchRanges.length}</span>
                 </div>
               )}
-              {!search.searchRanges.length && !!search.keyword && (
+              {!tab.state.search.searchRanges.length && !!tab.state.search.keyword && (
                 <div className={'text-gray-500 text-sm'}>{'没有结果'}</div>
               )}
             </div>
@@ -225,4 +226,4 @@ export function Search({ tab }: { tab: TabStore }) {
       </div>
     </div>
   )
-}
+})

@@ -9,7 +9,7 @@ export default function App() {
   const store = useMemo(() => new Store(messageApi), [])
   return (
     <ThemeProvider themeMode={'dark'}>
-      <ConfigProvider
+      {/* <ConfigProvider
         theme={{
           algorithm: theme.darkAlgorithm,
           token: {
@@ -22,13 +22,13 @@ export default function App() {
             }
           }
         }}
-      >
-        <StoreContext value={store}>
-          {contextHolder}
-          <Entry />
-          <ConfirmDialog />
-        </StoreContext>
-      </ConfigProvider>
+      > */}
+      <StoreContext value={store}>
+        {contextHolder}
+        <Entry />
+        <ConfirmDialog />
+      </StoreContext>
+      {/* </ConfigProvider> */}
     </ThemeProvider>
   )
 }

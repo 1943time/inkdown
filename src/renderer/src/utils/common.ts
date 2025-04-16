@@ -143,3 +143,7 @@ export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Om
   })
   return result as Omit<T, K>
 }
+
+export const isDark = () => {
+  return window.matchMedia && window.matchMedia?.('(prefers-color-scheme: dark)').matches
+}

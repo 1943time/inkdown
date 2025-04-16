@@ -11,8 +11,6 @@ import {
 import { memo } from 'react'
 
 export const ModelIcon = memo(({ mode, size }: { mode: string; size: number }) => {
-  console.log('1', mode)
-
   if (mode === 'openai') {
     return <OpenAI.Avatar size={size} />
   }

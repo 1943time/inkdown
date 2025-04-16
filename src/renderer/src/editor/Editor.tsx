@@ -21,9 +21,11 @@ import { IDoc } from 'types/model'
 import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
 import { observer } from 'mobx-react-lite'
+import { useSubject } from '@/hooks/common'
 
-export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => {
+export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
+  const settings = tab.store.settings.state
   // const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
   //   useShallow((state) => [
   //     state.docChanged,
@@ -36,7 +38,7 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
   const saveTimer = useRef(0)
-  const nodeRef = useRef<IDoc | undefined>(doc)
+  const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const renderElement = useCallback(
     (props: any) => <MElement {...props} children={props.children} />,
     []
@@ -102,13 +104,13 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
       }
       value.current = v
       onChange()
-      if (doc) {
-        tab.note.docStatus.set(doc.id, {
+      if (tab.state.doc) {
+        tab.note.docStatus.set(tab.state.doc.id, {
           history: tab.editor.history,
           sel: tab.editor.selection
         })
-        tab.note.useState.setState((state) => {
-          const target = state.nodes[doc?.id]
+        tab.setState((state) => {
+          const target = state.doc
           if (target) {
             target.schema = v
           }
@@ -116,8 +118,8 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
       }
       if (tab.editor.operations[0]?.type === 'set_selection') {
         try {
-          if (openInsertCompletion || openQuickLinkComplete) {
-            tab.useState.setState((state) => {
+          if (tab.state.openInsertCompletion || tab.state.openQuickLinkComplete) {
+            tab.setState((state) => {
               state.openLangCompletion = false
               state.openQuickLinkComplete = false
             })
@@ -129,7 +131,7 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
         if (!changedMark.current) {
           changedMark.current = true
         }
-        tab.useState.setState((state) => {
+        tab.setState((state) => {
           state.docChanged = true
         })
         clearTimeout(saveTimer.current)
@@ -138,20 +140,20 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
         }, 3000)
       }
     },
-    [tab, doc, openInsertCompletion, openQuickLinkComplete]
+    [tab]
   )
 
   const initialNote = useCallback(async () => {
     clearTimeout(saveTimer.current)
-    if (doc) {
-      nodeRef.current = doc
+    if (tab.state.doc) {
+      nodeRef.current = tab.state.doc
       first.current = true
       try {
         tab.editor.selection = null
         EditorUtils.reset(
           tab.editor,
-          doc.schema?.length ? doc.schema : undefined,
-          tab.note.docStatus.get(doc.id)?.history || true
+          tab.state.doc.schema?.length ? tab.state.doc.schema : undefined,
+          tab.note.docStatus.get(tab.state.doc.id)?.history || true
         )
       } catch (e) {
         EditorUtils.deleteAll(tab.editor)
@@ -164,8 +166,8 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
   useEffect(() => {
     save()
     initialNote()
-    nodeRef.current = doc
-  }, [doc?.id])
+    nodeRef.current = tab.state.doc
+  }, [tab.state.doc])
 
   useEffect(() => {
     const blur = async () => {
@@ -178,20 +180,19 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
     }
   }, [])
 
-  // useSubject(
-  //   core.tree.externalChange$,
-  //   (changeNote) => {
-  //     if (changeNote === note) {
-  //       try {
-  //         first.current = true
-  //         ReactEditor.blur(editor)
-  //         document.querySelector
-  //         EditorUtils.deleteAll(editor, changeNote.schema)
-  //       } catch (e) {}
-  //     }
-  //   },
-  //   [note]
-  // )
+  useSubject(
+    tab.externalChange$,
+    (changeDocId) => {
+      if (changeDocId === tab.state.doc?.id) {
+        try {
+          first.current = true
+          ReactEditor.blur(tab.editor)
+          EditorUtils.deleteAll(tab.editor, tab.state.doc?.schema)
+        } catch (e) {}
+      }
+    },
+    []
+  )
 
   const checkEnd = useCallback(
     (e: React.MouseEvent) => {
@@ -211,62 +212,53 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
     [tab.editor]
   )
 
-  const drop = useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
-      // if (core.tree.dragNode) {
-      //   const node = core.tree.dragNode
-      //   setTimeout(() => {
-      //     if (!node.folder) {
-      //       const [n] = Editor.nodes<any>(store.editor, {
-      //         match: (n) => Element.isElement(n),
-      //         mode: 'lowest'
-      //       })
-      //       if (!n || n[0].type === 'head' || n[0].type === 'code') {
-      //         return
-      //       }
-      //       if (editor.selection) {
-      //         Transforms.insertNodes(store.editor, {
-      //           text: node.name,
-      //           docId: node.cid
-      //         })
-      //       }
-      //     }
-      //   }, 16)
-      //   return
-      // }
-      // if (e.dataTransfer?.files?.length > 0 && core.tree.openedNote) {
-      //   store.insertMultipleImages(Array.from(e.dataTransfer.files))
-      // }
-    },
-    [tab]
-  )
+  const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    const note = tab.store.note
+    if (note.state.dragNode) {
+      const node = note.state.dragNode
+      setTimeout(() => {
+        if (!node.folder) {
+          const [n] = Editor.nodes<any>(tab.editor, {
+            match: (n) => Element.isElement(n),
+            mode: 'lowest'
+          })
+          if (!n || n[0].type === 'head' || n[0].type === 'code') {
+            return
+          }
+          if (tab.editor.selection) {
+            Transforms.insertNodes(tab.editor, {
+              text: node.name,
+              docId: node.id
+            })
+          }
+        }
+      }, 16)
+      return
+    }
+    // if (e.dataTransfer?.files?.length > 0 && core.tree.openedNote) {
+    //   store.insertMultipleImages(Array.from(e.dataTransfer.files))
+    // }
+  }, [])
 
-  // const focus = useCallback(() => {
-  //   runInAction(() => (store.focus = true))
-  //   store.hideRanges()
-  // }, [tab])
+  const focus = useCallback(() => {
+    tab.setState({ focus: true })
+    tab.hideRanges()
+  }, [tab])
 
-  // const blur = useCallback((e: React.FocusEvent) => {
-  //   const [node] = Editor.nodes(store.editor, {
-  //     match: (n) => n.type === 'media'
-  //   })
-  //   if (node) {
-  //     editor.selection = null
-  //     selChange$.next(null)
-  //   }
-  //   runInAction(() => {
-  //     store.focus = false
-  //     store.tableCellNode = null
-  //     store.refreshTableAttr = !store.refreshTableAttr
-  //     setTimeout(
-  //       action(() => {
-  //         store.openLangCompletion = false
-  //         store.openQuickLinkComplete = false
-  //       }),
-  //       30
-  //     )
-  //   })
-  // }, [])
+  const blur = useCallback((e: React.FocusEvent) => {
+    const [node] = Editor.nodes(tab.editor, {
+      match: (n) => n.type === 'media'
+    })
+    if (node) {
+      tab.editor.selection = null
+      selChange$.next(null)
+    }
+    tab.setState((state) => {
+      state.focus = false
+      state.openLangCompletion = false
+      state.openQuickLinkComplete = false
+    })
+  }, [])
 
   const paste = useCallback(
     (e: React.ClipboardEvent<HTMLDivElement>) => {
@@ -359,40 +351,42 @@ export const MEditor = observer(({ tab, doc }: { tab: TabStore; doc: IDoc }) => 
     [tab]
   )
 
-  // const compositionStart = useCallback((e: React.CompositionEvent) => {
-  //   store.inputComposition = true
-  //   if (editor.selection && Range.isCollapsed(editor.selection)) {
-  //     e.preventDefault()
-  //   }
-  // }, [])
+  const compositionStart = useCallback((e: React.CompositionEvent) => {
+    tab.setState((state) => {
+      state.inputComposition = true
+    })
+    if (tab.editor.selection && Range.isCollapsed(tab.editor.selection)) {
+      e.preventDefault()
+    }
+  }, [])
 
-  // const compositionEnd = useCallback((e: React.CompositionEvent) => {
-  //   store.inputComposition = false
-  // }, [])
-  if (!doc) {
+  const compositionEnd = useCallback((e: React.CompositionEvent) => {
+    tab.setState({ inputComposition: false })
+  }, [])
+  if (!tab.state.doc) {
     return null
   }
   return (
     <ErrorBoundary fallback={(e) => <ErrorFallback error={e} />}>
       <Slate editor={tab.editor} initialValue={[EditorUtils.p]} onChange={change}>
-        <Title tab={tab} doc={doc} />
+        <Title tab={tab} />
         <Editable
           decorate={high}
           onDragOver={(e) => e.preventDefault()}
-          spellCheck={spellCheck}
-          readOnly={readonly}
+          spellCheck={settings.spellCheck}
+          readOnly={tab.state.readonly}
           className={`edit-area`}
           style={{
-            fontSize: fontSize || 16
+            fontSize: settings.editorFontSize || 16
           }}
           onContextMenu={(e) => e.stopPropagation()}
           onMouseDown={checkEnd}
           onDrop={drop}
-          // onFocus={focus}
-          // onBlur={blur}
+          onFocus={focus}
+          onBlur={blur}
           onPaste={paste}
-          // onCompositionStart={compositionStart}
-          // onCompositionEnd={compositionEnd}
+          onCompositionStart={compositionStart}
+          onCompositionEnd={compositionEnd}
           renderElement={renderElement}
           onKeyDown={keydown}
           renderLeaf={renderLeaf}

@@ -9,11 +9,12 @@ import { nanoid } from 'nanoid'
 import { useSubject } from '@/hooks/common'
 import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
+import { observable } from 'mobx'
 
-export const openEditFolderDialog$ = new Subject<{
-  ctxNode?: IDoc
-  mode: 'create' | 'update'
-}>()
+// export const openEditFolderDialog$ = new Subject<{
+//   ctxNode?: IDoc
+//   mode: 'create' | 'update'
+// }>()
 export function EditFolderDialog() {
   const store = useStore()
   const [state, setState] = useGetSetState({
@@ -27,22 +28,20 @@ export function EditFolderDialog() {
 
   const confirm = useCallback(async () => {
     const name = state().name.trim()
-    const nodes = store.note.useState.getState().nodes
+    const nodes = store.note.state.nodes
     if (name) {
       if (/[.\/\\]/.test(name)) {
         return setState({ message: 'Please do not include special characters' })
       }
       if (state().mode === 'create') {
-        const stack = state().ctxNode
-          ? state().ctxNode!.children!.map((s) => nodes[s])
-          : nodes['root']!.children!.map((s) => nodes[s])
+        const stack = state().ctxNode ? state().ctxNode!.children! : nodes['root']!.children!
         if (stack.some((s) => s.name === name && s.folder)) {
           return setState({ message: 'The folder already exists' })
         }
         const id = nanoid()
         const now = Date.now()
-        const spaceId = store.note.currentSpace!.id
-        const data: IDoc = {
+        const spaceId = store.note.state.currentSpace!.id
+        const data: IDoc = observable({
           id,
           name,
           deleted: false,
@@ -52,35 +51,33 @@ export function EditFolderDialog() {
           parentId: state().ctxNode?.id,
           folder: true,
           created: now
-        }
+        })
         store.model.createDoc(data)
         // core.ipc.sendMessage({
         //   type: 'createFolder',
         //   data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state().ctxNode?.cid }
         // })
-        store.note.useState.setState((draft) => {
+        store.note.setState((draft) => {
           draft.nodes[id] = data
           const parentId = state().ctxNode ? state().ctxNode!.id : 'root'
-          draft.nodes[parentId]!.children!.unshift(data.id)
+          draft.nodes[parentId]!.children!.unshift(data)
           const updateData: Partial<IDoc>[] = []
           draft.nodes[parentId]!.children!.map((s, i) => {
-            draft.nodes[s]!.sort = i
-            draft.nodes[s]!.updated = now
-            updateData.push({ id: s, sort: i, updated: now })
+            s.sort = i
+            s.updated = now
+            updateData.push({ id: s.id, sort: i, updated: now })
           })
           store.model.updateDocs(updateData)
         })
         // core.local.localWriteNode(node)
       } else if (state().ctxNode) {
         const ctx = state().ctxNode!
-        const stack = ctx.parentId
-          ? nodes[ctx.parentId]!.children!.map((s) => nodes[s])
-          : nodes['root']!.children!.map((s) => nodes[s])
+        const stack = ctx.parentId ? nodes[ctx.parentId]!.children! : nodes['root']!.children!
         if (stack.some((s) => s.name === name && s.folder && s.id !== ctx.id)) {
           return setState({ message: 'The folder already exists' })
         }
         store.model.updateDoc(ctx.id, { name })
-        store.note.useState.setState((draft) => {
+        store.note.setState((draft) => {
           draft.nodes[ctx.id]!.name = name
           draft.nodes[ctx.id]!.updated = Date.now()
         })

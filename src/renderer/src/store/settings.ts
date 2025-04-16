@@ -1,6 +1,8 @@
 import { Store } from './store'
 import { AiMode, IClient } from 'types/model'
 import { StructStore } from './struct'
+import { Subject } from 'rxjs'
+import { isDark } from '@/utils/common'
 
 const state = {
   open: false,
@@ -12,12 +14,16 @@ const state = {
   reduceFileName: false,
   sidePanelWidth: 300,
   tab: 'model',
-  dark: false,
   editorFontSize: 16,
+  theme: 'dark' as 'system' | 'light' | 'dark',
+  systemDark: isDark(),
   editorWidth: 720,
   spellCheck: false,
   codeAutoBreak: false,
   codeTabSize: 2,
+  get dark() {
+    return this.theme === 'system' ? this.systemDark : this.theme === 'dark'
+  },
   get model() {
     if (this.defaultModel) {
       const model = this.models.find((item) => item.id === this.defaultModel!.providerId)
@@ -57,10 +63,23 @@ export type ClientModel = {
   options?: Record<string, any>
 }
 export class SettingsStore extends StructStore<typeof state> {
-  private scallback: Function[] = []
+  darkChanged$ = new Subject<boolean>()
+  private callbacks: Function[] = []
   constructor(private readonly store: Store) {
     super(state)
     this.init()
+    try {
+      const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
+      setTimeout(() => {
+        darkModePreference.addEventListener('change', (e) => {
+          this.setState({
+            systemDark: e.matches
+          })
+        })
+      }, 1000)
+    } catch (e) {
+      console.error(e)
+    }
   }
   async init() {
     await this.getModels()
@@ -75,11 +94,11 @@ export class SettingsStore extends StructStore<typeof state> {
       }
     })
     this.setState({ ready: true })
-    if (this.scallback.length) {
-      for (const callback of this.scallback) {
+    if (this.callbacks.length) {
+      for (const callback of this.callbacks) {
         callback()
       }
-      this.scallback = []
+      this.callbacks = []
     }
   }
   close() {
@@ -141,7 +160,7 @@ export class SettingsStore extends StructStore<typeof state> {
     if (this.state.ready) {
       callback()
     } else {
-      this.scallback.push(callback)
+      this.callbacks.push(callback)
     }
   }
 }

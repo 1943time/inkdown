@@ -7,7 +7,7 @@ import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { useShallow } from 'zustand/react/shallow'
-
+import { observer } from 'mobx-react-lite'
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
     cb(c)
@@ -17,12 +17,9 @@ const visitSchema = (schema: any[], cb: (node: any) => void) => {
   }
 }
 
-export function FullSearch() {
+export const FullSearch = observer(() => {
   const store = useStore()
   const input = useRef<HTMLInputElement>(null)
-  const [view, searchKeyWord] = store.note.useState(
-    useShallow((state) => [state.view, state.searchKeyWord])
-  )
   const [state, setState] = useGetSetState({
     unfold: false,
     searchResults: [] as {
@@ -49,9 +46,9 @@ export function FullSearch() {
   }, [])
 
   const toNode = useCallback((res: { el: any; doc: IDoc; codeLine?: number }) => {
-    const tab = store.note.currentTabStore
+    const tab = store.note.state.currentTabStore
     if (res.el) {
-      if (tab.doc.id !== res.doc.id) {
+      if (tab.state.doc.id !== res.doc.id) {
         store.note.openDoc(res.doc, false)
         setTimeout(() => {
           requestIdleCallback(() => {
@@ -93,7 +90,7 @@ export function FullSearch() {
         }
       }
     } else {
-      if (tab.doc.id !== res.doc.id) {
+      if (tab.state.doc.id !== res.doc.id) {
         store.note.openDoc(res.doc, false)
       }
       setTimeout(() => {
@@ -111,7 +108,7 @@ export function FullSearch() {
     setState({ searching: true })
     timer.current = window.setTimeout(
       () => {
-        const state = store.note.useState.getState()
+        const state = store.note.state
         if (!state.searchKeyWord.trim() || !state.nodes['root'].children?.length) {
           return setState({ searchResults: [] })
         }
@@ -178,19 +175,19 @@ export function FullSearch() {
     )
   }, [])
   useEffect(() => {
-    if (view === 'search') {
+    if (store.note.state.view === 'search') {
       input.current?.focus()
-      const { searchKeyWord } = store.note.useState.getState()
+      const { searchKeyWord } = store.note.state
       if (searchKeyWord) {
         search()
       }
     }
-  }, [view])
+  }, [store.note.state.view])
   return (
     <div className={'h-full flex flex-col'}>
       <div className={'flex mb-2 px-4'}>
         <div
-          onClick={() => store.note.useState.setState({ view: 'folder' })}
+          onClick={() => store.note.setState({ view: 'folder' })}
           className={
             'text-sm flex px-2 py-1 items-center text-black/70 dark:text-white/70 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 duration-200 cursor-pointer'
           }
@@ -207,22 +204,22 @@ export function FullSearch() {
         />
         <input
           ref={input}
-          value={searchKeyWord}
+          value={store.note.state.searchKeyWord}
           autoFocus={true}
           className={'input h-8 w-full pl-7'}
           onChange={(e) => {
-            store.note.useState.setState({ searchKeyWord: e.target.value })
+            store.note.setState({ searchKeyWord: e.target.value })
             search()
           }}
           placeholder={true ? '搜索' : 'Search'}
         />
       </div>
       <div className={'pt-3 pb-10 px-5 space-y-3 flex-1 h-0 flex-shrink-0 overflow-y-auto'}>
-        {!state().searching && !state().searchResults.length && searchKeyWord && (
+        {!state().searching && !state().searchResults.length && store.note.state.searchKeyWord && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
               {true ? '未找到相关内容' : 'No content found for'}{' '}
-              <span className={'text-blue-500 inline'}>{searchKeyWord}</span>
+              <span className={'text-blue-500 inline'}>{store.note.state.searchKeyWord}</span>
             </span>
           </div>
         )}
@@ -283,4 +280,4 @@ export function FullSearch() {
       </div>
     </div>
   )
-}
+})

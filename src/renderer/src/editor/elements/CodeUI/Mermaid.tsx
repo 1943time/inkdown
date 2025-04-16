@@ -3,10 +3,10 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { EditorUtils } from '../../utils/editorUtils'
 import { CodeNode } from '@/editor'
 import { useTab } from '@/store/note/TabCtx'
+import { useSubject } from '@/hooks/common'
 
 export default function Mermaid(props: { el: CodeNode }) {
   const tab = useTab()
-  const dark = tab.store.settings.useState((state) => state.dark)
   const [state, setState] = useGetSetState({
     code: '',
     error: ''
@@ -32,12 +32,11 @@ export default function Mermaid(props: { el: CodeNode }) {
         })
     })
   }, [])
-
-  useUpdateEffect(() => {
+  useSubject(tab.store.settings.darkChanged$, () => {
     setTimeout(() => {
       render()
     })
-  }, [dark])
+  })
 
   useEffect(() => {
     const code = props.el.code || ''

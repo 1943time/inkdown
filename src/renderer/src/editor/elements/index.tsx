@@ -49,12 +49,12 @@ const toHash = (tab: TabStore, hash: string = '') => {
 }
 export const MElement = memo((props: RenderElementProps) => {
   const tab = useTab()
-  const refreshHighlight = tab.useState((state) => state.refreshHighlight)
+  // const refreshHighlight = tab.useState((state) => state.refreshHighlight)
   switch (props.element.type) {
     case 'blockquote':
-      return <Blockquote {...props} refreshHighlight={refreshHighlight} />
+      return <Blockquote {...props} />
     case 'head':
-      return <Head {...props} refreshHighlight={refreshHighlight} />
+      return <Head {...props} />
     case 'hr':
       return (
         <div {...props.attributes} contentEditable={false} className={'m-hr select-none'}>
@@ -69,37 +69,28 @@ export const MElement = memo((props: RenderElementProps) => {
         </span>
       )
     case 'list-item':
-      return <ListItem {...props} refreshHighlight={refreshHighlight} />
+      return <ListItem {...props} />
     case 'list':
-      return <List {...props} refreshHighlight={refreshHighlight} />
+      return <List {...props} />
     case 'code':
-      return <AceElement {...props} refreshHighlight={refreshHighlight} />
+      return <AceElement {...props} />
     case 'table':
-      return (
-        <Table {...props} refreshHighlight={refreshHighlight}>
-          {props.children}
-        </Table>
-      )
+      return <Table {...props}>{props.children}</Table>
     case 'table-row':
       return <tr {...props.attributes}>{props.children}</tr>
     case 'table-cell':
-      return (
-        <TableCell {...props} refreshHighlight={refreshHighlight}>
-          {props.children}
-        </TableCell>
-      )
+      return <TableCell {...props}>{props.children}</TableCell>
     case 'media':
-      return <Media {...props} refreshHighlight={refreshHighlight} />
+      return <Media {...props} />
     case 'inline-katex':
-      return <InlineKatex {...props} refreshHighlight={refreshHighlight} />
+      return <InlineKatex {...props} />
     default:
-      return <Paragraph {...props} refreshHighlight={refreshHighlight} />
+      return <Paragraph {...props} />
   }
 })
 
 export const MLeaf = memo((props: RenderLeafProps) => {
   const tab = useTab()
-  const focus = tab.useState((state) => state.focus)
   const leaf = props.leaf
   const style: CSSProperties = {}
   let className = ''
@@ -146,12 +137,11 @@ export const MLeaf = memo((props: RenderLeafProps) => {
         onClick={(e) => {
           e.stopPropagation()
           e.preventDefault()
-          const { selectedDocId, nodes } = tab.note.useState.getState()
-          if (selectedDocId) {
-            tab.note.useState.setState((state) => {
-              state.selectedDocId = null
-            })
-          }
+          // if (selectedDocId) {
+          //   tab.note.useState.setState((state) => {
+          //     state.selectedDocId = null
+          //   })
+          // }
           if (e.metaKey || e.ctrlKey) {
             // if (leaf.docId) {
             //   let node:IDoc | undefined = nodes[leaf.docId]

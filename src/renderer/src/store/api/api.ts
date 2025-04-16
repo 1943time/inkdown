@@ -108,6 +108,10 @@ export class ModelApi {
     return ipcRenderer.invoke('getSpaces')
   }
 
+  async sortSpaces(ids: string[]): Promise<void> {
+    return ipcRenderer.invoke('sortSpaces', ids)
+  }
+
   async getSpace(id: string): Promise<ISpace | null> {
     return ipcRenderer.invoke('getSpace', id)
   }

@@ -1,4 +1,3 @@
-import { Skeleton } from 'antd'
 import { FullSearch } from './FullSearch'
 import { TreeRender } from './TreeRender'
 import { Trash } from './Trash'
@@ -6,17 +5,17 @@ import { ToggleSpace } from './ToogleSpace'
 import { useEffect } from 'react'
 import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
-import { useShallow } from 'zustand/react/shallow'
+import { observer } from 'mobx-react-lite'
 
-export function Tree() {
+export const Tree = observer(() => {
   const store = useStore()
-  const [root, view] = store.note.useState(useShallow((state) => [state.nodes['root'], state.view]))
+  const { nodes, view } = store.note.state
   const [state, setState] = useGetSetState({
     scroll: false
   })
   useEffect(() => {
     setState({ scroll: false })
-  }, [root?.id])
+  }, [store.note.state.currentSpace?.id])
   return (
     <div className={`h-full width-duration relative duration-200`}>
       <div className={'h-full flex flex-col'}>
@@ -46,7 +45,7 @@ export function Tree() {
                 className={`${view === 'folder' ? '' : 'hidden'} pb-20`}
                 onDragOver={(e) => e.preventDefault()}
                 onDragLeave={() => {
-                  store.note.useState.setState({ dragStatus: null })
+                  store.note.setState({ dragStatus: null })
                 }}
               >
                 <div
@@ -68,4 +67,4 @@ export function Tree() {
       </div>
     </div>
   )
-}
+})

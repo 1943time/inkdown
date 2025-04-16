@@ -9,53 +9,53 @@ import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
 import { useShallow } from 'zustand/react/shallow'
 import { ISpace } from 'types/model'
-export function SpaceList(props: {
-  spaces: ISpace[]
-  onClick: (id: string) => void
-  onMove?: (oldIndex: number, newIndex: number) => void
-  chrome?: boolean
-}) {
-  const store = useStore()
-  const move = useCallback(({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
-    if (oldIndex !== newIndex) {
-      if (props.onMove) {
-        props.onMove?.(oldIndex, newIndex)
-      } else {
-        // runInAction(() => {
-        //   core.service.spaces = arrayMoveImmutable(core.service.spaces, oldIndex, newIndex)
-        // })
-        // core.service.spaces.map((s, i) => db.space.update(s.cid, { sort: i }))
-        // core.api.sortSpaces.mutate({
-        //   cids: core.service.spaces.map((m) => m.cid)
-        // })
+import { observer } from 'mobx-react-lite'
+export const SpaceList = observer(
+  (props: {
+    spaces: ISpace[]
+    onClick: (id: string) => void
+    onMove?: (oldIndex: number, newIndex: number) => void
+    chrome?: boolean
+  }) => {
+    const store = useStore()
+    const move = useCallback(({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) => {
+      if (oldIndex !== newIndex) {
+        if (props.onMove) {
+          props.onMove?.(oldIndex, newIndex)
+        } else {
+          store.note.setState((state) => {
+            state.spaces = arrayMoveImmutable(state.spaces, oldIndex, newIndex)
+          })
+          store.model.sortSpaces(props.spaces.map((s) => s.id))
+        }
       }
-    }
-  }, [])
-  return (
-    <SortableList
-      className={`overflow-y-auto max-h-[200px] relative`}
-      id={'space-container'}
-      draggedItemClassName={'z-[2100]'}
-      onSortEnd={(oldIndex: number, newIndex: number) => {
-        move({ oldIndex, newIndex })
-      }}
-    >
-      {props.spaces.map((s, i) => (
-        <SortableItem key={s.id}>
-          <div key={s.id} className={'select-none'}>
-            <SpaceItem
-              item={s}
-              onClick={() => {
-                props.onClick(s.id)
-              }}
-            />
-          </div>
-        </SortableItem>
-      ))}
-    </SortableList>
-  )
-}
-export function ToggleSpace() {
+    }, [])
+    return (
+      <SortableList
+        className={`overflow-y-auto max-h-[200px] relative`}
+        id={'space-container'}
+        draggedItemClassName={'z-[2100]'}
+        onSortEnd={(oldIndex: number, newIndex: number) => {
+          move({ oldIndex, newIndex })
+        }}
+      >
+        {props.spaces.map((s, i) => (
+          <SortableItem key={s.id}>
+            <div key={s.id} className={'select-none'}>
+              <SpaceItem
+                item={s}
+                onClick={() => {
+                  props.onClick(s.id)
+                }}
+              />
+            </div>
+          </SortableItem>
+        ))}
+      </SortableList>
+    )
+  }
+)
+export const ToggleSpace = observer(() => {
   const [state, setState] = useGetSetState({
     open: false,
     dragging: '',
@@ -67,8 +67,7 @@ export function ToggleSpace() {
     } | null
   })
   const store = useStore()
-  const [spaces] = store.note.useState(useShallow((state) => [state.spaces]))
-  const space = store.note.useSpace()
+  const { spaces, currentSpace } = store.note.state
   return (
     <div className={`h-9 mb-1`}>
       <Popover
@@ -142,11 +141,11 @@ export function ToggleSpace() {
         >
           <div className={'flex items-center'}>
             <div
-              className={`text-white flex-shrink-0 w-6 h-6 rounded space-${space?.background || 'sky'} flex items-center justify-center  font-medium`}
+              className={`text-white flex-shrink-0 w-6 h-6 rounded space-${currentSpace?.background || 'sky'} flex items-center justify-center  font-medium`}
             >
-              {space?.name.slice(0, 1).toUpperCase()}
+              {currentSpace?.name.slice(0, 1).toUpperCase()}
             </div>
-            <div className={'ml-2 max-w-full truncate text-[13px]'}>{space?.name}</div>
+            <div className={'ml-2 max-w-full truncate text-[13px]'}>{currentSpace?.name}</div>
           </div>
           <div>
             <Icon
@@ -158,4 +157,4 @@ export function ToggleSpace() {
       </Popover>
     </div>
   )
-}
+})

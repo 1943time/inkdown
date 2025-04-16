@@ -1,5 +1,4 @@
 import { CSSProperties, memo, useRef } from 'react'
-import { selChange$ } from '../plugins/useOnchange'
 import { GripVertical } from 'lucide-react'
 import { useTab } from '@/store/note/TabCtx'
 
@@ -24,7 +23,7 @@ export const DragHandle = memo((props: { style?: CSSProperties }) => {
         }
         tab.dragEl = parent
         tab.editor.selection = null
-        selChange$.next(null)
+        tab.selChange$.next(null)
         tab.dragStart(e)
         e.stopPropagation()
       }}

@@ -217,6 +217,14 @@ ipcMain.handle('updateSpace', async (_, id: string, space: Partial<ISpace>) => {
   return knex('space').where('id', id).update(space)
 })
 
+ipcMain.handle('sortSpaces', async (_, ids: string[]) => {
+  return Promise.all(
+    ids.map((id, index) => {
+      return knex('space').where('id', id).update({ sort: index, updated: Date.now() })
+    })
+  )
+})
+
 ipcMain.handle('deleteSpace', async (_, id: string) => {
   return knex.transaction(async (trx) => {
     const docs = await trx('doc').where('spaceId', id).select(['id'])

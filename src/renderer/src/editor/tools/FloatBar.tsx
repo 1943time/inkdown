@@ -16,6 +16,7 @@ import { ArrowBigUp, ChevronUp, Code, Command, Option, Slash } from 'lucide-reac
 import { os } from '@/utils/common'
 import { useTab } from '@/store/note/TabCtx'
 import { useGetSetState } from 'react-use'
+import { observer } from 'mobx-react-lite'
 
 function Mod() {
   if (os() === 'mac') {
@@ -80,7 +81,7 @@ const colors = [
 ]
 // const fileMap = new Map<string, IFileItem>()
 const FloatBarWidth = 246
-export const FloatBar = memo(() => {
+export const FloatBar = observer(() => {
   const tab = useTab()
   const inputRef = useRef<any>(null)
   const [state, setState] = useGetSetState({
@@ -91,7 +92,6 @@ export const FloatBar = memo(() => {
     hoverSelectColor: false,
     openSelectColor: false
   })
-  const showFloatBar = tab.useState((state) => state.showFloatBar)
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
 
@@ -106,22 +106,11 @@ export const FloatBar = memo(() => {
     // })
   }, [])
   useEffect(() => {
-    if (showFloatBar) {
+    if (tab.state.showFloatBar) {
       setState({ open: true })
-      const react = tab.useState.getState().domRect
-      if (react) {
-        resize(react)
-      }
-      return tab.useState.subscribe(
-        (state) => state.domRect,
-        (domRect) => {
-          if (domRect) {
-            resize(domRect)
-          }
-        }
-      )
+      resize(tab.state.domRect)
     }
-  }, [showFloatBar, tab])
+  }, [tab.state.showFloatBar])
   // useSubject(tab.useStatus.showFloatBar$, (type) => {
   //   if (type === 'link') {
   //     const [text] = Editor.nodes(tab.editor, {
@@ -149,7 +138,8 @@ export const FloatBar = memo(() => {
   // })
 
   const resize = useCallback(
-    (domRect: DOMRect) => {
+    (domRect: DOMRect | null) => {
+      if (!domRect) return
       let left = domRect.x
       left = left - ((state().openSelectColor ? 260 : FloatBarWidth) - domRect.width) / 2
       const container = tab.container!
@@ -204,9 +194,9 @@ export const FloatBar = memo(() => {
       if (state().open) {
         const rect = getSelRect()
         if (rect) {
-          tab.useState.setState({ domRect: rect })
+          tab.setState({ domRect: rect })
         }
-        // resize(true)
+        resize(rect)
       }
     }
     window.addEventListener('resize', change)

@@ -8,17 +8,17 @@ import { IDoc } from 'types/model'
 import { useStore } from '@/store/store'
 import { TabStore } from '@/store/note/tab'
 import { File } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 
-export function Title({ tab, doc }: { tab: TabStore; doc: IDoc }) {
+export const Title = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
   const inputRef = useRef<HTMLDivElement>(null)
-  const reduceFileName = store.settings.useState((state) => state.reduceFileName)
   const [state, setState] = useGetSetState({
     name: '',
     tip: false,
     tipMessage: ''
   })
-  const nodeRef = useRef<IDoc | undefined>(doc)
+  const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const setName = useCallback((name: string = '') => {
     if (inputRef.current) {
       inputRef.current.innerText = name
@@ -37,10 +37,12 @@ export function Title({ tab, doc }: { tab: TabStore; doc: IDoc }) {
   }, [])
   useEffect(() => {
     setState({ tip: false })
-    setName(doc?.name)
-  }, [doc])
+    setName(tab.state.doc?.name)
+    nodeRef.current = tab.state.doc
+  }, [tab.state.doc])
 
   const detectRename = useCallback(async () => {
+    const doc = nodeRef.current!
     const name = getName()
     if (name.includes('/')) {
       setState({
@@ -60,22 +62,22 @@ export function Title({ tab, doc }: { tab: TabStore; doc: IDoc }) {
     }
     setState({ tip: false, tipMessage: '' })
     return true
-  }, [doc])
+  }, [])
 
   const save = useCallback(async () => {
     const name = getName()
+    const doc = nodeRef.current!
     if (name === doc.name) {
       setState({ tip: false, tipMessage: '' })
     } else if (doc && (await detectRename())) {
       if (!name) {
         setName(doc.name)
       } else {
-        // await core.service.rename(node, name)
-        // refreshNavPath$.next(node)
+        tab.store.model.updateDoc(doc.id, { name })
         setState({ tip: false, tipMessage: '' })
       }
     }
-  }, [doc])
+  }, [])
   // useSubject(core.ipc.updateDoc$, (data) => {
   //   if (data.cid === nodeRef.current?.cid && data.title) {
   //     setName(data.title)
@@ -89,9 +91,9 @@ export function Title({ tab, doc }: { tab: TabStore; doc: IDoc }) {
       placement={'bottom'}
     >
       <div
-        className={`${reduceFileName === 'true' ? 'mini mt-8 flex items-baseline mb-6 ' : 'mt-12 mb-4'}`}
+        className={`${store.settings.state.reduceFileName ? 'mini mt-8 flex items-baseline mb-6 ' : 'mt-12 mb-4'}`}
       >
-        {reduceFileName === 'true' && (
+        {store.settings.state.reduceFileName && (
           <File
             className={
               'mr-1 relative top-0.5 text-sm flex-shrink-0 w-4 h-4 dark:text-white/60 text-black/60'
@@ -141,4 +143,4 @@ export function Title({ tab, doc }: { tab: TabStore; doc: IDoc }) {
       </div>
     </Tooltip>
   )
-}
+})

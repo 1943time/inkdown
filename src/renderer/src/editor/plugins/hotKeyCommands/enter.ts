@@ -21,7 +21,7 @@ export class EnterKey {
   }
   run(e: React.KeyboardEvent) {
     let sel = this.editor.selection
-    const { inputComposition } = this.tab.useState.getState()
+    const { inputComposition } = this.tab.state
     if (!sel || inputComposition) return
     if (!Range.isCollapsed(sel)) {
       e.preventDefault()

@@ -12,13 +12,11 @@ import { useStore } from '@/store/store'
 import { isMod } from '@/utils/common'
 import { TabContext } from '@/store/note/TabCtx'
 import { useShallow } from 'zustand/react/shallow'
-export function EditorFrame({ id }: { id: string }) {
+import { observer } from 'mobx-react-lite'
+import { TabStore } from '@/store/note/tab'
+export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
-  const tab = useMemo(() => store.note.tabStoreMap.get(id)!, [id])
-  const startDragging = tab.useState((state) => state.startDragging)
-  const doc = tab.useDoc()
-  const [editorWidth] = store.settings.useNoteSettings(useShallow((state) => [state.editorWidth]))
   const click = useCallback((e: React.MouseEvent) => {
     if (isMod(e) && e.target) {
       const el = (e.target as HTMLDivElement).parentElement
@@ -37,7 +35,7 @@ export function EditorFrame({ id }: { id: string }) {
   return (
     <TabContext value={tab}>
       <div
-        className={`flex-1 h-full overflow-y-auto items-start relative ${startDragging ? 'dragging' : ''}`}
+        className={`flex-1 h-full overflow-y-auto items-start relative ${tab.state.startDragging ? 'dragging' : ''}`}
         onScroll={(e) => {
           clearTimeout(timer.current)
         }}
@@ -46,7 +44,7 @@ export function EditorFrame({ id }: { id: string }) {
         }}
       >
         <Search tab={tab} />
-        {!!doc && (
+        {!!tab.state.doc && (
           <>
             <div className={`items-start min-h-[calc(100vh_-_40px)] relative`} onClick={click}>
               <div
@@ -54,10 +52,10 @@ export function EditorFrame({ id }: { id: string }) {
                 className={`flex-1 duration-200 flex justify-center items-start h-full`}
               >
                 <div
-                  style={{ maxWidth: editorWidth + 96 || 816 }}
+                  style={{ maxWidth: store.settings.state.editorWidth + 96 || 816 }}
                   className={`flex-1 content px-12`}
                 >
-                  <MEditor tab={tab} doc={doc} />
+                  <MEditor tab={tab} />
                 </div>
               </div>
             </div>
@@ -80,4 +78,4 @@ export function EditorFrame({ id }: { id: string }) {
       /> */}
     </TabContext>
   )
-}
+})

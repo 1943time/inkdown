@@ -31,7 +31,7 @@ export const Trash = observer(() => {
   }, [])
 
   const getDocs = useCallback(() => {
-    store.model.getDocs(store.note.currentSpace!.id, true).then(async (res) => {
+    store.model.getDocs(store.note.state.currentSpace!.id, true).then(async (res) => {
       const docs = res.sort((a, b) => (a.updated! < b.updated! ? 1 : -1))
       const map = new Map(docs.map((d) => [d.id, d as DocTree]))
       const tree = await getTree(
@@ -61,7 +61,7 @@ export const Trash = observer(() => {
         setState({ loading: true })
         const ids = await getAllIds(state().removeDocs)
         if (!ids.length) return
-        await store.model.clearDocs(store.note.currentSpace!.id, ids)
+        await store.model.clearDocs(store.note.state.currentSpace!.id, ids)
         setState({ removeDocs: [] })
       } catch (e) {
         console.error('e')
@@ -73,19 +73,17 @@ export const Trash = observer(() => {
   }, [])
 
   const doDelete = useCallback(async (ids: string[]) => {
-    await store.model.clearDocs(store.note.currentSpace!.id, ids)
+    await store.model.clearDocs(store.note.state.currentSpace!.id, ids)
   }, [])
 
-  const deleteDoc = useCallback(async (doc: DocTree) => {
+  const deleteDoc = useCallback(async (doc: IDoc) => {
     const ids = await getAllIds([doc])
     await doDelete(ids)
     setState({
       removeDocs: state().removeDocs.filter((d) => d.id !== doc.id)
     })
   }, [])
-  const restore = useCallback(async (doc: DocTree, ipc = false) => {
-    const { nodes } = store.note.useState.getState()
-    let parent = nodes[doc.parentId || 'root']
+  const restore = useCallback(async (doc: IDoc, ipc = false) => {
     let node: IDoc = {
       ...doc,
       children: []
@@ -95,8 +93,8 @@ export const Trash = observer(() => {
     if (!doc.folder) {
       restoreIds.push(doc.id)
     } else {
-      const items: IDoc[] = []
       const restoreChildren = async (node: IDoc) => {
+        const items: IDoc[] = []
         const docs = await store.model.getDocsByParentId(node.id)
         for (let d of docs) {
           const item: IDoc = {
@@ -110,7 +108,7 @@ export const Trash = observer(() => {
           items.push(item)
           restoreIds.push(d.id)
         }
-        return items.map((item) => item.id)
+        return items
       }
       restoreIds.push(doc.id)
       const children = await restoreChildren(node)
@@ -124,15 +122,14 @@ export const Trash = observer(() => {
         updated: now
       }))
     )
-    store.note.useState.setState((draft) => {
+    store.note.setState((draft) => {
       items.forEach((item) => {
         draft.nodes[item.id] = item
       })
-      draft.nodes[doc.parentId || 'root'].children?.push(node.id)
-      draft.nodes[doc.parentId || 'root'].children = draft.nodes[doc.parentId || 'root'].children
-        ?.map((d) => draft.nodes[d])
-        .sort((a, b) => (a.sort! > b.sort! ? 1 : -1))
-        .map((d) => d.id)
+      draft.nodes[doc.parentId || 'root'].children?.push(node)
+      draft.nodes[doc.parentId || 'root'].children = draft.nodes[
+        doc.parentId || 'root'
+      ].children!.sort((a, b) => (a.sort! > b.sort! ? 1 : -1))
     })
     const removeDocs = state().removeDocs.filter((d) => d.id !== doc.id)
     setState({

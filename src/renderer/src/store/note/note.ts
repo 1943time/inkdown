@@ -155,7 +155,7 @@ export class NoteStore extends StructStore<typeof state> {
               links: doc.links ? JSON.parse(doc.links as unknown as string) : []
             },
             {
-              schema: observable.ref
+              schema: false
             }
           )
         }
@@ -188,7 +188,7 @@ export class NoteStore extends StructStore<typeof state> {
     if (tabs.length > 1 && doc) {
       tabs.forEach((t, i) => {
         if (i !== tabIndex && t.state.doc.id === doc.id) {
-          t.externalChange$.next(null)
+          t.externalChange$.next(t.state.doc.id)
         }
       })
     }

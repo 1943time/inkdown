@@ -95,7 +95,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
 
   useEffect(() => {
     let code = element.code || ''
-    const settings = tab.store.settings.useNoteSettings.getState()
+    const settings = tab.store.settings.state
     const editor = ace.edit(dom.current!, {
       useWorker: false,
       value: code,
@@ -104,7 +104,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
       wrap: settings.codeAutoBreak ? true : 'off',
       tabSize: settings.codeTabSize,
       showPrintMargin: false,
-      readOnly: tab.useState.getState().historyView
+      readOnly: tab.state.historyView
     })
     editor.commands.addCommand({
       name: 'disableFind',
@@ -216,7 +216,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
     })
     let lang = state().lang as string
     setTimeout(() => {
-      if (tab.store.settings.useState.getState().dark) {
+      if (tab.store.settings.state.dark) {
         editor.setTheme(`ace/theme/cloud_editor_dark`)
       } else {
         editor.setTheme('ace/theme/cloud_editor')

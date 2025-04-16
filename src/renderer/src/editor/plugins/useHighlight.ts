@@ -11,7 +11,6 @@ export const cacheTextNode = new WeakMap<object, { path: Path; range: Range[] }>
 const highlightNodes = new Set(['paragraph', 'table-cell', 'head', 'inline-katex'])
 
 export function useHighlight(tab: TabStore) {
-  const refreshHighlight = tab.useState((state) => state.refreshHighlight)
   return useCallback(
     ([node, path]: NodeEntry): Range[] => {
       if (Element.isElement(node) && highlightNodes.has(node.type)) {
@@ -105,6 +104,6 @@ export function useHighlight(tab: TabStore) {
       }
       return []
     },
-    [refreshHighlight]
+    [tab.state.refreshHighlight]
   )
 }

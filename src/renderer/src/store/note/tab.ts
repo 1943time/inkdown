@@ -67,7 +67,7 @@ export class TabStore extends StructStore<typeof state> {
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
   selChange$ = new Subject<Path | null>()
   saveDoc$ = new Subject()
-  externalChange$ = new Subject<null | any[]>()
+  externalChange$ = new Subject<string>()
   uploadFileCache = new WeakMap<object, File>()
   manual = false
   dragEl: null | HTMLElement = null
