@@ -1,6 +1,5 @@
 import { Button, Input } from 'antd'
 import { useCallback } from 'react'
-import { Subject } from 'rxjs'
 import isHotkey from 'is-hotkey'
 import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
@@ -10,12 +9,9 @@ import { useSubject } from '@/hooks/common'
 import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
 import { observable } from 'mobx'
+import { observer } from 'mobx-react-lite'
 
-// export const openEditFolderDialog$ = new Subject<{
-//   ctxNode?: IDoc
-//   mode: 'create' | 'update'
-// }>()
-export function EditFolderDialog() {
+export const EditFolderDialog = observer(() => {
   const store = useStore()
   const [state, setState] = useGetSetState({
     open: false,
@@ -116,8 +112,8 @@ export function EditFolderDialog() {
       onClose={close}
       title={
         <div className={'flex items-center'}>
-          <FolderClosed className={'text-lg'} />
-          <span className={'ml-1'}>
+          <FolderClosed size={16} />
+          <span className={'ml-2'}>
             {state().mode === 'create' ? 'Create New Folder' : 'Update'}
           </span>
         </div>
@@ -150,4 +146,4 @@ export function EditFolderDialog() {
       </div>
     </Dialog>
   )
-}
+})

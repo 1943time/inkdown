@@ -110,7 +110,6 @@ export interface ISpace {
   lastOpenTime: number
   sort: number
   writeFolderPath?: string
-  background?: string
   opt?: Record<string, any>
 }
 

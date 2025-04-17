@@ -96,7 +96,6 @@ export const initModel = async () => {
         t.integer('lastOpenTime').defaultTo(Date.now())
         t.integer('sort').defaultTo(0)
         t.string('writeFolderPath').nullable()
-        t.text('background').nullable()
         t.string('opt').nullable()
       })
     }
@@ -116,6 +115,7 @@ export const initModel = async () => {
         t.integer('created').defaultTo(Date.now())
         t.integer('sort').defaultTo(0)
         t.text('links').nullable()
+        t.text('summary').nullable()
         t.integer('lastOpenTime').defaultTo(Date.now())
         t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
       })

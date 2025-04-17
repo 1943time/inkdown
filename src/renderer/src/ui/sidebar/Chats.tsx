@@ -61,11 +61,9 @@ export const Chats = observer(() => {
   }, [chats])
   return (
     <div className={'flex flex-col h-full'}>
-      <div className={'px-3 space-y-1 font-medium text-sm text-white'}>
+      <div className={'px-2 space-y-1 font-medium text-sm text-white'}>
         <div
-          className={
-            'flex items-center rounded-lg px-3 h-8 cursor-pointer hover:dark:bg-white/5 duration-200'
-          }
+          className={'flex items-center rounded-lg px-2 h-8 action-btn'}
           onClick={() => {
             store.chat.setState({ activeChat: null })
           }}
@@ -73,18 +71,14 @@ export const Chats = observer(() => {
           <MessageSquarePlus className={'w-4 h-4 mr-2'} />
           New Chat
         </div>
-        <div
-          className={
-            'flex items-center rounded-lg px-3 h-8 cursor-pointer hover:dark:bg-white/5 duration-200'
-          }
-        >
+        <div className={'flex items-center rounded-lg px-2 h-8 action-btn'}>
           <Search className={'w-4 h-4 mr-2'} />
           Search
         </div>
       </div>
-      <div className={'space-y-6 mt-4 flex-1 overflow-y-auto overscroll-contain min-h-0 pb-5 px-1'}>
+      <div className={'space-y-6 mt-4 flex-1 overflow-y-auto overscroll-contain min-h-0 pb-5'}>
         {Array.from(data.entries()).map(([key, item]) => (
-          <div className={'px-3'} key={key}>
+          <div className={'px-2'} key={key}>
             <div className={'text-[13px] text-white font-semibold line-clamp-1 mb-2 px-2'}>
               {key}
             </div>
@@ -92,7 +86,7 @@ export const Chats = observer(() => {
               {item.map((c) => (
                 <div
                   key={c.id}
-                  className={`group text-sm h-8 items-center flex duration-100 rounded-lg px-2 cursor-pointer ${activeChat?.id === c.id ? 'dark:bg-white/15 text-white' : 'dark:hover:bg-white/10 text-gray-300/90'}`}
+                  className={`group text-sm h-8 items-center flex duration-100 rounded-lg px-2 cursor-pointer ${activeChat?.id === c.id ? 'dark:bg-white/15 text-white' : 'action-btn text-gray-300'}`}
                   onClick={() => {
                     store.chat.createChat(c.id)
                   }}

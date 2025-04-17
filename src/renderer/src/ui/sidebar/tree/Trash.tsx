@@ -175,7 +175,7 @@ export const Trash = observer(() => {
       align={{
         offset: [10, 2]
       }}
-      overlayInnerStyle={{ padding: 0 }}
+      styles={{ body: { padding: 0 } }}
       content={
         <div className={'relative h-[300px] pt-2 pb-8 flex flex-col'}>
           {!!state().removeDocs.length && (

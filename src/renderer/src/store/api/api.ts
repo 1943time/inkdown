@@ -112,8 +112,12 @@ export class ModelApi {
     return ipcRenderer.invoke('sortSpaces', ids)
   }
 
-  async getSpace(id: string): Promise<ISpace | null> {
-    return ipcRenderer.invoke('getSpace', id)
+  async getSpace(opts: {
+    id?: string
+    name?: string
+    writeFolderPath?: string
+  }): Promise<ISpace | null> {
+    return ipcRenderer.invoke('getSpace', opts)
   }
 
   async createSpace(space: ISpace): Promise<void> {

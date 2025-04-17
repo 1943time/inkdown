@@ -33,7 +33,9 @@
 .primary-bg-color {
   background-color: var(--primary-bg-color);
 }
-
+html {
+  color: var(--md-text);
+}
 html.dark {
   color-scheme: dark;
 }
@@ -202,4 +204,8 @@ html {
 
 .space-slate {
   @apply bg-gradient-to-br from-slate-500 to-stone-500;
+}
+
+.action-btn {
+  @apply hover:dark:bg-white/5 duration-150 hover:bg-gray-200/50 cursor-pointer;
 }

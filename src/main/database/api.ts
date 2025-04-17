@@ -214,10 +214,19 @@ ipcMain.handle('getSpaces', async () => {
   return spaces
 })
 
-ipcMain.handle('getSpace', async (_, id: string) => {
-  const space = await knex.select('*').from('space').where('id', id).first()
-  return space
-})
+ipcMain.handle(
+  'getSpace',
+  async (
+    _,
+    opt: {
+      id?: string
+      name?: string
+      writeFolderPath?: string
+    }
+  ) => {
+    return knex.select('*').from('space').where(opt).first()
+  }
+)
 
 ipcMain.handle('createSpace', async (_, space: ISpace) => {
   return knex('space').insert(space)

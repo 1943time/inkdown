@@ -51,6 +51,8 @@ export class NoteStore extends StructStore<typeof state> {
     ctxNode?: IDoc
     mode: 'create' | 'update'
   }>()
+  openEditSpace$ = new Subject<string | null>()
+  openSpaceExport$ = new Subject()
   openConfirmDialog$ = new Subject<{
     onClose?: () => void
     title: string

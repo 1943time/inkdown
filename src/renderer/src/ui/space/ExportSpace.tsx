@@ -1,27 +1,25 @@
-import { Button, Modal, Progress, Tag } from 'antd'
+import { Button, Modal, Tag } from 'antd'
 import { observer } from 'mobx-react-lite'
-import { Subject } from 'rxjs'
-import { useLocalState } from '../../hooks/useLocalState.ts'
-import { useSubject } from '../../hooks/subscribe.ts'
 import { ExportOutlined } from '@ant-design/icons'
-import { useCoreContext } from '../../utils/env.ts'
-import { IExport } from '../../icons/IExport.tsx'
-import { TextHelp } from '../set/Help.tsx'
+import { useStore } from '@/store/store'
+import { useLocalState } from '@/hooks/useLocalState.js'
+import { useSubject } from '@/hooks/common'
+import { FolderInput } from 'lucide-react'
+import { TextHelp } from '../common/HelpText'
 
-export const openSpaceExport$ = new Subject()
 export const ExportSpace = observer(() => {
-  const core = useCoreContext()
+  const store = useStore()
   const [state, setState] = useLocalState({
     open: false
   })
-  useSubject(openSpaceExport$, async () => {
-    setState({open: true})
+  useSubject(store.note.openSpaceExport$, async () => {
+    setState({ open: true })
   })
   return (
     <Modal
       title={
         <div className={'flex items-center'}>
-          {core.tree.root?.name} <IExport className={'ml-2 text-lg'} />
+          {store.note.state.currentSpace?.name} <FolderInput size={16} className={'ml-2'} />
         </div>
       }
       open={state.open}
@@ -38,7 +36,7 @@ export const ExportSpace = observer(() => {
         folder with some delay.{' '}
         <TextHelp text={'To ensure writing speed, inkdown only writes attachments within 5MB.'} />
       </div>
-      {core.exportSpace.start && (
+      {/* {core.exportSpace.start && (
         <Progress
           percent={core.exportSpace.progress}
           className={'mt-4'}
@@ -47,14 +45,14 @@ export const ExportSpace = observer(() => {
             '100%': '#87d068'
           }}
         />
-      )}
+      )} */}
       <Button
         block={true}
         type={'primary'}
         className={'mt-5'}
         icon={<ExportOutlined />}
-        onClick={() => core.exportSpace.export()}
-        disabled={core.exportSpace.start}
+        // onClick={() => core.exportSpace.export()}
+        // disabled={core.exportSpace.start}
       >
         Select Folder
       </Button>

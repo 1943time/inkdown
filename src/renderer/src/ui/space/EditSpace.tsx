@@ -1,15 +1,14 @@
 import { observer } from 'mobx-react-lite'
 import { Button, Collapse, Form, Input, Modal, Progress, Space, Tag } from 'antd'
 import { CloseCircleOutlined, FolderOpenOutlined, SaveOutlined } from '@ant-design/icons'
-import { Subject } from 'rxjs'
 import { useCallback, useEffect } from 'react'
 import { action, runInAction } from 'mobx'
 import { useStore } from '@/store/store'
 import { ISpace } from 'types/model'
 import { useLocalState } from '@/hooks/useLocalState'
 import { useSubject } from '@/hooks/common'
-
-export const editSpace$ = new Subject<string | null>()
+import { nanoid } from 'nanoid'
+import { Folders } from 'lucide-react'
 
 export const EditSpace = observer(() => {
   const store = useStore()
@@ -27,27 +26,20 @@ export const EditSpace = observer(() => {
     startWriting: false
   })
 
-  useSubject(editSpace$, (spaceId) => {
+  useSubject(store.note.openEditSpace$, async (spaceId) => {
     if (spaceId) {
-      // db.space.get(spaceId).then((res) => {
-      //   if (res) {
-      //     setState({
-      //       space: res,
-      //       spaceName: res.name,
-      //       spaceId,
-      //       filePath: res.filePath,
-      //       open: true,
-      //       background: res.background || 'sky',
-      //       inputDeleteName: ''
-      //     })
-      //     if (res.$f) {
-      //       const name = res.$f.name
-      //       setState({
-      //         filePath: name
-      //       })
-      //     }
-      //   }
-      // })
+      store.model.getSpace({ id: spaceId }).then((space) => {
+        if (space) {
+          setState({
+            space,
+            spaceName: space.name,
+            filePath: space.writeFolderPath,
+            open: true,
+            spaceId: space.id,
+            inputDeleteName: ''
+          })
+        }
+      })
     } else {
       setState({
         open: true,
@@ -61,58 +53,49 @@ export const EditSpace = observer(() => {
   })
 
   const validatePath = useCallback(async (filePath: string, spaceId?: string) => {
-    if (core.desktop) {
-      const includeSpace = await db.space
-        .filter((s) => !!s.filePath && filePath.startsWith(s.filePath || ''))
-        .first()
-      if (includeSpace && (!spaceId || includeSpace.cid !== spaceId)) {
-        return false
-      }
-    }
-    return true
+    // const includeSpace = await db.space
+    //   .filter((s) => !!s.filePath && filePath.startsWith(s.filePath || ''))
+    //   .first()
+    // if (includeSpace && (!spaceId || includeSpace.cid !== spaceId)) {
+    //   return false
+    // }
+    // return true
   }, [])
 
   const save = useCallback(async () => {
-    if (state.filePath && !(await validatePath(state.filePath, state.spaceId))) {
-      core.message.open({
-        type: 'info',
-        content: 'This directory is already included in another space'
-      })
-      return
-    }
+    // if (state.filePath && !(await validatePath(state.filePath, state.spaceId))) {
+    //   core.message.open({
+    //     type: 'info',
+    //     content: 'This directory is already included in another space'
+    //   })
+    //   return
+    // }
     if (state.space) {
-      await db.space.update(state.spaceId, {
+      store.model.updateSpace(state.space.id, {
         name: state.spaceName,
-        filePath: state.filePath,
-        settings: {
-          background: state.background
-        }
+        writeFolderPath: state.filePath
       })
-      if (state.spaceId === core.tree.root?.cid) {
-        runInAction(() => {
-          core.tree.root!.filePath = state.filePath
-          core.tree.root!.name = state.spaceName
-          core.tree.root.settings = {
-            background: state.background
-          }
+      if (state.spaceId === store.note.state.currentSpace?.id) {
+        store.note.setState((draft) => {
+          draft.currentSpace!.name = state.spaceName
+          draft.currentSpace!.writeFolderPath = state.filePath
         })
       }
       setState({ open: false })
     } else {
-      const exist = await db.space
-        .filter(
-          (s) => s.name === state.spaceName || (!!s.filePath && s.filePath === state.filePath)
-        )
-        .first()
+      const exist = await store.model.getSpace({
+        name: state.spaceName,
+        writeFolderPath: state.filePath
+      })
       if (exist) {
         if (exist.name === state.spaceName) {
-          core.message.open({
+          store.msg.open({
             type: 'info',
             content: 'Space name already exists'
           })
         }
-        if (state.filePath && exist.filePath === state.filePath) {
-          core.message.open({
+        if (state.filePath && exist.writeFolderPath === state.filePath) {
+          store.msg.open({
             type: 'info',
             content: 'The folder is already used by another space'
           })
@@ -120,41 +103,24 @@ export const EditSpace = observer(() => {
       } else {
         try {
           setState({ submitting: true })
-          const id = nid()
-          await core.api.createSpace
-            .mutate({
-              background: state.background,
-              name: state.spaceName,
-              cid: id
-            })
-            .catch(core.pay.catchLimit())
-          const count = await db.space.count()
+          const id = nanoid()
           const now = Date.now()
-          await db.space.add({
-            cid: id,
+          await store.model.createSpace({
+            id,
             name: state.spaceName,
-            filePath: state.filePath,
-            sort: count,
-            lastOpenTime: now,
+            writeFolderPath: state.filePath,
             created: now,
-            background: state.background,
-            opt: {}
+            lastOpenTime: now,
+            sort: 0
           })
-          core.service.initialOffline(id, false)
           setState({ open: false })
-          core.service.resetSpaces()
+          store.note.selectSpace(id)
         } finally {
           setState({ submitting: false })
         }
       }
     }
   }, [])
-  useEffect(() => {
-    setState({
-      startWriting: false,
-      progress: 0
-    })
-  }, [core.tree.root?.cid])
   return (
     <Modal
       open={state.open}
@@ -162,24 +128,18 @@ export const EditSpace = observer(() => {
       width={400}
       title={
         <div className={'flex items-center'}>
-          <IWorkspace className={'mr-1 text-lg'} />
-          <span className={'text-sm'}>
-            {state.space
-              ? state.space.name
-              : core.config.zh
-                ? '创建工作空间'
-                : 'Create a workspace'}
-          </span>
+          <Folders className={'mr-1 text-lg'} />
+          <span className={'text-sm'}>{state.space ? state.space.name : 'Create a workspace'}</span>
         </div>
       }
       onCancel={() => setState({ open: false })}
     >
       <div className={'pb-3'}>
         <Form layout={'vertical'} className={'pt-2'}>
-          <Form.Item label={core.config.zh ? '空间名称' : 'Space Name'}>
+          <Form.Item label={'Space Name'}>
             <Space.Compact className={'w-full'}>
               <Input
-                placeholder={core.config.zh ? '输入名称' : 'Enter Name'}
+                placeholder={'Enter Name'}
                 value={state.spaceName}
                 onChange={(e) => setState({ spaceName: e.target.value })}
                 maxLength={50}
@@ -190,15 +150,17 @@ export const EditSpace = observer(() => {
                   loading={state.submitting}
                   disabled={!state.spaceName || state.spaceName === state.space?.name}
                   onClick={() => {
-                    if (core.service.spaces.some((s) => s.name === state.spaceName)) {
-                      core.message.info('The space name already exists')
+                    if (store.note.state.spaces.some((s) => s.name === state.spaceName)) {
+                      store.msg.open({
+                        type: 'info',
+                        content: 'The space name already exists'
+                      })
                     } else {
                       const name = state.spaceName
                       setState({ submitting: true })
-                      core.api.updateSpace
-                        .mutate({
-                          name: name,
-                          cid: state.space!.cid
+                      store.model
+                        .updateSpace(state.space!.id, {
+                          name: name
                         })
                         .then(() => {
                           setState({
@@ -207,18 +169,10 @@ export const EditSpace = observer(() => {
                               name: name
                             }
                           })
-                          db.space.update(state.space!.cid, { name })
-                          core.service.spaces.some(
-                            action((s) => {
-                              if (s.cid === state.space?.cid) {
-                                s.name = name
-                              }
-                            })
-                          )
-                          runInAction(() => {
-                            core.tree.root.name = name
+                          store.note.setState((draft) => {
+                            draft.currentSpace!.name = name
                           })
-                          core.message.success('Saved successfully')
+                          store.msg.success('Saved successfully')
                         })
                         .finally(() => {
                           setState({ submitting: false })
@@ -230,7 +184,7 @@ export const EditSpace = observer(() => {
             </Space.Compact>
           </Form.Item>
           <Form.Item
-            label={core.config.zh ? '空间目录' : 'Workspace Location'}
+            label={'Workspace Location'}
             tooltip={{
               title: (
                 <div>
@@ -244,96 +198,68 @@ export const EditSpace = observer(() => {
             }}
           >
             <Space.Compact className={'w-full'}>
-              <Input
-                disabled={true}
-                value={state.filePath}
-                placeholder={core.config.zh ? '请选择文件夹' : 'Choose Folder'}
-              />
+              <Input disabled={true} value={state.filePath} placeholder={'Choose Folder'} />
               <Button
                 icon={state.filePath ? <CloseCircleOutlined /> : <FolderOpenOutlined />}
                 onClick={async () => {
-                  core.local.checkLocalSupport()
                   if (state.filePath) {
-                    openConfirmDialog$.next({
+                    store.note.openConfirmDialog$.next({
                       title: 'Note',
                       description:
                         'After canceling, files will no longer be written to the folder in real time.',
                       okText: 'Confirm',
                       onConfirm: () => {
                         setState({ filePath: '' })
-                        db.space.update(state.space!.cid, {
-                          filePath: undefined,
-                          $f: undefined
+                        store.model.updateSpace(state.space!.id, {
+                          writeFolderPath: undefined
                         })
-                        if (state.spaceId === core.tree.root.cid) {
-                          runInAction(() => {
-                            core.tree.root.filePath = ''
-                            core.tree.root.$fd = undefined
+                        if (state.spaceId === store.note.state.root.id) {
+                          store.note.setState((draft) => {
+                            draft.currentSpace!.writeFolderPath = undefined
                           })
                         }
                       }
                     })
                   } else {
-                    if (core.desktop) {
-                      core.local.chooseLocalFolder().then(async (res) => {
-                        if (res.filePaths.length) {
-                          const path = res.filePaths[0]
-                          const includeSpace = await db.space
-                            .filter((s) => !!s.filePath && path.startsWith(s.filePath || ''))
-                            .first()
-                          if (
-                            includeSpace &&
-                            (!state.spaceId || includeSpace.cid !== state.spaceId)
-                          ) {
-                            core.message.open({
-                              type: 'info',
-                              content: 'This directory is already included in another space'
-                            })
-                            return
-                          }
-                          setState({ filePath: path })
-                          if (state.spaceId) {
-                            db.space.update(state.spaceId, { filePath: res.filePaths[0] })
-                          }
-                          if (state.spaceId === core.tree.root.cid) {
-                            runInAction(() => {
-                              core.tree.root.filePath = path
-                            })
-                          }
-                          if (state.space) {
-                            setState({ startWriting: true, progress: 0 })
-                            core.exportSpace.exportToLocal({
-                              rootPath: state.filePath,
-                              onProgress: (p) => {
-                                setState({ progress: p })
-                                if (p === 100) {
-                                  setState({ startWriting: false, progress: 0 })
-                                }
-                              }
-                            })
-                          }
-                        }
-                      })
-                    } else {
-                      const res = await core.local.chooseFolder()
-                      if (state.space) {
-                        db.space.update(state.space.cid, { $f: res })
-                        if (state.space.cid === core.tree.root.cid) {
-                          core.tree.root.$fd = res
-                          setState({ filePath: res.name })
-                          await core.local.setFilesHandle(res, core.tree.root)
-                          await core.exportSpace.exportToLocalByWeb({
-                            root: core.tree.root.$fd,
-                            onProgress: (p) => {
-                              setState({ progress: p })
-                              if (p === 100) {
-                                setState({ startWriting: false, progress: 0 })
-                              }
-                            }
-                          })
-                        }
-                      }
-                    }
+                    // core.local.chooseLocalFolder().then(async (res) => {
+                    //   if (res.filePaths.length) {
+                    //     const path = res.filePaths[0]
+                    //     const includeSpace = await db.space
+                    //       .filter((s) => !!s.filePath && path.startsWith(s.filePath || ''))
+                    //       .first()
+                    //     if (
+                    //       includeSpace &&
+                    //       (!state.spaceId || includeSpace.cid !== state.spaceId)
+                    //     ) {
+                    //       core.message.open({
+                    //         type: 'info',
+                    //         content: 'This directory is already included in another space'
+                    //       })
+                    //       return
+                    //     }
+                    //     setState({ filePath: path })
+                    //     if (state.spaceId) {
+                    //       db.space.update(state.spaceId, { filePath: res.filePaths[0] })
+                    //     }
+                    //     if (state.spaceId === core.tree.root.cid) {
+                    //       runInAction(() => {
+                    //         core.tree.root.filePath = path
+                    //       })
+                    //     }
+                    //     if (state.space) {
+                    //       setState({ startWriting: true, progress: 0 })
+                    //       core.exportSpace.exportToLocal({
+                    //         rootPath: state.filePath,
+                    //         onProgress: (p) => {
+                    //           setState({ progress: p })
+                    //           if (p === 100) {
+                    //             setState({ startWriting: false, progress: 0 })
+                    //           }
+                    //         }
+                    //       })
+                    //     }
+                    //   }
+                    // })
                   }
                 }}
               ></Button>
@@ -353,40 +279,6 @@ export const EditSpace = observer(() => {
               </div>
             </div>
           )}
-          <Form.Item label={core.config.zh ? '定义颜色' : 'Color Indentifer'} name={'background'}>
-            <div className={'space-x-3 flex'}>
-              {core.config.spaceColors.map((c) => {
-                return (
-                  <div
-                    onClick={() => {
-                      setState({ background: c })
-                      if (state.space) {
-                        core.api.updateSpace.mutate({
-                          cid: state.space.cid,
-                          background: c
-                        })
-                        db.space.update(state.space!.cid, { background: c })
-                        core.service.spaces.some(
-                          action((s) => {
-                            if (s.cid === state.space?.cid) {
-                              s.background = c
-                            }
-                          })
-                        )
-                        runInAction(() => {
-                          core.tree.root.background = c
-                        })
-                      }
-                    }}
-                    className={`rounded space-${c} w-6 h-6 flex items-center justify-center cursor-pointer hover:opacity-90 duration-200 text-white`}
-                    key={c}
-                  >
-                    {state.background === c && <ICheck />}
-                  </div>
-                )
-              })}
-            </div>
-          </Form.Item>
           <div className={'space-y-3'}>
             {!state.spaceId && (
               <Button
@@ -396,7 +288,7 @@ export const EditSpace = observer(() => {
                 disabled={!state.spaceName}
                 loading={state.submitting}
               >
-                {core.config.zh ? '创建' : 'Create Workspace'}
+                {'Create Workspace'}
               </Button>
             )}
             {!!state.space && (
@@ -409,7 +301,7 @@ export const EditSpace = observer(() => {
                     label: 'More',
                     children: (
                       <div>
-                        {core.service.spaces.length > 1 && (
+                        {store.note.state.spaces.length > 1 && (
                           <Input
                             placeholder={'Enter space name to delete'}
                             className={'mb-4'}
@@ -422,27 +314,20 @@ export const EditSpace = observer(() => {
                           danger={true}
                           block={true}
                           onClick={() => {
-                            openConfirmDialog$.next({
+                            store.note.openConfirmDialog$.next({
                               title:
                                 'Confirm delete? All files in the space will be permanently deleted.',
                               okText: 'Delete',
                               onConfirm: async () => {
-                                const cid = state.space?.cid!
-                                await core.api.deleteSpace.mutate({
-                                  cid
-                                })
-                                await db.deleteSpace(cid)
-                                await core.service.resetSpaces()
-                                await core.service.initialOffline()
+                                await store.model.deleteSpace(state.space!.id)
                                 setState({ open: false })
-                                core.message.success('Workspace deleted')
-                                core.ipc.sendMessage({ type: 'deleteSpace', data: cid })
+                                store.note.selectSpace(store.note.state.spaces[0].id)
                               }
                             })
                           }}
                           disabled={
                             state.inputDeleteName !== state.space.name ||
-                            core.service.spaces.length === 1
+                            store.note.state.spaces.length === 1
                           }
                         >
                           Delete
@@ -452,7 +337,7 @@ export const EditSpace = observer(() => {
                             'text-xs text-center mt-4 text-black/70 dark:text-white/70 px-10'
                           }
                         >
-                          {core.service.spaces.length > 1
+                          {store.note.state.spaces.length > 1
                             ? 'Permanently delete space documents and related media files'
                             : 'At least one workspace must be reserved'}
                         </div>
