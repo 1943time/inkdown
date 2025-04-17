@@ -18,6 +18,8 @@ const state = {
   ctxNode: null as null | IDoc,
   dragNode: null as null | IDoc,
   tabs: [] as TabStore[],
+  // 空间已被删除
+  deleted: false,
   tabIndex: 0,
   selectedDoc: null as null | IDoc,
   searchKeyWord: '',
@@ -53,6 +55,7 @@ export class NoteStore extends StructStore<typeof state> {
   }>()
   openEditSpace$ = new Subject<string | null>()
   openSpaceExport$ = new Subject()
+  openImportFolder$ = new Subject<string | null>()
   openConfirmDialog$ = new Subject<{
     onClose?: () => void
     title: string
@@ -105,12 +108,17 @@ export class NoteStore extends StructStore<typeof state> {
       })
     })
   }
-  selectSpace(spaceId: string) {
+  selectSpace(spaceId?: string) {
     this.docStatus.clear()
     this.setState((state) => {
-      state.selectedSpaceId = spaceId
+      if (spaceId) {
+        state.selectedSpaceId = spaceId!
+      } else {
+        spaceId = this.state.spaces[0]!.id
+        state.selectedSpaceId = spaceId!
+      }
+      this.getDocs(spaceId)
     })
-    this.getDocs(spaceId)
   }
   createTab(doc?: IDoc) {
     this.setState((state) => {
@@ -145,22 +153,15 @@ export class NoteStore extends StructStore<typeof state> {
             children: []
           })
         } else {
-          const parent = doc.parentId || 'root'
-          if (!foldersMap.has(parent)) {
-            foldersMap.set(parent, [])
-          }
-          foldersMap.get(parent)?.push(doc)
-          nodes[doc.id] = observable(
-            {
-              ...doc,
-              schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : [EditorUtils.p],
-              links: doc.links ? JSON.parse(doc.links as unknown as string) : []
-            },
-            {
-              schema: false
-            }
-          )
+          nodes[doc.id] = observable(doc, {
+            schema: false
+          })
         }
+        const parent = doc.parentId || 'root'
+        if (!foldersMap.has(parent)) {
+          foldersMap.set(parent, [])
+        }
+        foldersMap.get(parent)?.push(nodes[doc.id])
       }
       const now = Date.now()
       nodes['root'] = observable({
@@ -173,7 +174,6 @@ export class NoteStore extends StructStore<typeof state> {
         folder: true,
         sort: 0
       })
-
       for (const [id, children] of foldersMap.entries()) {
         if (id === 'root') continue
         if (nodes[id]) {
@@ -183,6 +183,7 @@ export class NoteStore extends StructStore<typeof state> {
       this.setState((state) => {
         state.nodes = nodes
       })
+      this.restoreTabs()
     })
   }
   checkOtherTabsShouldUpdate() {
@@ -221,11 +222,42 @@ export class NoteStore extends StructStore<typeof state> {
       await this.store.model.putSetting({
         key: `tab-${selectedSpaceId}`,
         value: {
-          tabs,
+          tabs: tabs.map((t) => t.state.doc?.id).filter((id) => !!id),
           tabIndex
         }
       })
     }, 300)
+  }
+  async restoreTabs() {
+    const record = await this.store.model.getSetting(`tab-${this.state.selectedSpaceId}`)
+    if (record && record.value.tabs.length) {
+      this.setState((state) => {
+        state.tabs = record.value.tabs.map((id) => {
+          const tab = new TabStore(this.store)
+          if (this.state.nodes[id]) {
+            tab.setState((state) => {
+              state.docs.push(this.state.nodes[id])
+              state.currentIndex = state.docs.length - 1
+            })
+          }
+          return tab
+        })
+        state.tabIndex = record.value.tabIndex > state.tabs.length - 1 ? 0 : record.value.tabIndex
+      })
+    } else {
+      const doc = this.findFirstChildNote(this.state.root)
+      const tab = new TabStore(this.store)
+      if (doc) {
+        tab.setState((state) => {
+          state.docs.push(doc)
+          state.currentIndex = 0
+        })
+      }
+      this.setState((state) => {
+        state.tabs.push(tab)
+        state.tabIndex = 0
+      })
+    }
   }
   openDoc(doc: IDoc, scroll: boolean = false) {
     const tab = this.state.currentTab

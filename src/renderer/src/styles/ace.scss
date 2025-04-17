@@ -1,4 +1,5 @@
-.ace-cloud_editor, .ace-cloud_editor_dark{
+.ace-cloud_editor,
+.ace-cloud_editor_dark {
   background: none !important;
 }
 .ace_gutter {
@@ -10,14 +11,14 @@
 .ace_indent-guide-active {
   background: none !important;
 }
-.ace_focus{
-  .ace_gutter-cell  {
+.ace_focus {
+  .ace_gutter-cell {
     @apply text-black/60 dark:text-white/60;
     &.ace_gutter-active-line {
       @apply text-black/90 dark:text-white/90;
     }
   }
-  .ace_active-line{
+  .ace_active-line {
     @apply bg-gray-600/5 rounded-sm dark:bg-white/5;
   }
 }
@@ -36,13 +37,14 @@
   @apply text-black/60 dark:text-white/60;
   background: none !important;
 }
-.ace_gutter-active-line, .ace_active-line {
+.ace_gutter-active-line,
+.ace_active-line {
   border: none !important;
 }
-.ace-tm{
+.ace-tm {
   background: none !important;
 }
-.ace-el{
+.ace-el {
   padding: 2px 0;
   position: relative;
   margin-bottom: 0.5em;
@@ -69,15 +71,16 @@
 .ace_hidden-cursors {
   display: none !important;
 }
-.match-text, .match-current {
+.match-text,
+.match-current {
   position: absolute;
   width: auto;
 }
 
-.match-text{
+.match-text {
   @apply bg-black/15 dark:bg-white/15 rounded-sm;
 }
 
-.match-current{
+.match-current {
   @apply bg-sky-500 rounded-sm;
 }

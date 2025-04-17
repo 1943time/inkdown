@@ -293,7 +293,9 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
             <Popover
               trigger={['click']}
               placement={'bottomLeft'}
-              overlayClassName={'light-poppver'}
+              classNames={{
+                root: 'light-poppver'
+              }}
               arrow={false}
               open={state().openSelectMenu}
               onOpenChange={(v) => {
@@ -307,7 +309,11 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
                   })
                 }
               }}
-              overlayInnerStyle={{ padding: 10 }}
+              styles={{
+                body: {
+                  padding: 10
+                }
+              }}
               content={
                 <AutoComplete
                   value={state().lang}
@@ -363,7 +369,9 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
                     <span>{'plain text'}</span>
                   )}
                 </div>
-                {!element.katex && !element.render && <ChevronDown className={'text-lg ml-0.5'} />}
+                {!element.katex && !element.render && (
+                  <ChevronDown className={'ml-1'} size={14} strokeWidth={2.5} />
+                )}
               </div>
             </Popover>
             <div>
@@ -378,7 +386,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
                   tab.store.copySuccessfully(code)
                 }}
               >
-                <Copy />
+                <Copy size={15} />
               </div>
             </div>
           </div>

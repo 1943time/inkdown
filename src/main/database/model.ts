@@ -9,6 +9,7 @@ export const knex = Knex({
     filename: join(app.getPath('userData'), 'data.sqlite')
   }
 })
+console.log('app', app.getPath('userData'))
 
 export const initModel = async () => {
   await knex.schema.hasTable('client').then((exists) => {

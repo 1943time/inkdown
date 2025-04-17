@@ -5,15 +5,12 @@ import isHotkey from 'is-hotkey'
 import { Icon } from '@iconify/react'
 import { EditorUtils } from '../utils/editorUtils'
 import { getOffsetLeft, getOffsetTop } from '../../utils/dom'
-import { Button, Input, Tabs, Tag, Tooltip } from 'antd'
-import { selChange$ } from '../plugins/useOnchange'
-import { fileOpen } from 'browser-fs-access'
+import { Button, Input, Tabs } from 'antd'
 import { TabStore } from '@/store/note/tab'
 import { IPlanet } from '../icons/IPlanet'
 import { TextHelp } from '@/ui/common/HelpText'
 import { useGetSetState } from 'react-use'
 import { useTab } from '@/store/note/TabCtx'
-import { useShallow } from 'zustand/react/shallow'
 import IMermaid from '../icons/IMermaid'
 
 type InsertOptions = {
@@ -248,7 +245,6 @@ export const InsertAutocomplete = memo(() => {
     path: number[]
     isTop: boolean
   }>({ path: [], isTop: true })
-  const [openInsertCompletion] = tab.useState(useShallow((state) => [state.openInsertCompletion]))
   const [state, setState] = useGetSetState({
     index: 0,
     filterOptions: [] as InsertOptions[],
@@ -273,7 +269,7 @@ export const InsertAutocomplete = memo(() => {
   }, [])
 
   const close = useCallback(() => {
-    tab.useState.setState({ openInsertCompletion: false })
+    tab.setState({ openInsertCompletion: false })
     setState({
       filterOptions: [],
       options: [],
@@ -284,7 +280,7 @@ export const InsertAutocomplete = memo(() => {
       insertUrl: ''
     })
     window.removeEventListener('click', clickClose)
-  }, [tab])
+  }, [])
 
   const insertMedia = useCallback(async () => {
     setState({ loading: true })
@@ -359,120 +355,108 @@ export const InsertAutocomplete = memo(() => {
     }
   }, [])
 
-  const run = useCallback(
-    (op: InsertOptions['children'][number]) => {
-      if (op.key === 'media' || op.key === 'attach') {
-        if (op.key === 'media') {
-          setState({ insertLink: true })
-          setTimeout(() => {
-            dom.current?.querySelector('input')?.focus()
-          }, 30)
-        } else {
-          setState({ insertAttach: true })
+  const run = useCallback((op: InsertOptions['children'][number]) => {
+    if (op.key === 'media' || op.key === 'attach') {
+      if (op.key === 'media') {
+        setState({ insertLink: true })
+        setTimeout(() => {
+          dom.current?.querySelector('input')?.focus()
+        }, 30)
+      } else {
+        setState({ insertAttach: true })
+      }
+    } else {
+      if (op) {
+        Transforms.insertText(tab.editor, '', {
+          at: {
+            anchor: Editor.start(tab.editor, ctx.current.path),
+            focus: Editor.end(tab.editor, ctx.current.path)
+          }
+        })
+        op.run?.()
+      }
+      close()
+    }
+  }, [])
+
+  const keydown = useCallback((e: KeyboardEvent) => {
+    if (state().options.length && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault()
+      if (e.key === 'ArrowUp' && state().index > 0) {
+        setState({ index: state().index - 1 })
+        const key = state().options[state().index].key
+        const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
+        if (target && dom.current!.scrollTop > target.offsetTop) {
+          dom.current!.scroll({
+            top: dom.current!.scrollTop - 160 + 30
+          })
+        }
+      }
+      if (e.key === 'ArrowDown' && state().index < state().options.length - 1) {
+        setState({ index: state().index + 1 })
+        const key = state().options[state().index].key
+        const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
+        if (target && target.offsetTop > dom.current!.scrollTop + dom.current!.clientHeight - 30) {
+          dom.current!.scroll({
+            top: target.offsetTop - 30
+          })
+        }
+      }
+    }
+    if (e.key === 'Enter' && tab.state.openInsertCompletion) {
+      const op = state().options[state().index]
+      if (op) {
+        e.preventDefault()
+        e.stopPropagation()
+        run(op)
+      }
+    }
+    if (isHotkey('esc', e)) {
+      tab.setState({ openInsertCompletion: false })
+      EditorUtils.focus(tab.editor)
+    }
+  }, [])
+  useEffect(() => {
+    if (tab.state.openInsertCompletion) {
+      const text = tab.state.insertCompletionText || ''
+      const insertOptions = getInsertOptions({
+        isTop: ctx.current.isTop,
+        tab
+      })
+      let filterOptions: InsertOptions[] = []
+      let options: InsertOptions['children'] = []
+      if (text) {
+        for (let item of insertOptions) {
+          const ops = item.children.filter((op) => {
+            return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
+          })
+          options.push(...ops)
+          if (ops.length) {
+            filterOptions.push({
+              ...item,
+              children: ops
+            })
+          }
         }
       } else {
-        if (op) {
-          Transforms.insertText(tab.editor, '', {
-            at: {
-              anchor: Editor.start(tab.editor, ctx.current.path),
-              focus: Editor.end(tab.editor, ctx.current.path)
-            }
-          })
-          op.run?.()
-        }
-        close()
+        filterOptions = insertOptions
+        options = insertOptions.reduce(
+          (a, b) => a.concat(b.children),
+          [] as InsertOptions['children']
+        )
       }
-    },
-    [tab]
-  )
-
-  const keydown = useCallback(
-    (e: KeyboardEvent) => {
-      if (state().options.length && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-        e.preventDefault()
-        if (e.key === 'ArrowUp' && state().index > 0) {
-          setState({ index: state().index - 1 })
-          const key = state().options[state().index].key
-          const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
-          if (target && dom.current!.scrollTop > target.offsetTop) {
-            dom.current!.scroll({
-              top: dom.current!.scrollTop - 160 + 30
-            })
-          }
-        }
-        if (e.key === 'ArrowDown' && state().index < state().options.length - 1) {
-          setState({ index: state().index + 1 })
-          const key = state().options[state().index].key
-          const target = document.querySelector(`[data-action="${key}"]`) as HTMLDivElement
-          if (
-            target &&
-            target.offsetTop > dom.current!.scrollTop + dom.current!.clientHeight - 30
-          ) {
-            dom.current!.scroll({
-              top: target.offsetTop - 30
-            })
-          }
-        }
-      }
-      if (e.key === 'Enter' && openInsertCompletion) {
-        const op = state().options[state().index]
-        if (op) {
-          e.preventDefault()
-          e.stopPropagation()
-          run(op)
-        }
-      }
-      if (isHotkey('esc', e)) {
-        tab.useState.setState({ openInsertCompletion: false })
-        EditorUtils.focus(tab.editor)
-      }
-    },
-    [openInsertCompletion, tab]
-  )
-  useEffect(() => {
-    tab.useState.subscribe(
-      (state) => state.insertCompletionText,
-      (text) => {
-        text = text || ''
-        const insertOptions = getInsertOptions({
-          isTop: ctx.current.isTop,
-          tab
-        })
-        let filterOptions: InsertOptions[] = []
-        let options: InsertOptions['children'] = []
-        if (text) {
-          for (let item of insertOptions) {
-            const ops = item.children.filter((op) => {
-              return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
-            })
-            options.push(...ops)
-            if (ops.length) {
-              filterOptions.push({
-                ...item,
-                children: ops
-              })
-            }
-          }
-        } else {
-          filterOptions = insertOptions
-          options = insertOptions.reduce(
-            (a, b) => a.concat(b.children),
-            [] as InsertOptions['children']
-          )
-        }
-        setState({
-          index: 0,
-          text,
-          options,
-          filterOptions,
-          insertLink: false
-        })
-      }
-    )
-  }, [tab])
+      setState({
+        index: 0,
+        text,
+        options,
+        filterOptions,
+        insertLink: false
+      })
+    }
+  }, [tab.state.insertCompletionText])
 
   useEffect(() => {
-    if (openInsertCompletion) {
+    if (tab.state.openInsertCompletion) {
       setState({ insertLink: false })
       const [node] = Editor.nodes<any>(tab.editor, {
         match: (n) => Element.isElement(n),
@@ -513,12 +497,12 @@ export const InsertAutocomplete = memo(() => {
       window.removeEventListener('keydown', keydown)
       close()
     }
-  }, [openInsertCompletion, tab])
+  }, [tab.state.openInsertCompletion, tab])
   return (
     <div
       ref={dom}
       className={`
-      ${!openInsertCompletion || !state().filterOptions.length ? 'hidden' : ''}
+      ${!tab.state.openInsertCompletion || !state().filterOptions.length ? 'hidden' : ''}
       absolute z-50 ${state().insertLink || state().insertAttach ? 'w-80' : 'w-44'} max-h-52 overflow-y-auto p-1.5 ctx-panel rounded-lg py-1 text-black/80 card-bg dark:text-white/90
       `}
       onMouseDown={(e) => {

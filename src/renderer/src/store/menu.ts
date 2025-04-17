@@ -21,7 +21,7 @@ export class ContextMenu {
     }
     return cur
   }
-  createDoc(parentId: string, name = 'Untitled', schema?: any[]) {
+  createDoc(parentId: string = 'root', name = 'Untitled', schema?: any[]) {
     const parent = this.store.note.state.nodes[parentId]
     const docName = this.getCreateName(name, parent)
     this.store.note.setState((state) => {

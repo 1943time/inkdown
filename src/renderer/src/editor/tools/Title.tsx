@@ -74,6 +74,9 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
         setName(doc.name)
       } else {
         tab.store.model.updateDoc(doc.id, { name })
+        store.note.setState((state) => {
+          state.nodes[doc.id].name = name
+        })
         setState({ tip: false, tipMessage: '' })
       }
     }

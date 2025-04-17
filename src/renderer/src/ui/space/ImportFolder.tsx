@@ -2,52 +2,48 @@ import { observer } from 'mobx-react-lite'
 import { Button, Modal, Table, Tag } from 'antd'
 import { FolderOpenOutlined } from '@ant-design/icons'
 import { useCallback, useEffect, useRef } from 'react'
-import { useLocalState } from '../../hooks/useLocalState.ts'
 import { Icon } from '@iconify/react'
-import { sizeUnit } from '../../utils'
-import { useCoreContext } from '../../utils/env.ts'
-import { ImportTree } from '../../store/logic/local.ts'
-import { Subject } from 'rxjs'
-import { useSubject } from '../../hooks/subscribe.ts'
-import { IImport } from '../../icons/IImport.tsx'
+import { useStore } from '@/store/store'
+import { useLocalState } from '@/hooks/useLocalState'
+import { useSubject } from '@/hooks/common.js'
+import { FolderInput } from 'lucide-react'
 
-export const openImportFolder$ = new Subject<null | string>()
 export const ImportFolder = observer(() => {
-  const core = useCoreContext()
+  const store = useStore()
   const [state, setState] = useLocalState({
     loading: false,
-    tree: [] as ImportTree[],
+    // tree: [] as ImportTree[],
     imageTotalSize: 0,
     imageTotal: 0,
     docTotal: 0,
     open: false,
     parentCid: null as null | string
   })
-  useSubject(openImportFolder$, (cid) => {
-    setState({ tree: [], imageTotal: 0, imageTotalSize: 0, parentCid: cid, open: true })
-  })
-  const dataCache = useRef<{
-    insertImages: { cid: string; file: File }[]
-    tree: ImportTree[]
-  }>()
-  const selectFolder = useCallback(async () => {
-    try {
-      const res = await core.import.importFolder(state.parentCid ? state.parentCid : undefined)
-      if (res) {
-        dataCache.current = res
-        setState({
-          imageTotal: res.insertImages.length,
-          imageTotalSize: res.insertImages.reduce((a, b) => a + b.file.size, 0),
-          tree: res.tree,
-          docTotal: res.docCount
-        })
-      }
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setState({ loading: false })
-    }
-  }, [])
+  // useSubject(store.note.openImportFolder$, (cid) => {
+  //   setState({ tree: [], imageTotal: 0, imageTotalSize: 0, parentCid: cid, open: true })
+  // })
+  // const dataCache = useRef<{
+  //   insertImages: { cid: string; file: File }[]
+  //   // tree: ImportTree[]
+  // }>({insertImages: []})
+  // const selectFolder = useCallback(async () => {
+  //   try {
+  //     const res = await core.import.importFolder(state.parentCid ? state.parentCid : undefined)
+  //     if (res) {
+  //       dataCache.current = res
+  //       setState({
+  //         imageTotal: res.insertImages.length,
+  //         imageTotalSize: res.insertImages.reduce((a, b) => a + b.file.size, 0),
+  //         tree: res.tree,
+  //         docTotal: res.docCount
+  //       })
+  //     }
+  //   } catch (e) {
+  //     console.error(e)
+  //   } finally {
+  //     setState({ loading: false })
+  //   }
+  // }, [])
 
   return (
     <Modal
@@ -62,11 +58,11 @@ export const ImportFolder = observer(() => {
       footer={null}
       title={
         <div className={'flex items-center'}>
-          {core.config.zh ? '导入文件夹' : 'Import'} <IImport className={'ml-2 text-lg'} />
+          {'Import'} <FolderInput className={'ml-2'} size={16} />
         </div>
       }
     >
-      {!state.tree.length && (
+      {/* {!state.tree.length && (
         <>
           <div className={'text-sm text-black/80 dark:text-white/80 my-2'}>
             Import markdown documents into the
@@ -85,12 +81,12 @@ export const ImportFolder = observer(() => {
             loading={state.loading}
             onClick={selectFolder}
           >
-            {core.config.zh ? '打开文件夹' : 'Open Folder'}
+            {'Open Folder'}
           </Button>
         </>
       )}
 
-      {!!state.tree.length && (
+      {/* {!!state.tree.length && (
         <>
           <Table
             dataSource={state.tree}
@@ -171,7 +167,7 @@ export const ImportFolder = observer(() => {
             </Button>
           </div>
         </>
-      )}
+      )} */}
     </Modal>
   )
 })

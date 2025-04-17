@@ -1,4 +1,5 @@
 import { dataTransform, stringTransform } from '@/utils/common'
+import { toJS } from 'mobx'
 import {
   IChat,
   IChatTable,
@@ -13,7 +14,6 @@ import {
   ISpace,
   ITag
 } from 'types/model'
-// 使用系统api
 const ipcRenderer = window.electron.ipcRenderer
 export class ModelApi {
   async getChats(): Promise<IChatTable[]> {
@@ -25,11 +25,11 @@ export class ModelApi {
   }
 
   async createChat(chat: IChat): Promise<void> {
-    return ipcRenderer.invoke('createChat', chat)
+    return ipcRenderer.invoke('createChat', toJS(chat))
   }
 
   async updateChat(id: string, chat: Partial<IChat>): Promise<void> {
-    return ipcRenderer.invoke('updateChat', id, chat)
+    return ipcRenderer.invoke('updateChat', id, toJS(chat))
   }
 
   async deleteChat(id: string): Promise<void> {
@@ -94,11 +94,11 @@ export class ModelApi {
   }
 
   async createClient(client: IClient): Promise<void> {
-    return ipcRenderer.invoke('createClient', client)
+    return ipcRenderer.invoke('createClient', toJS(client))
   }
 
   async updateClient(id: string, client: Partial<IClient>): Promise<void> {
-    return ipcRenderer.invoke('updateClient', id, client)
+    return ipcRenderer.invoke('updateClient', id, toJS(client))
   }
 
   async deleteClient(id: string): Promise<void> {
@@ -121,11 +121,11 @@ export class ModelApi {
   }
 
   async createSpace(space: ISpace): Promise<void> {
-    return ipcRenderer.invoke('createSpace', space)
+    return ipcRenderer.invoke('createSpace', toJS(space))
   }
 
   async updateSpace(id: string, space: Partial<ISpace>): Promise<void> {
-    return ipcRenderer.invoke('updateSpace', id, space)
+    return ipcRenderer.invoke('updateSpace', id, toJS(space))
   }
 
   async deleteSpace(id: string): Promise<void> {
@@ -137,6 +137,7 @@ export class ModelApi {
       return docs.map((d) => {
         return {
           ...d,
+          folder: Boolean(d.folder),
           links: d.links ? JSON.parse(d.links as unknown as string) : [],
           schema: d.schema ? JSON.parse(d.schema as unknown as string) : []
         }
@@ -153,15 +154,34 @@ export class ModelApi {
   }
 
   async createDoc(doc: IDoc): Promise<void> {
-    return ipcRenderer.invoke('createDoc', doc)
+    const data = toJS(doc)
+    return ipcRenderer.invoke('createDoc', {
+      ...data,
+      schema: data.schema ? JSON.stringify(data.schema) : undefined
+    })
   }
 
   async updateDoc(id: string, doc: Partial<IDoc>): Promise<void> {
-    return ipcRenderer.invoke('updateDoc', id, doc)
+    const data = toJS(doc)
+    return ipcRenderer.invoke('updateDoc', id, {
+      ...data,
+      schema: data.schema ? JSON.stringify(data.schema) : undefined,
+      links: data.links ? JSON.stringify(data.links) : undefined
+    })
   }
 
   async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
-    return ipcRenderer.invoke('updateDocs', docs)
+    const data = toJS(docs)
+    return ipcRenderer.invoke(
+      'updateDocs',
+      data.map((d) => {
+        return {
+          ...d,
+          schema: d.schema ? JSON.stringify(d.schema) : undefined,
+          links: d.links ? JSON.stringify(d.links) : undefined
+        }
+      })
+    )
   }
 
   async deleteDoc(id: string): Promise<void> {
@@ -169,11 +189,18 @@ export class ModelApi {
   }
 
   async getDoc(id: string): Promise<IDoc | null> {
-    return ipcRenderer.invoke('getDoc', id)
+    return ipcRenderer.invoke('getDoc', id).then((doc) => {
+      return {
+        ...doc,
+        folder: Boolean(doc?.folder),
+        schema: doc?.schema ? JSON.parse(doc.schema as unknown as string) : [],
+        links: doc?.links ? JSON.parse(doc.links as unknown as string) : []
+      }
+    })
   }
 
   async createDocTag(docTag: IDocTag): Promise<void> {
-    return ipcRenderer.invoke('createDocTag', docTag)
+    return ipcRenderer.invoke('createDocTag', toJS(docTag))
   }
 
   async deleteDocTag(id: string): Promise<void> {
@@ -185,7 +212,7 @@ export class ModelApi {
   }
 
   async createTag(tag: ITag): Promise<void> {
-    return ipcRenderer.invoke('createTag', tag)
+    return ipcRenderer.invoke('createTag', toJS(tag))
   }
 
   async deleteTag(id: string): Promise<void> {
@@ -201,7 +228,7 @@ export class ModelApi {
   }
 
   async createHistory(history: IHistory): Promise<void> {
-    return ipcRenderer.invoke('createHistory', history)
+    return ipcRenderer.invoke('createHistory', toJS(history))
   }
 
   async clearHistory(docId: string): Promise<void> {
@@ -213,7 +240,7 @@ export class ModelApi {
   }
 
   async createFile(file: IFile): Promise<void> {
-    return ipcRenderer.invoke('createFile', file)
+    return ipcRenderer.invoke('createFile', toJS(file))
   }
 
   async deleteFiles(ids: string[]): Promise<void> {

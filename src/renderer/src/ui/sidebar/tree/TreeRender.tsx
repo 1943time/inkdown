@@ -18,7 +18,7 @@ export const TreeRender = observer(() => {
     <>
       <div
         onContextMenu={(e) => e.stopPropagation()}
-        className={`py-1 flex justify-between items-center pl-2 pr-1 dark:text-gray-400 text-gray-500`}
+        className={`py-1 flex justify-between items-center pl-2 pr-0.5 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-semibold text-[13px] flex items-center'}>
           <span>Folders</span>
@@ -36,7 +36,7 @@ export const TreeRender = observer(() => {
           <Plus size={20} />
         </div>
       </div>
-      <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
+      <div onContextMenu={(e) => e.stopPropagation()}>
         <RenderItem items={store.note.state.root.children || []} level={0} />
         {!store.note.state.root.children?.length && (
           <div className={'mt-10  text-sm'}>
@@ -46,7 +46,7 @@ export const TreeRender = observer(() => {
                 'mt-2 flex justify-center items-center link cursor-pointer hover:text-white text-gray-400 duration-200'
               }
               onClick={() => {
-                // core.menu.createDoc({ parent: core.tree.root })
+                store.menu.createDoc()
               }}
             >
               <FileText size={16} />
@@ -79,7 +79,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
       <div
         ref={el}
         data-fid={item.id}
-        className={'py-[1px]'}
+        className={'py-[1px] cursor-pointer'}
         onDragLeave={(e) => e.stopPropagation()}
         onDragOver={action((e) => {
           e.stopPropagation()
@@ -159,7 +159,9 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
               {item.folder && (
                 <div className={'w-4 h-full flex items-center justify-center'}>
                   <ChevronRight
-                    className={`w-[11px] h-[11px] dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}
+                    size={16}
+                    strokeWidth={3}
+                    className={`dark:text-gray-500 text-gray-400 duration-200 ${item.folder && item.expand ? 'rotate-90' : ''}`}
                   />
                 </div>
               )}
@@ -168,8 +170,8 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
                 data-entity={'true'}
               >
                 <div className={`relative flex-shrink-0`}>
-                  {!!item.folder && <FolderClosed />}
-                  {!item.folder && <FileText />}
+                  {!!item.folder && <FolderClosed size={14} />}
+                  {!item.folder && <FileText size={14} />}
                 </div>
                 <div className={'truncate max-w-full ml-1'}>{item.name || 'Untitled'}</div>
                 {store.note.state.dragStatus?.dropNode?.id === item.id &&

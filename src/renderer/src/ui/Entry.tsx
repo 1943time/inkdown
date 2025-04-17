@@ -7,6 +7,7 @@ import { observer } from 'mobx-react-lite'
 import { ConfirmDialog } from './dialog/ConfirmDialog'
 import { EditFolderDialog } from './sidebar/tree/EditFolderDialog'
 import { EditSpace } from './space/EditSpace'
+import { Note } from '@/editor/Note'
 const Entry = observer(() => {
   const store = useStore()
   const { open, ready } = store.settings.state
@@ -21,7 +22,16 @@ const Entry = observer(() => {
       <div className={'flex-1 relative flex flex-col'}>
         <Nav />
         <div className={'flex-1 relative h-[calc(100vh_-_40px)]'}>
-          <Chat />
+          {store.settings.state.view === 'chat' && (
+            <div className={'h-full'}>
+              <Chat />
+            </div>
+          )}
+          {store.settings.state.view === 'note' && (
+            <div className={'h-full'}>
+              <Note />
+            </div>
+          )}
           {open && <Settings />}
         </div>
       </div>

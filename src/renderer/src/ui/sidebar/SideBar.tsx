@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { Tree } from './tree/Tree'
 export const SideBar = observer(() => {
   const store = useStore()
-  const { sidePanelWidth, fold, view } = store.settings.state
+  const { sidePanelWidth, foldSideBar: fold, view } = store.settings.state
   const move = useCallback((e: React.MouseEvent) => {
     const startX = e.clientX
     document.body.classList.add('drag-sidebar')

@@ -320,8 +320,15 @@ export const EditSpace = observer(() => {
                               okText: 'Delete',
                               onConfirm: async () => {
                                 await store.model.deleteSpace(state.space!.id)
+                                store.note.setState((draft) => {
+                                  const space = draft.spaces.find((s) => s.id !== state.spaceId)
+                                  if (space) {
+                                    draft.selectedSpaceId = space.id
+                                  }
+                                  draft.spaces = draft.spaces.filter((s) => s.id !== state.spaceId)
+                                  store.note.selectSpace()
+                                })
                                 setState({ open: false })
-                                store.note.selectSpace(store.note.state.spaces[0].id)
                               }
                             })
                           }}

@@ -4,7 +4,7 @@ import { ExportOutlined } from '@ant-design/icons'
 import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState.js'
 import { useSubject } from '@/hooks/common'
-import { FolderInput } from 'lucide-react'
+import { FolderDown } from 'lucide-react'
 import { TextHelp } from '../common/HelpText'
 
 export const ExportSpace = observer(() => {
@@ -19,7 +19,7 @@ export const ExportSpace = observer(() => {
     <Modal
       title={
         <div className={'flex items-center'}>
-          {store.note.state.currentSpace?.name} <FolderInput size={16} className={'ml-2'} />
+          {store.note.state.currentSpace?.name} <FolderDown size={16} className={'ml-2'} />
         </div>
       }
       open={state.open}

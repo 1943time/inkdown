@@ -17,7 +17,7 @@ export const useKeyboard = (tab: TabStore) => {
     const enter = new EnterKey(tab, backspace)
     const match = new MatchKey(tab)
     return (e: React.KeyboardEvent) => {
-      const state = tab.useState.getState()
+      const state = tab.state
       if (state.openInsertCompletion && (isHotkey('up', e) || isHotkey('down', e))) {
         e.preventDefault()
         return
@@ -75,7 +75,7 @@ export const useKeyboard = (tab: TabStore) => {
         if (e.key === 'Enter') {
           if (state.openLangCompletion) {
             setTimeout(() => {
-              tab.useState.setState({ openLangCompletion: false })
+              tab.setState({ openLangCompletion: false })
             })
           } else {
             enter.run(e)
@@ -155,7 +155,7 @@ export const useKeyboard = (tab: TabStore) => {
               let str = Node.string(node[0]) || ''
               const codeMatch = str.match(/^```([\w+\-#]+)$/i)
               if (codeMatch) {
-                tab.useState.setState({
+                tab.setState({
                   openLangCompletion: true,
                   langCompletionText: codeMatch[1]
                 })
@@ -168,13 +168,13 @@ export const useKeyboard = (tab: TabStore) => {
                     Node.parent(tab.editor, node[1]).type === 'list-item'
                   )
                 ) {
-                  tab.useState.setState({
+                  tab.setState({
                     openInsertCompletion: true,
                     insertCompletionText: insertMatch[1]
                   })
                 } else {
                   if (state.openInsertCompletion || state.openLangCompletion) {
-                    tab.useState.setState({
+                    tab.setState({
                       openLangCompletion: false,
                       openInsertCompletion: false
                     })
@@ -182,7 +182,7 @@ export const useKeyboard = (tab: TabStore) => {
                 }
               }
             } else {
-              tab.useState.setState({ openLangCompletion: false })
+              tab.setState({ openLangCompletion: false })
             }
           })
         }

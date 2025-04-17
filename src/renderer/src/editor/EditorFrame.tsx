@@ -11,7 +11,6 @@ import { PhotoSlider } from 'react-photo-view'
 import { useStore } from '@/store/store'
 import { isMod } from '@/utils/common'
 import { TabContext } from '@/store/note/TabCtx'
-import { useShallow } from 'zustand/react/shallow'
 import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {

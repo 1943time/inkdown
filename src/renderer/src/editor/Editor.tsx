@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Editable, ReactEditor, Slate } from 'slate-react'
-import { Editor, Element, Node, Range, Transforms } from 'slate'
+import { Editor, Element, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements/index'
 import { useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
@@ -16,7 +16,6 @@ import { Title } from './tools/Title'
 // import { useCoreContext } from '../utils/env.ts'
 // import { htmlToMarkdown } from '../store/logic/parserNode.ts'
 import { useStore } from '@/store/store'
-import { useShallow } from 'zustand/react/shallow'
 import { IDoc } from 'types/model'
 import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
@@ -59,9 +58,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.setState((state) => {
         state.docChanged = false
       })
-      // core.service.updateNode(node, {
-      //   schema: node.schema
-      // })
+      store.model.updateDoc(node.id, {
+        schema: node.schema,
+        updated: Date.now()
+      })
       if (!ipc) {
         // core.ipc.sendMessage({
         //   type: 'updateDoc',

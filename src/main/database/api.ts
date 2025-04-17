@@ -206,8 +206,7 @@ ipcMain.handle('getSpaces', async () => {
     await knex('space').insert({
       id: nanoid(),
       name: 'My Space',
-      sort: 0,
-      background: 'sky'
+      sort: 0
     })
     spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
   }
@@ -418,6 +417,7 @@ ipcMain.handle(
         parentId: data.parentId,
         name: data.name
       })
-      .count()
+      .count('id', { as: 'count' })
+      .then((res) => res[0].count)
   }
 )

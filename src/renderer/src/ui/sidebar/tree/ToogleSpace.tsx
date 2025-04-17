@@ -121,7 +121,7 @@ export const ToggleSpace = observer(() => {
                 }}
                 className={`flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded`}
               >
-                <Settings size={16} />
+                <Settings size={15} />
                 <span className={'text-xs ml-2'}>Workspace Settings</span>
               </div>
               <div

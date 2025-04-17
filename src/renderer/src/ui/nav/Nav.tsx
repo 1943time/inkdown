@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
 export const Nav = observer(() => {
   const store = useStore()
-  const { fold } = store.settings.state
+  const { foldSideBar: fold } = store.settings.state
   const [iconLeft, navLeft] = useMemo(() => {
     const osType = os()
     if (!fold) {
@@ -37,7 +37,7 @@ export const Nav = observer(() => {
           className={'p-1 rounded hover:bg-white/10 cursor-pointer'}
           onClick={() => {
             store.settings.setState((state) => {
-              state.fold = !state.fold
+              state.foldSideBar = !state.foldSideBar
             })
           }}
         >
