@@ -26,6 +26,7 @@
     "electron-updater": "^6.3.9",
     "knex": "^3.1.0",
     "mime-types": "^2.1.35",
+    "nanoid": "^5.1.4",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
@@ -63,7 +64,6 @@
     "framer-motion": "^12.5.0",
     "gpt-tokenizer": "^2.9.0",
     "i18next": "^24.2.3",
-    "immer": "^10.1.1",
     "is-hotkey": "^0.2.0",
     "katex": "^0.16.21",
     "lodash-es": "^4.17.21",
@@ -73,7 +73,6 @@
     "mime-types": "^3.0.1",
     "mobx": "^6.13.7",
     "mobx-react-lite": "^4.1.0",
-    "nanoid": "^5.1.4",
     "openai": "^4.87.3",
     "path-browserify": "^1.0.1",
     "pdfjs-dist": "^5.0.375",
@@ -120,7 +119,6 @@
     "vite": "^6.2.3",
     "webpack": "^5.98.0",
     "xlsx": "^0.18.5",
-    "xss": "^1.0.15",
-    "zustand": "^5.0.3"
+    "xss": "^1.0.15"
   }
 }

@@ -16,6 +16,7 @@ import { omit } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
+import { nanoid } from 'nanoid'
 
 export const modelReady = () => {
   return initModel()
@@ -200,7 +201,16 @@ ipcMain.handle('deleteClient', async (_, id: string) => {
 })
 
 ipcMain.handle('getSpaces', async () => {
-  const spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
+  let spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
+  if (spaces.length === 0) {
+    await knex('space').insert({
+      id: nanoid(),
+      name: 'My Space',
+      sort: 0,
+      background: 'sky'
+    })
+    spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
+  }
   return spaces
 })
 

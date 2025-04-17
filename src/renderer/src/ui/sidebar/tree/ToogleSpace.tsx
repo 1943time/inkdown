@@ -4,10 +4,9 @@ import { useCallback } from 'react'
 import { arrayMoveImmutable } from 'array-move'
 import { Icon } from '@iconify/react'
 import SortableList, { SortableItem } from 'react-easy-sort'
-import { Plus, Settings } from 'lucide-react'
+import { Folders, Plus, Settings } from 'lucide-react'
 import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
-import { useShallow } from 'zustand/react/shallow'
 import { ISpace } from 'types/model'
 import { observer } from 'mobx-react-lite'
 export const SpaceList = observer(
@@ -69,17 +68,23 @@ export const ToggleSpace = observer(() => {
   const store = useStore()
   const { spaces, currentSpace } = store.note.state
   return (
-    <div className={`h-9 mb-1`}>
+    <div className={`h-8 mb-1`}>
       <Popover
         trigger={['click']}
         placement={'bottomLeft'}
-        overlayClassName={'light-poppver'}
+        classNames={{
+          root: 'light-poppver'
+        }}
         arrow={false}
         open={state().open}
         onOpenChange={(v) => {
           setState({ open: v })
         }}
-        overlayInnerStyle={{ padding: 0 }}
+        styles={{
+          body: {
+            padding: 0
+          }
+        }}
         forceRender={true}
         content={
           <div
@@ -116,7 +121,7 @@ export const ToggleSpace = observer(() => {
                 }}
                 className={`flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded`}
               >
-                <Settings />
+                <Settings size={16} />
                 <span className={'text-xs ml-2'}>Workspace Settings</span>
               </div>
               <div
@@ -127,7 +132,7 @@ export const ToggleSpace = observer(() => {
                   'flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded'
                 }
               >
-                <Plus />
+                <Plus size={16} />
                 <span className={'text-xs ml-2'}>Create Workspace</span>
               </div>
             </div>
@@ -140,11 +145,7 @@ export const ToggleSpace = observer(() => {
           }
         >
           <div className={'flex items-center'}>
-            <div
-              className={`text-white flex-shrink-0 w-6 h-6 rounded space-${currentSpace?.background || 'sky'} flex items-center justify-center  font-medium`}
-            >
-              {currentSpace?.name.slice(0, 1).toUpperCase()}
-            </div>
+            <Folders size={16} />
             <div className={'ml-2 max-w-full truncate text-[13px]'}>{currentSpace?.name}</div>
           </div>
           <div>

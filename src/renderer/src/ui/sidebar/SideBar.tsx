@@ -2,8 +2,8 @@ import { useStore } from '@/store/store'
 import { useCallback } from 'react'
 import { Chats } from './Chats'
 import { Bot, PenLine } from 'lucide-react'
-import { Docs } from './Docs'
 import { observer } from 'mobx-react-lite'
+import { Tree } from './tree/Tree'
 export const SideBar = observer(() => {
   const store = useStore()
   const { sidePanelWidth, fold, view } = store.settings.state
@@ -54,7 +54,7 @@ export const SideBar = observer(() => {
               store.settings.setState({ view: 'note' })
             }}
           >
-            <PenLine size={18} />
+            <PenLine size={16} />
             <span className={'ml-2 text-sm'}>Note</span>
           </div>
           <div
@@ -63,7 +63,7 @@ export const SideBar = observer(() => {
               store.settings.setState({ view: 'chat' })
             }}
           >
-            <Bot size={18} />
+            <Bot size={16} />
             <span className={'ml-2 text-sm'}>Chat</span>
           </div>
           <div
@@ -80,7 +80,9 @@ export const SideBar = observer(() => {
       />
       <div style={{ width: sidePanelWidth }} className={'flex-1'}>
         {view === 'chat' && <Chats />}
-        {view === 'note' && <Docs />}
+        <div className={`h-full ${view === 'note' ? '' : 'hidden'}`}>
+          <Tree />
+        </div>
       </div>
     </div>
   )

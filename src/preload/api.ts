@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync } from 'fs'
 import { writeFile, readFile, cp } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
-import { app } from 'electron'
+import { app, shell } from 'electron'
 import {
   ipcRenderer,
   OpenDialogOptions,
@@ -50,7 +50,7 @@ export const Api = {
       ipcRenderer.send('open-in-default-app', path)
     },
     showInFinder: (path: string) => {
-      ipcRenderer.send('openInFolder', path)
+      shell.showItemInFolder(path)
     },
     writeBuffer(filePath: string, buffer: ArrayBuffer) {
       return writeFile(filePath, Buffer.from(buffer))

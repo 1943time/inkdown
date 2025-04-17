@@ -20,6 +20,9 @@ dependencies:
   mime-types:
     specifier: ^2.1.35
     version: 2.1.35
+  nanoid:
+    specifier: ^5.1.4
+    version: 5.1.5
   sqlite3:
     specifier: ^5.1.7
     version: 5.1.7
@@ -127,9 +130,6 @@ devDependencies:
   i18next:
     specifier: ^24.2.3
     version: 24.2.3(typescript@5.8.3)
-  immer:
-    specifier: ^10.1.1
-    version: 10.1.1
   is-hotkey:
     specifier: ^0.2.0
     version: 0.2.0
@@ -154,9 +154,6 @@ devDependencies:
   mobx-react-lite:
     specifier: ^4.1.0
     version: 4.1.0(mobx@6.13.7)(react-dom@19.1.0)(react@19.1.0)
-  nanoid:
-    specifier: ^5.1.4
-    version: 5.1.5
   openai:
     specifier: ^4.87.3
     version: 4.93.0
@@ -298,9 +295,6 @@ devDependencies:
   xss:
     specifier: ^1.0.15
     version: 1.0.15
-  zustand:
-    specifier: ^5.0.3
-    version: 5.0.3(@types/react@19.1.0)(immer@10.1.1)(react@19.1.0)
 
 packages:
 
@@ -8635,7 +8629,6 @@ packages:
     resolution: {integrity: sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw==}
     engines: {node: ^18 || >=20}
     hasBin: true
-    dev: true
 
   /napi-build-utils@2.0.0:
     resolution: {integrity: sha512-GEbrYkbfF7MoNaoh2iGG84Mnf/WZfB0GdGEsM8wz7Expx/LlWf5U8t9nvJKXSp3qr5IsEbK04cBGhol/KwOsWA==}
@@ -12098,29 +12091,6 @@ packages:
       react:
         optional: true
     dependencies:
-      react: 19.1.0
-    dev: true
-
-  /zustand@5.0.3(@types/react@19.1.0)(immer@10.1.1)(react@19.1.0):
-    resolution: {integrity: sha512-14fwWQtU3pH4dE0dOpdMiWjddcH+QzKIgk1cl8epwSE7yag43k/AD/m4L6+K7DytAOr9gGBe3/EXj9g7cdostg==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      '@types/react': '>=18.0.0'
-      immer: '>=9.0.6'
-      react: '>=18.0.0'
-      use-sync-external-store: '>=1.2.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      immer:
-        optional: true
-      react:
-        optional: true
-      use-sync-external-store:
-        optional: true
-    dependencies:
-      '@types/react': 19.1.0
-      immer: 10.1.1
       react: 19.1.0
     dev: true
 

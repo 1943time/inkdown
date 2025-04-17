@@ -1,22 +1,18 @@
 import { observer } from 'mobx-react-lite'
 import { Button, Collapse, Form, Input, Modal, Progress, Space, Tag } from 'antd'
-import { useLocalState } from '../../hooks/useLocalState.ts'
 import { CloseCircleOutlined, FolderOpenOutlined, SaveOutlined } from '@ant-design/icons'
 import { Subject } from 'rxjs'
-import { useSubject } from '../..//hooks/subscribe.ts'
 import { useCallback, useEffect } from 'react'
-import { ISpace, db } from '../..//store/db.ts'
-import { nid } from '../../utils'
-import { openConfirmDialog$ } from '../dialog/ConfirmDialog.tsx'
 import { action, runInAction } from 'mobx'
-import { useCoreContext } from '../..//utils/env.ts'
-import { IWorkspace } from '../../icons/IWorkspace.tsx'
-import { ICheck } from '../../icons/ICheck.tsx'
+import { useStore } from '@/store/store'
+import { ISpace } from 'types/model'
+import { useLocalState } from '@/hooks/useLocalState'
+import { useSubject } from '@/hooks/common'
 
 export const editSpace$ = new Subject<string | null>()
 
 export const EditSpace = observer(() => {
-  const core = useCoreContext()
+  const store = useStore()
   const [state, setState] = useLocalState({
     open: false,
     spaceId: '',
@@ -33,25 +29,25 @@ export const EditSpace = observer(() => {
 
   useSubject(editSpace$, (spaceId) => {
     if (spaceId) {
-      db.space.get(spaceId).then((res) => {
-        if (res) {
-          setState({
-            space: res,
-            spaceName: res.name,
-            spaceId,
-            filePath: res.filePath,
-            open: true,
-            background: res.background || 'sky',
-            inputDeleteName: ''
-          })
-          if (res.$f) {
-            const name = res.$f.name
-            setState({
-              filePath: name
-            })
-          }
-        }
-      })
+      // db.space.get(spaceId).then((res) => {
+      //   if (res) {
+      //     setState({
+      //       space: res,
+      //       spaceName: res.name,
+      //       spaceId,
+      //       filePath: res.filePath,
+      //       open: true,
+      //       background: res.background || 'sky',
+      //       inputDeleteName: ''
+      //     })
+      //     if (res.$f) {
+      //       const name = res.$f.name
+      //       setState({
+      //         filePath: name
+      //       })
+      //     }
+      //   }
+      // })
     } else {
       setState({
         open: true,
@@ -240,8 +236,8 @@ export const EditSpace = observer(() => {
                 <div>
                   After setting, the documents and attachments in the space will be synchronized
                   with the bound folder in real time in standard markdown format. The attachments
-                  will be saved in the <Tag color={'blue'}>.files</Tag> folder. To ensure the writing speed,
-                  Inkdown only writes files within 5mb
+                  will be saved in the <Tag color={'blue'}>.files</Tag> folder. To ensure the
+                  writing speed, Inkdown only writes files within 5mb
                 </div>
               ),
               overlayInnerStyle: { width: 320 }

@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { MoreOutlined } from '@ant-design/icons'
 import { Fragment, useRef } from 'react'
-import { action, runInAction } from 'mobx'
+import { action } from 'mobx'
 import { Store, useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ChevronRight, FileText, FolderClosed, Plus } from 'lucide-react'
@@ -18,36 +18,38 @@ export const TreeRender = observer(() => {
     <>
       <div
         onContextMenu={(e) => e.stopPropagation()}
-        className={`py-1 flex justify-between items-center pl-5 pr-[14px] dark:text-gray-400 text-gray-500`}
+        className={`py-1 flex justify-between items-center pl-2 pr-1 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-semibold text-[13px] flex items-center'}>
           <span>Folders</span>
         </span>
         <div
-          className={`duration-100 p-1 rounded dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer ${
+          className={`duration-100 p-0.5 rounded dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer ${
             store.note.state.ctxNode?.id === 'root'
               ? 'dark:bg-gray-300/10 bg-gray-200/70'
               : 'dark:hover:bg-gray-300/10 hover:bg-gray-200/70'
           }`}
           onClick={(e) => {
-            // core.menu.openContextMenu(e, core.tree.root!)
+            store.menu.openContextMenu(e, store.note.state.root)
           }}
         >
-          <Plus className={'text-base'} />
+          <Plus size={20} />
         </div>
       </div>
       <div className={'px-3'} onContextMenu={(e) => e.stopPropagation()}>
         <RenderItem items={store.note.state.root.children || []} level={0} />
         {!store.note.state.root.children?.length && (
-          <div className={'mt-20  text-sm'}>
+          <div className={'mt-10  text-sm'}>
             <div className={'text-gray-400 text-center'}>No space document yet</div>
             <div
-              className={'mt-2 flex justify-center items-center link cursor-pointer'}
+              className={
+                'mt-2 flex justify-center items-center link cursor-pointer hover:text-white text-gray-400 duration-200'
+              }
               onClick={() => {
                 // core.menu.createDoc({ parent: core.tree.root })
               }}
             >
-              <FileText />
+              <FileText size={16} />
               <span className={'ml-1'}>New doc</span>
             </div>
           </div>

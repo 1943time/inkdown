@@ -5,11 +5,13 @@ import { MessageInstance } from 'antd/es/message/interface'
 import { SettingsStore } from './settings'
 import { NoteStore } from './note/note'
 import { mediaType } from '@/editor/utils/dom'
+import { ContextMenu } from './menu'
 export class Store {
   public readonly model = new ModelApi()
   public readonly settings = new SettingsStore(this)
   public readonly chat = new ChatStore(this)
   public readonly note = new NoteStore(this)
+  public readonly menu = new ContextMenu(this)
   constructor(public readonly msg: MessageInstance) {}
   copySuccessfully(str: string, message?: string) {
     this.copy(str)

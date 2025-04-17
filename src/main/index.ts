@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { Bound, createWindow, lastCloseWindow, winMap } from './window'
 import { knex } from './database/model'
 import { modelReady } from './database/api'
+import './handle'
 app.whenReady().then(() => {
   modelReady()
   electronApp.setAppUserModelId('com.inkdown')

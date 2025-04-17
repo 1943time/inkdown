@@ -19,7 +19,7 @@ export class ChatStore extends StructStore<typeof state> {
   private warningThreshold = 25000
   private minRetainMessages = 8 // 最少保留的消息数
   private recentMessagesCount = 6 // 保留最近的消息数
-  private activeClient: AiClient | null = null
+  activeClient: AiClient | null = null
   private chatAbort = new Map<string, AbortController>()
   generateTopicChat = new Set<string>()
   constructor(private readonly store: Store) {
@@ -91,7 +91,7 @@ export class ChatStore extends StructStore<typeof state> {
     const { models } = this.store.settings.state
     const activeChat = this.state.activeChat
     const config = models.find((item) => item.id === id)
-    if (config) {
+    if (config && this.activeClient) {
       const useModel = config.models.includes(model) ? model : config.models[0]
       this.activeClient = new AiClient({
         model: useModel,

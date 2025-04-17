@@ -238,7 +238,7 @@ export const Trash = observer(() => {
             'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1.5 px-2 cursor-pointer duration-200'
           }
         >
-          <Trash2 />
+          <Trash2 size={16} />
           <span className={'ml-2 text-[13px] leading-5 select-none'}>
             {true ? '废纸篓' : 'Trash'}
           </span>
@@ -307,7 +307,11 @@ const RenderItem = observer(
                     description="Are you sure you want to delete this doc permanently?"
                     okText="Yes"
                     okButtonProps={{ danger: true, type: 'default' }}
-                    overlayStyle={{ width: 260 }}
+                    styles={{
+                      body: {
+                        padding: 0
+                      }
+                    }}
                     onConfirm={(e) => {
                       return props.onDelete?.(d)
                     }}
@@ -318,7 +322,7 @@ const RenderItem = observer(
                         'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
                       }
                     >
-                      <Trash2 />
+                      <Trash2 size={16} />
                     </div>
                   </Popconfirm>
                 </div>

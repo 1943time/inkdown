@@ -151,7 +151,7 @@ export class NoteStore extends StructStore<typeof state> {
           nodes[doc.id] = observable(
             {
               ...doc,
-              schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : EditorUtils.p,
+              schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : [EditorUtils.p],
               links: doc.links ? JSON.parse(doc.links as unknown as string) : []
             },
             {
@@ -171,6 +171,7 @@ export class NoteStore extends StructStore<typeof state> {
         folder: true,
         sort: 0
       })
+
       for (const [id, children] of foldersMap.entries()) {
         if (id === 'root') continue
         if (nodes[id]) {

@@ -6,7 +6,6 @@ import { SearchOutlined } from '@ant-design/icons'
 import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
-import { useShallow } from 'zustand/react/shallow'
 import { observer } from 'mobx-react-lite'
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
@@ -185,21 +184,21 @@ export const FullSearch = observer(() => {
   }, [store.note.state.view])
   return (
     <div className={'h-full flex flex-col'}>
-      <div className={'flex mb-2 px-4'}>
+      <div className={'flex mb-2 px-1'}>
         <div
           onClick={() => store.note.setState({ view: 'folder' })}
           className={
-            'text-sm flex px-2 py-1 items-center text-black/70 dark:text-white/70 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 duration-200 cursor-pointer'
+            'text-sm flex px-1 py-1 items-center text-black/70 dark:text-white/70 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 duration-200 cursor-pointer'
           }
         >
-          <ArrowLeft className={'text-base'} />
+          <ArrowLeft size={18} />
           <span className={'ml-1'}>Return</span>
         </div>
       </div>
-      <div className={'px-4 relative'}>
+      <div className={'px-2 relative'}>
         <SearchOutlined
           className={
-            'absolute left-6 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'
+            'absolute left-4 top-1/2 -translate-y-1/2 z-10 dark:text-gray-500 text-gray-400'
           }
         />
         <input
