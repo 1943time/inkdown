@@ -325,6 +325,21 @@ export class NoteStore extends StructStore<typeof state> {
       // })
     }
   }
+  navigatePrev() {
+    if (this.state.currentTab?.state.hasPrev) {
+      this.state.currentTab.setState((state) => {
+        state.currentIndex--
+      })
+    }
+  }
+
+  navigateNext() {
+    if (this.state.currentTab?.state.hasNext) {
+      this.state.currentTab.setState((state) => {
+        state.currentIndex++
+      })
+    }
+  }
   async moveNode(ipc = false) {
     const { dragNode: dragDoc, dragStatus, ctxNode, nodes } = this.state
     if (!dragStatus) return
@@ -457,5 +472,15 @@ export class NoteStore extends StructStore<typeof state> {
         })
       }
     }
+  }
+  getDocPath(doc: IDoc) {
+    const path: string[] = []
+    let current = doc
+    while (current) {
+      if (current.id === 'root') break
+      path.unshift(current.name)
+      current = this.state.nodes[current.parentId]
+    }
+    return path
   }
 }

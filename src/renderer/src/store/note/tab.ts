@@ -35,6 +35,12 @@ const state = {
   openInsertCompletion: false,
   domRect: null as null | DOMRect,
   refreshHighlight: false,
+  get hasPrev() {
+    return this.currentIndex > 0
+  },
+  get hasNext() {
+    return this.currentIndex < this.docs.length - 1
+  },
   search: {
     replace: false,
     index: 0,
