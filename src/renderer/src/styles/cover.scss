@@ -9,10 +9,6 @@
     display: none;
   }
 }
-
-body {
-  overflow: hidden;
-}
 .tree-tab {
   @apply text-gray-600 dark:text-gray-300 flex justify-center items-center flex-1 relative z-10 cursor-pointer;
 }

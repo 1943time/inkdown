@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite'
 import { MoreOutlined } from '@ant-design/icons'
-import { Fragment, useRef } from 'react'
+import { Fragment, useCallback, useRef } from 'react'
 import { action } from 'mobx'
 import { Store, useStore } from '@/store/store'
 import { IDoc } from 'types/model'
@@ -18,7 +18,7 @@ export const TreeRender = observer(() => {
     <>
       <div
         onContextMenu={(e) => e.stopPropagation()}
-        className={`py-1 flex justify-between items-center pl-2 pr-0.5 dark:text-gray-400 text-gray-500`}
+        className={`py-1 flex justify-between items-center pl-4 pr-2.5 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-semibold text-[13px] flex items-center'}>
           <span>Folders</span>
@@ -36,7 +36,7 @@ export const TreeRender = observer(() => {
           <Plus size={20} />
         </div>
       </div>
-      <div onContextMenu={(e) => e.stopPropagation()}>
+      <div onContextMenu={(e) => e.stopPropagation()} className={'px-2'}>
         <RenderItem items={store.note.state.root.children || []} level={0} />
         {!store.note.state.root.children?.length && (
           <div className={'mt-10  text-sm'}>
@@ -74,6 +74,41 @@ const checkChildren = (node: IDoc, targetNode: IDoc | undefined, nodes: Record<s
 const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
   const store = useStore()
   const el = useRef<HTMLDivElement>(null)
+  const dragOver = useCallback(
+    action((e: React.DragEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      const container = document.querySelector<HTMLDivElement>('#tree-container')
+      if (!container) return
+      const scrollTop = container.scrollTop || 0
+
+      const offsetY = e.clientY - container.offsetTop + scrollTop - (el.current?.offsetTop || 0)
+      let mode: 'top' | 'bottom' | 'enter' = 'top'
+
+      const state = store.note.state
+      if (item.folder) {
+        mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
+      } else {
+        mode = offsetY < 24 ? 'top' : 'bottom'
+      }
+      if (mode === 'enter' && !item.folder && store.note.state.dragStatus) {
+        state.dragStatus = null
+        return
+      }
+      const dragNode = state.dragNode
+      if (dragNode && !checkChildren(dragNode, item, state.nodes)) {
+        state.dragStatus = null
+        return
+      }
+      if (state.dragStatus?.dropNode !== item || state.dragStatus.mode !== mode) {
+        state.dragStatus = {
+          dropNode: item,
+          mode
+        }
+      }
+    }),
+    []
+  )
   return (
     <Fragment>
       <div
@@ -81,34 +116,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
         data-fid={item.id}
         className={'py-[1px] cursor-pointer'}
         onDragLeave={(e) => e.stopPropagation()}
-        onDragOver={action((e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          const scrollTop = document.querySelector('#tree-container')?.scrollTop || 0
-          const offsetY = e.clientY - (el.current?.offsetTop || 0) + scrollTop
-          let mode: 'top' | 'bottom' | 'enter' = 'top'
-          const state = store.note.state
-          if (item.folder) {
-            mode = offsetY < 12 ? 'top' : offsetY > 24 ? 'bottom' : 'enter'
-          } else {
-            mode = offsetY < 24 ? 'top' : 'bottom'
-          }
-          if (mode === 'enter' && !item.folder && store.note.state.dragStatus) {
-            state.dragStatus = null
-            return
-          }
-          const dragNode = state.dragNode
-          if (dragNode && !checkChildren(dragNode, item, state.nodes)) {
-            state.dragStatus = null
-            return
-          }
-          if (state.dragStatus?.dropNode !== item || state.dragStatus.mode !== mode) {
-            state.dragStatus = {
-              dropNode: item,
-              mode
-            }
-          }
-        })}
+        onDragOver={dragOver}
       >
         <div
           style={{
@@ -134,7 +142,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
             })}
             onContextMenu={(e) => {
               e.preventDefault()
-              // core.menu.openContextMenu(e, item)
+              store.menu.openContextMenu(e, item)
             }}
             onClick={action((e) => {
               e.stopPropagation()

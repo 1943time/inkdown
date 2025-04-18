@@ -14,6 +14,8 @@ html {
   background-color: transparent !important;
   background-color: var(--primary-bg-color) !important;
   -webkit-font-smoothing: antialiased;
+  height: 100vh;
+  overflow: hidden !important;
 }
 
 .action {

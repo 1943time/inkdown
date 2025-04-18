@@ -2,6 +2,7 @@ import { useStore } from '@/store/store'
 import { observer } from 'mobx-react-lite'
 import { Tabs } from './ui/Tabs'
 import { EditorFrame } from './EditorFrame'
+import { Characters } from './ui/Characters'
 
 export const Note = observer(() => {
   const store = useStore()
@@ -29,7 +30,7 @@ export const Note = observer(() => {
             ))}
           </>
           {/* <Tools /> */}
-          {/* <Characters /> */}
+          <Characters />
         </div>
       )}
     </div>

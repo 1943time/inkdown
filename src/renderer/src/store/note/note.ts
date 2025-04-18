@@ -1,6 +1,5 @@
 import { IDoc, ISpace } from 'types/model'
 import { Store } from '../store'
-import { EditorUtils } from '@/editor/utils/editorUtils'
 import { History } from 'slate-history'
 import { TabStore } from './tab'
 import { BaseSelection } from 'slate'
@@ -39,7 +38,7 @@ const state = {
     return this.spaces.find((space) => space.id === this.selectedSpaceId)
   },
   get opendDoc() {
-    return this.currentTab.state.doc
+    return this.currentTab?.state.doc
   },
   get root() {
     return this.nodes['root']
@@ -260,6 +259,16 @@ export class NoteStore extends StructStore<typeof state> {
       })
     }
   }
+  openParents(doc: IDoc) {
+    this.setState((state) => {
+      let parent = this.state.nodes[doc.parentId]
+      while (parent) {
+        parent.expand = true
+        parent = this.state.nodes[parent.parentId]
+      }
+      state.selectedDoc = null
+    })
+  }
   openDoc(doc: IDoc, scroll: boolean = false) {
     const tab = this.state.currentTab
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
@@ -278,6 +287,7 @@ export class NoteStore extends StructStore<typeof state> {
       lastOpenTime: now
     })
     this.recordTabs()
+    this.openParents(doc)
     if (scroll) {
       tab.container?.scroll({
         top: 0,
@@ -363,22 +373,25 @@ export class NoteStore extends StructStore<typeof state> {
               this.store.model.updateDoc(dragNode.id, {
                 parentId: dropNode?.parentId
               })
+              dragNode.parentId = dropNode!.parentId
               this.store.model.updateDocs(
-                targetList.map((n) => ({ id: n.id, sort: index, updated }))
+                targetList.map((n, i) => ({ id: n.id, sort: i, updated }))
               )
             }
           } else if (!ipc) {
             const updated = Date.now()
-            this.store.model.updateDocs(targetList.map((n) => ({ id: n.id, sort: index, updated })))
+            this.store.model.updateDocs(targetList.map((n, i) => ({ id: n.id, sort: i, updated })))
           }
         }
         if (mode === 'enter' && dropNode!.folder) {
           dropNode!.children!.unshift(dragNode)
+          dropNode!.expand = true
           draft.nodes[dragNode.parentId].children = oldList.filter((c) => c.id !== dragNode.id)
           if (!ipc) {
             this.store.model.updateDoc(dragNode.id, {
-              parentId: dropNode?.parentId
+              parentId: dropNode!.id
             })
+            dragNode.parentId = dropNode!.id
             this.store.model.updateDocs(
               dropNode!.children!.map((n, i) => ({ id: n.id, sort: i, updated }))
             )

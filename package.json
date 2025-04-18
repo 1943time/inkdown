@@ -50,6 +50,7 @@
     "@types/unist": "^3.0.3",
     "@vitejs/plugin-react": "^4.3.4",
     "ace-builds": "^1.39.1",
+    "alfaaz": "^1.1.0",
     "antd": "^5.24.4",
     "antd-style": "^3.7.1",
     "array-move": "^4.0.0",

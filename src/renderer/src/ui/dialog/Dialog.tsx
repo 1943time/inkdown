@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useEffect, useRef } from 'react'
 import { CloseOutlined } from '@ant-design/icons'
 import isHotkey from 'is-hotkey'
 import { useGetSetState } from 'react-use'
+import { X } from 'lucide-react'
 
 export function Dialog(props: {
   open: boolean
@@ -63,7 +64,7 @@ export function Dialog(props: {
           onClick={(e) => e.stopPropagation()}
         >
           {props.title && (
-            <div className={'flex items-center justify-between h-10 px-3 border-b b1'}>
+            <div className={'flex items-center justify-between h-10 pl-3 pr-2 border-b b1'}>
               <div className={'text-sm dark:text-gray-300 text-gray-600'}>{props.title}</div>
               <div
                 className={
@@ -71,7 +72,7 @@ export function Dialog(props: {
                 }
                 onClick={close}
               >
-                <CloseOutlined />
+                <X size={16} />
               </div>
             </div>
           )}

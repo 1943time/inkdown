@@ -68,7 +68,7 @@ export const ToggleSpace = observer(() => {
   const store = useStore()
   const { spaces, currentSpace } = store.note.state
   return (
-    <div className={`h-8 mb-1`}>
+    <div className={`h-8 mb-1 px-2`}>
       <Popover
         trigger={['click']}
         placement={'bottomLeft'}

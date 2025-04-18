@@ -65,6 +65,7 @@ export class TabStore extends StructStore<typeof state> {
     return this.store.note
   }
   editor = withMarkdown(withReact(withHistory(createEditor())), this)
+  docChanged$ = new Subject()
   selChange$ = new Subject<Path | null>()
   saveDoc$ = new Subject()
   externalChange$ = new Subject<string>()

@@ -134,6 +134,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         tab.setState((state) => {
           state.docChanged = true
         })
+        tab.docChanged$.next(null)
         clearTimeout(saveTimer.current)
         saveTimer.current = window.setTimeout(() => {
           save()

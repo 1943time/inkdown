@@ -39,7 +39,6 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
     setState({ tip: false })
     setName(tab.state.doc?.name)
     nodeRef.current = tab.state.doc
-    console.log('change tab', nodeRef.current)
   }, [tab.state.doc])
 
   const detectRename = useCallback(async () => {
