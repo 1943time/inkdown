@@ -2,13 +2,13 @@ import { Popover } from 'antd'
 import { SpaceItem } from '@/ui/space/SpaceItem'
 import { useCallback } from 'react'
 import { arrayMoveImmutable } from 'array-move'
-import { Icon } from '@iconify/react'
 import SortableList, { SortableItem } from 'react-easy-sort'
 import { Folders, Plus, Settings } from 'lucide-react'
 import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
 import { ISpace } from 'types/model'
 import { observer } from 'mobx-react-lite'
+import { ISwitch } from '@/icons/ISwitch'
 export const SpaceList = observer(
   (props: {
     spaces: ISpace[]
@@ -141,7 +141,7 @@ export const ToggleSpace = observer(() => {
       >
         <div
           className={
-            'pl-2 pr-1 h-full flex items-center justify-between text-sm duration-200 rounded-lg dark:hover:bg-white/5 hover:bg-black/5 cursor-pointer'
+            'pl-2 pr-1 h-full flex items-center justify-between text-sm duration-200 rounded-lg dark:hover:bg-white/5 hover:bg-black/5 cursor-pointer font-medium'
           }
         >
           <div className={'flex items-center'}>
@@ -149,10 +149,7 @@ export const ToggleSpace = observer(() => {
             <div className={'ml-2 max-w-full truncate text-[13px]'}>{currentSpace?.name}</div>
           </div>
           <div>
-            <Icon
-              icon={'ic:round-unfold-more'}
-              className={'text-lg ml-1 flex-shrink-0 text-gray-500 dark:text-gray-400'}
-            />
+            <ISwitch className={'text-lg ml-1 flex-shrink-0 text-gray-500 dark:text-gray-400'} />
           </div>
         </div>
       </Popover>

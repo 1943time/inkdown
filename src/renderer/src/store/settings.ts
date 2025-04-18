@@ -7,7 +7,7 @@ import { isDark } from '@/utils/common'
 const state = {
   open: false,
   foldSideBar: false,
-  view: 'chat' as 'chat' | 'note',
+  view: 'note' as 'chat' | 'note',
   defaultModel: null as { providerId: string; model: string } | null,
   models: [] as IClient[],
   ready: false,

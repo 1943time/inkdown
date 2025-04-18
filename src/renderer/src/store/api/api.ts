@@ -1,5 +1,4 @@
-import { dataTransform, stringTransform } from '@/utils/common'
-import { toJS } from 'mobx'
+import { copy, dataTransform, stringTransform } from '@/utils/common'
 import {
   IChat,
   IChatTable,
@@ -25,11 +24,11 @@ export class ModelApi {
   }
 
   async createChat(chat: IChat): Promise<void> {
-    return ipcRenderer.invoke('createChat', toJS(chat))
+    return ipcRenderer.invoke('createChat', chat)
   }
 
   async updateChat(id: string, chat: Partial<IChat>): Promise<void> {
-    return ipcRenderer.invoke('updateChat', id, toJS(chat))
+    return ipcRenderer.invoke('updateChat', id, chat)
   }
 
   async deleteChat(id: string): Promise<void> {
@@ -94,11 +93,11 @@ export class ModelApi {
   }
 
   async createClient(client: IClient): Promise<void> {
-    return ipcRenderer.invoke('createClient', toJS(client))
+    return ipcRenderer.invoke('createClient', client)
   }
 
   async updateClient(id: string, client: Partial<IClient>): Promise<void> {
-    return ipcRenderer.invoke('updateClient', id, toJS(client))
+    return ipcRenderer.invoke('updateClient', id, client)
   }
 
   async deleteClient(id: string): Promise<void> {
@@ -121,11 +120,11 @@ export class ModelApi {
   }
 
   async createSpace(space: ISpace): Promise<void> {
-    return ipcRenderer.invoke('createSpace', toJS(space))
+    return ipcRenderer.invoke('createSpace', space)
   }
 
   async updateSpace(id: string, space: Partial<ISpace>): Promise<void> {
-    return ipcRenderer.invoke('updateSpace', id, toJS(space))
+    return ipcRenderer.invoke('updateSpace', id, space)
   }
 
   async deleteSpace(id: string): Promise<void> {
@@ -154,27 +153,24 @@ export class ModelApi {
   }
 
   async createDoc(doc: IDoc): Promise<void> {
-    const data = toJS(doc)
     return ipcRenderer.invoke('createDoc', {
-      ...data,
-      schema: data.schema ? JSON.stringify(data.schema) : undefined
+      ...doc,
+      schema: doc.schema ? JSON.stringify(doc.schema) : undefined
     })
   }
 
   async updateDoc(id: string, doc: Partial<IDoc>): Promise<void> {
-    const data = toJS(doc)
     return ipcRenderer.invoke('updateDoc', id, {
-      ...data,
-      schema: data.schema ? JSON.stringify(data.schema) : undefined,
-      links: data.links ? JSON.stringify(data.links) : undefined
+      ...doc,
+      schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
+      links: doc.links ? JSON.stringify(doc.links) : undefined
     })
   }
 
   async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
-    const data = toJS(docs)
     return ipcRenderer.invoke(
       'updateDocs',
-      data.map((d) => {
+      docs.map((d) => {
         return {
           ...d,
           schema: d.schema ? JSON.stringify(d.schema) : undefined,
@@ -200,7 +196,7 @@ export class ModelApi {
   }
 
   async createDocTag(docTag: IDocTag): Promise<void> {
-    return ipcRenderer.invoke('createDocTag', toJS(docTag))
+    return ipcRenderer.invoke('createDocTag', copy(docTag))
   }
 
   async deleteDocTag(id: string): Promise<void> {
@@ -212,7 +208,7 @@ export class ModelApi {
   }
 
   async createTag(tag: ITag): Promise<void> {
-    return ipcRenderer.invoke('createTag', toJS(tag))
+    return ipcRenderer.invoke('createTag', copy(tag))
   }
 
   async deleteTag(id: string): Promise<void> {
@@ -228,7 +224,7 @@ export class ModelApi {
   }
 
   async createHistory(history: IHistory): Promise<void> {
-    return ipcRenderer.invoke('createHistory', toJS(history))
+    return ipcRenderer.invoke('createHistory', copy(history))
   }
 
   async clearHistory(docId: string): Promise<void> {
@@ -240,7 +236,7 @@ export class ModelApi {
   }
 
   async createFile(file: IFile): Promise<void> {
-    return ipcRenderer.invoke('createFile', toJS(file))
+    return ipcRenderer.invoke('createFile', copy(file))
   }
 
   async deleteFiles(ids: string[]): Promise<void> {

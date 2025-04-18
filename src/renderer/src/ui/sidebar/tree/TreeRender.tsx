@@ -187,7 +187,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
           {store.note.state.dragNode !== item && (
             <div
               onClick={(e) => {
-                // core.menu.openContextMenu(e, item)
+                store.menu.openContextMenu(e, item)
               }}
               className={`h-6 rounded top-1/2 -mt-3 ${store.note.state.ctxNode?.id === item.id ? 'flex dark:bg-gray-200/20 bg-gray-400/30' : 'hidden group-hover:flex dark:hover:bg-gray-200/20 hover:bg-gray-400/30'}
             absolute right-1 w-[14px] justify-center items-center dark:text-gray-200 text-lg`}

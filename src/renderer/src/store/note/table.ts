@@ -5,16 +5,16 @@ import { Editor, Element, Node, Path, Transforms } from 'slate'
 import isHotkey from 'is-hotkey'
 import { TabStore } from './tab'
 import { EditorUtils } from '@/editor/utils/editorUtils'
-import { create } from 'zustand'
 import { openMenus } from '@/ui/common/Menu'
+import { StructStore } from '../struct'
 
-export class TableLogic {
+const store = {
+  moveLeft: 0,
+  showMoveMark: false,
+  startedMove: false
+}
+export class TableLogic extends StructStore<typeof store> {
   private keys = new Set(['arrow', 'enter', 'backspace'])
-  useState = create(() => ({
-    moveLeft: 0,
-    showMoveMark: false,
-    startedMove: false
-  }))
   get editor() {
     return this.tab.editor
   }
@@ -27,6 +27,7 @@ export class TableLogic {
     return node
   }
   constructor(private readonly tab: TabStore) {
+    super(store)
     this.hoverMark = this.hoverMark.bind(this)
     this.leaveMark = this.leaveMark.bind(this)
     this.startMove = this.startMove.bind(this)
@@ -84,13 +85,13 @@ export class TableLogic {
 
   hoverMark(e: React.MouseEvent) {
     const div = e.target as HTMLDivElement
-    this.useState.setState({
+    this.setState({
       moveLeft: div.parentElement!.offsetLeft + div.parentElement!.clientWidth - 2,
       showMoveMark: true
     })
   }
   leaveMark() {
-    this.useState.setState({
+    this.setState({
       showMoveMark: false
     })
   }
@@ -107,7 +108,7 @@ export class TableLogic {
     const tableNode = Node.get(this.editor, tablePath)
     const minLeft = cellLeft + 50
     const startMoveLeft = cellLeft + div.parentElement!.clientWidth - 2
-    this.useState.setState({
+    this.setState({
       moveLeft: startMoveLeft,
       startedMove: true
     })
@@ -123,11 +124,11 @@ export class TableLogic {
         if (width > 500) {
           width = 500
         }
-        this.useState.setState({
+        this.setState({
           moveLeft: startMoveLeft + offset
         })
-        if (this.useState.getState().moveLeft < minLeft) {
-          this.useState.setState({
+        if (this.state.moveLeft < minLeft) {
+          this.setState({
             moveLeft: cellLeft + 48
           })
         }
@@ -148,7 +149,7 @@ export class TableLogic {
         }
         window.removeEventListener('mousemove', move)
         document.body.classList.remove('cursor-col-resize')
-        this.useState.setState({
+        this.setState({
           startedMove: false,
           showMoveMark: false
         })

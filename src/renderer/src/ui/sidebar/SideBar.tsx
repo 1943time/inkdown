@@ -26,10 +26,7 @@ export const SideBar = observer(() => {
       'mouseup',
       () => {
         document.body.classList.remove('drag-sidebar')
-        store.model.putSetting({
-          key: 'sidePanelWidth',
-          value: store.settings.state.sidePanelWidth
-        })
+        store.settings.setSetting('sidePanelWidth', store.settings.state.sidePanelWidth)
         window.removeEventListener('mousemove', move)
       },
       { once: true }
@@ -51,7 +48,7 @@ export const SideBar = observer(() => {
           <div
             className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${view === 'note' ? 'text-black' : 'text-white/70'}`}
             onClick={() => {
-              store.settings.setState({ view: 'note' })
+              store.settings.setSetting('view', 'note')
             }}
           >
             <PenLine size={16} />
@@ -60,7 +57,7 @@ export const SideBar = observer(() => {
           <div
             className={`flex items-center duration-150 relative z-10 justify-center flex-1 ${view === 'chat' ? 'text-black' : 'text-white/70'}`}
             onClick={() => {
-              store.settings.setState({ view: 'chat' })
+              store.settings.setSetting('view', 'chat')
             }}
           >
             <Bot size={16} />
@@ -79,8 +76,14 @@ export const SideBar = observer(() => {
         onMouseDown={move}
       />
       <div style={{ width: sidePanelWidth }} className={'flex-1'}>
-        {view === 'chat' && <Chats />}
-        <div className={`h-full ${view === 'note' ? '' : 'hidden'}`}>
+        <div
+          className={`h-full ${view === 'chat' ? '' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
+        >
+          <Chats />
+        </div>
+        <div
+          className={`h-full ${view === 'note' ? '' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
+        >
           <Tree />
         </div>
       </div>

@@ -6,12 +6,17 @@ import { ElementProps, TableCellNode, TableNode } from '..'
 import { useTab } from '@/store/note/TabCtx'
 import { Ellipsis } from 'lucide-react'
 import { useGetSetState } from 'react-use'
-import { useShallow } from 'zustand/react/shallow'
+import { useObserve, useObserveKey } from '@/hooks/common'
 
 export function TableCell({ element, children, attributes }: ElementProps<TableCellNode>) {
   const tab = useTab()
-  const [showMenu, setShowMenu] = useState(false)
-  const startedMove = tab.table.useState((state) => state.startedMove)
+  const [state, setState] = useGetSetState({
+    showMenu: false,
+    startedMove: false
+  })
+  useObserveKey(tab.table.state, 'startedMove', (value) => {
+    setState({ startedMove: value.newValue })
+  })
   return element.title ? (
     <th
       {...attributes}
@@ -32,17 +37,17 @@ export function TableCell({ element, children, attributes }: ElementProps<TableC
         onMouseDown={tab.table.startMove}
         contentEditable={false}
       ></div>
-      {!startedMove && (
+      {!state().startedMove && (
         <div
-          className={`t-more ${showMenu ? 'flex' : 'hidden group-hover:flex'}`}
+          className={`t-more ${state().showMenu ? 'flex' : 'hidden group-hover:flex'}`}
           contentEditable={false}
           onClick={(e) => {
-            setShowMenu(true)
+            setState({ showMenu: true })
             Transforms.select(
               tab.editor,
               Editor.end(tab.editor, ReactEditor.findPath(tab.editor, element))
             )
-            tab.table.openTableMenus(e, true, () => setShowMenu(false))
+            tab.table.openTableMenus(e, true, () => setState({ showMenu: false }))
           }}
         >
           <Ellipsis />
@@ -69,17 +74,17 @@ export function TableCell({ element, children, attributes }: ElementProps<TableC
         onMouseEnter={tab.table.hoverMark}
         onMouseLeave={tab.table.leaveMark}
       ></div>
-      {!startedMove && (
+      {!state().startedMove && (
         <div
-          className={`t-more ${showMenu ? 'flex' : 'hidden group-hover:flex'}`}
+          className={`t-more ${state().showMenu ? 'flex' : 'hidden group-hover:flex'}`}
           contentEditable={false}
           onClick={(e) => {
-            setShowMenu(true)
+            setState({ showMenu: true })
             Transforms.select(
               tab.editor,
               Editor.end(tab.editor, ReactEditor.findPath(tab.editor, element))
             )
-            tab.table.openTableMenus(e, false, () => setShowMenu(false))
+            tab.table.openTableMenus(e, false, () => setState({ showMenu: false }))
           }}
         >
           <Ellipsis />
@@ -96,11 +101,14 @@ export function Table({ element, children, attributes }: ElementProps<TableNode>
   const [state, setState] = useGetSetState({
     floatRight: false,
     floatLeft: false,
-    enter: false
+    enter: false,
+    showMoveMark: false,
+    startedMove: false,
+    moveLeft: 0
   })
-  const [showMoveMark, startedMove, moveLeft] = tab.table.useState(
-    useShallow((state) => [state.showMoveMark, state.startedMove, state.moveLeft])
-  )
+  useObserve(tab.table.state, (value) => {
+    setState({ [value.name]: value.newValue })
+  })
   const scroll = useCallback(() => {
     const dom = domRef.current
     if (dom) {
@@ -143,8 +151,12 @@ export function Table({ element, children, attributes }: ElementProps<TableNode>
         <table className={'w-auto'} onMouseDown={(e) => e.stopPropagation()}>
           <tbody>{children}</tbody>
         </table>
-        {state().enter && (showMoveMark || startedMove) && (
-          <div className={'col-move-mark'} style={{ left: moveLeft }} contentEditable={false} />
+        {state().enter && (state().showMoveMark || state().startedMove) && (
+          <div
+            className={'col-move-mark'}
+            style={{ left: state().moveLeft }}
+            contentEditable={false}
+          />
         )}
       </div>
       <div

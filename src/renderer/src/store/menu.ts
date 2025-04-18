@@ -26,20 +26,22 @@ export class ContextMenu {
     const docName = this.getCreateName(name, parent)
     this.store.note.setState((state) => {
       const now = Date.now()
-      const doc: IDoc = {
-        id: nanoid(),
-        name: docName,
-        parentId,
-        folder: false,
-        schema: schema ? copy(schema) : [EditorUtils.p],
-        spaceId: this.store.note.state.currentSpace?.id!,
-        sort: 0,
-        created: now,
-        updated: now
-      }
-      state.nodes[doc.id] = observable(doc, {
-        schema: !doc.folder ? false : undefined
-      })
+      const doc: IDoc = observable(
+        {
+          id: nanoid(),
+          name: docName,
+          parentId,
+          folder: false,
+          schema: schema ? copy(schema) : [EditorUtils.p],
+          spaceId: this.store.note.state.currentSpace?.id!,
+          sort: 0,
+          created: now,
+          updated: now
+        },
+        { schema: false }
+      )
+      state.nodes[doc.id] = doc
+      this.store.note.openDoc(doc)
       doc.folder ? parent.children?.unshift(doc) : parent.children?.push(doc)
       this.store.model.createDoc(doc).then(() => {
         this.store.model.updateDocs(
@@ -52,6 +54,18 @@ export class ContextMenu {
           })
         )
       })
+      setTimeout(() => {
+        const title = document.querySelector<HTMLInputElement>('.page-title')
+        if (title) {
+          title.focus()
+          const range = document.createRange()
+          range.selectNodeContents(title)
+          range.collapse(false)
+          const sel = window.getSelection()
+          sel?.removeAllRanges()
+          sel?.addRange(range)
+        }
+      }, 30)
     })
   }
   openContextMenu(e: React.MouseEvent, node: IDoc) {

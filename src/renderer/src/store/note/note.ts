@@ -157,7 +157,7 @@ export class NoteStore extends StructStore<typeof state> {
             schema: false
           })
         }
-        const parent = doc.parentId || 'root'
+        const parent = doc.parentId
         if (!foldersMap.has(parent)) {
           foldersMap.set(parent, [])
         }
@@ -171,6 +171,7 @@ export class NoteStore extends StructStore<typeof state> {
         created: now,
         updated: now,
         spaceId,
+        parentId: '',
         folder: true,
         sort: 0
       })
@@ -191,7 +192,7 @@ export class NoteStore extends StructStore<typeof state> {
     const doc = currentTab.state.doc
     if (tabs.length > 1 && doc) {
       tabs.forEach((t, i) => {
-        if (i !== tabIndex && t.state.doc.id === doc.id) {
+        if (i !== tabIndex && t.state.doc?.id === doc.id) {
           t.externalChange$.next(t.state.doc.id)
         }
       })
@@ -331,8 +332,8 @@ export class NoteStore extends StructStore<typeof state> {
       this.setState((draft) => {
         const { dropNode, mode } = draft.dragStatus!
         const dragNode = draft.dragNode!
-        let targetList = draft.nodes[dropNode!.parentId || 'root'].children!
-        const oldList = draft.nodes[dragNode.parentId || 'root'].children!
+        let targetList = draft.nodes[dropNode!.parentId].children!
+        const oldList = draft.nodes[dragNode.parentId].children!
         let index = targetList.findIndex((l) => l === dropNode)
         draft.dragNode = null
         draft.dragStatus = null
@@ -347,9 +348,7 @@ export class NoteStore extends StructStore<typeof state> {
         }
         if (mode === 'top' && targetList[index - 1] === dragNode) return
         if (mode === 'bottom' && targetList[index + 1] === dragNode) return
-        draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
-          (c) => c.id !== dragNode.id
-        )
+        draft.nodes[dragNode.parentId].children = oldList.filter((c) => c.id !== dragNode.id)
         if (dragNode.parentId === dropNode?.parentId) {
           targetList = targetList.filter((c) => c.id !== dragNode.id)
           index = targetList.findIndex((l) => l.id === dropNode!.id)
@@ -357,11 +356,9 @@ export class NoteStore extends StructStore<typeof state> {
         const updated = Date.now()
         if (mode === 'bottom' || mode === 'top') {
           targetList.splice(mode === 'top' ? index : index + 1, 0, dragNode)
-          draft.nodes[dropNode!.parentId || 'root'].children = targetList
+          draft.nodes[dropNode!.parentId].children = targetList
           if (dragNode.parentId !== dropNode?.parentId) {
-            draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
-              (c) => c.id !== dragNode.id
-            )
+            draft.nodes[dragNode.parentId].children = oldList.filter((c) => c.id !== dragNode.id)
             if (!ipc) {
               this.store.model.updateDoc(dragNode.id, {
                 parentId: dropNode?.parentId
@@ -377,9 +374,7 @@ export class NoteStore extends StructStore<typeof state> {
         }
         if (mode === 'enter' && dropNode!.folder) {
           dropNode!.children!.unshift(dragNode)
-          draft.nodes[dragNode.parentId || 'root'].children = oldList.filter(
-            (c) => c.id !== dragNode.id
-          )
+          draft.nodes[dragNode.parentId].children = oldList.filter((c) => c.id !== dragNode.id)
           if (!ipc) {
             this.store.model.updateDoc(dragNode.id, {
               parentId: dropNode?.parentId
@@ -405,16 +400,13 @@ export class NoteStore extends StructStore<typeof state> {
   }
   private removeSelf(node: IDoc) {
     if (!node.folder) this.removeNodeFromHistory(node)
-    const parentId = node.parentId || 'root'
-    const nodes = this.state.nodes
-    if (parent) {
-      this.setState((state) => {
-        state.nodes[parentId].children = state.nodes[parentId].children!.filter(
-          (c) => c.id !== node.id
-        )
-        delete state.nodes[node.id]
-      })
-    }
+    const parentId = node.parentId
+    this.setState((state) => {
+      state.nodes[parentId].children = state.nodes[parentId].children!.filter(
+        (c) => c.id !== node.id
+      )
+      delete state.nodes[node.id]
+    })
     if (node.folder) {
       const stack = node.children!.slice()
       const deletedIds: string[] = []
@@ -437,6 +429,7 @@ export class NoteStore extends StructStore<typeof state> {
   private removeNodeFromHistory(doc: IDoc) {
     const { tabs } = this.state
     for (let t of tabs) {
+      if (!t.state?.doc) continue
       if (t.state.doc.id === doc.id) {
         t.editor.selection = null
       }

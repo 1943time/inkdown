@@ -117,7 +117,7 @@ export interface IDoc {
   id: string
   name: string
   spaceId: string
-  parentId?: string
+  parentId: string
   folder: boolean
   schema?: any[]
   updated: number

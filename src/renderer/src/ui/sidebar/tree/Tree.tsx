@@ -19,7 +19,7 @@ export const Tree = observer(() => {
   }, [store.note.state.currentSpace?.id])
   if (!nodes['root'] || !store.note.state.currentTab) return null
   return (
-    <div className={`h-full width-duration relative duration-200`}>
+    <div className={`h-full width-duration relative duration-200 text-white`}>
       <div className={'h-full flex flex-col'}>
         <div className={'px-2 flex-1'}>
           <ToggleSpace />
@@ -28,7 +28,7 @@ export const Tree = observer(() => {
               store.note.setState({ view: 'search' })
             }}
             className={
-              'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1.5 px-2 cursor-pointer duration-200'
+              'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1.5 px-2 cursor-pointer duration-200 font-medium'
             }
           >
             <Search size={16} />

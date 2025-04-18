@@ -279,9 +279,7 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
 
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
   const handle = knex('doc').where('spaceId', spaceId)
-  if (deleted) {
-    handle.andWhere('deleted', 1)
-  }
+  handle.andWhere('deleted', !!deleted)
   const docs = await handle.orderBy('sort', 'asc').select('*')
   return docs
 })

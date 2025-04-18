@@ -1,10 +1,11 @@
-import { Empty, Popconfirm, Popover } from 'antd'
+import { Empty, Popover } from 'antd'
 import { Fragment, useCallback } from 'react'
 import { IDoc } from 'types/model'
 import { useGetSetState } from 'react-use'
 import { useStore } from '@/store/store'
-import { ChevronRight, FileText, FolderClosed, TicketSlash, Trash2, Undo2 } from 'lucide-react'
+import { ChevronRight, FileText, FolderClosed, Trash2, Undo2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { TextHelp } from '@/ui/common/HelpText'
 
 interface DocTree extends Omit<IDoc, 'children'> {
   children?: DocTree[]
@@ -177,29 +178,7 @@ export const Trash = observer(() => {
       }}
       styles={{ body: { padding: 0 } }}
       content={
-        <div className={'relative h-[300px] pt-2 pb-8 flex flex-col'}>
-          {!!state().removeDocs.length && (
-            <Popconfirm
-              title={true ? '提示' : 'Note'}
-              description={
-                true
-                  ? '是否确定要永久删除所有文档？'
-                  : 'Are you sure you want to permanently empty the Trash?'
-              }
-              okButtonProps={{ danger: true, type: 'default' }}
-              overlayStyle={{ width: 260 }}
-              onConfirm={clearDocs}
-              disabled={state().loading}
-            >
-              <div
-                className={
-                  'ml-2 p-1 right-1 bottom-1 absolute rounded hover:bg-gray-100 cursor-pointer text-gray-600 dark:text-gray-300 dark:hover:bg-gray-100/10'
-                }
-              >
-                <TicketSlash className={'text-lg'} />
-              </div>
-            </Popconfirm>
-          )}
+        <div className={'h-[300px] pt-2 pb-5 flex flex-col relative'}>
           <div
             className={
               'w-[380px] overflow-y-auto px-2 pt-2 text-gray-600 dark:text-gray-300 flex-1'
@@ -219,6 +198,13 @@ export const Trash = observer(() => {
               }}
               onRestore={restore}
               onDelete={deleteDoc}
+            />
+          </div>
+          <div className={'absolute text-center right-1 bottom-1'}>
+            <TextHelp
+              text={
+                'The document will remain here for 30 days, after which it will be permanently deleted.'
+              }
             />
           </div>
         </div>
@@ -269,21 +255,23 @@ const RenderItem = observer(
                 }
               }}
               className={
-                'flex select-none items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-100/10 rounded h-6 px-2'
+                'flex select-none items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-100/10 rounded h-6 px-1'
               }
             >
               <div className={'flex items-center text-sm max-w-[236px]'}>
                 {d.folder ? (
                   <>
                     <ChevronRight
+                      size={16}
+                      strokeWidth={3}
                       className={`w-[11px] h-[11px] mr-1 dark:text-gray-500 text-gray-400 duration-200 ${
                         d.folder && props.expands.includes(d.id) ? 'rotate-90' : ''
                       }`}
                     />
-                    <FolderClosed />
+                    <FolderClosed size={15} />
                   </>
                 ) : (
-                  <FileText />
+                  <FileText size={15} />
                 )}
                 <span className={'ml-1 flex-1 truncate'}>{d.name}</span>
               </div>
@@ -300,31 +288,8 @@ const RenderItem = observer(
                       'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
                     }
                   >
-                    <Undo2 />
+                    <Undo2 size={16} />
                   </div>
-                  <Popconfirm
-                    title={'Note'}
-                    description="Are you sure you want to delete this doc permanently?"
-                    okText="Yes"
-                    okButtonProps={{ danger: true, type: 'default' }}
-                    styles={{
-                      body: {
-                        padding: 0
-                      }
-                    }}
-                    onConfirm={(e) => {
-                      return props.onDelete?.(d)
-                    }}
-                    cancelText="No"
-                  >
-                    <div
-                      className={
-                        'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
-                      }
-                    >
-                      <Trash2 size={16} />
-                    </div>
-                  </Popconfirm>
                 </div>
               )}
             </div>

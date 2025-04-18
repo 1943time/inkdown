@@ -7,16 +7,15 @@ import { memo, useCallback, useMemo } from 'react'
 import { createEditor, Node, Range, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from 'slate-react'
-import { useShallow } from 'zustand/react/shallow'
 import { IMessageFile } from 'types/model'
 import { chooseFile } from './ChooseFile'
 import { ILoad } from '@/icons/ILoad'
-import { useGetImmer } from '@/hooks/useImmer'
 import { copyToClipboard } from '@/utils/clipboard'
 import { IStop } from '@/icons/IStop'
 import { getFileExtension } from '@/utils/string'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { observer } from 'mobx-react-lite'
+import { useLocalState } from '@/hooks/useLocalState'
 
 export const ChatInput = observer(() => {
   const store = useStore()
@@ -26,7 +25,7 @@ export const ChatInput = observer(() => {
     return (activeChat && activeChat?.websearch) || (!activeChat && webSearch)
   }, [activeChat, webSearch])
   const editor = useMemo(() => withReact(withHistory(createEditor())), [])
-  const [state, setState] = useGetImmer({
+  const [state, setState] = useLocalState({
     inputComposition: false,
     height: 24,
     text: '',
@@ -58,14 +57,14 @@ export const ChatInput = observer(() => {
       store.chat.stopCompletion(activeChat.id)
       return
     }
-    if (!state().text || state().files.find((f) => f.status === 'pending')) return
-    store.chat.completion(state().text, {
-      files: state().files,
-      images: state().images
+    if (!state.text || state.files.find((f) => f.status === 'pending')) return
+    store.chat.completion(state.text, {
+      files: state.files,
+      images: state.images
     })
     EditorUtils.reset(editor)
     setState({ text: '', files: [], images: [] })
-  }, [editor, state().text, activeChat?.pending])
+  }, [editor, state.text, activeChat?.pending])
 
   const keydown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (isHotkey('mod+backspace', e)) {
@@ -112,9 +111,9 @@ export const ChatInput = observer(() => {
     <div className={'chat-input w-full relative'}>
       <div className={'chat-input-mask'}></div>
       <div className={'pt-3 pb-2 px-4 w-full border dark:border-white/20 rounded-2xl'}>
-        {!!state().files.length && (
+        {!!state.files.length && (
           <div className={'pb-3 flex items-center flex-wrap'}>
-            {state().files.map((f, i) => (
+            {state.files.map((f, i) => (
               <div
                 className={
                   'max-w-[200px] py-1.5 rounded-xl mr-2 mb-1 bg-white/10 pl-2 pr-1 relative group'
@@ -195,7 +194,7 @@ export const ChatInput = observer(() => {
             <Popover
               placement="topLeft"
               arrow={false}
-              open={state().menuVisible}
+              open={state.menuVisible}
               onOpenChange={(visible) => setState({ menuVisible: visible })}
               styles={{
                 body: {
@@ -246,7 +245,7 @@ export const ChatInput = observer(() => {
           </div>
           <div>
             <div
-              className={`rounded-full duration-200 w-8 h-8 flex items-center justify-center ${state().text || !!activeChat?.pending ? 'cursor-pointer dark:hover:bg-white/10' : 'cursor-not-allowed'}`}
+              className={`rounded-full duration-200 w-8 h-8 flex items-center justify-center ${state.text || !!activeChat?.pending ? 'cursor-pointer dark:hover:bg-white/10' : 'cursor-not-allowed'}`}
               onClick={send}
             >
               {activeChat?.pending ? (
@@ -254,7 +253,7 @@ export const ChatInput = observer(() => {
               ) : (
                 <SendHorizontal
                   size={16}
-                  className={state().text ? 'stroke-white/80' : 'stroke-white/50'}
+                  className={state.text ? 'stroke-white/80' : 'stroke-white/50'}
                 />
               )}
             </div>

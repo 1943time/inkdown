@@ -12,6 +12,7 @@ import { TextHelp } from '@/ui/common/HelpText'
 import { useGetSetState } from 'react-use'
 import { useTab } from '@/store/note/TabCtx'
 import IMermaid from '../icons/IMermaid'
+import { observer } from 'mobx-react-lite'
 
 type InsertOptions = {
   label: [string, string]
@@ -238,7 +239,7 @@ const getInsertOptions = ({ isTop, tab }: { isTop: boolean; tab: TabStore }) => 
   return options
 }
 
-export const InsertAutocomplete = memo(() => {
+export const InsertAutocomplete = observer(() => {
   const dom = useRef<HTMLDivElement>(null)
   const tab = useTab()
   const ctx = useRef<{
@@ -428,7 +429,7 @@ export const InsertAutocomplete = memo(() => {
       if (text) {
         for (let item of insertOptions) {
           const ops = item.children.filter((op) => {
-            return op.label.some((l) => l.toLowerCase().includes(text.toLowerCase()))
+            return op.label.some((l) => !text || l.toLowerCase().includes(text.toLowerCase()))
           })
           options.push(...ops)
           if (ops.length) {
@@ -445,6 +446,7 @@ export const InsertAutocomplete = memo(() => {
           [] as InsertOptions['children']
         )
       }
+
       setState({
         index: 0,
         text,
@@ -453,7 +455,7 @@ export const InsertAutocomplete = memo(() => {
         insertLink: false
       })
     }
-  }, [tab.state.insertCompletionText])
+  }, [tab.state.insertCompletionText, tab.state.openInsertCompletion])
 
   useEffect(() => {
     if (tab.state.openInsertCompletion) {
@@ -497,7 +499,7 @@ export const InsertAutocomplete = memo(() => {
       window.removeEventListener('keydown', keydown)
       close()
     }
-  }, [tab.state.openInsertCompletion, tab])
+  }, [tab.state.openInsertCompletion])
   return (
     <div
       ref={dom}

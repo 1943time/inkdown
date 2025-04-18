@@ -42,9 +42,9 @@ export const EditFolderDialog = observer(() => {
           name,
           deleted: false,
           spaceId,
+          parentId: state().ctxNode?.id || 'root',
           updated: now,
           sort: 0,
-          parentId: state().ctxNode?.id,
           folder: true,
           created: now
         })

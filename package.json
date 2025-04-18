@@ -23,11 +23,11 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "better-sqlite3": "^11.9.1",
     "electron-updater": "^6.3.9",
     "knex": "^3.1.0",
     "mime-types": "^2.1.35",
-    "nanoid": "^5.1.4",
-    "sqlite3": "^5.1.7"
+    "nanoid": "^5.1.4"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.6.1",

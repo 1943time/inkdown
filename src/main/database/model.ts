@@ -3,7 +3,7 @@ import { app } from 'electron'
 import { join } from 'path'
 
 export const knex = Knex({
-  client: 'sqlite3',
+  client: 'better-sqlite3',
   useNullAsDefault: true,
   connection: {
     filename: join(app.getPath('userData'), 'data.sqlite')
@@ -108,7 +108,7 @@ export const initModel = async () => {
         t.string('id').primary()
         t.text('name')
         t.string('spaceId')
-        t.string('parentId').nullable()
+        t.string('parentId').defaultTo('root')
         t.boolean('folder').defaultTo(false)
         t.text('schema').nullable()
         t.integer('updated').defaultTo(Date.now())

@@ -33,7 +33,8 @@
 .primary-bg-color {
   background-color: var(--primary-bg-color);
 }
-html {
+html,
+body {
   color: var(--md-text);
 }
 html.dark {

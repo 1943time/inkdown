@@ -1,8 +1,12 @@
-import { ArrowBigUp, ChevronRight, Command, Delete, Option } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { ReactNode, Fragment, useRef, useState, useLayoutEffect, RefObject } from 'react'
 import { createRoot } from 'react-dom/client'
 import { useGetSetState } from 'react-use'
 import { getOffsetLeft, getOffsetTop } from '../../utils/dom'
+import Command from '@/icons/keyboard/Command'
+import Option from '@/icons/keyboard/Option'
+import Shift from '@/icons/keyboard/Shift'
+import Backspace from '@/icons/keyboard/Backspace'
 
 export type IMenu = {
   text?: string | ReactNode
@@ -19,8 +23,8 @@ const keyIconClass = 'w-[13px] h-[13px]'
 const transformKey = (key: string) => {
   if (key === 'cmd') return <Command className={keyIconClass} />
   if (key === 'option') return <Option className={keyIconClass} />
-  if (key === 'shift') return <ArrowBigUp className={keyIconClass} />
-  if (key === 'backspace') return <Delete className={keyIconClass} />
+  if (key === 'shift') return <Shift className={keyIconClass} />
+  if (key === 'backspace') return <Backspace className={keyIconClass} />
   if (key.length > 1) {
     return key[0].toUpperCase() + key.slice(1)
   }
@@ -90,7 +94,11 @@ function MenuRender(props: {
                       </span>
                     ))}
                   {m.children?.length && (
-                    <ChevronRight className={'text-gray-400 text-xs group-hover:text-white'} />
+                    <ChevronRight
+                      className={'text-gray-400 group-hover:text-white'}
+                      size={14}
+                      strokeWidth={3}
+                    />
                   )}
                   {state().visibleIndex === i && (
                     <Menu
