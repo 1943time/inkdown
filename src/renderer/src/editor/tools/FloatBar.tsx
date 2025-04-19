@@ -30,7 +30,7 @@ const tools = [
     type: 'bold',
     icon: <BoldOutlined />,
     tooltip: (
-      <div className={'text-xs flex items-center space-x-1'}>
+      <div className={'text-sm flex items-center space-x-1'}>
         <Mod />
         <span>B</span>
       </div>
@@ -40,7 +40,7 @@ const tools = [
     type: 'italic',
     icon: <ItalicOutlined />,
     tooltip: (
-      <div className={'text-xs flex items-center space-x-1'}>
+      <div className={'text-sm flex items-center space-x-1'}>
         <Mod />
         <span>I</span>
       </div>
@@ -50,19 +50,19 @@ const tools = [
     type: 'strikethrough',
     icon: <StrikethroughOutlined />,
     tooltip: (
-      <div className={'text-xs flex items-center space-x-1'}>
+      <div className={'text-sm flex items-center space-x-1'}>
         <Mod />
-        <ArrowBigUp />
+        <ArrowBigUp size={16} />
         <span>S</span>
       </div>
     )
   },
   {
     type: 'code',
-    icon: <Code className={'text-xs ml-[1px]'} />,
+    icon: <Code className={'ml-[1px]'} size={16} />,
     tooltip: (
-      <div className={'text-xs flex items-center space-x-0.5'}>
-        <Option />
+      <div className={'text-sm flex items-center space-x-0.5'}>
+        <Option size={14} />
         <span>`</span>
       </div>
     )
@@ -94,17 +94,6 @@ export const FloatBar = observer(() => {
   })
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
-
-  const openLink = useCallback(() => {
-    // const sel = store.editor.selection!
-    // el.current = Editor.parent(store.editor, sel.focus.path)
-    // store.highlightCache.set(el.current[0], [{ ...sel, highlight: true }])
-    // store.openInsertLink$.next(sel)
-    // runInAction(() => {
-    //   store.refreshHighlight = !store.refreshHighlight
-    //   store.openLinkPanel = true
-    // })
-  }, [])
   useEffect(() => {
     if (tab.state.showFloatBar) {
       setState({ open: true })
@@ -244,7 +233,7 @@ export const FloatBar = observer(() => {
                   key={t.type}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => {
-                    EditorUtils.toggleFormat(tab.editor, t.type)
+                    tab.keyboard.toggleFormat(t.type as any)
                   }}
                   className={`${
                     EditorUtils.isFormatActive(tab.editor, t.type)
@@ -261,9 +250,7 @@ export const FloatBar = observer(() => {
             <div className={'h-full w-[1px] dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'} />
             <div
               onMouseDown={(e) => e.preventDefault()}
-              onClick={(e) => {
-                openLink()
-              }}
+              onClick={(e) => {}}
               className={`${
                 EditorUtils.isFormatActive(tab.editor, 'url')
                   ? 'text-blue-500 '
@@ -290,8 +277,7 @@ export const FloatBar = observer(() => {
                   'cursor-pointer px-2 dark:hover:text-gray-200 dark:hover:bg-gray-200/5 hover:bg-gray-200/50 hover:text-gray-600'
                 }
                 onClick={() => {
-                  EditorUtils.clearMarks(tab.editor, true)
-                  EditorUtils.highColor(tab.editor)
+                  tab.keyboard.clearFormat()
                 }}
               >
                 <ClearOutlined />

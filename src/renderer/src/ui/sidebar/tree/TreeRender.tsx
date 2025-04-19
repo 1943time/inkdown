@@ -36,7 +36,7 @@ export const TreeRender = observer(() => {
           <Plus size={20} />
         </div>
       </div>
-      <div onContextMenu={(e) => e.stopPropagation()} className={'px-2'}>
+      <div onContextMenu={(e) => e.stopPropagation()} className={'px-2'} id={'tree-content'}>
         <RenderItem items={store.note.state.root.children || []} level={0} />
         {!store.note.state.root.children?.length && (
           <div className={'mt-10  text-sm'}>

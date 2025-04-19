@@ -1,12 +1,12 @@
 import { Editor, Element, Node, Path, Range, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
-import isHotkey from 'is-hotkey'
-import { Store } from '../store'
 
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
-
+  get store() {
+    return this.tab.store
+  }
   get editor() {
     return this.tab.editor
   }
@@ -28,7 +28,13 @@ export class KeyboardTask {
       } catch (e) {}
     })
   }
-
+  toggleFormat(type: 'bold' | 'italic' | 'strikethrough' | 'code') {
+    EditorUtils.toggleFormat(this.editor, type)
+  }
+  clearFormat() {
+    EditorUtils.clearMarks(this.editor, true)
+    EditorUtils.highColor(this.editor)
+  }
   selectAll() {
     const [node] = this.curNodes
     if (!node) {
@@ -178,36 +184,36 @@ export class KeyboardTask {
 
   async insertMarkdown(md: string) {
     const [node] = this.curNodes
-    // const res = await this.core.local.getSingleDocSchemaByMd(md)
-    // if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
-    //   Transforms.delete(this.editor, { at: node[1] })
-    //   Transforms.insertNodes(this.editor, res, { at: node[1], select: true })
-    //   return
-    // }
-    // if (
-    //   res[0]?.type === 'paragraph' &&
-    //   ['paragraph', 'table-cell', 'head'].includes(node[0].type)
-    // ) {
-    //   const first = res.shift()
-    //   Editor.insertNode(this.editor, first.children)
-    // }
-    // if (res.length) {
-    //   if (['code', 'table-cell', 'inline-katex'].includes(node[0].type)) {
-    //     const [block] = Editor.nodes<any>(this.editor, {
-    //       match: (n) => ['table', 'code', 'paragraph', 'head'].includes(n.type),
-    //       mode: 'lowest'
-    //     })
-    //     Transforms.insertNodes(this.editor, res, {
-    //       at: Path.next(block[1]),
-    //       select: true
-    //     })
-    //   } else {
-    //     Transforms.insertNodes(this.editor, res, {
-    //       at: Path.next(node[1]),
-    //       select: true
-    //     })
-    //   }
-    // }
+    const res = await this.store.local.getSingleDocSchemaByMd(md)
+    if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
+      Transforms.delete(this.editor, { at: node[1] })
+      Transforms.insertNodes(this.editor, res, { at: node[1], select: true })
+      return
+    }
+    if (
+      res[0]?.type === 'paragraph' &&
+      ['paragraph', 'table-cell', 'head'].includes(node[0].type)
+    ) {
+      const first = res.shift()
+      Editor.insertNode(this.editor, first.children)
+    }
+    if (res.length) {
+      if (['code', 'table-cell', 'inline-katex'].includes(node[0].type)) {
+        const [block] = Editor.nodes<any>(this.editor, {
+          match: (n) => ['table', 'code', 'paragraph', 'head'].includes(n.type),
+          mode: 'lowest'
+        })
+        Transforms.insertNodes(this.editor, res, {
+          at: Path.next(block[1]),
+          select: true
+        })
+      } else {
+        Transforms.insertNodes(this.editor, res, {
+          at: Path.next(node[1]),
+          select: true
+        })
+      }
+    }
   }
   head(level: number) {
     const [node] = this.curNodes

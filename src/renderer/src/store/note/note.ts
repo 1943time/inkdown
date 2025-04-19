@@ -167,6 +167,11 @@ export class NoteStore extends StructStore<typeof state> {
     })
   }
   createTab(doc?: IDoc) {
+    const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc?.id)
+    if (index !== -1) {
+      this.selectTab(index)
+      return
+    }
     this.setState((state) => {
       const store = new TabStore(this.store)
       state.tabs.push(store)
@@ -176,6 +181,7 @@ export class NoteStore extends StructStore<typeof state> {
           state.currentIndex = 0
         })
       }
+      state.tabIndex = state.tabs.length - 1
     })
   }
   removeTab(i: number) {
@@ -314,7 +320,6 @@ export class NoteStore extends StructStore<typeof state> {
         parent.expand = true
         parent = this.state.nodes[parent.parentId]
       }
-      state.selectedDoc = null
     })
   }
   openDoc(doc: IDoc, scroll: boolean = false) {

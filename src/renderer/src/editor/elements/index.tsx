@@ -143,6 +143,9 @@ export const MLeaf = memo((props: RenderLeafProps) => {
           //   })
           // }
           if (e.metaKey || e.ctrlKey) {
+            if (leaf.url) {
+              window.open(leaf.url)
+            }
             // if (leaf.docId) {
             //   let node:IDoc | undefined = nodes[leaf.docId]
             //   let folder = false
@@ -168,7 +171,7 @@ export const MLeaf = memo((props: RenderLeafProps) => {
             // } else if (leaf.url) {
             //   window.open(leaf.url)
             // } else if (leaf.link) {
-            window.open(leaf.link)
+            // window.open(leaf.link)
             // } else {
             //   core.message.info('Invalid link')
             // }
@@ -177,7 +180,7 @@ export const MLeaf = memo((props: RenderLeafProps) => {
           }
         }}
         data-slate-inline={true}
-        className={`mx-[1px] inline-block link relative cursor-text ${className} ${!!leaf.hash ? 'inner' : ''}`}
+        className={`mx-[1px] inline-block link relative cursor-default ${className} ${!!leaf.hash ? 'inner' : ''}`}
         {...props.attributes}
       >
         {!!props.text?.text && <InlineChromiumBugfix />}

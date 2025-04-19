@@ -17,6 +17,15 @@ export const Tree = observer(() => {
   useEffect(() => {
     setState({ scroll: false })
   }, [store.note.state.currentSpace?.id])
+  useEffect(() => {
+    window.addEventListener('click', (e) => {
+      if (store.note.state.selectedDoc) {
+        if (!document.querySelector('#tree-content')?.contains(e.target as Node)) {
+          store.note.setState({ selectedDoc: null })
+        }
+      }
+    })
+  }, [nodes])
   if (!nodes['root']) return null
   return (
     <div className={`h-full width-duration duration-200 text-white`}>

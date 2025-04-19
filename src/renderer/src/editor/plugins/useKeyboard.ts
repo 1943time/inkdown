@@ -24,6 +24,10 @@ export const useKeyboard = (tab: TabStore) => {
       if (isHotkey('mod+z', e) || isHotkey('mod+shift+z', e)) {
         tab.doManual()
       }
+      if (isHotkey('mod+option+v', e)) {
+        e.preventDefault()
+        tab.keyboard.pasteMarkdownCode()
+      }
       if (isHotkey('mod+ArrowDown', e)) {
         e.preventDefault()
         Transforms.select(tab.editor, Editor.end(tab.editor, []))

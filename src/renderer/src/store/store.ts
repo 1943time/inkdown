@@ -7,6 +7,7 @@ import { NoteStore } from './note/note'
 import { mediaType } from '@/editor/utils/dom'
 import { ContextMenu } from './menu'
 import { SystemApi } from './api/system'
+import { LocalFile } from './note/local'
 export class Store {
   public readonly model = new ModelApi()
   public readonly settings = new SettingsStore(this)
@@ -14,6 +15,7 @@ export class Store {
   public readonly note = new NoteStore(this)
   public readonly menu = new ContextMenu(this)
   public readonly system = new SystemApi()
+  public readonly local = new LocalFile(this)
   userDataPath = ''
   constructor(public readonly msg: MessageInstance) {
     this.system.userDataPath().then((path) => {
