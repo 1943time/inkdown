@@ -7,8 +7,7 @@ import { Collapse } from '@lobehub/ui'
 import { AiModeLabel, openAiModels } from '@/store/model/data/data'
 import { ModelIcon } from '../chat/ModelIcon'
 import { CircleCheckBig, CircleX } from 'lucide-react'
-import { copy } from '@/utils/common'
-import { nanoid } from 'nanoid'
+import { copy, nid } from '@/utils/common'
 import { observer } from 'mobx-react-lite'
 
 const ModelItem = observer(
@@ -258,7 +257,7 @@ export function ModelSettings() {
               editModels: [
                 ...state().editModels,
                 {
-                  id: nanoid(),
+                  id: nid(),
                   create: true
                 }
               ]

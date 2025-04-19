@@ -16,8 +16,8 @@ import { omit } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
-import { nanoid } from 'nanoid'
-
+import { customAlphabet } from 'nanoid'
+const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 15)
 export const modelReady = () => {
   return initModel()
 }
@@ -204,7 +204,7 @@ ipcMain.handle('getSpaces', async () => {
   let spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
   if (spaces.length === 0) {
     await knex('space').insert({
-      id: nanoid(),
+      id: nid(),
       name: 'My Space',
       sort: 0
     })
@@ -290,6 +290,11 @@ ipcMain.handle('clearDocs', async (_, spaceId: string, ids: string[]) => {
 
 ipcMain.handle('getDocsByParentId', async (_, parentId: string) => {
   const docs = await knex('doc').where('parentId', parentId).orderBy('sort', 'asc').select('*')
+  return docs
+})
+
+ipcMain.handle('getDocsByIds', async (_, ids: string[]) => {
+  const docs = await knex('doc').whereIn('id', ids).orderBy('sort', 'asc').select('*')
   return docs
 })
 

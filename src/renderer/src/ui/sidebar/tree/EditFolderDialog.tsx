@@ -4,12 +4,12 @@ import isHotkey from 'is-hotkey'
 import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
 import { IDoc } from 'types/model'
-import { nanoid } from 'nanoid'
 import { useSubject } from '@/hooks/common'
 import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react-lite'
+import { nid } from '@/utils/common'
 
 export const EditFolderDialog = observer(() => {
   const store = useStore()
@@ -34,7 +34,7 @@ export const EditFolderDialog = observer(() => {
         if (stack.some((s) => s.name === name && s.folder)) {
           return setState({ message: 'The folder already exists' })
         }
-        const id = nanoid()
+        const id = nid()
         const now = Date.now()
         const spaceId = store.note.state.currentSpace!.id
         const data: IDoc = observable({

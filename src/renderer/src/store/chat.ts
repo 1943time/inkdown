@@ -1,12 +1,12 @@
 import { Store } from './store'
 import { IChat, IMessage, IMessageFile, IMessageModel } from 'types/model'
-import { nanoid } from 'nanoid'
 import { AiClient } from './model/client'
 import { getTokens } from '../utils/ai'
 import { ClientModel } from './settings'
 import { openAiModels } from './model/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
 import { StructStore } from './struct'
+import { nid } from '@/utils/common'
 
 const state = {
   chats: [] as IChat[],
@@ -61,7 +61,7 @@ export class ChatStore extends StructStore<typeof state> {
     }
     if (!obj) {
       obj = {
-        id: nanoid(),
+        id: nid(),
         messages: [],
         created: now,
         updated: now,
@@ -224,7 +224,7 @@ export class ChatStore extends StructStore<typeof state> {
       created: now,
       updated: now,
       role: 'user',
-      id: nanoid(),
+      id: nid(),
       content: text,
       files: opts?.files,
       tokens: tokens
@@ -238,7 +238,7 @@ export class ChatStore extends StructStore<typeof state> {
       state.activeChat.messages?.push(userMsg)
     })
     const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
-    const msgId = nanoid()
+    const msgId = nid()
     const aiMsg: IMessage = {
       chatId: activeChat!.id,
       created: now + 100,
@@ -473,7 +473,7 @@ export class ChatStore extends StructStore<typeof state> {
         baseUrl: baseUrl || openAiModels.get(mode),
         apiKey: apiKey,
         model: model,
-        id: nanoid(),
+        id: nid(),
         options: {}
       })
       await client.completionStream([{ role: 'user', content: 'Hello' }], {

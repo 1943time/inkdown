@@ -171,7 +171,7 @@ export class KeyboardTask {
   }
 
   async pasteMarkdownCode() {
-    const md = await window.api.getClipboardText()
+    const md = window.api.getClipboardText()
     if (!md) return
     this.insertMarkdown(md)
   }

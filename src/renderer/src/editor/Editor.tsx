@@ -7,13 +7,13 @@ import { useKeyboard } from './plugins/useKeyboard'
 import { selChange$, useOnchange } from './plugins/useOnchange'
 import { EditorUtils } from './utils/editorUtils'
 import { Title } from './tools/Title'
-// import { htmlToMarkdown } from '../store/logic/parserNode.ts'
 import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ErrorFallback, ErrorBoundary } from '@/ui/error/ErrorBoundary'
 import { TabStore } from '@/store/note/tab'
 import { observer } from 'mobx-react-lite'
 import { useSubject } from '@/hooks/common'
+import { htmlToMarkdown } from '@/parser/htmlToMarkdown'
 
 export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
@@ -104,8 +104,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
       if (tab.editor.operations[0]?.type === 'set_selection') {
         try {
-          const path = tab.editor.selection?.anchor.path.slice(0, -1) || null
-          tab.selChange$.next(path?.length ? path : null)
           if (tab.state.openInsertCompletion || tab.state.openQuickLinkComplete) {
             tab.setState((state) => {
               state.openLangCompletion = false
@@ -128,6 +126,13 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
           save()
         }, 3000)
       }
+      setTimeout(() => {
+        const [node] = Editor.nodes<Element>(tab.editor, {
+          match: (n) => Element.isElement(n),
+          mode: 'lowest'
+        })
+        tab.selChange$.next(node?.[1])
+      }, 30)
     },
     [tab]
   )
@@ -147,15 +152,15 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       } catch (e) {
         EditorUtils.deleteAll(tab.editor)
       }
-    } else {
-      nodeRef.current = undefined
+      return () => {
+        save()
+      }
     }
-  }, [tab])
+  }, [tab.state.doc])
 
   useEffect(() => {
     save()
     initialNote()
-    nodeRef.current = tab.state.doc
   }, [tab.state.doc])
 
   useEffect(() => {
@@ -203,31 +208,9 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   )
 
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    const note = tab.store.note
-    if (note.state.dragNode) {
-      const node = note.state.dragNode
-      setTimeout(() => {
-        if (!node.folder) {
-          const [n] = Editor.nodes<any>(tab.editor, {
-            match: (n) => Element.isElement(n),
-            mode: 'lowest'
-          })
-          if (!n || n[0].type === 'head' || n[0].type === 'code') {
-            return
-          }
-          if (tab.editor.selection) {
-            Transforms.insertNodes(tab.editor, {
-              text: node.name,
-              docId: node.id
-            })
-          }
-        }
-      }, 16)
-      return
+    if (e.dataTransfer?.files?.length > 0 && tab.state.doc) {
+      tab.insertMultipleImages(Array.from(e.dataTransfer.files))
     }
-    // if (e.dataTransfer?.files?.length > 0 && core.tree.openedNote) {
-    //   store.insertMultipleImages(Array.from(e.dataTransfer.files))
-    // }
   }, [])
 
   const focus = useCallback(() => {
@@ -250,96 +233,41 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     })
   }, [])
 
-  const paste = useCallback(
-    (e: React.ClipboardEvent<HTMLDivElement>) => {
-      if (!Range.isCollapsed(tab.editor.selection!)) {
-        Transforms.delete(tab.editor, { at: tab.editor.selection! })
-      }
-      const text = e.clipboardData.getData('text/plain')
-      // if (text.startsWith('media://') || text.startsWith('attach://')) {
-      //   const path = EditorUtils.findMediaInsertPath(store.editor)
-      //   let insert = false
-      //   if (path) {
-      //     if (text.startsWith('media://')) {
-      //       // const url = new URL(text)
-      //       // if (url.searchParams.get('space') === core.tree.root.cid) {
-      //       //   insert = true
-      //       //   Transforms.insertNodes(
-      //       //     store.editor,
-      //       //     {
-      //       //       type: 'media',
-      //       //       height: url.searchParams.get('height')
-      //       //         ? +url.searchParams.get('height')!
-      //       //         : undefined,
-      //       //       id: url.searchParams.get('id') || undefined,
-      //       //       url: url.searchParams.get('url') || undefined,
-      //       //       size: url.searchParams.get('size') || undefined,
-      //       //       children: [{ text: '' }]
-      //       //     },
-      //       //     { select: true, at: path }
-      //       //   )
-      //       // }
-      //     }
-      //     // if (text.startsWith('attach://')) {
-      //     //   insert = true
-      //     //   const url = new URL(text)
-      //     //   if (url.searchParams.get('space') === core.tree.root.cid) {
-      //     //     Transforms.insertNodes(
-      //     //       store.editor,
-      //     //       {
-      //     //         type: 'attach',
-      //     //         name: url.searchParams.get('name'),
-      //     //         size: Number(url.searchParams.get('size') || 0),
-      //     //         id: url.searchParams.get('id') || undefined,
-      //     //         url: url.searchParams.get('url') || undefined,
-      //     //         children: [{ text: '' }]
-      //     //       },
-      //     //       { select: true, at: path }
-      //     //     )
-      //     //   }
-      //     // }
-      //     // if (insert) {
-      //     //   e.preventDefault()
-      //     //   const next = Editor.next(store.editor, { at: path })
-      //     //   if (next && next[0].type === 'paragraph' && !Node.string(next[0])) {
-      //     //     Transforms.delete(store.editor, { at: next[1] })
-      //     //   }
-      //     // }
-      //   }
-      // }
-      const files = e.clipboardData?.files
-      if (files?.length > 0) {
-        // store.insertMultipleImages(Array.from(files))
+  const paste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (!Range.isCollapsed(tab.editor.selection!)) {
+      Transforms.delete(tab.editor, { at: tab.editor.selection! })
+    }
+    const text = e.clipboardData.getData('text/plain')
+    const files = e.clipboardData?.files
+    if (files?.length > 0) {
+      tab.insertMultipleImages(Array.from(files))
+      return
+    }
+    if (text) {
+      const [node] = Editor.nodes<Element>(tab.editor, {
+        match: (n) => Element.isElement(n) && (n.type === 'inline-katex' || n.type === 'table-cell')
+      })
+      if (node) {
+        Transforms.insertText(tab.editor, text.replace(/\r?\n/g, ' '))
+        e.stopPropagation()
+        e.preventDefault()
         return
       }
-      if (text) {
-        const [node] = Editor.nodes<Element>(tab.editor, {
-          match: (n) =>
-            Element.isElement(n) && (n.type === 'inline-katex' || n.type === 'table-cell')
-        })
-        if (node) {
-          Transforms.insertText(tab.editor, text.replace(/\r?\n/g, ' '))
-          e.stopPropagation()
-          e.preventDefault()
-          return
+    }
+    let paste = e.clipboardData.getData('text/html')
+    if (paste) {
+      const parsed = new DOMParser().parseFromString(paste, 'text/html').body
+      const inner = !!parsed.querySelector('[data-be]')
+      if (!inner) {
+        const md = htmlToMarkdown(paste)
+        if (md) {
+          // core.keyboard.insertMarkdown(md)
         }
+        e.stopPropagation()
+        e.preventDefault()
       }
-      let paste = e.clipboardData.getData('text/html')
-      if (paste) {
-        const parsed = new DOMParser().parseFromString(paste, 'text/html').body
-        const inner = !!parsed.querySelector('[data-be]')
-        // if (!inner) {
-        //   const md = htmlToMarkdown(paste)
-        //   if (md) {
-        //     core.keyboard.insertMarkdown(md)
-        //   }
-        //   e.stopPropagation()
-        //   e.preventDefault()
-        // }
-      }
-    },
-    [tab]
-  )
+    }
+  }, [])
 
   const compositionStart = useCallback((e: React.CompositionEvent) => {
     tab.setState((state) => {
@@ -365,7 +293,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
           onDragOver={(e) => e.preventDefault()}
           spellCheck={settings.spellCheck}
           readOnly={tab.state.readonly}
-          className={`edit-area`}
+          className={`edit-area ${tab.state.focus ? 'focus' : ''}`}
           style={{
             fontSize: settings.editorFontSize || 16
           }}

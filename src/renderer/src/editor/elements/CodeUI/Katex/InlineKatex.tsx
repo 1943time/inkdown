@@ -20,26 +20,23 @@ export default function ({ children, element, attributes }: ElementProps<InlineK
       })
     }
   }, [selected])
-  return useMemo(
-    () => (
-      <span {...attributes} data-be={'inline-katex'} className={`relative`}>
-        <span
-          className={`inline-code-input ${selected ? 'px-1' : 'inline-flex invisible w-0 h-0 overflow-hidden absolute'}`}
-        >
-          <InlineChromiumBugfix />
-          {children}
-          <InlineChromiumBugfix />
-        </span>
-        <span
-          contentEditable={false}
-          ref={renderEl}
-          onClick={() => {
-            Transforms.select(store.editor, Editor.end(store.editor, path))
-          }}
-          className={`mx-1 select-none ${selected ? 'invisible w-0 h-0 overflow-hidden absolute' : ''}`}
-        />
+  return (
+    <span {...attributes} data-be={'inline-katex'} className={`relative`}>
+      <span
+        className={`inline-code-input ${selected ? 'px-1' : 'inline-flex invisible w-0 h-0 overflow-hidden absolute'}`}
+      >
+        <InlineChromiumBugfix />
+        {children}
+        <InlineChromiumBugfix />
       </span>
-    ),
-    [element, element.children, selected]
+      <span
+        contentEditable={false}
+        ref={renderEl}
+        onClick={() => {
+          Transforms.select(store.editor, Editor.end(store.editor, path))
+        }}
+        className={`mx-1 select-none ${selected ? 'invisible w-0 h-0 overflow-hidden absolute' : ''}`}
+      />
+    </span>
   )
 }

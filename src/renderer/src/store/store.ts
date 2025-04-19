@@ -14,7 +14,12 @@ export class Store {
   public readonly note = new NoteStore(this)
   public readonly menu = new ContextMenu(this)
   public readonly system = new SystemApi()
-  constructor(public readonly msg: MessageInstance) {}
+  userDataPath = ''
+  constructor(public readonly msg: MessageInstance) {
+    this.system.userDataPath().then((path) => {
+      this.userDataPath = path
+    })
+  }
   copySuccessfully(str: string, message?: string) {
     this.copy(str)
     this.msg.open({
@@ -23,7 +28,7 @@ export class Store {
     })
   }
   copy(text: string) {
-    window.api.copyToClipboard(text)
+    window.api.writeToClipboard(text)
   }
   async getRemoteMediaType(url: string) {
     if (!url) return 'other'

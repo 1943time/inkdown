@@ -2,12 +2,14 @@ import { IDoc, ISpace } from 'types/model'
 import { Store } from '../store'
 import { History } from 'slate-history'
 import { TabStore } from './tab'
-import { BaseSelection } from 'slate'
+import { BaseSelection, Editor, Range, Transforms } from 'slate'
 import { Subject } from 'rxjs'
 import { ReactNode } from 'react'
 import { StructStore } from '../struct'
 import { observable } from 'mobx'
 import isHotkey from 'is-hotkey'
+import { ReactEditor } from 'slate-react'
+import { EditorUtils } from '@/editor/utils/editorUtils'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -84,7 +86,9 @@ export class NoteStore extends StructStore<typeof state> {
       okText: true ? '移入垃圾箱' : 'Move To Trash'
     })
   }
-
+  get activeNote() {
+    return this.store.settings.state.view === 'note'
+  }
   constructor(private readonly store: Store) {
     super(
       observable(state, {
@@ -93,7 +97,8 @@ export class NoteStore extends StructStore<typeof state> {
     )
     this.init()
     window.addEventListener('keydown', (e) => {
-      if (this.store.settings.state.view === 'chat') return
+      if (!this.activeNote) return
+      const editor = this.state.currentTab.editor
       if (isHotkey('mod+t', e)) {
         this.createTab()
       }
@@ -101,6 +106,35 @@ export class NoteStore extends StructStore<typeof state> {
         if (this.state.tabs.length > 1) {
           e.preventDefault()
           this.removeTab(this.state.tabIndex)
+        }
+      }
+
+      if (isHotkey('mod+c', e) && this.state.opendDoc) {
+        const [node] = Editor.nodes(editor, {
+          match: (n) => n.type === 'media'
+        })
+        if (node) {
+          if (node[0].id) {
+            window.api.writeImageToClipboard(
+              window.api.path.join(this.store.userDataPath, 'assets', node[0].id)
+            )
+            // window.api.writeToClipboard(
+            //   `media://file?id=${node[0].id || ''}&height=${node[0].height || ''}&url=${node[0].url || ''}`
+            // )
+          }
+        }
+      }
+      if (isHotkey('backspace', e) && !ReactEditor.isFocused(editor)) {
+        const [node] = Editor.nodes(editor, {
+          match: (n) => n.type === 'media'
+        })
+        if (node && Range.isCollapsed(editor.selection!)) {
+          Transforms.removeNodes(editor, { at: node[1] })
+          Transforms.insertNodes(editor, EditorUtils.p, {
+            at: node[1],
+            select: true
+          })
+          ReactEditor.focus(editor)
         }
       }
     })

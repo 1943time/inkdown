@@ -14,9 +14,6 @@ export function useOnchange(tab: TabStore) {
         match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
-      setTimeout(() => {
-        selChange$.next(node?.[1])
-      })
       // runInAction(() => store.sel = sel)
       if (!node) return
       if (

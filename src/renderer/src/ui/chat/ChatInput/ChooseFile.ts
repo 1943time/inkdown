@@ -4,6 +4,7 @@ import { WordParser } from '@/parser/wordParser'
 import { IMessageFile } from 'types/model'
 import { fileOpen } from 'browser-fs-access'
 import { nanoid } from 'nanoid'
+import { nid } from '@/utils/common'
 
 const programmingFileExtensions = [
   // 主流编程语言
@@ -158,7 +159,7 @@ export const chooseFile = async (onParsed: (id: string, content: string | null) 
   const extension = file.name.split('.').pop()
   const content = programmingFileExtensions.includes(`.${extension}`) ? await file.text() : ''
   contents.push({
-    id: nanoid(),
+    id: nid(),
     name: file.name,
     size: file.size,
     status: 'pending',

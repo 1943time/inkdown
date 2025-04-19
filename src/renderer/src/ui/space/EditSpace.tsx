@@ -1,14 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Button, Collapse, Form, Input, Modal, Progress, Space, Tag } from 'antd'
 import { CloseCircleOutlined, FolderOpenOutlined, SaveOutlined } from '@ant-design/icons'
-import { useCallback, useEffect } from 'react'
-import { action, runInAction } from 'mobx'
+import { useCallback } from 'react'
 import { useStore } from '@/store/store'
 import { ISpace } from 'types/model'
 import { useLocalState } from '@/hooks/useLocalState'
 import { useSubject } from '@/hooks/common'
-import { nanoid } from 'nanoid'
 import { Folders } from 'lucide-react'
+import { nid } from '@/utils/common'
 
 export const EditSpace = observer(() => {
   const store = useStore()
@@ -103,7 +102,7 @@ export const EditSpace = observer(() => {
       } else {
         try {
           setState({ submitting: true })
-          const id = nanoid()
+          const id = nid()
           const now = Date.now()
           await store.model.createSpace({
             id,

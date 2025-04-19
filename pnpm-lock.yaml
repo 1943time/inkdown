@@ -79,6 +79,9 @@ devDependencies:
   '@types/react-dom':
     specifier: ^19.1.2
     version: 19.1.2(@types/react@19.1.0)
+  '@types/turndown':
+    specifier: ^5.0.5
+    version: 5.0.5
   '@types/unist':
     specifier: ^3.0.3
     version: 3.0.3
@@ -3510,6 +3513,10 @@ packages:
 
   /@types/trusted-types@2.0.7:
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+    dev: true
+
+  /@types/turndown@5.0.5:
+    resolution: {integrity: sha512-TL2IgGgc7B5j78rIccBtlYAnkuv8nUQqhQc+DSYV5j9Be9XOcm/SKOVRuA47xAVI3680Tk9B1d8flK2GWT2+4w==}
     dev: true
 
   /@types/unist@2.0.11:

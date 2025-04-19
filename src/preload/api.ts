@@ -2,7 +2,7 @@ import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync 
 import { writeFile, readFile, cp } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
 import { app, shell } from 'electron'
-import { ipcRenderer, clipboard } from 'electron'
+import { ipcRenderer, clipboard, nativeImage } from 'electron'
 import { lookup } from 'mime-types'
 const dev = process.env.NODE_ENV === 'development'
 
@@ -61,7 +61,7 @@ export const Api = {
   getClipboardText() {
     return clipboard.readText()
   },
-  copyToClipboard(text: string) {
+  writeToClipboard(text: string) {
     return clipboard.writeText(text)
   },
   async downloadUrl(url: string) {
@@ -81,6 +81,24 @@ export const Api = {
   },
   getFilePath(name: string) {
     return join(app.getPath('userData'), 'assets', name)
+  },
+  writeImageToClipboard(image: string) {
+    try {
+      if (image.startsWith('data:image')) {
+        // base64图片
+        const base64Data = image.replace(/^data:image\/\w+;base64,/, '')
+        const imageBuffer = Buffer.from(base64Data, 'base64')
+        const object = nativeImage.createFromBuffer(imageBuffer)
+        clipboard.writeImage(object)
+      } else {
+        const object = nativeImage.createFromPath(image)
+        clipboard.writeImage(object)
+      }
+      return true
+    } catch (e) {
+      console.error('write image to clipboard error:', e)
+      return false
+    }
   },
   path: {
     join,

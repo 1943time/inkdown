@@ -587,17 +587,28 @@ export class TabStore extends StructStore<typeof state> {
       }
     } catch (e) {}
   }
-  async insertMultipleImages(files: string[]) {
+  async insertMultipleImages(files: (string | File)[]) {
     const path = EditorUtils.findMediaInsertPath(this.editor)
     if (path && files.length) {
       const { extname } = window.api.path
       const ids: { id: string; size: number }[] = []
       for (const f of files) {
         try {
-          const id = nid() + extname(f)
-          await this.store.system.writeFile(f, id)
-          const stat = window.api.fs.statSync(f)
-          ids.push({ id, size: stat.size })
+          const id = nid() + (typeof f === 'string' ? extname(f) : '.' + f.name.split('.').pop())
+          if (typeof f === 'string') {
+            const ext = extname(f).toLowerCase()
+            if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'].includes(ext)) {
+              await this.store.system.writeFile(f, id)
+              const stat = window.api.fs.statSync(f)
+              ids.push({ id, size: stat.size })
+            }
+          } else {
+            if (f.type.startsWith('image/')) {
+              const buffer = await f.arrayBuffer()
+              await this.store.system.writeFileBuffer(buffer, id)
+              ids.push({ id, size: f.size })
+            }
+          }
         } catch (e) {
           console.error(e)
         }

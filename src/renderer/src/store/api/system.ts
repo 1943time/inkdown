@@ -17,7 +17,14 @@ export class SystemApi {
     const path = await ipcRenderer.invoke('getAssetsPath')
     await window.api.fs.cp(from, window.api.path.join(path, name))
   }
+  async writeFileBuffer(buffer: ArrayBuffer, name: string) {
+    const path = await ipcRenderer.invoke('getAssetsPath')
+    await window.api.fs.writeBuffer(window.api.path.join(path, name), buffer)
+  }
   async getFilePath(name: string): Promise<string> {
     return ipcRenderer.invoke('getFilePath', name)
+  }
+  async userDataPath(): Promise<string> {
+    return ipcRenderer.invoke('userDataPath')
   }
 }
