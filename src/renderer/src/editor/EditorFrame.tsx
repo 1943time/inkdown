@@ -66,15 +66,23 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
         <LangAutocomplete tab={tab} />
         <InsertAutocomplete />
       </div>
-      {/* <PhotoSlider
+      <PhotoSlider
         maskOpacity={0.5}
-        className={core.desktop ? 'desktop-img-view' : ''}
-        images={tab.store.viewImages.map((src) => ({ src, key: src }))}
-        visible={tab.store.openViewImage}
-        onClose={action(() => (tab.store.openViewImage = false))}
-        index={tab.store.viewImageIndex}
-        onIndexChange={action((i) => (tab.store.viewImageIndex = i))}
-      /> */}
+        className={'desktop-img-view'}
+        images={tab.state.previewImage.images.map((item) => ({ src: item.src, key: item.src }))}
+        visible={tab.state.previewImage.open}
+        onClose={() => {
+          tab.setState((state) => {
+            state.previewImage.open = false
+          })
+        }}
+        index={tab.state.previewImage.index}
+        onIndexChange={(i) => {
+          tab.setState((state) => {
+            state.previewImage.index = i
+          })
+        }}
+      />
     </TabContext>
   )
 })

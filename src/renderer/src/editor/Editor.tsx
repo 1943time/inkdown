@@ -5,15 +5,8 @@ import { MElement, MLeaf } from './elements/index'
 import { useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
 import { selChange$, useOnchange } from './plugins/useOnchange'
-// import { observer } from 'mobx-react-lite'
 import { EditorUtils } from './utils/editorUtils'
-// import { action, runInAction } from 'mobx'
-// import { useSubject } from '../hooks/subscribe.ts'
-// import { ErrorBoundary, ErrorFallback } from '../components/ErrorBoundary.tsx'
 import { Title } from './tools/Title'
-// import { IFileItem } from '../types/index'
-// import { useEditorStore } from '../store/editor.ts'
-// import { useCoreContext } from '../utils/env.ts'
 // import { htmlToMarkdown } from '../store/logic/parserNode.ts'
 import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
@@ -25,14 +18,6 @@ import { useSubject } from '@/hooks/common'
 export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
   const settings = tab.store.settings.state
-  // const [docChanged, openInsertCompletion, openQuickLinkComplete] = tab.useState(
-  //   useShallow((state) => [
-  //     state.docChanged,
-  //     state.openInsertCompletion,
-  //     state.openQuickLinkComplete
-  //   ])
-  // )
-  // const readonly = tab.useState((state) => state.readonly)
   const changedMark = useRef(false)
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
@@ -104,6 +89,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
       value.current = v
       onChange()
+
       if (tab.state.doc) {
         tab.note.docStatus.set(tab.state.doc.id, {
           history: tab.editor.history,
@@ -118,6 +104,8 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
       if (tab.editor.operations[0]?.type === 'set_selection') {
         try {
+          const path = tab.editor.selection?.anchor.path.slice(0, -1) || null
+          tab.selChange$.next(path?.length ? path : null)
           if (tab.state.openInsertCompletion || tab.state.openQuickLinkComplete) {
             tab.setState((state) => {
               state.openLangCompletion = false
@@ -174,6 +162,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     const blur = async () => {
       clearTimeout(saveTimer.current)
       await save()
+      tab.selChange$.next(null)
     }
     window.addEventListener('blur', blur)
     return () => {

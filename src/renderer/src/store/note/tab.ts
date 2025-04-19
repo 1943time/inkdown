@@ -12,9 +12,9 @@ import { KeyboardTask } from './keyboard'
 import { Subject } from 'rxjs'
 import { TableLogic } from './table'
 import { StructStore } from '../struct'
-import { observable } from 'mobx'
-import { nanoid } from 'nanoid'
 import { nid } from '@/utils/common'
+import { MediaNode } from '@/editor'
+import { getImageData } from '@/editor/utils'
 
 const state = {
   path: null as null | Path,
@@ -37,6 +37,11 @@ const state = {
   openInsertCompletion: false,
   domRect: null as null | DOMRect,
   refreshHighlight: false,
+  previewImage: {
+    open: false,
+    index: 0,
+    images: [] as { src: string }[]
+  },
   get hasPrev() {
     return this.currentIndex > 0
   },
@@ -571,7 +576,6 @@ export class TabStore extends StructStore<typeof state> {
   }
   selectMedia(path: Path) {
     Transforms.select(this.editor, path)
-    this.selChange$.next(path)
     try {
       const top = this.container!.scrollTop
       const dom = ReactEditor.toDOMNode(this.editor, Node.get(this.editor, path))
@@ -614,6 +618,33 @@ export class TabStore extends StructStore<typeof state> {
           this.editor.selection ? Path.parent(this.editor.selection.anchor.path) : null
         )
       }
+    }
+  }
+  async openPreviewImages(el: MediaNode) {
+    const nodes = Array.from(
+      Editor.nodes<MediaNode>(this.editor, {
+        at: [],
+        match: (n) => n.type === 'media' && n.mediaType === 'image'
+      })
+    )
+    let index = nodes.findIndex((n) => n[0] === el)
+    if (index < 0) {
+      index = 0
+    }
+    if (nodes.length) {
+      const urls: { src: string }[] = []
+      for (const n of nodes) {
+        if (n[0].id) {
+          urls.push({ src: getImageData(await this.store.system.getFilePath(n[0].id)) })
+        } else {
+          urls.push({ src: n[0].url! })
+        }
+      }
+      this.setState((state) => {
+        state.previewImage.open = true
+        state.previewImage.index = index
+        state.previewImage.images = urls
+      })
     }
   }
 }

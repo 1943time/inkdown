@@ -63,12 +63,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     if (url.startsWith('file://')) {
       const path = url.replace('file://', '')
       if (window.api.fs.existsSync(path)) {
-        // const savePath = await window.api.dialog.showSaveIdalog({
-        //   filters: [{ extensions: [ext], name: 'type' }]
-        // })
-        // if (savePath.filePath) {
-        //   await window.api.fs.cp(path, savePath.filePath)
-        // }
+        const savePath = await tab.store.system.showSaveDialog({
+          filters: [{ extensions: [ext], name: 'type' }]
+        })
+        if (savePath.filePath) {
+          await window.api.fs.cp(path, savePath.filePath)
+        }
       }
     } else {
       setState({ downloading: true })
@@ -79,12 +79,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           const contentType = res.headers.get('content-type') || ''
           ext = contentType.split('/')[1]
         }
-        // const save = await window.api.dialog.showSaveIdalog({
-        //   filters: [{ extensions: [ext], name: 'type' }]
-        // })
-        // if (save.filePath) {
-        //   window.api.fs.writeBuffer(save.filePath, await blob.arrayBuffer())
-        // }
+        const save = await tab.store.system.showSaveDialog({
+          filters: [{ extensions: [ext], name: 'type' }]
+        })
+        if (save.filePath) {
+          window.api.fs.writeBuffer(save.filePath, await blob.arrayBuffer())
+        }
       } catch (e) {
         if (url) {
           window.open(url)
@@ -126,7 +126,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               <div
                 className={'p-0.5 hover:text-gray-300'}
                 onClick={() => {
-                  // store.openPreviewImages(element)
+                  tab.openPreviewImages(element)
                 }}
               >
                 <Fullscreen size={16} />
@@ -167,12 +167,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           e.stopPropagation()
         }}
         onMouseDown={(e) => {
-          if (!focus) {
+          if (!tab.state.focus) {
             EditorUtils.focus(store.editor)
           }
           tab.selectMedia(path)
-          store.dragStart(e)
-          store.dragEl = ReactEditor.toDOMNode(store.editor, element)
+          tab.dragStart(e)
+          tab.dragEl = ReactEditor.toDOMNode(store.editor, element)
         }}
         onClick={(e) => {
           e.preventDefault()
