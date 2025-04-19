@@ -17,7 +17,7 @@ export const Tree = observer(() => {
   useEffect(() => {
     setState({ scroll: false })
   }, [store.note.state.currentSpace?.id])
-  if (!nodes['root'] || !store.note.state.currentTab) return null
+  if (!nodes['root']) return null
   return (
     <div className={`h-full width-duration duration-200 text-white`}>
       <div className={'h-full flex flex-col'}>

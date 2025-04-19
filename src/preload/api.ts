@@ -2,14 +2,7 @@ import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync 
 import { writeFile, readFile, cp } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
 import { app, shell } from 'electron'
-import {
-  ipcRenderer,
-  OpenDialogOptions,
-  OpenDialogReturnValue,
-  SaveDialogOptions,
-  clipboard,
-  SaveDialogReturnValue
-} from 'electron'
+import { ipcRenderer, clipboard } from 'electron'
 import { lookup } from 'mime-types'
 const dev = process.env.NODE_ENV === 'development'
 
@@ -84,14 +77,6 @@ export const Api = {
 
       const buffer = Buffer.from(arrayBuffer)
       await writeFile(save.filePath, buffer)
-    }
-  },
-  dialog: {
-    showOpenDialog(options: OpenDialogOptions) {
-      return ipcRenderer.invoke('showOpenDialog', options) as Promise<OpenDialogReturnValue>
-    },
-    showSaveIdalog(options: SaveDialogOptions) {
-      return ipcRenderer.invoke('showSaveDialog', options) as Promise<SaveDialogReturnValue>
     }
   },
   getFilePath(name: string) {

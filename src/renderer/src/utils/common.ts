@@ -1,3 +1,5 @@
+import { customAlphabet } from 'nanoid'
+
 export const copy = <T>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj))
 }
@@ -147,3 +149,8 @@ export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Om
 export const isDark = () => {
   return window.matchMedia && window.matchMedia?.('(prefers-color-scheme: dark)').matches
 }
+
+export const nid = customAlphabet(
+  '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  15
+)

@@ -13,6 +13,8 @@ import { Subject } from 'rxjs'
 import { TableLogic } from './table'
 import { StructStore } from '../struct'
 import { observable } from 'mobx'
+import { nanoid } from 'nanoid'
+import { nid } from '@/utils/common'
 
 const state = {
   path: null as null | Path,
@@ -569,6 +571,7 @@ export class TabStore extends StructStore<typeof state> {
   }
   selectMedia(path: Path) {
     Transforms.select(this.editor, path)
+    this.selChange$.next(path)
     try {
       const top = this.container!.scrollTop
       const dom = ReactEditor.toDOMNode(this.editor, Node.get(this.editor, path))
@@ -579,5 +582,38 @@ export class TabStore extends StructStore<typeof state> {
         })
       }
     } catch (e) {}
+  }
+  async insertMultipleImages(files: string[]) {
+    const path = EditorUtils.findMediaInsertPath(this.editor)
+    if (path && files.length) {
+      const { extname } = window.api.path
+      const ids: { id: string; size: number }[] = []
+      for (const f of files) {
+        try {
+          const id = nid() + extname(f)
+          await this.store.system.writeFile(f, id)
+          const stat = window.api.fs.statSync(f)
+          ids.push({ id, size: stat.size })
+        } catch (e) {
+          console.error(e)
+        }
+      }
+      if (ids.length) {
+        Transforms.insertNodes(
+          this.editor,
+          ids.map((p) => {
+            return { type: 'media', id: p.id, size: p.size, children: [{ text: '' }] }
+          }),
+          { select: true, at: path }
+        )
+        const next = Editor.next(this.editor, { at: path })
+        if (next?.[0].type === 'paragraph' && !Node.string(next[0])) {
+          Transforms.delete(this.editor, { at: next[1] })
+        }
+        this.selChange$.next(
+          this.editor.selection ? Path.parent(this.editor.selection.anchor.path) : null
+        )
+      }
+    }
   }
 }

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react'
-import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Range, Text, Transforms } from 'slate'
 import { TabKey } from './hotKeyCommands/tab'
 import { EnterKey } from './hotKeyCommands/enter'
 import { BackspaceKey } from './hotKeyCommands/backspace'
@@ -7,7 +7,6 @@ import { MatchKey } from './hotKeyCommands/match'
 import { keyArrow } from './hotKeyCommands/arrow'
 import { EditorUtils } from '../utils/editorUtils'
 import isHotkey from 'is-hotkey'
-import { NoteStore } from '@/store/note/note'
 import { TabStore } from '@/store/note/tab'
 
 export const useKeyboard = (tab: TabStore) => {

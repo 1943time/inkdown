@@ -99,14 +99,6 @@ const getInsertOptions = ({ isTop, tab }: { isTop: boolean; tab: TabStore }) => 
           icon: <Icon icon={'material-symbols:image-outline'} className={'text-base'} />
         },
         {
-          label: ['视频', 'Video'],
-          key: 'video',
-          run() {
-            tab.keyboard.localImage('video')
-          },
-          icon: <Icon icon={'ri:video-line'} className={'text-base'} />
-        },
-        {
           label: ['远程媒体', 'Media link'],
           key: 'media-link',
           run() {
@@ -582,7 +574,7 @@ export const InsertAutocomplete = observer(() => {
           </Button>
         </div>
       )}
-      {state().insertAttach && (
+      {/* {state().insertAttach && (
         <div className={'px-1 pb-2'}>
           <Tabs
             size={'small'}
@@ -655,7 +647,7 @@ export const InsertAutocomplete = observer(() => {
             ]}
           />
         </div>
-      )}
+      )} */}
     </div>
   )
 })

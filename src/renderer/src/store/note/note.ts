@@ -7,6 +7,7 @@ import { Subject } from 'rxjs'
 import { ReactNode } from 'react'
 import { StructStore } from '../struct'
 import { observable } from 'mobx'
+import isHotkey from 'is-hotkey'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -91,6 +92,18 @@ export class NoteStore extends StructStore<typeof state> {
       })
     )
     this.init()
+    window.addEventListener('keydown', (e) => {
+      if (this.store.settings.state.view === 'chat') return
+      if (isHotkey('mod+t', e)) {
+        this.createTab()
+      }
+      if (isHotkey('mod+w', e)) {
+        if (this.state.tabs.length > 1) {
+          e.preventDefault()
+          this.removeTab(this.state.tabIndex)
+        }
+      }
+    })
   }
   init() {
     this.store.model.getSpaces().then((spaces) => {
@@ -135,7 +148,7 @@ export class NoteStore extends StructStore<typeof state> {
     if (this.state.tabs.length < 2) return
     this.setState((state) => {
       state.tabs.splice(i, 1)
-      if (i > 0) {
+      if (i <= state.tabIndex && i > 0) {
         state.tabIndex--
       }
     })
@@ -231,6 +244,7 @@ export class NoteStore extends StructStore<typeof state> {
   async restoreTabs() {
     const record = await this.store.model.getSetting(`tab-${this.state.selectedSpaceId}`)
     if (record && record.value.tabs.length) {
+      record.value.tabIndex = record.value.tabIndex < 0 ? 0 : record.value.tabIndex
       this.setState((state) => {
         state.tabs = record.value.tabs.map((id) => {
           const tab = new TabStore(this.store)

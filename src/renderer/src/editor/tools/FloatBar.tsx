@@ -111,43 +111,19 @@ export const FloatBar = observer(() => {
       resize(tab.state.domRect)
     }
   }, [tab.state.showFloatBar])
-  // useSubject(tab.useStatus.showFloatBar$, (type) => {
-  //   if (type === 'link') {
-  //     const [text] = Editor.nodes(tab.editor, {
-  //       match: Text.isText
-  //     })
-  //     if (text && text[0].url) {
-  //       Transforms.select(store.editor, text[1])
-  //     }
-  //     setTimeout(() => {
-  //       runInAction(() => {
-  //         store.domRect = getSelRect()
-  //       })
-  //       resize(true)
-  //       openLink()
-  //       setTimeout(() => {
-  //         inputRef.current?.focus()
-  //       }, 16)
-  //     })
-  //   } else if (type === 'highlight') {
-  //     if (!Range.isCollapsed(store.editor.selection!)) {
-  //       setState({ openSelectColor: true, hoverSelectColor: false })
-  //       resize(true)
-  //     }
-  //   }
-  // })
 
   const resize = useCallback(
     (domRect: DOMRect | null) => {
       if (!domRect) return
       let left = domRect.x
-      left = left - ((state().openSelectColor ? 260 : FloatBarWidth) - domRect.width) / 2
+      const barWidth = state().openSelectColor ? 264 : FloatBarWidth + 4
+      if (!tab.store.settings.state.foldSideBar) {
+        left -= tab.store.settings.state.sidePanelWidth
+      }
+      left += domRect.width / 2 - barWidth / 2
       const container = tab.container!
       if (left < 4) left = 4
-      const barWidth = state().openSelectColor ? 264 : FloatBarWidth + 4
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
-      // let top = state().top
-      // if (!state().open || force) {
       let top = container.scrollTop + domRect.top - 80
       setState({
         open: true,
@@ -158,15 +134,14 @@ export const FloatBar = observer(() => {
     [tab]
   )
 
-  // useEffect(() => {
-  //   if (store.domRect) {
-  //     resize(true)
-  //     sel.current = store.editor.selection!
-  //   } else {
-  //     setState({ open: false })
-  //     fileMap.clear()
-  //   }
-  // }, [store.domRect, store.openSearch])
+  useEffect(() => {
+    if (tab.state.domRect) {
+      resize(tab.state.domRect)
+      sel.current = tab.editor.selection!
+    } else {
+      setState({ open: false })
+    }
+  }, [tab.state.domRect])
 
   useEffect(() => {
     if (state().open) {
@@ -257,7 +232,7 @@ export const FloatBar = observer(() => {
                 onMouseLeave={() => setState({ hoverSelectColor: false })}
                 onClick={() => {
                   setState({ openSelectColor: true, hoverSelectColor: false })
-                  // resize()
+                  resize(tab.state.domRect)
                 }}
               >
                 <CaretDownOutlined className={'scale-95'} />

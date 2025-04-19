@@ -22,7 +22,7 @@ export const Nav = observer(() => {
       style={{
         paddingLeft: navLeft
       }}
-      className={'h-10 flex-shrink-0 relative z-10 drag-nav side-move-transition'}
+      className={'h-10 flex-shrink-0 relative z-10 drag-nav side-move-transition shadow-sm'}
     >
       <div
         style={{

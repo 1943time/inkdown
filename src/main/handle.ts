@@ -1,21 +1,22 @@
-import { ipcMain, Menu, BrowserWindow } from 'electron'
-import { MenuItemConstructorOptions } from 'electron'
+import { ipcMain, dialog, OpenDialogOptions, SaveDialogOptions, app } from 'electron'
+import { existsSync, mkdirSync } from 'fs'
+import { join } from 'path'
 
-ipcMain.handle('show-context-menu', async (event, items: MenuItemConstructorOptions[]) => {
-  return new Promise((resolve) => {
-    const menu = Menu.buildFromTemplate(
-      items.map((item) => ({
-        ...item,
-        click: () => {
-          resolve(item.id || '')
-        }
-      }))
-    )
-    menu.popup({
-      window: BrowserWindow.fromWebContents(event.sender) || undefined,
-      callback: () => {
-        resolve(null)
-      }
-    })
-  })
+ipcMain.handle('showOpenDialog', async (_, options: OpenDialogOptions) => {
+  return dialog.showOpenDialog(options)
+})
+
+ipcMain.handle('showSaveDialog', async (_, options: SaveDialogOptions) => {
+  return dialog.showSaveDialog(options)
+})
+
+ipcMain.handle('getAssetsPath', async () => {
+  const assetsPath = join(app.getPath('userData'), 'assets')
+  if (!existsSync(assetsPath)) {
+    mkdirSync(assetsPath, { recursive: true })
+  }
+  return assetsPath
+})
+ipcMain.handle('getFilePath', async (_, name: string) => {
+  return join(app.getPath('userData'), 'assets', name)
 })

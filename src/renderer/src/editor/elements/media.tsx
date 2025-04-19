@@ -34,7 +34,9 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     [path]
   )
   const initial = useCallback(async (element: MediaNode) => {
-    const url = element.id ? getImageData(window.api.getFilePath(element.id)) : element.url || ''
+    const url = element.id
+      ? getImageData(await tab.store.system.getFilePath(element.id))
+      : element.url || ''
     let type = element.id
       ? mediaType(element.id)
       : element.mediaType
@@ -61,12 +63,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
     if (url.startsWith('file://')) {
       const path = url.replace('file://', '')
       if (window.api.fs.existsSync(path)) {
-        const savePath = await window.api.dialog.showSaveIdalog({
-          filters: [{ extensions: [ext], name: 'type' }]
-        })
-        if (savePath.filePath) {
-          await window.api.fs.cp(path, savePath.filePath)
-        }
+        // const savePath = await window.api.dialog.showSaveIdalog({
+        //   filters: [{ extensions: [ext], name: 'type' }]
+        // })
+        // if (savePath.filePath) {
+        //   await window.api.fs.cp(path, savePath.filePath)
+        // }
       }
     } else {
       setState({ downloading: true })
@@ -77,12 +79,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           const contentType = res.headers.get('content-type') || ''
           ext = contentType.split('/')[1]
         }
-        const save = await window.api.dialog.showSaveIdalog({
-          filters: [{ extensions: [ext], name: 'type' }]
-        })
-        if (save.filePath) {
-          window.api.fs.writeBuffer(save.filePath, await blob.arrayBuffer())
-        }
+        // const save = await window.api.dialog.showSaveIdalog({
+        //   filters: [{ extensions: [ext], name: 'type' }]
+        // })
+        // if (save.filePath) {
+        //   window.api.fs.writeBuffer(save.filePath, await blob.arrayBuffer())
+        // }
       } catch (e) {
         if (url) {
           window.open(url)
@@ -110,7 +112,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                   updateElement({ align: element.align === 'left' ? undefined : 'left' })
                 }
               >
-                <AlignLeft />
+                <AlignLeft size={16} />
               </div>
               <div
                 title={'Valid when the image width is not full'}
@@ -119,7 +121,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                   updateElement({ align: element.align === 'right' ? undefined : 'right' })
                 }
               >
-                <AlignRight />
+                <AlignRight size={16} />
               </div>
               <div
                 className={'p-0.5 hover:text-gray-300'}
@@ -127,7 +129,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                   // store.openPreviewImages(element)
                 }}
               >
-                <Fullscreen />
+                <Fullscreen size={16} />
               </div>
             </>
           )}
@@ -137,12 +139,12 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
             </div>
           ) : (
             <div className={'p-0.5 hover:text-gray-300'} onClick={download}>
-              <Download />
+              <Download size={16} />
             </div>
           )}
         </div>
       )}
-      {selected && element.url && !element.url.startsWith(location.origin) && (
+      {selected && element.url && !state().url.startsWith('file://') && (
         <>
           <div
             className={

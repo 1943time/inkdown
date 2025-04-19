@@ -19,47 +19,38 @@ export function useOnchange(tab: TabStore) {
       })
       // runInAction(() => store.sel = sel)
       if (!node) return
-      // if (sel && !floatBarIgnoreNode.has(node[0].type) &&
-      //   !Range.isCollapsed(sel) &&
-      //   Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path))
-      // ) {
-      //   const domSelection = window.getSelection()
-      //   const domRange = domSelection?.getRangeAt(0)
-      //   if (rangeContent.current === domRange?.toString()) {
-      //     // runInAction(() => {
-      //     //   store.refreshFloatBar = !store.refreshFloatBar
-      //     // })
-      //   }
-      //   const rect = domRange?.getBoundingClientRect()
-      //   const rangeStr = domRange?.toString() || ''
-      //   if (rect && rangeContent.current !== rangeStr) {
-      //     rangeContent.current = rangeStr
-      //     // runInAction(() => {
-      //     //   store.domRect = rect
-      //     // })
-      //   }
-      // } else if (store.domRect) {
-      //   rangeContent.current = ''
-      //   runInAction(() => {
-      //     store.domRect = null
-      //   })
-      // }
+      if (
+        sel &&
+        !floatBarIgnoreNode.has(node[0].type) &&
+        !Range.isCollapsed(sel) &&
+        Path.equals(Path.parent(sel.focus.path), Path.parent(sel.anchor.path))
+      ) {
+        const domSelection = window.getSelection()
+        const domRange = domSelection?.getRangeAt(0)
+        if (rangeContent.current === domRange?.toString()) {
+          // runInAction(() => {
+          //   store.refreshFloatBar = !store.refreshFloatBar
+          // })
+        }
+        const rect = domRange?.getBoundingClientRect()
+        const rangeStr = domRange?.toString() || ''
+        if (rect && rangeContent.current !== rangeStr) {
+          rangeContent.current = rangeStr
+          tab.setState((state) => {
+            state.domRect = rect
+          })
+        }
+      } else if (tab.state.domRect) {
+        rangeContent.current = ''
+        tab.setState((state) => {
+          state.domRect = null
+        })
+      }
 
       // if (node && node[0].type === 'media') {
       //   store.mediaNode$.next(node)
       // } else {
       //   store.mediaNode$.next(null)
-      // }
-      // if (node && node[0].type === 'table-cell') {
-      //   runInAction(() => {
-      //     store.tableCellNode = node
-      //     store.refreshTableAttr = !store.refreshTableAttr
-      //   })
-      // } else if (store.tableCellNode) {
-      //   runInAction(() => {
-      //     store.tableCellNode = null
-      //     store.refreshTableAttr = !store.refreshTableAttr
-      //   })
       // }
     }
   }, [tab.editor])

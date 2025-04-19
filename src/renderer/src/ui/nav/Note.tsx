@@ -2,6 +2,7 @@ import { observer } from 'mobx-react-lite'
 import { useStore } from '@/store/store'
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react'
 import { Fragment, useMemo } from 'react'
+
 export const NoteNav = observer(() => {
   const store = useStore()
   const path = useMemo(() => {

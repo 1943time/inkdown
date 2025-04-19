@@ -19,7 +19,7 @@ const Entry = observer(() => {
       <div className={'sidebar flex-shrink-0'}>
         <SideBar />
       </div>
-      <div className={'flex-1 relative flex flex-col'}>
+      <div className={'flex-1 relative flex flex-col w-0 min-w-0'}>
         <Nav />
         <div className={'flex-1 relative h-[calc(100vh_-_40px)]'}>
           {store.settings.state.view === 'chat' && (

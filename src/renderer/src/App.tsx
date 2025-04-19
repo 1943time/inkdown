@@ -7,26 +7,24 @@ export default function App() {
   const [messageApi, contextHolder] = message.useMessage()
   const store = useMemo(() => new Store(messageApi), [])
   return (
-    <ThemeProvider themeMode={'dark'}>
-      <ConfigProvider
-        theme={{
-          algorithm: theme.darkAlgorithm,
-          token: {
-            colorPrimary: '#fff',
-            colorPrimaryText: '#000'
-          },
-          components: {
-            Button: {
-              colorTextBase: '#000'
-            }
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorPrimary: '#fff',
+          colorPrimaryText: '#000'
+        },
+        components: {
+          Button: {
+            colorTextBase: '#000'
           }
-        }}
-      >
-        <StoreContext value={store}>
-          {contextHolder}
-          <Entry />
-        </StoreContext>
-      </ConfigProvider>
-    </ThemeProvider>
+        }
+      }}
+    >
+      <StoreContext value={store}>
+        {contextHolder}
+        <Entry />
+      </StoreContext>
+    </ConfigProvider>
   )
 }

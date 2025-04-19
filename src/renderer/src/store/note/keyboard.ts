@@ -1,6 +1,8 @@
 import { Editor, Element, Node, Path, Range, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
+import isHotkey from 'is-hotkey'
+import { Store } from '../store'
 
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
@@ -481,7 +483,7 @@ export class KeyboardTask {
   localImage(type: 'image' | 'video' = 'image') {
     const doc = this.tab.state.doc
     if (doc) {
-      window.api.dialog
+      this.tab.store.system
         .showOpenDialog({
           filters: [
             {
@@ -496,16 +498,7 @@ export class KeyboardTask {
         })
         .then(async (res) => {
           if (res.filePaths.length) {
-            const files: File[] = []
-            // for (const p of res.filePaths) {
-            //   const file = await this.core.local.copyFile(p)
-            //   if (this.core.pay.checkFileSize(file)) {
-            //     files.push(await this.core.local.copyFile(p))
-            //   } else {
-            //     break
-            //   }
-            // }
-            // this.store.insertMultipleImages(files)
+            this.tab.insertMultipleImages(res.filePaths)
           }
         })
     }
