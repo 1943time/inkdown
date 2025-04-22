@@ -150,26 +150,18 @@ export const initModel = async () => {
     }
   })
 
-  await knex.schema.hasTable('tag').then((exists) => {
+  await knex.schema.hasTable('docFts').then(async (exists) => {
     if (!exists) {
-      return knex.schema.createTable('tag', (t) => {
-        t.string('id').primary()
-        t.string('name')
-        t.integer('created').defaultTo(Date.now())
-      })
-    }
-  })
-
-  await knex.schema.hasTable('docTag').then((exists) => {
-    if (!exists) {
-      return knex.schema.createTable('docTag', (t) => {
-        t.string('id').primary()
-        t.string('docId')
-        t.string('tagId')
-        t.integer('created').defaultTo(Date.now())
-        t.foreign('docId').references('id').inTable('doc').onDelete('CASCADE')
-        t.foreign('tagId').references('id').inTable('tag').onDelete('CASCADE')
-      })
+      await knex.raw(`
+          CREATE VIRTUAL TABLE docFts USING fts5(
+            spaceId UNINDEXED,
+            docId UNINDEXED, 
+            path UNINDEXED,
+            el UNINDEXED,
+            text UNINDEXED,
+            words
+          )
+        `)
     }
   })
 }

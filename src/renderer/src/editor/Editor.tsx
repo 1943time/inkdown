@@ -43,10 +43,15 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.setState((state) => {
         state.docChanged = false
       })
-      store.model.updateDoc(node.id, {
-        schema: node.schema,
-        updated: Date.now()
-      })
+      store.model.updateDoc(
+        node.id,
+        {
+          spaceId: node.spaceId,
+          schema: node.schema,
+          updated: Date.now()
+        },
+        EditorUtils.getSchemaText(tab.editor)
+      )
       if (!ipc) {
         // core.ipc.sendMessage({
         //   type: 'updateDoc',
@@ -142,6 +147,12 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     if (tab.state.doc) {
       nodeRef.current = tab.state.doc
       first.current = true
+      if (!tab.state.doc.schema) {
+        const doc = await store.model.getDoc(tab.state.doc.id)
+        store.note.setState((state) => {
+          state.nodes[tab.state.doc.id].schema = doc?.schema
+        })
+      }
       try {
         tab.editor.selection = null
         EditorUtils.reset(

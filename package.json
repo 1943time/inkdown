@@ -23,11 +23,16 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@lancedb/lancedb": "^0.18.2",
+    "@xenova/transformers": "^2.17.2",
+    "apache-arrow": "^19.0.1",
     "better-sqlite3": "^11.9.1",
+    "compromise": "^14.14.4",
     "electron-updater": "^6.3.9",
     "knex": "^3.1.0",
     "mime-types": "^2.1.35",
-    "nanoid": "^5.1.4"
+    "nanoid": "^5.1.4",
+    "nodejieba": "^3.4.4"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.6.1",

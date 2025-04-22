@@ -12,7 +12,7 @@ import {
   IHistory,
   IFile
 } from 'types/model'
-import { omit } from '../utils'
+import { omit, prepareFtsTokens } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
@@ -267,12 +267,13 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
       try {
         const filePath = join(assetsPath, file.name)
         if (existsSync(filePath)) {
-          await unlink(filePath)
+          unlink(filePath)
         }
       } catch (e) {
         console.error(e)
       }
     }
+    await trx('docFts').where('spaceId', id).delete()
     await trx('file').where('spaceId', id).delete()
   })
 })
@@ -280,7 +281,21 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
   const handle = knex('doc').where('spaceId', spaceId)
   handle.andWhere('deleted', !!deleted)
-  const docs = await handle.orderBy('sort', 'asc').select('*')
+  const docs = await handle
+    .orderBy('sort', 'asc')
+    .select([
+      'id',
+      'name',
+      'parentId',
+      'sort',
+      'created',
+      'updated',
+      'deleted',
+      'folder',
+      'lastOpenTime',
+      'links',
+      'spaceId'
+    ])
   return docs
 })
 
@@ -302,10 +317,26 @@ ipcMain.handle('createDoc', async (_, doc: IDoc) => {
   return knex('doc').insert(omit(doc, ['expand', 'children']))
 })
 
-ipcMain.handle('updateDoc', async (_, id: string, doc: Partial<IDoc>) => {
-  return knex('doc')
+ipcMain.handle('updateDoc', async (_, id: string, doc: Partial<IDoc>, text?: string) => {
+  await knex('doc')
     .where('id', id)
     .update(omit(doc, ['expand', 'children', 'id']))
+  if (text) {
+    const tokens = prepareFtsTokens(text)
+    const exists = await knex('docFts').where('docId', id).first()
+    if (exists) {
+      await knex('docFts')
+        .where('docId', id)
+        .update({ text: text, words: tokens.join(' ') })
+    } else {
+      await knex('docFts').insert({
+        docId: id,
+        text: text,
+        words: tokens.join(' '),
+        spaceId: doc.spaceId
+      })
+    }
+  }
 })
 
 ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
@@ -316,6 +347,48 @@ ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
         .update(omit(d, ['id', 'expand', 'children']))
     })
   )
+})
+
+ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
+  const tokens = prepareFtsTokens(text)
+
+  const likeResults = await knex.raw(
+    `
+    SELECT docId
+    FROM docFts
+    WHERE spaceId = ? AND text LIKE ?
+    `,
+    [spaceId, `%${text}%`]
+  )
+
+  const matchResults = await knex.raw(
+    `
+    SELECT docId, bm25(docFts) AS score
+    FROM docFts
+    WHERE spaceId = ?
+    ${likeResults.length > 0 ? 'AND docId NOT IN (' + likeResults.map((r: any) => `'${r.docId}'`).join(',') + ')' : ''}
+    AND words MATCH ?
+    ORDER BY score ASC
+    LIMIT 30
+    `,
+    [spaceId, tokens.join(' OR ')]
+  )
+
+  // console.log('match', text, likeResults, matchResults)
+
+  const results = [
+    ...likeResults.map((result: any) => ({ docId: result.docId, rank: 1.0 })),
+    ...matchResults.map((result: any) => ({ docId: result.docId, rank: 0.3 }))
+  ]
+
+  const docs = await knex('doc')
+    .where('spaceId', spaceId)
+    .whereIn(
+      'id',
+      results.map((d) => d.docId)
+    )
+    .select(['id', 'schema'])
+  return { docs, tokens }
 })
 
 ipcMain.handle('deleteDoc', async (_, id: string) => {

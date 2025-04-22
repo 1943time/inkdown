@@ -137,8 +137,7 @@ export class ModelApi {
         return {
           ...d,
           folder: Boolean(d.folder),
-          links: d.links ? JSON.parse(d.links as unknown as string) : [],
-          schema: d.schema ? JSON.parse(d.schema as unknown as string) : []
+          links: d.links ? JSON.parse(d.links as unknown as string) : []
         }
       })
     })
@@ -159,12 +158,17 @@ export class ModelApi {
     })
   }
 
-  async updateDoc(id: string, doc: Partial<IDoc>): Promise<void> {
-    return ipcRenderer.invoke('updateDoc', id, {
-      ...doc,
-      schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
-      links: doc.links ? JSON.stringify(doc.links) : undefined
-    })
+  async updateDoc(id: string, doc: Partial<IDoc>, text?: string): Promise<void> {
+    return ipcRenderer.invoke(
+      'updateDoc',
+      id,
+      {
+        ...doc,
+        schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
+        links: doc.links ? JSON.stringify(doc.links) : undefined
+      },
+      text
+    )
   }
 
   async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
@@ -189,7 +193,7 @@ export class ModelApi {
       return {
         ...doc,
         folder: Boolean(doc?.folder),
-        schema: doc?.schema ? JSON.parse(doc.schema as unknown as string) : [],
+        schema: doc?.schema ? JSON.parse(doc.schema as unknown as string) : undefined,
         links: doc?.links ? JSON.parse(doc.links as unknown as string) : []
       }
     })
@@ -248,5 +252,8 @@ export class ModelApi {
   }
   async findDocName(data: { spaceId: string; name: string; parentId?: string }): Promise<number> {
     return ipcRenderer.invoke('findDocName', data)
+  }
+  async searchDocs(spaceId: string, text: string): Promise<{ docs: IDoc[]; tokens: string[] }> {
+    return ipcRenderer.invoke('searchDocs', spaceId, text)
   }
 }

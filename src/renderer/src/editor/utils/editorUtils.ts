@@ -423,4 +423,27 @@ export class EditorUtils {
       return Editor.start(editor, []).path
     }
   }
+  static getSchemaText(editor: Editor) {
+    let text = ''
+    const nodes = Editor.nodes(editor, {
+      at: [],
+      match: (n) => Text.isText(n) || Element.isElement(n)
+    })
+    for (const [node] of nodes) {
+      if (Text.isText(node)) {
+        text += node.text
+      } else if (Element.isElement(node)) {
+        if (['paragraph', 'heading', 'block-quote', 'table', 'table-row'].includes(node.type)) {
+          text += '\n'
+        }
+        if (node.type === 'code' && node.code) {
+          text += '\n' + node.code + '\n'
+        }
+        if (node.type === 'table-cell') {
+          text += ' '
+        }
+      }
+    }
+    return text.trim()
+  }
 }

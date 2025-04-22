@@ -205,9 +205,15 @@ export class NoteStore extends StructStore<typeof state> {
             children: []
           })
         } else {
-          nodes[doc.id] = observable(doc, {
-            schema: false
-          })
+          nodes[doc.id] = observable(
+            {
+              ...doc,
+              schema: undefined
+            },
+            {
+              schema: false
+            }
+          )
         }
         const parent = doc.parentId
         if (!foldersMap.has(parent)) {
@@ -237,6 +243,15 @@ export class NoteStore extends StructStore<typeof state> {
         state.nodes = nodes
       })
       this.restoreTabs()
+      this.store.model
+        .searchDocs(
+          spaceId,
+          // '你好啊，我是黄杰，南京市长江大桥，今天我想去play football, i am very happy, i want to play football, 你是谁？'
+          '系统卡片全部放置在src/components/panel/builtin_card目录下，新建卡片时创建目录，目录内容如下1'
+        )
+        .then((res) => {
+          console.log(res)
+        })
     })
   }
   checkOtherTabsShouldUpdate() {
