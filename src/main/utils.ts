@@ -1,5 +1,7 @@
-import nodejieba from 'nodejieba'
 import nlp from 'compromise'
+import { Jieba } from '@node-rs/jieba'
+import { dict } from '@node-rs/jieba/dict'
+const jieba = Jieba.withDict(dict)
 
 export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
   const result = {} as Pick<T, K>
@@ -20,7 +22,7 @@ export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Om
 }
 
 const chineseSegment = (text: string): string[] => {
-  return nodejieba.cut(text, true)
+  return jieba.cut(text, true)
 }
 
 const englishSegment = (text: string): string[] => {
