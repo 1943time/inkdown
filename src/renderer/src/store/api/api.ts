@@ -158,7 +158,13 @@ export class ModelApi {
     })
   }
 
-  async updateDoc(id: string, doc: Partial<IDoc>, text?: string): Promise<void> {
+  async updateDoc(
+    id: string,
+    doc: Partial<IDoc>,
+    ctx?: { texts: string; chunks?: { text: string; path: number; type: string }[] }
+  ): Promise<void> {
+    console.log('ctx', ctx)
+
     return ipcRenderer.invoke(
       'updateDoc',
       id,
@@ -167,7 +173,7 @@ export class ModelApi {
         schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
         links: doc.links ? JSON.stringify(doc.links) : undefined
       },
-      text
+      ctx
     )
   }
 

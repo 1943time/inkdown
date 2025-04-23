@@ -1,7 +1,7 @@
 import nlp from 'compromise'
 import { Jieba } from '@node-rs/jieba'
 import { dict } from '@node-rs/jieba/dict'
-const jieba = Jieba.withDict(dict)
+const jieba = Jieba.withDict(Buffer.from(dict))
 
 export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
   const result = {} as Pick<T, K>

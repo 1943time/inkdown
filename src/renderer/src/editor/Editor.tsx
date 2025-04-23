@@ -50,7 +50,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
           schema: node.schema,
           updated: Date.now()
         },
-        EditorUtils.getSchemaText(tab.editor)
+        {
+          texts: EditorUtils.getSchemaText(tab.editor),
+          chunks: await store.output.getChunks(node.schema)
+        }
       )
       if (!ipc) {
         // core.ipc.sendMessage({

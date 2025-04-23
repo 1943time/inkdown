@@ -9,7 +9,6 @@ export class MarkdownOutput {
   private readonly space = '  '
   private filePath = ''
   private exportRootPath: undefined | string = undefined
-  // 仅收集小于5mb图片
   private depMedias = new Map<string, string>()
   private readonly inlineNode = new Set(['inline-katex', 'break'])
   private isMix(t: CustomLeaf) {
@@ -274,6 +273,27 @@ export class MarkdownOutput {
     this.filePath = this.getNodeSpacePath(data.node)
     const md = await this.parse(data.node.schema || [])
     return { md, medias: this.depMedias }
+  }
+
+  async getChunks(schema: any[]) {
+    this.depMedias.clear()
+    this.exportRootPath = undefined
+    this.filePath = ''
+    const chunks: {
+      text: string
+      path: number
+      type: string
+    }[] = []
+    for (let i = 0; i < schema.length; i++) {
+      const node = schema[i]
+      const text = await this.parse([node])
+      chunks.push({
+        type: node.type,
+        path: i,
+        text
+      })
+    }
+    return chunks
   }
 
   private async parse(tree: any[], preString = '', parent: any[] = [{ root: true }]) {

@@ -8,6 +8,7 @@ import { mediaType } from '@/editor/utils/dom'
 import { ContextMenu } from './menu'
 import { SystemApi } from './api/system'
 import { LocalFile } from './note/local'
+import { MarkdownOutput } from './note/output'
 export class Store {
   public readonly model = new ModelApi()
   public readonly settings = new SettingsStore(this)
@@ -16,6 +17,7 @@ export class Store {
   public readonly menu = new ContextMenu(this)
   public readonly system = new SystemApi()
   public readonly local = new LocalFile(this)
+  public readonly output = new MarkdownOutput(this)
   userDataPath = ''
   constructor(public readonly msg: MessageInstance) {
     this.system.userDataPath().then((path) => {

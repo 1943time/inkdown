@@ -17,7 +17,56 @@ import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
 import { customAlphabet } from 'nanoid'
+import * as lancedb from '@lancedb/lancedb'
+import * as arrow from 'apache-arrow'
+import { pipeline, env, FeatureExtractionPipeline } from '@xenova/transformers'
+env.remoteHost = 'https://hf-mirror.com'
 const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 15)
+let vdb: lancedb.Connection | null = null
+let extractor: null | FeatureExtractionPipeline = null
+const tableMap = new Map<string, lancedb.Table>()
+const openTable = async (spaceId: string) => {
+  if (tableMap.has(spaceId)) {
+    return tableMap.get(spaceId)
+  }
+  if (!vdb || !extractor) return null
+  try {
+    const table = await vdb.openTable(`space-${spaceId}`)
+    tableMap.set(spaceId, table)
+    return table
+  } catch (error) {
+    const schema = new arrow.Schema([
+      new arrow.Field('path', new arrow.Int32(), true),
+      new arrow.Field('content', new arrow.Utf8(), true),
+      new arrow.Field('type', new arrow.Utf8(), true),
+      new arrow.Field('doc_id', new arrow.Utf8(), true),
+      new arrow.Field('space_id', new arrow.Utf8(), true),
+      new arrow.Field(
+        'vector',
+        new arrow.FixedSizeList(768, new arrow.Field('item', new arrow.Float32(), true)),
+        true
+      )
+    ])
+    const table = await vdb.createEmptyTable(`space-${spaceId}`, schema, { mode: 'create' })
+    // await table.createIndex('docId')
+    // await table.createIndex('spaceId', { config: lancedb.Index.bitmap() })
+    tableMap.set(spaceId, table)
+    return table
+  }
+}
+
+try {
+  const databaseDir = join(app.getPath('userData'), 'lance-db')
+  lancedb.connect(databaseDir).then(async (db) => {
+    vdb = db
+    extractor = await pipeline('feature-extraction', 'Xenova/jina-embeddings-v2-base-zh', {
+      cache_dir: join(app.getPath('userData'), 'model')
+    })
+  })
+} catch (error) {
+  console.error(error)
+}
+
 export const modelReady = () => {
   return initModel()
 }
@@ -83,8 +132,8 @@ ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
         ...m,
         files: m.files ? JSON.stringify(m.files) : null,
         images: m.images ? JSON.stringify(m.images) : null,
-        error: m.error ? JSON.stringify(m.error) : null
-        // docs: m.docs ? JSON.stringify(m.docs) : null
+        error: m.error ? JSON.stringify(m.error) : null,
+        docs: m.docs ? JSON.stringify(m.docs) : null
       }
     })
   )
@@ -244,7 +293,7 @@ ipcMain.handle('sortSpaces', async (_, ids: string[]) => {
 })
 
 ipcMain.handle('deleteSpace', async (_, id: string) => {
-  return knex.transaction(async (trx) => {
+  await knex.transaction(async (trx) => {
     const docs = await trx('doc').where('spaceId', id).select(['id'])
     await trx('docTag')
       .whereIn(
@@ -276,6 +325,12 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
     await trx('docFts').where('spaceId', id).delete()
     await trx('file').where('spaceId', id).delete()
   })
+  try {
+    if (vdb) {
+      vdb.dropTable(`space-${id}`)
+      tableMap.delete(id)
+    }
+  } catch (e) {}
 })
 
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
@@ -317,27 +372,88 @@ ipcMain.handle('createDoc', async (_, doc: IDoc) => {
   return knex('doc').insert(omit(doc, ['expand', 'children']))
 })
 
-ipcMain.handle('updateDoc', async (_, id: string, doc: Partial<IDoc>, text?: string) => {
-  await knex('doc')
-    .where('id', id)
-    .update(omit(doc, ['expand', 'children', 'id']))
-  if (text) {
-    const tokens = prepareFtsTokens(text)
-    const exists = await knex('docFts').where('docId', id).first()
-    if (exists) {
-      await knex('docFts')
-        .where('docId', id)
-        .update({ text: text, words: tokens.join(' ') })
-    } else {
-      await knex('docFts').insert({
-        docId: id,
-        text: text,
-        words: tokens.join(' '),
-        spaceId: doc.spaceId
-      })
+ipcMain.handle(
+  'updateDoc',
+  async (
+    _,
+    id: string,
+    doc: Partial<IDoc>,
+    ctx?: { texts: string; chunks: { text: string; path: number; type: string }[] }
+  ) => {
+    await knex('doc')
+      .where('id', id)
+      .update(omit(doc, ['expand', 'children', 'id']))
+    if (ctx?.texts) {
+      const tokens = prepareFtsTokens(ctx.texts)
+      const exists = await knex('docFts').where('docId', id).first()
+      if (exists) {
+        await knex('docFts')
+          .where('docId', id)
+          .update({ text: ctx.texts, words: tokens.join(' ') })
+      } else {
+        await knex('docFts').insert({
+          docId: id,
+          text: ctx.texts,
+          words: tokens.join(' '),
+          spaceId: doc.spaceId
+        })
+      }
+    }
+    if (ctx?.chunks) {
+      const table = await openTable(doc.spaceId!)
+      if (!table) return
+      let rows = await table
+        .query()
+        .where(`space_id = '${doc.spaceId}' AND doc_id = '${id}'`)
+        .select(['path', 'doc_id', 'space_id', 'content'])
+        .toArray()
+      rows = rows.sort((a, b) => a.path - b.path)
+      const exist = new Map<number, string>(rows.map((r) => [r.path, r.content]))
+      const chunkMap = new Map<number, string>(ctx.chunks.map((c) => [c.path, c.text]))
+      const remove: number[] = Array.from(exist)
+        .filter(([k]) => !chunkMap.has(k))
+        .filter(([k]) => !chunkMap.has(k))
+        .map(([k]) => k)
+      for (const chunk of ctx.chunks) {
+        if (exist.has(chunk.path) && exist.get(chunk.path) === chunk.text) {
+          continue
+        }
+        try {
+          const res = await extractor!(chunk.text, {
+            pooling: 'mean',
+            normalize: true
+          })
+          if (exist.has(chunk.path)) {
+            table.update({
+              where: `doc_id = '${id}' AND path = ${chunk.path}`,
+              values: {
+                content: chunk.text,
+                type: chunk.type,
+                vector: Array.from(res.data)
+              }
+            })
+          } else {
+            table.add([
+              {
+                path: chunk.path,
+                content: chunk.text,
+                type: chunk.type,
+                doc_id: id,
+                space_id: doc.spaceId,
+                vector: Array.from(res.data)
+              }
+            ])
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      }
+      if (remove.length > 0) {
+        await table.delete(`doc_id = '${id}' AND path IN (${remove.join(',')})`)
+      }
     }
   }
-})
+)
 
 ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
   return Promise.all(
