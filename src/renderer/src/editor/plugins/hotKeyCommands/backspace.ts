@@ -46,6 +46,10 @@ export class BackspaceKey {
     }
     this.clearStyle(sel)
     const [el, path] = node
+    if (el.type === 'wiki-link' && !Node.string(el)) {
+      Transforms.delete(this.editor, { at: path })
+      return true
+    }
     if (el.type === 'head') {
       const str = Node.string(el)
       if (!str) {

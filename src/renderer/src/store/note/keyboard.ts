@@ -586,6 +586,7 @@ export class KeyboardTask {
         })
         if (node) {
           this.tab.editor.selection = null
+
           this.tab.setState({ domRect: null })
         }
       }

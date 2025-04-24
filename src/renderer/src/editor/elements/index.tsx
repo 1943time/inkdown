@@ -16,6 +16,7 @@ import { CustomLeaf } from '..'
 import { AceElement } from './ace'
 import { useTab } from '@/store/note/TabCtx'
 import { TabStore } from '@/store/note/tab'
+import { WikiLink } from './wikilink'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -74,6 +75,8 @@ export const MElement = memo((props: RenderElementProps) => {
       return <List {...props} />
     case 'code':
       return <AceElement {...props} />
+    case 'wiki-link':
+      return <WikiLink {...props} />
     case 'table':
       return <Table {...props}>{props.children}</Table>
     case 'table-row':

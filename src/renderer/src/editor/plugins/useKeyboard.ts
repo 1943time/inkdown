@@ -69,7 +69,6 @@ export const useKeyboard = (tab: TabStore) => {
           EditorUtils.clearMarks(tab.editor)
         }
       }
-
       if (e.key.toLowerCase().startsWith('arrow')) {
         if (state.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
         keyArrow(tab, e)

@@ -23,6 +23,7 @@ export const DragHandle = memo((props: { style?: CSSProperties }) => {
         }
         tab.dragEl = parent
         tab.editor.selection = null
+
         tab.selChange$.next(null)
         tab.dragStart(e)
         e.stopPropagation()

@@ -113,7 +113,7 @@ export const FloatBar = observer(() => {
       const container = tab.container!
       if (left < 4) left = 4
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
-      let top = container.scrollTop + domRect.top - 80
+      let top = container.scrollTop + domRect.top - 110
       setState({
         open: true,
         left,

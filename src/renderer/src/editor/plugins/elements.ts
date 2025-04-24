@@ -320,6 +320,32 @@ const MdElements: Record<string, MdNode> = {
     run: matchText(({ editor, match }) => {
       Transforms.insertNodes(editor, [{ text: match[1], strikethrough: true }], { select: true })
     })
+  },
+  wikiLink: {
+    reg: /\[/,
+    matchKey: '[',
+    run: ({ editor, sel }) => {
+      const str = Editor.string(editor, {
+        anchor: {
+          path: sel.anchor.path,
+          offset: sel.anchor.offset - 1
+        },
+        focus: {
+          path: sel.anchor.path,
+          offset: sel.anchor.offset
+        }
+      })
+      if (str === '[') {
+        Transforms.insertNodes(editor, [{ type: 'wiki-link', children: [{ text: '' }] }], {
+          select: true,
+          at: {
+            anchor: { path: sel.anchor.path, offset: sel.anchor.offset - 1 },
+            focus: { path: sel.anchor.path, offset: sel.anchor.offset }
+          }
+        })
+        return true
+      }
+    }
   }
 }
 export const BlockMathNodes = Object.entries(MdElements)

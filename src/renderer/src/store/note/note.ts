@@ -10,6 +10,7 @@ import { observable } from 'mobx'
 import isHotkey from 'is-hotkey'
 import { ReactEditor } from 'slate-react'
 import { EditorUtils } from '@/editor/utils/editorUtils'
+import { slugify } from '@/editor/utils/dom'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -32,9 +33,6 @@ const state = {
     dropNode: null | IDoc
   },
   get currentTab() {
-    return this.tabs[this.tabIndex]
-  },
-  get currentTabStore() {
     return this.tabs[this.tabIndex]
   },
   get currentSpace() {
@@ -341,7 +339,7 @@ export class NoteStore extends StructStore<typeof state> {
     const tab = this.state.currentTab
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
     if (index !== -1) {
-      if (index === state.tabIndex) return
+      if (index === this.state.tabIndex) return
       return this.selectTab(index)
     }
     tab.setState((state) => {
@@ -550,5 +548,84 @@ export class NoteStore extends StructStore<typeof state> {
       current = this.state.nodes[current.parentId]
     }
     return path
+  }
+
+  deepCreateFolder(path: string[]) {
+    const docMap = new Map<string, IDoc>(
+      Object.values(this.state.nodes).map((node) => [this.getDocPath(node).join('/'), node])
+    )
+    let curNode = this.state.nodes['root']
+    let curPath = ''
+    for (const p of path) {
+      curPath = curPath ? `${curPath}/${p}` : p
+      if (docMap.has(curPath)) {
+        const node = docMap.get(curPath)!
+        if (node.folder) {
+          curNode = node
+          continue
+        }
+      }
+      const data = this.store.menu.createFolder(p, curNode.id)
+      curNode = data
+    }
+    return curNode
+  }
+
+  toWikiLink(str: string) {
+    if (!str) return
+    const match = EditorUtils.parseWikiLink(str)
+    if (!match) return str
+    const { docName, anchor } = match
+    const nodes = this.state.nodes
+    let exist = false
+    if (docName) {
+      for (let doc of Object.values(nodes)) {
+        if (!doc.folder) {
+          if (docName.includes('/')) {
+            const path = this.getDocPath(doc)
+            if (path.join('/') === docName) {
+              this.openDoc(doc)
+              exist = true
+            }
+          } else {
+            if (doc.name === docName) {
+              this.openDoc(doc)
+              exist = true
+            }
+          }
+        }
+      }
+    } else if (anchor) {
+      const doc = this.state.currentTab.state.doc
+      if (doc) {
+        const id = slugify(anchor)
+        const el = this.state.currentTab.container?.querySelector(
+          `[data-head="${id}"]`
+        ) as HTMLElement
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+      exist = true
+    }
+
+    if (!exist) {
+      let parentNode = this.state.nodes[this.state.opendDoc.parentId]
+      if (docName.includes('/')) {
+        parentNode = this.deepCreateFolder(docName.split('/').slice(0, -1))
+      }
+      const name = docName.split('/').pop()!
+      this.store.menu.createDoc(parentNode.id, name)
+    } else if (docName && anchor) {
+      setTimeout(() => {
+        const id = slugify(anchor)
+        const el = this.state.currentTab.container?.querySelector(
+          `[data-head="${id}"]`
+        ) as HTMLElement
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
   }
 }

@@ -9,6 +9,7 @@ import { ContextMenu } from './menu'
 import { SystemApi } from './api/system'
 import { LocalFile } from './note/local'
 import { MarkdownOutput } from './note/output'
+import { KeyboardTask } from './note/keyboard'
 export class Store {
   public readonly model = new ModelApi()
   public readonly settings = new SettingsStore(this)

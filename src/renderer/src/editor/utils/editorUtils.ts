@@ -446,4 +446,30 @@ export class EditorUtils {
     }
     return text.trim()
   }
+  static parseWikiLink(str: string) {
+    const wikiLinkRegex = /([^#|]+)?(#[^|]+)?(\s*\|\s*[^|]+)?/
+    const match = str.match(wikiLinkRegex)
+    if (!match) return null
+
+    let [, docName, anchor, displayText] = match
+    if (displayText) {
+      displayText = displayText.trim().replace(/^\s*\|\s*/, '')
+    } else if (docName) {
+      displayText = docName
+        .trim()
+        .replace(/^\/+|\/+$/g, '')
+        .split('/')
+        .pop()!
+      if (anchor) {
+        displayText += anchor.trim()
+      }
+    } else if (anchor) {
+      displayText = anchor.trim()
+    }
+    return {
+      docName: docName?.trim().replace(/^\/+|\/+$/g, ''),
+      anchor: anchor?.trim().replace(/^#/, ''),
+      displayText: displayText
+    }
+  }
 }

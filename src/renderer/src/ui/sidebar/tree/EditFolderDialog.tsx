@@ -34,37 +34,7 @@ export const EditFolderDialog = observer(() => {
         if (stack.some((s) => s.name === name && s.folder)) {
           return setState({ message: 'The folder already exists' })
         }
-        const id = nid()
-        const now = Date.now()
-        const spaceId = store.note.state.currentSpace!.id
-        const data: IDoc = observable({
-          id,
-          name,
-          deleted: false,
-          spaceId,
-          parentId: state().ctxNode?.id || 'root',
-          updated: now,
-          sort: 0,
-          folder: true,
-          created: now
-        })
-        store.model.createDoc(data)
-        // core.ipc.sendMessage({
-        //   type: 'createFolder',
-        //   data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state().ctxNode?.cid }
-        // })
-        store.note.setState((draft) => {
-          draft.nodes[id] = data
-          const parentId = state().ctxNode ? state().ctxNode!.id : 'root'
-          draft.nodes[parentId]!.children!.unshift(data)
-          const updateData: Partial<IDoc>[] = []
-          draft.nodes[parentId]!.children!.map((s, i) => {
-            s.sort = i
-            s.updated = now
-            updateData.push({ id: s.id, sort: i, updated: now })
-          })
-          store.model.updateDocs(updateData)
-        })
+        store.menu.createFolder(name, state().ctxNode?.id || 'root')
         // core.local.localWriteNode(node)
       } else if (state().ctxNode) {
         const ctx = state().ctxNode!

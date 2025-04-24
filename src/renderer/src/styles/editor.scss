@@ -115,6 +115,9 @@ a {
     display: none !important;
   }
 }
+[data-be='head'] {
+  scroll-margin: 16px;
+}
 .edit-area {
   &.focus {
     [data-empty] {
@@ -686,4 +689,19 @@ ul.m-list {
 }
 .float-bar {
   @apply z-20 dark:text-gray-300 h-8 rounded text-[13px] dark:bg-zinc-800 bg-white text-gray-500 absolute;
+}
+
+.wiki-link {
+  margin: 0 1px;
+  @apply dark:text-blue-500 cursor-default;
+  &.selected {
+    &:before {
+      content: '[[';
+      @apply dark:text-white/60;
+    }
+    &:after {
+      content: ']]';
+      @apply dark:text-white/60;
+    }
+  }
 }

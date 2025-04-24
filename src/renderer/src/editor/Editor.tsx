@@ -265,8 +265,11 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     }
     if (text) {
       const [node] = Editor.nodes<Element>(tab.editor, {
-        match: (n) => Element.isElement(n) && (n.type === 'inline-katex' || n.type === 'table-cell')
+        match: (n) =>
+          Element.isElement(n) &&
+          (n.type === 'inline-katex' || n.type === 'table-cell' || n.type === 'wiki-link')
       })
+
       if (node) {
         Transforms.insertText(tab.editor, text.replace(/\r?\n/g, ' '))
         e.stopPropagation()
@@ -275,13 +278,14 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
     }
     let paste = e.clipboardData.getData('text/html')
+
     if (paste) {
       const parsed = new DOMParser().parseFromString(paste, 'text/html').body
       const inner = !!parsed.querySelector('[data-be]')
       if (!inner) {
         const md = htmlToMarkdown(paste)
         if (md) {
-          // core.keyboard.insertMarkdown(md)
+          tab.keyboard.insertMarkdown(md)
         }
         e.stopPropagation()
         e.preventDefault()

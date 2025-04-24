@@ -43,7 +43,7 @@ export const Characters = observer(() => {
     if (!store.note.state.opendDoc) return
     count()
     let timer = 0
-    const sub = store.note.state.currentTabStore.docChanged$.subscribe(() => {
+    const sub = store.note.state.currentTab.docChanged$.subscribe(() => {
       clearTimeout(timer)
       timer = window.setTimeout(count, 300)
     })

@@ -408,11 +408,11 @@ ipcMain.handle(
         .select(['path', 'doc_id', 'space_id', 'content'])
         .toArray()
       rows = rows.sort((a, b) => a.path - b.path)
+      console.log('rows', rows)
       const exist = new Map<number, string>(rows.map((r) => [r.path, r.content]))
       const chunkMap = new Map<number, string>(ctx.chunks.map((c) => [c.path, c.text]))
       const remove: number[] = Array.from(exist)
-        .filter(([k]) => !chunkMap.has(k))
-        .filter(([k]) => !chunkMap.has(k))
+        .filter(([k]) => !chunkMap.has(k) && k !== -1)
         .map(([k]) => k)
       const meta = `名称 name ${doc.name} time 时间 ${formatDate(doc.updated!)}`
       const metaData = await extractor!(meta, {

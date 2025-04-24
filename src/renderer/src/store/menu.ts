@@ -3,7 +3,7 @@ import { action, observable, runInAction } from 'mobx'
 import { Store } from './store'
 import { IDoc } from 'types/model'
 import { IMenu, openMenus } from '@/ui/common/Menu'
-import { copy, os } from '@/utils/common'
+import { copy, nid, os } from '@/utils/common'
 import { nanoid } from 'nanoid'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 
@@ -21,6 +21,40 @@ export class ContextMenu {
     }
     return cur
   }
+  createFolder(name: string, parentId: string = 'root') {
+    const id = nid()
+    const now = Date.now()
+    const spaceId = this.store.note.state.currentSpace!.id
+    const data: IDoc = observable({
+      id,
+      name,
+      deleted: false,
+      spaceId,
+      parentId: parentId,
+      updated: now,
+      sort: 0,
+      folder: true,
+      created: now,
+      children: []
+    })
+    this.store.model.createDoc(data)
+    // core.ipc.sendMessage({
+    //   type: 'createFolder',
+    //   data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state().ctxNode?.cid }
+    // })
+    this.store.note.setState((draft) => {
+      draft.nodes[id] = data
+      draft.nodes[parentId]!.children!.unshift(data)
+      const updateData: Partial<IDoc>[] = []
+      draft.nodes[parentId]!.children!.map((s, i) => {
+        s.sort = i
+        s.updated = now
+        updateData.push({ id: s.id, sort: i, updated: now })
+      })
+      this.store.model.updateDocs(updateData)
+    })
+    return data
+  }
   createDoc(parentId: string = 'root', name = 'Untitled', schema?: any[]) {
     const parent = this.store.note.state.nodes[parentId]
     const docName = this.getCreateName(name, parent)
@@ -28,7 +62,7 @@ export class ContextMenu {
       const now = Date.now()
       const doc: IDoc = observable(
         {
-          id: nanoid(),
+          id: nid(),
           name: docName,
           parentId,
           folder: false,

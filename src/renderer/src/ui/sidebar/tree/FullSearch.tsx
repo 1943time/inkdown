@@ -45,7 +45,7 @@ export const FullSearch = observer(() => {
   }, [])
 
   const toNode = useCallback((res: { el: any; doc: IDoc; codeLine?: number }) => {
-    const tab = store.note.state.currentTabStore
+    const tab = store.note.state.currentTab
     if (res.el) {
       if (tab.state.doc.id !== res.doc.id) {
         store.note.openDoc(res.doc, false)

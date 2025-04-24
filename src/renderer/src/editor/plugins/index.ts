@@ -2,7 +2,7 @@ import { NoteStore } from '@/store/note/note'
 import { TabStore } from '@/store/note/tab'
 import { Editor, Node, Transforms } from 'slate'
 
-export const inlineNode = new Set(['inline-katex', 'break', 'quick-link'])
+export const inlineNode = new Set(['inline-katex', 'break', 'wiki-link'])
 const voidNode = new Set(['hr', 'break'])
 export const withMarkdown = (editor: Editor, store: TabStore) => {
   const { isInline, isVoid, apply } = editor

@@ -4,7 +4,7 @@ import { Subject } from 'rxjs'
 import { TabStore } from '@/store/note/tab'
 
 export const selChange$ = new Subject<Path | null>()
-const floatBarIgnoreNode = new Set(['code', 'inline-katex'])
+const floatBarIgnoreNode = new Set(['code', 'inline-katex', 'wiki-link'])
 export function useOnchange(tab: TabStore) {
   const rangeContent = useRef('')
   return useMemo(() => {

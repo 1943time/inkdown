@@ -19,6 +19,7 @@ export type CodeLineNode = { type: 'code-line'; children: BaseElement['children'
 export type ParagraphNode = { type: 'paragraph'; children: BaseElement['children']; h?: number }
 export type TableNode = { type: 'table'; children: TableRowNode[] }
 export type TableRowNode = { type: 'table-row'; children: TableCellNode[] }
+export type WikiLinkNode = { type: 'wiki-link'; children: BaseElement['children'][] }
 export type TableCellNode = {
   type: 'table-cell'
   title?: boolean
@@ -96,6 +97,7 @@ export type Elements =
   | InlineKatexNode
   | BreakNode
   | AttachNode
+  | WikiLinkNode
 
 export type CustomLeaf = {
   bold?: boolean | null

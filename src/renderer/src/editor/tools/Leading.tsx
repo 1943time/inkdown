@@ -131,10 +131,7 @@ export const Heading = observer(({ tab }: { tab: TabStore }) => {
               key={h.key}
               onClick={() => {
                 if (h.dom && tab.container) {
-                  tab.container.scroll({
-                    top: getOffsetTop(h.dom, tab.container) - 10,
-                    behavior: 'smooth'
-                  })
+                  h.dom.scrollIntoView({ behavior: 'smooth' })
                 }
               }}
               className={`${levelClass.get(h.level)} cursor-pointer ${state().active === h.id ? 'dark:text-white text-black' : 'dark:hover:text-gray-200 hover:text-gray-800'}`}
