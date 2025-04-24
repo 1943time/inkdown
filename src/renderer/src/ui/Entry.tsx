@@ -22,16 +22,16 @@ const Entry = observer(() => {
       <div className={'flex-1 relative flex flex-col w-0 min-w-0'}>
         <Nav />
         <div className={'flex-1 relative h-[calc(100vh_-_40px)]'}>
-          {store.settings.state.view === 'chat' && (
-            <div className={'h-full'}>
-              <Chat />
-            </div>
-          )}
-          {store.settings.state.view === 'note' && (
-            <div className={'h-full'}>
-              <Note />
-            </div>
-          )}
+          <div
+            className={`h-full ${store.settings.state.view === 'chat' ? '' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
+          >
+            <Chat />
+          </div>
+          <div
+            className={`h-full ${store.settings.state.view === 'note' ? '' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
+          >
+            <Note />
+          </div>
           {open && <Settings />}
         </div>
       </div>

@@ -22,6 +22,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
   const saveTimer = useRef(0)
+  const changeTimer = useRef(0)
   const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const renderElement = useCallback(
     (props: any) => <MElement {...props} children={props.children} />,
@@ -48,6 +49,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         {
           spaceId: node.spaceId,
           schema: node.schema,
+          name: node.name,
           updated: Date.now()
         },
         {
@@ -128,7 +130,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         tab.setState((state) => {
           state.docChanged = true
         })
-        tab.docChanged$.next(null)
+        clearTimeout(changeTimer.current)
+        changeTimer.current = window.setTimeout(() => {
+          tab.docChanged$.next(null)
+        }, 500)
         clearTimeout(saveTimer.current)
         saveTimer.current = window.setTimeout(() => {
           save()
@@ -155,6 +160,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         store.note.setState((state) => {
           state.nodes[tab.state.doc.id].schema = doc?.schema
         })
+        tab.docChanged$.next(null)
       }
       try {
         tab.editor.selection = null

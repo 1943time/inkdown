@@ -12,7 +12,7 @@ import {
   IHistory,
   IFile
 } from 'types/model'
-import { omit, prepareFtsTokens } from '../utils'
+import { formatDate, omit, prepareFtsTokens } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
@@ -414,6 +414,32 @@ ipcMain.handle(
         .filter(([k]) => !chunkMap.has(k))
         .filter(([k]) => !chunkMap.has(k))
         .map(([k]) => k)
+      const meta = `名称 name ${doc.name} time 时间 ${formatDate(doc.updated!)}`
+      const metaData = await extractor!(meta, {
+        pooling: 'mean',
+        normalize: true
+      })
+      if (exist.has(-1)) {
+        table.update({
+          where: `doc_id = '${id}' AND path = -1`,
+          values: {
+            content: meta,
+            type: 'meta',
+            vector: Array.from(metaData.data)
+          }
+        })
+      } else {
+        table.add([
+          {
+            path: -1,
+            content: meta,
+            type: 'meta',
+            doc_id: id,
+            space_id: doc.spaceId,
+            vector: Array.from(metaData.data)
+          }
+        ])
+      }
       for (const chunk of ctx.chunks) {
         if (exist.has(chunk.path) && exist.get(chunk.path) === chunk.text) {
           continue

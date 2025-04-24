@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect } from 'react'
 import { countWords } from 'alfaaz'
-import { Editor } from 'slate'
+import { Editor, Text } from 'slate'
 import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState'
 import { CustomLeaf } from '..'
@@ -14,15 +14,20 @@ export const Characters = observer(() => {
   const count = useCallback(() => {
     if (store.note.state.opendDoc) {
       try {
-        const texts = Editor.nodes<CustomLeaf>(store.note.state.currentTab.editor, {
+        const texts = Editor.nodes<any>(store.note.state.currentTab.editor, {
           at: [],
-          match: (n) => n.text
+          match: (n) => n.text || n.type === 'code'
         })
         let words = 0
         let characters = 0
         for (let t of texts) {
-          words += countWords(t[0].text || '')
-          characters += (t[0].text || '').length
+          if (Text.isText(t[0])) {
+            words += countWords(t[0].text || '')
+            characters += (t[0].text || '').length
+          } else if (t[0].type === 'code') {
+            words += countWords(t[0].code || '')
+            characters += (t[0].code || '').length
+          }
         }
         setState({
           words,

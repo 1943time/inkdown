@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { Node } from 'slate'
 import { slugify } from '../utils/dom'
 import { nanoid } from 'nanoid'
 import { getOffsetTop } from '../../utils/dom'
-import { IDoc } from 'types/model'
 import { TabStore } from '@/store/note/tab'
+import { observer } from 'mobx-react-lite'
+import { useSubject } from '@/hooks/common'
 type Leading = {
   title: string
   level: number
@@ -23,7 +24,7 @@ const levelClass = new Map([
   [4, 'pl-9']
 ])
 
-export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
+export const Heading = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef<number>(null)
   const [state, setState] = useGetSetState({
     headings: [] as Leading[],
@@ -34,11 +35,11 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
     cache.clear()
     getHeading()
     setState({ active: '' })
-  }, [doc])
+  }, [tab.state.doc])
 
   const getHeading = useCallback(() => {
-    if (doc) {
-      const schema = doc.schema
+    if (tab.state.doc) {
+      const schema = tab.state.doc.schema
       if (schema?.length) {
         const headings: Leading[] = []
         for (let s of schema) {
@@ -75,8 +76,8 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
     } else {
       setState({ headings: [] })
     }
-  }, [tab, doc])
-
+  }, [tab.state.doc])
+  useSubject(tab.docChanged$, getHeading)
   useEffect(() => {
     const div = box.current
     if (div) {
@@ -98,9 +99,10 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
     }
     return () => {}
   }, [tab])
+  if (!tab.state.doc) return null
   return (
     <div
-      className={`sticky flex-shrink-0`}
+      className={`sticky flex-shrink-0 top-0`}
       ref={(e) => {
         box.current = e?.parentElement?.parentElement?.parentElement || null
       }}
@@ -111,7 +113,7 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
       >
         <div className={'text-gray-500 text-sm mb-4'}>{'大纲'}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm break-words'}>
-          {!!doc && (
+          {!!tab.state.doc && (
             <div
               onClick={() => {
                 tab.container?.scroll({
@@ -121,7 +123,7 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
               }}
               className={`cursor-pointer dark:hover:text-gray-200 hover:text-gray-800`}
             >
-              {doc.name}
+              {tab.state.doc.name}
             </div>
           )}
           {state().headings.map((h) => (
@@ -144,4 +146,4 @@ export function Heading({ doc, tab }: { doc: IDoc; tab: TabStore }) {
       </div>
     </div>
   )
-}
+})
