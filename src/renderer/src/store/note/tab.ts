@@ -39,7 +39,8 @@ const state = {
     open: false,
     keyword: '',
     left: 0,
-    top: 0
+    top: 0,
+    offset: 0
   },
   domRect: null as null | DOMRect,
   refreshHighlight: false,

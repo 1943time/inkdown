@@ -14,7 +14,7 @@ export function Paragraph(props: ElementProps<ParagraphNode>) {
       data-be={'paragraph'}
       className={'drag-el'}
       onDragStart={tab.dragStart}
-      data-empty={!str && selected ? 'true' : undefined}
+      data-empty={!str && selected && props.element.children?.length === 1 ? 'true' : undefined}
     >
       <DragHandle style={{ left: -20 }} />
       {props.children}

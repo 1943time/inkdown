@@ -6,7 +6,6 @@ import { Editor, Node, Transforms } from 'slate'
 import { isMod } from '@/utils/common'
 import { useMemo } from 'react'
 import { EditorUtils } from '../utils/editorUtils'
-import { ReactEditor } from 'slate-react'
 
 export function WikiLink({ element, children, attributes }: ElementProps<WikiLinkNode>) {
   const store = useStore()
@@ -19,7 +18,8 @@ export function WikiLink({ element, children, attributes }: ElementProps<WikiLin
   return (
     <span
       {...attributes}
-      className={`wiki-link ${selected ? 'selected' : ''}`}
+      className={`wiki-link ${selected || !displayText ? 'selected' : ''}`}
+      title={'mod + click to open link, mod + alt + click to open file in new tab'}
       onMouseDown={(e) => {
         if (isMod(e)) {
           e.stopPropagation()
@@ -27,7 +27,7 @@ export function WikiLink({ element, children, attributes }: ElementProps<WikiLin
       }}
       onClick={(e) => {
         if (isMod(e)) {
-          store.note.toWikiLink(Node.string(element))
+          store.note.toWikiLink(Node.string(element), !!e.altKey)
         } else if (!selected) {
           Transforms.select(tab.editor, path)
           setTimeout(() => {

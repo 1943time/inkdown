@@ -16,7 +16,7 @@ export function Head({ element, attributes, children }: ElementProps<HeadNode>) 
       className: 'drag-el',
       ['data-head']: slugify(Node.string(element) || ''),
       ['data-title']: path?.[0] === 0,
-      ['data-empty']: !str && selected ? 'true' : undefined
+      ['data-empty']: !str && selected && element.children?.length === 1 ? 'true' : undefined
     },
     <>
       <DragHandle style={{ left: -28, paddingRight: 10 }} />

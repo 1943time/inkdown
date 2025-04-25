@@ -333,37 +333,47 @@ export class NoteStore extends StructStore<typeof state> {
   }
   openParents(doc: IDoc) {
     this.setState((state) => {
-      let parent = this.state.nodes[doc.parentId]
+      let parent = state.nodes[doc.parentId]
       while (parent) {
         parent.expand = true
-        parent = this.state.nodes[parent.parentId]
+        parent = state.nodes[parent.parentId]
       }
     })
   }
-  openDoc(doc: IDoc, scroll: boolean = false) {
+  openDoc(
+    doc: IDoc,
+    opt?: {
+      scroll?: boolean
+      newTab?: boolean
+    }
+  ) {
     const tab = this.state.currentTab
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
     if (index !== -1) {
       if (index === this.state.tabIndex) return
       return this.selectTab(index)
     }
-    tab.setState((state) => {
-      state.docs = state.docs.filter((t) => t.id !== doc.id)
-      state.docs.push(doc)
-      state.currentIndex = state.docs.length - 1
-      state.domRect = null
-    })
-    const now = Date.now()
-    this.store.model.updateDoc(doc.id, {
-      lastOpenTime: now
-    })
-    this.recordTabs()
-    this.openParents(doc)
-    if (scroll) {
-      tab.container?.scroll({
-        top: 0,
-        behavior: 'auto'
+    if (opt?.newTab) {
+      this.createTab(doc)
+    } else {
+      tab.setState((state) => {
+        state.docs = state.docs.filter((t) => t.id !== doc.id)
+        state.docs.push(doc)
+        state.currentIndex = state.docs.length - 1
+        state.domRect = null
       })
+      const now = Date.now()
+      this.store.model.updateDoc(doc.id, {
+        lastOpenTime: now
+      })
+      this.recordTabs()
+      this.openParents(doc)
+      if (opt?.scroll) {
+        tab.container?.scroll({
+          top: 0,
+          behavior: 'auto'
+        })
+      }
     }
   }
   findFirstChildNote(doc: IDoc) {
@@ -575,30 +585,42 @@ export class NoteStore extends StructStore<typeof state> {
     }
     return curNode
   }
-
-  toWikiLink(str: string) {
+  getWikiDoc(docName: string) {
+    if (!docName) return this.state.opendDoc
+    const parent = this.state.nodes[this.state.opendDoc?.parentId].children || []
+    for (let doc of parent) {
+      if (!doc.folder) {
+        if (doc.name === docName) {
+          return doc
+        }
+      }
+    }
+    for (let doc of Object.values(this.state.nodes)) {
+      if (!doc.folder) {
+        if (docName.includes('/')) {
+          const path = this.getDocPath(doc)
+          if (path.join('/') === docName) {
+            return doc
+          }
+        } else {
+          if (doc.name === docName) {
+            return doc
+          }
+        }
+      }
+    }
+  }
+  toWikiLink(str: string, newTab = false) {
     if (!str) return
     const match = EditorUtils.parseWikiLink(str)
     if (!match) return str
     const { docName, anchor } = match
-    const nodes = this.state.nodes
     let exist = false
     if (docName) {
-      for (let doc of Object.values(nodes)) {
-        if (!doc.folder) {
-          if (docName.includes('/')) {
-            const path = this.getDocPath(doc)
-            if (path.join('/') === docName) {
-              this.openDoc(doc)
-              exist = true
-            }
-          } else {
-            if (doc.name === docName) {
-              this.openDoc(doc)
-              exist = true
-            }
-          }
-        }
+      const doc = this.getWikiDoc(docName)
+      if (doc) {
+        this.openDoc(doc, { newTab })
+        exist = true
       }
     } else if (anchor) {
       const doc = this.state.currentTab.state.doc

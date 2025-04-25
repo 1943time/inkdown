@@ -41,25 +41,42 @@ export function useOnchange(tab: TabStore) {
         setTimeout(() => {
           const dom = ReactEditor.toDOMNode(tab.editor, node[0])
           if (dom) {
-            const top = getOffsetTop(dom, tab.container!)
+            let top = getOffsetTop(dom, tab.container!)
+            if (top - tab.container!.scrollTop + 270 > window.innerHeight) {
+              top -= 204
+            } else {
+              top = getOffsetTop(dom, tab.container!) + dom!.clientHeight + 24
+            }
+            let left = getOffsetLeft(dom, tab.container!)
+
+            if (left + 400 > tab.container!.clientWidth) {
+              left = tab.container!.clientWidth - 400
+            }
             tab.setState((state) => {
               state.wikilink = {
                 open: true,
-                left: getOffsetLeft(dom, tab.container!),
-                top: top + 26,
-                keyword: Node.string(node[0])
+                left,
+                top,
+                keyword: Node.string(node[0]),
+                offset: sel?.anchor.offset!
               }
             })
           }
         }, 30)
-      } else if (tab.state.wikilink.open) {
+      } else if (tab.state.wikilink.open && (!setSelection || node[0].type !== 'wiki-link')) {
         tab.setState((state) => {
           state.wikilink = {
             open: false,
             left: 0,
             top: 0,
-            keyword: ''
+            keyword: '',
+            offset: 0
           }
+        })
+      }
+      if (tab.state.wikilink.open && node[0].type === 'wiki-link') {
+        tab.setState((state) => {
+          state.wikilink.offset = sel?.anchor.offset!
         })
       }
       // if (node && node[0].type === 'media') {

@@ -287,7 +287,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
               }
             }}
             className={
-              'h-7 pl-3 pr-1.5 flex items-center w-full absolute left-0 top-0 text-sm text-black/60 dark:text-white/60 justify-between z-50 select-none'
+              'h-7 pl-3 pr-1.5 flex items-center w-full absolute left-0 top-0 text-sm text-black/60 dark:text-white/60 justify-between z-10 select-none'
             }
           >
             <Popover

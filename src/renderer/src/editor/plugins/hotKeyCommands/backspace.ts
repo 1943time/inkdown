@@ -1,4 +1,4 @@
-import { Editor, Element, Node, Path, Point, Range, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
 import { EditorUtils } from '../../utils/editorUtils'
 import { Elements } from '../..'
 import { TabStore } from '@/store/note/tab'
@@ -50,6 +50,14 @@ export class BackspaceKey {
       Transforms.delete(this.editor, { at: path })
       return true
     }
+    if (Path.hasPrevious(sel.anchor.path)) {
+      const prev = Node.get(this.editor, Path.previous(sel.anchor.path))
+      if (prev && prev.type === 'wiki-link') {
+        Transforms.select(this.editor, Editor.end(this.editor, Path.previous(sel.anchor.path)))
+        return true
+      }
+    }
+
     if (el.type === 'head') {
       const str = Node.string(el)
       if (!str) {

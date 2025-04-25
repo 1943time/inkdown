@@ -137,7 +137,7 @@ export const Trash = observer(() => {
       removeDocs: removeDocs
     })
     if (!node.folder) {
-      store.note.openDoc(node, true)
+      store.note.openDoc(node, { scroll: true })
     }
     // if (!ipc) {
     //   core.ipc.sendMessage({

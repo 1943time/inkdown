@@ -1,6 +1,7 @@
 import { Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
 import { Elements, ListNode, TableRowNode } from '..'
+import { ReactEditor } from 'slate-react'
 
 const insertAfter = (
   editor: Editor,
@@ -336,14 +337,19 @@ const MdElements: Record<string, MdNode> = {
         }
       })
       if (str === '[') {
-        Transforms.insertNodes(editor, [{ type: 'wiki-link', children: [{ text: '' }] }], {
-          select: true,
-          at: {
-            anchor: { path: sel.anchor.path, offset: sel.anchor.offset - 1 },
-            focus: { path: sel.anchor.path, offset: sel.anchor.offset }
+        setTimeout(() => {
+          try {
+            Transforms.insertNodes(editor, [{ type: 'wiki-link', children: [{ text: '' }] }], {
+              select: true,
+              at: {
+                anchor: { path: sel.anchor.path, offset: editor.selection!.anchor.offset - 2 },
+                focus: { path: sel.anchor.path, offset: editor.selection!.anchor.offset }
+              }
+            })
+          } catch (e) {
+            console.log(e)
           }
-        })
-        return true
+        }, 16)
       }
     }
   }

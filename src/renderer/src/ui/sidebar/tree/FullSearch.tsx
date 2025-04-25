@@ -48,7 +48,7 @@ export const FullSearch = observer(() => {
     const tab = store.note.state.currentTab
     if (res.el) {
       if (tab.state.doc.id !== res.doc.id) {
-        store.note.openDoc(res.doc, false)
+        store.note.openDoc(res.doc)
         setTimeout(() => {
           requestIdleCallback(() => {
             try {
@@ -90,7 +90,7 @@ export const FullSearch = observer(() => {
       }
     } else {
       if (tab.state.doc.id !== res.doc.id) {
-        store.note.openDoc(res.doc, false)
+        store.note.openDoc(res.doc)
       }
       setTimeout(() => {
         const title = document.querySelector('.page-title') as HTMLElement

@@ -102,7 +102,7 @@ export const Heading = observer(({ tab }: { tab: TabStore }) => {
   if (!tab.state.doc) return null
   return (
     <div
-      className={`sticky flex-shrink-0 top-0`}
+      className={`sticky flex-shrink-0 top-0 hidden md:block`}
       ref={(e) => {
         box.current = e?.parentElement?.parentElement?.parentElement || null
       }}
