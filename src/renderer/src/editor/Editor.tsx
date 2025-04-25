@@ -4,7 +4,7 @@ import { Editor, Element, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements/index'
 import { useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
-import { selChange$, useOnchange } from './plugins/useOnchange'
+import { useOnchange } from './plugins/useOnchange'
 import { EditorUtils } from './utils/editorUtils'
 import { Title } from './tools/Title'
 import { useStore } from '@/store/store'
@@ -98,7 +98,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         return
       }
       value.current = v
-      onChange()
+      onChange(tab.editor.operations[0]?.type === 'set_selection')
 
       if (tab.state.doc) {
         tab.note.docStatus.set(tab.state.doc.id, {
@@ -244,7 +244,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     })
     if (node) {
       tab.editor.selection = null
-      selChange$.next(null)
+      tab.selChange$.next(null)
     }
     tab.setState((state) => {
       state.focus = false

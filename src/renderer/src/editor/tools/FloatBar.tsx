@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import {
   BoldOutlined,
   CaretDownOutlined,
@@ -8,7 +8,7 @@ import {
   LinkOutlined,
   StrikethroughOutlined
 } from '@ant-design/icons'
-import { BaseRange, Editor, NodeEntry, Range, Text, Transforms } from 'slate'
+import { BaseRange, Editor, NodeEntry, Range, Transforms } from 'slate'
 import { Tooltip } from 'antd'
 import { EditorUtils } from '../utils/editorUtils'
 import { getSelRect } from '../utils/dom'
@@ -90,8 +90,12 @@ export const FloatBar = observer(() => {
     top: 0,
     url: '',
     hoverSelectColor: false,
-    openSelectColor: false
+    openSelectColor: false,
+    refresh: false
   })
+  const refresh = useCallback(() => {
+    setState({ refresh: !state().refresh })
+  }, [])
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
   useEffect(() => {
@@ -113,7 +117,8 @@ export const FloatBar = observer(() => {
       const container = tab.container!
       if (left < 4) left = 4
       if (left > container.clientWidth - barWidth) left = container.clientWidth - barWidth
-      let top = container.scrollTop + domRect.top - 110
+      let top =
+        container.scrollTop + domRect.top - 76 - (tab.store.note.state.tabs.length > 1 ? 34 : 0)
       setState({
         open: true,
         left,
@@ -122,6 +127,11 @@ export const FloatBar = observer(() => {
     },
     [tab]
   )
+  useEffect(() => {
+    setState({
+      open: false
+    })
+  }, [tab.store.note.state.tabs.length])
 
   useEffect(() => {
     if (tab.state.domRect) {
@@ -209,6 +219,7 @@ export const FloatBar = observer(() => {
                       localStorage.getItem('high-color') || '#10b981'
                     )
                   }
+                  refresh()
                 }}
               >
                 <FontColorsOutlined />
@@ -234,6 +245,7 @@ export const FloatBar = observer(() => {
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={(e) => {
                     tab.keyboard.toggleFormat(t.type as any)
+                    refresh()
                   }}
                   className={`${
                     EditorUtils.isFormatActive(tab.editor, t.type)

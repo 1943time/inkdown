@@ -7,9 +7,7 @@ import { IDoc } from 'types/model'
 import { useSubject } from '@/hooks/common'
 import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
-import { observable } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { nid } from '@/utils/common'
 
 export const EditFolderDialog = observer(() => {
   const store = useStore()

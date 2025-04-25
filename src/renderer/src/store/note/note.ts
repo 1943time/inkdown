@@ -325,6 +325,11 @@ export class NoteStore extends StructStore<typeof state> {
         state.tabIndex = 0
       })
     }
+    for (const tab of this.state.tabs) {
+      if (tab.state.doc) {
+        this.openParents(tab.state.doc)
+      }
+    }
   }
   openParents(doc: IDoc) {
     this.setState((state) => {

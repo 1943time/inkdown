@@ -15,3 +15,13 @@ export const getOffsetLeft = (dom: HTMLElement, target: HTMLElement = document.b
   }
   return left
 }
+
+export const getDomRect = () => {
+  try {
+    const domSelection = window.getSelection()
+    const domRange = domSelection?.getRangeAt(0)
+    return domRange?.getBoundingClientRect()
+  } catch (e) {
+    return null
+  }
+}

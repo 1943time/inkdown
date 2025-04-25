@@ -35,6 +35,12 @@ const state = {
   openLangCompletion: false,
   openQuickLinkComplete: false,
   openInsertCompletion: false,
+  wikilink: {
+    open: false,
+    keyword: '',
+    left: 0,
+    top: 0
+  },
   domRect: null as null | DOMRect,
   refreshHighlight: false,
   previewImage: {

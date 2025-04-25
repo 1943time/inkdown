@@ -1,5 +1,5 @@
 import React from 'react'
-import { action, observable, runInAction } from 'mobx'
+import { action, observable, runInAction, toJS } from 'mobx'
 import { Store } from './store'
 import { IDoc } from 'types/model'
 import { IMenu, openMenus } from '@/ui/common/Menu'
@@ -37,7 +37,7 @@ export class ContextMenu {
       created: now,
       children: []
     })
-    this.store.model.createDoc(data)
+    this.store.model.createDoc(toJS(data))
     // core.ipc.sendMessage({
     //   type: 'createFolder',
     //   data: { cid: id, spaceCid: core.tree.root.cid, parentCid: state().ctxNode?.cid }

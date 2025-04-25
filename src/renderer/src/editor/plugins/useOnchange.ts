@@ -1,20 +1,19 @@
-import { BaseOperation, BaseSelection, Editor, Element, NodeEntry, Path, Range } from 'slate'
+import { Editor, Element, Node, Path, Range } from 'slate'
 import { useMemo, useRef } from 'react'
-import { Subject } from 'rxjs'
 import { TabStore } from '@/store/note/tab'
+import { getDomRect, getOffsetLeft, getOffsetTop } from '@/utils/dom'
+import { ReactEditor } from 'slate-react'
 
-export const selChange$ = new Subject<Path | null>()
 const floatBarIgnoreNode = new Set(['code', 'inline-katex', 'wiki-link'])
 export function useOnchange(tab: TabStore) {
   const rangeContent = useRef('')
   return useMemo(() => {
-    return () => {
+    return (setSelection = false) => {
       const sel = tab.editor.selection
       const [node] = Editor.nodes<Element>(tab.editor, {
         match: (n) => Element.isElement(n),
         mode: 'lowest'
       })
-      // runInAction(() => store.sel = sel)
       if (!node) return
       if (
         sel &&
@@ -24,12 +23,7 @@ export function useOnchange(tab: TabStore) {
       ) {
         const domSelection = window.getSelection()
         const domRange = domSelection?.getRangeAt(0)
-        if (rangeContent.current === domRange?.toString()) {
-          // runInAction(() => {
-          //   store.refreshFloatBar = !store.refreshFloatBar
-          // })
-        }
-        const rect = domRange?.getBoundingClientRect()
+        const rect = getDomRect()
         const rangeStr = domRange?.toString() || ''
         if (rect && rangeContent.current !== rangeStr) {
           rangeContent.current = rangeStr
@@ -43,7 +37,31 @@ export function useOnchange(tab: TabStore) {
           state.domRect = null
         })
       }
-
+      if (node && node[0].type === 'wiki-link' && !setSelection) {
+        setTimeout(() => {
+          const dom = ReactEditor.toDOMNode(tab.editor, node[0])
+          if (dom) {
+            const top = getOffsetTop(dom, tab.container!)
+            tab.setState((state) => {
+              state.wikilink = {
+                open: true,
+                left: getOffsetLeft(dom, tab.container!),
+                top: top + 26,
+                keyword: Node.string(node[0])
+              }
+            })
+          }
+        }, 30)
+      } else if (tab.state.wikilink.open) {
+        tab.setState((state) => {
+          state.wikilink = {
+            open: false,
+            left: 0,
+            top: 0,
+            keyword: ''
+          }
+        })
+      }
       // if (node && node[0].type === 'media') {
       //   store.mediaNode$.next(node)
       // } else {

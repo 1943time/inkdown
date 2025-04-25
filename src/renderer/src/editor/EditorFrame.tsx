@@ -13,6 +13,7 @@ import { isMod } from '@/utils/common'
 import { TabContext } from '@/store/note/TabCtx'
 import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
+import { ChooseLink } from './tools/Links'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
@@ -66,6 +67,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
         {/* <InsertLink /> */}
         <LangAutocomplete tab={tab} />
         <InsertAutocomplete />
+        <ChooseLink />
       </div>
       <PhotoSlider
         maskOpacity={0.5}
