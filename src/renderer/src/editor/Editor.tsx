@@ -98,7 +98,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         return
       }
       value.current = v
-      onChange(tab.editor.operations?.pop()?.type === 'set_selection')
+      onChange(tab.editor.operations?.some((o) => o.type === 'set_selection'))
       if (tab.state.doc) {
         tab.note.docStatus.set(tab.state.doc.id, {
           history: tab.editor.history,

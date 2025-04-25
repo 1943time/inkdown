@@ -18,7 +18,8 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "postpack": "electron-rebuild -f -w sqlite3"
+    "postpack": "electron-rebuild -f -w sqlite3",
+    "build:parser": "node src/renderer/src/editor/parser/worker/compiler.js"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -104,6 +105,7 @@
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
+    "remark-wiki-link": "^2.0.1",
     "rollup-plugin-visualizer": "^5.14.0",
     "rxjs": "^7.8.2",
     "sass": "^1.86.3",
@@ -114,6 +116,7 @@
     "slate-react": "^0.112.1",
     "string-width": "^7.2.0",
     "tailwindcss": "^3.4.17",
+    "terser-webpack-plugin": "^5.3.14",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^5.8.2",

@@ -302,8 +302,9 @@ export class EditorUtils {
     }
     return true
   }
-  static includeOnly(editor: Editor, sel: Range, nodePath: Path) {
-    const [start, end] = Range.edges(sel)
+  static includeOnly(editor: Editor, nodePath: Path) {
+    if (!editor.selection) return false
+    const [start, end] = Range.edges(editor.selection)
     return (
       Point.compare(start, Editor.start(editor, nodePath)) === 0 &&
       Point.compare(end, Editor.end(editor, nodePath)) === 0

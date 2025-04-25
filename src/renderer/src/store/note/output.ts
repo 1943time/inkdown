@@ -32,7 +32,7 @@ export class MarkdownOutput {
         node = parent
       }
     }
-    return window.api.path.join(this.exportRootPath!, path.join('/'))
+    return window.api.path.join(this.exportRootPath || '', path.join('/'))
   }
 
   private docIdToRelateivePath(id: string) {
@@ -371,6 +371,8 @@ export class MarkdownOutput {
             (await this.parserNode(node, preString, parent))?.replace(/^[\s\t]+/g, '') +
             '\n\n'
         }
+      } else if (node.type === 'wiki-link') {
+        str += `[[${Node.string(node)}]]`
       } else {
         str += await this.parserNode(node, preString, parent)
         if (node.type && !this.inlineNode.has(node.type) && i !== tree.length - 1) {

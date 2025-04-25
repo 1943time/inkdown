@@ -115,10 +115,10 @@ export class ContextMenu {
         {
           text: 'Copy Markdown Source Code',
           click: async () => {
-            // const res = await this.core.output.toMarkdown({
-            //   node
-            // })
-            // copySuccessfully(res.md)
+            const res = await this.store.output.toMarkdown({
+              node
+            })
+            this.store.copySuccessfully(res.md)
           }
         },
         {

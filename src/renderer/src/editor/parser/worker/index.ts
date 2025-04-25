@@ -117,6 +117,14 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           children: n.children?.length ? parserBlock(n.children, false, n) : [{ text: '' }]
         }
         break
+      // @ts-ignore
+      case 'wikiLink':
+        el = {
+          type: 'wiki-link',
+          // @ts-ignore
+          children: [{ text: n.value }]
+        }
+        break
       case 'html':
         if (!parent || ['listItem', 'blockquote'].includes(parent.type)) {
           const media = findImageElement(n.value)
