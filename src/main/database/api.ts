@@ -409,17 +409,22 @@ ipcMain.handle(
         .toArray()
       rows = rows.sort((a, b) => a.path - b.path)
       console.log('rows', rows)
-      const exist = new Map<number, string>(rows.map((r) => [r.path, r.content]))
+      const pathMap = new Map<number, string>()
+      const contentMap = new Map<string, number>()
+      for (const row of rows) {
+        pathMap.set(row.path, row.content)
+        contentMap.set(row.content, row.path)
+      }
       const chunkMap = new Map<number, string>(ctx.chunks.map((c) => [c.path, c.text]))
-      const remove: number[] = Array.from(exist)
+      const remove: number[] = Array.from(pathMap)
         .filter(([k]) => !chunkMap.has(k) && k !== -1)
         .map(([k]) => k)
-      const meta = `名称 name ${doc.name} time 时间 ${formatDate(doc.updated!)}`
+      const meta = `DocName ${doc.name} Updated time ${formatDate(doc.updated!)}`
       const metaData = await extractor!(meta, {
         pooling: 'mean',
         normalize: true
       })
-      if (exist.has(-1)) {
+      if (pathMap.has(-1)) {
         table.update({
           where: `doc_id = '${id}' AND path = -1`,
           values: {
@@ -440,26 +445,33 @@ ipcMain.handle(
           }
         ])
       }
+
       for (const chunk of ctx.chunks) {
-        if (exist.has(chunk.path) && exist.get(chunk.path) === chunk.text) {
+        if (!chunk.text) continue
+        if (pathMap.has(chunk.path) && pathMap.get(chunk.path) === chunk.text) {
           continue
         }
         try {
-          const res = await extractor!(chunk.text, {
-            pooling: 'mean',
-            normalize: true
-          })
-          if (exist.has(chunk.path)) {
-            table.update({
+          if (contentMap.has(chunk.text)) {
+            await table.update({
+              where: `doc_id = '${id}' AND path = ${contentMap.get(chunk.text)}`,
+              values: { type: chunk.type, path: chunk.path }
+            })
+          } else if (pathMap.has(chunk.path)) {
+            const res = await extractor!(chunk.text, {
+              pooling: 'mean',
+              normalize: true
+            })
+            await table.update({
               where: `doc_id = '${id}' AND path = ${chunk.path}`,
-              values: {
-                content: chunk.text,
-                type: chunk.type,
-                vector: Array.from(res.data)
-              }
+              values: { type: chunk.type, content: chunk.text, vector: Array.from(res.data) }
             })
           } else {
-            table.add([
+            const res = await extractor!(chunk.text, {
+              pooling: 'mean',
+              normalize: true
+            })
+            await table.add([
               {
                 path: chunk.path,
                 content: chunk.text,
