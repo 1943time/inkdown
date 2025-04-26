@@ -118,7 +118,8 @@ export const ChooseLink = observer(() => {
             })
           } else {
             setState({
-              anchors: []
+              anchors: [],
+              filterAnchors: []
             })
           }
         }
@@ -134,7 +135,8 @@ export const ChooseLink = observer(() => {
             filterNodes: state.nodes.filter((n) => {
               return n.fullPath.toLowerCase().includes(filterKeyword)
             }),
-            index: 0
+            index: 0,
+            filterAnchors: []
           })
         }
         setState({ showAnchor })
@@ -234,10 +236,10 @@ export const ChooseLink = observer(() => {
                 </div>
               )
             })}
-          {(state.showAnchor && !state.filterAnchors.length) ||
-            (!state.showAnchor && !state.filterNodes.length && (
-              <div className={'py-4 text-center text-gray-400 text-sm'}>没有匹配的内容</div>
-            ))}
+          {((state.showAnchor && !state.filterAnchors.length) ||
+            (!state.showAnchor && !state.filterNodes.length)) && (
+            <div className={'py-4 text-center text-gray-400 text-sm'}>没有匹配的内容</div>
+          )}
         </>
       </div>
       <div

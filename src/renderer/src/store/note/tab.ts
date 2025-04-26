@@ -33,8 +33,8 @@ const state = {
   focusSearch: false,
   docChanged: false,
   openLangCompletion: false,
-  openQuickLinkComplete: false,
   openInsertCompletion: false,
+  openInsertLink: false,
   wikilink: {
     open: false,
     keyword: '',

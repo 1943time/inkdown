@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Editable, ReactEditor, Slate } from 'slate-react'
-import { Editor, Element, Range, Transforms } from 'slate'
+import { Editor, Element, Node, Range, Transforms } from 'slate'
 import { MElement, MLeaf } from './elements/index'
 import { useHighlight } from './plugins/useHighlight'
 import { useKeyboard } from './plugins/useKeyboard'
@@ -44,13 +44,27 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.setState((state) => {
         state.docChanged = false
       })
+      const links = Array.from(
+        Editor.nodes(tab.editor, {
+          at: [],
+          match: (n) => n.type === 'wiki-link'
+        })
+      )
+      const docs = links.map(([el]) => {
+        const str = Node.string(el)
+        const match = EditorUtils.parseWikiLink(str)
+        if (match?.docName) {
+          return store.note.getWikiDoc(match.docName)
+        }
+      })
       store.model.updateDoc(
         node.id,
         {
           spaceId: node.spaceId,
           schema: node.schema,
           name: node.name,
-          updated: Date.now()
+          updated: Date.now(),
+          links: docs.filter((d) => !!d).map((d) => d.id)
         },
         {
           texts: EditorUtils.getSchemaText(tab.editor),
@@ -113,10 +127,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
       if (tab.editor.operations[0]?.type === 'set_selection') {
         try {
-          if (tab.state.openInsertCompletion || tab.state.openQuickLinkComplete) {
+          if (tab.state.openInsertCompletion || tab.state.wikilink.open) {
             tab.setState((state) => {
               state.openLangCompletion = false
-              state.openQuickLinkComplete = false
+              state.wikilink.open = false
             })
             tab.range = document.getSelection()?.getRangeAt(0)
           }
@@ -248,7 +262,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     tab.setState((state) => {
       state.focus = false
       state.openLangCompletion = false
-      state.openQuickLinkComplete = false
     })
   }, [])
 

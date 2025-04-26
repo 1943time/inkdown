@@ -14,6 +14,7 @@ import { TabContext } from '@/store/note/TabCtx'
 import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
 import { ChooseLink } from './tools/Links'
+import { InsertLink } from './tools/InsertLink'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
@@ -64,7 +65,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
         )}
         {/* {!tab.docIds[tab.index] && <Empty />} */}
         <FloatBar />
-        {/* <InsertLink /> */}
+        <InsertLink />
         <LangAutocomplete tab={tab} />
         <InsertAutocomplete />
         <ChooseLink />

@@ -3,7 +3,7 @@ import { Table, TableCell } from './table'
 import { Blockquote } from './blockquote'
 import { List, ListItem } from './list'
 import { Head } from './head'
-import React, { CSSProperties, memo } from 'react'
+import React, { CSSProperties, memo, useEffect, useState } from 'react'
 import { Paragraph } from './paragraph'
 import { InlineChromiumBugfix } from '../utils/InlineChromiumBugfix'
 import { Media } from './media'
@@ -17,6 +17,7 @@ import { AceElement } from './ace'
 import { useTab } from '@/store/note/TabCtx'
 import { TabStore } from '@/store/note/tab'
 import { WikiLink } from './wikilink'
+import { IDoc } from 'types/model'
 
 const dragStart = (e: React.DragEvent) => {
   e.preventDefault()
@@ -50,7 +51,10 @@ const toHash = (tab: TabStore, hash: string = '') => {
 }
 export const MElement = memo((props: RenderElementProps) => {
   const tab = useTab()
-  // const refreshHighlight = tab.useState((state) => state.refreshHighlight)
+  const [, setRefresh] = useState(tab.state.refreshHighlight)
+  useEffect(() => {
+    setRefresh(tab.state.refreshHighlight)
+  }, [tab.state.refreshHighlight])
   switch (props.element.type) {
     case 'blockquote':
       return <Blockquote {...props} />
@@ -123,7 +127,7 @@ export const MLeaf = memo((props: RenderLeafProps) => {
       }
     } catch (e) {}
   }
-  if (leaf.url || leaf.hash || leaf.link) {
+  if (leaf.url || leaf.hash || leaf.link || leaf.docId) {
     return (
       <span
         style={style}
@@ -140,44 +144,44 @@ export const MLeaf = memo((props: RenderLeafProps) => {
         onClick={(e) => {
           e.stopPropagation()
           e.preventDefault()
-          // if (selectedDocId) {
-          //   tab.note.useState.setState((state) => {
-          //     state.selectedDocId = null
-          //   })
-          // }
+          if (tab.note.state.selectedDoc) {
+            tab.note.setState((state) => {
+              state.selectedDoc = null
+            })
+          }
           if (e.metaKey || e.ctrlKey) {
             if (leaf.url) {
               window.open(leaf.url)
             }
-            // if (leaf.docId) {
-            //   let node:IDoc | undefined = nodes[leaf.docId]
-            //   let folder = false
-            //   if (node?.folder) {
-            //     node = tab.note.findFirstChildNote(node)
-            //     folder = true
-            //     if (!node) {
-            //       tab..info('The folder is empty')
-            //     }
-            //   }
-            //   if (node) {
-            //     e.altKey ? core.tree.appendTab(node) : core.tree.openNote(node)
-            //     if (leaf.hash) {
-            //       setTimeout(() => {
-            //         toHash(core, leaf.hash)
-            //       }, 200)
-            //     }
-            //   } else if (!folder) {
-            //     core.message.info('The target doc has been deleted')
-            //   }
-            // } else if (leaf.hash) {
-            //   toHash(core, leaf.hash)
-            // } else if (leaf.url) {
-            //   window.open(leaf.url)
-            // } else if (leaf.link) {
-            // window.open(leaf.link)
-            // } else {
-            //   core.message.info('Invalid link')
-            // }
+            if (leaf.docId) {
+              let node: IDoc | undefined = tab.note.state.nodes[leaf.docId]
+              let folder = false
+              if (node?.folder) {
+                node = tab.note.findFirstChildNote(node)
+                folder = true
+                if (!node) {
+                  tab.store.msg.info('The folder is empty')
+                }
+              }
+              if (node) {
+                e.altKey ? tab.note.createTab(node) : tab.note.openDoc(node)
+                if (leaf.hash) {
+                  setTimeout(() => {
+                    toHash(tab, leaf.hash)
+                  }, 200)
+                }
+              } else if (!folder) {
+                tab.store.msg.info('The target doc has been deleted')
+              }
+            } else if (leaf.hash) {
+              toHash(tab, leaf.hash)
+            } else if (leaf.url) {
+              window.open(leaf.url)
+            } else if (leaf.link) {
+              window.open(leaf.link)
+            } else {
+              tab.store.msg.info('Invalid link')
+            }
           } else if (e.detail === 2) {
             selectFormat()
           }

@@ -96,6 +96,15 @@ export const FloatBar = observer(() => {
   const refresh = useCallback(() => {
     setState({ refresh: !state().refresh })
   }, [])
+  const openLink = useCallback(() => {
+    const sel = tab.editor.selection!
+    el.current = Editor.parent(tab.editor, sel.focus.path)
+    tab.highlightCache.set(el.current[0], [{ ...sel, highlight: true }])
+    tab.setState((state) => {
+      state.openInsertLink = true
+      tab.refreshHighlight()
+    })
+  }, [])
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
   useEffect(() => {
@@ -262,14 +271,10 @@ export const FloatBar = observer(() => {
             <div className={'h-full w-[1px] dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'} />
             <div
               onMouseDown={(e) => e.preventDefault()}
-              onClick={(e) => {}}
-              className={`${
-                EditorUtils.isFormatActive(tab.editor, 'url')
-                  ? 'text-blue-500 '
-                  : 'dark:hover:text-gray-200 hover:text-gray-600'
-              }
-              cursor-pointer py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50
-              `}
+              onClick={(e) => {
+                openLink()
+              }}
+              className={`cursor-pointer py-0.5 px-1.5 dark:hover:bg-gray-100/10 hover:bg-gray-200/50`}
             >
               <LinkOutlined />
               <span className={'ml-1 text-[13px]'}>Link</span>
