@@ -11,7 +11,8 @@ import { nid } from '@/utils/common'
 const state = {
   chats: [] as IChat[],
   activeChat: null as null | IChat,
-  webSearch: false
+  webSearch: false,
+  docContext: false
 }
 export class ChatStore extends StructStore<typeof state> {
   private maxTokens = 32000
@@ -163,9 +164,7 @@ export class ChatStore extends StructStore<typeof state> {
           ...chat
         }
       }
-      state.chats = state.chats
-        .map((item) => (item.id === id ? { ...item, ...chat } : item))
-        .sort((a, b) => b.updated - a.updated)
+      state.chats = state.chats.sort((a, b) => b.updated - a.updated)
     })
   }
   async regenrate() {

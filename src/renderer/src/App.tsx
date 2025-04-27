@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { Store, StoreContext } from './store/store'
 import { message, ConfigProvider, theme } from 'antd'
 import Entry from './ui/Entry'
-import { ThemeProvider } from '@lobehub/ui'
 export default function App() {
   const [messageApi, contextHolder] = message.useMessage()
   const store = useMemo(() => new Store(messageApi), [])

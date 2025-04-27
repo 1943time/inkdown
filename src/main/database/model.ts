@@ -36,6 +36,7 @@ export const initModel = async () => {
         t.integer('updated').defaultTo(Date.now())
         t.string('promptId').nullable()
         t.boolean('websearch').defaultTo(false)
+        t.boolean('docContext').defaultTo(false)
         t.string('model').nullable()
         t.string('clientId').nullable()
         t.integer('summaryIndex').defaultTo(0)

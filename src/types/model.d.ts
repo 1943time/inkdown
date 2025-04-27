@@ -42,6 +42,7 @@ export interface IChat {
   updated: number
   messages?: IMessage[]
   promptId?: string
+  docContext?: boolean
   websearch?: boolean
   model?: string // 对话正在使用的模型
   clientId?: string // 对话正在使用的模型配置id
@@ -143,16 +144,4 @@ export interface IFile {
   created: number
   size: number
   spaceId: string
-}
-
-export interface ITag {
-  id: string
-  name: string
-  created: number
-}
-
-export interface IDocTag {
-  id: string
-  docId: string
-  tagId: string
 }

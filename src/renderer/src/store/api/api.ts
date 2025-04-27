@@ -4,14 +4,12 @@ import {
   IChatTable,
   IClient,
   IDoc,
-  IDocTag,
   IFile,
   IHistory,
   IMessage,
   IPrompt,
   ISetting,
-  ISpace,
-  ITag
+  ISpace
 } from 'types/model'
 const ipcRenderer = window.electron.ipcRenderer
 export class ModelApi {
@@ -205,30 +203,6 @@ export class ModelApi {
     })
   }
 
-  async createDocTag(docTag: IDocTag): Promise<void> {
-    return ipcRenderer.invoke('createDocTag', copy(docTag))
-  }
-
-  async deleteDocTag(id: string): Promise<void> {
-    return ipcRenderer.invoke('deleteDocTag', id)
-  }
-
-  async getDocTags(docId: string): Promise<ITag[]> {
-    return ipcRenderer.invoke('getDocTags', docId)
-  }
-
-  async createTag(tag: ITag): Promise<void> {
-    return ipcRenderer.invoke('createTag', copy(tag))
-  }
-
-  async deleteTag(id: string): Promise<void> {
-    return ipcRenderer.invoke('deleteTag', id)
-  }
-
-  async getTags(): Promise<ITag[]> {
-    return ipcRenderer.invoke('getTags')
-  }
-
   async getHistory(docId: string): Promise<IHistory[]> {
     return ipcRenderer.invoke('getHistory', docId)
   }
@@ -261,5 +235,11 @@ export class ModelApi {
   }
   async searchDocs(spaceId: string, text: string): Promise<{ docs: IDoc[]; tokens: string[] }> {
     return ipcRenderer.invoke('searchDocs', spaceId, text)
+  }
+  async fetchChatContext(
+    query: string,
+    spaceId: string
+  ): Promise<{ docs: IDoc[]; tokens: string[] }> {
+    return ipcRenderer.invoke('fetchChatContext', { query, spaceId })
   }
 }

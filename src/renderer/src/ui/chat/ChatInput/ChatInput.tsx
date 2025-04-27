@@ -2,7 +2,7 @@ import { useStore } from '@/store/store'
 import { Tooltip } from '@lobehub/ui'
 import { Popover } from 'antd'
 import isHotkey from 'is-hotkey'
-import { CircleX, Earth, Image, Paperclip, Plus, SendHorizontal } from 'lucide-react'
+import { CircleX, Earth, Image, Paperclip, Plus, SendHorizontal, SquareLibrary } from 'lucide-react'
 import { memo, useCallback, useMemo } from 'react'
 import { createEditor, Node, Range, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
@@ -82,14 +82,17 @@ export const ChatInput = observer(() => {
       })
     }
   }, [])
+
   const onChange = useCallback(() => {
     const text = editor.children.map((n) => Node.string(n)).join('\n')
     setState({ text: text.trim() })
   }, [editor])
+
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <span {...props.attributes}>{props.children}</span>,
     []
   )
+
   const renderElement = useCallback((props: RenderElementProps) => <Elements {...props} />, [])
   const addFile = useCallback(async () => {
     setState({ menuVisible: false })
@@ -189,7 +192,7 @@ export const ChatInput = observer(() => {
             />
           </Slate>
         </div>
-        <div className={'mt-3 flex justify-between items-center'}>
+        <div className={'mt-3 flex justify-between items-center select-none'}>
           <div className={'flex items-center space-x-2'}>
             <Popover
               placement="topLeft"
@@ -232,7 +235,7 @@ export const ChatInput = observer(() => {
                 <Plus size={22} />
               </div>
             </Popover>
-            <Tooltip title={''} mouseEnterDelay={1}>
+            <Tooltip title={'使用互联网搜索，部分模型可用'} mouseEnterDelay={1}>
               <div
                 className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer duration-200 ${ableWebSearch ? 'dark:bg-blue-500/50' : 'hover:dark:bg-white/10'}`}
                 onClick={() =>
@@ -240,6 +243,24 @@ export const ChatInput = observer(() => {
                 }
               >
                 <Earth size={16} />
+              </div>
+            </Tooltip>
+            <Tooltip title={'将空间中相似的文档片段作为对话上下文'} mouseEnterDelay={1}>
+              <div
+                className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer duration-200 ${(activeChat ? activeChat.docContext : store.chat.state.docContext) ? 'dark:bg-blue-500/50' : 'hover:dark:bg-white/10'}`}
+                onClick={() => {
+                  if (store.chat.state.activeChat) {
+                    store.chat.updateChat(store.chat.state.activeChat!.id, {
+                      docContext: !store.chat.state.activeChat?.docContext
+                    })
+                  } else {
+                    store.chat.setState((state) => {
+                      state.docContext = !state.docContext
+                    })
+                  }
+                }}
+              >
+                <SquareLibrary size={16} />
               </div>
             </Tooltip>
           </div>

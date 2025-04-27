@@ -1,17 +1,6 @@
 import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
-import {
-  IChat,
-  IMessage,
-  ISetting,
-  IClient,
-  ISpace,
-  IDoc,
-  IDocTag,
-  ITag,
-  IHistory,
-  IFile
-} from 'types/model'
+import { IChat, IMessage, ISetting, IClient, ISpace, IDoc, IHistory, IFile } from 'types/model'
 import { formatDate, omit, prepareFtsTokens } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
@@ -408,7 +397,6 @@ ipcMain.handle(
         .select(['path', 'doc_id', 'space_id', 'content'])
         .toArray()
       rows = rows.sort((a, b) => a.path - b.path)
-      console.log('rows', rows)
       const pathMap = new Map<number, string>()
       const contentMap = new Map<string, number>()
       for (const row of rows) {
@@ -503,6 +491,42 @@ ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
   )
 })
 
+ipcMain.handle('fetchChatContext', async (_, ctx: { query: string; spaceId: string }) => {
+  if (!extractor) return null
+  if (!ctx.query) return []
+  const db = await openTable(ctx.spaceId)
+  if (!db) return []
+
+  const queryVec = await extractor(ctx.query, {
+    pooling: 'mean',
+    normalize: true
+  })
+  const queryVector = Array.from(queryVec.data)
+
+  let results = await db
+    .search(queryVector)
+    .select(['path', 'doc_id', 'space_id', 'content'])
+    .limit(50)
+    .toArray()
+  const text = new Map<string, string>()
+  for (const r of results) {
+    if (text.has(r.doc_id)) {
+      text.set(r.doc_id, text.get(r.doc_id)! + '\n\n' + r.content)
+    } else {
+      text.set(r.doc_id, r.content)
+    }
+  }
+  return {
+    rows: results.map((r) => {
+      return {
+        ...r,
+        _distance: String(r._distance)
+      }
+    }),
+    ctx: Object.fromEntries(text.entries())
+  }
+})
+
 ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
   const tokens = prepareFtsTokens(text)
 
@@ -552,38 +576,6 @@ ipcMain.handle('deleteDoc', async (_, id: string) => {
 ipcMain.handle('getDoc', async (_, id: string) => {
   const doc = await knex('doc').where('id', id).first()
   return doc
-})
-
-ipcMain.handle('createDocTag', async (_, docTag: IDocTag) => {
-  return knex('docTag').insert(docTag)
-})
-
-ipcMain.handle('deleteDocTag', async (_, id: string) => {
-  return knex('docTag').where('id', id).delete()
-})
-
-ipcMain.handle('getDocTags', async (_, docId: string) => {
-  const docTags = await knex('docTag')
-    .join('tag', 'docTag.tagId', '=', 'tag.id')
-    .where('docId', docId)
-    .select(['tag.id', 'tag.name'])
-  return docTags
-})
-
-ipcMain.handle('createTag', async (_, tag: ITag) => {
-  return knex('tag').insert(tag)
-})
-
-ipcMain.handle('deleteTag', async (_, id: string) => {
-  return knex.transaction(async (trx) => {
-    await trx('docTag').where('tagId', id).delete()
-    await trx('tag').where('id', id).delete()
-  })
-})
-
-ipcMain.handle('getTags', async () => {
-  const tags = await knex('tag').select('*')
-  return tags
 })
 
 ipcMain.handle('getHistory', async (_, docId: string) => {
