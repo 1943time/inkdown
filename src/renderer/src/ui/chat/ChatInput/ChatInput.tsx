@@ -245,7 +245,7 @@ export const ChatInput = observer(() => {
                 <Earth size={16} />
               </div>
             </Tooltip>
-            <Tooltip title={'将空间中相似的文档片段作为对话上下文'} mouseEnterDelay={1}>
+            <Tooltip title={'将空间中匹配的文档片段作为对话上下文'} mouseEnterDelay={1}>
               <div
                 className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer duration-200 ${(activeChat ? activeChat.docContext : store.chat.state.docContext) ? 'dark:bg-blue-500/50' : 'hover:dark:bg-white/10'}`}
                 onClick={() => {

@@ -63,6 +63,7 @@ export const initModel = async () => {
         t.string('error').nullable()
         t.string('files').nullable()
         t.string('docs').nullable()
+        t.string('context').nullable()
         t.string('images').nullable()
         t.foreign('chatId').references('id').inTable('chat').onDelete('CASCADE')
       })

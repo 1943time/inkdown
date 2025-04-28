@@ -4,12 +4,15 @@ import { Store } from '../store'
 import { CustomLeaf, TableNode } from '@/editor'
 import { IDoc } from 'types/model'
 import { mediaType } from '@/editor/utils/dom'
+import { getTokens } from '@/utils/ai'
+import dayjs from 'dayjs'
 export class MarkdownOutput {
   constructor(private readonly store: Store) {}
   private readonly space = '  '
   private filePath = ''
   private exportRootPath: undefined | string = undefined
   private depMedias = new Map<string, string>()
+  private maxChunkSize = 600
   private readonly inlineNode = new Set(['inline-katex', 'break'])
   private isMix(t: CustomLeaf) {
     return (
@@ -275,7 +278,7 @@ export class MarkdownOutput {
     return { md, medias: this.depMedias }
   }
 
-  async getChunks(schema: any[]) {
+  async getChunks(schema: any[], doc: IDoc) {
     this.depMedias.clear()
     this.exportRootPath = undefined
     this.filePath = ''
@@ -284,14 +287,41 @@ export class MarkdownOutput {
       path: number
       type: string
     }[] = []
+    const meta = `# Doc: ${doc.name}, Updated time ${dayjs(doc.updated!).format('YYYY MM DD HH mm')}`
+    let currentChunk = {
+      text: meta,
+      path: 0,
+      type: 'meta',
+      size: getTokens(meta)
+    }
     for (let i = 0; i < schema.length; i++) {
-      const node = schema[i]
-      const text = await this.parse([node])
-      chunks.push({
-        type: node.type,
-        path: i,
-        text
-      })
+      try {
+        const node = schema[i]
+        const text = (await this.parse([node])).trim()
+        if (!text || node.type === 'media' || node.type === 'hr') continue
+        const tokens = getTokens(text)
+        if (currentChunk.size + tokens > this.maxChunkSize) {
+          chunks.push(currentChunk)
+          currentChunk = {
+            text,
+            path: i,
+            type: node.type,
+            size: tokens
+          }
+        } else {
+          currentChunk.text += '\n\n' + text
+          currentChunk.size += tokens
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    if (currentChunk.text) {
+      chunks.push(currentChunk)
+    }
+    if (chunks.length > 1 && currentChunk.size < 200) {
+      const last = chunks.pop()!
+      chunks[chunks.length - 1].text += last.text
     }
     return chunks
   }

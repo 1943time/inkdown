@@ -11,13 +11,15 @@ export function findLastIndex<T>(array: T[], callback: (item: T) => boolean) {
 }
 
 export const modelToLabel = (model: string) => {
-  return model.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-')
+  return model
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('-')
 }
 
 export const generateRandomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
-
 
 export const formatTime = (time: number): string => {
   const now = dayjs()

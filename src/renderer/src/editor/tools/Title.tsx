@@ -9,6 +9,7 @@ import { useStore } from '@/store/store'
 import { TabStore } from '@/store/note/tab'
 import { File } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { EditorUtils } from '../utils/editorUtils'
 
 export const Title = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
@@ -73,7 +74,13 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
       if (!name) {
         setName(doc.name)
       } else {
-        tab.store.model.updateDoc(doc.id, { name })
+        tab.store.model.updateDoc(
+          doc.id,
+          { name },
+          {
+            chunks: await store.output.getChunks(doc.schema!, doc)
+          }
+        )
         store.note.setState((state) => {
           state.nodes[doc.id].name = name
         })

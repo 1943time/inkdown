@@ -159,7 +159,7 @@ export class ModelApi {
   async updateDoc(
     id: string,
     doc: Partial<IDoc>,
-    ctx?: { texts: string; chunks?: { text: string; path: number; type: string }[] }
+    ctx?: { texts?: string; chunks?: { text: string; path: number; type: string }[] }
   ): Promise<void> {
     console.log('ctx', ctx)
 
@@ -236,10 +236,13 @@ export class ModelApi {
   async searchDocs(spaceId: string, text: string): Promise<{ docs: IDoc[]; tokens: string[] }> {
     return ipcRenderer.invoke('searchDocs', spaceId, text)
   }
-  async fetchChatContext(
+  async fetchSpaceContext(
     query: string,
     spaceId: string
-  ): Promise<{ docs: IDoc[]; tokens: string[] }> {
-    return ipcRenderer.invoke('fetchChatContext', { query, spaceId })
+  ): Promise<{
+    rows: { path: number; doc_id: string; space_id: string; content: string; _distance: string }[]
+    ctx: { text: string; docId: string }[]
+  } | null> {
+    return ipcRenderer.invoke('fetchSpaceContext', { query, spaceId })
   }
 }

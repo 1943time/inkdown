@@ -7,12 +7,15 @@ import { openAiModels } from './model/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
 import { StructStore } from './struct'
 import { nid } from '@/utils/common'
+import { observable, runInAction, toJS } from 'mobx'
+import dayjs from 'dayjs'
 
 const state = {
   chats: [] as IChat[],
   activeChat: null as null | IChat,
   webSearch: false,
-  docContext: false
+  docContext: false,
+  refresh: false
 }
 export class ChatStore extends StructStore<typeof state> {
   private maxTokens = 32000
@@ -42,7 +45,11 @@ export class ChatStore extends StructStore<typeof state> {
       this.chatAbort.clear()
     })
   }
-
+  refresh() {
+    this.setState((state) => {
+      state.refresh = !state.refresh
+    })
+  }
   async createChat(id?: string) {
     let obj: IChat | null = null
     const now = Date.now()
@@ -56,7 +63,8 @@ export class ChatStore extends StructStore<typeof state> {
           messages: chat.messages || [],
           clientId: chat.clientId,
           model: chat.model,
-          websearch: chat.websearch
+          websearch: chat.websearch,
+          docContext: chat.docContext
         }
       }
     }
@@ -67,7 +75,8 @@ export class ChatStore extends StructStore<typeof state> {
         created: now,
         updated: now,
         pending: true,
-        websearch: this.state.webSearch
+        websearch: this.state.webSearch,
+        docContext: this.state.docContext
       }
     }
     const model = this.store.settings.getAvailableUseModel(obj?.clientId, obj?.model)
@@ -76,7 +85,9 @@ export class ChatStore extends StructStore<typeof state> {
     obj.clientId = model.id
     this.store.model.updateChat(obj!.id, {
       model: model.model,
-      clientId: model.id
+      clientId: model.id,
+      websearch: obj.websearch,
+      docContext: obj.docContext
     })
     if (!id) {
       await this.store.model.createChat(obj!)
@@ -218,7 +229,7 @@ export class ChatStore extends StructStore<typeof state> {
         state.activeChat!.messages = state.activeChat!.messages!.slice(0, -2)
       })
     }
-    const userMsg: IMessage = {
+    const userMsg: IMessage = observable({
       chatId: activeChat!.id,
       created: now,
       updated: now,
@@ -227,7 +238,7 @@ export class ChatStore extends StructStore<typeof state> {
       content: text,
       files: opts?.files,
       tokens: tokens
-    }
+    })
 
     this.setState((state) => {
       if (activeChat.id !== state.activeChat?.id) {
@@ -236,7 +247,6 @@ export class ChatStore extends StructStore<typeof state> {
       state.activeChat.pending = true
       state.activeChat.messages?.push(userMsg)
     })
-    const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     const msgId = nid()
     const aiMsg: IMessage = {
       chatId: activeChat!.id,
@@ -250,8 +260,35 @@ export class ChatStore extends StructStore<typeof state> {
     }
     this.setState((state) => {
       state.activeChat!.messages!.push(aiMsg)
-      this.store.model.createMessages([userMsg, aiMsg])
+      this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)])
     })
+
+    if (activeChat.docContext) {
+      try {
+        const res = await this.store.model.fetchSpaceContext(
+          text,
+          this.store.note.state.currentSpace?.id!
+        )
+        if (res?.ctx?.length) {
+          const docs = res.ctx
+            .map((c) => {
+              return { doc: this.store.note.state.nodes[c.docId], text: c.text }
+            })
+            .filter((d) => !!d.doc)
+          if (docs.length) {
+            userMsg.context = docs.map((d) => `${d.text}`).join('\n\n')
+          }
+        }
+        if (!userMsg.context) {
+          userMsg.context =
+            'The system did not find the corresponding context note. Can you remind me to describe it more accurately?'
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    this.refresh()
+    const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     this.startCompletion(activeChat, sendMessages)
   }
   private async startCompletion(activeChat: IChat, sendMessages: IMessageModel[]) {
@@ -318,6 +355,7 @@ export class ChatStore extends StructStore<typeof state> {
             }
           })
         })
+        this.refresh()
       },
       onFinish: (content: string = '') => {
         console.log('onFinish', content)
@@ -348,6 +386,7 @@ export class ChatStore extends StructStore<typeof state> {
             })
           }
         })
+        this.refresh()
         if (!activeChat.topic) {
           this.generateTopic(activeChat.id)
         }
@@ -381,6 +420,7 @@ export class ChatStore extends StructStore<typeof state> {
             this.store.model.updateChat(chat.id, {
               topic: content!
             })
+            this.refresh()
           }
         }
       })
@@ -428,6 +468,8 @@ export class ChatStore extends StructStore<typeof state> {
       let content = m.content
       if (m.files?.length) {
         content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
+      } else if (m.context) {
+        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context} \n ${content}`
       }
       acc.push({
         role: m.role,
@@ -445,7 +487,7 @@ export class ChatStore extends StructStore<typeof state> {
     if (summaryText) {
       prompt = `${prompt}\n[Conversation History Summary Reference]:\n ${summaryText}`
     }
-    // 后续加入自定义提示词
+
     newMessages.unshift({
       role: 'system',
       content: prompt

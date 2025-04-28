@@ -25,8 +25,8 @@ export interface IMessage extends IMessageModel {
   updated: number
   reasoning?: string
   duration?: number
-  // 提前终止
   terminated?: boolean
+  context?: string
   model?: string
   error?: { code: string; message: string }
   files?: IMessageFile[]
@@ -86,7 +86,7 @@ export interface IMessageFile {
 }
 
 export interface IMessageDoc {
-  id: string
+  name: string
   content: string
 }
 

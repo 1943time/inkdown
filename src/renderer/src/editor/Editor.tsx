@@ -60,7 +60,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       store.model.updateDoc(
         node.id,
         {
-          spaceId: node.spaceId,
           schema: node.schema,
           name: node.name,
           updated: Date.now(),
@@ -68,7 +67,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         },
         {
           texts: EditorUtils.getSchemaText(tab.editor),
-          chunks: await store.output.getChunks(node.schema)
+          chunks: await store.output.getChunks(node.schema, node)
         }
       )
       if (!ipc) {

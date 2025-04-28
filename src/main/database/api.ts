@@ -29,7 +29,6 @@ const openTable = async (spaceId: string) => {
       new arrow.Field('content', new arrow.Utf8(), true),
       new arrow.Field('type', new arrow.Utf8(), true),
       new arrow.Field('doc_id', new arrow.Utf8(), true),
-      new arrow.Field('space_id', new arrow.Utf8(), true),
       new arrow.Field(
         'vector',
         new arrow.FixedSizeList(768, new arrow.Field('item', new arrow.Float32(), true)),
@@ -37,8 +36,7 @@ const openTable = async (spaceId: string) => {
       )
     ])
     const table = await vdb.createEmptyTable(`space-${spaceId}`, schema, { mode: 'create' })
-    // await table.createIndex('docId')
-    // await table.createIndex('spaceId', { config: lancedb.Index.bitmap() })
+    await table.createIndex('doc_id')
     tableMap.set(spaceId, table)
     return table
   }
@@ -66,7 +64,7 @@ ipcMain.handle('getPrompts', async () => {
 })
 
 ipcMain.handle('getChats', async () => {
-  const chats = await knex.select('*').from('chat')
+  const chats = await knex.select('*').from('chat').orderBy('updated', 'desc')
   return chats.map((chat) => {
     return {
       ...chat,
@@ -388,14 +386,22 @@ ipcMain.handle(
         })
       }
     }
-    if (ctx?.chunks) {
+
+    if (doc.deleted) {
+      const table = await openTable(doc.spaceId!)
+      if (table) {
+        await table.delete(`doc_id = '${id}'`)
+      }
+    } else if (ctx?.chunks.length) {
       const table = await openTable(doc.spaceId!)
       if (!table) return
       let rows = await table
         .query()
-        .where(`space_id = '${doc.spaceId}' AND doc_id = '${id}'`)
-        .select(['path', 'doc_id', 'space_id', 'content'])
+        .where(`doc_id = '${id}'`)
+        .select(['path', 'doc_id', 'content'])
         .toArray()
+      console.log('rows', rows)
+
       rows = rows.sort((a, b) => a.path - b.path)
       const pathMap = new Map<number, string>()
       const contentMap = new Map<string, number>()
@@ -405,35 +411,8 @@ ipcMain.handle(
       }
       const chunkMap = new Map<number, string>(ctx.chunks.map((c) => [c.path, c.text]))
       const remove: number[] = Array.from(pathMap)
-        .filter(([k]) => !chunkMap.has(k) && k !== -1)
+        .filter(([k]) => !chunkMap.has(k))
         .map(([k]) => k)
-      const meta = `DocName ${doc.name} Updated time ${formatDate(doc.updated!)}`
-      const metaData = await extractor!(meta, {
-        pooling: 'mean',
-        normalize: true
-      })
-      if (pathMap.has(-1)) {
-        table.update({
-          where: `doc_id = '${id}' AND path = -1`,
-          values: {
-            content: meta,
-            type: 'meta',
-            vector: Array.from(metaData.data)
-          }
-        })
-      } else {
-        table.add([
-          {
-            path: -1,
-            content: meta,
-            type: 'meta',
-            doc_id: id,
-            space_id: doc.spaceId,
-            vector: Array.from(metaData.data)
-          }
-        ])
-      }
-
       for (const chunk of ctx.chunks) {
         if (!chunk.text) continue
         if (pathMap.has(chunk.path) && pathMap.get(chunk.path) === chunk.text) {
@@ -465,7 +444,6 @@ ipcMain.handle(
                 content: chunk.text,
                 type: chunk.type,
                 doc_id: id,
-                space_id: doc.spaceId,
                 vector: Array.from(res.data)
               }
             ])
@@ -491,7 +469,7 @@ ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
   )
 })
 
-ipcMain.handle('fetchChatContext', async (_, ctx: { query: string; spaceId: string }) => {
+ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: string }) => {
   if (!extractor) return null
   if (!ctx.query) return []
   const db = await openTable(ctx.spaceId)
@@ -502,19 +480,30 @@ ipcMain.handle('fetchChatContext', async (_, ctx: { query: string; spaceId: stri
     normalize: true
   })
   const queryVector = Array.from(queryVec.data)
-
   let results = await db
     .search(queryVector)
-    .select(['path', 'doc_id', 'space_id', 'content'])
-    .limit(50)
+    .select(['path', 'doc_id', 'content'])
+    .limit(20)
     .toArray()
-  const text = new Map<string, string>()
+  console.log('results', results)
+  results = results.filter((r) => r._distance < 1.4)
+  const text = new Map<string, { path: number; text: string }[]>()
   for (const r of results) {
     if (text.has(r.doc_id)) {
-      text.set(r.doc_id, text.get(r.doc_id)! + '\n\n' + r.content)
+      text.set(r.doc_id, [...text.get(r.doc_id)!, { path: r.path, text: r.content }])
     } else {
-      text.set(r.doc_id, r.content)
+      text.set(r.doc_id, [{ path: r.path, text: r.content }])
     }
+  }
+  const data: { text: string; docId: string }[] = []
+  for (const [docId, chunks] of text.entries()) {
+    data.push({
+      docId,
+      text: chunks
+        .sort((a, b) => a.path - b.path)
+        .map((c) => c.text)
+        .join('\n\n')
+    })
   }
   return {
     rows: results.map((r) => {
@@ -523,7 +512,7 @@ ipcMain.handle('fetchChatContext', async (_, ctx: { query: string; spaceId: stri
         _distance: String(r._distance)
       }
     }),
-    ctx: Object.fromEntries(text.entries())
+    ctx: data
   }
 })
 
