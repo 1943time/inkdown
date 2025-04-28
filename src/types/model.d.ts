@@ -28,6 +28,7 @@ export interface IMessage extends IMessageModel {
   terminated?: boolean
   context?: string
   model?: string
+  height?: number
   error?: { code: string; message: string }
   files?: IMessageFile[]
   images?: IMessageFile[]

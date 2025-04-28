@@ -190,6 +190,7 @@ export class ChatStore extends StructStore<typeof state> {
       this.setState((state) => {
         const msg = {
           ...aiMsg,
+          tokens: 0,
           reasoning: undefined,
           terminated: false,
           error: undefined,

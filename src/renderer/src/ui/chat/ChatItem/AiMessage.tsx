@@ -1,5 +1,5 @@
 import { IMessage } from 'types/model'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import MessageContent from './components/MessageContent'
 import { Alert } from '@lobehub/ui'
 import dayjs from 'dayjs'
@@ -11,6 +11,7 @@ import { markdownToHtml } from '@/output/markdownToHtml'
 import { observer } from 'mobx-react-lite'
 export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const store = useStore()
+  const ref = useRef<HTMLDivElement>(null)
   const [state, setState] = useGetSetState({
     copied: false,
     isEditing: false
@@ -24,8 +25,30 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
       setState({ copied: false })
     }, 1000)
   }, [msg.content])
+  useEffect(() => {
+    const dom = ref.current
+    if (dom && !!msg.tokens && !msg.height) {
+      store.model.updateMessage(msg.id, {
+        height: dom.clientHeight
+      })
+      store.chat.setState((state) => {
+        const msg = state.activeChat?.messages?.find((m) => m.id === msg.id)
+        if (msg) {
+          msg.height = dom.clientHeight
+        }
+      })
+    }
+  }, [msg.tokens])
   return (
-    <div className={'p-4 ai-message w-full'}>
+    <div
+      className={'p-4 ai-message w-full'}
+      data-msg-id={msg.id}
+      ref={ref}
+      style={{
+        containIntrinsicHeight: msg.height,
+        contentVisibility: 'auto'
+      }}
+    >
       <div className={'flex w-full ai-message-content group'}>
         <div
           className={

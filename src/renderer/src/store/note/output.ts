@@ -13,6 +13,7 @@ export class MarkdownOutput {
   private exportRootPath: undefined | string = undefined
   private depMedias = new Map<string, string>()
   private maxChunkSize = 600
+  private lastMinChunkSize = 200
   private readonly inlineNode = new Set(['inline-katex', 'break'])
   private isMix(t: CustomLeaf) {
     return (
@@ -319,7 +320,7 @@ export class MarkdownOutput {
     if (currentChunk.text) {
       chunks.push(currentChunk)
     }
-    if (chunks.length > 1 && currentChunk.size < 200) {
+    if (chunks.length > 1 && currentChunk.size < this.lastMinChunkSize) {
       const last = chunks.pop()!
       chunks[chunks.length - 1].text += last.text
     }

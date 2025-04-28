@@ -62,6 +62,9 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
       if (preChatId.current !== chat?.id) {
         setState({ visible: false, showScrollToBottom: false })
         preChatId.current = chat?.id
+        setTimeout(() => {
+          setState({ visible: true })
+        }, 100)
       }
     }, [chat?.id])
     useEffect(() => {
@@ -71,9 +74,20 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
         }, 50)
       }
     }, [messages.length])
+    console.log('messages', messages)
+
     return (
       <div className={'h-full relative'}>
-        <Virtuoso
+        <div
+          className={`chat-list h-full ${state().visible ? 'animate-show' : ''} ${chat?.pending ? 'pending' : ''}`}
+        >
+          <div>
+            {messages.map((m) => (
+              <ChatItem key={m.id} msg={m} />
+            ))}
+          </div>
+        </div>
+        {/* <Virtuoso
           atBottomThreshold={50}
           style={{ height: '100%', fontSize: 16, opacity: state().visible ? 1 : 0 }}
           className={`chat-list ${state().visible ? 'animate-show' : ''} ${chat?.pending ? 'pending' : ''}`}
@@ -106,7 +120,7 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
           itemContent={render}
           overscan={window.innerHeight * 3}
           ref={virtuosoRef}
-        />
+        /> */}
         {state().showScrollToBottom && (
           <div
             onClick={() => {

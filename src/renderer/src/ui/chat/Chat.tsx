@@ -25,7 +25,7 @@ export const Chat = observer(() => {
 
   return (
     <div className={'flex flex-col h-full'}>
-      <div className={'flex-1 flex-shrink-0 min-h-0'}>
+      <div className={'flex-1 flex-shrink-0 min-h-0 overflow-y-auto'}>
         {!chat ? null : <AiMessageList messages={chat?.messages || []} chat={chat!} />}
       </div>
       <div className={'relative flex-shrink-0 flex flex-col items-center pb-4 duration-200'}>

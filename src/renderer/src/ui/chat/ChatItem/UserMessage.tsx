@@ -5,7 +5,7 @@ import { Button } from 'antd'
 import { useTheme } from 'antd-style'
 import isHotkey from 'is-hotkey'
 import { Check, Copy, Pencil } from 'lucide-react'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
 import { observer } from 'mobx-react-lite'
@@ -21,6 +21,7 @@ const fileTypeIconMap = [
 export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const { themeMode } = useTheme()
   const store = useStore()
+  const ref = useRef<HTMLDivElement>(null)
   const [state, setState] = useGetSetState({
     copied: false,
     inputText: msg.content || '',
@@ -86,8 +87,29 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
     },
     [msg.content]
   )
+  useEffect(() => {
+    const dom = ref.current
+    if (dom && !msg.height) {
+      store.model.updateMessage(msg.id, {
+        height: dom.clientHeight
+      })
+      store.chat.setState((state) => {
+        const msg = state.activeChat?.messages?.find((m) => m.id === msg.id)
+        if (msg) {
+          msg.height = dom.clientHeight
+        }
+      })
+    }
+  }, [])
   return (
-    <div className={'py-4 pl-28 pr-4 flex flex-col items-end user-message'}>
+    <div
+      className={'py-4 pl-28 pr-4 flex flex-col items-end user-message'}
+      ref={ref}
+      style={{
+        containIntrinsicHeight: msg.height,
+        contentVisibility: 'auto'
+      }}
+    >
       {state().isEditing && (
         <div className={'w-[80%]'}>
           <TextArea

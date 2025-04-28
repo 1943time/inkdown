@@ -483,7 +483,7 @@ ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: str
   let results = await db
     .search(queryVector)
     .select(['path', 'doc_id', 'content'])
-    .limit(20)
+    .limit(10)
     .toArray()
   console.log('results', results)
   results = results.filter((r) => r._distance < 1.4)
