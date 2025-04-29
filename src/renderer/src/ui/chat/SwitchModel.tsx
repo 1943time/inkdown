@@ -82,7 +82,7 @@ export const SwitchModel = observer(() => {
           <>
             <div className={'flex items-center'}>
               {chatModel ? (
-                <ModelIcon mode={chatModel.mode} size={18} />
+                <ModelIcon mode={chatModel.mode} size={17} />
               ) : (
                 <OpenAI.Avatar size={20} />
               )}

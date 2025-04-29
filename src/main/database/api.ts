@@ -1,7 +1,7 @@
 import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
 import { IChat, IMessage, ISetting, IClient, ISpace, IDoc, IHistory, IFile } from 'types/model'
-import { formatDate, omit, prepareFtsTokens } from '../utils'
+import { omit, prepareFtsTokens } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'

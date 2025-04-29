@@ -3,7 +3,7 @@ import { Tooltip } from '@lobehub/ui'
 import { Popover } from 'antd'
 import isHotkey from 'is-hotkey'
 import { CircleX, Earth, Image, Paperclip, Plus, SendHorizontal, SquareLibrary } from 'lucide-react'
-import { memo, useCallback, useMemo } from 'react'
+import { memo, useCallback, useEffect, useMemo } from 'react'
 import { createEditor, Node, Range, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from 'slate-react'
@@ -110,6 +110,11 @@ export const ChatInput = observer(() => {
       setState({ files })
     })
   }, [])
+  useEffect(() => {
+    if (store.settings.state.showChatBot) {
+      EditorUtils.focus(editor)
+    }
+  }, [store.settings.state.showChatBot])
   return (
     <div className={'chat-input w-full relative'}>
       <div className={'chat-input-mask'}></div>
@@ -192,7 +197,7 @@ export const ChatInput = observer(() => {
             />
           </Slate>
         </div>
-        <div className={'mt-3 flex justify-between items-center select-none'}>
+        <div className={'mt-3 flex justify-between items-center select-none dark:stroke-white/80'}>
           <div className={'flex items-center space-x-2'}>
             <Popover
               placement="topLeft"
@@ -205,10 +210,10 @@ export const ChatInput = observer(() => {
                 }
               }}
               content={
-                <div className={'py-2 w-32'}>
+                <div className={'py-1.5 w-32'}>
                   <div
                     className={
-                      'flex items-center space-x-3 h-9 px-4 cursor-pointer hover:bg-white/10 duration-100'
+                      'flex items-center space-x-3 h-8 px-4 cursor-pointer hover:bg-white/10 duration-100'
                     }
                     onClick={addFile}
                   >
@@ -217,7 +222,7 @@ export const ChatInput = observer(() => {
                   </div>
                   <div
                     className={
-                      'flex items-center space-x-3 h-9 px-4 cursor-pointer hover:bg-white/10 duration-100'
+                      'flex items-center space-x-3 h-8 px-4 cursor-pointer hover:bg-white/10 duration-100'
                     }
                   >
                     <Image size={16} />
@@ -232,7 +237,7 @@ export const ChatInput = observer(() => {
                   'rounded-full w-8 h-8 flex items-center justify-center hover:dark:bg-white/10 cursor-pointer duration-200'
                 }
               >
-                <Plus size={22} />
+                <Plus size={20} className={'stroke-inherit'} />
               </div>
             </Popover>
             <Tooltip title={'使用互联网搜索，部分模型可用'} mouseEnterDelay={1}>
@@ -242,7 +247,7 @@ export const ChatInput = observer(() => {
                   store.chat.setWebSearch(activeChat ? !activeChat.websearch : !webSearch)
                 }
               >
-                <Earth size={16} />
+                <Earth size={15} className={'stroke-inherit'} />
               </div>
             </Tooltip>
             <Tooltip title={'将空间中匹配的文档片段作为对话上下文'} mouseEnterDelay={1}>
@@ -260,7 +265,7 @@ export const ChatInput = observer(() => {
                   }
                 }}
               >
-                <SquareLibrary size={16} />
+                <SquareLibrary size={15} className={'stroke-inherit'} />
               </div>
             </Tooltip>
           </div>

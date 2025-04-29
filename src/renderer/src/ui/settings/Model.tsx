@@ -3,7 +3,7 @@ import { useStore } from '@/store/store'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useGetSetState } from 'react-use'
 import { IClient } from 'types/model'
-import { Collapse } from '@lobehub/ui'
+// import { Collapse } from '@lobehub/ui'
 import { AiModeLabel, openAiModels } from '@/store/model/data/data'
 import { ModelIcon } from '../chat/ModelIcon'
 import { CircleCheckBig, CircleX } from 'lucide-react'
@@ -109,105 +109,82 @@ const ModelItem = observer(
       )
     }, [state().provider, state().name])
     return (
-      <Collapse
-        activeKey={state().open ? ['model'] : []}
-        onChange={() => {
-          setState({ open: !state().open })
-        }}
-        items={[
-          {
-            label,
-            key: 'model',
-            children: (
-              <div className={'p-4 rounded'}>
-                <Form form={form} layout={'vertical'} labelAlign={'right'}>
-                  <Form.Item label={'名称'} name={'id'} hidden={true}>
-                    <Input />
-                  </Form.Item>
-                  <Form.Item label={'名称'} name={'name'} rules={[{ required: true }]}>
-                    <Input placeholder={'自定义名称'} />
-                  </Form.Item>
-                  <Form.Item
-                    label={'Api 提供方'}
-                    name={'mode'}
-                    rules={[{ required: true }]}
-                    tooltip={
-                      '很多模型都与OpenAi 的api兼容，如果未列出您所使用的模型，可以考虑使用OpenAi模式'
-                    }
-                  >
-                    <Select
-                      options={Array.from(AiModeLabel.entries()).map(([key, value]) => ({
-                        label: (
-                          <div className={'flex items-center gap-2'}>
-                            {' '}
-                            <ModelIcon mode={key} size={16} /> <span>{value}</span>
-                          </div>
-                        ),
-                        value: key
-                      }))}
-                      onChange={(value) => {
-                        setState({ provider: value })
-                      }}
-                      placeholder={'请选择Api 提供方'}
-                    />
-                  </Form.Item>
-                  <Form.Item rules={[{ required: true }]} label={'Api Key'} name={'apiKey'}>
-                    <Input placeholder={'请输入Api Key'} />
-                  </Form.Item>
-                  <Form.Item
-                    rules={[{ required: true, type: 'array' }]}
-                    label={'模型'}
-                    name={'models'}
-                  >
-                    <Select
-                      mode="tags"
-                      style={{ width: '100%' }}
-                      placeholder="使用回车添加模型，可添加多个"
-                    />
-                  </Form.Item>
-                  <Form.Item rules={[{ type: 'url' }]} label={'Api Base Url'} name={'baseUrl'}>
-                    <Input placeholder={'Default use: https://api.openai.com'} />
-                  </Form.Item>
-                  <div className={'flex justify-between items-center space-x-3'}>
-                    <div className={'ml-10'}>
-                      {state().checked && (
-                        <div className={'flex items-center'}>
-                          <CircleCheckBig className={'w-4 h-4 mr-2 text-green-500'} />
-                          检查通过
-                        </div>
-                      )}
-                      {!state().checked && !!state().error && (
-                        <div className={'text-red-500 flex items-center'}>
-                          <CircleX className={'w-4 h-4 mr-2 text-red-500'} />
-                          {state().error || ''}
-                        </div>
-                      )}
-                    </div>
-                    <div className={'space-x-3 flex-shrink-0'}>
-                      <Popconfirm title={'确定删除该模型吗？'} onConfirm={props.onRemove}>
-                        <Button danger={true} size={'middle'}>
-                          删除
-                        </Button>
-                      </Popconfirm>
-                      <Button
-                        type={'default'}
-                        size={'middle'}
-                        onClick={check}
-                        loading={state().checking}
-                      >
-                        检查
-                      </Button>
-                      <Button size={'middle'} onClick={save} loading={state().loading}>
-                        保存
-                      </Button>
-                    </div>
+      <div className={'p-4 rounded'}>
+        <Form form={form} layout={'vertical'} labelAlign={'right'}>
+          <Form.Item label={'名称'} name={'id'} hidden={true}>
+            <Input />
+          </Form.Item>
+          <Form.Item label={'名称'} name={'name'} rules={[{ required: true }]}>
+            <Input placeholder={'自定义名称'} />
+          </Form.Item>
+          <Form.Item
+            label={'Api 提供方'}
+            name={'mode'}
+            rules={[{ required: true }]}
+            tooltip={
+              '很多模型都与OpenAi 的api兼容，如果未列出您所使用的模型，可以考虑使用OpenAi模式'
+            }
+          >
+            <Select
+              options={Array.from(AiModeLabel.entries()).map(([key, value]) => ({
+                label: (
+                  <div className={'flex items-center gap-2'}>
+                    {' '}
+                    <ModelIcon mode={key} size={16} /> <span>{value}</span>
                   </div>
-                </Form>
-              </div>
-            )
-          }
-        ]}
-      />
+                ),
+                value: key
+              }))}
+              onChange={(value) => {
+                setState({ provider: value })
+              }}
+              placeholder={'请选择Api 提供方'}
+            />
+          </Form.Item>
+          <Form.Item rules={[{ required: true }]} label={'Api Key'} name={'apiKey'}>
+            <Input placeholder={'请输入Api Key'} />
+          </Form.Item>
+          <Form.Item rules={[{ required: true, type: 'array' }]} label={'模型'} name={'models'}>
+            <Select
+              mode="tags"
+              style={{ width: '100%' }}
+              placeholder="使用回车添加模型，可添加多个"
+            />
+          </Form.Item>
+          <Form.Item rules={[{ type: 'url' }]} label={'Api Base Url'} name={'baseUrl'}>
+            <Input placeholder={'Default use: https://api.openai.com'} />
+          </Form.Item>
+          <div className={'flex justify-between items-center space-x-3'}>
+            <div className={'ml-10'}>
+              {state().checked && (
+                <div className={'flex items-center'}>
+                  <CircleCheckBig className={'w-4 h-4 mr-2 text-green-500'} />
+                  检查通过
+                </div>
+              )}
+              {!state().checked && !!state().error && (
+                <div className={'text-red-500 flex items-center'}>
+                  <CircleX className={'w-4 h-4 mr-2 text-red-500'} />
+                  {state().error || ''}
+                </div>
+              )}
+            </div>
+            <div className={'space-x-3 flex-shrink-0'}>
+              <Popconfirm title={'确定删除该模型吗？'} onConfirm={props.onRemove}>
+                <Button danger={true} size={'middle'}>
+                  删除
+                </Button>
+              </Popconfirm>
+              <Button type={'default'} size={'middle'} onClick={check} loading={state().checking}>
+                检查
+              </Button>
+              <Button size={'middle'} onClick={save} loading={state().loading} type={'primary'}>
+                保存
+              </Button>
+            </div>
+          </div>
+        </Form>
+      </div>
     )
   }
 )

@@ -5,6 +5,7 @@
     "composite": true,
     "types": ["electron-vite/node"],
     "noImplicitReturns": false,
+    "moduleResolution": "bundler",
     "paths": {
       "types/*": ["./src/types/*"]
     }

@@ -118,6 +118,11 @@ a {
 [data-be='head'] {
   scroll-margin: 16px;
 }
+.dark {
+  .edit-area.focus [data-empty]:before {
+    @apply text-gray-300/50;
+  }
+}
 .edit-area {
   &.focus {
     [data-empty] {
@@ -126,7 +131,7 @@ a {
         left: 0;
         top: 3px;
         display: block;
-        @apply text-gray-400 dark:text-gray-300/30 cursor-text;
+        @apply text-gray-400 cursor-text;
         content: "Press '/' for quick actions";
       }
     }
@@ -574,7 +579,7 @@ ol.m-list {
 }
 
 .drag-handle {
-  @apply absolute opacity-0 flex items-center select-none;
+  @apply absolute opacity-0 flex items-center select-none text-blue-500;
   padding-left: 2px;
   padding-right: 6px;
   left: -24px;

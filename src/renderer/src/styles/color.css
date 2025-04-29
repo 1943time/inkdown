@@ -11,10 +11,11 @@
   --md-border: #b9b9b9;
   --card-bg: #fff;
   --panel-bg: rgba(255, 255, 255, 0.95);
+  --chat-bg: #f5f5f5;
 }
 .dark {
   color-scheme: dark;
-  --primary-bg-color: #1e1f20;
+  --primary-bg-color: #1a1b1b;
   --side-panel-bg-color: #282a2c;
   --chat-user-message-bg-color: #333537;
   --nav: #1e1e1f;
@@ -28,11 +29,16 @@
   --md-high: rgba(255, 255, 255, 0.2);
   --md-border: #3f3f46;
   --panel-bg: rgba(35, 35, 35, 0.95);
+  --chat-bg: oklch(20.5% 0 0);
 }
 
 .primary-bg-color {
   background-color: var(--primary-bg-color);
 }
+.bg-sidebar {
+  background-color: var(--side-panel-bg-color);
+}
+
 html,
 body {
   color: var(--md-text);
@@ -130,8 +136,8 @@ html {
   max-height: calc(100vh - 100px);
 }
 .context-menu {
-  @extend .panel-bg;
-  @apply absolute p-1 rounded-lg
+  background-color: var(--panel-bg);
+  @apply absolute p-1 rounded-lg backdrop-blur
    border border-gray-200 dark:border-gray-200/20 text-[13px];
 }
 
@@ -146,14 +152,14 @@ html {
 .float-color-icon {
   @apply w-5 h-5 rounded-full hover:opacity-80 cursor-pointer;
 }
-.ant-btn-primary {
+/* .ant-btn-primary {
   &:not([disabled], .ant-btn-dangerous) {
     background-color: #3b82f6 !important;
     &:hover {
       background-color: #2563eb !important;
     }
   }
-}
+} */
 .ant-btn-sm {
   height: 28px !important;
 }

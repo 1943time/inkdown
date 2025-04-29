@@ -9,6 +9,7 @@ import { copyRichTextToClipboard, copyToClipboard } from '@/utils/clipboard'
 import { useStore } from '@/store/store'
 import { markdownToHtml } from '@/output/markdownToHtml'
 import { observer } from 'mobx-react-lite'
+import { runInAction } from 'mobx'
 export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const store = useStore()
   const ref = useRef<HTMLDivElement>(null)
@@ -28,15 +29,14 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
   useEffect(() => {
     const dom = ref.current
     if (dom && !!msg.tokens && !msg.height) {
-      store.model.updateMessage(msg.id, {
-        height: dom.clientHeight
-      })
-      store.chat.setState((state) => {
-        const msg = state.activeChat?.messages?.find((m) => m.id === msg.id)
-        if (msg) {
-          msg.height = dom.clientHeight
-        }
-      })
+      setTimeout(() => {
+        store.model.updateMessage(msg.id, {
+          height: dom.offsetHeight
+        })
+        runInAction(() => {
+          msg.height = dom.offsetHeight
+        })
+      }, 100)
     }
   }, [msg.tokens])
   return (
@@ -50,17 +50,6 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
       }}
     >
       <div className={'flex w-full ai-message-content group'}>
-        <div
-          className={
-            'relative w-8 h-8 text-xl flex justify-center items-center bg-blue-500 flex-shrink-0 rounded-full mr-3'
-          }
-        >
-          😎
-          {/* <img
-               src={}
-               className={'w-full h-full object-cover'}
-             /> */}
-        </div>
         <div className="flex-1 relative">
           <div
             className={

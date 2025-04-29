@@ -18,9 +18,12 @@ const state = {
   theme: 'dark' as 'system' | 'light' | 'dark',
   systemDark: isDark(),
   editorWidth: 720,
+  chatWidth: 460,
+  fullChatBot: false,
   spellCheck: false,
   codeAutoBreak: false,
   codeTabSize: 2,
+  showChatBot: true,
   get dark() {
     return this.theme === 'system' ? this.systemDark : this.theme === 'dark'
   },

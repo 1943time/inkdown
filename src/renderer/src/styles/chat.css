@@ -1,6 +1,6 @@
 .chat-input-mask {
   height: 30px;
-  background: var(--primary-bg-color);
+  background: var(--chat-bg);
   position: absolute;
   top: -30px;
   width: 100%;
@@ -11,7 +11,10 @@
   mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
   pointer-events: none; /* 允许鼠标事件穿透遮罩层 */
 }
-
+.chat {
+  background-color: var(--chat-bg);
+  @apply flex flex-col h-full px-1;
+}
 .chat-list {
   display: flex;
   justify-content: center;

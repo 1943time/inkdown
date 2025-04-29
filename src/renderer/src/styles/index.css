@@ -1,10 +1,11 @@
-@use 'tailwind';
-@use 'animate';
-@use 'color';
-@use 'chat';
-@use 'cover';
-@use 'ace';
-@use 'editor';
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+@import './animate.css';
+@import './color.css';
+@import './chat.css';
+@import './cover.css';
+@import './ace.css';
+@import './editor.css';
 .ant-tabs-tab {
   margin-block: 0 !important;
 }
@@ -26,12 +27,6 @@ html {
   @apply dark:bg-[rgba(105,81,81,0.95)] bg-white/95 backdrop-blur;
 }
 
-.context-menu {
-  @extend .panel-bg;
-  @apply absolute p-1 rounded-lg
-   border border-gray-200 dark:border-gray-200/20 text-[13px];
-}
-
 .action-icon {
   @apply rounded-full duration-150 dark:hover:bg-white/15 cursor-pointer dark:bg-white/10;
 }
@@ -51,4 +46,8 @@ body.drag-sidebar {
   .side-move-transition {
     transition: none;
   }
+}
+
+.nav-action {
+  @apply flex items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-white/5 duration-200 cursor-pointer;
 }

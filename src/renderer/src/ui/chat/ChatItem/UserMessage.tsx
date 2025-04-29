@@ -9,6 +9,7 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
 import { observer } from 'mobx-react-lite'
+import { runInAction } from 'mobx'
 const fileTypeIconMap = [
   [/\.pdf$/i, 'pdf', '#F54838'],
   [/\.docx$/i, 'doc', '#0078D4'],
@@ -90,14 +91,13 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   useEffect(() => {
     const dom = ref.current
     if (dom && !msg.height) {
-      store.model.updateMessage(msg.id, {
-        height: dom.clientHeight
-      })
-      store.chat.setState((state) => {
-        const msg = state.activeChat?.messages?.find((m) => m.id === msg.id)
-        if (msg) {
+      setTimeout(() => {
+        store.model.updateMessage(msg.id, {
+          height: dom.clientHeight
+        })
+        runInAction(() => {
           msg.height = dom.clientHeight
-        }
+        })
       })
     }
   }, [])

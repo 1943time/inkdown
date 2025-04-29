@@ -3,9 +3,8 @@ import { IChat } from 'types/model'
 import { openMenus } from '@/ui/common/Menu'
 import dayjs from 'dayjs'
 import { Ellipsis, MessageSquarePlus, Search } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
-import { useObserveKey } from '@/hooks/common'
 
 export const Chats = observer(() => {
   const store = useStore()

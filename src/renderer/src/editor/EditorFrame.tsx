@@ -58,7 +58,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
                 >
                   <MEditor tab={tab} />
                 </div>
-                <Heading tab={tab} />
+                {!store.settings.state.showChatBot && <Heading tab={tab} />}
               </div>
             </div>
           </>

@@ -61,7 +61,7 @@ export const Tabs = observer(() => {
             onClick={() => {
               store.note.selectTab(i)
             }}
-            className={`${i === store.note.state.tabIndex ? 'dark:bg-white/5 bg-white text-gray-600 dark:text-gray-200' : 'dark:text-gray-300 text-gray-500 hover:text-gray-600 dark:hover:text-gray-200'}
+            className={`${i === store.note.state.tabIndex ? 'dark:bg-[rgba(255,255,255,0.03)] bg-white text-gray-600 dark:text-gray-200' : 'dark:text-gray-300 text-gray-500 hover:text-gray-600 dark:hover:text-gray-200'}
               ${i !== 0 ? 'border-l dark:border-gray-200/10 border-gray-200' : ''}
               relative flex-1 min-w-[200px] h-full flex items-center group px-8 cursor-default tab
               `}
