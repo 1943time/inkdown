@@ -38,7 +38,6 @@
 .bg-sidebar {
   background-color: var(--side-panel-bg-color);
 }
-
 html,
 body {
   color: var(--md-text);

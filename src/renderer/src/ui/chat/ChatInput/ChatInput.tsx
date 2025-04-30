@@ -16,6 +16,7 @@ import { getFileExtension } from '@/utils/string'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { observer } from 'mobx-react-lite'
 import { useLocalState } from '@/hooks/useLocalState'
+import { getDomRect } from '@/utils/dom'
 
 export const ChatInput = observer(() => {
   const store = useStore()
@@ -35,9 +36,6 @@ export const ChatInput = observer(() => {
   })
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
-  }, [])
-  const paste = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
-    // e.preventDefault()
   }, [])
   const compositionStart = useCallback(
     (e: React.CompositionEvent<HTMLDivElement>) => {
@@ -81,6 +79,15 @@ export const ChatInput = observer(() => {
         children: [{ text: '' }]
       })
     }
+    if (e.key === '@') {
+      const domRect = getDomRect()
+      if (domRect) {
+        store.chat.setState((state) => {
+          state.reference.open = true
+          state.reference.domRect = domRect
+        })
+      }
+    }
   }, [])
 
   const onChange = useCallback(() => {
@@ -112,7 +119,9 @@ export const ChatInput = observer(() => {
   }, [])
   useEffect(() => {
     if (store.settings.state.showChatBot) {
-      EditorUtils.focus(editor)
+      setTimeout(() => {
+        EditorUtils.focus(editor)
+      }, 16)
     }
   }, [store.settings.state.showChatBot])
   return (
@@ -187,7 +196,6 @@ export const ChatInput = observer(() => {
               className={
                 'outline-none min-h-6 leading-6 w-full resize-none overflow-hidden h-auto text-base'
               }
-              onPaste={paste}
               onCompositionStart={compositionStart}
               placeholder="问一问 AI 助手吧"
               onCompositionEnd={compositionEnd}

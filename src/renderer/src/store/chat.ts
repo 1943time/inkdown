@@ -7,15 +7,19 @@ import { openAiModels } from './model/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
 import { StructStore } from './struct'
 import { nid } from '@/utils/common'
-import { observable, runInAction, toJS } from 'mobx'
-import dayjs from 'dayjs'
+import { observable, toJS } from 'mobx'
 
 const state = {
   chats: [] as IChat[],
   activeChat: null as null | IChat,
   webSearch: false,
   docContext: false,
-  refresh: false
+  refresh: false,
+  openSearch: false,
+  reference: {
+    open: false,
+    domRect: null as null | DOMRect
+  }
 }
 export class ChatStore extends StructStore<typeof state> {
   private maxTokens = 32000

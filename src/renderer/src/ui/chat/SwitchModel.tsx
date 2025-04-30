@@ -75,9 +75,7 @@ export const SwitchModel = observer(() => {
         }))
       }}
     >
-      <div
-        className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer drag-none'}
-      >
+      <div className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer'}>
         {ready && (
           <>
             <div className={'flex items-center'}>

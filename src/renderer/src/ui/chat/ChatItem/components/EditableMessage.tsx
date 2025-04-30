@@ -1,4 +1,4 @@
-import { MessageInput, MessageInputProps, MessageModalProps } from '@lobehub/ui'
+import { MessageInput, MessageInputProps, MessageModalProps } from '@lobehub/ui/chat'
 import { memo, useState } from 'react'
 import BubblesLoading from '../../message/BubbleLoading'
 import Markdown from '@/ui/markdown/Markdown'
@@ -26,7 +26,6 @@ export interface EditableMessageProps {
   fontSize?: number
   fullFeaturedCodeBlock?: boolean
   height?: MessageInputProps['height']
-  inputType?: MessageInputProps['type']
   model?: {
     extra?: MessageModalProps['extra']
     footer?: MessageModalProps['footer']
@@ -51,7 +50,6 @@ const EditableMessage = memo<EditableMessageProps>(
     placeholder,
     showEditWhenEmpty = false,
     height,
-    inputType,
     editButtonSize,
     text,
     fullFeaturedCodeBlock,
@@ -74,8 +72,6 @@ const EditableMessage = memo<EditableMessageProps>(
         placeholder={placeholder}
         shortcut
         text={text}
-        textareaClassname={classNames?.input}
-        type={inputType}
       />
     )
 

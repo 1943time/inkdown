@@ -68,8 +68,8 @@ devDependencies:
     specifier: ^1.89.0
     version: 1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
   '@lobehub/ui':
-    specifier: ^1.165.5
-    version: 1.170.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+    specifier: ^2.0.8
+    version: 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
   '@tailwindcss/vite':
     specifier: ^4.1.4
     version: 4.1.4(vite@6.2.6)
@@ -1727,6 +1727,32 @@ packages:
       - supports-color
     dev: true
 
+  /@lobehub/fluent-emoji@2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-bKjU3sf0+7NppvcdqD/raWvKGJIw8HDJVporNQ7oR8pIPoLeb9IUu/vqIYClOlwfu9qntji7FFySfbdNqXSiJw==}
+    peerDependencies:
+      antd: ^5.23.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+    dependencies:
+      '@lobehub/emojilib': 1.0.0
+      '@lobehub/ui': 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
+      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+      emoji-regex: 10.4.0
+      lodash-es: 4.17.21
+      lucide-react: 0.469.0(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      react-layout-kit: 1.9.1(react@19.1.0)
+      url-join: 5.0.0
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/react'
+      - acorn
+      - framer-motion
+      - supports-color
+    dev: true
+
   /@lobehub/icons@1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-TzbSMPb70et/gvytdqc8M5Y4nNC+KSkYTdqH7t6VdhTeQ4aewldPpxCO5z0QhvOaIgc6BSGtS5Ss+nR3A1HGUw==}
     peerDependencies:
@@ -1747,6 +1773,29 @@ packages:
       - '@emotion/is-prop-valid'
       - '@types/react'
       - acorn
+      - supports-color
+    dev: true
+
+  /@lobehub/icons@2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-B11QeeubHV6ztu2z6owHho2kWUKCBHqySiOMobpS8unrwwZaiSkUWNrxB3zH6JmzMGcs+iXdeuG0YGB1jlZc0g==}
+    peerDependencies:
+      antd: ^5.23.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+    dependencies:
+      '@lobehub/ui': 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
+      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+      lucide-react: 0.469.0(react@19.1.0)
+      polished: 4.3.1
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      react-layout-kit: 1.9.1(react@19.1.0)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/react'
+      - acorn
+      - framer-motion
       - supports-color
     dev: true
 
@@ -1817,6 +1866,81 @@ packages:
     transitivePeerDependencies:
       - '@babel/core'
       - '@emotion/is-prop-valid'
+      - '@types/react'
+      - acorn
+      - supports-color
+    dev: true
+
+  /@lobehub/ui@2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-627IJ2eSMCg19H0FoDG7LwyCUzL+rCbKqpbwzNVPVMsM40gVmkyk8Q1TAyQsCT4Wv2QBNuKcBtpw2TcXMA4O3w==}
+    peerDependencies:
+      antd: ^5.23.0
+      framer-motion: ^12.0.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+    dependencies:
+      '@ant-design/cssinjs': 1.23.0(react-dom@19.1.0)(react@19.1.0)
+      '@dnd-kit/core': 6.3.1(react-dom@19.1.0)(react@19.1.0)
+      '@dnd-kit/modifiers': 9.0.0(@dnd-kit/core@6.3.1)(react@19.1.0)
+      '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1)(react@19.1.0)
+      '@dnd-kit/utilities': 3.2.2(react@19.1.0)
+      '@emoji-mart/data': 1.2.1
+      '@emoji-mart/react': 1.1.1(emoji-mart@5.6.0)(react@19.1.0)
+      '@floating-ui/react': 0.27.7(react-dom@19.1.0)(react@19.1.0)
+      '@giscus/react': 3.1.0(react-dom@19.1.0)(react@19.1.0)
+      '@lobehub/fluent-emoji': 2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      '@lobehub/icons': 2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      '@mdx-js/mdx': 3.1.0(acorn@8.14.1)
+      '@mdx-js/react': 3.1.0(@types/react@19.1.0)(react@19.1.0)
+      '@radix-ui/react-slot': 1.2.0(@types/react@19.1.0)(react@19.1.0)
+      '@shikijs/transformers': 3.2.2
+      '@splinetool/runtime': 0.9.526
+      ahooks: 3.8.4(react@19.1.0)
+      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
+      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+      chroma-js: 3.1.2
+      class-variance-authority: 0.7.1
+      dayjs: 1.11.13
+      emoji-mart: 5.6.0
+      fast-deep-equal: 3.1.3
+      framer-motion: 12.6.3(react-dom@19.1.0)(react@19.1.0)
+      immer: 10.1.1
+      leva: 0.10.0(@types/react@19.1.0)(react-dom@19.1.0)(react@19.1.0)
+      lodash-es: 4.17.21
+      lucide-react: 0.484.0(react@19.1.0)
+      mermaid: 11.6.0
+      numeral: 2.0.6
+      polished: 4.3.1
+      query-string: 9.1.1
+      rc-collapse: 4.0.0(react-dom@19.1.0)(react@19.1.0)
+      rc-footer: 0.6.8(react-dom@19.1.0)(react@19.1.0)
+      rc-image: 7.11.1(react-dom@19.1.0)(react@19.1.0)
+      rc-menu: 9.16.1(react-dom@19.1.0)(react@19.1.0)
+      re-resizable: 6.11.2(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-avatar-editor: 13.0.2(@babel/core@7.26.10)(react-dom@19.1.0)(react@19.1.0)
+      react-dom: 19.1.0(react@19.1.0)
+      react-error-boundary: 5.0.0(react@19.1.0)
+      react-hotkeys-hook: 4.6.2(react-dom@19.1.0)(react@19.1.0)
+      react-layout-kit: 1.9.1(react@19.1.0)
+      react-markdown: 10.1.0(@types/react@19.1.0)(react@19.1.0)
+      react-merge-refs: 2.1.1
+      react-rnd: 10.5.2(react-dom@19.1.0)(react@19.1.0)
+      react-zoom-pan-pinch: 3.7.0(react-dom@19.1.0)(react@19.1.0)
+      rehype-katex: 7.0.1
+      rehype-raw: 7.0.0
+      remark-breaks: 4.0.0
+      remark-gfm: 4.0.1
+      remark-math: 6.0.0
+      shiki: 3.2.2
+      swr: 2.3.3(react@19.1.0)
+      ts-md5: 1.3.1
+      unified: 11.0.5
+      url-join: 5.0.0
+      use-merge-value: 1.2.0(react@19.1.0)
+      uuid: 11.1.0
+    transitivePeerDependencies:
+      - '@babel/core'
       - '@types/react'
       - acorn
       - supports-color
@@ -9939,6 +10063,20 @@ packages:
 
   /rc-collapse@3.9.0(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-swDdz4QZ4dFTo4RAUMLL50qP0EY62N2kvmk2We5xYdRwcRn8WcYtuetCJpwpaCbUfUt5+huLpVxhvmnK+PHrkA==}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+    dependencies:
+      '@babel/runtime': 7.27.0
+      classnames: 2.5.1
+      rc-motion: 2.9.5(react-dom@19.1.0)(react@19.1.0)
+      rc-util: 5.44.4(react-dom@19.1.0)(react@19.1.0)
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+    dev: true
+
+  /rc-collapse@4.0.0(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-SwoOByE39/3oIokDs/BnkqI+ltwirZbP8HZdq1/3SkPSBi7xDdvWHTp7cpNI9ullozkR6mwTWQi6/E/9huQVrA==}
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'

@@ -106,7 +106,7 @@ export const Nav = observer(() => {
           <div
             className={`nav-action`}
             onClick={() => {
-              store.settings.setState({ showChatBot: !store.settings.state.showChatBot })
+              store.settings.setSetting('showChatBot', !store.settings.state.showChatBot)
             }}
           >
             <Bot size={18} />

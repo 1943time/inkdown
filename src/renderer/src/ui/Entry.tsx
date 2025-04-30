@@ -41,16 +41,18 @@ const Entry = observer(() => {
     return null
   }
   return (
-    <div className={'flex h-screen'}>
-      <div className={'sidebar flex-shrink-0'}>
+    <div className={`flex h-screen`}>
+      <div
+        className={`sidebar flex-shrink-0  ${!store.settings.state.fullChatBot ? '' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
+      >
         <SideBar />
       </div>
-      <div className={'flex-1 relative flex flex-col w-0 min-w-0'}>
+      <div
+        className={`flex-1 flex flex-col w-0 min-w-0 ${!store.settings.state.fullChatBot ? 'relative' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
+      >
         <Nav />
         <div className={'flex-1 relative h-[calc(100vh_-_40px)]'}>
-          <div
-            className={`h-full ${!store.settings.state.fullChatBot ? '' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
-          >
+          <div className={`h-full`}>
             <Note />
           </div>
           {open && <Settings />}

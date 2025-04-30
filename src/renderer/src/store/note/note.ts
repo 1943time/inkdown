@@ -619,7 +619,7 @@ export class NoteStore extends StructStore<typeof state> {
     if (docName) {
       const doc = this.getWikiDoc(docName)
       if (doc) {
-        this.openDoc(doc, { newTab })
+        this.openDoc(doc, { newTab, scroll: true })
         exist = true
       }
     } else if (anchor) {

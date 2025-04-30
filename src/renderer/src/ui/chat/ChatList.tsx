@@ -1,5 +1,5 @@
 import { IChat, IMessage } from 'types/model'
-import { memo, useCallback, useEffect, useRef } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
 import { useGetSetState } from 'react-use'
 import ChatItem from './ChatItem'
@@ -58,30 +58,29 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
       return <ChatItem msg={msg} />
     }, [])
 
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (preChatId.current !== chat?.id) {
         setState({ visible: false, showScrollToBottom: false })
         preChatId.current = chat?.id
         setTimeout(() => {
           setState({ visible: true })
-        }, 100)
+        }, 30)
       }
     }, [chat?.id])
     useEffect(() => {
       if (state().visible) {
         setTimeout(() => {
           scrollToChat('smooth')
-        }, 50)
+        }, 30)
       }
     }, [messages.length])
-    console.log('messages', messages)
 
     return (
-      <div className={'h-full relative'}>
+      <div className={'relative'}>
         <div
-          className={`chat-list h-full ${state().visible ? 'animate-show' : ''} ${chat?.pending ? 'pending' : ''}`}
+          className={`chat-list ${state().visible ? 'animate-show' : 'hidden'} ${chat?.pending ? 'pending' : ''}`}
         >
-          <div>
+          <div className={'w-full'}>
             {messages.map((m) => (
               <ChatItem key={m.id} msg={m} />
             ))}

@@ -103,7 +103,7 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   }, [])
   return (
     <div
-      className={'py-4 pl-28 pr-4 flex flex-col items-end user-message'}
+      className={'py-2 pl-28 pr-4 flex flex-col items-end user-message'}
       ref={ref}
       style={{
         containIntrinsicHeight: msg.height,

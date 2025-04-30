@@ -4,7 +4,10 @@ import { ChatInput } from './ChatInput/ChatInput'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { SwitchModel } from './SwitchModel'
-import { History, Plus, X } from 'lucide-react'
+import { Fullscreen, History, Minimize, Plus, X } from 'lucide-react'
+import { ChatEmpty } from './Empty'
+import { ChatSearch } from './Search'
+import { os } from '@/utils/common'
 export const Chat = observer(() => {
   const store = useStore()
   const chat = store.chat.state.activeChat
@@ -31,8 +34,8 @@ export const Chat = observer(() => {
     const startWidth = store.settings.state.chatWidth
     const move = (e: MouseEvent) => {
       let width = startWidth + startX - e.clientX
-      if (width > 600) {
-        width = 600
+      if (width > 650) {
+        width = 650
       }
       if (width < 380) {
         width = 380
@@ -50,25 +53,41 @@ export const Chat = observer(() => {
       { once: true }
     )
   }, [])
-  if (!store.settings.state.showChatBot) return null
   return (
     <div
-      className={`border-l min-w-[380px] dark:border-white/10 ${store.settings.state.showChatBot ? '' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'}`}
+      className={`border-l min-w-[380px] dark:border-white/10 
+        ${store.settings.state.showChatBot ? 'relative' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'} 
+        ${store.settings.state.fullChatBot ? 'flex-1 w-0' : ''}
+      `}
       style={{
-        width: store.settings.state.chatWidth
+        width: store.settings.state.fullChatBot ? '' : store.settings.state.chatWidth
       }}
     >
       <div className={'chat'}>
         <div className={'h-10 relative z-10 drag-nav shadow-xs shadow-black/20'}>
-          <div className={'flex justify-between items-center h-full'}>
-            <SwitchModel />
-            <div className={'drag-none pr-2 flex items-center space-x-2'}>
+          <div
+            className={`flex justify-between items-center h-full px-1 ${store.settings.state.fullChatBot && os() === 'mac' ? 'pl-20' : ''}`}
+          >
+            <div className={'flex items-center drag-none'}>
               <div
                 className={'nav-action'}
                 onClick={() => {
-                  store.settings.setState((state) => {
-                    state.showChatBot = false
-                  })
+                  store.settings.setSetting('fullChatBot', !store.settings.state.fullChatBot)
+                }}
+              >
+                {store.settings.state.fullChatBot ? (
+                  <Minimize size={16} />
+                ) : (
+                  <Fullscreen size={16} />
+                )}
+              </div>
+              <SwitchModel />
+            </div>
+            <div className={'drag-none flex items-center space-x-1.5'}>
+              <div
+                className={'nav-action'}
+                onClick={() => {
+                  store.chat.setState({ activeChat: null })
                 }}
               >
                 <Plus size={19} />
@@ -76,8 +95,8 @@ export const Chat = observer(() => {
               <div
                 className={'nav-action'}
                 onClick={() => {
-                  store.settings.setState((state) => {
-                    state.showChatBot = false
+                  store.chat.setState((state) => {
+                    state.openSearch = true
                   })
                 }}
               >
@@ -86,9 +105,8 @@ export const Chat = observer(() => {
               <div
                 className={'nav-action'}
                 onClick={() => {
-                  store.settings.setState((state) => {
-                    state.showChatBot = false
-                  })
+                  store.settings.setSetting('showChatBot', false)
+                  store.settings.setSetting('fullChatBot', false)
                 }}
               >
                 <X size={17} />
@@ -96,8 +114,8 @@ export const Chat = observer(() => {
             </div>
           </div>
         </div>
-        <div className={'flex-1 flex-shrink-0 min-h-0 overflow-y-auto'}>
-          {!chat ? null : <AiMessageList messages={chat?.messages || []} chat={chat!} />}
+        <div className={'flex-1 flex-shrink-0 min-h-0 overflow-y-auto pt-4 pb-10'}>
+          {!chat ? <ChatEmpty /> : <AiMessageList messages={chat?.messages || []} chat={chat!} />}
         </div>
         <div className={'relative flex-shrink-0 flex flex-col items-center pb-4 duration-200'}>
           <div className={'flex justify-center flex-1 w-full px-3'}>
@@ -112,6 +130,7 @@ export const Chat = observer(() => {
         }}
         onMouseDown={move}
       />
+      <ChatSearch />
     </div>
   )
 })
