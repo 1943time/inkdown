@@ -99,7 +99,7 @@ export const Heading = observer(({ tab }: { tab: TabStore }) => {
     }
     return () => {}
   }, [tab])
-  if (!tab.state.doc) return null
+  if (!tab.store.settings.state.showHeading || !tab.state.doc) return null
   return (
     <div
       className={`sticky flex-shrink-0 top-0 hidden md:block`}
@@ -109,7 +109,7 @@ export const Heading = observer(({ tab }: { tab: TabStore }) => {
     >
       <div
         className={`h-full pt-10 pb-10 pr-4 overflow-y-auto hide-scrollbar overflow-x-hidden`}
-        style={{ width: +200 }}
+        style={{ width: tab.store.settings.state.headingWidth }}
       >
         <div className={'text-gray-500 text-sm mb-4'}>{'大纲'}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm break-words'}>

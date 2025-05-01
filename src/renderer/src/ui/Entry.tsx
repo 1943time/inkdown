@@ -2,12 +2,12 @@ import { useStore } from '@/store/store'
 import { SideBar } from './sidebar/SideBar'
 import { Nav } from './Nav'
 import { Chat } from './chat/Chat'
-import { Settings } from './settings/Settings'
 import { observer } from 'mobx-react-lite'
 import { ConfirmDialog } from './dialog/ConfirmDialog'
 import { EditFolderDialog } from './sidebar/tree/EditFolderDialog'
 import { EditSpace } from './space/EditSpace'
 import { Note } from '@/editor/Note'
+import { Settings } from './settings/Settings'
 const Entry = observer(() => {
   const store = useStore()
   return (
@@ -25,13 +25,13 @@ const Entry = observer(() => {
           <div className={`h-full`}>
             <Note />
           </div>
-          {store.settings.state.open && <Settings />}
         </div>
       </div>
       <Chat />
       <ConfirmDialog />
       <EditFolderDialog />
       <EditSpace />
+      <Settings />
     </div>
   )
 })

@@ -94,9 +94,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     //   save()
     // }
   }, [])
-  // useSubject(store.saveDoc$, (data) => {
-  //   reset(data)
-  // })
   // useSubject(core.ipc.updateDoc$, (data) => {
   //   if (data.cid === nodeRef.current?.cid && data.schema) {
   //     reset(data.schema, true)

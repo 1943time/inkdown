@@ -12,7 +12,7 @@
   --card-bg: #fff;
   --panel-bg: rgba(255, 255, 255, 0.95);
   --chat-bg: oklch(98.5% 0 0);
-  --side-panel-bg-color: oklch(96.7% 0.003 264.542);
+  --side-panel-bg-color: oklch(98.5% 0.002 247.839);
 }
 .dark {
   color-scheme: dark;
@@ -34,7 +34,7 @@
 }
 
 .ink-modal {
-  @apply bg-white dark:bg-zinc-800 shadow-sm shadow-gray-300 dark:shadow-black/20 rounded-lg;
+  @apply bg-white dark:bg-neutral-900 shadow-sm shadow-gray-300 dark:shadow-black/30 rounded-lg;
 }
 .primary-bg-color {
   background-color: var(--primary-bg-color);

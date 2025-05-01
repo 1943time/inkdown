@@ -21,6 +21,10 @@ const App = observer(() => {
           Checkbox: {
             colorPrimary: 'oklch(62.3% 0.214 259.815)',
             colorPrimaryHover: 'oklch(70.7% 0.165 254.624)'
+          },
+          Radio: {
+            colorPrimary: 'oklch(62.3% 0.214 259.815)',
+            colorPrimaryHover: 'oklch(70.7% 0.165 254.624)'
           }
         }
       }

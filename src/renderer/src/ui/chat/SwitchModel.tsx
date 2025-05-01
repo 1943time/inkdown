@@ -62,7 +62,9 @@ export const SwitchModel = observer(() => {
                 <div
                   className={'action p-1'}
                   onClick={() => {
-                    store.settings.setState({ open: true })
+                    store.settings.setData((data) => {
+                      data.open = true
+                    })
                     setState({ open: false })
                   }}
                 >

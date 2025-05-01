@@ -116,7 +116,7 @@ export const ChatSearch = observer(() => {
                     })
                   }}
                   className={
-                    'group-hover:block hidden absolute right-1 top-[3px] p-1 rounded-sm dark:hover:bg-white/10 duration-150 cursor-pointer'
+                    'group-hover:block hidden absolute right-1 top-[3px] p-1 rounded-sm dark:hover:bg-white/10 hover:bg-black/5 duration-150 cursor-pointer'
                   }
                 >
                   <Delete size={14} />

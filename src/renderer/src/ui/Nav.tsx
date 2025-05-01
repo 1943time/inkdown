@@ -95,12 +95,7 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'drag-none pr-3 space-x-2 flex items-center'}>
-          <div
-            className={'nav-action'}
-            onClick={() => {
-              store.settings.setState({ open: true })
-            }}
-          >
+          <div className={'nav-action'} onClick={() => {}}>
             <Ellipsis size={22} />
           </div>
           <div

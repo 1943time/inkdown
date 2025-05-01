@@ -3,21 +3,29 @@ import { AiMode, IClient } from 'types/model'
 import { StructStore } from './struct'
 import { Subject } from 'rxjs'
 import { isDark } from '@/utils/common'
+import { observable, runInAction } from 'mobx'
+import isHotkey from 'is-hotkey'
+import { Editor, Element } from 'slate'
 
+const data = {
+  open: false,
+  setTab: 1
+}
 const state = {
   open: false,
   foldSideBar: false,
-  view: 'note' as 'chat' | 'note',
   defaultModel: null as { providerId: string; model: string } | null,
   models: [] as IClient[],
   ready: false,
   reduceFileName: false,
   sidePanelWidth: 300,
-  tab: 'model',
   editorFontSize: 16,
   theme: 'system' as 'system' | 'light' | 'dark',
   systemDark: isDark(),
+  autoConvertInlineFormula: false,
   editorWidth: 720,
+  showHeading: true,
+  headingWidth: 260,
   chatWidth: 460,
   fullChatBot: false,
   spellCheck: false,
@@ -68,9 +76,22 @@ export type ClientModel = {
 export class SettingsStore extends StructStore<typeof state> {
   darkChanged$ = new Subject<boolean>()
   private callbacks: Function[] = []
+  data = observable(data)
   constructor(private readonly store: Store) {
     super(state)
     this.init()
+    window.addEventListener('keydown', (e) => {
+      if (isHotkey('esc', e) && this.data.open) {
+        this.setData((data) => {
+          data.open = false
+        })
+      }
+      if (isHotkey('mod+,', e) && !this.data.open) {
+        this.setData((data) => {
+          data.open = true
+        })
+      }
+    })
     try {
       const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
       setTimeout(() => {
@@ -104,12 +125,6 @@ export class SettingsStore extends StructStore<typeof state> {
       this.callbacks = []
     }
   }
-  close() {
-    this.setState({ open: false })
-  }
-  open(opts?: { tab?: 'model'; clientId?: string }) {
-    this.setState({ open: true })
-  }
   async setSetting<T extends typeof state, U extends keyof T>(key: U, value: T[U]) {
     await this.store.model.putSetting({ key: key as string, value })
     this.setState((state) => {
@@ -125,6 +140,13 @@ export class SettingsStore extends StructStore<typeof state> {
         document.documentElement.classList.remove('dark')
       }
       localStorage.setItem('theme', value as string)
+      this.setCodeOptions('theme', this.state.dark ? 'cloud_editor_dark' : 'cloud_editor')
+    }
+    if (key === 'codeAutoBreak') {
+      this.setCodeOptions('autoWrap', value)
+    }
+    if (key === 'codeTabSize') {
+      this.setCodeOptions('tabSize', value)
     }
   }
   async getModels() {
@@ -172,6 +194,33 @@ export class SettingsStore extends StructStore<typeof state> {
       callback()
     } else {
       this.callbacks.push(callback)
+    }
+  }
+  setData(ctx: (state: typeof data) => void) {
+    runInAction(() => {
+      ctx(this.data)
+    })
+  }
+  setCodeOptions(type: 'theme' | 'tabSize' | 'autoWrap', value: any) {
+    for (const tab of this.store.note.state.tabs) {
+      const codes = Editor.nodes<any>(tab.editor, {
+        at: [],
+        match: (e) => Element.isElement(e) && e.type === 'code'
+      })
+      for (const code of codes) {
+        const e = tab.codeMap.get(code[0])
+        if (e) {
+          if (type === 'theme') {
+            e.setTheme(`ace/theme/${value}`)
+          }
+          if (type === 'tabSize') {
+            e.setOption('tabSize', value)
+          }
+          if (type === 'autoWrap') {
+            e.setOption('wrap', value)
+          }
+        }
+      }
     }
   }
 }

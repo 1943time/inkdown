@@ -1,58 +1,96 @@
-import { Tabs } from 'antd'
-import { ModelSettings } from './Model'
-import { ChevronLeft } from 'lucide-react'
-import { useStore } from '@/store/store'
 import { observer } from 'mobx-react-lite'
+import { FileBox, PenLine, X } from 'lucide-react'
+import { useStore } from '@/store/store'
+import { SetEditor } from './Editor'
 
+const tabs = [
+  {
+    key: 1,
+    label: 'Editor',
+    icon: <PenLine size={16} />
+  },
+  {
+    key: 2,
+    label: 'Model',
+    icon: <FileBox size={16} />
+  }
+]
 export const Settings = observer(() => {
-  const store = useStore()
+  const core = useStore()
+  if (!core.settings.data.open) return null
   return (
-    <div
-      className={
-        'absolute inset-0 z-50 flex flex-col px-5 items-center border-t border-white/10 dark:bg-neutral-950'
-      }
-    >
+    <div className={`fixed inset-0 z-[2200] dark:bg-black/30 bg-black/10`}>
       <div
-        className={
-          'flex items-center space-x-1 absolute top-2 left-2 hover:bg-white/5 duration-200 py-1 pr-2 pl-1 rounded cursor-pointer'
-        }
+        className={'w-full h-full flex items-center justify-center overflow-auto py-10 flex-wrap'}
         onClick={() => {
-          store.settings.setState({ open: false })
+          core.settings.setData((data) => {
+            data.open = false
+          })
         }}
       >
-        <ChevronLeft size={16} />
-        <span>Back</span>
-      </div>
-      <div className={'pt-10'}>
-        <Tabs
-          size={'small'}
-          accessKey={store.settings.state.tab}
-          onChange={(key) => {
-            store.settings.setState({ tab: key })
-          }}
-          items={[
-            {
-              key: 'model',
-              label: 'Models'
-            },
-            {
-              key: 'general',
-              label: 'General'
-            },
-            {
-              key: 'chat',
-              label: 'Editor'
-            },
-            {
-              key: 'prompt',
-              label: 'Prompt'
+        <div
+          className={'min-w-[500px] ink-modal w-4/5 max-w-[900px] relative overflow-hidden'}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className={
+              'z-[10] p-1 flex items-center cursor-pointer dark:text-gray-400 text-gray-500 duration-200 hover:bg-gray-100 rounded dark:hover:bg-gray-500/30 absolute right-3 top-2.5'
             }
-          ]}
-        />
-      </div>
-      <div className={'flex-1 flex-shrink-0 w-full overflow-auto min-h-0'}>
-        <div className={'max-w-[1000px] mx-auto'}>
-          {store.settings.state.tab === 'model' && <ModelSettings />}
+            onClick={() => {
+              core.settings.setData((data) => {
+                data.open = false
+              })
+            }}
+          >
+            <X size={20} />
+          </div>
+          <div className={'flex'}>
+            <div
+              className={
+                'pt-4 w-[230px] border-r b1 dark:bg-neutral-800 bg-gray-100 rounded-tl-lg rounded-bl-lg flex flex-col'
+              }
+            >
+              <div className={'flex-1 px-2'}>
+                <div className={'mb-4 px-2 text-black/70 dark:text-white/70 text-sm font-semibold'}>
+                  Settings
+                </div>
+                <div className={'space-y-1'}>
+                  {tabs.map((item) => (
+                    <div
+                      key={item.label}
+                      onClick={() =>
+                        core.settings.setData((data) => {
+                          data.setTab = item.key
+                        })
+                      }
+                      className={`py-1 h-7 flex items-center cursor-pointer px-3 text-[13px] rounded  ${
+                        core.settings.data.setTab === item.key
+                          ? 'bg-blue-500/80 text-gray-100'
+                          : 'dark:hover:bg-gray-400/10 hover:bg-gray-500/10 text-gray-600 dark:text-gray-200'
+                      }`}
+                    >
+                      {item.icon}
+                      <span className={'ml-2'}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className={'flex-1'}>
+              <div
+                className={
+                  'border-b text-base font-medium h-12 items-center flex dark:text-gray-200 text-gray-700 b1 relative px-4'
+                }
+              >
+                <div>{tabs.find((t) => t.key === core.settings.data.setTab)?.label}</div>
+              </div>
+              <div
+                className={' text-gray-600 dark:text-gray-300 px-2 py-2 h-[500px] overflow-y-auto'}
+              >
+                {core.settings.data.setTab === 1 && <SetEditor />}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

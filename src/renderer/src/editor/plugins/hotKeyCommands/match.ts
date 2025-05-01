@@ -30,9 +30,9 @@ export class MatchKey {
     if (!sel || !Range.isCollapsed(sel)) return
     for (let n of TextMatchNodes) {
       // 配置开启
-      // if (n.type === 'inlineKatex') {
-
-      // }
+      if (n.type === 'inlineKatex' && !this.tab.store.settings.state.autoConvertInlineFormula) {
+        continue
+      }
       if (typeof n.matchKey === 'object' ? n.matchKey.test(e.key) : n.matchKey === e.key) {
         if (n.checkAllow && !n.checkAllow({ editor: this.editor, node, sel })) continue
         const str =
