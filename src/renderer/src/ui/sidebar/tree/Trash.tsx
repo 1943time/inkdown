@@ -212,7 +212,7 @@ export const Trash = observer(() => {
     >
       <div
         className={
-          'py-1 px-3 p-0.5 border-t border-r-gray-200 dark:text-white/80 text-black/70 dark:border-gray-100/10'
+          'py-1 px-3 border-t p-0.5 border-black/10 dark:text-white/80 text-black/70 dark:border-gray-100/10'
         }
       >
         <div
@@ -221,7 +221,7 @@ export const Trash = observer(() => {
             getDocs()
           }}
           className={
-            'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1.5 px-2 cursor-pointer duration-200'
+            'flex items-center dark:hover:bg-white/5 hover:bg-black/5 rounded-lg py-1 px-2 cursor-pointer duration-200'
           }
         >
           <Trash2 size={16} />

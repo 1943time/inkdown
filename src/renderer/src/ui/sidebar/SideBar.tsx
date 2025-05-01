@@ -35,7 +35,7 @@ export const SideBar = observer(() => {
   return (
     <div
       className={
-        'border-r dark:border-white/10 bg-sidebar pt-10 overflow-hidden side-move-transition flex flex-col h-full'
+        'border-r dark:border-white/10 border-black/10 bg-sidebar pt-10 overflow-hidden side-move-transition flex flex-col h-full'
       }
       style={{ width: fold ? 0 : sidePanelWidth }}
     >
@@ -47,14 +47,12 @@ export const SideBar = observer(() => {
         onMouseDown={move}
       />
       <div style={{ width: sidePanelWidth }} className={'flex-1 flex-shrink-0 min-h-0'}>
-        <div
+        {/* <div
           className={`h-full ${fullChatBot ? '' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
         >
           <Chats />
-        </div>
-        <div
-          className={`h-full ${!fullChatBot ? '' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
-        >
+        </div> */}
+        <div className={`h-full`}>
           <Tree />
         </div>
       </div>

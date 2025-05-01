@@ -49,5 +49,5 @@ body.drag-sidebar {
 }
 
 .nav-action {
-  @apply flex items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-white/10 duration-200 cursor-pointer dark:stroke-white/90;
+  @apply flex items-center justify-center w-[26px] h-[26px] rounded dark:hover:bg-white/10 hover:bg-black/5 duration-200 cursor-pointer dark:stroke-white/90 stroke-black/90;
 }

@@ -51,9 +51,7 @@ export const ChatSearch = observer(() => {
   return (
     <div className={'z-[1000] fixed inset-0 dark:bg-black/30 bg-black/10'} onClick={closeModal}>
       <div
-        className={
-          'mt-20 w-[500px] ctx-panel rounded-lg mx-auto relative dark:border-white/10 border border-black/10'
-        }
+        className={'mt-20 w-[500px] ink-modal mx-auto relative '}
         onClick={(e) => e.stopPropagation()}
       >
         <input

@@ -15,7 +15,7 @@ const state = {
   sidePanelWidth: 300,
   tab: 'model',
   editorFontSize: 16,
-  theme: 'dark' as 'system' | 'light' | 'dark',
+  theme: 'system' as 'system' | 'light' | 'dark',
   systemDark: isDark(),
   editorWidth: 720,
   chatWidth: 460,
@@ -118,6 +118,14 @@ export class SettingsStore extends StructStore<typeof state> {
         state[key] = value
       }
     })
+    if (key === 'theme') {
+      if (this.state.dark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      localStorage.setItem('theme', value as string)
+    }
   }
   async getModels() {
     const models = await this.store.model.getClients()

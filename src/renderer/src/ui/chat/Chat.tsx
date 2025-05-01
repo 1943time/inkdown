@@ -55,7 +55,7 @@ export const Chat = observer(() => {
   }, [])
   return (
     <div
-      className={`border-l min-w-[380px] dark:border-white/10 
+      className={`border-l min-w-[380px] dark:border-white/10 border-black/15
         ${store.settings.state.showChatBot ? 'relative' : 'invisible opacity-0 w-0 h-0 absolute left-0 top-0 pointer-events-none'} 
         ${store.settings.state.fullChatBot ? 'flex-1 w-0' : ''}
       `}
@@ -64,9 +64,9 @@ export const Chat = observer(() => {
       }}
     >
       <div className={'chat'}>
-        <div className={'h-10 relative z-10 drag-nav shadow-xs shadow-black/20'}>
+        <div className={'h-10 relative z-10 drag-nav'}>
           <div
-            className={`flex justify-between items-center h-full px-1 ${store.settings.state.fullChatBot && os() === 'mac' ? 'pl-20' : ''}`}
+            className={`flex pl-1 pr-2 justify-between items-center h-full ${store.settings.state.fullChatBot && os() === 'mac' ? 'pl-20' : ''}`}
           >
             <div className={'flex items-center drag-none'}>
               <div
@@ -114,7 +114,7 @@ export const Chat = observer(() => {
             </div>
           </div>
         </div>
-        <div className={'flex-1 flex-shrink-0 min-h-0 overflow-y-auto pt-4 pb-10'}>
+        <div className={'flex-1 flex-shrink-0 min-h-0'}>
           {!chat ? <ChatEmpty /> : <AiMessageList messages={chat?.messages || []} chat={chat!} />}
         </div>
         <div className={'relative flex-shrink-0 flex flex-col items-center pb-4 duration-200'}>

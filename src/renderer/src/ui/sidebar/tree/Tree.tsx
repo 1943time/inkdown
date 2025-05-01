@@ -28,7 +28,7 @@ export const Tree = observer(() => {
   }, [nodes])
   if (!nodes['root']) return null
   return (
-    <div className={`h-full width-duration duration-200 text-white`}>
+    <div className={`h-full width-duration duration-200`}>
       <div className={'h-full flex flex-col'}>
         <div className={'flex-1 flex-shrink-0 overflow-hidden flex flex-col'}>
           <ToggleSpace />

@@ -76,7 +76,7 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
     }, [messages.length])
 
     return (
-      <div className={'relative'}>
+      <div className={'relative overflow-y-auto h-full pt-4 pb-10'}>
         <div
           className={`chat-list ${state().visible ? 'animate-show' : 'hidden'} ${chat?.pending ? 'pending' : ''}`}
         >

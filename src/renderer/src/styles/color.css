@@ -1,5 +1,5 @@
 :root {
-  --primary-bg-color: #1e1f20;
+  --primary-bg-color: #fff;
   --nav: #fff;
   --tab: #fafafa;
   --b1: rgb(229 231 235 / 0.8);
@@ -11,7 +11,8 @@
   --md-border: #b9b9b9;
   --card-bg: #fff;
   --panel-bg: rgba(255, 255, 255, 0.95);
-  --chat-bg: #f5f5f5;
+  --chat-bg: oklch(98.5% 0 0);
+  --side-panel-bg-color: oklch(96.7% 0.003 264.542);
 }
 .dark {
   color-scheme: dark;
@@ -32,6 +33,9 @@
   --chat-bg: oklch(20.5% 0 0);
 }
 
+.ink-modal {
+  @apply bg-white dark:bg-zinc-800 shadow-sm shadow-gray-300 dark:shadow-black/20 rounded-lg;
+}
 .primary-bg-color {
   background-color: var(--primary-bg-color);
 }

@@ -52,7 +52,7 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
       }}
     >
       <div className={'flex w-full ai-message-content group'}>
-        <div className="flex-1 relative">
+        <div className="flex-1 relative w-0">
           {/* <div
             className={
               'test-xs dark:text-white/50 scale-[.8] origin-left absolute -top-5 left-0 duration-200 group-hover:opacity-100 opacity-0'
@@ -76,7 +76,7 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
           {!!msg.terminated && (
             <div className={'dark:text-gray-300 italic text-sm mt-1'}>系统已停止这条回答</div>
           )}
-          <div className="flex items-center justify-between dark:text-white/50 text-sm ai-msg-actions pb-1">
+          <div className="flex items-center justify-between dark:text-white/50 text-sm ai-msg-actions h-8 pb-1">
             <div className="flex items-center gap-2 relative">
               <div
                 className={

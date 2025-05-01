@@ -127,7 +127,9 @@ export const ChatInput = observer(() => {
   return (
     <div className={'chat-input w-full relative'}>
       <div className={'chat-input-mask'}></div>
-      <div className={'pt-3 pb-2 px-4 w-full border dark:border-white/20 rounded-2xl'}>
+      <div
+        className={'pt-3 pb-2 px-4 w-full border dark:border-white/20 rounded-2xl border-black/40'}
+      >
         {!!state.files.length && (
           <div className={'pb-3 flex items-center flex-wrap'}>
             {state.files.map((f, i) => (
@@ -205,7 +207,11 @@ export const ChatInput = observer(() => {
             />
           </Slate>
         </div>
-        <div className={'mt-3 flex justify-between items-center select-none dark:stroke-white/80'}>
+        <div
+          className={
+            'mt-3 flex justify-between items-center select-none dark:stroke-white/80 stroke-black/80'
+          }
+        >
           <div className={'flex items-center space-x-2'}>
             <Popover
               placement="topLeft"
@@ -221,7 +227,7 @@ export const ChatInput = observer(() => {
                 <div className={'py-1.5 w-32'}>
                   <div
                     className={
-                      'flex items-center space-x-3 h-8 px-4 cursor-pointer hover:bg-white/10 duration-100'
+                      'flex items-center space-x-3 h-8 px-4 cursor-pointer dark:hover:bg-white/10 hover:bg-black/5 duration-100'
                     }
                     onClick={addFile}
                   >
@@ -230,7 +236,7 @@ export const ChatInput = observer(() => {
                   </div>
                   <div
                     className={
-                      'flex items-center space-x-3 h-8 px-4 cursor-pointer hover:bg-white/10 duration-100'
+                      'flex items-center space-x-3 h-8 px-4 cursor-pointer dark:hover:bg-white/10 hover:bg-black/5 duration-100'
                     }
                   >
                     <Image size={16} />
@@ -242,7 +248,7 @@ export const ChatInput = observer(() => {
             >
               <div
                 className={
-                  'rounded-full w-8 h-8 flex items-center justify-center hover:dark:bg-white/10 cursor-pointer duration-200'
+                  'rounded-full w-7 h-7 flex items-center justify-center hover:dark:bg-white/10 cursor-pointer duration-200 hover:bg-black/10'
                 }
               >
                 <Plus size={20} className={'stroke-inherit'} />
@@ -250,7 +256,7 @@ export const ChatInput = observer(() => {
             </Popover>
             <Tooltip title={'使用互联网搜索，部分模型可用'} mouseEnterDelay={1}>
               <div
-                className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer duration-200 ${ableWebSearch ? 'dark:bg-blue-500/50' : 'hover:dark:bg-white/10'}`}
+                className={`rounded-full w-7 h-7 flex items-center justify-center cursor-pointer duration-200 ${ableWebSearch ? 'dark:bg-blue-500/50 bg-blue-500/80 stroke-white' : 'dark:hover:dark:bg-white/10 hover:bg-black/10'}`}
                 onClick={() =>
                   store.chat.setWebSearch(activeChat ? !activeChat.websearch : !webSearch)
                 }
@@ -260,7 +266,7 @@ export const ChatInput = observer(() => {
             </Tooltip>
             <Tooltip title={'将空间中匹配的文档片段作为对话上下文'} mouseEnterDelay={1}>
               <div
-                className={`rounded-full w-8 h-8 flex items-center justify-center cursor-pointer duration-200 ${(activeChat ? activeChat.docContext : store.chat.state.docContext) ? 'dark:bg-blue-500/50' : 'hover:dark:bg-white/10'}`}
+                className={`rounded-full w-7 h-7 flex items-center justify-center cursor-pointer duration-200 ${(activeChat ? activeChat.docContext : store.chat.state.docContext) ? 'dark:bg-blue-500/50 bg-blue-500/80 stroke-white' : 'dark:hover:dark:bg-white/10 hover:bg-black/10'}`}
                 onClick={() => {
                   if (store.chat.state.activeChat) {
                     store.chat.updateChat(store.chat.state.activeChat!.id, {

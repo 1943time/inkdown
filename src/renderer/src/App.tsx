@@ -1,13 +1,15 @@
 import { useMemo } from 'react'
 import { Store, StoreContext } from './store/store'
-import { message, ConfigProvider, theme } from 'antd'
+import { message, ConfigProvider, theme, ThemeConfig } from 'antd'
 import Entry from './ui/Entry'
-export default function App() {
+import { observer } from 'mobx-react-lite'
+
+const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const store = useMemo(() => new Store(messageApi), [])
-  return (
-    <ConfigProvider
-      theme={{
+  const themeData = useMemo((): ThemeConfig => {
+    if (store.settings.state.dark) {
+      return {
         algorithm: theme.darkAlgorithm,
         token: {
           colorPrimary: '#fff'
@@ -21,12 +23,24 @@ export default function App() {
             colorPrimaryHover: 'oklch(70.7% 0.165 254.624)'
           }
         }
-      }}
-    >
+      }
+    }
+    return {
+      algorithm: theme.defaultAlgorithm
+    }
+  }, [store.settings.state.dark])
+
+  if (!store.settings.state.ready) {
+    return null
+  }
+  return (
+    <ConfigProvider theme={themeData}>
       <StoreContext value={store}>
         {contextHolder}
         <Entry />
       </StoreContext>
     </ConfigProvider>
   )
-}
+})
+
+export default App

@@ -146,7 +146,11 @@ export const ToggleSpace = observer(() => {
         >
           <div className={'flex items-center'}>
             <Folders size={16} />
-            <div className={'ml-2 max-w-full truncate text-[13px]'}>{currentSpace?.name}</div>
+            <div
+              className={'ml-2 max-w-full truncate text-[13px] dark:text-white/80 text-black/80'}
+            >
+              {currentSpace?.name}
+            </div>
           </div>
           <div>
             <ISwitch className={'text-lg ml-1 flex-shrink-0 text-gray-500 dark:text-gray-400'} />

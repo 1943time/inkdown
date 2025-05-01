@@ -8,38 +8,8 @@ import { ConfirmDialog } from './dialog/ConfirmDialog'
 import { EditFolderDialog } from './sidebar/tree/EditFolderDialog'
 import { EditSpace } from './space/EditSpace'
 import { Note } from '@/editor/Note'
-import { useCallback } from 'react'
 const Entry = observer(() => {
   const store = useStore()
-  const { open, ready } = store.settings.state
-  const move = useCallback((e: React.MouseEvent) => {
-    const startX = e.clientX
-    document.body.classList.add('drag-sidebar')
-    const startWidth = store.settings.state.sidePanelWidth
-    const move = (e: MouseEvent) => {
-      let width = startWidth + e.clientX - startX
-      if (width > 500) {
-        width = 500
-      }
-      if (width < 200) {
-        width = 200
-      }
-      store.settings.setState({ sidePanelWidth: width })
-    }
-    window.addEventListener('mousemove', move)
-    window.addEventListener(
-      'mouseup',
-      () => {
-        document.body.classList.remove('drag-sidebar')
-        store.settings.setSetting('sidePanelWidth', store.settings.state.sidePanelWidth)
-        window.removeEventListener('mousemove', move)
-      },
-      { once: true }
-    )
-  }, [])
-  if (!ready) {
-    return null
-  }
   return (
     <div className={`flex h-screen`}>
       <div
@@ -55,7 +25,7 @@ const Entry = observer(() => {
           <div className={`h-full`}>
             <Note />
           </div>
-          {open && <Settings />}
+          {store.settings.state.open && <Settings />}
         </div>
       </div>
       <Chat />
