@@ -16,7 +16,8 @@ export class MatchKey {
       editor: this.editor,
       sel: this.editor.selection!,
       match,
-      startText: match[0]
+      startText: match[0],
+      tab: this.tab
     }
   }
 
@@ -41,7 +42,6 @@ export class MatchKey {
         if (m) {
           if (n.run(this.createParams(node, m))) {
             e.preventDefault()
-            break
           }
         }
       }

@@ -1,8 +1,7 @@
 import { observer } from 'mobx-react-lite'
-import { Checkbox, Radio, Select, Slider } from 'antd'
+import { Checkbox, Radio, Slider } from 'antd'
 import { useStore } from '@/store/store'
 import { TextHelp } from '../common/HelpText'
-import { MonitorCog, Moon, Sun } from 'lucide-react'
 
 export const SetEditor = observer(() => {
   const store = useStore()

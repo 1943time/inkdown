@@ -702,11 +702,11 @@ ul.m-list {
   &.selected {
     &:before {
       content: '[[';
-      @apply dark:text-white/60;
+      @apply dark:text-white/60 text-black/60;
     }
     &:after {
       content: ']]';
-      @apply dark:text-white/60;
+      @apply dark:text-white/60 text-black/60;
     }
   }
 }

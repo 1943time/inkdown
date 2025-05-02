@@ -1,6 +1,8 @@
 import { Editor, Element, Node, Path, Range, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
+import { ReactEditor } from 'slate-react'
+import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
 
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
@@ -591,5 +593,32 @@ export class KeyboardTask {
         }
       }
     } catch (e) {}
+  }
+  showWikiLink(node: Element) {
+    setTimeout(() => {
+      const dom = ReactEditor.toDOMNode(this.tab.editor, node)
+      if (dom) {
+        let top = getOffsetTop(dom, this.tab.container!)
+        if (top - this.tab.container!.scrollTop + 270 > window.innerHeight) {
+          top -= 204
+        } else {
+          top = getOffsetTop(dom, this.tab.container!) + dom!.clientHeight + 24
+        }
+        let left = getOffsetLeft(dom, this.tab.container!)
+
+        if (left + 400 > this.tab.container!.clientWidth) {
+          left = this.tab.container!.clientWidth - 400
+        }
+        this.tab.setState((state) => {
+          state.wikilink = {
+            open: true,
+            left,
+            top,
+            keyword: Node.string(node),
+            offset: this.tab.editor.selection?.anchor.offset!
+          }
+        })
+      }
+    }, 30)
   }
 }

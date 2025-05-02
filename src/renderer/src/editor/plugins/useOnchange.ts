@@ -1,8 +1,7 @@
-import { Editor, Element, Node, Path, Range } from 'slate'
+import { Editor, Element, Path, Range } from 'slate'
 import { useMemo, useRef } from 'react'
 import { TabStore } from '@/store/note/tab'
-import { getDomRect, getOffsetLeft, getOffsetTop } from '@/utils/dom'
-import { ReactEditor } from 'slate-react'
+import { getDomRect } from '@/utils/dom'
 
 const floatBarIgnoreNode = new Set(['code', 'inline-katex', 'wiki-link'])
 export function useOnchange(tab: TabStore) {
@@ -38,31 +37,7 @@ export function useOnchange(tab: TabStore) {
         })
       }
       if (node && node[0].type === 'wiki-link' && !setSelection) {
-        setTimeout(() => {
-          const dom = ReactEditor.toDOMNode(tab.editor, node[0])
-          if (dom) {
-            let top = getOffsetTop(dom, tab.container!)
-            if (top - tab.container!.scrollTop + 270 > window.innerHeight) {
-              top -= 204
-            } else {
-              top = getOffsetTop(dom, tab.container!) + dom!.clientHeight + 24
-            }
-            let left = getOffsetLeft(dom, tab.container!)
-
-            if (left + 400 > tab.container!.clientWidth) {
-              left = tab.container!.clientWidth - 400
-            }
-            tab.setState((state) => {
-              state.wikilink = {
-                open: true,
-                left,
-                top,
-                keyword: Node.string(node[0]),
-                offset: sel?.anchor.offset!
-              }
-            })
-          }
-        }, 30)
+        tab.keyboard.showWikiLink(node[0])
       } else if (tab.state.wikilink.open && (!setSelection || node[0].type !== 'wiki-link')) {
         tab.setState((state) => {
           state.wikilink = {

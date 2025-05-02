@@ -92,10 +92,6 @@ export const useKeyboard = (tab: TabStore) => {
           mode: 'lowest'
         })
         if (!node) return
-        const [text] = Editor.nodes<any>(tab.editor, {
-          match: Text.isText,
-          mode: 'lowest'
-        })
         let str = Node.string(node[0]) || ''
         if (node[0].type === 'paragraph') {
           if (

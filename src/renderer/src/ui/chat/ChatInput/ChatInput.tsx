@@ -209,7 +209,7 @@ export const ChatInput = observer(() => {
         </div>
         <div
           className={
-            'mt-3 flex justify-between items-center select-none dark:stroke-white/80 stroke-black/80'
+            'mt-3 flex justify-between items-center select-none dark:stroke-white/60 stroke-black/60'
           }
         >
           <div className={'flex items-center space-x-2'}>

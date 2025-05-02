@@ -56,7 +56,9 @@ export const SwitchModel = observer(() => {
             <div className={'flex items-center justify-between'}>
               <div className={'flex items-center space-x-2'}>
                 <ModelIcon mode={item.mode} size={16} />
-                <span className={'text-sm text-gray-400'}>{modelToLabel(item.mode)}</span>
+                <span className={'text-sm dark:text-gray-400 text-gray-500'}>
+                  {modelToLabel(item.mode)}
+                </span>
               </div>
               <Tooltip title={'前往设置'} mouseEnterDelay={0.5}>
                 <div
@@ -91,7 +93,7 @@ export const SwitchModel = observer(() => {
               </span>
             </div>
             <div className={'flex items-center ml-1 text-white/50'}>
-              <ChevronDown size={16} />
+              <ChevronDown size={16} className={'dark:stroke-white/60 stroke-black/60'} />
             </div>
           </>
         )}

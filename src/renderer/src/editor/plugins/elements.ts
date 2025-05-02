@@ -2,6 +2,7 @@ import { Editor, Element, Node, NodeEntry, Path, Point, Range, Transforms } from
 import { EditorUtils } from '../utils/editorUtils'
 import { Elements, ListNode, TableRowNode } from '..'
 import { ReactEditor } from 'slate-react'
+import { TabStore } from '@/store/note/tab'
 
 const insertAfter = (
   editor: Editor,
@@ -21,6 +22,7 @@ export type CheckMdParams = {
   path: Path
   match: RegExpMatchArray
   el: Element
+  tab: TabStore
   startText: string
 }
 
@@ -325,7 +327,7 @@ const MdElements: Record<string, MdNode> = {
   wikiLink: {
     reg: /\[/,
     matchKey: '[',
-    run: ({ editor, sel }) => {
+    run: ({ editor, sel, tab }) => {
       const str = Editor.string(editor, {
         anchor: {
           path: sel.anchor.path,
@@ -346,6 +348,14 @@ const MdElements: Record<string, MdNode> = {
                 focus: { path: sel.anchor.path, offset: editor.selection!.anchor.offset }
               }
             })
+            setTimeout(() => {
+              const [node] = Editor.nodes(editor, {
+                match: (n) => n.type === 'wiki-link'
+              })
+              if (node) {
+                tab.keyboard.showWikiLink(node[0])
+              }
+            }, 16)
           } catch (e) {
             console.log(e)
           }
