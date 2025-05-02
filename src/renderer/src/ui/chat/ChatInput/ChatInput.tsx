@@ -4,10 +4,10 @@ import { Popover } from 'antd'
 import isHotkey from 'is-hotkey'
 import { CircleX, Earth, Image, Paperclip, Plus, SendHorizontal, SquareLibrary } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo } from 'react'
-import { createEditor, Node, Range, Transforms } from 'slate'
+import { createEditor, Editor, Element, Node, Range, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from 'slate-react'
-import { IMessageFile } from 'types/model'
+import { IMessageDoc, IMessageFile } from 'types/model'
 import { chooseFile } from './ChooseFile'
 import { ILoad } from '@/icons/ILoad'
 import { copyToClipboard } from '@/utils/clipboard'
@@ -32,7 +32,8 @@ export const ChatInput = observer(() => {
     text: '',
     menuVisible: false,
     files: [] as IMessageFile[],
-    images: [] as IMessageFile[]
+    images: [] as IMessageFile[],
+    docs: [] as IMessageDoc[]
   })
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -79,6 +80,7 @@ export const ChatInput = observer(() => {
         children: [{ text: '' }]
       })
     }
+
     if (e.key === '@') {
       const domRect = getDomRect()
       if (domRect) {
@@ -87,6 +89,22 @@ export const ChatInput = observer(() => {
           state.reference.domRect = domRect
         })
       }
+    } else if (store.chat.state.reference.open) {
+      setTimeout(() => {
+        const [node] = Editor.nodes(editor, {
+          match: (n) => Element.isElement(n) && n.type === 'paragraph'
+        })
+
+        if (node) {
+          const text = Node.string(node[0])
+          if (!/@[^\n]*$/.test(text) || /\s{2,}$/.test(text)) {
+            store.chat.setState((state) => {
+              state.reference.open = false
+              state.reference.domRect = null
+            })
+          }
+        }
+      }, 16)
     }
   }, [])
 
@@ -285,7 +303,7 @@ export const ChatInput = observer(() => {
           </div>
           <div>
             <div
-              className={`rounded-full duration-200 w-8 h-8 flex items-center justify-center ${state.text || !!activeChat?.pending ? 'cursor-pointer dark:hover:bg-white/10' : 'cursor-not-allowed'}`}
+              className={`rounded-full duration-200 w-8 h-8 flex items-center justify-center ${state.text || !!activeChat?.pending ? 'cursor-pointer dark:hover:dark:bg-white/10 hover:bg-black/10' : 'cursor-not-allowed'}`}
               onClick={send}
             >
               {activeChat?.pending ? (
@@ -293,7 +311,11 @@ export const ChatInput = observer(() => {
               ) : (
                 <SendHorizontal
                   size={16}
-                  className={state.text ? 'stroke-white/80' : 'stroke-white/50'}
+                  className={
+                    state.text
+                      ? 'dark:stroke-white/80 stroke-black/80'
+                      : 'stroke-black/50 dark:stroke-white/50'
+                  }
                 />
               )}
             </div>

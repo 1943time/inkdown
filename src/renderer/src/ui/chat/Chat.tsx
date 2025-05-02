@@ -8,6 +8,7 @@ import { Fullscreen, History, Minimize, Plus, Scan, X } from 'lucide-react'
 import { ChatEmpty } from './Empty'
 import { ChatSearch } from './Search'
 import { os } from '@/utils/common'
+import { ChatNotes } from './ChatNotes'
 export const Chat = observer(() => {
   const store = useStore()
   const chat = store.chat.state.activeChat
@@ -114,6 +115,7 @@ export const Chat = observer(() => {
         onMouseDown={move}
       />
       <ChatSearch />
+      <ChatNotes />
     </div>
   )
 })

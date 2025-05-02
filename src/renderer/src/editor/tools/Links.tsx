@@ -1,11 +1,11 @@
 import { useLocalState } from '@/hooks/useLocalState'
 import { useTab } from '@/store/note/TabCtx'
-import isHotkey from 'is-hotkey'
 import { FileText, Heading1, Heading2, Heading3, Heading4, Heading5, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useRef } from 'react'
 import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
+import { ScrollList } from '@/ui/common/ScrollList'
 
 const headIcon = new Map<number, React.ReactNode>([
   [1, <Heading1 size={16} />],
@@ -14,7 +14,7 @@ const headIcon = new Map<number, React.ReactNode>([
   [4, <Heading4 size={16} />],
   [5, <Heading5 size={16} />]
 ])
-export const ChooseLink = observer(() => {
+export const ChooseWikiLink = observer(() => {
   const tab = useTab()
   const scrollRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useLocalState({
@@ -26,67 +26,47 @@ export const ChooseLink = observer(() => {
     anchors: [] as { title: string; level: number }[],
     filterAnchors: [] as { title: string; level: number }[]
   })
-  const insert = useCallback((complete = false) => {
-    const [node] = Editor.nodes(tab.editor, {
-      match: (n) => Element.isElement(n) && n.type === 'wiki-link',
-      mode: 'lowest'
-    })
-    if (node) {
-      if (state.showAnchor) {
-        const anchor = state.filterAnchors[state.index]
-        if (anchor) {
-          const match = EditorUtils.parseWikiLink(tab.state.wikilink.keyword)
-          Transforms.insertText(tab.editor, (match?.docName || '') + '#' + anchor.title, {
-            at: {
-              anchor: Editor.start(tab.editor, node[1]),
-              focus: Editor.end(tab.editor, node[1])
-            }
-          })
-        }
-      } else {
-        const doc = state.filterNodes[state.index]
-        if (doc) {
+  const insert = useCallback(
+    (ctx: {
+      complete?: boolean
+      anchor?: { title: string; level: number }
+      node?: { folder: string[]; name: string; fullPath: string }
+    }) => {
+      const [node] = Editor.nodes(tab.editor, {
+        match: (n) => Element.isElement(n) && n.type === 'wiki-link',
+        mode: 'lowest'
+      })
+      if (node) {
+        if (state.showAnchor && ctx.anchor) {
+          const anchor = state.filterAnchors[state.index]
+          if (anchor) {
+            const match = EditorUtils.parseWikiLink(tab.state.wikilink.keyword)
+            Transforms.insertText(tab.editor, (match?.docName || '') + '#' + anchor.title, {
+              at: {
+                anchor: Editor.start(tab.editor, node[1]),
+                focus: Editor.end(tab.editor, node[1])
+              }
+            })
+          }
+        } else if (ctx.node) {
           const duplicate = state.nodes.find(
-            (n) => n.name === doc.name && n.fullPath !== doc.fullPath
+            (n) => n.name === ctx.node!.name && n.fullPath !== ctx.node!.fullPath
           )
-          Transforms.insertText(tab.editor, duplicate ? doc.fullPath : doc.name, {
+          Transforms.insertText(tab.editor, duplicate ? ctx.node!.fullPath : ctx.node!.name, {
             at: {
               anchor: Editor.start(tab.editor, node[1]),
               focus: Editor.end(tab.editor, node[1])
             }
           })
         }
+        if (!ctx.complete) {
+          EditorUtils.moveAfterSpace(tab.editor, node[1])
+        }
       }
-      if (!complete) {
-        EditorUtils.moveAfterSpace(tab.editor, node[1])
-      }
-    }
-  }, [])
+    },
+    []
+  )
 
-  const keydown = useCallback((e: KeyboardEvent) => {
-    if (isHotkey('up', e)) {
-      if (state.showAnchor) {
-        setState({ index: state.index - 1 < 0 ? state.filterAnchors.length - 1 : state.index - 1 })
-      } else {
-        setState({ index: state.index - 1 < 0 ? state.filterNodes.length - 1 : state.index - 1 })
-      }
-    }
-    if (isHotkey('down', e)) {
-      if (state.showAnchor) {
-        setState({ index: state.index + 1 < state.filterAnchors.length ? state.index + 1 : 0 })
-      } else {
-        setState({ index: state.index + 1 < state.filterNodes.length ? state.index + 1 : 0 })
-      }
-    }
-    if (isHotkey('tab', e)) {
-      e.preventDefault()
-      insert(true)
-    }
-    if (isHotkey('enter', e)) {
-      e.preventDefault()
-      insert()
-    }
-  }, [])
   useEffect(() => {
     if (tab.state.wikilink.open) {
       ;(async () => {
@@ -158,12 +138,9 @@ export const ChooseLink = observer(() => {
       setState({
         nodes: docs,
         filterNodes: docs,
-        anchors: []
+        anchors: [],
+        index: 0
       })
-      window.addEventListener('keydown', keydown)
-      return () => {
-        window.removeEventListener('keydown', keydown)
-      }
     }
   }, [tab.state.wikilink.open])
   useEffect(() => {
@@ -178,7 +155,8 @@ export const ChooseLink = observer(() => {
       className={'absolute z-30 w-[370px] ctx-panel flex flex-col'}
       style={{
         left: tab.state.wikilink.left,
-        top: tab.state.wikilink.top,
+        top: tab.state.wikilink.mode === 'top' ? tab.state.wikilink.top : undefined,
+        bottom: tab.state.wikilink.mode === 'bottom' ? tab.state.wikilink.top : undefined,
         width: 390
       }}
     >
@@ -187,32 +165,58 @@ export const ChooseLink = observer(() => {
         ref={scrollRef}
       >
         <>
-          {!!state.showAnchor &&
-            state.filterAnchors.map((a, i) => (
-              <div
-                key={i}
-                onMouseEnter={(e) => {
-                  setState({ index: i })
-                }}
-                onClick={() => insert()}
-                className={`flex justify-between items-center py-0.5 rounded ${
-                  state.index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''
-                } cursor-pointer px-2`}
-              >
-                <div className={'flex-1 w-0 truncate'}>{a.title}</div>
-                <div className={'ml-1'}>{headIcon.get(a.level)}</div>
-              </div>
-            ))}
-          {!state.showAnchor &&
-            state.filterNodes.map((f, i) => {
-              return (
+          {!!state.showAnchor && (
+            <ScrollList
+              items={state.filterAnchors}
+              onClose={() => {
+                tab.setState((state) => {
+                  state.wikilink.open = false
+                })
+              }}
+              onSelect={(item) => {
+                insert({ anchor: item })
+              }}
+              onTab={(item) => {
+                insert({ anchor: item, complete: true })
+              }}
+              renderItem={(item, i) => (
                 <div
-                  onClick={() => insert()}
                   key={i}
                   onMouseEnter={(e) => {
                     setState({ index: i })
                   }}
-                  className={`flex justify-center py-0.5 rounded  cursor-pointer px-2 flex-col leading-4 ${state.index === i ? 'bg-gray-200/70 dark:bg-gray-100/10' : ''}`}
+                  onClick={() => insert({ anchor: item })}
+                  className={`flex justify-between items-center py-0.5 rounded cursor-pointer px-2`}
+                >
+                  <div className={'flex-1 w-0 truncate'}>{item.title}</div>
+                  <div className={'ml-1'}>{headIcon.get(item.level)}</div>
+                </div>
+              )}
+            />
+          )}
+          {!state.showAnchor && (
+            <ScrollList
+              items={state.filterNodes}
+              onSelect={(item, i) => {
+                insert({
+                  node: item
+                })
+              }}
+              onClose={() => {
+                tab.setState((state) => {
+                  state.wikilink.open = false
+                })
+              }}
+              onTab={(item, i) => {
+                insert({
+                  complete: true,
+                  node: item
+                })
+              }}
+              renderItem={(item, i) => (
+                <div
+                  key={i}
+                  className={`flex justify-center py-0.5 rounded  cursor-pointer px-2 flex-col leading-4`}
                 >
                   <div
                     className={
@@ -222,20 +226,23 @@ export const ChooseLink = observer(() => {
                     <div className={'h-5 flex items-center'}>
                       <FileText size={14} className={'dark:stroke-white/70 stroke-gray-500'} />
                     </div>
-                    <span className={'ml-1 flex-1 max-w-full break-all w-0 text-sm'}>{f.name}</span>
+                    <span className={'ml-1 flex-1 max-w-full break-all w-0 text-sm'}>
+                      {item.name}
+                    </span>
                   </div>
-                  {!!f.folder.length && (
+                  {!!item.folder.length && (
                     <div
                       className={
                         'text-gray-500 dark:text-white/70 pl-[20px] break-all text-xs w-full truncate'
                       }
                     >
-                      {f.folder.join('/')}
+                      {item.folder.join('/')}
                     </div>
                   )}
                 </div>
-              )
-            })}
+              )}
+            />
+          )}
           {((state.showAnchor && !state.filterAnchors.length) ||
             (!state.showAnchor && !state.filterNodes.length)) && (
             <div className={'py-4 text-center text-gray-400 text-sm'}>没有匹配的内容</div>

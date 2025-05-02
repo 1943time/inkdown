@@ -13,7 +13,7 @@ import { isMod } from '@/utils/common'
 import { TabContext } from '@/store/note/TabCtx'
 import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
-import { ChooseLink } from './tools/Links'
+import { ChooseWikiLink } from './tools/Links'
 import { InsertLink } from './tools/InsertLink'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
@@ -60,6 +60,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
                 </div>
                 {!store.settings.state.showChatBot && <Heading tab={tab} />}
               </div>
+              <ChooseWikiLink />
             </div>
           </>
         )}
@@ -68,7 +69,6 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
         <InsertLink />
         <LangAutocomplete tab={tab} />
         <InsertAutocomplete />
-        <ChooseLink />
       </div>
       <PhotoSlider
         maskOpacity={0.5}

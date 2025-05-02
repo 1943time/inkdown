@@ -473,4 +473,43 @@ export class EditorUtils {
       displayText: displayText
     }
   }
+
+  static getSelectedText(editor: Editor) {
+    const { selection } = editor
+    if (!selection) return ''
+
+    const [start, end] = Range.edges(selection)
+    const range = { anchor: start, focus: end }
+    let text = ''
+    const nodes = Editor.nodes(editor, {
+      at: range,
+      match: (n) => Text.isText(n) || Element.isElement(n)
+    })
+    for (const [node, path] of nodes) {
+      if (Text.isText(node)) {
+        const nodeText = node.text || ''
+        text += Editor.string(editor, {
+          anchor: {
+            path,
+            offset: Math.max(0, Path.equals(path, start.path) ? start.offset : 0)
+          },
+          focus: {
+            path,
+            offset: Path.equals(path, end.path) ? end.offset : nodeText.length
+          }
+        })
+      } else if (Element.isElement(node)) {
+        if (['paragraph', 'heading', 'block-quote', 'table', 'table-row'].includes(node.type)) {
+          text += '\n'
+        }
+        if (node.type === 'code' && node.code) {
+          text += '\n' + node.code + '\n'
+        }
+        if (node.type === 'table-cell') {
+          text += ' '
+        }
+      }
+    }
+    return text.trim()
+  }
 }

@@ -38,6 +38,7 @@ const state = {
   wikilink: {
     open: false,
     keyword: '',
+    mode: 'top' as 'top' | 'bottom',
     left: 0,
     top: 0,
     offset: 0

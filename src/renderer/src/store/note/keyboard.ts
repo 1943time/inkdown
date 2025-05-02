@@ -2,7 +2,7 @@ import { Editor, Element, Node, Path, Range, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
 import { ReactEditor } from 'slate-react'
-import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
+import { getDomRect, getOffsetLeft, getOffsetTop } from '@/utils/dom'
 
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
@@ -599,10 +599,13 @@ export class KeyboardTask {
       const dom = ReactEditor.toDOMNode(this.tab.editor, node)
       if (dom) {
         let top = getOffsetTop(dom, this.tab.container!)
+        let mode: 'top' | 'bottom' = 'top'
         if (top - this.tab.container!.scrollTop + 270 > window.innerHeight) {
-          top -= 204
+          const rect = getDomRect()
+          top = this.tab.container!.children[0].clientHeight - top + 5
+          mode = 'bottom'
         } else {
-          top = getOffsetTop(dom, this.tab.container!) + dom!.clientHeight + 24
+          top = getOffsetTop(dom, this.tab.container!) + dom!.offsetHeight + 5
         }
         let left = getOffsetLeft(dom, this.tab.container!)
 
@@ -615,7 +618,8 @@ export class KeyboardTask {
             left,
             top,
             keyword: Node.string(node),
-            offset: this.tab.editor.selection?.anchor.offset!
+            offset: this.tab.editor.selection?.anchor.offset!,
+            mode
           }
         })
       }

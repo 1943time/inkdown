@@ -10,10 +10,19 @@ interface ScrollListProps<T> {
   onSelect?: (item: T, index: number) => void
   className?: string
   onClose?: () => void
+  onTab?: (item: T, index: number) => void
 }
 
 export const ScrollList = observer(
-  <T,>({ items, style, renderItem, onSelect, className = '', onClose }: ScrollListProps<T>) => {
+  <T,>({
+    items,
+    style,
+    renderItem,
+    onSelect,
+    className = '',
+    onClose,
+    onTab
+  }: ScrollListProps<T>) => {
     const [state, setState] = useLocalState({
       activeIndex: 0
     })
@@ -21,8 +30,6 @@ export const ScrollList = observer(
 
     const handleKeyDown = useCallback(
       (e: KeyboardEvent) => {
-        console.log('keydown')
-
         if (['ArrowDown', 'ArrowUp'].includes(e.key) && items.length > 1) {
           e.preventDefault()
           if (e.key === 'ArrowDown') {
@@ -34,7 +41,6 @@ export const ScrollList = observer(
             setState({ activeIndex: index })
           }
 
-          // 确保选中的项在视窗内可见
           const target = scrollRef.current?.children[state.activeIndex] as HTMLDivElement
           if (target && scrollRef.current) {
             const { scrollTop, clientHeight } = scrollRef.current
@@ -57,6 +63,10 @@ export const ScrollList = observer(
           e.preventDefault()
           onSelect?.(items[state.activeIndex], state.activeIndex)
         }
+        if (items.length && isHotkey('tab', e)) {
+          e.preventDefault()
+          onTab?.(items[state.activeIndex], state.activeIndex)
+        }
         if (isHotkey('esc', e)) {
           e.preventDefault()
           onClose?.()
@@ -64,7 +74,9 @@ export const ScrollList = observer(
       },
       [items, onSelect, onClose]
     )
-
+    useEffect(() => {
+      setState({ activeIndex: 0 })
+    }, [items])
     useEffect(() => {
       window.addEventListener('keydown', handleKeyDown)
       return () => {
