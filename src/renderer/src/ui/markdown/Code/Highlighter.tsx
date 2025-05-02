@@ -1,12 +1,17 @@
-import { memo, ReactNode, useState } from 'react'
+import { memo, ReactNode } from 'react'
 import { Flexbox } from 'react-layout-kit'
-import { useStyles } from './highlighterStyle'
-import { ChevronDown, ChevronRight } from 'lucide-react'
-import { ActionIcon, ActionIconProps, CopyButton, DivProps } from '@lobehub/ui'
+import { Check, ChevronDown, Copy } from 'lucide-react'
+import { ActionIconProps, DivProps } from '@lobehub/ui'
 import SyntaxHighlighter from './SyntaxHighlighter'
+import { useSetState } from 'react-use'
 
 export interface HighlighterProps extends DivProps {
-  actionsRender?: (props: { actionIconSize: ActionIconProps['size']; content: string; language: string; originalNode: ReactNode }) => ReactNode
+  actionsRender?: (props: {
+    actionIconSize: ActionIconProps['size']
+    content: string
+    language: string
+    originalNode: ReactNode
+  }) => ReactNode
   /**
    * @description The code content to be highlighted
    */
@@ -35,63 +40,76 @@ export interface HighlighterProps extends DivProps {
   wrap?: boolean
 }
 
-export const Highlighter = memo<HighlighterProps>(({ children, language = 'markdown', className, style, type = 'block', ...rest }) => {
-  const tirmedChildren = children.trim()
+export const Highlighter = memo<HighlighterProps>(
+  ({
+    children,
+    language = 'markdown',
+    className,
+    style,
+    type = 'block',
+    fileName,
+    fullFeatured,
+    actionsRender,
+    defalutExpand,
+    enableTransformer,
+    wrap,
+    ...rest
+  }) => {
+    const tirmedChildren = children.trim()
 
-  const [expand, setExpand] = useState(true)
-  const { styles, cx } = useStyles(type)
+    const [state, setState] = useSetState({
+      copied: false,
+      expand: true
+    })
 
-  const size = { blockSize: 24, fontSize: 14, strokeWidth: 2 }
-
-  const origianlActions = (
-    <CopyButton
-      content={tirmedChildren}
-      placement="left"
-      size={size}
-    />
-  )
-
-  return (
-    <div
-      className={cx(styles.container, className)}
-      data-code-type="highlighter"
-      style={style}
-      {...rest}
-    >
-      <Flexbox
-        align={'center'}
-        className={`${styles.header}`}
-        horizontal
-        justify={'space-between'}
+    return (
+      <div
+        className={
+          'relative overflow-hidden rounded-md border border-gray-200/60 dark:border-white/10'
+        }
+        style={style}
+        {...rest}
       >
-        <ActionIcon
-          icon={expand ? ChevronDown : ChevronRight}
-          onClick={() => setExpand(!expand)}
-          size={{ blockSize: 24, fontSize: 14, strokeWidth: 3 }}
-        />
-        <Flexbox
-          align={'center'}
-          gap={2}
-          horizontal
-          className={styles.select}
-          justify={'center'}
-        >
-          <span>{language}</span>
-        </Flexbox>
-        <Flexbox
-          align={'center'}
-          flex={'none'}
-          gap={4}
-          horizontal
-        >
-          {origianlActions}
-        </Flexbox>
-      </Flexbox>
-      <div style={expand ? {} : { height: 0, overflow: 'hidden' }}>
-        <SyntaxHighlighter language={language?.toLowerCase()}>{tirmedChildren}</SyntaxHighlighter>
+        <div className={'justify-between flex items-center h-8 dark:bg-gray-100/5 px-2 bg-gray-50'}>
+          <div
+            className={
+              'p-1 rounded-sm hover:bg-black/10 duration-200 cursor-pointer dark:hover:bg-white/10'
+            }
+            onClick={() => setState({ expand: !state.expand })}
+          >
+            <ChevronDown
+              className={`duration-200 stroke-gray-500 dark:stroke-gray-400 ${!state.expand ? '-rotate-90' : ''}`}
+              size={16}
+            />
+          </div>
+          <Flexbox align={'center'} gap={2} horizontal justify={'center'}>
+            <span>{language}</span>
+          </Flexbox>
+          <div
+            className={
+              'p-1 rounded-sm hover:bg-black/10 duration-200 cursor-pointer dark:hover:bg-white/10'
+            }
+            onClick={() => {
+              window.api.writeToClipboard(tirmedChildren)
+              setState({ copied: true })
+              setTimeout(() => {
+                setState({ copied: false })
+              }, 1000)
+            }}
+          >
+            {!state.copied ? (
+              <Copy className={`duration-200 stroke-gray-500 dark:stroke-gray-400`} size={14} />
+            ) : (
+              <Check className={`duration-200 stroke-gray-500 dark:stroke-gray-400`} size={14} />
+            )}
+          </div>
+        </div>
+        <div style={state.expand ? {} : { height: 0, overflow: 'hidden' }}>
+          <SyntaxHighlighter language={language?.toLowerCase()}>{tirmedChildren}</SyntaxHighlighter>
+        </div>
       </div>
-    </div>
-  )
-})
+    )
+  }
+)
 
 export default Highlighter

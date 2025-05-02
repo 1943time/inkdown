@@ -1,8 +1,7 @@
-import { createStyles } from 'antd-style';
+import { createStyles } from 'antd-style'
 
 export const useStyles = createStyles(({ css, token, cx, prefixCls }) => {
-
-  const prefix = `${prefixCls}-highlighter`;
+  const prefix = `${prefixCls}-highlighter`
   return {
     shiki: cx(
       `${prefix}-shiki`,
@@ -15,7 +14,7 @@ export const useStyles = createStyles(({ css, token, cx, prefixCls }) => {
         .shiki {
           overflow-x: auto;
           margin: 0;
-          padding: 0;
+          padding: 12px 16px;
           /* background: none !important; */
 
           code {
@@ -91,7 +90,7 @@ export const useStyles = createStyles(({ css, token, cx, prefixCls }) => {
             }
           }
         }
-      `,
+      `
     )
-  };
-});
+  }
+})

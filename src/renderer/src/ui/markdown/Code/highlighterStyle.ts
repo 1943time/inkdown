@@ -1,119 +1,111 @@
 import { createStyles } from 'antd-style'
 
-export const useStyles = createStyles(({ token, css, cx, prefixCls, stylish }, type: 'ghost' | 'block' | 'pure') => {
-  const prefix = `${prefixCls}-highlighter`
-  const buttonHoverCls = `${prefix}-hover-btn`
-  const langHoverCls = `${prefix}-hover-lang`
+export const useStyles = createStyles(
+  ({ token, css, cx, prefixCls, stylish }, type: 'ghost' | 'block' | 'pure') => {
+    const prefix = `${prefixCls}-highlighter`
+    const buttonHoverCls = `${prefix}-hover-btn`
+    const langHoverCls = `${prefix}-hover-lang`
 
-  const typeStylish = css`
-    background-color: ${type === 'block' ? token.colorFillTertiary : 'transparent'};
-    border: 1px solid ${type === 'block' ? 'transparent' : token.colorBorder};
+    return {
+      button: cx(
+        buttonHoverCls,
+        css`
+          position: absolute;
+          z-index: 2;
+          inset-block-start: ${type === 'pure' ? 0 : '8px'};
+          inset-inline-end: ${type === 'pure' ? 0 : '8px'};
 
-    &:hover {
-      background-color: ${type === 'block' ? token.colorFillTertiary : token.colorFillQuaternary};
-    }
-  `
+          opacity: 0;
+        `
+      ),
 
-  return {
-    button: cx(
-      buttonHoverCls,
-      css`
-        position: absolute;
-        z-index: 2;
-        inset-block-start: ${type === 'pure' ? 0 : '8px'};
-        inset-inline-end: ${type === 'pure' ? 0 : '8px'};
+      container: cx(
+        prefix,
+        css`
+          position: relative;
+          overflow: hidden;
+          border-radius: ${token.borderRadius}px;
+          transition: background-color 100ms ${token.motionEaseOut};
 
-        opacity: 0;
-      `
-    ),
+          &:hover {
+            .${buttonHoverCls} {
+              opacity: 1;
+            }
 
-    container: cx(
-      prefix,
-      type !== 'pure' && typeStylish,
-      css`
+            .${langHoverCls} {
+              opacity: 1;
+            }
+          }
+
+          .prism-code {
+            background: none !important;
+          }
+
+          pre {
+            overflow: auto hidden;
+
+            margin: 0 !important;
+            padding: ${type === 'pure' ? 0 : `16px`} !important;
+
+            white-space: break-spaces;
+          }
+
+          code {
+            background: transparent !important;
+          }
+        `
+      ),
+      header: css`
         position: relative;
-        overflow: hidden;
-        border-radius: ${token.borderRadius}px;
-        transition: background-color 100ms ${token.motionEaseOut};
+        padding-block: 4px;
+        padding-inline: 8px;
+      `,
+      lang: cx(
+        langHoverCls,
+        // stylish.blur,
+        css`
+          position: absolute;
+          z-index: 2;
+          inset-block-end: 8px;
+          inset-inline-end: 0;
 
-        &:hover {
-          .${buttonHoverCls} {
-            opacity: 1;
-          }
+          font-family: ${token.fontFamilyCode};
+          color: ${token.colorTextSecondary};
 
-          .${langHoverCls} {
-            opacity: 1;
-          }
-        }
+          opacity: 0;
 
-        .prism-code {
-          background: none !important;
-        }
-
-        pre {
-          overflow: auto hidden;
-
-          margin: 0 !important;
-          padding: ${type === 'pure' ? 0 : `16px`} !important;
-
-          white-space: break-spaces;
-        }
-
+          transition: opacity 0.1s;
+        `
+      ),
+      nowrap: css`
         code {
-          background: transparent !important;
+          text-wrap: nowrap !important;
         }
-      `
-    ),
-    header: css`
-      position: relative;
-      padding-block: 4px;
-      padding-inline: 8px;
-    `,
-    lang: cx(
-      langHoverCls,
-      // stylish.blur,
-      css`
+      `,
+      scroller: css`
+        overflow: auto;
+        width: 100%;
+        height: 100%;
+      `,
+      select: css`
+        user-select: none;
+
         position: absolute;
-        z-index: 2;
-        inset-block-end: 8px;
-        inset-inline-end: 0;
+        inset-inline-start: 50%;
+        transform: translateX(-50%);
 
-        font-family: ${token.fontFamilyCode};
-        color: ${token.colorTextSecondary};
-
-        opacity: 0;
-
-        transition: opacity 0.1s;
-      `
-    ),
-    nowrap: css`
-      code {
-        text-wrap: nowrap !important;
-      }
-    `,
-    scroller: css`
-      overflow: auto;
-      width: 100%;
-      height: 100%;
-    `,
-    select: css`
-      user-select: none;
-
-      position: absolute;
-      inset-inline-start: 50%;
-      transform: translateX(-50%);
-
-      min-width: 100px;
-
-      font-size: 14px;
-      color: ${token.colorTextDescription};
-      text-align: center;
-      .${prefixCls}-select-selection-item {
         min-width: 100px;
-        padding-inline-end: 0 !important;
+
+        font-size: 14px;
         color: ${token.colorTextDescription};
         text-align: center;
-      }
-    `
+        .${prefixCls}-select-selection-item {
+          min-width: 100px;
+          padding-inline-end: 0 !important;
+          color: ${token.colorTextDescription};
+          text-align: center;
+        }
+      `
+    }
   }
-})
+)

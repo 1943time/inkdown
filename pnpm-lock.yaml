@@ -68,8 +68,8 @@ devDependencies:
     specifier: ^1.89.0
     version: 1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
   '@lobehub/ui':
-    specifier: ^2.0.8
-    version: 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+    specifier: ^2.0.10
+    version: 2.0.10(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
   '@tailwindcss/vite':
     specifier: ^4.1.4
     version: 4.1.4(vite@6.2.6)
@@ -220,9 +220,6 @@ devDependencies:
   react-use:
     specifier: ^17.6.0
     version: 17.6.0(react-dom@19.1.0)(react@19.1.0)
-  react-virtuoso:
-    specifier: ^4.12.5
-    version: 4.12.6(react-dom@19.1.0)(react@19.1.0)
   rehype-katex:
     specifier: ^7.0.1
     version: 7.0.1
@@ -1735,7 +1732,7 @@ packages:
       react-dom: ^19.0.0
     dependencies:
       '@lobehub/emojilib': 1.0.0
-      '@lobehub/ui': 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      '@lobehub/ui': 2.0.10(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
       antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
       antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
       emoji-regex: 10.4.0
@@ -1783,7 +1780,7 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
     dependencies:
-      '@lobehub/ui': 2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
+      '@lobehub/ui': 2.0.10(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
       antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
       antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
       lucide-react: 0.469.0(react@19.1.0)
@@ -1871,8 +1868,8 @@ packages:
       - supports-color
     dev: true
 
-  /@lobehub/ui@2.0.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-627IJ2eSMCg19H0FoDG7LwyCUzL+rCbKqpbwzNVPVMsM40gVmkyk8Q1TAyQsCT4Wv2QBNuKcBtpw2TcXMA4O3w==}
+  /@lobehub/ui@2.0.10(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-NZ9jaSVDhCU+Yhomm80SL58Ag+/ZCMO4m4t82ifU7rfUtbF2WtS8ur4dnQ+ca7TVvI9flUPjNsOJodqi824L8g==}
     peerDependencies:
       antd: ^5.23.0
       framer-motion: ^12.0.0
@@ -10866,16 +10863,6 @@ packages:
       throttle-debounce: 3.0.1
       ts-easing: 0.2.0
       tslib: 2.8.1
-    dev: true
-
-  /react-virtuoso@4.12.6(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-bfvS6aCL1ehXmq39KRiz/vxznGUbtA27I5I24TYCe1DhMf84O3aVNCIwrSjYQjkJGJGzY46ihdN8WkYlemuhMQ==}
-    peerDependencies:
-      react: '>=16 || >=17 || >= 18 || >= 19'
-      react-dom: '>=16 || >=17 || >= 18 || >=19'
-    dependencies:
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
     dev: true
 
   /react-zoom-pan-pinch@3.7.0(react-dom@19.1.0)(react@19.1.0):

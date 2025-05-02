@@ -35,7 +35,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
+        <div className={'text-sm flex items-center'}>
           <span className={'mr-1'}>显示大纲</span>
           <TextHelp
             text={
@@ -121,7 +121,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>
+        <div className={'text-sm flex items-center'}>
           <span className={'mr-1'}>{'Use $ to convert inline formulas'}</span>
           <TextHelp
             text={

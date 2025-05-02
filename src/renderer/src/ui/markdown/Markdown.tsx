@@ -55,12 +55,7 @@ const Markdown = memo<MarkdownProps>(
 
     const memoComponents: Components = useMemo(
       () => ({
-        a: (props: any) => (
-          <a
-            {...props}
-            target={'_blank'}
-          />
-        ),
+        a: (props: any) => <a {...props} target={'_blank'} />,
         // img: enableImageGallery
         //   ? (props: any) => (
         //     <Image
@@ -74,12 +69,7 @@ const Markdown = memo<MarkdownProps>(
         //     />
         //   )
         //   : undefined,
-        pre: (props: any) => (
-          <CodeLite
-            enableMermaid={enableMermaid}
-            {...props}
-          />
-        ),
+        pre: (props: any) => <CodeLite enableMermaid={enableMermaid} {...props} />,
         section: (props: any) => <section {...props} />
         // video: (props: any) => <Video {...props} {...componentProps?.video} />
       }),
@@ -89,16 +79,30 @@ const Markdown = memo<MarkdownProps>(
     const innerRehypePlugins = Array.isArray(rehypePlugins) ? rehypePlugins : [rehypePlugins]
 
     const memoRehypePlugins = useMemo(
-      () => [allowHtml && rehypeRaw, enableLatex && rehypeKatex, enableLatex && rehypeKatexDir, ...innerRehypePlugins].filter(Boolean) as any,
+      () =>
+        [
+          allowHtml && rehypeRaw,
+          enableLatex && rehypeKatex,
+          enableLatex && rehypeKatexDir,
+          ...innerRehypePlugins
+        ].filter(Boolean) as any,
       [allowHtml, enableLatex, ...innerRehypePlugins]
     )
 
     const innerRemarkPlugins = Array.isArray(remarkPlugins) ? remarkPlugins : [remarkPlugins]
-    const innerRemarkPluginsAhead = Array.isArray(remarkPluginsAhead) ? remarkPluginsAhead : [remarkPluginsAhead]
+    const innerRemarkPluginsAhead = Array.isArray(remarkPluginsAhead)
+      ? remarkPluginsAhead
+      : [remarkPluginsAhead]
 
     const memoRemarkPlugins = useMemo(
       () =>
-        [...innerRemarkPluginsAhead, remarkGfm, enableLatex && remarkMath, isChatMode && remarkBreaks, ...innerRemarkPlugins].filter(Boolean) as any,
+        [
+          ...innerRemarkPluginsAhead,
+          remarkGfm,
+          enableLatex && remarkMath,
+          isChatMode && remarkBreaks,
+          ...innerRemarkPlugins
+        ].filter(Boolean) as any,
       [isChatMode, enableLatex, ...innerRemarkPluginsAhead, ...innerRemarkPlugins]
     )
 

@@ -11,8 +11,9 @@
   --md-border: #b9b9b9;
   --card-bg: #fff;
   --panel-bg: rgba(255, 255, 255, 0.95);
-  --chat-bg: oklch(98.5% 0 0);
+  --chat-bg: white;
   --side-panel-bg-color: oklch(98.5% 0.002 247.839);
+  --chat-user-message-bg-color: #eaeef5;
 }
 .dark {
   color-scheme: dark;

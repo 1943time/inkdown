@@ -90,7 +90,7 @@ const MdElements: Record<string, MdNode> = {
     checkAllow: (ctx) => {
       return ['paragraph', 'table-cell'].includes(ctx.node[0].type)
     },
-    run: ({ editor, path, match, sel }) => {
+    run: ({ editor, match, sel }) => {
       Transforms.select(editor, {
         anchor: { path: sel.anchor.path, offset: sel.anchor.offset - match[0].length + 1 },
         focus: { path: sel.anchor.path, offset: sel.anchor.offset }
@@ -105,7 +105,7 @@ const MdElements: Record<string, MdNode> = {
   },
   katex: {
     reg: /^\s*(\$\$|￥￥)\s*$/,
-    run: ({ editor, path, match }) => {
+    run: ({ editor, path }) => {
       Transforms.delete(editor, { at: path })
       Transforms.insertNodes(
         editor,

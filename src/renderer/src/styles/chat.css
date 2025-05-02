@@ -32,28 +32,12 @@
   border-radius: 24px 4px 24px 24px;
 }
 
-.chat-list [data-testid='virtuoso-item-list'] > div:last-child > .ai-message {
-  min-height: calc(100vh - 300px);
-}
-
-.chat-list [data-testid='virtuoso-item-list'] > div:first-child > div {
-  margin-top: 20px;
-}
-
-.chat-list [data-testid='virtuoso-item-list'] > div:nth-last-child(2) .last-user-message-action {
-  display: flex;
+.chat-list .ai-message:last-child {
+  min-height: calc(100vh - 220px);
 }
 
 .last-user-message-action {
   display: none;
-}
-
-.last-ai-message-action {
-  display: none;
-}
-
-.chat-list [data-testid='virtuoso-item-list'] > div:nth-last-child(1) .last-ai-message-action {
-  display: flex;
 }
 
 .ai-msg-actions {
@@ -66,15 +50,6 @@
   opacity: 1;
   pointer-events: auto;
 }
-/* .chat-list:not(.pending) [data-testid='virtuoso-item-list'] > div:not(:last-child) .ai-message-content:hover .ai-msg-actions {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.chat-list:not(.pending) [data-testid='virtuoso-item-list'] > div:last-child .ai-msg-actions {
-  opacity: 1;
-  pointer-events: auto;
-} */
 
 .switch-model-menu {
   .ant-dropdown-menu-item {
@@ -94,4 +69,8 @@
 
 .message-markdown > div > :first-child {
   margin-top: 5px !important;
+}
+
+.ai-message {
+  scroll-margin: 100px;
 }

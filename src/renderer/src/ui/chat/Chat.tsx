@@ -11,23 +11,6 @@ import { os } from '@/utils/common'
 export const Chat = observer(() => {
   const store = useStore()
   const chat = store.chat.state.activeChat
-  // const messages = useMemo(() => {
-  //   return Array.from(new Array(100)).map((_, index) => {
-  //     return {
-  //       id: nanoid(),
-  //       created: 0,
-  //       chatId: '1',
-  //       tokens: 0,
-  //       role: 'assistant',
-  //       reasoning: '',
-  //       duration: 0,
-  //       height: generateRandomNumber(100, 1000),
-  //       content: `# Hello ${index}`,
-  //       updated: Date.now()
-  //     } as IMessage
-  //   })
-  // }, [])
-  // console.log('messages', messages);
   const move = useCallback((e: React.MouseEvent) => {
     const startX = e.clientX
     document.body.classList.add('drag-sidebar')

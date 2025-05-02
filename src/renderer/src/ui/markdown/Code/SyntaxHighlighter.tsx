@@ -21,27 +21,27 @@ const SyntaxHighlighter = memo<SyntaxHighlighterProps>(
     const [dom, setDom] = useState('')
     const matchedLanguage = useMemo(
       () => (langMap.has(language as any) ? language : FALLBACK_LANG),
-      [language],
+      [language]
     )
     useEffect(() => {
       codeToHtml(children, {
         lang: matchedLanguage,
         theme: isDarkMode ? 'plastic' : 'github-light'
-      }).then(res => {
+      }).then((res) => {
         setDom(res)
       })
-    }, [children, lang])
+    }, [children, lang, isDarkMode])
     return (
       <div
         className={cx(styles.shiki, className)}
         dangerouslySetInnerHTML={{
-          __html: dom as string,
+          __html: dom as string
         }}
         dir="ltr"
         style={style}
       />
     )
-  },
+  }
 )
 
 export default SyntaxHighlighter

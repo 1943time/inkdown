@@ -1,6 +1,5 @@
 import { IChat, IMessage } from 'types/model'
-import { memo, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import ChatItem from './ChatItem'
 import { ChevronDown } from 'lucide-react'
@@ -8,7 +7,8 @@ import { observer } from 'mobx-react-lite'
 
 export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
   ({ messages, chat }) => {
-    const virtuosoRef = useRef<VirtuosoHandle>(null)
+    const scrollRef = useRef<HTMLDivElement>(null)
+    const listRef = useRef<HTMLDivElement>(null)
     const scrollTimer = useRef(0)
     const preChatId = useRef(chat?.id)
     const [state, setState] = useGetSetState({
@@ -16,120 +16,96 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
       isScrolling: false,
       followOutput: false,
       visible: true,
-      showScrollToBottom: false
+      showScrollToBottom: true
     })
 
     const scrollToChat = useCallback(
-      (behavior: 'auto' | 'smooth' = 'auto') => {
-        if (virtuosoRef.current) {
-          virtuosoRef.current.scrollToIndex({
-            index: messages.length - 2,
-            align: 'start',
-            behavior: behavior
-          })
+      (index: number, behavior: 'auto' | 'smooth' = 'auto') => {
+        if (scrollRef.current) {
+          const target = listRef.current!.children[0]?.children[index - 1]
+          if (target) {
+            target.scrollIntoView({ behavior, block: 'start' })
+          }
         }
       },
       [messages.length]
     )
     const scrollToBottom = useCallback(
       (behavior: 'auto' | 'smooth' = 'auto') => {
-        if (virtuosoRef.current) {
-          virtuosoRef.current.scrollToIndex({
-            index: 'LAST',
-            align: 'end',
-            behavior: behavior,
-            offset: 100
-          })
+        if (scrollRef.current) {
+          const last =
+            listRef.current!.children[0]?.children[
+              listRef.current!.children[0]!.children.length - 1
+            ]
+          if (last) {
+            last.scrollIntoView({ behavior, block: 'end' })
+          }
         }
       },
       [messages.length]
     )
-    const scrollTop = useCallback((behavior: 'auto' | 'smooth' = 'auto') => {
-      if (virtuosoRef.current) {
-        virtuosoRef.current.scrollToIndex({
-          index: 0,
-          align: 'start',
-          behavior: behavior
+    const scroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+      clearTimeout(scrollTimer.current)
+      scrollTimer.current = window.setTimeout(() => {
+        setState({
+          showScrollToBottom:
+            listRef.current!.scrollHeight > window.innerHeight - 200 &&
+            scrollRef.current!.scrollTop + scrollRef.current!.clientHeight <
+              listRef.current!.scrollHeight - 300
         })
-      }
+      }, 100)
     }, [])
-
-    const render = useCallback((index: number, msg: IMessage) => {
-      return <ChatItem msg={msg} />
-    }, [])
-
     useLayoutEffect(() => {
       if (preChatId.current !== chat?.id) {
         setState({ visible: false, showScrollToBottom: false })
         preChatId.current = chat?.id
+        scrollRef.current?.scrollTo({
+          top: 0,
+          behavior: 'instant'
+        })
         setTimeout(() => {
-          setState({ visible: true })
+          setState({
+            visible: true,
+            showScrollToBottom: listRef.current!.scrollHeight > window.innerHeight - 200
+          })
         }, 30)
       }
     }, [chat?.id])
+
     useEffect(() => {
       if (state().visible) {
         setTimeout(() => {
-          scrollToChat('smooth')
+          scrollToChat(messages.length - 1, 'smooth')
         }, 30)
       }
     }, [messages.length])
 
     return (
-      <div className={'relative overflow-y-auto h-full pt-4 pb-10'}>
+      <div className={'relative h-full'}>
         <div
-          className={`chat-list ${state().visible ? 'animate-show' : 'hidden'} ${chat?.pending ? 'pending' : ''}`}
+          className={'overflow-y-auto h-full pt-4 pb-10 relative'}
+          ref={scrollRef}
+          onScroll={scroll}
         >
-          <div className={'w-full'}>
-            {messages.map((m) => (
-              <ChatItem key={m.id} msg={m} />
-            ))}
+          <div
+            ref={listRef}
+            className={`chat-list ${state().visible ? 'animate-show' : 'hidden'} ${chat?.pending ? 'pending' : ''}`}
+          >
+            <div className={'w-full'}>
+              {messages.map((m) => (
+                <ChatItem key={m.id} msg={m} />
+              ))}
+            </div>
           </div>
         </div>
-        {/* <Virtuoso
-          atBottomThreshold={50}
-          style={{ height: '100%', fontSize: 16, opacity: state().visible ? 1 : 0 }}
-          className={`chat-list ${state().visible ? 'animate-show' : ''} ${chat?.pending ? 'pending' : ''}`}
-          computeItemKey={(_, item) => item.id}
-          onScroll={(e) => {
-            const target = e.target as HTMLDivElement
-            const clientHeight = target.children[0]?.children[0]?.clientHeight || 0
-            setState({
-              showScrollToBottom:
-                clientHeight > window.innerHeight &&
-                target.scrollTop < clientHeight - target.clientHeight - 500
-            })
+        <div
+          onClick={() => {
+            scrollToBottom('smooth')
           }}
-          components={{
-            Footer: () => <div style={{ height: 30 }}></div>
-          }}
-          data={messages}
-          totalListHeightChanged={(height) => {
-            clearTimeout(scrollTimer.current)
-            if (!state().visible) {
-              scrollTimer.current = window.setTimeout(() => {
-                scrollTop()
-                setState({ showScrollToBottom: height > window.innerHeight + 500, visible: true })
-              }, 100)
-            }
-          }}
-          followOutput={false}
-          increaseViewportBy={window.innerHeight * 3}
-          initialTopMostItemIndex={messages.length - 1}
-          itemContent={render}
-          overscan={window.innerHeight * 3}
-          ref={virtuosoRef}
-        /> */}
-        {state().showScrollToBottom && (
-          <div
-            onClick={() => {
-              scrollToBottom('smooth')
-            }}
-            className={`absolute left-1/2 -translate-x-1/2 p-1 bg-[var(--primary-bg-color)] z-10 bottom-3 rounded-full border dark:border-white/10 opacity-0 ${state().showScrollToBottom ? 'animate-show cursor-pointer' : 'pointer-events-none'}`}
-          >
-            <ChevronDown size={16} />
-          </div>
-        )}
+          className={`absolute left-1/2 -translate-x-1/2 p-0.5 bg-[var(--primary-bg-color)] z-10 bottom-4 rounded-full border dark:border-white/10 border-black/20 opacity-0 ${state().showScrollToBottom ? 'animate-show cursor-pointer' : 'pointer-events-none'}`}
+        >
+          <ChevronDown size={16} className={'dark:stroke-white/60 stroke-black/60'} />
+        </div>
       </div>
     )
   }
