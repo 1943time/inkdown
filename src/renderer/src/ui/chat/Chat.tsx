@@ -106,6 +106,7 @@ export const Chat = observer(() => {
             <ChatInput />
           </div>
         </div>
+        <ChatNotes />
       </div>
       <div
         className={'fixed w-1 h-screen top-0 z-10 cursor-col-resize'}
@@ -115,7 +116,6 @@ export const Chat = observer(() => {
         onMouseDown={move}
       />
       <ChatSearch />
-      <ChatNotes />
     </div>
   )
 })

@@ -16,13 +16,10 @@ const headIcon = new Map<number, React.ReactNode>([
 ])
 export const ChooseWikiLink = observer(() => {
   const tab = useTab()
-  const scrollRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useLocalState({
     nodes: [] as { folder: string[]; name: string; fullPath: string }[],
     filterNodes: [] as { folder: string[]; name: string; fullPath: string }[],
     showAnchor: false,
-    keyword: '',
-    index: 0,
     anchors: [] as { title: string; level: number }[],
     filterAnchors: [] as { title: string; level: number }[]
   })
@@ -38,7 +35,7 @@ export const ChooseWikiLink = observer(() => {
       })
       if (node) {
         if (state.showAnchor && ctx.anchor) {
-          const anchor = state.filterAnchors[state.index]
+          const anchor = ctx.anchor
           if (anchor) {
             const match = EditorUtils.parseWikiLink(tab.state.wikilink.keyword)
             Transforms.insertText(tab.editor, (match?.docName || '') + '#' + anchor.title, {
@@ -107,15 +104,13 @@ export const ChooseWikiLink = observer(() => {
           setState({
             filterAnchors: state.anchors.filter((a) =>
               a.title.toLowerCase().includes(filterKeyword)
-            ),
-            index: 0
+            )
           })
         } else {
           setState({
             filterNodes: state.nodes.filter((n) => {
               return n.fullPath.toLowerCase().includes(filterKeyword)
             }),
-            index: 0,
             filterAnchors: []
           })
         }
@@ -138,8 +133,7 @@ export const ChooseWikiLink = observer(() => {
       setState({
         nodes: docs,
         filterNodes: docs,
-        anchors: [],
-        index: 0
+        anchors: []
       })
     }
   }, [tab.state.wikilink.open])
@@ -160,10 +154,7 @@ export const ChooseWikiLink = observer(() => {
         width: 390
       }}
     >
-      <div
-        className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}
-        ref={scrollRef}
-      >
+      <div className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}>
         <>
           {!!state.showAnchor && (
             <ScrollList
@@ -182,9 +173,6 @@ export const ChooseWikiLink = observer(() => {
               renderItem={(item, i) => (
                 <div
                   key={i}
-                  onMouseEnter={(e) => {
-                    setState({ index: i })
-                  }}
                   onClick={() => insert({ anchor: item })}
                   className={`flex justify-between items-center py-0.5 rounded cursor-pointer px-2`}
                 >

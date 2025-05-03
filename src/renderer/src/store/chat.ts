@@ -1,5 +1,5 @@
 import { Store } from './store'
-import { IChat, IMessage, IMessageFile, IMessageModel } from 'types/model'
+import { IChat, IMessage, IMessageDoc, IMessageFile, IMessageModel } from 'types/model'
 import { AiClient } from './model/client'
 import { getTokens } from '../utils/ai'
 import { ClientModel } from './settings'
@@ -8,6 +8,9 @@ import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/uti
 import { StructStore } from './struct'
 import { nid } from '@/utils/common'
 import { observable, toJS } from 'mobx'
+import { withReact } from 'slate-react'
+import { withHistory } from 'slate-history'
+import { createEditor } from 'slate'
 
 const state = {
   chats: [] as IChat[],
@@ -16,13 +19,16 @@ const state = {
   docContext: false,
   refresh: false,
   openSearch: false,
+  cacheDocs: [] as IMessageDoc[],
   reference: {
     open: false,
+    keyword: '',
     domRect: null as null | DOMRect
   }
 }
 export class ChatStore extends StructStore<typeof state> {
   private maxTokens = 32000
+  editor = withReact(withHistory(createEditor()))
   // 触发压缩的阈值
   private warningThreshold = 25000
   private minRetainMessages = 8 // 最少保留的消息数

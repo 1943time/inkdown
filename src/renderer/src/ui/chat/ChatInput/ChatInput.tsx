@@ -2,11 +2,20 @@ import { useStore } from '@/store/store'
 import { Tooltip } from '@lobehub/ui'
 import { Popover } from 'antd'
 import isHotkey from 'is-hotkey'
-import { CircleX, Earth, Image, Paperclip, Plus, SendHorizontal, SquareLibrary } from 'lucide-react'
+import {
+  CircleX,
+  Earth,
+  FileText,
+  Image,
+  Paperclip,
+  Plus,
+  SendHorizontal,
+  SquareLibrary,
+  X
+} from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo } from 'react'
-import { createEditor, Editor, Element, Node, Range, Transforms } from 'slate'
-import { withHistory } from 'slate-history'
-import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from 'slate-react'
+import { Editor, Element, Node, Range, Transforms } from 'slate'
+import { Editable, RenderElementProps, RenderLeafProps, Slate } from 'slate-react'
 import { IMessageDoc, IMessageFile } from 'types/model'
 import { chooseFile } from './ChooseFile'
 import { ILoad } from '@/icons/ILoad'
@@ -25,7 +34,7 @@ export const ChatInput = observer(() => {
   const ableWebSearch = useMemo(() => {
     return (activeChat && activeChat?.websearch) || (!activeChat && webSearch)
   }, [activeChat, webSearch])
-  const editor = useMemo(() => withReact(withHistory(createEditor())), [])
+  const editor = useMemo(() => store.chat.editor, [])
   const [state, setState] = useLocalState({
     inputComposition: false,
     height: 24,
@@ -71,7 +80,9 @@ export const ChatInput = observer(() => {
     }
     if (isHotkey('enter', e)) {
       e.preventDefault()
-      send()
+      if (!store.chat.state.reference.open) {
+        send()
+      }
     }
     if (isHotkey('shift+enter', e) || isHotkey('mod+enter', e)) {
       e.preventDefault()
@@ -80,15 +91,30 @@ export const ChatInput = observer(() => {
         children: [{ text: '' }]
       })
     }
-
-    if (e.key === '@') {
-      const domRect = getDomRect()
-      if (domRect) {
-        store.chat.setState((state) => {
-          state.reference.open = true
-          state.reference.domRect = domRect
-        })
+    if (isHotkey('backspace', e)) {
+      const str = Editor.string(editor, [])
+      if (!str) {
+        if (editor.children.length > 1 && editor.selection?.anchor.path[0] === 0) {
+          Transforms.delete(editor, {
+            at: [0]
+          })
+        } else if (editor.children.length === 1 && store.chat.state.cacheDocs.length) {
+          store.chat.setState((state) => {
+            state.cacheDocs.pop()
+          })
+        }
       }
+    }
+    if (e.key === '@') {
+      setTimeout(() => {
+        const domRect = getDomRect()
+        if (domRect) {
+          store.chat.setState((state) => {
+            state.reference.open = true
+            state.reference.domRect = domRect
+          })
+        }
+      }, 16)
     } else if (store.chat.state.reference.open) {
       setTimeout(() => {
         const [node] = Editor.nodes(editor, {
@@ -111,7 +137,21 @@ export const ChatInput = observer(() => {
   const onChange = useCallback(() => {
     const text = editor.children.map((n) => Node.string(n)).join('\n')
     setState({ text: text.trim() })
-  }, [editor])
+    if (store.chat.state.reference.open) {
+      const [node] = Editor.nodes(editor, {
+        match: (n) => Element.isElement(n) && n.type === 'paragraph'
+      })
+      if (node) {
+        const text = Node.string(node[0])
+        const match = text.match(/@[^\n]*$/)
+        if (match) {
+          store.chat.setState((state) => {
+            state.reference.keyword = match[0].slice(1)
+          })
+        }
+      }
+    }
+  }, [])
 
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <span {...props.attributes}>{props.children}</span>,
@@ -122,7 +162,6 @@ export const ChatInput = observer(() => {
   const addFile = useCallback(async () => {
     setState({ menuVisible: false })
     chooseFile((id: string, content: string | null) => {
-      // console.log('content', content)
       copyToClipboard(content!)
       setState((state) => {
         const item = state.files.find((f) => f.id === id)
@@ -148,6 +187,32 @@ export const ChatInput = observer(() => {
       <div
         className={'pt-3 pb-2 px-4 w-full border dark:border-white/20 rounded-2xl border-black/40'}
       >
+        <div className={'flex items-center space-x-1.5 relative -top-1 flex-wrap'}>
+          {store.chat.state.cacheDocs.map((d, i) => (
+            <div
+              className={
+                'text-xs rounded-sm px-1 py-0.5 dark:bg-white/5 flex items-center bg-black/10 mb-1'
+              }
+              key={i}
+            >
+              <FileText size={12} className={'mr-1'} />
+              <span className={'max-w-40 truncate'}>{d.name}</span>
+              <div
+                className={'p-0.5 cursor-pointer'}
+                onClick={() => {
+                  store.chat.setState((state) => {
+                    state.cacheDocs.splice(i, 1)
+                  })
+                  setTimeout(() => {
+                    EditorUtils.focus(editor)
+                  }, 16)
+                }}
+              >
+                <X size={12} />
+              </div>
+            </div>
+          ))}
+        </div>
         {!!state.files.length && (
           <div className={'pb-3 flex items-center flex-wrap'}>
             {state.files.map((f, i) => (
