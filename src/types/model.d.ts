@@ -26,7 +26,7 @@ export interface IMessage extends IMessageModel {
   reasoning?: string
   duration?: number
   terminated?: boolean
-  context?: string
+  context?: IMessageContext[]
   model?: string
   height?: number
   error?: { code: string; message: string }
@@ -87,6 +87,12 @@ export interface IMessageFile {
 }
 
 export interface IMessageDoc {
+  docId: string
+  name: string
+  content: string
+}
+
+export interface IMessageContext {
   name: string
   content: string
 }

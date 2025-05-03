@@ -77,15 +77,7 @@ ipcMain.handle('getChats', async () => {
 ipcMain.handle('getChat', async (_, id: string) => {
   const chat = await knex.select('*').from('chat').where('id', id).first()
   if (chat) {
-    const messages = await knex.select('*').from('message').where('chatId', id)
-    chat.messages = messages.map((m) => {
-      return {
-        ...m,
-        files: m.files ? JSON.parse(m.files) : null,
-        images: m.images ? JSON.parse(m.images) : null,
-        error: m.error ? JSON.parse(m.error) : null
-      }
-    })
+    chat.messages = await knex.select('*').from('message').where('chatId', id)
   }
   return {
     ...chat,
@@ -129,18 +121,6 @@ ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
 ipcMain.handle('updateMessage', async (_, id: string, message: Partial<IMessage>) => {
   const updateData: any = {
     ...message
-  }
-  if (message.files) {
-    updateData.files = JSON.stringify(message.files)
-  }
-  if (message.images) {
-    updateData.images = JSON.stringify(message.images)
-  }
-  if (message.error) {
-    updateData.error = JSON.stringify(message.error)
-  }
-  if (message.docs) {
-    updateData.docs = JSON.stringify(message.docs)
   }
   const updatedMessage = await knex('message').where({ id }).update(updateData)
   return updatedMessage
@@ -540,8 +520,6 @@ ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
     `,
     [spaceId, tokens.join(' OR ')]
   )
-
-  // console.log('match', text, likeResults, matchResults)
 
   const results = [
     ...likeResults.map((result: any) => ({ docId: result.docId, rank: 1.0 })),

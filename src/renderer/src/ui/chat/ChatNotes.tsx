@@ -75,7 +75,8 @@ export const ChatNotes = observer(() => {
           store.chat.setState((state) => {
             state.cacheDocs.push({
               name: node.name,
-              content: md
+              content: md,
+              docId: item.docId
             })
           })
         }

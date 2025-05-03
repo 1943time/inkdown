@@ -18,7 +18,21 @@ export class ModelApi {
   }
 
   async getChat(id: string): Promise<IChat | null> {
-    return ipcRenderer.invoke('getChat', id)
+    return ipcRenderer.invoke('getChat', id).then((chat: any) => {
+      return {
+        ...chat,
+        messages: chat.messages
+          ? chat.messages.map((m: any) => {
+              return {
+                ...m,
+                files: m.files ? JSON.parse(m.files) : [],
+                context: m.context ? JSON.parse(m.context) : [],
+                docs: m.docs ? JSON.parse(m.docs) : []
+              }
+            })
+          : []
+      }
+    })
   }
 
   async createChat(chat: IChat): Promise<void> {
@@ -38,7 +52,12 @@ export class ModelApi {
   }
 
   async updateMessage(id: string, message: Partial<IMessage>): Promise<void> {
-    return ipcRenderer.invoke('updateMessage', id, message)
+    return ipcRenderer.invoke('updateMessage', id, {
+      ...message,
+      context: message.context ? JSON.stringify(message.context) : undefined,
+      docs: message.docs ? JSON.stringify(message.docs) : undefined,
+      files: message.files ? JSON.stringify(message.files) : undefined
+    })
   }
 
   async deleteMessages(ids: string[]): Promise<void> {
@@ -46,7 +65,16 @@ export class ModelApi {
   }
 
   async getMessages(chatId: string): Promise<IMessage[]> {
-    return ipcRenderer.invoke('getMessages', chatId)
+    return ipcRenderer.invoke('getMessages', chatId).then((messages: any[]) => {
+      return messages.map((m) => {
+        return {
+          ...m,
+          docs: m.docs ? JSON.parse(m.docs) : [],
+          files: m.files ? JSON.parse(m.files) : [],
+          context: m.context ? JSON.parse(m.context) : []
+        }
+      })
+    })
   }
 
   async getPrompts(): Promise<IPrompt[]> {

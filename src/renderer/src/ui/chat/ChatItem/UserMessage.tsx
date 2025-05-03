@@ -4,7 +4,7 @@ import { FileTypeIcon, TextArea } from '@lobehub/ui'
 import { Button } from 'antd'
 import { useTheme } from 'antd-style'
 import isHotkey from 'is-hotkey'
-import { Check, Copy, Pencil } from 'lucide-react'
+import { Check, Copy, FileText, Pencil } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
@@ -180,6 +180,26 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
               >
                 <FileTypeIcon size={20} filetype={type} color={color} />
                 <span className={'truncate w-full ml-1'}>{getFileName(f.name)}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {!!msg.docs?.length && (
+        <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
+          {msg.docs.map((f) => {
+            return (
+              <div
+                key={f.docId}
+                title={store.note.state.nodes[f.docId]?.name || f.name}
+                className={
+                  'max-w-[300px] flex items-center truncate rounded-sm bg-black/10 dark:bg-white/10 text-[13px] px-1.5 py-0.5 mb-0.5'
+                }
+              >
+                <FileText size={15} />
+                <span className={'truncate w-full ml-1'}>
+                  {store.note.state.nodes[f.docId]?.name || f.name}
+                </span>
               </div>
             )
           })}

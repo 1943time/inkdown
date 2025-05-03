@@ -1,9 +1,9 @@
 import { Store } from './store'
 import { IChat, IMessage, IMessageDoc, IMessageFile, IMessageModel } from 'types/model'
-import { AiClient } from './model/client'
+import { AiClient } from './llm/client'
 import { getTokens } from '../utils/ai'
 import { ClientModel } from './settings'
-import { openAiModels } from './model/data/data'
+import { openAiModels } from './llm/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
 import { StructStore } from './struct'
 import { nid } from '@/utils/common'
@@ -248,15 +248,16 @@ export class ChatStore extends StructStore<typeof state> {
       id: nid(),
       content: text,
       files: opts?.files,
+      docs: this.state.cacheDocs.length ? this.state.cacheDocs.slice() : undefined,
       tokens: tokens
     })
-
     this.setState((state) => {
       if (activeChat.id !== state.activeChat?.id) {
         state.activeChat = activeChat
       }
       state.activeChat.pending = true
       state.activeChat.messages?.push(userMsg)
+      state.cacheDocs = []
     })
     const msgId = nid()
     const aiMsg: IMessage = {
@@ -287,12 +288,17 @@ export class ChatStore extends StructStore<typeof state> {
             })
             .filter((d) => !!d.doc)
           if (docs.length) {
-            userMsg.context = docs.map((d) => `${d.text}`).join('\n\n')
+            userMsg.context = docs.map((d) => ({ name: d.doc.name, content: d.text }))
           }
         }
         if (!userMsg.context) {
-          userMsg.context =
-            'The system did not find the corresponding context note. Can you remind me to describe it more accurately?'
+          userMsg.context = [
+            {
+              name: 'System',
+              content:
+                'The system did not find the corresponding context note. Can you remind me to describe it more accurately?'
+            }
+          ]
         }
       } catch (e) {
         console.error(e)
@@ -479,8 +485,11 @@ export class ChatStore extends StructStore<typeof state> {
       let content = m.content
       if (m.files?.length) {
         content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
-      } else if (m.context) {
-        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context} \n ${content}`
+      } else if (m.context?.length) {
+        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')}`
+      }
+      if (m.docs?.length) {
+        content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')}`
       }
       acc.push({
         role: m.role,
