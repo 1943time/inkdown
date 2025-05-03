@@ -147,14 +147,17 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
         <div className={'flex w-full justify-end group'}>
           <div
             className={
-              'flex pt-2 mr-2 space-x-1 *:cursor-pointer *:w-8 *:h-8 *:items-center *:justify-center *:rounded-full duration-150 opacity-0 group-hover:opacity-100 dark:text-gray-300'
+              'flex pt-2 mr-2 space-x-1 *:cursor-pointer *:w-8 *:h-8 *:items-center *:justify-center *:rounded-full duration-150 opacity-0 group-hover:opacity-100 dark:text-gray-300 text-black/60'
             }
           >
-            <div className={'duration-150 dark:hover:bg-white/10 flex'} onClick={copy}>
-              {state().copied ? <Check size={16} /> : <Copy size={16} />}
+            <div
+              className={'duration-150 dark:hover:bg-white/10 flex hover:bg-black/10'}
+              onClick={copy}
+            >
+              {state().copied ? <Check size={15} /> : <Copy size={15} />}
             </div>
             <div
-              className={'duration-150 dark:hover:bg-white/10 last-user-message-action'}
+              className={'duration-150 dark:hover:bg-white/10 last hover:bg-black/10'}
               onClick={startEditing}
             >
               <Pencil size={15} />

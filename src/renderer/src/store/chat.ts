@@ -447,41 +447,44 @@ export class ChatStore extends StructStore<typeof state> {
   }
 
   private async getHistoryMessages(chat: IChat) {
-    let start = chat.summaryIndex && chat.summaryIndex > 0 ? chat.summaryIndex : 0
-    // 未压缩的消息
-    const messages = chat.messages!.slice(start)
-    let summaryText = chat.summary
-    // 大于最小消息数
-    if (messages.length > this.minRetainMessages) {
-      const tokens = messages.reduce((token, msg) => token + msg.tokens, 0)
-      // 大于token阈值
-      if (tokens > this.warningThreshold) {
-        // 保留最近的消息，找出之前的消息
-        const compressedMessages = messages.slice(0, -this.recentMessagesCount)
-        if (compressedMessages.length > 2) {
-          const summaryMessages = this.activeClient!.getHistoryCompressMessage(
-            compressedMessages,
-            chat.summary
-          )
-          const [content] = await this.activeClient!.client.completion(summaryMessages)
-          if (content) {
-            summaryText = content!
-            this.setState((state) => {
-              if (state.activeChat?.id === chat.id) {
-                state.activeChat!.summaryIndex = start + compressedMessages.length
-                start = start + compressedMessages.length
-                state.activeChat!.summary = content
-              }
-            })
-            this.store.model.updateChat(chat.id, {
-              summaryIndex: start + compressedMessages.length,
-              summary: content!
-            })
-          }
-        }
+    // let start = chat.summaryIndex && chat.summaryIndex > 0 ? chat.summaryIndex : 0
+    // // 未压缩的消息
+    // const messages = chat.messages!.slice(start)
+    // let summaryText = chat.summary
+    // // 大于最小消息数
+    // if (messages.length > this.minRetainMessages) {
+    //   const tokens = messages.reduce((token, msg) => token + msg.tokens, 0)
+    //   // 大于token阈值
+    //   if (tokens > this.warningThreshold) {
+    //     // 保留最近的消息，找出之前的消息
+    //     const compressedMessages = messages.slice(0, -this.recentMessagesCount)
+    //     if (compressedMessages.length > 2) {
+    //       const summaryMessages = this.activeClient!.getHistoryCompressMessage(
+    //         compressedMessages,
+    //         chat.summary
+    //       )
+    //       const [content] = await this.activeClient!.client.completion(summaryMessages)
+    //       if (content) {
+    //         summaryText = content!
+    //         this.setState((state) => {
+    //           if (state.activeChat?.id === chat.id) {
+    //             state.activeChat!.summaryIndex = start + compressedMessages.length
+    //             start = start + compressedMessages.length
+    //             state.activeChat!.summary = content
+    //           }
+    //         })
+    //         this.store.model.updateChat(chat.id, {
+    //           summaryIndex: start + compressedMessages.length,
+    //           summary: content!
+    //         })
+    //       }
+    //     }
+    //   }
+    // }
+    const newMessages = chat.messages!.slice(-10).reduce((acc, m) => {
+      if (m.role === 'assistant' && m.content === '...') {
+        return acc
       }
-    }
-    const newMessages = chat.messages!.slice(start).reduce((acc, m) => {
       let content = m.content
       if (m.files?.length) {
         content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
@@ -497,16 +500,10 @@ export class ChatStore extends StructStore<typeof state> {
       })
       return acc
     }, [] as IMessageModel[])
-    if (summaryText) {
-      newMessages.unshift({
-        role: 'user',
-        content: `[Conversation History Summary]:\n ${summaryText}`
-      })
-    }
     let prompt = 'You are an AI assistant, please answer in the language used by the user'
-    if (summaryText) {
-      prompt = `${prompt}\n[Conversation History Summary Reference]:\n ${summaryText}`
-    }
+    // if (summaryText) {
+    //   prompt = `${prompt}\n[Conversation History Summary Reference]:\n ${summaryText}`
+    // }
 
     newMessages.unshift({
       role: 'system',

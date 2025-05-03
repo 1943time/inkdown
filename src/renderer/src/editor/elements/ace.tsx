@@ -15,7 +15,7 @@ import Mermaid from './CodeUI/Mermaid'
 import Katex from './CodeUI/Katex/Katex'
 import { CodeNode, ElementProps } from '..'
 import { useTab } from '@/store/note/TabCtx'
-import { ChevronDown, Copy } from 'lucide-react'
+import { Check, ChevronDown, Copy } from 'lucide-react'
 import { useSelStatus } from '../utils'
 
 const langOptions = Array.from(langIconMap).map(([lang, icon]) => {
@@ -52,7 +52,8 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
     htmlStr: '',
     hide: !!element.render || !!element.katex || element.language === 'mermaid',
     lang: (element.language || '').toLowerCase(),
-    openSelectMenu: false
+    openSelectMenu: false,
+    copied: false
   })
   const [selected, path] = useSelStatus(element)
   const codeRef = useRef(element.code || '')
@@ -383,10 +384,13 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
                 onClick={(e) => {
                   e.stopPropagation()
                   const code = element.code || ''
-                  tab.store.copySuccessfully(code)
+                  setState({ copied: true })
+                  setTimeout(() => {
+                    setState({ copied: false })
+                  }, 1000)
                 }}
               >
-                <Copy size={15} />
+                {state().copied ? <Check size={15} /> : <Copy size={15} />}
               </div>
             </div>
           </div>

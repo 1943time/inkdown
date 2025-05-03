@@ -31,13 +31,23 @@
   background-color: var(--chat-user-message-bg-color);
   border-radius: 24px 4px 24px 24px;
 }
-
+.chat-list .ai-message .last {
+  display: none;
+}
 .chat-list .ai-message:last-child {
   min-height: calc(100vh - 220px);
+  .last {
+    display: flex;
+  }
 }
 
-.last-user-message-action {
+.chat-list .user-message .last {
   display: none;
+}
+.chat-list .user-message:nth-last-child(2) {
+  .last {
+    display: flex;
+  }
 }
 
 .ai-msg-actions {
@@ -65,6 +75,7 @@
   transform: translateZ(0);
   will-change: transform;
   contain: content;
+  font-size: 15px;
 }
 
 .message-markdown > div > :first-child {
