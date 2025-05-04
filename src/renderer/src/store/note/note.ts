@@ -92,7 +92,7 @@ export class NoteStore extends StructStore<typeof state> {
     )
     this.init()
     window.addEventListener('keydown', (e) => {
-      if (!this.store.settings.state.fullChatBot) return
+      if (this.store.settings.state.fullChatBot) return
       const editor = this.state.currentTab.editor
       if (isHotkey('mod+t', e)) {
         this.createTab()

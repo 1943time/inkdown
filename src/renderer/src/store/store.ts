@@ -9,6 +9,7 @@ import { ContextMenu } from './menu'
 import { SystemApi } from './api/system'
 import { LocalFile } from './note/local'
 import { MarkdownOutput } from './note/output'
+import { WorkerHandle } from './note/worker/handle'
 export class Store {
   public readonly model = new ModelApi()
   public readonly settings = new SettingsStore(this)
@@ -18,6 +19,7 @@ export class Store {
   public readonly system = new SystemApi()
   public readonly local = new LocalFile(this)
   public readonly output = new MarkdownOutput(this)
+  public readonly worker = new WorkerHandle(this)
   userDataPath = ''
   constructor(public readonly msg: MessageInstance) {
     this.system.userDataPath().then((path) => {

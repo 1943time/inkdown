@@ -14,6 +14,7 @@ import { TabStore } from '@/store/note/tab'
 import { observer } from 'mobx-react-lite'
 import { useSubject } from '@/hooks/common'
 import { htmlToMarkdown } from '@/parser/htmlToMarkdown'
+import { delayRun } from '@/utils/common'
 
 export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
@@ -22,6 +23,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
   const saveTimer = useRef(0)
+  const chunkSaved = useRef(true)
   const changeTimer = useRef(0)
   const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const renderElement = useCallback(
@@ -32,44 +34,74 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const keydown = useKeyboard(tab)
   const onChange = useOnchange(tab)
   const first = useRef(true)
-
+  const saveChunk = useCallback(async () => {
+    if (chunkSaved.current) return
+    const node = nodeRef.current
+    if (node && node.schema) {
+      delayRun(async () => {
+        const now = Date.now()
+        store.model.updateDoc(
+          node.id,
+          {
+            updated: now,
+            spaceId: node.spaceId
+          },
+          {
+            texts: await store.worker.getSchemaText(node.schema!),
+            chunks: await store.worker.getChunks(node.schema!, {
+              folder: node.folder,
+              id: node.id,
+              name: node.name,
+              parentId: node.parentId,
+              updated: now
+            })
+          }
+        )
+        chunkSaved.current = true
+      })
+    }
+  }, [tab.state.doc])
   const save = useCallback(async (ipc = false) => {
     clearTimeout(saveTimer.current)
     const node = nodeRef.current
     changedMark.current = false
     if (node?.schema && tab.state.docChanged) {
+      const now = Date.now()
+      const links = Array.from(
+        Editor.nodes(tab.editor, {
+          at: [],
+          match: (n) => n.type === 'wiki-link' || n.docId
+        })
+      )
+      const docs = links.map(([el]) => {
+        if (el.docId) {
+          return store.note.state.nodes[el.docId]
+        } else {
+          const str = Node.string(el)
+          const match = EditorUtils.parseWikiLink(str)
+          if (match?.docName) {
+            return store.note.getWikiDoc(match.docName)
+          }
+        }
+      })
       store.note.setState((state) => {
-        state.nodes[node.id].schema = node.schema
+        const doc = state.nodes[node.id]
+        doc.schema = node.schema
+        doc.links = docs.filter((d) => !!d).map((d) => d.id)
+        doc.updated = now
       })
       tab.setState((state) => {
         state.docChanged = false
       })
-      const links = Array.from(
-        Editor.nodes(tab.editor, {
-          at: [],
-          match: (n) => n.type === 'wiki-link'
-        })
-      )
-      const docs = links.map(([el]) => {
-        const str = Node.string(el)
-        const match = EditorUtils.parseWikiLink(str)
-        if (match?.docName) {
-          return store.note.getWikiDoc(match.docName)
-        }
+      chunkSaved.current = false
+      store.model.updateDoc(node.id, {
+        schema: node.schema,
+        name: node.name,
+        updated: now,
+        spaceId: node.spaceId,
+        links: docs.filter((d) => !!d).map((d) => d.id)
       })
-      store.model.updateDoc(
-        node.id,
-        {
-          schema: node.schema,
-          name: node.name,
-          updated: Date.now(),
-          links: docs.filter((d) => !!d).map((d) => d.id)
-        },
-        {
-          texts: EditorUtils.getSchemaText(tab.editor),
-          chunks: await store.output.getChunks(node.schema, node)
-        }
-      )
+
       if (!ipc) {
         // core.ipc.sendMessage({
         //   type: 'updateDoc',
@@ -181,14 +213,14 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       } catch (e) {
         EditorUtils.deleteAll(tab.editor)
       }
-      return () => {
-        save()
-      }
     }
   }, [tab.state.doc])
 
   useEffect(() => {
     save()
+    if (nodeRef.current && !chunkSaved.current) {
+      saveChunk()
+    }
     initialNote()
   }, [tab.state.doc])
 

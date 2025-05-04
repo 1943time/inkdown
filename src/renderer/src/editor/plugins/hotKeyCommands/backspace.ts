@@ -11,6 +11,8 @@ export class BackspaceKey {
     const sel = this.editor.selection
     if (!sel) return
     let [start, end] = Range.edges(sel)
+    console.log('run', start, end)
+
     if (
       Point.equals(start, Editor.start(this.editor, [])) &&
       Point.equals(end, Editor.end(this.editor, []))
@@ -54,7 +56,8 @@ export class BackspaceKey {
     }
     if (Path.hasPrevious(sel.anchor.path)) {
       const prev = Node.get(this.editor, Path.previous(sel.anchor.path))
-      if (prev && prev.type === 'wiki-link') {
+      const leaf = Node.leaf(this.editor, sel.anchor.path)
+      if (prev && prev.type === 'wiki-link' && !leaf.text) {
         Transforms.select(this.editor, Editor.end(this.editor, Path.previous(sel.anchor.path)))
         return true
       }

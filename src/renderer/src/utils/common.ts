@@ -154,3 +154,13 @@ export const nid = customAlphabet(
   '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
   15
 )
+
+export const delayRun = (fn: Function) => {
+  if (window.requestIdleCallback) {
+    window.requestIdleCallback(() => {
+      fn()
+    })
+  } else {
+    setTimeout(fn, 16)
+  }
+}

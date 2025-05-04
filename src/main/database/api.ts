@@ -131,16 +131,7 @@ ipcMain.handle('deleteMessages', async (_, ids: string[]) => {
 })
 
 ipcMain.handle('getMessages', async (_, chatId: string) => {
-  const messages = await knex.select('*').from('message').where('chatId', chatId)
-  return messages.map((m) => {
-    return {
-      ...m,
-      files: m.files ? JSON.parse(m.files) : null,
-      images: m.images ? JSON.parse(m.images) : null,
-      error: m.error ? JSON.parse(m.error) : null,
-      docs: m.docs ? JSON.parse(m.docs) : null
-    }
-  })
+  return knex.select('*').from('message').where('chatId', chatId)
 })
 ipcMain.handle('putSetting', async (_, setting: ISetting) => {
   const row = await knex('setting').where('key', setting.key).first()
@@ -380,7 +371,6 @@ ipcMain.handle(
         .where(`doc_id = '${id}'`)
         .select(['path', 'doc_id', 'content'])
         .toArray()
-      console.log('rows', rows)
 
       rows = rows.sort((a, b) => a.path - b.path)
       const pathMap = new Map<number, string>()
@@ -454,7 +444,6 @@ ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: str
   if (!ctx.query) return []
   const db = await openTable(ctx.spaceId)
   if (!db) return []
-
   const queryVec = await extractor(ctx.query, {
     pooling: 'mean',
     normalize: true
@@ -463,9 +452,8 @@ ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: str
   let results = await db
     .search(queryVector)
     .select(['path', 'doc_id', 'content'])
-    .limit(10)
+    .limit(20)
     .toArray()
-  console.log('results', results)
   results = results.filter((r) => r._distance < 1.4)
   const text = new Map<string, { path: number; text: string }[]>()
   for (const r of results) {

@@ -360,6 +360,11 @@ export const ChatInput = observer(() => {
                       state.docContext = !state.docContext
                     })
                   }
+                  store.model
+                    .fetchSpaceContext('开源收费有哪些可能', store.note.state.currentSpace?.id!)
+                    .then((res) => {
+                      console.log('res', res)
+                    })
                 }}
               >
                 <SquareLibrary size={15} className={'stroke-inherit'} />

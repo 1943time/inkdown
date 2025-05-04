@@ -77,7 +77,7 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
             </div>
           )}
           <div className="flex items-center justify-between dark:text-white/50 text-gray-500 text-sm ai-msg-actions h-8 pb-1 mt-1">
-            <div className="flex items-center gap-2 relative">
+            <div className="flex items-center gap-2 relative select-none">
               <div
                 className={
                   'flex space-x-0.5 *:cursor-pointer *:w-[30px] *:h-[30px] *:items-center *:justify-center *:rounded-full'

@@ -698,15 +698,29 @@ ul.m-list {
 
 .wiki-link {
   margin: 0 1px;
-  @apply dark:text-blue-500 cursor-default;
+  @apply cursor-default;
+  @apply text-blue-500;
   &.selected {
     &:before {
       content: '[[';
-      @apply dark:text-white/60 text-black/60;
+      @apply text-black/60;
     }
     &:after {
       content: ']]';
-      @apply dark:text-white/60 text-black/60;
+      @apply text-black/60;
+    }
+  }
+}
+
+.dark .wiki-link {
+  &.selected {
+    &:before {
+      content: '[[';
+      @apply text-white/60;
+    }
+    &:after {
+      content: ']]';
+      @apply text-white/60;
     }
   }
 }

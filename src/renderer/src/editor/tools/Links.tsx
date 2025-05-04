@@ -34,27 +34,37 @@ export const ChooseWikiLink = observer(() => {
         mode: 'lowest'
       })
       if (node) {
+        const ps = EditorUtils.parseWikiLink(Node.string(node[0]))
         if (state.showAnchor && ctx.anchor) {
           const anchor = ctx.anchor
           if (anchor) {
-            const match = EditorUtils.parseWikiLink(tab.state.wikilink.keyword)
-            Transforms.insertText(tab.editor, (match?.docName || '') + '#' + anchor.title, {
-              at: {
-                anchor: Editor.start(tab.editor, node[1]),
-                focus: Editor.end(tab.editor, node[1])
+            Transforms.insertText(
+              tab.editor,
+              (ps?.docName || '') + '#' + anchor.title + (ps?.alias ? `|${ps.alias}` : ''),
+              {
+                at: {
+                  anchor: Editor.start(tab.editor, node[1]),
+                  focus: Editor.end(tab.editor, node[1])
+                }
               }
-            })
+            )
           }
         } else if (ctx.node) {
           const duplicate = state.nodes.find(
             (n) => n.name === ctx.node!.name && n.fullPath !== ctx.node!.fullPath
           )
-          Transforms.insertText(tab.editor, duplicate ? ctx.node!.fullPath : ctx.node!.name, {
-            at: {
-              anchor: Editor.start(tab.editor, node[1]),
-              focus: Editor.end(tab.editor, node[1])
+          Transforms.insertText(
+            tab.editor,
+            (duplicate ? ctx.node!.fullPath : ctx.node!.name) +
+              (ps?.anchor ? `#${ps.anchor}` : '') +
+              (ps?.alias ? `|${ps.alias}` : ''),
+            {
+              at: {
+                anchor: Editor.start(tab.editor, node[1]),
+                focus: Editor.end(tab.editor, node[1])
+              }
             }
-          })
+          )
         }
         if (!ctx.complete) {
           EditorUtils.moveAfterSpace(tab.editor, node[1])
@@ -67,11 +77,11 @@ export const ChooseWikiLink = observer(() => {
   useEffect(() => {
     if (tab.state.wikilink.open) {
       ;(async () => {
-        const anchorIndex = tab.state.wikilink.keyword.indexOf('#')
-        const showAnchor = anchorIndex !== -1 && tab.state.wikilink.offset >= anchorIndex
         let filterKeyword = tab.state.wikilink.keyword
           .slice(0, tab.state.wikilink.offset)
           .toLowerCase()
+        const anchorIndex = filterKeyword.indexOf('#')
+        const showAnchor = anchorIndex !== -1 && tab.state.wikilink.offset >= anchorIndex
         if (showAnchor) {
           const match = EditorUtils.parseWikiLink(tab.state.wikilink.keyword)
           const doc = tab.store.note.getWikiDoc(match?.docName || '')

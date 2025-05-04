@@ -1,13 +1,60 @@
 import { Node } from 'slate'
 import stringWidth from 'string-width'
-import { Store } from '../store'
 import { CustomLeaf, TableNode } from '@/editor'
-import { IDoc } from 'types/model'
 import { mediaType } from '@/editor/utils/dom'
 import { getTokens } from '@/utils/ai'
 import dayjs from 'dayjs'
-export class MarkdownOutput {
-  constructor(private readonly store: Store) {}
+import { join } from 'path-browserify'
+export type INode = { id: string; name: string; folder: boolean; parentId: string; updated: number }
+/**
+ * 实现一个可以在浏览器环境使用的 node path 模块的 relative 函数
+ * 计算从 from 到 to 的相对路径
+ * @param from 起始路径
+ * @param to 目标路径
+ * @returns 相对路径
+ */
+function relative(from: string, to: string): string {
+  const normalizePathParts = (p: string): string[] => {
+    const parts = p.split(/[/\\]/).filter(Boolean)
+    const result: string[] = []
+
+    for (const part of parts) {
+      if (part === '.') continue
+      if (part === '..') {
+        if (result.length > 0) result.pop()
+        continue
+      }
+      result.push(part)
+    }
+
+    return result
+  }
+
+  const fromParts = normalizePathParts(from)
+  const toParts = normalizePathParts(to)
+
+  let commonLength = 0
+  const minLength = Math.min(fromParts.length, toParts.length)
+
+  while (commonLength < minLength && fromParts[commonLength] === toParts[commonLength]) {
+    commonLength++
+  }
+
+  const upCount = fromParts.length - commonLength
+  const relativeParts: string[] = []
+
+  for (let i = 0; i < upCount; i++) {
+    relativeParts.push('..')
+  }
+
+  relativeParts.push(...toParts.slice(commonLength))
+  if (relativeParts.length === 0) return '.'
+
+  return relativeParts.join('/')
+}
+
+class Parser {
+  public nodes: Record<string, INode> = {}
   private readonly space = '  '
   private filePath = ''
   private exportRootPath: undefined | string = undefined
@@ -21,13 +68,10 @@ export class MarkdownOutput {
         .length > 1
     )
   }
-  get nodes() {
-    return this.store.note.state.nodes
-  }
   getAttachmentPath(name: string) {
-    return window.api.path.join(this.exportRootPath!, `.files/${name}`)
+    return join(this.exportRootPath!, `.files/${name}`)
   }
-  getNodeSpacePath(node: IDoc) {
+  getNodeSpacePath(node: INode) {
     const path = [node.name + (node.folder ? '' : '.md')]
     while (node.parentId && node.parentId !== 'root') {
       const parent = this.nodes[node.parentId]
@@ -36,23 +80,20 @@ export class MarkdownOutput {
         node = parent
       }
     }
-    return window.api.path.join(this.exportRootPath || '', path.join('/'))
+    return join(this.exportRootPath || '', path.join('/'))
   }
 
   private docIdToRelateivePath(id: string) {
     const node = this.nodes[id]
     if (node) {
       const path = this.getNodeSpacePath(node)
-      return window.api.path.relative(window.api.path.join(this.filePath, '..'), path)
+      return relative(join(this.filePath, '..'), path)
     }
     return null
   }
 
   private getFileRelativePath(name: string) {
-    return window.api.path.relative(
-      window.api.path.join(this.filePath, '..'),
-      this.getAttachmentPath(name)
-    )
+    return relative(join(this.filePath, '..'), this.getAttachmentPath(name))
   }
 
   private textHtml(t: CustomLeaf) {
@@ -270,15 +311,15 @@ export class MarkdownOutput {
     return str
   }
 
-  async toMarkdown(data: { node: IDoc; exportRootPath?: string }) {
+  toMarkdown(data: { schema: any[]; node: INode; exportRootPath?: string }) {
     this.depMedias.clear()
-    this.exportRootPath = data.exportRootPath
+    this.exportRootPath = data.exportRootPath || ''
     this.filePath = this.getNodeSpacePath(data.node)
-    const md = await this.parse(data.node.schema || [])
+    const md = this.parse(data.schema || [])
     return { md, medias: this.depMedias }
   }
 
-  async getChunks(schema: any[], doc: IDoc) {
+  getChunks(schema: any[], doc: INode) {
     this.depMedias.clear()
     this.exportRootPath = undefined
     this.filePath = ''
@@ -297,8 +338,9 @@ export class MarkdownOutput {
     for (let i = 0; i < schema.length; i++) {
       try {
         const node = schema[i]
-        const text = (await this.parse([node])).trim()
-        if (!text || node.type === 'media' || node.type === 'hr') continue
+        if (node.type === 'media' || node.type === 'hr') continue
+        const text = this.parse([node]).trim()
+        if (!text) continue
         const tokens = getTokens(text)
         if (currentChunk.size + tokens > this.maxChunkSize) {
           chunks.push(currentChunk)
@@ -412,5 +454,74 @@ export class MarkdownOutput {
       }
     }
     return str
+  }
+  getSchemaText(schema: any[]) {
+    let text = ''
+    const traverse = (nodes: any[]) => {
+      for (const node of nodes) {
+        if (node.text) {
+          text += node.text
+        } else if (node.type) {
+          if (['paragraph', 'heading', 'block-quote', 'table', 'table-row'].includes(node.type)) {
+            text += '\n'
+          }
+          if (node.type === 'code' && node.code) {
+            text += '\n' + node.code + '\n'
+          }
+          if (node.type === 'table-cell') {
+            text += ' '
+          }
+          if (node.children) {
+            traverse(node.children)
+          }
+        }
+      }
+    }
+    traverse(schema)
+    return text.trim()
+  }
+}
+const parser = new Parser()
+
+onmessage = async (e) => {
+  if (e.data.type === 'getSchemaText') {
+    let text = ''
+    try {
+      text = parser.getSchemaText(e.data.schema)
+    } catch (e) {
+      console.error('getSchemaText error', e)
+    }
+    postMessage({
+      data: text,
+      id: e.data.id
+    })
+  }
+  if (e.data.type === 'getChunks') {
+    try {
+      parser.nodes = e.data.nodes
+      const chunks = parser.getChunks(e.data.schema, e.data.doc)
+      postMessage({
+        data: chunks,
+        id: e.data.id
+      })
+    } catch (e) {
+      console.error('getChunks error', e)
+    }
+  }
+  if (e.data.type === 'toMarkdown') {
+    try {
+      parser.nodes = e.data.nodes
+      const { md, medias } = parser.toMarkdown({
+        schema: e.data.schema,
+        node: e.data.doc,
+        exportRootPath: e.data.exportRootPath
+      })
+      postMessage({
+        data: { md, medias },
+        id: e.data.id
+      })
+    } catch (e) {
+      console.error('toMarkdown error', e)
+    }
   }
 }

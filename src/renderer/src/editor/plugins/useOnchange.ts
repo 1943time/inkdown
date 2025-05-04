@@ -36,23 +36,35 @@ export function useOnchange(tab: TabStore) {
           state.domRect = null
         })
       }
-      if (node && node[0].type === 'wiki-link' && !setSelection) {
-        tab.keyboard.showWikiLink(node[0])
-      } else if (tab.state.wikilink.open && (!setSelection || node[0].type !== 'wiki-link')) {
+      if (
+        node &&
+        node[0].type === 'wiki-link' &&
+        node[0]?.children?.[0]?.text?.slice(0, sel?.anchor.offset).includes('|')
+      ) {
         tab.setState((state) => {
-          state.wikilink = {
-            open: false,
-            left: 0,
-            top: 0,
-            keyword: '',
-            offset: 0
-          }
+          state.wikilink.open = false
         })
-      }
-      if (tab.state.wikilink.open && node[0].type === 'wiki-link') {
-        tab.setState((state) => {
-          state.wikilink.offset = sel?.anchor.offset!
-        })
+      } else {
+        if (node && node[0].type === 'wiki-link' && !setSelection) {
+          tab.keyboard.showWikiLink(node[0])
+        } else if (tab.state.wikilink.open && (!setSelection || node[0].type !== 'wiki-link')) {
+          tab.setState((state) => {
+            state.wikilink = {
+              open: false,
+              left: 0,
+              top: 0,
+              keyword: '',
+              offset: 0,
+              mode: 'top'
+            }
+          })
+        }
+
+        if (tab.state.wikilink.open && node[0].type === 'wiki-link') {
+          tab.setState((state) => {
+            state.wikilink.offset = sel?.anchor.offset!
+          })
+        }
       }
       // if (node && node[0].type === 'media') {
       //   store.mediaNode$.next(node)

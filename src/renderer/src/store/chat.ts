@@ -34,6 +34,7 @@ export class ChatStore extends StructStore<typeof state> {
   private minRetainMessages = 8 // 最少保留的消息数
   private recentMessagesCount = 6 // 保留最近的消息数
   activeClient: AiClient | null = null
+  writeClient: AiClient | null = null
   private chatAbort = new Map<string, AbortController>()
   generateTopicChat = new Set<string>()
   constructor(private readonly store: Store) {
@@ -65,6 +66,7 @@ export class ChatStore extends StructStore<typeof state> {
     const now = Date.now()
     if (id) {
       const chat = await this.store.model.getChat(id)
+
       if (chat) {
         obj = {
           id: chat.id,
@@ -89,6 +91,7 @@ export class ChatStore extends StructStore<typeof state> {
         docContext: this.state.docContext
       }
     }
+
     const model = this.store.settings.getAvailableUseModel(obj?.clientId, obj?.model)
     this.refreshClient(model)
     obj.model = model.model
@@ -272,7 +275,6 @@ export class ChatStore extends StructStore<typeof state> {
     }
     this.setState((state) => {
       state.activeChat!.messages!.push(aiMsg)
-      this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)])
     })
 
     if (activeChat.docContext) {
@@ -305,6 +307,7 @@ export class ChatStore extends StructStore<typeof state> {
       }
     }
     this.refresh()
+    this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)])
     const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     this.startCompletion(activeChat, sendMessages)
   }
@@ -489,10 +492,10 @@ export class ChatStore extends StructStore<typeof state> {
       if (m.files?.length) {
         content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
       } else if (m.context?.length) {
-        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')}`
+        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')} \n ${content}`
       }
       if (m.docs?.length) {
-        content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')}`
+        content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')} \n ${content}`
       }
       acc.push({
         role: m.role,

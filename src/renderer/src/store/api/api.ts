@@ -48,15 +48,25 @@ export class ModelApi {
   }
 
   async createMessages(messages: IMessage[]): Promise<void> {
-    return ipcRenderer.invoke('createMessages', messages)
+    return ipcRenderer.invoke(
+      'createMessages',
+      messages.map((m) => {
+        return {
+          ...m,
+          context: typeof m.context === 'string' ? m.context : JSON.stringify(m.context),
+          docs: typeof m.docs === 'string' ? m.docs : JSON.stringify(m.docs),
+          files: typeof m.files === 'string' ? m.files : JSON.stringify(m.files)
+        }
+      })
+    )
   }
-
   async updateMessage(id: string, message: Partial<IMessage>): Promise<void> {
     return ipcRenderer.invoke('updateMessage', id, {
       ...message,
-      context: message.context ? JSON.stringify(message.context) : undefined,
-      docs: message.docs ? JSON.stringify(message.docs) : undefined,
-      files: message.files ? JSON.stringify(message.files) : undefined
+      context:
+        typeof message.context === 'string' ? message.context : JSON.stringify(message.context),
+      docs: typeof message.docs === 'string' ? message.docs : JSON.stringify(message.docs),
+      files: typeof message.files === 'string' ? message.files : JSON.stringify(message.files)
     })
   }
 

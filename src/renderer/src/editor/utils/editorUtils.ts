@@ -453,8 +453,10 @@ export class EditorUtils {
     if (!match) return null
 
     let [, docName, anchor, displayText] = match
+    let alias = ''
     if (displayText) {
       displayText = displayText.trim().replace(/^\s*\|\s*/, '')
+      alias = displayText
     } else if (docName) {
       displayText = docName
         .trim()
@@ -470,7 +472,8 @@ export class EditorUtils {
     return {
       docName: docName?.trim().replace(/^\/+|\/+$/g, ''),
       anchor: anchor?.trim().replace(/^#/, ''),
-      displayText: displayText
+      displayText: displayText,
+      alias
     }
   }
 
