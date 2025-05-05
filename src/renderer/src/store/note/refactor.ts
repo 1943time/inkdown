@@ -5,32 +5,53 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 import { join } from 'path-browserify'
 import { runInAction } from 'mobx'
 import { copy } from '@/utils/common'
-export class RefactorStore {
+export class Refactor {
   constructor(private readonly store: Store) {}
-  async refactor(doc: IDoc, oldParentPath = '') {
+  async refactor(doc: IDoc, oldPath = '') {
     const curPath = this.store.note.getDocPath(doc).join('/')
-    const oldPath = join(oldParentPath, doc.name)
     if (curPath === oldPath) {
       return
     }
     if (doc.folder) {
       for (const child of doc.children || []) {
-        await this.refactor(child, oldPath)
+        await this.refactor(child, join(oldPath, child.name))
       }
     } else {
       const docs = this.store.note.state.nodes
-      for (const [, node] of Object.entries(docs)) {
-        if (node.links?.includes(doc.id)) {
+      for (const node of Object.values(docs)) {
+        if (!node.folder && node.links?.includes(doc.id)) {
+          let schema: any[] = []
+          if (!node.schema) {
+            const data = await this.store.model.getDoc(node.id)
+            if (data) {
+              schema = data.schema || []
+            }
+          } else {
+            schema = copy(node.schema!)
+          }
+          const changed = this.refactorSchema({ schema, oldPath, newPath: curPath, docId: node.id })
           runInAction(() => {
-            const schema = copy(node.schema)
-            this.refactorSchema(schema!, oldPath, curPath)
-            node.schema = schema
+            if (changed) {
+              node.schema = schema
+              this.store.note.externalChange$.next(node.id)
+              this.store.model.updateDoc(node.id, { schema, updated: Date.now() })
+            }
           })
         }
       }
     }
   }
-  private refactorSchema(schema: any[], oldPath: string, newPath: string) {
+  private refactorSchema({
+    schema,
+    oldPath,
+    newPath,
+    docId
+  }: {
+    schema: any[]
+    oldPath: string
+    newPath: string
+    docId: string
+  }) {
     const stack = schema.slice()
     let changed = false
     while (stack.length) {

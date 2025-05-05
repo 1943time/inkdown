@@ -237,7 +237,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   }, [])
 
   useSubject(
-    tab.externalChange$,
+    store.note.externalChange$,
     (changeDocId) => {
       if (changeDocId === tab.state.doc?.id) {
         try {

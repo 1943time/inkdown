@@ -11,6 +11,7 @@ import isHotkey from 'is-hotkey'
 import { ReactEditor } from 'slate-react'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { slugify } from '@/editor/utils/dom'
+import { Refactor } from './refactor'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -47,6 +48,7 @@ const state = {
 }
 
 export class NoteStore extends StructStore<typeof state> {
+  refactor: Refactor
   docStatus = new Map<string, { history: History | null; sel: BaseSelection | null }>()
   recordTimer = 0
   openEditFolderDialog$ = new Subject<{
@@ -56,6 +58,7 @@ export class NoteStore extends StructStore<typeof state> {
   openEditSpace$ = new Subject<string | null>()
   openSpaceExport$ = new Subject()
   openImportFolder$ = new Subject<string | null>()
+  externalChange$ = new Subject<string>()
   openConfirmDialog$ = new Subject<{
     onClose?: () => void
     title: string
@@ -90,6 +93,7 @@ export class NoteStore extends StructStore<typeof state> {
         tabs: observable.shallow
       })
     )
+    this.refactor = new Refactor(this.store)
     this.init()
     window.addEventListener('keydown', (e) => {
       if (this.store.settings.state.fullChatBot) return
@@ -255,7 +259,7 @@ export class NoteStore extends StructStore<typeof state> {
     if (tabs.length > 1 && doc) {
       tabs.forEach((t, i) => {
         if (i !== tabIndex && t.state.doc?.id === doc.id) {
-          t.externalChange$.next(t.state.doc.id)
+          this.externalChange$.next(t.state.doc.id)
         }
       })
     }
@@ -432,6 +436,8 @@ export class NoteStore extends StructStore<typeof state> {
         state.dragStatus = null
       })
     } else {
+      const oldPath = this.getDocPath(dragDoc).join('/')
+      let changed = false
       this.setState((draft) => {
         const { dropNode, mode } = draft.dragStatus!
         const dragNode = draft.dragNode!
@@ -466,6 +472,7 @@ export class NoteStore extends StructStore<typeof state> {
               this.store.model.updateDoc(dragNode.id, {
                 parentId: dropNode?.parentId
               })
+              changed = dragNode.parentId! !== dragNode!.parentId
               dragNode.parentId = dropNode!.parentId
               this.store.model.updateDocs(
                 targetList.map((n, i) => ({ id: n.id, sort: i, updated }))
@@ -481,6 +488,7 @@ export class NoteStore extends StructStore<typeof state> {
           dropNode!.expand = true
           draft.nodes[dragNode.parentId].children = oldList.filter((c) => c.id !== dragNode.id)
           if (!ipc) {
+            changed = true
             this.store.model.updateDoc(dragNode.id, {
               parentId: dropNode!.id
             })
@@ -489,6 +497,9 @@ export class NoteStore extends StructStore<typeof state> {
               dropNode!.children!.map((n, i) => ({ id: n.id, sort: i, updated }))
             )
           }
+        }
+        if (changed) {
+          this.refactor.refactor(dragNode, oldPath)
         }
         if (!ipc) {
           // this.core.ipc.sendMessage({

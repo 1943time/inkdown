@@ -89,7 +89,6 @@ export class TabStore extends StructStore<typeof state> {
   docChanged$ = new Subject()
   selChange$ = new Subject<Path | null>()
   saveDoc$ = new Subject()
-  externalChange$ = new Subject<string>()
   manual = false
   dragEl: null | HTMLElement = null
   range?: Range

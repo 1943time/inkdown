@@ -68,6 +68,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
   const save = useCallback(async () => {
     const name = getName()
     const doc = nodeRef.current!
+    const oldPath = store.note.getDocPath(doc).join('/')
     if (name === doc.name) {
       setState({ tip: false, tipMessage: '' })
     } else if (doc && (await detectRename())) {
@@ -84,6 +85,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
         store.note.setState((state) => {
           state.nodes[doc.id].name = name
         })
+        store.note.refactor.refactor(doc, oldPath)
         setState({ tip: false, tipMessage: '' })
       }
     }

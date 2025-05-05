@@ -80,6 +80,7 @@ export const ChooseWikiLink = observer(() => {
         let filterKeyword = tab.state.wikilink.keyword
           .slice(0, tab.state.wikilink.offset)
           .toLowerCase()
+
         const anchorIndex = filterKeyword.indexOf('#')
         const showAnchor = anchorIndex !== -1 && tab.state.wikilink.offset >= anchorIndex
         if (showAnchor) {
@@ -114,17 +115,25 @@ export const ChooseWikiLink = observer(() => {
           setState({
             filterAnchors: state.anchors.filter((a) =>
               a.title.toLowerCase().includes(filterKeyword)
-            )
+            ),
+            showAnchor: true
           })
         } else {
+          console.log(
+            'items',
+            state.nodes.filter((n) => {
+              return n.fullPath.toLowerCase().includes(filterKeyword)
+            })
+          )
+
           setState({
             filterNodes: state.nodes.filter((n) => {
               return n.fullPath.toLowerCase().includes(filterKeyword)
             }),
-            filterAnchors: []
+            filterAnchors: [],
+            showAnchor: false
           })
         }
-        setState({ showAnchor })
       })()
     }
   }, [tab.state.wikilink.keyword, tab.state.wikilink.offset])

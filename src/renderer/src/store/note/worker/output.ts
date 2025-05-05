@@ -343,12 +343,17 @@ class Parser {
         if (!text) continue
         const tokens = getTokens(text)
         if (currentChunk.size + tokens > this.maxChunkSize) {
-          chunks.push(currentChunk)
-          currentChunk = {
-            text,
-            path: i,
-            type: node.type,
-            size: tokens
+          if (currentChunk.size < this.lastMinChunkSize) {
+            currentChunk.text += '\n\n' + text
+            currentChunk.size += tokens
+          } else {
+            chunks.push(currentChunk)
+            currentChunk = {
+              text,
+              path: i,
+              type: node.type,
+              size: tokens
+            }
           }
         } else {
           currentChunk.text += '\n\n' + text

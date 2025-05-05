@@ -22,7 +22,6 @@ export type TableRowNode = { type: 'table-row'; children: TableCellNode[] }
 export type WikiLinkNode = {
   type: 'wiki-link'
   children: BaseElement['children'][]
-  docId?: string
 }
 export type TableCellNode = {
   type: 'table-cell'

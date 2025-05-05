@@ -595,13 +595,15 @@ export class KeyboardTask {
     } catch (e) {}
   }
   showWikiLink(node: Element) {
+    if (this.tab.state.wikilink.open) {
+      return
+    }
     setTimeout(() => {
       const dom = ReactEditor.toDOMNode(this.tab.editor, node)
       if (dom) {
         let top = getOffsetTop(dom, this.tab.container!)
         let mode: 'top' | 'bottom' = 'top'
         if (top - this.tab.container!.scrollTop + 270 > window.innerHeight) {
-          const rect = getDomRect()
           top = this.tab.container!.children[0].clientHeight - top + 5
           mode = 'bottom'
         } else {

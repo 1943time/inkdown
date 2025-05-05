@@ -1,4 +1,4 @@
-import { Editor, Element, Path, Range } from 'slate'
+import { Editor, Element, Node, Path, Range } from 'slate'
 import { useMemo, useRef } from 'react'
 import { TabStore } from '@/store/note/tab'
 import { getDomRect } from '@/utils/dom'
@@ -62,6 +62,7 @@ export function useOnchange(tab: TabStore) {
 
         if (tab.state.wikilink.open && node[0].type === 'wiki-link') {
           tab.setState((state) => {
+            state.wikilink.keyword = Node.string(node[0])
             state.wikilink.offset = sel?.anchor.offset!
           })
         }

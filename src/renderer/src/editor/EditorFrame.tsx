@@ -52,10 +52,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
                 style={{ transitionProperty: 'padding' }}
                 className={`flex-1 duration-200 flex justify-center items-start h-full`}
               >
-                <div
-                  style={{ maxWidth: store.settings.state.editorWidth + 96 || 816 }}
-                  className={`flex-1 content px-12`}
-                >
+                <div style={{ maxWidth: 796 }} className={`flex-1 content px-12`}>
                   <MEditor tab={tab} />
                 </div>
                 {!store.settings.state.showChatBot && <Heading tab={tab} />}

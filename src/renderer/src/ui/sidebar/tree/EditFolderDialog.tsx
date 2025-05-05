@@ -8,6 +8,7 @@ import { useSubject } from '@/hooks/common'
 import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { delayRun } from '@/utils/common'
 
 export const EditFolderDialog = observer(() => {
   const store = useStore()
@@ -40,10 +41,15 @@ export const EditFolderDialog = observer(() => {
         if (stack.some((s) => s.name === name && s.folder && s.id !== ctx.id)) {
           return setState({ message: 'The folder already exists' })
         }
-        store.model.updateDoc(ctx.id, { name })
-        store.note.setState((draft) => {
-          draft.nodes[ctx.id]!.name = name
-          draft.nodes[ctx.id]!.updated = Date.now()
+        const oldPath = store.note.getDocPath(ctx).join('/')
+        const now = Date.now()
+        store.model.updateDoc(ctx.id, { name, updated: now })
+        store.note.setState(() => {
+          ctx.name = name
+          ctx.updated = now
+        })
+        delayRun(() => {
+          store.note.refactor.refactor(ctx, oldPath)
         })
       }
       close()
