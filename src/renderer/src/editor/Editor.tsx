@@ -101,7 +101,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         spaceId: node.spaceId,
         links: docs.filter((d) => !!d).map((d) => d.id)
       })
-
+      store.local.writeDoc(node)
       if (!ipc) {
         // core.ipc.sendMessage({
         //   type: 'updateDoc',

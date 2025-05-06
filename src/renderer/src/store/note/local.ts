@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from 'mobx'
+import { makeAutoObservable } from 'mobx'
 import { Store } from '../store'
 import { copy, nid } from '@/utils/common'
 import { IDoc } from 'types/model'
@@ -38,7 +38,10 @@ export class LocalFile {
   }
   getDocLocalPath(doc: IDoc) {
     const { join } = window.api.path
-    return join(this.writePath!, this.store.note.getDocPath(doc).join('/'), '.md')
+    return join(
+      this.writePath!,
+      this.store.note.getDocPath(doc).join('/') + (doc.folder ? '' : '.md')
+    )
   }
   async deleteDocByIds(docs: string[]) {
     if (this.saveLocal) {
@@ -75,7 +78,7 @@ export class LocalFile {
       window.api.fs.mkdirSync(path, { recursive: true })
       if (node.children?.length) {
         for (const item of node.children) {
-          await this.localWriteNode(item)
+          // await this.localWriteNode(item)
         }
       }
     } else {
@@ -87,12 +90,6 @@ export class LocalFile {
       //   }
       // }
     }
-  }
-  async localWriteNode(node: IDoc) {
-    if (!this.saveLocal) return
-    this.parseLocalNodes(node).then(() => {
-      this.writeNodes()
-    })
   }
 
   async localDeleteAssetsFile(name: string) {
@@ -113,48 +110,25 @@ export class LocalFile {
     }
   }
 
-  async writeNodes() {
-    if (!this.saveLocal) return
-    const nodes = this.store.note.state.nodes
-    for (const id of this.rewriteNode) {
-      const node = nodes[id]
-      if (node) {
-        const path = this.getDocLocalPath(node)
-        const parent = window.api.path.join(path, '..')
-        if (!window.api.fs.existsSync(parent)) {
-          window.api.fs.mkdirSync(parent, { recursive: true })
-        }
-        if (!node.folder) {
-          // const res = await this.store.output.toMarkdown({
-          //   node,
-          //   exportRootPath: this.store.tree.root.filePath
-          // })
-          // await window.api.fs.writeFile(path, res.md, { encoding: 'utf-8' })
-        }
-      }
-    }
-    this.rewriteNode.clear()
-  }
   localRename(from: string, node: IDoc) {
     if (!this.saveLocal) return
     const to = this.getDocLocalPath(node)
+    from = window.api.path.join(this.writePath!, from + (node.folder ? '' : '.md'))
     if (window.api.fs.existsSync(from)) {
       const parent = window.api.path.join(to, '..')
       if (!window.api.fs.existsSync(parent)) {
         window.api.fs.mkdirSync(parent, { recursive: true })
       }
-      window.api.fs.renameSync(from, to)
+      window.api.fs.rename(from, to)
     }
-    this.localWriteNode(node)
   }
 
   async showInFinder(doc: IDoc) {
     if (!this.saveLocal) {
       this.store.note.openConfirmDialog$.next({
-        title: 'Kind tips',
-        description:
-          'After setting up a workspace to bind a folder, you can use "Reveal in Finder"',
-        okText: 'Go to Settings',
+        title: '提示',
+        description: '设置工作区绑定文件夹后，您可以使用"在访达中显示"功能',
+        okText: '前往设置',
         okType: 'primary',
         onConfirm: () => {
           this.store.note.openEditSpace$.next(this.store.note.state.currentSpace?.id!)
@@ -162,7 +136,7 @@ export class LocalFile {
       })
     } else {
       const path = this.store.note.getDocPath(doc)
-      window.api.fs.showInFinder(window.api.path.join(this.writePath!, path.join('/'), '.md'))
+      window.api.fs.showInFinder(window.api.path.join(this.writePath!, path.join('/') + '.md'))
     }
   }
 
@@ -173,28 +147,7 @@ export class LocalFile {
       type: window.api.fs.lookup(filePath) || undefined
     })
   }
-  async getSingleDocSchemaByMd(md: string) {
-    const parser = await this.getMdParser()
-    const schema = parser(md)
-    const deepFilter = async (schema: any[], filterData: any[] = []) => {
-      for (let item of schema) {
-        if (item.type === 'media') {
-          if (!item.url || !/^https?:\/\//.test(item.url)) {
-            continue
-          }
-        }
-        if (item.text && (!item.url || !item.url.startsWith('https'))) {
-          delete item.url
-        }
-        if (item.children) {
-          item.children = await deepFilter(item.children)
-        }
-        filterData.push(item)
-      }
-      return filterData
-    }
-    return deepFilter(schema)
-  }
+
   async newDocFromlocal(parentNode: IDoc) {
     try {
       let md = '',
@@ -207,7 +160,7 @@ export class LocalFile {
       }
       md = window.api.fs.readFileSync(res.filePaths[0], { encoding: 'utf-8' })
       name = window.api.path.basename(res.filePaths[0])
-      const schema = await this.getSingleDocSchemaByMd(md)
+      // const schema = await this.getSingleDocSchemaByMd(md)
       name = name.replace(/\.md$/, '')
       // name = this.store.menu.getCreateName(parentNode, name)
       // this.store.menu.createDoc({
@@ -218,29 +171,61 @@ export class LocalFile {
     } catch (e) {}
   }
 
+  async writeDoc(node: IDoc) {
+    if (!this.saveLocal) return
+    const path = this.getDocLocalPath(node)
+    const parent = window.api.path.join(path, '..')
+    if (!window.api.fs.existsSync(parent)) {
+      window.api.fs.mkdirSync(parent, { recursive: true })
+    }
+    const res = await this.store.worker.toMarkdown({
+      schema: node.schema || [],
+      doc: {
+        id: node.id,
+        name: node.name,
+        folder: node.folder,
+        parentId: node.parentId,
+        updated: node.updated
+      },
+      exportRootPath: this.writePath!
+    })
+    await window.api.fs.writeFile(path, res.md, { encoding: 'utf-8' })
+  }
   async initialRewrite(nodes: Record<string, IDoc>) {
     if (this.saveLocal) {
       try {
         const { join } = window.api.path
         window.api.fs.readdirSync(this.writePath!)
+        const nMap = this.store.worker.getSpaceNodes()
         for (const node of Object.values(nodes)) {
-          if (!node.folder && node.schema) {
+          if (!node.folder) {
             try {
+              if (!node.schema) {
+                const res = await this.store.model.getDoc(node.id)
+                if (res) {
+                  node.schema = res.schema
+                }
+              }
               const target = join(
                 this.writePath!,
-                this.store.note.getDocPath(node).join('/'),
-                '.md'
+                this.store.note.getDocPath(node).join('/') + '.md'
               )
               if (!window.api.fs.existsSync(target)) {
                 const parent = join(target, '..')
                 if (!window.api.fs.existsSync(parent)) {
                   window.api.fs.mkdirSync(parent, { recursive: true })
                 }
-                // const res = await this.store.output.toMarkdown({
-                //   node,
-                //   exportRootPath: this.writePath!
-                // })
-                // await window.api.fs.writeFile(target, res.md, { encoding: 'utf-8' })
+
+                const res = await this.store.worker.toMarkdown({
+                  schema: node.schema || [],
+                  doc: nMap[node.id],
+                  nodes: nMap,
+                  exportRootPath: this.writePath!
+                })
+                console.log('res', res.medias)
+                if (res.medias) {
+                }
+                await window.api.fs.writeFile(target, res.md, { encoding: 'utf-8' })
               }
             } catch (e) {
               console.error('write err', e)

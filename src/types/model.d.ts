@@ -117,7 +117,7 @@ export interface ISpace {
   created: number
   lastOpenTime: number
   sort: number
-  writeFolderPath?: string
+  writeFolderPath?: string | null
   opt?: Record<string, any>
 }
 

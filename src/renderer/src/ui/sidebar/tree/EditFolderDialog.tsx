@@ -34,7 +34,6 @@ export const EditFolderDialog = observer(() => {
           return setState({ message: 'The folder already exists' })
         }
         store.menu.createFolder(name, state().ctxNode?.id || 'root')
-        // core.local.localWriteNode(node)
       } else if (state().ctxNode) {
         const ctx = state().ctxNode!
         const stack = ctx.parentId ? nodes[ctx.parentId]!.children! : nodes['root']!.children!
@@ -48,6 +47,7 @@ export const EditFolderDialog = observer(() => {
           ctx.name = name
           ctx.updated = now
         })
+        store.local.localRename(oldPath, ctx)
         delayRun(() => {
           store.note.refactor.refactor(ctx, oldPath)
         })

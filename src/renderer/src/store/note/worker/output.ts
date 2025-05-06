@@ -6,13 +6,7 @@ import { getTokens } from '@/utils/ai'
 import dayjs from 'dayjs'
 import { join } from 'path-browserify'
 export type INode = { id: string; name: string; folder: boolean; parentId: string; updated: number }
-/**
- * 实现一个可以在浏览器环境使用的 node path 模块的 relative 函数
- * 计算从 from 到 to 的相对路径
- * @param from 起始路径
- * @param to 目标路径
- * @returns 相对路径
- */
+
 function relative(from: string, to: string): string {
   const normalizePathParts = (p: string): string[] => {
     const parts = p.split(/[/\\]/).filter(Boolean)
@@ -521,8 +515,9 @@ onmessage = async (e) => {
         node: e.data.doc,
         exportRootPath: e.data.exportRootPath
       })
+
       postMessage({
-        data: { md, medias },
+        data: { md, medias: Array.from(medias.values()) },
         id: e.data.id
       })
     } catch (e) {

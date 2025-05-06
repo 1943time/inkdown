@@ -472,7 +472,7 @@ export class NoteStore extends StructStore<typeof state> {
               this.store.model.updateDoc(dragNode.id, {
                 parentId: dropNode?.parentId
               })
-              changed = dragNode.parentId! !== dragNode!.parentId
+              changed = true
               dragNode.parentId = dropNode!.parentId
               this.store.model.updateDocs(
                 targetList.map((n, i) => ({ id: n.id, sort: i, updated }))
@@ -498,8 +498,10 @@ export class NoteStore extends StructStore<typeof state> {
             )
           }
         }
+
         if (changed) {
           this.refactor.refactor(dragNode, oldPath)
+          this.store.local.localRename(oldPath, dragNode)
         }
         if (!ipc) {
           // this.core.ipc.sendMessage({

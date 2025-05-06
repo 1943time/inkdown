@@ -1,13 +1,19 @@
 import { observer } from 'mobx-react-lite'
-import { Button, Collapse, Form, Input, Modal, Progress, Space, Tag } from 'antd'
-import { CloseCircleOutlined, FolderOpenOutlined, SaveOutlined } from '@ant-design/icons'
+import {
+  CloseCircleOutlined,
+  FolderOpenOutlined,
+  SaveFilled,
+  SaveOutlined
+} from '@ant-design/icons'
 import { useCallback } from 'react'
+import { runInAction } from 'mobx'
 import { useStore } from '@/store/store'
-import { ISpace } from 'types/model'
 import { useLocalState } from '@/hooks/useLocalState'
+import { ISpace } from 'types/model'
 import { useSubject } from '@/hooks/common'
-import { Folders } from 'lucide-react'
 import { nid } from '@/utils/common'
+import { IWorkspace } from '@/icons/IWorkspace'
+import { Space, Form, Input, Modal, Collapse, Button } from 'antd'
 
 export const EditSpace = observer(() => {
   const store = useStore()
@@ -21,23 +27,21 @@ export const EditSpace = observer(() => {
     inputDeleteName: '',
     submitting: false,
     space: null as null | ISpace,
-    progress: 0,
     startWriting: false
   })
 
-  useSubject(store.note.openEditSpace$, async (spaceId) => {
+  useSubject(store.note.openEditSpace$, (spaceId) => {
     if (spaceId) {
-      store.model.getSpace({ id: spaceId }).then((space) => {
-        if (space) {
-          setState({
-            space,
-            spaceName: space.name,
-            filePath: space.writeFolderPath,
-            open: true,
-            spaceId: space.id,
-            inputDeleteName: ''
-          })
-        }
+      store.model.getSpace({ id: spaceId }).then((res) => {
+        setState({
+          space: res,
+          spaceName: res?.name,
+          spaceId,
+          filePath: res?.writeFolderPath || '',
+          open: true,
+          inputDeleteName: '',
+          startWriting: false
+        })
       })
     } else {
       setState({
@@ -46,38 +50,37 @@ export const EditSpace = observer(() => {
         spaceName: '',
         filePath: '',
         space: null,
-        inputDeleteName: ''
+        inputDeleteName: '',
+        startWriting: false
       })
     }
   })
 
   const validatePath = useCallback(async (filePath: string, spaceId?: string) => {
-    // const includeSpace = await db.space
-    //   .filter((s) => !!s.filePath && filePath.startsWith(s.filePath || ''))
-    //   .first()
-    // if (includeSpace && (!spaceId || includeSpace.cid !== spaceId)) {
-    //   return false
-    // }
-    // return true
+    const includeSpace = await store.model.getSpace({ writeFolderPath: filePath })
+    if (includeSpace && (!spaceId || includeSpace.id !== spaceId)) {
+      return false
+    }
+    return true
   }, [])
 
   const save = useCallback(async () => {
-    // if (state.filePath && !(await validatePath(state.filePath, state.spaceId))) {
-    //   core.message.open({
-    //     type: 'info',
-    //     content: 'This directory is already included in another space'
-    //   })
-    //   return
-    // }
+    if (state.filePath && !(await validatePath(state.filePath, state.spaceId))) {
+      store.msg.open({
+        type: 'info',
+        content: 'This directory is already included in another space'
+      })
+      return
+    }
     if (state.space) {
-      store.model.updateSpace(state.space.id, {
+      await store.model.updateSpace(state.space.id, {
         name: state.spaceName,
         writeFolderPath: state.filePath
       })
       if (state.spaceId === store.note.state.currentSpace?.id) {
-        store.note.setState((draft) => {
-          draft.currentSpace!.name = state.spaceName
-          draft.currentSpace!.writeFolderPath = state.filePath
+        runInAction(() => {
+          store.note.state.currentSpace!.name = state.spaceName
+          store.note.state.currentSpace!.writeFolderPath = state.filePath
         })
       }
       setState({ open: false })
@@ -101,21 +104,36 @@ export const EditSpace = observer(() => {
         }
       } else {
         try {
-          setState({ submitting: true })
           const id = nid()
-          const now = Date.now()
-          await store.model.createSpace({
+          const res = await store.model.createSpace({
             id,
             name: state.spaceName,
             writeFolderPath: state.filePath,
-            created: now,
-            lastOpenTime: now,
-            sort: 0
+            sort: 0,
+            created: Date.now(),
+            lastOpenTime: Date.now()
           })
+          // await core.api.createSpace
+          //   .mutate({
+          //     background: state.background,
+          //     name: state.spaceName,
+          //     cid: id
+          //   })
+          // const count = await db.space.count()
+          const now = Date.now()
+          // await db.space.add({
+          //   cid: id,
+          //   name: state.spaceName,
+          //   filePath: state.filePath,
+          //   sort: count,
+          //   lastOpenTime: now,
+          //   created: now,
+          //   background: state.background,
+          //   opt: {}
+          // })
           setState({ open: false })
-          store.note.selectSpace(id)
-        } finally {
-          setState({ submitting: false })
+        } catch (e) {
+          console.error(e)
         }
       }
     }
@@ -127,157 +145,84 @@ export const EditSpace = observer(() => {
       width={400}
       title={
         <div className={'flex items-center'}>
-          <Folders className={'mr-1 text-lg'} />
-          <span className={'text-sm'}>{state.space ? state.space.name : 'Create a workspace'}</span>
+          <IWorkspace className={'mr-1 text-sm'} />
+          <span className={'text-sm'}>{'创建工作空间'}</span>
         </div>
       }
       onCancel={() => setState({ open: false })}
     >
-      <div className={'pb-3'}>
-        <Form layout={'vertical'} className={'pt-2'}>
-          <Form.Item label={'Space Name'}>
+      <div className={'py-3'}>
+        <Form layout={'vertical'}>
+          <Form.Item label={'空间名称'}>
             <Space.Compact className={'w-full'}>
               <Input
-                placeholder={'Enter Name'}
+                placeholder={'输入名称'}
                 value={state.spaceName}
                 onChange={(e) => setState({ spaceName: e.target.value })}
                 maxLength={50}
               />
-              {!!state.space && (
-                <Button
-                  icon={<SaveOutlined />}
-                  loading={state.submitting}
-                  disabled={!state.spaceName || state.spaceName === state.space?.name}
-                  onClick={() => {
-                    if (store.note.state.spaces.some((s) => s.name === state.spaceName)) {
-                      store.msg.open({
-                        type: 'info',
-                        content: 'The space name already exists'
-                      })
-                    } else {
-                      const name = state.spaceName
-                      setState({ submitting: true })
-                      store.model
-                        .updateSpace(state.space!.id, {
-                          name: name
-                        })
-                        .then(() => {
-                          setState({
-                            space: {
-                              ...state.space!,
-                              name: name
-                            }
-                          })
-                          store.note.setState((draft) => {
-                            draft.currentSpace!.name = name
-                          })
-                          store.msg.success('Saved successfully')
-                        })
-                        .finally(() => {
-                          setState({ submitting: false })
-                        })
-                    }
-                  }}
-                />
-              )}
+              <Button icon={<SaveOutlined />} />
             </Space.Compact>
           </Form.Item>
-          <Form.Item
-            label={'Workspace Location'}
-            tooltip={{
-              title: (
-                <div>
-                  After setting, the documents and attachments in the space will be synchronized
-                  with the bound folder in real time in standard markdown format. The attachments
-                  will be saved in the <Tag color={'blue'}>.files</Tag> folder. To ensure the
-                  writing speed, Inkdown only writes files within 5mb
-                </div>
-              ),
-              overlayInnerStyle: { width: 320 }
-            }}
-          >
+          <Form.Item label={'空间目录'} tooltip={'选择文件夹后，文档与附件将实时写入文件夹内'}>
             <Space.Compact className={'w-full'}>
-              <Input disabled={true} value={state.filePath} placeholder={'Choose Folder'} />
+              <Input readOnly={true} value={state.filePath} placeholder={'请选择文件夹'} />
               <Button
                 icon={state.filePath ? <CloseCircleOutlined /> : <FolderOpenOutlined />}
                 onClick={async () => {
                   if (state.filePath) {
                     store.note.openConfirmDialog$.next({
                       title: 'Note',
-                      description:
-                        'After canceling, files will no longer be written to the folder in real time.',
+                      description: '取消后，文件将不再实时写入到该文件夹。',
                       okText: 'Confirm',
                       onConfirm: () => {
                         setState({ filePath: '' })
                         store.model.updateSpace(state.space!.id, {
-                          writeFolderPath: undefined
+                          writeFolderPath: null
                         })
-                        if (state.spaceId === store.note.state.root.id) {
-                          store.note.setState((draft) => {
-                            draft.currentSpace!.writeFolderPath = undefined
+                        if (state.spaceId === store.note.state.currentSpace?.id) {
+                          runInAction(() => {
+                            store.note.state.currentSpace!.writeFolderPath = null
                           })
                         }
                       }
                     })
                   } else {
-                    // core.local.chooseLocalFolder().then(async (res) => {
-                    //   if (res.filePaths.length) {
-                    //     const path = res.filePaths[0]
-                    //     const includeSpace = await db.space
-                    //       .filter((s) => !!s.filePath && path.startsWith(s.filePath || ''))
-                    //       .first()
-                    //     if (
-                    //       includeSpace &&
-                    //       (!state.spaceId || includeSpace.cid !== state.spaceId)
-                    //     ) {
-                    //       core.message.open({
-                    //         type: 'info',
-                    //         content: 'This directory is already included in another space'
-                    //       })
-                    //       return
-                    //     }
-                    //     setState({ filePath: path })
-                    //     if (state.spaceId) {
-                    //       db.space.update(state.spaceId, { filePath: res.filePaths[0] })
-                    //     }
-                    //     if (state.spaceId === core.tree.root.cid) {
-                    //       runInAction(() => {
-                    //         core.tree.root.filePath = path
-                    //       })
-                    //     }
-                    //     if (state.space) {
-                    //       setState({ startWriting: true, progress: 0 })
-                    //       core.exportSpace.exportToLocal({
-                    //         rootPath: state.filePath,
-                    //         onProgress: (p) => {
-                    //           setState({ progress: p })
-                    //           if (p === 100) {
-                    //             setState({ startWriting: false, progress: 0 })
-                    //           }
-                    //         }
-                    //       })
-                    //     }
-                    //   }
-                    // })
+                    store.local.chooseLocalFolder().then(async (res) => {
+                      if (res.filePaths.length) {
+                        const path = res.filePaths[0]
+                        const includeSpace = await store.model.getSpace({
+                          writeFolderPath: path
+                        })
+                        if (includeSpace && (!state.spaceId || includeSpace.id !== state.spaceId)) {
+                          store.msg.open({
+                            type: 'info',
+                            content: 'This directory is already included in another space'
+                          })
+                          return
+                        }
+                        setState({ filePath: path })
+                        if (state.spaceId) {
+                          store.model.updateSpace(state.spaceId, {
+                            writeFolderPath: path
+                          })
+                        }
+                        if (state.spaceId === store.note.state.currentSpace?.id) {
+                          runInAction(() => {
+                            store.note.state.currentSpace!.writeFolderPath = path
+                          })
+                        }
+                        if (state.space) {
+                          setState({ startWriting: true })
+                          store.local.initialRewrite(store.note.state.nodes)
+                        }
+                      }
+                    })
                   }
                 }}
               ></Button>
             </Space.Compact>
           </Form.Item>
-          {state.startWriting && (
-            <div className={'mb-6'}>
-              <Progress
-                percent={state.progress}
-                strokeColor={{
-                  '0%': '#108ee9',
-                  '100%': '#87d068'
-                }}
-              />
-              <div className={'text-center text-xs text-black/70 dark:text-white/70'}>
-                Writing data...
-              </div>
-            </div>
-          )}
           <div className={'space-y-3'}>
             {!state.spaceId && (
               <Button
@@ -287,7 +232,7 @@ export const EditSpace = observer(() => {
                 disabled={!state.spaceName}
                 loading={state.submitting}
               >
-                {'Create Workspace'}
+                {'创建'}
               </Button>
             )}
             {!!state.space && (
@@ -314,20 +259,19 @@ export const EditSpace = observer(() => {
                           block={true}
                           onClick={() => {
                             store.note.openConfirmDialog$.next({
-                              title:
-                                'Confirm delete? All files in the space will be permanently deleted.',
+                              title: '确认删除空间',
                               okText: 'Delete',
                               onConfirm: async () => {
                                 await store.model.deleteSpace(state.space!.id)
                                 store.note.setState((draft) => {
-                                  const space = draft.spaces.find((s) => s.id !== state.spaceId)
-                                  if (space) {
-                                    draft.selectedSpaceId = space.id
-                                  }
-                                  draft.spaces = draft.spaces.filter((s) => s.id !== state.spaceId)
-                                  store.note.selectSpace()
+                                  draft.spaces = draft.spaces.filter(
+                                    (s) => s.id !== state.space!.id
+                                  )
+                                  store.note.selectSpace(draft.spaces[0].id)
                                 })
                                 setState({ open: false })
+                                store.msg.success('Workspace deleted')
+                                // core.ipc.sendMessage({ type: 'deleteSpace', data: cid })
                               }
                             })
                           }}
@@ -344,8 +288,8 @@ export const EditSpace = observer(() => {
                           }
                         >
                           {store.note.state.spaces.length > 1
-                            ? 'Permanently delete space documents and related media files'
-                            : 'At least one workspace must be reserved'}
+                            ? '永久删除空间文档和相关媒体文件'
+                            : '至少需要保留一个工作空间'}
                         </div>
                       </div>
                     )

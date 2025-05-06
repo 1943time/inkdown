@@ -116,7 +116,7 @@ export const ToggleSpace = observer(() => {
             <div className={'text-sm px-1'}>
               <div
                 onClick={() => {
-                  // editSpace$.next(core.tree.root!.cid)
+                  store.note.openEditSpace$.next(store.note.state.currentSpace?.id || null)
                   setState({ open: false })
                 }}
                 className={`flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded`}

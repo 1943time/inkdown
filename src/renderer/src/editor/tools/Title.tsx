@@ -9,7 +9,6 @@ import { useStore } from '@/store/store'
 import { TabStore } from '@/store/note/tab'
 import { File } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { EditorUtils } from '../utils/editorUtils'
 
 export const Title = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
@@ -86,6 +85,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
           state.nodes[doc.id].name = name
         })
         store.note.refactor.refactor(doc, oldPath)
+        store.local.localRename(oldPath, doc)
         setState({ tip: false, tipMessage: '' })
       }
     }

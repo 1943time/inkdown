@@ -2,6 +2,7 @@ import Worker from './output?worker'
 import { nanoid } from 'nanoid'
 import { INode } from './output'
 import { Store } from '@/store/store'
+import { copy } from '@/utils/common'
 export class WorkerHandle {
   private worker = new Worker()
   private callbacks = new Map<string, Function>()
@@ -55,18 +56,23 @@ export class WorkerHandle {
       this.callbacks.set(id, resolve)
     })
   }
-  async toMarkdown(
-    schema: any[],
-    doc: INode,
-    nodes: INode[],
+  async toMarkdown({
+    schema,
+    doc,
+    nodes,
+    exportRootPath
+  }: {
+    schema: any[]
+    doc: INode
+    nodes?: Record<string, INode>
     exportRootPath?: string
-  ): Promise<{ md: string; medias: Record<string, string> }> {
+  }): Promise<{ md: string; medias: string[] }> {
     const id = nanoid()
     this.worker.postMessage({
       type: 'toMarkdown',
-      schema,
+      schema: schema,
       doc,
-      nodes,
+      nodes: nodes || this.getSpaceNodes(),
       exportRootPath,
       id
     })

@@ -16,9 +16,6 @@ const App = observer(() => {
       themeMode={store.settings.state.dark ? 'dark' : 'light'}
       theme={{
         components: {
-          Input: {
-            colorBorder: store.settings.state.dark ? undefined : 'rgba(0, 0, 0, 0.8)'
-          },
           Checkbox: {
             colorBorder: store.settings.state.dark
               ? 'rgba(255, 255, 255, 0.2)'

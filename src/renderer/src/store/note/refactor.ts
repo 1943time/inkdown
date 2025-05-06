@@ -35,6 +35,7 @@ export class Refactor {
               node.schema = schema
               this.store.note.externalChange$.next(node.id)
               this.store.model.updateDoc(node.id, { schema, updated: Date.now() })
+              this.store.local.writeDoc(node)
             }
           })
         }

@@ -1,10 +1,9 @@
 import React from 'react'
-import { action, observable, runInAction, toJS } from 'mobx'
+import { observable, toJS } from 'mobx'
 import { Store } from './store'
 import { IDoc } from 'types/model'
 import { IMenu, openMenus } from '@/ui/common/Menu'
 import { copy, nid, os } from '@/utils/common'
-import { nanoid } from 'nanoid'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 
 export class ContextMenu {
@@ -136,7 +135,7 @@ export class ContextMenu {
             {
               text: 'Reveal in Finder',
               click: () => {
-                // this.core.local.showInFinder(node)
+                this.store.local.showInFinder(node)
               }
             }
           ]
@@ -188,7 +187,7 @@ export class ContextMenu {
         menus.push({
           text: os() === 'mac' ? 'Reveal in Finder' : 'Show in Explorer',
           click: () => {
-            // this.core.local.showInFinder(node)
+            this.store.local.showInFinder(node)
           }
         })
       }
