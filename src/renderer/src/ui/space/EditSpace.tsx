@@ -214,7 +214,9 @@ export const EditSpace = observer(() => {
                         }
                         if (state.space) {
                           setState({ startWriting: true })
-                          store.local.initialRewrite(store.note.state.nodes)
+                          store.local.initialRewrite(store.note.state.nodes).then(() => {
+                            store.msg.success('文件已写入')
+                          })
                         }
                       }
                     })

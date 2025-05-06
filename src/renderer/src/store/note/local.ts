@@ -23,11 +23,12 @@ export class LocalFile {
   downLoadTotal = 0
   downloaded = 0
   rewriteNode = new Set<string>()
+  manualWritePath: null | string = null
   constructor(private readonly store: Store) {
     makeAutoObservable(this)
   }
   get writePath() {
-    return this.store.note.state.currentSpace?.writeFolderPath
+    return this.manualWritePath || this.store.note.state.currentSpace?.writeFolderPath
   }
   get saveLocal() {
     return Boolean(this.writePath)
@@ -191,11 +192,12 @@ export class LocalFile {
     })
     await window.api.fs.writeFile(path, res.md, { encoding: 'utf-8' })
   }
-  async initialRewrite(nodes: Record<string, IDoc>) {
+  async initialRewrite(nodes: Record<string, IDoc>, force = false) {
     if (this.saveLocal) {
       try {
         const { join } = window.api.path
         window.api.fs.readdirSync(this.writePath!)
+        const assetsPath = await this.store.system.getAssetsPath()
         const nMap = this.store.worker.getSpaceNodes()
         for (const node of Object.values(nodes)) {
           if (!node.folder) {
@@ -210,7 +212,7 @@ export class LocalFile {
                 this.writePath!,
                 this.store.note.getDocPath(node).join('/') + '.md'
               )
-              if (!window.api.fs.existsSync(target)) {
+              if (!window.api.fs.existsSync(target) || force) {
                 const parent = join(target, '..')
                 if (!window.api.fs.existsSync(parent)) {
                   window.api.fs.mkdirSync(parent, { recursive: true })
@@ -222,8 +224,16 @@ export class LocalFile {
                   nodes: nMap,
                   exportRootPath: this.writePath!
                 })
-                console.log('res', res.medias)
                 if (res.medias) {
+                  if (!window.api.fs.existsSync(join(this.writePath!, '.files'))) {
+                    window.api.fs.mkdirSync(join(this.writePath!, '.files'), { recursive: true })
+                  }
+                  for (const media of res.medias) {
+                    window.api.fs.cp(
+                      join(assetsPath, media),
+                      join(this.writePath!, '.files', media)
+                    )
+                  }
                 }
                 await window.api.fs.writeFile(target, res.md, { encoding: 'utf-8' })
               }

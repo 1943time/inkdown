@@ -2,18 +2,13 @@ import { Button, Modal, Tag } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { ExportOutlined } from '@ant-design/icons'
 import { useStore } from '@/store/store'
-import { useLocalState } from '@/hooks/useLocalState.js'
-import { useSubject } from '@/hooks/common'
 import { FolderDown } from 'lucide-react'
-import { TextHelp } from '../common/HelpText'
+import { useLocalState } from '@/hooks/useLocalState'
 
 export const ExportSpace = observer(() => {
   const store = useStore()
   const [state, setState] = useLocalState({
-    open: false
-  })
-  useSubject(store.note.openSpaceExport$, async () => {
-    setState({ open: true })
+    loading: false
   })
   return (
     <Modal
@@ -22,39 +17,41 @@ export const ExportSpace = observer(() => {
           {store.note.state.currentSpace?.name} <FolderDown size={16} className={'ml-2'} />
         </div>
       }
-      open={state.open}
+      open={store.note.state.openExportSpace}
       footer={null}
-      onCancel={() => setState({ open: false })}
-      width={460}
+      onCancel={() => store.note.setState({ openExportSpace: false })}
+      width={420}
     >
       <div className={'text-sm text-black/80 dark:text-white/80 mt-3'}>
-        Export the document in the space to the local computer in standard markdown format. Media
-        files will be downloaded one by one into the{' '}
-        <Tag color={'blue'} className={'mr-0'}>
-          .files
-        </Tag>{' '}
-        folder with some delay.{' '}
-        <TextHelp text={'To ensure writing speed, inkdown only writes attachments within 5MB.'} />
+        Inkdown将以 <Tag>GitHub Flavored Markdown Spec</Tag>格式导出至本机文件夹。 文件附件将保存至{' '}
+        <Tag>.files</Tag> 文件夹中。
       </div>
-      {/* {core.exportSpace.start && (
-        <Progress
-          percent={core.exportSpace.progress}
-          className={'mt-4'}
-          strokeColor={{
-            '0%': '#108ee9',
-            '100%': '#87d068'
-          }}
-        />
-      )} */}
       <Button
         block={true}
         type={'primary'}
         className={'mt-5'}
+        loading={state.loading}
         icon={<ExportOutlined />}
-        // onClick={() => core.exportSpace.export()}
-        // disabled={core.exportSpace.start}
+        onClick={() => {
+          setState({ loading: true })
+          store.local.chooseLocalFolder().then((path) => {
+            if (path.filePaths.length) {
+              store.local.manualWritePath = path.filePaths[0]
+              store.local
+                .initialRewrite(store.note.state.nodes, true)
+                .then(() => {
+                  store.msg.success('文件已写入。')
+                  window.api.fs.showInFinder(window.api.path.join(path.filePaths[0]))
+                })
+                .finally(() => {
+                  store.local.manualWritePath = null
+                  setState({ loading: false })
+                })
+            }
+          })
+        }}
       >
-        Select Folder
+        {state.loading ? '正在导出...' : '选择文件夹'}
       </Button>
     </Modal>
   )

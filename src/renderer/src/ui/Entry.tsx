@@ -8,6 +8,7 @@ import { EditFolderDialog } from './sidebar/tree/EditFolderDialog'
 import { EditSpace } from './space/EditSpace'
 import { Note } from '@/editor/Note'
 import { Settings } from './settings/Settings'
+import { ExportSpace } from './space/ExportSpace'
 const Entry = observer(() => {
   const store = useStore()
   return (
@@ -32,6 +33,7 @@ const Entry = observer(() => {
       <EditFolderDialog />
       <EditSpace />
       <Settings />
+      <ExportSpace />
     </div>
   )
 })

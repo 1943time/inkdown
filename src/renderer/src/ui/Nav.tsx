@@ -95,7 +95,12 @@ export const Nav = observer(() => {
           </div>
         </div>
         <div className={'drag-none pr-3 space-x-2 flex items-center'}>
-          <div className={'nav-action'} onClick={() => {}}>
+          <div
+            className={'nav-action'}
+            onClick={(e) => {
+              store.menu.openGlobalMenu(e)
+            }}
+          >
             <Ellipsis size={22} />
           </div>
           <div

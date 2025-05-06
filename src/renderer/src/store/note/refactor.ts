@@ -29,7 +29,7 @@ export class Refactor {
           } else {
             schema = copy(node.schema!)
           }
-          const changed = this.refactorSchema({ schema, oldPath, newPath: curPath, docId: node.id })
+          const changed = this.refactorSchema({ schema, oldPath, newPath: curPath })
           runInAction(() => {
             if (changed) {
               node.schema = schema
@@ -45,13 +45,11 @@ export class Refactor {
   private refactorSchema({
     schema,
     oldPath,
-    newPath,
-    docId
+    newPath
   }: {
     schema: any[]
     oldPath: string
     newPath: string
-    docId: string
   }) {
     const stack = schema.slice()
     let changed = false

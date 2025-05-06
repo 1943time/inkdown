@@ -12,6 +12,7 @@ import { ReactEditor } from 'slate-react'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { slugify } from '@/editor/utils/dom'
 import { Refactor } from './refactor'
+import { delayRun } from '@/utils/common'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -29,6 +30,7 @@ const state = {
   searchKeyWord: '',
   selectedSpaceId: null as null | string,
   selectedSpace: null as null | ISpace,
+  openExportSpace: false,
   dragStatus: null as null | {
     mode: 'enter' | 'top' | 'bottom'
     dropNode: null | IDoc
@@ -242,15 +244,9 @@ export class NoteStore extends StructStore<typeof state> {
         state.nodes = nodes
       })
       this.restoreTabs()
-      this.store.model
-        .searchDocs(
-          spaceId,
-          // '你好啊，我是黄杰，南京市长江大桥，今天我想去play football, i am very happy, i want to play football, 你是谁？'
-          '系统卡片全部放置在src/components/panel/builtin_card目录下，新建卡片时创建目录，卡片目录内容如下1'
-        )
-        .then((res) => {
-          console.log(res)
-        })
+      delayRun(() => {
+        this.store.local.initialRewrite(this.state.nodes)
+      })
     })
   }
   checkOtherTabsShouldUpdate() {

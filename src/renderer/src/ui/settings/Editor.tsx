@@ -60,8 +60,8 @@ export const SetEditor = observer(() => {
             value={store.settings.state.headingWidth}
             min={260}
             max={400}
-            tooltip={{
-              overlayStyle: { zIndex: 2210 }
+            styles={{
+              root: { zIndex: 2210 }
             }}
             marks={{ 260: '260', 400: '400' }}
             step={20}

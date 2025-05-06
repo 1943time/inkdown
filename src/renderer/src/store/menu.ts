@@ -20,6 +20,26 @@ export class ContextMenu {
     }
     return cur
   }
+  openGlobalMenu(e: React.MouseEvent) {
+    openMenus(e, [
+      {
+        text: '导出空间至本机',
+        click: () => {
+          this.store.note.setState({ openExportSpace: true })
+        }
+      },
+      { hr: true },
+      {
+        text: '设置',
+        key: 'cmd+,',
+        click: () => {
+          this.store.settings.setData((state) => {
+            state.open = true
+          })
+        }
+      }
+    ])
+  }
   createFolder(name: string, parentId: string = 'root') {
     const id = nid()
     const now = Date.now()
