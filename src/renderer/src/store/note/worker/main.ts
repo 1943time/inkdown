@@ -1,3 +1,4 @@
+import { parse } from '@/editor/parser/worker'
 import { Node } from 'slate'
 import stringWidth from 'string-width'
 import { CustomLeaf, TableNode } from '@/editor'
@@ -47,7 +48,7 @@ function relative(from: string, to: string): string {
   return relativeParts.join('/')
 }
 
-class Parser {
+class Output {
   public nodes: Record<string, INode> = {}
   private readonly space = '  '
   private filePath = ''
@@ -480,13 +481,13 @@ class Parser {
     return text.trim()
   }
 }
-const parser = new Parser()
+const output = new Output()
 
 onmessage = async (e) => {
   if (e.data.type === 'getSchemaText') {
     let text = ''
     try {
-      text = parser.getSchemaText(e.data.schema)
+      text = output.getSchemaText(e.data.schema)
     } catch (e) {
       console.error('getSchemaText error', e)
     }
@@ -495,10 +496,24 @@ onmessage = async (e) => {
       id: e.data.id
     })
   }
+  if (e.data.type === 'parseMarkdown') {
+    try {
+      postMessage({
+        data: parse(e.data.md),
+        id: e.data.id
+      })
+    } catch (error) {
+      postMessage({
+        data: [{ type: 'paragraph', children: [{ text: '' }] }],
+        id: e.data.id
+      })
+      console.error('parseMarkdown error', error)
+    }
+  }
   if (e.data.type === 'getChunks') {
     try {
-      parser.nodes = e.data.nodes
-      const chunks = parser.getChunks(e.data.schema, e.data.doc)
+      output.nodes = e.data.nodes
+      const chunks = output.getChunks(e.data.schema, e.data.doc)
       postMessage({
         data: chunks,
         id: e.data.id
@@ -509,8 +524,8 @@ onmessage = async (e) => {
   }
   if (e.data.type === 'toMarkdown') {
     try {
-      parser.nodes = e.data.nodes
-      const { md, medias } = parser.toMarkdown({
+      output.nodes = e.data.nodes
+      const { md, medias } = output.toMarkdown({
         schema: e.data.schema,
         node: e.data.doc,
         exportRootPath: e.data.exportRootPath

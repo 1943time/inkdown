@@ -70,13 +70,13 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       const links = Array.from(
         Editor.nodes(tab.editor, {
           at: [],
-          match: (n) => n.type === 'wiki-link' || n.docId
+          match: (n) => n.type === 'wiki-link' || n.docId || n.type === 'media'
         })
       )
       const docs = links.map(([el]) => {
         if (el.docId) {
           return store.note.state.nodes[el.docId]
-        } else {
+        } else if (el.type === 'wiki-link') {
           const str = Node.string(el)
           const match = EditorUtils.parseWikiLink(str)
           if (match?.docName) {
@@ -99,7 +99,8 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         name: node.name,
         updated: now,
         spaceId: node.spaceId,
-        links: docs.filter((d) => !!d).map((d) => d.id)
+        links: docs.filter((d) => !!d).map((d) => d.id),
+        medias: links.filter(([el]) => el.type === 'media' && el.id).map(([el]) => el.id)
       })
       store.local.writeDoc(node)
       if (!ipc) {

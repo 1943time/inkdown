@@ -6,45 +6,52 @@ import { Icon } from '@iconify/react'
 import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState'
 import { useSubject } from '@/hooks/common.js'
-import { FolderInput } from 'lucide-react'
+import { FileText, FolderInput } from 'lucide-react'
+import { ImportTree } from '@/store/note/local'
+import { IDoc } from 'types/model'
+import { sizeUnit } from '@/utils/common'
 
 export const ImportFolder = observer(() => {
   const store = useStore()
   const [state, setState] = useLocalState({
     loading: false,
-    // tree: [] as ImportTree[],
-    imageTotalSize: 0,
+    tree: [] as (IDoc & { path: string; isset: boolean })[],
     imageTotal: 0,
-    docTotal: 0,
     open: false,
-    parentCid: null as null | string
+    docTotal: 0,
+    parent: null as null | IDoc
   })
-  // useSubject(store.note.openImportFolder$, (cid) => {
-  //   setState({ tree: [], imageTotal: 0, imageTotalSize: 0, parentCid: cid, open: true })
-  // })
-  // const dataCache = useRef<{
-  //   insertImages: { cid: string; file: File }[]
-  //   // tree: ImportTree[]
-  // }>({insertImages: []})
-  // const selectFolder = useCallback(async () => {
-  //   try {
-  //     const res = await core.import.importFolder(state.parentCid ? state.parentCid : undefined)
-  //     if (res) {
-  //       dataCache.current = res
-  //       setState({
-  //         imageTotal: res.insertImages.length,
-  //         imageTotalSize: res.insertImages.reduce((a, b) => a + b.file.size, 0),
-  //         tree: res.tree,
-  //         docTotal: res.docCount
-  //       })
-  //     }
-  //   } catch (e) {
-  //     console.error(e)
-  //   } finally {
-  //     setState({ loading: false })
-  //   }
-  // }, [])
-
+  useSubject(store.note.openImportFolder$, (id) => {
+    setState({
+      open: true,
+      parent: store.note.state.nodes[id || 'root'],
+      tree: []
+    })
+  })
+  const selectFolder = useCallback(async () => {
+    try {
+      const res = await store.import.importFolder(state.parent)
+      setState({
+        tree: res?.tree || [],
+        docTotal: res?.docs || 0,
+        imageTotal: res?.images || 0
+      })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setState({ loading: false })
+    }
+  }, [])
+  const insert = useCallback(async () => {
+    try {
+      setState({ loading: true })
+      await store.import.insertFiles()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setState({ loading: false })
+    }
+  }, [])
   return (
     <Modal
       open={state.open}
@@ -62,14 +69,12 @@ export const ImportFolder = observer(() => {
         </div>
       }
     >
-      {/* {!state.tree.length && (
+      {!state.tree.length && (
         <>
           <div className={'text-sm text-black/80 dark:text-white/80 my-2'}>
             Import markdown documents into the
             <Tag className={'ml-1.5'} color={'pink'}>
-              {state.parentCid
-                ? `${core.tree.nodeMap.get(state.parentCid!)?.name || 'root'}`
-                : 'current workspace'}
+              {state.parent?.name || 'current workspace'}
             </Tag>
             in batches. Inkdown will automatically convert file path links and dependent images.
           </div>
@@ -86,7 +91,7 @@ export const ImportFolder = observer(() => {
         </>
       )}
 
-      {/* {!!state.tree.length && (
+      {!!state.tree.length && (
         <>
           <Table
             dataSource={state.tree}
@@ -110,10 +115,6 @@ export const ImportFolder = observer(() => {
                       <span className={'text-sm text-gray-600 dark:text-gray-300 font-normal'}>
                         {state.imageTotal}
                       </span>
-                      <span className={'text-gray-500 dark:text-gray-400'}>Size:</span>
-                      <span className={'text-sm text-gray-600 dark:text-gray-300 font-normal'}>
-                        {sizeUnit(state.imageTotalSize)}
-                      </span>
                     </div>
                   </div>
                 ),
@@ -135,39 +136,12 @@ export const ImportFolder = observer(() => {
             <Button block={true} onClick={() => setState({ open: false })} disabled={state.loading}>
               Cancel
             </Button>
-            <Button
-              type={'primary'}
-              block={true}
-              loading={state.loading}
-              onClick={async () => {
-                setState({ loading: true })
-                try {
-                  await core.api.checkQuota
-                    .mutate({
-                      docs: state.docTotal,
-                      fileSize: state.imageTotalSize
-                    })
-                    .catch(core.pay.catchLimit())
-                  await core.import
-                    .insertFiles({
-                      insertImages: dataCache.current?.insertImages || [],
-                      tree: dataCache.current?.tree || [],
-                      spaceCid: core.tree.root.cid
-                    })
-                    .then(() => {
-                      setState({ open: false })
-                      core.service.initialOffline(core.tree.root.cid)
-                    })
-                } finally {
-                  setState({ loading: false })
-                }
-              }}
-            >
+            <Button type={'primary'} block={true} loading={state.loading} onClick={insert}>
               Import
             </Button>
           </div>
         </>
-      )} */}
+      )}
     </Modal>
   )
 })

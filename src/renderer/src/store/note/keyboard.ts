@@ -186,7 +186,7 @@ export class KeyboardTask {
 
   async insertMarkdown(md: string) {
     const [node] = this.curNodes
-    const res = await this.store.local.getSingleDocSchemaByMd(md)
+    const res = await this.store.worker.parseMarkdown(md)
     if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
       Transforms.delete(this.editor, { at: node[1] })
       Transforms.insertNodes(this.editor, res, { at: node[1], select: true })

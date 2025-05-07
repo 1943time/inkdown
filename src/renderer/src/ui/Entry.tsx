@@ -9,6 +9,7 @@ import { EditSpace } from './space/EditSpace'
 import { Note } from '@/editor/Note'
 import { Settings } from './settings/Settings'
 import { ExportSpace } from './space/ExportSpace'
+import { ImportFolder } from './space/ImportFolder'
 const Entry = observer(() => {
   const store = useStore()
   return (
@@ -34,6 +35,7 @@ const Entry = observer(() => {
       <EditSpace />
       <Settings />
       <ExportSpace />
+      <ImportFolder />
     </div>
   )
 })

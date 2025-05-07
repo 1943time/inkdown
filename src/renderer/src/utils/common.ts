@@ -164,3 +164,7 @@ export const delayRun = (fn: Function) => {
     setTimeout(fn, 16)
   }
 }
+
+export const toUnixPath = (path: string) => {
+  return path.replace(/\\/g, '/')
+}

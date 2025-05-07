@@ -173,7 +173,8 @@ export class ModelApi {
         return {
           ...d,
           folder: Boolean(d.folder),
-          links: d.links ? JSON.parse(d.links as unknown as string) : []
+          links: d.links ? JSON.parse(d.links as unknown as string) : [],
+          medias: d.medias ? JSON.parse(d.medias as unknown as string) : []
         }
       })
     })
@@ -190,7 +191,9 @@ export class ModelApi {
   async createDoc(doc: IDoc): Promise<void> {
     return ipcRenderer.invoke('createDoc', {
       ...doc,
-      schema: doc.schema ? JSON.stringify(doc.schema) : undefined
+      schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
+      links: doc.links ? JSON.stringify(doc.links) : undefined,
+      medias: doc.medias ? JSON.stringify(doc.medias) : undefined
     })
   }
 
@@ -207,7 +210,8 @@ export class ModelApi {
       {
         ...doc,
         schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
-        links: doc.links ? JSON.stringify(doc.links) : undefined
+        links: doc.links ? JSON.stringify(doc.links) : undefined,
+        medias: doc.medias ? JSON.stringify(doc.medias) : undefined
       },
       ctx
     )
@@ -220,7 +224,8 @@ export class ModelApi {
         return {
           ...d,
           schema: d.schema ? JSON.stringify(d.schema) : undefined,
-          links: d.links ? JSON.stringify(d.links) : undefined
+          links: d.links ? JSON.stringify(d.links) : undefined,
+          medias: d.medias ? JSON.stringify(d.medias) : undefined
         }
       })
     )
@@ -236,7 +241,8 @@ export class ModelApi {
         ...doc,
         folder: Boolean(doc?.folder),
         schema: doc?.schema ? JSON.parse(doc.schema as unknown as string) : undefined,
-        links: doc?.links ? JSON.parse(doc.links as unknown as string) : []
+        links: doc?.links ? JSON.parse(doc.links as unknown as string) : [],
+        medias: doc?.medias ? JSON.parse(doc.medias as unknown as string) : []
       }
     })
   }

@@ -119,13 +119,6 @@ export const ChooseWikiLink = observer(() => {
             showAnchor: true
           })
         } else {
-          console.log(
-            'items',
-            state.nodes.filter((n) => {
-              return n.fullPath.toLowerCase().includes(filterKeyword)
-            })
-          )
-
           setState({
             filterNodes: state.nodes.filter((n) => {
               return n.fullPath.toLowerCase().includes(filterKeyword)

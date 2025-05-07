@@ -134,6 +134,7 @@ export interface IDoc {
   created: number
   sort: number
   links?: string[]
+  medias?: string[]
   children?: IDoc[]
   lastOpenTime?: number
 }

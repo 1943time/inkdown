@@ -225,7 +225,7 @@ export class ContextMenu {
           {
             text: 'Import Folder',
             click: () => {
-              // openImportFolder$.next(node.root ? null : node.cid)
+              this.store.note.openImportFolder$.next(node.id)
             }
           }
         ]

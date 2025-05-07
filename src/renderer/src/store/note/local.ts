@@ -3,13 +3,13 @@ import { Store } from '../store'
 import { copy, nid } from '@/utils/common'
 import { IDoc } from 'types/model'
 export interface ImportTree {
-  cid: string
+  id: string
   name: string
   path: string
   sort?: number
-  folder?: boolean
+  folder: boolean
   schema?: any[]
-  parentCid?: string
+  parentId: string
   isset: boolean
   children?: ImportTree[]
 }
@@ -212,7 +212,7 @@ export class LocalFile {
                 this.writePath!,
                 this.store.note.getDocPath(node).join('/') + '.md'
               )
-              if (!window.api.fs.existsSync(target) || force) {
+              if (force || !window.api.fs.existsSync(target)) {
                 const parent = join(target, '..')
                 if (!window.api.fs.existsSync(parent)) {
                   window.api.fs.mkdirSync(parent, { recursive: true })
@@ -229,7 +229,7 @@ export class LocalFile {
                     window.api.fs.mkdirSync(join(this.writePath!, '.files'), { recursive: true })
                   }
                   for (const media of res.medias) {
-                    window.api.fs.cp(
+                    await window.api.fs.cp(
                       join(assetsPath, media),
                       join(this.writePath!, '.files', media)
                     )

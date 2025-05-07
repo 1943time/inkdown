@@ -118,6 +118,7 @@ export const initModel = async () => {
         t.integer('created').defaultTo(Date.now())
         t.integer('sort').defaultTo(0)
         t.text('links').nullable()
+        t.text('medias').nullable()
         t.text('summary').nullable()
         t.integer('lastOpenTime').defaultTo(Date.now())
         t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')

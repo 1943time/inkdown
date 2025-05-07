@@ -19,6 +19,7 @@ export const ExportSpace = observer(() => {
       }
       open={store.note.state.openExportSpace}
       footer={null}
+      maskClosable={!state.loading}
       onCancel={() => store.note.setState({ openExportSpace: false })}
       width={420}
     >
@@ -33,9 +34,9 @@ export const ExportSpace = observer(() => {
         loading={state.loading}
         icon={<ExportOutlined />}
         onClick={() => {
-          setState({ loading: true })
           store.local.chooseLocalFolder().then((path) => {
             if (path.filePaths.length) {
+              setState({ loading: true })
               store.local.manualWritePath = path.filePaths[0]
               store.local
                 .initialRewrite(store.note.state.nodes, true)

@@ -8,7 +8,7 @@ import { ElementProps, MediaNode } from '..'
 import { LoadingOutlined } from '@ant-design/icons'
 import { useTab } from '@/store/note/TabCtx'
 import { getImageData, useSelStatus } from '../utils'
-import { AlignLeft, AlignRight, Download, Fullscreen } from 'lucide-react'
+import { AlignLeft, AlignRight, Download, ScanEye } from 'lucide-react'
 
 const alignType = new Map([
   ['left', 'justify-start'],
@@ -129,7 +129,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                   tab.openPreviewImages(element)
                 }}
               >
-                <Fullscreen size={16} />
+                <ScanEye size={16} />
               </div>
             </>
           )}

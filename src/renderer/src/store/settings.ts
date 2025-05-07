@@ -31,7 +31,7 @@ const state = {
   spellCheck: false,
   codeAutoBreak: false,
   codeTabSize: 2,
-  showChatBot: true,
+  showChatBot: false,
   get dark() {
     return this.theme === 'system' ? this.systemDark : this.theme === 'dark'
   },

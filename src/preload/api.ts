@@ -50,12 +50,17 @@ export const Api = {
       return writeFile(filePath, Buffer.from(buffer))
     },
     statSync(filePath: string) {
-      const s = statSync(filePath)
-      return {
-        folder: s.isDirectory(),
-        ctime: s.ctime.valueOf(),
-        mtime: s.mtime.valueOf(),
-        size: s.size
+      try {
+        const s = statSync(filePath)
+        return {
+          folder: s.isDirectory(),
+          ctime: s.ctime.valueOf(),
+          mtime: s.mtime.valueOf(),
+          size: s.size
+        }
+      } catch (e) {
+        console.error(e)
+        return null
       }
     }
   },

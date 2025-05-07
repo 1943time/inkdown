@@ -268,21 +268,21 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
         el = { type: 'list-item', checked: n.checked, children: children }
         break
       case 'paragraph':
-        if (n.children?.[0].type === 'html' && n.children[0].value.startsWith('<a')) {
-          const text = n.children.map((n) => (n as any).value || '').join('')
-          const attach = findAttachment(text)
-          if (attach) {
-            const name = text.match(/\>(.*)<\/a\>/)
-            el = {
-              type: 'attach',
-              url: attach.url,
-              children: [{ text: '' }],
-              name: name ? name[1] : attach.url,
-              size: attach.size
-            }
-            break
-          }
-        }
+        // if (n.children?.[0].type === 'html' && n.children[0].value.startsWith('<a')) {
+        //   const text = n.children.map((n) => (n as any).value || '').join('')
+        //   const attach = findAttachment(text)
+        //   if (attach) {
+        //     const name = text.match(/\>(.*)<\/a\>/)
+        //     el = {
+        //       type: 'attach',
+        //       url: attach.url,
+        //       children: [{ text: '' }],
+        //       name: name ? name[1] : attach.url,
+        //       size: attach.size
+        //     }
+        //     break
+        //   }
+        // }
         el = []
         let textNodes: any[] = []
         for (let c of n.children || []) {
@@ -432,22 +432,4 @@ export const parse = (md: string) => {
   const root = parser.parse(md || '')
   const schema = parserBlock(root.children as any[], true)
   return schema
-}
-
-onmessage = (e) => {
-  const files: string[] = e.data.files
-  if (files) {
-    postMessage({
-      results: files.map((str) => {
-        try {
-          const root = parser.parse(str || '')
-          return parserBlock(root.children as any[], true)
-        } catch (e) {
-          console.error('parser error', e)
-          return { schema: [{ type: 'paragraph', children: [{ text: str }] }], links: [] }
-        }
-      }),
-      id: e.data.id
-    })
-  }
 }

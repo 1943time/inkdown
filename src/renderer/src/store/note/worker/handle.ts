@@ -1,6 +1,6 @@
-import Worker from './output?worker'
+import Worker from './main?worker'
 import { nanoid } from 'nanoid'
-import { INode } from './output'
+import { INode } from './main'
 import { Store } from '@/store/store'
 import { copy } from '@/utils/common'
 export class WorkerHandle {
@@ -38,6 +38,7 @@ export class WorkerHandle {
     const callback = this.callbacks.get(id)
     if (callback) {
       callback(data)
+      this.callbacks.delete(id)
     }
   }
   async getChunks(
@@ -74,6 +75,17 @@ export class WorkerHandle {
       doc,
       nodes: nodes || this.getSpaceNodes(),
       exportRootPath,
+      id
+    })
+    return new Promise((resolve) => {
+      this.callbacks.set(id, resolve)
+    })
+  }
+  async parseMarkdown(md: string): Promise<any[]> {
+    const id = nanoid()
+    this.worker.postMessage({
+      type: 'parseMarkdown',
+      md,
       id
     })
     return new Promise((resolve) => {
