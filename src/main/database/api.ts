@@ -14,6 +14,7 @@ const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP
 let vdb: lancedb.Connection | null = null
 let extractor: null | FeatureExtractionPipeline = null
 const tableMap = new Map<string, lancedb.Table>()
+const assetsPath = join(app.getPath('userData'), 'assets')
 const openTable = async (spaceId: string) => {
   if (tableMap.has(spaceId)) {
     return tableMap.get(spaceId)
@@ -269,7 +270,6 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
     await trx('space').where('id', id).delete()
     const files = await trx('file').where('spaceId', id).select(['name'])
     // 删除缓存区
-    const assetsPath = join(app.getPath('userData'), 'assets')
     for (const file of files) {
       try {
         const filePath = join(assetsPath, file.name)
@@ -546,21 +546,56 @@ ipcMain.handle('clearHistory', async (_, docId: string) => {
   return knex('history').where('docId', docId).delete()
 })
 
-ipcMain.handle('getFiles', async (_, spaceId: string) => {
-  const files = await knex('file')
+ipcMain.handle(
+  'getFiles',
+  async (_, params: { spaceId: string; page: number; pageSize: number }) => {
+    const files = await knex('file')
+      .where('spaceId', params.spaceId)
+      .orderBy('created', 'desc')
+      .select(['name', 'created', 'size'])
+      .limit(params.pageSize)
+      .offset((params.page - 1) * params.pageSize)
+    return files
+  }
+)
+ipcMain.handle('clearAttachFiles', async (_, spaceId: string) => {
+  const docs = await knex('doc').where('spaceId', spaceId).select(['medias'])
+  const files = await knex('file').where('spaceId', spaceId).select(['name'])
+  const usedFiles = new Set<string>()
+  for (const doc of docs) {
+    if (doc.medias) {
+      const medias = JSON.parse(doc.medias)
+      for (const media of medias) {
+        usedFiles.add(media)
+      }
+    }
+  }
+  const removeFiles = files.filter((f) => !usedFiles.has(f.name))
+  for (const file of removeFiles) {
+    try {
+      const filePath = join(assetsPath, file.name)
+      if (existsSync(filePath)) {
+        await unlink(filePath)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  return knex('file')
     .where('spaceId', spaceId)
-    .orderBy('created', 'desc')
-    .select(['id', 'name', 'created', 'size'])
-  return files
+    .whereIn(
+      'name',
+      removeFiles.map((f) => f.name)
+    )
+    .delete()
 })
 
-ipcMain.handle('createFile', async (_, file: IFile) => {
-  return knex('file').insert(file)
+ipcMain.handle('createFiles', async (_, files: IFile[]) => {
+  return knex('file').insert(files)
 })
 
 ipcMain.handle('deleteFiles', async (_, ids: string[]) => {
   const files = await knex('file').whereIn('id', ids).select(['name'])
-  const assetsPath = join(app.getPath('userData'), 'assets')
   for (const file of files) {
     try {
       const filePath = join(assetsPath, file.name)

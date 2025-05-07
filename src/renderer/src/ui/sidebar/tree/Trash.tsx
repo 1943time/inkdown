@@ -5,6 +5,7 @@ import { useGetSetState } from 'react-use'
 import { useStore } from '@/store/store'
 import { ChevronRight, FileText, FolderClosed, TicketSlash, Trash2, Undo2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { observable } from 'mobx'
 
 interface DocTree extends Omit<IDoc, 'children'> {
   children?: DocTree[]
@@ -84,10 +85,13 @@ export const Trash = observer(() => {
     })
   }, [])
   const restore = useCallback(async (doc: IDoc, ipc = false) => {
-    let node: IDoc = {
-      ...doc,
-      children: []
-    }
+    let node: IDoc = observable(
+      {
+        ...doc,
+        children: []
+      },
+      { schema: false }
+    )
     const items: IDoc[] = [node]
     let restoreIds: string[] = []
     if (!doc.folder) {

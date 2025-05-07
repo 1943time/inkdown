@@ -10,6 +10,7 @@ import { Note } from '@/editor/Note'
 import { Settings } from './settings/Settings'
 import { ExportSpace } from './space/ExportSpace'
 import { ImportFolder } from './space/ImportFolder'
+import { SpaceFiles } from './space/Files'
 const Entry = observer(() => {
   const store = useStore()
   return (
@@ -36,6 +37,7 @@ const Entry = observer(() => {
       <Settings />
       <ExportSpace />
       <ImportFolder />
+      <SpaceFiles />
     </div>
   )
 })

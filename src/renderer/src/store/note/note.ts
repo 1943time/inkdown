@@ -31,6 +31,7 @@ const state = {
   selectedSpaceId: null as null | string,
   selectedSpace: null as null | ISpace,
   openExportSpace: false,
+  openSpaceFiles: false,
   dragStatus: null as null | {
     mode: 'enter' | 'top' | 'bottom'
     dropNode: null | IDoc
@@ -344,6 +345,7 @@ export class NoteStore extends StructStore<typeof state> {
       newTab?: boolean
     }
   ) {
+    if (!this.state.nodes[doc.id]) return
     const tab = this.state.currentTab
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
     if (index !== -1) {

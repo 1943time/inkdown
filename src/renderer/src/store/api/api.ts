@@ -247,12 +247,16 @@ export class ModelApi {
     return ipcRenderer.invoke('clearHistory', docId)
   }
 
-  async getFiles(spaceId: string): Promise<IFile[]> {
-    return ipcRenderer.invoke('getFiles', spaceId)
+  async getFiles(params: { spaceId: string; page: number; pageSize: number }): Promise<IFile[]> {
+    return ipcRenderer.invoke('getFiles', params)
   }
 
-  async createFile(file: IFile): Promise<void> {
-    return ipcRenderer.invoke('createFile', copy(file))
+  async clearAttachFiles(spaceId: string): Promise<void> {
+    return ipcRenderer.invoke('clearAttachFiles', spaceId)
+  }
+
+  async createFiles(files: IFile[]): Promise<void> {
+    return ipcRenderer.invoke('createFiles', files)
   }
 
   async deleteFiles(ids: string[]): Promise<void> {

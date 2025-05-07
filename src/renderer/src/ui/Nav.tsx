@@ -96,7 +96,7 @@ export const Nav = observer(() => {
                         }}
                       >
                         <FileText className={'flex-shrink-0'} size={14} />
-                        <span className={'ml-1'}>{store.note.getDocPath(d)}</span>
+                        <span className={'ml-1'}>{store.note.getDocPath(d).join('/')}</span>
                       </div>
                     )
                   })}
@@ -108,7 +108,7 @@ export const Nav = observer(() => {
                   'ml-1 drag-none text-xl flex items-center dark:text-gray-400 text-gray-500 rounded hover:bg-gray-200/80 dark:hover:bg-gray-100/10 px-1 cursor-pointer duration-200'
                 }
               >
-                <IBackLink />
+                <IBackLink className={'text-lg'} />
                 <span className={'text-base ml-1 text-blue-500'}>{backLinks.length}</span>
               </div>
             </Popover>

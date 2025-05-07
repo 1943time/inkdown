@@ -161,14 +161,10 @@ export class LocalFile {
       }
       md = window.api.fs.readFileSync(res.filePaths[0], { encoding: 'utf-8' })
       name = window.api.path.basename(res.filePaths[0])
-      // const schema = await this.getSingleDocSchemaByMd(md)
+      const schema = await this.store.worker.parseMarkdown(md)
       name = name.replace(/\.md$/, '')
-      // name = this.store.menu.getCreateName(parentNode, name)
-      // this.store.menu.createDoc({
-      //   parent: parentNode,
-      //   newName: name,
-      //   schema
-      // })
+      name = this.store.menu.getCreateName(name, parentNode)
+      this.store.menu.createDoc(parentNode.id, name, schema)
     } catch (e) {}
   }
 

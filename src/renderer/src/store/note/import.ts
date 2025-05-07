@@ -14,7 +14,7 @@ export class ImportNote {
     pathMap: Map<string, IDoc>
   }
   constructor(private readonly store: Store) {}
-  private findDocLinks(
+  findDocLinks(
     schema: any[],
     ctx: {
       root: string
@@ -132,12 +132,14 @@ export class ImportNote {
             item.id = id
             delete item.url
             await window.api.fs.cp(item.url, target)
-            await this.store.model.createFile({
-              name: id,
-              spaceId: this.store.note.state.currentSpace!.id,
-              created: Date.now(),
-              size: window.api.fs.statSync(target)?.size || 0
-            })
+            await this.store.model.createFiles([
+              {
+                name: id,
+                spaceId: this.store.note.state.currentSpace!.id,
+                created: Date.now(),
+                size: window.api.fs.statSync(target)?.size || 0
+              }
+            ])
             deepMedias.set(pathMap.get(path)!.id, [
               ...(deepMedias.get(pathMap.get(path)!.id) || []),
               id
@@ -185,6 +187,7 @@ export class ImportNote {
     const now = Date.now()
     const allMedias: any[] = []
     const linkMap = new Map<string, { links: any[]; wikiLinks: any[]; medias: any[] }>()
+    const parentPath = this.store.note.getDocPath(parent).join('/')
     const readDir = async (dir: string, parent: IDoc) => {
       const files = window.api.fs.readdirSync(dir)
       for (const f of files) {
@@ -192,7 +195,7 @@ export class ImportNote {
         const target = join(dir, f)
         const unixPath = toUnixPath(target)
         const stat = window.api.fs.statSync(target)
-        let spacePath = unixPath.replace(root + '/', '')
+        let spacePath = join(parentPath, unixPath.replace(join(root) + '/', ''))
         if (stat?.folder) {
           if (!pathMap.get(spacePath)?.folder) {
             const node: ImportDoc = {

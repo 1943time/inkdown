@@ -115,6 +115,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
         <div
           contentEditable={true}
           ref={inputRef}
+          spellCheck={false}
           onPaste={(e) => {
             e.preventDefault()
             const text = e.clipboardData.getData('text/plain')

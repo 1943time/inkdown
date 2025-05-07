@@ -8,8 +8,7 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 
 export class ContextMenu {
   constructor(private readonly store: Store) {}
-  getCreateName(name = 'Untitled', parent?: IDoc) {
-    if (!parent) return name
+  getCreateName(name = 'Untitled', parent: IDoc) {
     const start = name.match(/\s(\d+)$/)
     let index = start ? +start[1] : 0
     let cur = name
@@ -26,6 +25,12 @@ export class ContextMenu {
         text: '导出空间至本机',
         click: () => {
           this.store.note.setState({ openExportSpace: true })
+        }
+      },
+      {
+        text: '查看空间附件',
+        click: () => {
+          this.store.note.setState({ openSpaceFiles: true })
         }
       },
       { hr: true },
@@ -126,13 +131,13 @@ export class ContextMenu {
     if (!node.folder) {
       const menus: IMenu[] = [
         {
-          text: 'New Copy',
+          text: '新副本',
           click: async () => {
             this.createDoc(node.parentId || 'root', node.name, node.schema)
           }
         },
         {
-          text: 'Copy Markdown Source Code',
+          text: '复制Markdown源码',
           click: async () => {
             const res = await this.store.output.toMarkdown({
               node
@@ -141,7 +146,7 @@ export class ContextMenu {
           }
         },
         {
-          text: 'Open in New Tab',
+          text: '在新标签页打开',
           click: () => {
             this.store.note.createTab(node)
           },
@@ -153,7 +158,7 @@ export class ContextMenu {
           ...[
             { hr: true },
             {
-              text: 'Reveal in Finder',
+              text: '在Finder中显示',
               click: () => {
                 this.store.local.showInFinder(node)
               }
@@ -165,7 +170,7 @@ export class ContextMenu {
         ...[
           { hr: true },
           {
-            text: 'Move to Trash',
+            text: '移动到废纸篓',
             click: () => this.store.note.moveToTrash(node),
             key: 'cmd+backspace'
           }
@@ -177,13 +182,13 @@ export class ContextMenu {
     } else {
       const menus: IMenu[] = [
         {
-          text: 'New Doc',
+          text: '新文档',
           click: () => {
             this.createDoc(node.id)
           }
         },
         {
-          text: 'New Folder',
+          text: '新文件夹',
           click: () => {
             this.store.note.setState({ selectedDoc: null })
             this.store.note.openEditFolderDialog$.next({
@@ -194,7 +199,7 @@ export class ContextMenu {
       ]
       if (node.id !== 'root') {
         menus.push({
-          text: 'Rename',
+          text: '重命名',
           click: () => {
             this.store.note.setState({ selectedDoc: null })
             this.store.note.openEditFolderDialog$.next({
@@ -217,13 +222,13 @@ export class ContextMenu {
             hr: true
           },
           {
-            text: 'Import Markdown Doc',
+            text: '导入Markdown文档',
             click: () => {
-              // this.core.local.newDocFromlocal(node)
+              this.store.local.newDocFromlocal(node)
             }
           },
           {
-            text: 'Import Folder',
+            text: '导入文件夹',
             click: () => {
               this.store.note.openImportFolder$.next(node.id)
             }
@@ -235,7 +240,7 @@ export class ContextMenu {
           ...[
             { hr: true },
             {
-              text: 'Move to Trash',
+              text: '移动到废纸篓',
               click: () => this.store.note.moveToTrash(node),
               key: 'cmd+backspace'
             }

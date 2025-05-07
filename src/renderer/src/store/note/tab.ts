@@ -606,7 +606,7 @@ export class TabStore extends StructStore<typeof state> {
             if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'].includes(ext)) {
               await this.store.system.writeFile(f, id)
               const stat = window.api.fs.statSync(f)
-              ids.push({ id, size: stat.size })
+              ids.push({ id, size: stat?.size || 0 })
             }
           } else {
             if (f.type.startsWith('image/')) {
@@ -631,6 +631,15 @@ export class TabStore extends StructStore<typeof state> {
         if (next?.[0].type === 'paragraph' && !Node.string(next[0])) {
           Transforms.delete(this.editor, { at: next[1] })
         }
+        const now = Date.now()
+        this.store.model.createFiles(
+          ids.map((p) => ({
+            name: p.id,
+            size: p.size,
+            spaceId: this.note.state.currentSpace?.id!,
+            created: now
+          }))
+        )
         this.selChange$.next(
           this.editor.selection ? Path.parent(this.editor.selection.anchor.path) : null
         )
