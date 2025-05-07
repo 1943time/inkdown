@@ -3,7 +3,9 @@ import { IFold } from '@/icons/IFold'
 import { os } from '@/utils/common'
 import { Fragment, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
-import { Bot, ChevronLeft, ChevronRight, Ellipsis, Plus } from 'lucide-react'
+import { Bot, ChevronLeft, ChevronRight, Ellipsis, FileText, Plus } from 'lucide-react'
+import { Popover } from 'antd'
+import { IBackLink } from '@/icons/IBackLink'
 export const Nav = observer(() => {
   const store = useStore()
   const { foldSideBar: fold } = store.settings.state
@@ -14,6 +16,12 @@ export const Nav = observer(() => {
     }
     return [os() === 'mac' ? 76 : 10, osType === 'mac' ? 120 : 40]
   }, [fold])
+  const backLinks = useMemo(() => {
+    if (!store.note.state.opendDoc) return []
+    return Object.values(store.note.state.nodes).filter((d) =>
+      d.links?.includes(store.note.state.opendDoc.id)
+    )
+  }, [store.note.state.opendDoc])
   const path = useMemo(() => {
     if (!store.note.state.opendDoc) return []
     return store.note.getDocPath(store.note.state.opendDoc)
@@ -68,6 +76,43 @@ export const Nav = observer(() => {
               <ChevronRight size={20} />
             </div>
           </div>
+          {!!backLinks?.length && (
+            <Popover
+              trigger={['click']}
+              title={null}
+              styles={{ body: { padding: 8 } }}
+              arrow={false}
+              content={
+                <div>
+                  {backLinks.map((d) => {
+                    return (
+                      <div
+                        key={d.id}
+                        className={
+                          'flex items-center px-2 py-0.5 cursor-pointer rounded duration-200 dark:hover:bg-gray-100/10 hover:bg-gray-200/70'
+                        }
+                        onClick={() => {
+                          store.note.openDoc(d)
+                        }}
+                      >
+                        <FileText className={'flex-shrink-0'} size={14} />
+                        <span className={'ml-1'}>{store.note.getDocPath(d)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              }
+            >
+              <div
+                className={
+                  'ml-1 drag-none text-xl flex items-center dark:text-gray-400 text-gray-500 rounded hover:bg-gray-200/80 dark:hover:bg-gray-100/10 px-1 cursor-pointer duration-200'
+                }
+              >
+                <IBackLink />
+                <span className={'text-base ml-1 text-blue-500'}>{backLinks.length}</span>
+              </div>
+            </Popover>
+          )}
           <div
             className={
               'hide-scrollbar overflow-x-auto ml-3 dark:text-gray-300 text-gray-500 text-sm flex items-center h-full flex-1 w-0'

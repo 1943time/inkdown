@@ -10,7 +10,7 @@ export class ImportNote {
   private dataCache?: {
     root: string
     linkMap: Map<string, { links: any[]; wikiLinks: any[]; medias: any[] }>
-    insertNodes: IDoc[]
+    insertNodes: ImportDoc[]
     pathMap: Map<string, IDoc>
   }
   constructor(private readonly store: Store) {}
@@ -72,7 +72,7 @@ export class ImportNote {
     return { links, wikiLinks, medias }
   }
   async insertFiles() {
-    const { insertNodes, linkMap, root, pathMap } = this.dataCache!
+    const { insertNodes, linkMap, pathMap } = this.dataCache!
     const { join, isAbsolute, extname } = window.api.path
     const { existsSync } = window.api.fs
     const assetsPath = await this.store.system.getAssetsPath()
@@ -83,9 +83,10 @@ export class ImportNote {
         for (const item of links.links) {
           if (!isLink(item.url)) {
             const urlPath = item.url.replace(/\.md$/i, '')
-            const node = pathMap.get(isAbsolute(urlPath) ? urlPath : join(path, urlPath))
+            const node = pathMap.get(isAbsolute(urlPath) ? urlPath : join(path, '..', urlPath))
             if (node) {
               item.docId = node.id
+              delete item.url
               deepDenceLink.set(pathMap.get(path)!.id, [
                 ...(deepDenceLink.get(pathMap.get(path)!.id) || []),
                 node.id
@@ -119,9 +120,7 @@ export class ImportNote {
         for (const item of links.medias) {
           const name = item.url.split(window.api.path.sep).pop()
           const target = join(assetsPath, name)
-
           if (existsSync(target)) {
-            console.log('1', name)
             item.id = name
             deepMedias.set(pathMap.get(path)!.id, [
               ...(deepMedias.get(pathMap.get(path)!.id) || []),
@@ -130,7 +129,6 @@ export class ImportNote {
             delete item.url
           } else {
             const id = nid() + extname(name)
-            console.log('2', id)
             item.id = id
             delete item.url
             await window.api.fs.cp(item.url, target)
@@ -149,6 +147,9 @@ export class ImportNote {
       }
     }
     for (const doc of insertNodes) {
+      if (doc.isset) {
+        continue
+      }
       await this.store.model.createDoc({
         id: doc.id,
         name: doc.name,
@@ -176,6 +177,7 @@ export class ImportNote {
       properties: ['openDirectory']
     })
     if (!res.filePaths.length) return
+    this.dataCache = undefined
     const root = res.filePaths[0]
     const { join } = window.api.path
     const insertNodes: ImportDoc[] = []
@@ -190,7 +192,7 @@ export class ImportNote {
         const target = join(dir, f)
         const unixPath = toUnixPath(target)
         const stat = window.api.fs.statSync(target)
-        const spacePath = unixPath.replace(root + '/', '')
+        let spacePath = unixPath.replace(root + '/', '')
         if (stat?.folder) {
           if (!pathMap.get(spacePath)?.folder) {
             const node: ImportDoc = {
@@ -210,8 +212,14 @@ export class ImportNote {
             await readDir(target, node)
           } else {
             await readDir(target, pathMap.get(spacePath)!)
+            insertNodes.push({
+              ...pathMap.get(spacePath)!,
+              path: spacePath,
+              isset: pathMap.has(spacePath)
+            })
           }
-        } else if (f.endsWith('.md') && stat?.size && stat.size < 1 * mb) {
+        } else if (/\.md$/i.test(f) && stat?.size && stat.size < 1 * mb) {
+          spacePath = spacePath.replace(/\.md$/i, '')
           const node: ImportDoc = {
             id: nid(),
             name: f.replace(/\.md$/, ''),

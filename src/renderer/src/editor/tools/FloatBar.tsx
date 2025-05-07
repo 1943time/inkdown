@@ -79,7 +79,6 @@ const colors = [
   { color: 'rgba(217,70,239,1)' },
   { color: 'rgba(14, 165, 233, 1)' }
 ]
-// const fileMap = new Map<string, IFileItem>()
 const FloatBarWidth = 246
 export const FloatBar = observer(() => {
   const tab = useTab()
@@ -104,7 +103,7 @@ export const FloatBar = observer(() => {
       state.openInsertLink = true
       tab.refreshHighlight()
     })
-  }, [])
+  }, [tab.editor])
   const sel = useRef<BaseRange>(null)
   const el = useRef<NodeEntry<any>>(null)
   useEffect(() => {

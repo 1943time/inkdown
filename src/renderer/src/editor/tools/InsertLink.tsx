@@ -245,26 +245,29 @@ export const InsertLink = observer(() => {
     }
   }, [tab.state.openInsertLink])
 
-  const close = useCallback((data?: { url?: string; docId?: string; hash?: string } | null) => {
-    tab.container!.parentElement?.removeEventListener('wheel', prevent)
-    setState({ open: false })
-    Transforms.select(tab.editor, selRef.current!)
-    EditorUtils.focus(tab.editor)
-    if (data === null) {
-      Transforms.setNodes(
-        tab.editor,
-        { url: undefined, docId: undefined, hash: undefined },
-        { match: Text.isText, split: true }
-      )
-    }
-    if (data) {
-      Transforms.setNodes(tab.editor, { ...data }, { match: Text.isText, split: true })
-    }
-    window.removeEventListener('keydown', keydown)
-    tab.setState((state) => {
-      state.openInsertLink = false
-    })
-  }, [])
+  const close = useCallback(
+    (data?: { url?: string; docId?: string; hash?: string } | null) => {
+      tab.container?.parentElement?.removeEventListener('wheel', prevent)
+      setState({ open: false })
+      Transforms.select(tab.editor, selRef.current!)
+      EditorUtils.focus(tab.editor)
+      if (data === null) {
+        Transforms.setNodes(
+          tab.editor,
+          { url: undefined, docId: undefined, hash: undefined },
+          { match: Text.isText, split: true }
+        )
+      }
+      if (data) {
+        Transforms.setNodes(tab.editor, { ...data }, { match: Text.isText, split: true })
+      }
+      window.removeEventListener('keydown', keydown)
+      tab.setState((state) => {
+        state.openInsertLink = false
+      })
+    },
+    [tab]
+  )
   if (!state.open) return null
   return createPortal(
     <div className={'fixed z-[100] inset-0'} onClick={() => close()}>

@@ -46,6 +46,9 @@ export const ImportFolder = observer(() => {
     try {
       setState({ loading: true })
       await store.import.insertFiles()
+      store.note.selectSpace(store.note.state.currentSpace!.id)
+      store.msg.success('导入成功')
+      setState({ open: false })
     } catch (e) {
       console.error(e)
     } finally {
