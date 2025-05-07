@@ -136,9 +136,6 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
             onDragStart={action((e) => {
               store.note.state.dragNode = item
               el.current!.style.opacity = '0.5'
-              // if (item === store.note.state.opendDoc && store.note.state.currentTab.store.docChanged) {
-              //   store.note.state.currentTab.store.saveDoc$.next(null)
-              // }
             })}
             onContextMenu={(e) => {
               e.preventDefault()
@@ -160,11 +157,11 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
           >
             <div
               className={`
-            ${item.folder && store.note.state.dragNode?.id !== item.id && store.note.state.dragStatus?.dropNode === item && store.note.state.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
+            ${!!item.folder && store.note.state.dragNode?.id !== item.id && store.note.state.dragStatus?.dropNode === item && store.note.state.dragStatus.mode === 'enter' ? 'dark:border-white/30 border-black/30' : 'border-transparent'}
             flex items-center h-full rounded pr-2 border
             `}
             >
-              {item.folder && (
+              {!!item.folder && (
                 <div className={'w-4 h-full flex items-center justify-center'}>
                   <ChevronRight
                     size={16}
@@ -205,7 +202,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
           )}
         </div>
       </div>
-      {item.folder && !!item.children?.length && !!item.expand && (
+      {!!item.folder && !!item.children?.length && !!item.expand && (
         <RenderItem items={item.children} level={level + 1} />
       )}
     </Fragment>

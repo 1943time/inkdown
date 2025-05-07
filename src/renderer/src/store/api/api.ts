@@ -13,6 +13,23 @@ import {
 } from 'types/model'
 const ipcRenderer = window.electron.ipcRenderer
 export class ModelApi {
+  private transformDoc(doc: IDoc): IDoc {
+    return {
+      ...doc,
+      folder: Boolean(doc.folder),
+      links: doc.links ? JSON.parse(doc.links as unknown as string) : [],
+      medias: doc.medias ? JSON.parse(doc.medias as unknown as string) : [],
+      schema: doc.schema ? JSON.parse(doc.schema as unknown as string) : undefined
+    }
+  }
+  private serializeDoc(doc: Partial<IDoc>) {
+    return {
+      ...doc,
+      schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
+      links: doc.links ? JSON.stringify(doc.links) : undefined,
+      medias: doc.medias ? JSON.stringify(doc.medias) : undefined
+    }
+  }
   async getChats(): Promise<IChatTable[]> {
     return ipcRenderer.invoke('getChats')
   }
@@ -170,18 +187,17 @@ export class ModelApi {
   async getDocs(spaceId: string, deleted?: boolean): Promise<IDoc[]> {
     return ipcRenderer.invoke('getDocs', spaceId, deleted).then((docs: IDoc[]) => {
       return docs.map((d) => {
-        return {
-          ...d,
-          folder: Boolean(d.folder),
-          links: d.links ? JSON.parse(d.links as unknown as string) : [],
-          medias: d.medias ? JSON.parse(d.medias as unknown as string) : []
-        }
+        return this.transformDoc(d)
       })
     })
   }
 
   async getDocsByParentId(parentId: string): Promise<IDoc[]> {
-    return ipcRenderer.invoke('getDocsByParentId', parentId)
+    return ipcRenderer.invoke('getDocsByParentId', parentId).then((docs: IDoc[]) => {
+      return docs.map((d) => {
+        return this.transformDoc(d)
+      })
+    })
   }
 
   async clearDocs(spaceId: string, ids: string[]): Promise<void> {
@@ -189,12 +205,7 @@ export class ModelApi {
   }
 
   async createDoc(doc: IDoc): Promise<void> {
-    return ipcRenderer.invoke('createDoc', {
-      ...doc,
-      schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
-      links: doc.links ? JSON.stringify(doc.links) : undefined,
-      medias: doc.medias ? JSON.stringify(doc.medias) : undefined
-    })
+    return ipcRenderer.invoke('createDoc', this.serializeDoc(doc))
   }
 
   async updateDoc(
@@ -204,29 +215,14 @@ export class ModelApi {
   ): Promise<void> {
     console.log('ctx', ctx)
 
-    return ipcRenderer.invoke(
-      'updateDoc',
-      id,
-      {
-        ...doc,
-        schema: doc.schema ? JSON.stringify(doc.schema) : undefined,
-        links: doc.links ? JSON.stringify(doc.links) : undefined,
-        medias: doc.medias ? JSON.stringify(doc.medias) : undefined
-      },
-      ctx
-    )
+    return ipcRenderer.invoke('updateDoc', id, this.serializeDoc(doc), ctx)
   }
 
   async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
     return ipcRenderer.invoke(
       'updateDocs',
       docs.map((d) => {
-        return {
-          ...d,
-          schema: d.schema ? JSON.stringify(d.schema) : undefined,
-          links: d.links ? JSON.stringify(d.links) : undefined,
-          medias: d.medias ? JSON.stringify(d.medias) : undefined
-        }
+        return this.serializeDoc(d)
       })
     )
   }
@@ -237,13 +233,7 @@ export class ModelApi {
 
   async getDoc(id: string): Promise<IDoc | null> {
     return ipcRenderer.invoke('getDoc', id).then((doc) => {
-      return {
-        ...doc,
-        folder: Boolean(doc?.folder),
-        schema: doc?.schema ? JSON.parse(doc.schema as unknown as string) : undefined,
-        links: doc?.links ? JSON.parse(doc.links as unknown as string) : [],
-        medias: doc?.medias ? JSON.parse(doc.medias as unknown as string) : []
-      }
+      return this.transformDoc(doc)
     })
   }
 

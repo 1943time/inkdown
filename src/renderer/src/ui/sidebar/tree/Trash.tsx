@@ -1,11 +1,10 @@
-import { Empty, Popover } from 'antd'
+import { Empty, Popconfirm, Popover } from 'antd'
 import { Fragment, useCallback } from 'react'
 import { IDoc } from 'types/model'
 import { useGetSetState } from 'react-use'
 import { useStore } from '@/store/store'
-import { ChevronRight, FileText, FolderClosed, Trash2, Undo2 } from 'lucide-react'
+import { ChevronRight, FileText, FolderClosed, TicketSlash, Trash2, Undo2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { TextHelp } from '@/ui/common/HelpText'
 
 interface DocTree extends Omit<IDoc, 'children'> {
   children?: DocTree[]
@@ -131,6 +130,14 @@ export const Trash = observer(() => {
       draft.nodes[doc.parentId || 'root'].children = draft.nodes[
         doc.parentId || 'root'
       ].children!.sort((a, b) => (a.sort! > b.sort! ? 1 : -1))
+      store.model.updateDocs(
+        draft.nodes[doc.parentId || 'root'].children!.map((n) => {
+          return {
+            id: n.id,
+            sort: n.sort
+          }
+        })
+      )
     })
     const removeDocs = state().removeDocs.filter((d) => d.id !== doc.id)
     setState({
@@ -178,7 +185,7 @@ export const Trash = observer(() => {
       }}
       styles={{ body: { padding: 0 } }}
       content={
-        <div className={'h-[300px] pt-2 pb-5 flex flex-col relative'}>
+        <div className={'h-[300px] pt-2 pb-7 flex flex-col relative'}>
           <div
             className={
               'w-[380px] overflow-y-auto px-2 pt-2 text-gray-600 dark:text-gray-300 flex-1'
@@ -200,13 +207,24 @@ export const Trash = observer(() => {
               onDelete={deleteDoc}
             />
           </div>
-          <div className={'absolute text-center right-1 bottom-1'}>
-            <TextHelp
-              text={
-                'The document will remain here for 30 days, after which it will be permanently deleted.'
-              }
-            />
-          </div>
+          {!!state().removeDocs.length && (
+            <Popconfirm
+              title={'提示'}
+              description={'是否确定要永久删除所有文档？'}
+              okButtonProps={{ danger: true, type: 'default' }}
+              styles={{ root: { width: 260 } }}
+              onConfirm={clearDocs}
+              disabled={state().loading}
+            >
+              <div
+                className={
+                  'ml-2 p-1 right-1 bottom-1 absolute rounded hover:bg-gray-100 cursor-pointer text-gray-600 dark:text-gray-300 dark:hover:bg-gray-100/10'
+                }
+              >
+                <TicketSlash size={16} />
+              </div>
+            </Popconfirm>
+          )}
         </div>
       }
     >

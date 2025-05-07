@@ -145,7 +145,7 @@ export const EditSpace = observer(() => {
       width={400}
       title={
         <div className={'flex items-center'}>
-          <IWorkspace className={'mr-1 text-sm'} />
+          <IWorkspace className={'mr-1 text-lg'} />
           <span className={'text-sm'}>{'创建工作空间'}</span>
         </div>
       }
