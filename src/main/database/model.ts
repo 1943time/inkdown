@@ -152,6 +152,14 @@ export const initModel = async () => {
       })
     }
   })
+  await knex.schema.hasTable('keyboard').then((exists) => {
+    if (!exists) {
+      return knex.schema.createTable('keyboard', (t) => {
+        t.string('task').primary()
+        t.text('key')
+      })
+    }
+  })
 
   await knex.schema.hasTable('docFts').then(async (exists) => {
     if (!exists) {

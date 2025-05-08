@@ -52,7 +52,7 @@ const tools = [
     tooltip: (
       <div className={'text-sm flex items-center space-x-1'}>
         <Mod />
-        <ArrowBigUp size={16} />
+        <Option size={13} />
         <span>S</span>
       </div>
     )
@@ -62,7 +62,7 @@ const tools = [
     icon: <Code className={'ml-[1px]'} size={16} />,
     tooltip: (
       <div className={'text-sm flex items-center space-x-0.5'}>
-        <Option size={14} />
+        <Option size={13} />
         <span>`</span>
       </div>
     )

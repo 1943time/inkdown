@@ -6,6 +6,7 @@ import {
   IDoc,
   IFile,
   IHistory,
+  IKeyboard,
   IMessage,
   IPrompt,
   ISetting,
@@ -280,5 +281,11 @@ export class ModelApi {
     ctx: { text: string; docId: string }[]
   } | null> {
     return ipcRenderer.invoke('fetchSpaceContext', { query, spaceId })
+  }
+  async getKeyboards(): Promise<IKeyboard[]> {
+    return ipcRenderer.invoke('getKeyboards')
+  }
+  async putKeyboard(keyboard: IKeyboard): Promise<void> {
+    return ipcRenderer.invoke('putKeyboard', keyboard)
   }
 }

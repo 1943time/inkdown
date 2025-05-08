@@ -153,3 +153,8 @@ export interface IFile {
   size: number
   spaceId: string
 }
+
+export interface IKeyboard {
+  task: string
+  key: string
+}

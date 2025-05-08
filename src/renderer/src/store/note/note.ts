@@ -101,16 +101,6 @@ export class NoteStore extends StructStore<typeof state> {
     window.addEventListener('keydown', (e) => {
       if (this.store.settings.state.fullChatBot) return
       const editor = this.state.currentTab.editor
-      if (isHotkey('mod+t', e)) {
-        this.createTab()
-      }
-      if (isHotkey('mod+w', e)) {
-        if (this.state.tabs.length > 1) {
-          e.preventDefault()
-          this.removeTab(this.state.tabIndex)
-        }
-      }
-
       if (isHotkey('mod+c', e) && this.state.opendDoc) {
         const [node] = Editor.nodes(editor, {
           match: (n) => n.type === 'media'

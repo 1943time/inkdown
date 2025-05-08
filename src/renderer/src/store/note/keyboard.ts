@@ -3,7 +3,6 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
 import { ReactEditor } from 'slate-react'
 import { getDomRect, getOffsetLeft, getOffsetTop } from '@/utils/dom'
-
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
   get store() {
@@ -395,6 +394,9 @@ export class KeyboardTask {
         { select: true }
       )
     }
+  }
+  save() {
+    this.tab.saveDoc$.next(true)
   }
 
   horizontalLine() {

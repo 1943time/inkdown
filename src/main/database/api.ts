@@ -1,6 +1,16 @@
 import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
-import { IChat, IMessage, ISetting, IClient, ISpace, IDoc, IHistory, IFile } from 'types/model'
+import {
+  IChat,
+  IMessage,
+  ISetting,
+  IClient,
+  ISpace,
+  IDoc,
+  IHistory,
+  IFile,
+  IKeyboard
+} from 'types/model'
 import { omit, prepareFtsTokens } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
@@ -546,6 +556,18 @@ ipcMain.handle('clearHistory', async (_, docId: string) => {
   return knex('history').where('docId', docId).delete()
 })
 
+ipcMain.handle('getKeyboards', async () => {
+  return knex('keyboard').select()
+})
+
+ipcMain.handle('putKeyboard', async (_, record: IKeyboard) => {
+  const exists = await knex('keyboard').where('task', record.task).first()
+  if (exists) {
+    return knex('keyboard').where('task', record.task).update({ key: record.key })
+  } else {
+    return knex('keyboard').insert(record)
+  }
+})
 ipcMain.handle(
   'getFiles',
   async (_, params: { spaceId: string; page: number; pageSize: number }) => {

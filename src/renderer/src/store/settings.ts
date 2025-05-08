@@ -125,6 +125,14 @@ export class SettingsStore extends StructStore<typeof state> {
       this.callbacks = []
     }
   }
+
+  toggleChatBot() {
+    if (this.state.showChatBot) {
+      this.setSetting('showChatBot', false)
+    } else {
+      this.setSetting('showChatBot', true)
+    }
+  }
   async setSetting<T extends typeof state, U extends keyof T>(key: U, value: T[U]) {
     await this.store.model.putSetting({ key: key as string, value })
     this.setState((state) => {

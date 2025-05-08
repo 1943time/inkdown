@@ -111,7 +111,9 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       }
     }
   }, [])
-
+  useSubject(tab.saveDoc$, () => {
+    save()
+  })
   const reset = useCallback((data: any[] | null, ipc = false) => {
     // if (data && nodeRef.current) {
     //   store.initializing = true
