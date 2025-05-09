@@ -183,7 +183,7 @@ export const FullSearch = observer(() => {
     }
   }, [store.note.state.view])
   return (
-    <div className={'h-full flex flex-col'}>
+    <div className={'h-full flex flex-col px-2 mt-1'}>
       <div className={'flex mb-2 px-1'}>
         <div
           onClick={() => store.note.setState({ view: 'folder' })}
@@ -192,7 +192,7 @@ export const FullSearch = observer(() => {
           }
         >
           <ArrowLeft size={18} />
-          <span className={'ml-1'}>Return</span>
+          <span className={'ml-1'}>返回</span>
         </div>
       </div>
       <div className={'px-2 relative'}>
@@ -213,7 +213,7 @@ export const FullSearch = observer(() => {
           placeholder={true ? '搜索' : 'Search'}
         />
       </div>
-      <div className={'pt-3 pb-10 px-5 space-y-3 flex-1 h-0 flex-shrink-0 overflow-y-auto'}>
+      <div className={'pt-3 pb-10 space-y-3 flex-1 h-0 flex-shrink-0 overflow-y-auto'}>
         {!state().searching && !state().searchResults.length && store.note.state.searchKeyWord && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>

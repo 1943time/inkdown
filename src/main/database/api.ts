@@ -501,33 +501,17 @@ ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: str
 
 ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
   const tokens = prepareFtsTokens(text)
-
-  const likeResults = await knex.raw(
-    `
-    SELECT docId
-    FROM docFts
-    WHERE spaceId = ? AND text LIKE ?
-    `,
-    [spaceId, `%${text}%`]
-  )
-
-  const matchResults = await knex.raw(
+  const results = await knex.raw(
     `
     SELECT docId, bm25(docFts) AS score
     FROM docFts
     WHERE spaceId = ?
-    ${likeResults.length > 0 ? 'AND docId NOT IN (' + likeResults.map((r: any) => `'${r.docId}'`).join(',') + ')' : ''}
     AND words MATCH ?
     ORDER BY score ASC
     LIMIT 30
     `,
     [spaceId, tokens.join(' OR ')]
   )
-
-  const results = [
-    ...likeResults.map((result: any) => ({ docId: result.docId, rank: 1.0 })),
-    ...matchResults.map((result: any) => ({ docId: result.docId, rank: 0.3 }))
-  ]
 
   const docs = await knex('doc')
     .where('spaceId', spaceId)

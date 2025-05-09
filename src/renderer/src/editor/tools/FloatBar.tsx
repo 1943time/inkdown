@@ -12,7 +12,7 @@ import { BaseRange, Editor, NodeEntry, Range, Transforms } from 'slate'
 import { Tooltip } from 'antd'
 import { EditorUtils } from '../utils/editorUtils'
 import { getSelRect } from '../utils/dom'
-import { ArrowBigUp, ChevronUp, Code, Command, Option, Slash } from 'lucide-react'
+import { ChevronUp, Code, Command, Option, Slash } from 'lucide-react'
 import { os } from '@/utils/common'
 import { useTab } from '@/store/note/TabCtx'
 import { useGetSetState } from 'react-use'
@@ -28,44 +28,19 @@ function Mod() {
 const tools = [
   {
     type: 'bold',
-    icon: <BoldOutlined />,
-    tooltip: (
-      <div className={'text-sm flex items-center space-x-1'}>
-        <Mod />
-        <span>B</span>
-      </div>
-    )
+    icon: <BoldOutlined />
   },
   {
     type: 'italic',
-    icon: <ItalicOutlined />,
-    tooltip: (
-      <div className={'text-sm flex items-center space-x-1'}>
-        <Mod />
-        <span>I</span>
-      </div>
-    )
+    icon: <ItalicOutlined />
   },
   {
     type: 'strikethrough',
-    icon: <StrikethroughOutlined />,
-    tooltip: (
-      <div className={'text-sm flex items-center space-x-1'}>
-        <Mod />
-        <Option size={13} />
-        <span>S</span>
-      </div>
-    )
+    icon: <StrikethroughOutlined />
   },
   {
     type: 'code',
-    icon: <Code className={'ml-[1px]'} size={16} />,
-    tooltip: (
-      <div className={'text-sm flex items-center space-x-0.5'}>
-        <Option size={13} />
-        <span>`</span>
-      </div>
-    )
+    icon: <Code className={'ml-[1px]'} size={16} />
   }
 ]
 
@@ -248,25 +223,23 @@ export const FloatBar = observer(() => {
               </div>
             </div>
             {tools.map((t) => (
-              <Tooltip title={t.tooltip} key={t.type} mouseEnterDelay={0.3}>
-                <div
-                  key={t.type}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    tab.keyboard.toggleFormat(t.type as any)
-                    refresh()
-                  }}
-                  className={`${
-                    EditorUtils.isFormatActive(tab.editor, t.type)
-                      ? 'text-blue-500 '
-                      : 'dark:hover:text-gray-200 hover:text-gray-600'
-                  }
+              <div
+                key={t.type}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={(e) => {
+                  tab.keyboard.toggleFormat(t.type as any)
+                  refresh()
+                }}
+                className={`${
+                  EditorUtils.isFormatActive(tab.editor, t.type)
+                    ? 'text-blue-500 '
+                    : 'dark:hover:text-gray-200 hover:text-gray-600'
+                }
               cursor-pointer py-0.5 ${t.type !== 'code' ? 'px-2' : 'px-1.5'} dark:hover:bg-gray-100/10 hover:bg-gray-200/50
               `}
-                >
-                  {t.icon}
-                </div>
-              </Tooltip>
+              >
+                {t.icon}
+              </div>
             ))}
             <div className={'h-full w-[1px] dark:bg-gray-200/10 bg-gray-200 flex-shrink-0'} />
             <div

@@ -4,6 +4,7 @@ import { TextMatchNodes } from '../elements'
 import { TabStore } from '@/store/note/tab'
 
 export class MatchKey {
+  private timer = 0
   get editor() {
     return this.tab.editor
   }
@@ -29,6 +30,8 @@ export class MatchKey {
     if (!node || ['code'].includes(node[0].type)) return
     const sel = this.editor.selection
     if (!sel || !Range.isCollapsed(sel)) return
+    const leaf = Node.leaf(this.editor, sel.anchor.path)
+    if (!leaf) return
     for (let n of TextMatchNodes) {
       // 配置开启
       if (n.type === 'inlineKatex' && !this.tab.store.settings.state.autoConvertInlineFormula) {
@@ -36,13 +39,16 @@ export class MatchKey {
       }
       if (typeof n.matchKey === 'object' ? n.matchKey.test(e.key) : n.matchKey === e.key) {
         if (n.checkAllow && !n.checkAllow({ editor: this.editor, node, sel })) continue
-        const str =
-          Node.string(Node.leaf(this.editor, sel.anchor.path)).slice(0, sel.anchor.offset) + e.key
-        const m = str.match(n.reg)
-        if (m) {
-          if (n.run(this.createParams(node, m))) {
-            e.preventDefault()
+        try {
+          const str = Node.string(leaf).slice(0, sel.anchor.offset) + e.key
+          const m = str.match(n.reg)
+          if (m) {
+            if (n.run(this.createParams(node, m))) {
+              e.preventDefault()
+            }
           }
+        } catch (e) {
+          console.error(e)
         }
       }
     }
