@@ -52,7 +52,7 @@ export const Chat = observer(() => {
           <div
             className={`flex pl-1 pr-2 justify-between items-center h-full ${store.settings.state.fullChatBot && os() === 'mac' ? 'pl-20' : ''}`}
           >
-            <div className={'flex items-center drag-none'}>
+            <div className={'flex items-center drag-none flex-1 w-0'}>
               <div
                 className={'nav-action'}
                 onClick={() => {

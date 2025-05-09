@@ -79,16 +79,16 @@ export const SwitchModel = observer(() => {
         }))
       }}
     >
-      <div className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer'}>
+      <div className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer w-full'}>
         {ready && (
           <>
-            <div className={'flex items-center'}>
+            <div className={'flex items-center flex-1 w-0'}>
               {chatModel ? (
                 <ModelIcon mode={chatModel.mode} size={17} />
               ) : (
                 <OpenAI.Avatar size={20} />
               )}
-              <span className={'ml-1.5 text-sm flex-1 dark:text-white/90'}>
+              <span className={'ml-1.5 text-sm dark:text-white/90 max-w-full truncate'}>
                 {chatModel ? modelToLabel(chatModel.model) : '您暂未添加模型'}
               </span>
             </div>

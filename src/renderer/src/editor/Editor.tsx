@@ -290,9 +290,11 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.editor.selection = null
       tab.selChange$.next(null)
     }
+
     tab.setState((state) => {
       state.focus = false
       state.openLangCompletion = false
+      state.domRect = null
     })
   }, [])
 

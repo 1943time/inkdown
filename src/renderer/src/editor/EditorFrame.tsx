@@ -44,7 +44,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
           tab.container = dom as HTMLDivElement
         }}
       >
-        <Search tab={tab} />
+        <Search />
         {!!tab.state.doc && (
           <>
             <div className={`items-start min-h-[calc(100vh_-_40px)] relative`} onClick={click}>

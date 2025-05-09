@@ -82,7 +82,6 @@ const colors = [
 const FloatBarWidth = 246
 export const FloatBar = observer(() => {
   const tab = useTab()
-  const inputRef = useRef<any>(null)
   const [state, setState] = useGetSetState({
     open: false,
     left: 0,
@@ -110,6 +109,8 @@ export const FloatBar = observer(() => {
     if (tab.state.showFloatBar) {
       setState({ open: true })
       resize(tab.state.domRect)
+    } else {
+      setState({ open: false })
     }
   }, [tab.state.showFloatBar])
 
@@ -148,7 +149,7 @@ export const FloatBar = observer(() => {
     } else {
       setState({ open: false })
     }
-  }, [tab.state.domRect])
+  }, [tab.state.domRect, tab.store.settings.state.showChatBot])
 
   useEffect(() => {
     if (state().open) {

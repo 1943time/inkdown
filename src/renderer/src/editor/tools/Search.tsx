@@ -5,46 +5,56 @@ import { ArrowRightOutlined, DownOutlined, UpOutlined } from '@ant-design/icons'
 import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
 import { Replace, X } from 'lucide-react'
-import { useGetSetState } from 'react-use'
-import { TabStore } from '@/store/note/tab'
 import { observer } from 'mobx-react-lite'
+import { useTab } from '@/store/note/TabCtx'
 
-export const Search = observer(({ tab }: { tab: TabStore }) => {
-  const [state, setState] = useGetSetState({
-    replaceText: '',
-    openReplace: false
-  })
+export const Search = observer(() => {
+  const tab = useTab()
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     setTimeout(() => inputRef.current?.focus())
   }, [tab.state.openSearch, tab.state.focusSearch])
 
   const replace = useCallback(() => {
-    if (!tab.state.search.searchRanges.length) {
+    if (!tab.searchRanges.length) {
       tab.matchSearch(true)
     } else {
-      const cur = tab.state.search.searchRanges[tab.state.search.index]
+      const cur = tab.searchRanges[tab.state.search.index]
       if (cur?.range) {
         const node = Editor.node(tab.editor, cur.range.anchor.path)
         const text = node[0]?.text as string
         if (text) {
-          Transforms.insertText(tab.editor, state().replaceText, {
+          Transforms.insertText(tab.editor, tab.state.search.replaceText, {
             at: cur.range
           })
         }
       } else if (cur.editorPath) {
         const code = tab.codeMap.get(cur.editorPath)
         if (code) {
-          code.session.replace(cur.aceRange!, state().replaceText)
+          code.session.replace(cur.aceRange!, tab.state.search.replaceText)
         }
       }
       tab.matchSearch(true)
     }
   }, [])
 
+  useEffect(() => {
+    if (tab.state.openSearch) {
+      const close = (e: KeyboardEvent) => {
+        if (isHotkey('esc', e)) {
+          tab.setOpenSearch(false)
+          EditorUtils.focus(tab.editor)
+        }
+      }
+      window.addEventListener('keydown', close)
+      return () => {
+        window.removeEventListener('keydown', close)
+      }
+    }
+  }, [tab.state.openSearch])
   const replaceAll = useCallback(() => {
     if (!tab.state.search.keyword) return
-    const ranges = tab.state.search.searchRanges
+    const ranges = tab.searchRanges
     if (!ranges.length) {
       tab.matchSearch(true)
     } else {
@@ -82,8 +92,8 @@ export const Search = observer(({ tab }: { tab: TabStore }) => {
         }
       }
       tab.highlightCache.clear()
+      tab.searchRanges = []
       tab.setState((state) => {
-        state.search.searchRanges = []
         state.search.index = 0
       })
     }
@@ -115,7 +125,9 @@ export const Search = observer(({ tab }: { tab: TabStore }) => {
               />
               <div
                 className={`absolute right-1 top-1/2 -mt-[10px] p-0.5 rounded-sm cursor-pointer ${tab.state.openReplace ? 'bg-black/10 dark:bg-white/20' : ''}`}
-                onClick={() => setState({ openReplace: !tab.state.openReplace })}
+                onClick={() => {
+                  tab.setState({ openReplace: !tab.state.openReplace })
+                }}
               >
                 <Replace className={'w-4 h-4 dark:text-gray-200 text-gray-700'} />
               </div>
@@ -127,7 +139,9 @@ export const Search = observer(({ tab }: { tab: TabStore }) => {
                   value={tab.state.search.replaceText}
                   placeholder={'替换'}
                   className={'w-full input px-2'}
-                  onChange={(e) => setState({ replaceText: e.target.value })}
+                  onChange={(e) =>
+                    tab.setState({ search: { ...tab.state.search, replaceText: e.target.value } })
+                  }
                 />
               </div>
             )}
@@ -196,14 +210,14 @@ export const Search = observer(({ tab }: { tab: TabStore }) => {
               )}
             </div>
             <div className={'w-16 text-right'}>
-              {!!tab.state.search.searchRanges.length && (
+              {!!tab.searchRanges.length && (
                 <div className={'space-x-0.5 text-sm'}>
                   <span>{tab.state.search.index + 1}</span>
                   <span>/</span>
-                  <span>{tab.state.search.searchRanges.length}</span>
+                  <span>{tab.searchRanges.length}</span>
                 </div>
               )}
-              {!tab.state.search.searchRanges.length && !!tab.state.search.keyword && (
+              {!tab.searchRanges.length && !!tab.state.search.keyword && (
                 <div className={'text-gray-500 text-sm'}>{'没有结果'}</div>
               )}
             </div>

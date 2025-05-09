@@ -3,7 +3,7 @@ import { IFold } from '@/icons/IFold'
 import { os } from '@/utils/common'
 import { Fragment, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
-import { Bot, ChevronLeft, ChevronRight, Ellipsis, FileText, Plus } from 'lucide-react'
+import { Bot, ChevronLeft, ChevronRight, Ellipsis, FileText } from 'lucide-react'
 import { Popover } from 'antd'
 import { IBackLink } from '@/icons/IBackLink'
 export const Nav = observer(() => {
@@ -42,14 +42,14 @@ export const Nav = observer(() => {
         }
       >
         <div
-          className={'p-1 rounded hover:bg-white/10 cursor-pointer'}
+          className={'p-1 rounded dark:hover:bg-white/10 cursor-pointer hover:bg-black/5'}
           onClick={() => {
             store.settings.setState((state) => {
               state.foldSideBar = !state.foldSideBar
             })
           }}
         >
-          <IFold className={'w-[18px] h-[18px] dark:stroke-white/60'} />
+          <IFold className={'w-[18px] h-[18px] dark:stroke-white/60 stroke-black/60'} />
         </div>
       </div>
       <div className={'flex justify-between items-center h-full'}>

@@ -60,13 +60,7 @@ const state = {
     replace: false,
     index: 0,
     keyword: '',
-    replaceText: '',
-    searchRanges: [] as {
-      range?: SlateRange
-      markerId?: number
-      aceRange?: InstanceType<typeof AceRange>
-      editorPath?: number[]
-    }[]
+    replaceText: ''
   },
   get doc() {
     return this.docs[this.currentIndex]
@@ -76,6 +70,12 @@ const state = {
 export class TabStore extends StructStore<typeof state> {
   keyboard: KeyboardTask
   table: TableLogic
+  searchRanges: {
+    range?: SlateRange
+    markerId?: number
+    aceRange?: InstanceType<typeof AceRange>
+    editorPath?: number[]
+  }[] = []
   constructor(public readonly store: Store) {
     super(state)
     this.dragStart = this.dragStart.bind(this)
@@ -124,9 +124,8 @@ export class TabStore extends StructStore<typeof state> {
     if (!open) {
       this.clearDocAllMarkers()
       this.highlightCache.clear()
-      this.setState((state) => {
-        state.search.searchRanges = []
-      })
+      this.searchRanges = []
+      this.refreshHighlight()
     } else {
       this.setState((state) => {
         state.focusSearch = !state.focusSearch
@@ -139,7 +138,7 @@ export class TabStore extends StructStore<typeof state> {
   }
 
   clearDocAllMarkers() {
-    const ranges = this.state.search.searchRanges
+    const ranges = this.searchRanges
     if (ranges.length) {
       for (const item of ranges) {
         if (item.editorPath) {
@@ -156,8 +155,8 @@ export class TabStore extends StructStore<typeof state> {
     this.setState((state) => {
       state.search.keyword = text || ''
       state.search.index = 0
-      state.search.searchRanges = []
     })
+    this.searchRanges = []
     clearTimeout(this.searchTimer)
     this.searchTimer = window.setTimeout(() => {
       this.matchSearch()
@@ -165,15 +164,14 @@ export class TabStore extends StructStore<typeof state> {
   }
 
   private changeCurrent() {
-    const { search } = this.state
-    search.searchRanges.forEach((r, j) => {
+    this.searchRanges.forEach((r, j) => {
       if (r.range) {
-        r.range.current = j === search.index
+        r.range.current = j === this.state.search.index
       } else if (r.editorPath) {
         const code = this.getCodeEditor(r.editorPath)
         if (code) {
           const marker = code.session.getMarkers()[r.markerId!]
-          const cl = j === search.index ? 'match-current' : 'match-text'
+          const cl = j === this.state.search.index ? 'match-current' : 'match-text'
           if (marker && cl !== marker.clazz) {
             code.session.removeMarker(r.markerId!)
             const id = code.session.addMarker(marker.range!, cl, 'text', false)
@@ -186,7 +184,7 @@ export class TabStore extends StructStore<typeof state> {
 
   nextSearch() {
     const { search } = this.state
-    if (search.index === search.searchRanges.length - 1) {
+    if (search.index === this.searchRanges.length - 1) {
       this.setState((state) => {
         state.search.index = 0
       })
@@ -197,13 +195,15 @@ export class TabStore extends StructStore<typeof state> {
     }
     this.changeCurrent()
     this.toPoint()
+
+    this.refreshHighlight()
   }
 
   prevSearch() {
     const { search } = this.state
     if (search.index === 0) {
       this.setState((state) => {
-        state.search.index = search.searchRanges.length - 1
+        state.search.index = this.searchRanges.length - 1
       })
     } else {
       this.setState((state) => {
@@ -212,13 +212,12 @@ export class TabStore extends StructStore<typeof state> {
     }
     this.changeCurrent()
     this.toPoint()
+    this.refreshHighlight()
   }
   matchSearch(scroll: boolean = true) {
     this.highlightCache.clear()
     const { search } = this.state
-    this.setState((state) => {
-      state.search.searchRanges = []
-    })
+    this.searchRanges = []
     if (!search.keyword) {
       this.setState((state) => {
         state.search.index = 0
@@ -234,7 +233,7 @@ export class TabStore extends StructStore<typeof state> {
     )
     let matchCount = 0
     const keyWord = search.keyword.toLowerCase()
-    let allRanges: typeof search.searchRanges = []
+    let allRanges: typeof this.searchRanges = []
     for (let n of nodes) {
       const [el, path] = n
       if (el.type === 'code') {
@@ -249,13 +248,13 @@ export class TabStore extends StructStore<typeof state> {
             const match = item.matchAll(regex)
             for (const m of match) {
               const range = new AceRange(i, m.index!, i, m.index! + m[0].length)
-              const data: (typeof search.searchRanges)[number] = {
+              const data: (typeof this.searchRanges)[number] = {
                 aceRange: range,
                 editorPath: path
               }
               const markerId = editor.session.addMarker(
                 range,
-                matchCount === search.index ? 'match-current' : 'match-text',
+                matchCount === this.state.search.index ? 'match-current' : 'match-text',
                 'text',
                 false
               )
@@ -270,7 +269,7 @@ export class TabStore extends StructStore<typeof state> {
         if (!str || /^\s+$/.test(str) || !str.includes(keyWord)) {
           continue
         }
-        let ranges: typeof search.searchRanges = []
+        let ranges: typeof this.searchRanges = []
         for (let i = 0; i < el.children.length; i++) {
           const text = el.children[i].text?.toLowerCase()
           if (text && text.includes(keyWord)) {
@@ -307,12 +306,14 @@ export class TabStore extends StructStore<typeof state> {
         )
       }
     }
-    if (search.index > matchCount - 1) {
-      search.index = 0
-    }
+
     this.setState((state) => {
-      state.search.searchRanges = allRanges
+      if (state.search.index > matchCount - 1) {
+        state.search.index = 0
+      }
+      this.searchRanges = allRanges
     })
+    this.refreshHighlight()
     if (scroll) setTimeout(() => this.toPoint(), 30)
   }
   getCodeEditor(path: number[]) {
@@ -325,7 +326,7 @@ export class TabStore extends StructStore<typeof state> {
   private toPoint() {
     const { search } = this.state
     try {
-      const cur = search.searchRanges[search.index]
+      const cur = this.searchRanges[search.index]
       if (!cur) return
       let dom: null | HTMLElement = null
       if (cur.range) {

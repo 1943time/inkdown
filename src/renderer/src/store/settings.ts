@@ -2,10 +2,11 @@ import { Store } from './store'
 import { AiMode, IClient } from 'types/model'
 import { StructStore } from './struct'
 import { Subject } from 'rxjs'
-import { isDark } from '@/utils/common'
+import { delayRun, isDark } from '@/utils/common'
 import { observable, runInAction } from 'mobx'
 import isHotkey from 'is-hotkey'
-import { Editor, Element } from 'slate'
+import { Editor, Element, Node, Transforms } from 'slate'
+import { EditorUtils } from '@/editor/utils/editorUtils'
 
 const data = {
   open: false,
@@ -130,6 +131,26 @@ export class SettingsStore extends StructStore<typeof state> {
     if (this.state.showChatBot) {
       this.setSetting('showChatBot', false)
     } else {
+      const editor = this.store.chat.editor
+      const noteEditor = this.store.note.state.currentTab?.editor
+      if (noteEditor) {
+        const text = EditorUtils.getSelectedText(noteEditor).replace(/\n/g, ' ')
+        if (text) {
+          const lastLine = Node.string(editor.children[editor.children.length - 1])
+          delayRun(() => {
+            if (lastLine) {
+              Transforms.insertNodes(editor, {
+                type: 'paragraph',
+                children: [{ text }]
+              })
+            } else {
+              Transforms.insertText(editor, text, {
+                at: Editor.end(editor, [editor.children.length - 1])
+              })
+            }
+          })
+        }
+      }
       this.setSetting('showChatBot', true)
     }
   }
