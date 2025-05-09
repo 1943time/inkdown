@@ -3,6 +3,7 @@ import { FileBox, KeyboardIcon, PenLine, X } from 'lucide-react'
 import { useStore } from '@/store/store'
 import { SetEditor } from './Editor'
 import { Keyboard } from './Keyboard'
+import { ModelSettings } from './Model'
 
 const tabs = [
   {
@@ -94,6 +95,7 @@ export const Settings = observer(() => {
                 className={' text-gray-600 dark:text-gray-300 px-2 py-2 h-[500px] overflow-y-auto'}
               >
                 {core.settings.data.setTab === 1 && <SetEditor />}
+                {core.settings.data.setTab === 2 && <ModelSettings />}
                 {core.settings.data.setTab === 3 && <Keyboard />}
               </div>
             </div>

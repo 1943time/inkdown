@@ -169,7 +169,7 @@ ipcMain.handle('getSettings', async (_, keys?: string[]) => {
 })
 
 ipcMain.handle('getClients', async () => {
-  const clients = await knex.select('*').from('client')
+  const clients = await knex.select('*').orderBy('sort', 'asc').from('client')
   return clients.map((client) => {
     return {
       ...client,
@@ -200,7 +200,6 @@ ipcMain.handle('createClient', async (_, client: IClient) => {
 })
 
 ipcMain.handle('updateClient', async (_, id: string, client: Partial<IClient>) => {
-  const updatedClient = await knex('client').where({ id }).update(client)
   const updateData: any = {
     ...client
   }
@@ -210,8 +209,14 @@ ipcMain.handle('updateClient', async (_, id: string, client: Partial<IClient>) =
   if (client.options) {
     updateData.options = JSON.stringify(client.options)
   }
-  knex('client').where({ id }).update(updateData)
-  return updatedClient
+  return knex('client').where({ id }).update(updateData)
+})
+
+ipcMain.handle('sortClients', async (_, ids: string[]) => {
+  const caseStatement = ids.map((id, index) => `WHEN '${id}' THEN ${index}`).join(' ')
+  return knex('client')
+    .whereIn('id', ids)
+    .update({ sort: knex.raw(`CASE id ${caseStatement} END`) })
 })
 
 ipcMain.handle('deleteClient', async (_, id: string) => {

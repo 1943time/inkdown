@@ -146,8 +146,12 @@ export class ModelApi {
     return ipcRenderer.invoke('getClient', id)
   }
 
-  async createClient(client: IClient): Promise<void> {
+  async createClient(client: IClient): Promise<IClient> {
     return ipcRenderer.invoke('createClient', client)
+  }
+
+  async sortClients(ids: string[]): Promise<void> {
+    return ipcRenderer.invoke('sortClients', ids)
   }
 
   async updateClient(id: string, client: Partial<IClient>): Promise<void> {

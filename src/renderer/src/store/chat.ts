@@ -116,8 +116,9 @@ export class ChatStore extends StructStore<typeof state> {
     const { models } = this.store.settings.state
     const activeChat = this.state.activeChat
     const config = models.find((item) => item.id === id)
+    let useModel = model
     if (config && this.activeClient) {
-      const useModel = config.models.includes(model) ? model : config.models[0]
+      useModel = config.models.includes(model) ? model : config.models[0]
       this.activeClient = new AiClient({
         model: useModel,
         mode: config.mode,
@@ -138,8 +139,8 @@ export class ChatStore extends StructStore<typeof state> {
           }
         })
       }
-      this.store.settings.setDefaultModel(id, useModel)
     }
+    this.store.settings.setDefaultModel(id, useModel)
   }
 
   private refreshClient(model: ClientModel) {

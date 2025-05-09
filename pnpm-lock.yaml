@@ -65,8 +65,8 @@ devDependencies:
     specifier: ^1.32.4
     version: 1.32.4(react-dom@19.1.0)(react@19.1.0)
   '@lobehub/icons':
-    specifier: ^1.89.0
-    version: 1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
+    specifier: ^2.0.0
+    version: 2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
   '@lobehub/ui':
     specifier: ^2.0.10
     version: 2.0.10(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0)
@@ -1698,32 +1698,6 @@ packages:
     resolution: {integrity: sha512-s9KnjaPjsEefaNv150G3aifvB+J3P4eEKG+epY9zDPS2BeB6+V2jELWqAZll+nkogMaVovjEE813z3V751QwGw==}
     dev: true
 
-  /@lobehub/fluent-emoji@1.2.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-l2Ed3kyNQpiquRVROYO/frFifuuGoXizkC7e93UIJ9lRLnwLx2XKi0EqGse0Qld/BHsfJfrlXhbwNBYd2RDZqQ==}
-    peerDependencies:
-      antd: ^5.23.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    dependencies:
-      '@lobehub/emojilib': 1.0.0
-      '@lobehub/ui': 1.170.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
-      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      emoji-regex: 10.4.0
-      lodash-es: 4.17.21
-      lucide-react: 0.469.0(react@19.1.0)
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      react-layout-kit: 1.9.1(react@19.1.0)
-      url-join: 5.0.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - acorn
-      - supports-color
-    dev: true
-
   /@lobehub/fluent-emoji@2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-bKjU3sf0+7NppvcdqD/raWvKGJIw8HDJVporNQ7oR8pIPoLeb9IUu/vqIYClOlwfu9qntji7FFySfbdNqXSiJw==}
     peerDependencies:
@@ -1750,29 +1724,6 @@ packages:
       - supports-color
     dev: true
 
-  /@lobehub/icons@1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-TzbSMPb70et/gvytdqc8M5Y4nNC+KSkYTdqH7t6VdhTeQ4aewldPpxCO5z0QhvOaIgc6BSGtS5Ss+nR3A1HGUw==}
-    peerDependencies:
-      antd: ^5.23.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    dependencies:
-      '@lobehub/ui': 1.170.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
-      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      lucide-react: 0.469.0(react@19.1.0)
-      polished: 4.3.1
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      react-layout-kit: 1.9.1(react@19.1.0)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - acorn
-      - supports-color
-    dev: true
-
   /@lobehub/icons@2.0.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(framer-motion@12.6.3)(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-B11QeeubHV6ztu2z6owHho2kWUKCBHqySiOMobpS8unrwwZaiSkUWNrxB3zH6JmzMGcs+iXdeuG0YGB1jlZc0g==}
     peerDependencies:
@@ -1793,78 +1744,6 @@ packages:
       - '@types/react'
       - acorn
       - framer-motion
-      - supports-color
-    dev: true
-
-  /@lobehub/ui@1.170.8(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-nqSW8EmWYI6Ewlb1bmQIEW3g/xiN3Rcv26p5AKH9DnsCCFJwfEkYyxcLuIBuK+ndXqzD7TFOwS77YAMbJT6IbA==}
-    peerDependencies:
-      antd: ^5.23.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    dependencies:
-      '@ant-design/cssinjs': 1.23.0(react-dom@19.1.0)(react@19.1.0)
-      '@dnd-kit/core': 6.3.1(react-dom@19.1.0)(react@19.1.0)
-      '@dnd-kit/modifiers': 9.0.0(@dnd-kit/core@6.3.1)(react@19.1.0)
-      '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1)(react@19.1.0)
-      '@dnd-kit/utilities': 3.2.2(react@19.1.0)
-      '@emoji-mart/data': 1.2.1
-      '@emoji-mart/react': 1.1.1(emoji-mart@5.6.0)(react@19.1.0)
-      '@floating-ui/react': 0.27.7(react-dom@19.1.0)(react@19.1.0)
-      '@giscus/react': 3.1.0(react-dom@19.1.0)(react@19.1.0)
-      '@lobehub/fluent-emoji': 1.2.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      '@lobehub/icons': 1.96.0(@babel/core@7.26.10)(@types/react@19.1.0)(acorn@8.14.1)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      '@mdx-js/mdx': 3.1.0(acorn@8.14.1)
-      '@mdx-js/react': 3.1.0(@types/react@19.1.0)(react@19.1.0)
-      '@radix-ui/react-slot': 1.2.0(@types/react@19.1.0)(react@19.1.0)
-      '@shikijs/transformers': 3.2.2
-      '@splinetool/runtime': 0.9.526
-      ahooks: 3.8.4(react@19.1.0)
-      antd: 5.24.6(react-dom@19.1.0)(react@19.1.0)
-      antd-style: 3.7.1(@types/react@19.1.0)(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
-      chroma-js: 3.1.2
-      class-variance-authority: 0.7.1
-      dayjs: 1.11.13
-      emoji-mart: 5.6.0
-      fast-deep-equal: 3.1.3
-      framer-motion: 11.18.2(react-dom@19.1.0)(react@19.1.0)
-      immer: 10.1.1
-      leva: 0.10.0(@types/react@19.1.0)(react-dom@19.1.0)(react@19.1.0)
-      lodash-es: 4.17.21
-      lucide-react: 0.484.0(react@19.1.0)
-      mermaid: 11.6.0
-      numeral: 2.0.6
-      polished: 4.3.1
-      query-string: 9.1.1
-      rc-footer: 0.6.8(react-dom@19.1.0)(react@19.1.0)
-      re-resizable: 6.11.2(react-dom@19.1.0)(react@19.1.0)
-      react: 19.1.0
-      react-avatar-editor: 13.0.2(@babel/core@7.26.10)(react-dom@19.1.0)(react@19.1.0)
-      react-dom: 19.1.0(react@19.1.0)
-      react-error-boundary: 5.0.0(react@19.1.0)
-      react-hotkeys-hook: 4.6.2(react-dom@19.1.0)(react@19.1.0)
-      react-layout-kit: 1.9.1(react@19.1.0)
-      react-markdown: 10.1.0(@types/react@19.1.0)(react@19.1.0)
-      react-merge-refs: 2.1.1
-      react-rnd: 10.5.2(react-dom@19.1.0)(react@19.1.0)
-      react-zoom-pan-pinch: 3.7.0(react-dom@19.1.0)(react@19.1.0)
-      rehype-katex: 7.0.1
-      rehype-raw: 7.0.0
-      remark-breaks: 4.0.0
-      remark-gfm: 4.0.1
-      remark-math: 6.0.0
-      shiki: 3.2.2
-      swr: 2.3.3(react@19.1.0)
-      ts-md5: 1.3.1
-      unified: 11.0.5
-      url-join: 5.0.0
-      use-merge-value: 1.2.0(react@19.1.0)
-      uuid: 11.1.0
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@emotion/is-prop-valid'
-      - '@types/react'
-      - acorn
       - supports-color
     dev: true
 
@@ -6807,27 +6686,6 @@ packages:
     engines: {node: '>=0.8'}
     dev: true
 
-  /framer-motion@11.18.2(react-dom@19.1.0)(react@19.1.0):
-    resolution: {integrity: sha512-5F5Och7wrvtLVElIpclDT0CBzMVg3dL22B64aZwHtsIY8RB4mXICLrkajK4G9R+ieSAGcgrLeae2SeUTg2pr6w==}
-    peerDependencies:
-      '@emotion/is-prop-valid': '*'
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@emotion/is-prop-valid':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-    dependencies:
-      motion-dom: 11.18.1
-      motion-utils: 11.18.1
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
-      tslib: 2.8.1
-    dev: true
-
   /framer-motion@12.6.3(react-dom@19.1.0)(react@19.1.0):
     resolution: {integrity: sha512-2hsqknz23aloK85bzMc9nSR2/JP+fValQ459ZTVElFQ0xgwR2YqNjYSuDZdFBPOwVCt4Q9jgyTt6hg6sVOALzw==}
     peerDependencies:
@@ -9293,20 +9151,10 @@ packages:
     resolution: {integrity: sha512-aChaVU/DO5aRPmk1GX8L+whocagUUpBQqoPtJk+cm7UOXUk87J4PeWCh6nNmTTIfEhiR9DI/+FnA8dln/hTK7g==}
     dev: true
 
-  /motion-dom@11.18.1:
-    resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
-    dependencies:
-      motion-utils: 11.18.1
-    dev: true
-
   /motion-dom@12.6.3:
     resolution: {integrity: sha512-gRY08RjcnzgFYLemUZ1lo/e9RkBxR+6d4BRvoeZDSeArG4XQXERSPapKl3LNQRu22Sndjf1h+iavgY0O4NrYqA==}
     dependencies:
       motion-utils: 12.6.3
-    dev: true
-
-  /motion-utils@11.18.1:
-    resolution: {integrity: sha512-49Kt+HKjtbJKLtgO/LKj9Ld+6vw9BjH5d9sc40R/kVyH8GLAXgT42M2NnuPcJNuA3s9ZfZBUcwIgpmZWGEE+hA==}
     dev: true
 
   /motion-utils@12.6.3:
