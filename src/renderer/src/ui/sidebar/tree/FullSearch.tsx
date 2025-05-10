@@ -163,7 +163,7 @@ export const FullSearch = observer(() => {
       .sort((a, b) => Number(b.updated) - Number(a.updated))
     let results: any[] = []
     for (let i = 0; i < docs.length; i++) {
-      if (i > 30) break
+      if (results.length > 30) break
       let res: {
         doc: IDoc
         results: { el: any; text: string; codeLine?: number }[]
@@ -345,21 +345,23 @@ export const FullSearch = observer(() => {
                 {!state().foldIndex.includes(i) && (
                   <div
                     className={
-                      'space-y-2 text-xs dark:text-white/80 text-black/80 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'
+                      'space-y-2 text-xs dark:text-white/80 text-black/80 rounded py-2 px-2 dark:bg-black/30 bg-gray-300/20 mt-1'
                     }
                   >
                     {s.results.slice(0, 50).map((r, j) => (
-                      <div
-                        key={j}
-                        onClick={() => {
-                          toPath(s.doc.id, r.path)
-                        }}
-                        title={r.text}
-                        className={
-                          'cursor-pointer dark:hover:text-white hover:text-black group line-clamp-5'
-                        }
-                      >
-                        {r.text}
+                      <div className={'rounded-sm p-1 dark:bg-white/5 bg-gray-300/50'}>
+                        <div
+                          key={j}
+                          onClick={() => {
+                            toPath(s.doc.id, r.path)
+                          }}
+                          title={r.text}
+                          className={
+                            'cursor-pointer dark:hover:text-white hover:text-black group line-clamp-5'
+                          }
+                        >
+                          {r.text}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -405,7 +407,7 @@ export const FullSearch = observer(() => {
                 {!state().foldIndex.includes(i) && (
                   <div
                     className={
-                      'space-y-2 text-xs dark:text-white/80 text-black/80 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/60 mt-1'
+                      'space-y-2 text-xs dark:text-white/80 text-black/80 rounded py-2 px-3 dark:bg-black/30 bg-gray-300/40 mt-1'
                     }
                   >
                     {s.results.slice(0, 50).map((r, j) => (

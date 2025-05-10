@@ -8,6 +8,7 @@ import {
   clipboard
 } from 'electron'
 import { existsSync, mkdirSync } from 'fs'
+import { writeFile } from 'fs/promises'
 import { join } from 'path'
 
 ipcMain.handle('showOpenDialog', async (_, options: OpenDialogOptions) => {
@@ -49,5 +50,27 @@ ipcMain.handle('writeImageToClipboard', async (_, image: string) => {
   } catch (e) {
     console.error('write image to clipboard error:', e)
     return false
+  }
+})
+
+ipcMain.handle('downloadImage', async (_, url: string, name: string) => {
+  try {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const contentLength = response.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > 100 * 1024 * 1024) {
+      return { exceed: true }
+    }
+
+    const buffer = await response.arrayBuffer()
+    const filePath = join(app.getPath('userData'), 'assets', name)
+    await writeFile(filePath, Buffer.from(buffer))
+    return { name, exceed: false }
+  } catch (e) {
+    console.error('download image error:', e)
+    return null
   }
 })

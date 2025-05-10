@@ -33,6 +33,12 @@ export class ContextMenu {
           this.store.note.setState({ openSpaceFiles: true })
         }
       },
+      {
+        text: '下载网络图片至空间',
+        click: () => {
+          this.store.note.state.currentTab.downloadDocImage()
+        }
+      },
       { hr: true },
       {
         text: '设置',

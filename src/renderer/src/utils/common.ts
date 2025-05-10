@@ -1,3 +1,4 @@
+import { mediaType } from '@/editor/utils/dom'
 import { customAlphabet } from 'nanoid'
 
 export const copy = <T>(obj: T): T => {
@@ -167,4 +168,24 @@ export const delayRun = (fn: Function) => {
 
 export const toUnixPath = (path: string) => {
   return path.replace(/\\/g, '/')
+}
+
+export const getRemoteMediaType = async (url: string): Promise<[string, string] | null> => {
+  try {
+    const controller = new AbortController()
+    const res = await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal
+    })
+    if (!res.ok) {
+      throw new Error()
+    }
+    setTimeout(() => {
+      controller.abort()
+    }, 1000)
+    const contentType = res.headers.get('content-type') || ''
+    return [contentType.split('/')[0], contentType.split('/')[1]]
+  } catch (e) {
+    return null
+  }
 }

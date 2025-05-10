@@ -40,4 +40,10 @@ export class SystemApi {
   async userDataPath(): Promise<string> {
     return ipcRenderer.invoke('userDataPath')
   }
+  async downloadImage(
+    url: string,
+    name: string
+  ): Promise<{ name?: string; exceed?: boolean } | null> {
+    return ipcRenderer.invoke('downloadImage', url, name)
+  }
 }

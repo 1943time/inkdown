@@ -5,14 +5,14 @@ import { ReactEditor, withReact } from 'slate-react'
 import { Ace, Range as AceRange } from 'ace-builds'
 import { Range as SlateRange } from 'slate'
 import { Store } from '../store'
-import { IDoc } from 'types/model'
+import { IDoc, IFile } from 'types/model'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { getOffsetLeft, getOffsetTop } from '@/utils/dom'
 import { KeyboardTask } from './keyboard'
 import { Subject } from 'rxjs'
 import { TableLogic } from './table'
 import { StructStore } from '../struct'
-import { nid } from '@/utils/common'
+import { getRemoteMediaType, nid } from '@/utils/common'
 import { MediaNode } from '@/editor'
 import { getImageData } from '@/editor/utils'
 
@@ -673,5 +673,52 @@ export class TabStore extends StructStore<typeof state> {
         state.previewImage.images = urls
       })
     }
+  }
+  async downloadDocImage() {
+    if (!this.state.doc) return
+    const medias = Array.from(
+      Editor.nodes<MediaNode>(this.editor, {
+        at: [],
+        match: (n) => {
+          return n.type === 'media' && n.url?.startsWith('http')
+        }
+      })
+    )
+
+    if (!medias.length) {
+      this.store.msg.warning('当前文档未使用网络图片')
+      return
+    }
+    this.store.msg.loading('正在下载图片...', 0)
+    const insertFiles: IFile[] = []
+    for (const [el, path] of medias) {
+      const url = el.url as string
+      const res = await getRemoteMediaType(url)
+      if (res) {
+        const name = nid() + '.' + res[1]
+        const data = await this.store.system.downloadImage(url, name)
+        if (data?.name) {
+          Transforms.setNodes(
+            this.editor,
+            {
+              url: undefined,
+              id: data.name
+            },
+            { at: path }
+          )
+          insertFiles.push({
+            name: data.name!,
+            size: 0,
+            spaceId: this.note.state.currentSpace?.id!,
+            created: Date.now()
+          })
+        }
+      }
+    }
+    if (insertFiles.length) {
+      await this.store.model.createFiles(insertFiles)
+    }
+    this.store.msg.destroy()
+    this.store.msg.success('已下载完成')
   }
 }
