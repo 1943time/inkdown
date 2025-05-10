@@ -1,4 +1,4 @@
-import { copy, dataTransform, stringTransform } from '@/utils/common'
+import { copy, dataTransform, delayRun, stringTransform } from '@/utils/common'
 import {
   IChat,
   IChatTable,
@@ -12,8 +12,10 @@ import {
   ISetting,
   ISpace
 } from 'types/model'
+import { Store } from '../store'
 const ipcRenderer = window.electron.ipcRenderer
 export class ModelApi {
+  constructor(private readonly store: Store) {}
   private transformDoc(doc: IDoc): IDoc {
     return {
       ...doc,
@@ -216,11 +218,13 @@ export class ModelApi {
   async updateDoc(
     id: string,
     doc: Partial<IDoc>,
-    ctx?: { texts?: string; chunks?: { text: string; path: number; type: string }[] }
+    ctx?: { chunks: { text: string; path: number; type: string }[] }
   ): Promise<void> {
-    console.log('ctx', ctx)
-
-    return ipcRenderer.invoke('updateDoc', id, this.serializeDoc(doc), ctx)
+    if (ctx) {
+      console.log('ctx', ctx)
+    }
+    const data = this.serializeDoc(doc)
+    return ipcRenderer.invoke('updateDoc', id, data, ctx)
   }
 
   async updateDocs(docs: Partial<IDoc>[]): Promise<void> {
@@ -232,6 +236,9 @@ export class ModelApi {
     )
   }
 
+  async getKeyWords(text: string): Promise<string[]> {
+    return ipcRenderer.invoke('getKeyWords', text)
+  }
   async deleteDoc(id: string): Promise<void> {
     return ipcRenderer.invoke('deleteDoc', id)
   }

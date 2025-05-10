@@ -113,7 +113,6 @@ export const initModel = async () => {
         t.string('parentId').defaultTo('root')
         t.boolean('folder').defaultTo(false)
         t.text('schema').nullable()
-        t.text('text').defaultTo('')
         t.integer('updated').defaultTo(Date.now())
         t.integer('deleted').defaultTo(0)
         t.integer('created').defaultTo(Date.now())
@@ -162,16 +161,16 @@ export const initModel = async () => {
     }
   })
 
-  await knex.schema.hasTable('docFts').then(async (exists) => {
-    if (!exists) {
-      await knex.raw(`
-          CREATE VIRTUAL TABLE docFts USING fts5(
-            spaceId UNINDEXED,
-            docId UNINDEXED, 
-            deleted UNINDEXED,
-            words
-          )
-        `)
-    }
-  })
+  // await knex.schema.hasTable('docFts').then(async (exists) => {
+  //   if (!exists) {
+  //     await knex.raw(`
+  //         CREATE VIRTUAL TABLE docFts USING fts5(
+  //           spaceId UNINDEXED,
+  //           docId UNINDEXED,
+  //           deleted UNINDEXED,
+  //           words
+  //         )
+  //       `)
+  //   }
+  // })
 }

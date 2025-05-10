@@ -86,11 +86,12 @@ export class WorkerHandle {
   }
   async parseMarkdown(md: string): Promise<any[]> {
     const id = nanoid()
-    this.worker.postMessage({
+    const binary = encode({
       type: 'parseMarkdown',
       md,
       id
     })
+    this.worker.postMessage(binary, [binary.buffer])
     return new Promise((resolve) => {
       this.callbacks.set(id, resolve)
     })

@@ -98,21 +98,25 @@ export const Trash = observer(() => {
       restoreIds.push(doc.id)
     } else {
       const restoreChildren = async (node: IDoc) => {
-        const items: IDoc[] = []
+        const children: IDoc[] = []
         const docs = await store.model.getDocsByParentId(node.id)
         for (let d of docs) {
-          const item: IDoc = {
-            ...d,
-            children: []
-          }
+          const item: IDoc = observable(
+            {
+              ...d,
+              children: []
+            },
+            { schema: false }
+          )
           if (d.folder) {
             const children = await restoreChildren(item)
             item.children = children
           }
+          children.push(item)
           items.push(item)
           restoreIds.push(d.id)
         }
-        return items
+        return children
       }
       restoreIds.push(doc.id)
       const children = await restoreChildren(node)

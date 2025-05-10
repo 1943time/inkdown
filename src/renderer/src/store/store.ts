@@ -13,7 +13,7 @@ import { WorkerHandle } from './note/worker/handle'
 import { ImportNote } from './note/import'
 import { KeyboardStore } from './keyboard'
 export class Store {
-  public readonly model = new ModelApi()
+  public readonly model = new ModelApi(this)
   public readonly settings = new SettingsStore(this)
   public readonly chat = new ChatStore(this)
   public readonly note = new NoteStore(this)

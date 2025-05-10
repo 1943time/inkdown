@@ -386,7 +386,6 @@ export class NoteStore extends StructStore<typeof state> {
       state.selectedDoc = null
     })
     this.removeSelf(item)
-    this.store.model.updateDoc(item.id, { deleted: true })
     if (!ipc) {
       // this.store.ipc.sendMessage({
       //   type: 'deleteNode',
@@ -507,6 +506,7 @@ export class NoteStore extends StructStore<typeof state> {
   private removeSelf(node: IDoc) {
     if (!node.folder) this.removeNodeFromHistory(node)
     const parentId = node.parentId
+    const deletedIds: string[] = [node.id]
     this.setState((state) => {
       state.nodes[parentId].children = state.nodes[parentId].children!.filter(
         (c) => c.id !== node.id
@@ -515,7 +515,6 @@ export class NoteStore extends StructStore<typeof state> {
     })
     if (node.folder) {
       const stack = node.children!.slice()
-      const deletedIds: string[] = []
       while (stack.length) {
         const item = stack.pop()!
         if (item.folder) {
@@ -526,11 +525,12 @@ export class NoteStore extends StructStore<typeof state> {
         deletedIds.push(item.id)
       }
       this.setState((state) => {
-        deletedIds.forEach((id) => {
+        for (const id of deletedIds) {
           delete state.nodes[id]
-        })
+        }
       })
     }
+    this.store.model.updateDocs(deletedIds.map((id) => ({ id, deleted: true })))
   }
   private removeNodeFromHistory(doc: IDoc) {
     const { tabs } = this.state

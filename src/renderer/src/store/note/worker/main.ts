@@ -506,7 +506,8 @@ onmessage = async (e) => {
         data: parse(data.md),
         id: data.id
       })
-      postMessage(binary, '*', [binary.buffer])
+      // @ts-ignore
+      postMessage(binary, [binary.buffer])
     } catch (error) {
       const binary = encode({
         data: [{ type: 'paragraph', children: [{ text: '' }] }],

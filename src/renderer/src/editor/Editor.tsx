@@ -23,7 +23,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
   const saveTimer = useRef(0)
-  const chunkSaved = useRef(true)
   const changeTimer = useRef(0)
   const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const renderElement = useCallback(
@@ -34,33 +33,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const keydown = useKeyboard(tab)
   const onChange = useOnchange(tab)
   const first = useRef(true)
-  const saveChunk = useCallback(async () => {
-    if (chunkSaved.current) return
-    const node = nodeRef.current
-    if (node && node.schema) {
-      delayRun(async () => {
-        const now = Date.now()
-        store.model.updateDoc(
-          node.id,
-          {
-            updated: now,
-            spaceId: node.spaceId
-          },
-          {
-            texts: await store.worker.getSchemaText(node.schema!),
-            chunks: await store.worker.getChunks(node.schema!, {
-              folder: node.folder,
-              id: node.id,
-              name: node.name,
-              parentId: node.parentId,
-              updated: now
-            })
-          }
-        )
-        chunkSaved.current = true
-      })
-    }
-  }, [tab.state.doc])
   const save = useCallback(async (ipc = false) => {
     clearTimeout(saveTimer.current)
     const node = nodeRef.current
@@ -93,16 +65,29 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.setState((state) => {
         state.docChanged = false
       })
-      chunkSaved.current = false
-      store.model.updateDoc(node.id, {
-        schema: node.schema,
-        name: node.name,
-        updated: now,
-        spaceId: node.spaceId,
-        links: docs.filter((d) => !!d).map((d) => d.id),
-        medias: links.filter(([el]) => el.type === 'media' && el.id).map(([el]) => el.id)
+      delayRun(async () => {
+        store.model.updateDoc(
+          node.id,
+          {
+            schema: node.schema,
+            name: node.name,
+            updated: now,
+            spaceId: node.spaceId,
+            links: docs.filter((d) => !!d).map((d) => d.id),
+            medias: links.filter(([el]) => el.type === 'media' && el.id).map(([el]) => el.id)
+          },
+          {
+            chunks: await store.worker.getChunks(node.schema!, {
+              folder: node.folder,
+              id: node.id,
+              name: node.name,
+              parentId: node.parentId,
+              updated: now
+            })
+          }
+        )
+        store.local.writeDoc(node)
       })
-      store.local.writeDoc(node)
       if (!ipc) {
         // core.ipc.sendMessage({
         //   type: 'updateDoc',
@@ -220,10 +205,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   }, [tab.state.doc])
 
   useEffect(() => {
-    save()
-    if (nodeRef.current && !chunkSaved.current) {
-      saveChunk()
-    }
+    // save()
     initialNote()
   }, [tab.state.doc])
 

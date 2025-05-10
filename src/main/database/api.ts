@@ -295,7 +295,6 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
         console.error(e)
       }
     }
-    await trx('docFts').where('spaceId', id).delete()
     await trx('file').where('spaceId', id).delete()
   })
   try {
@@ -306,6 +305,9 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
   } catch (e) {}
 })
 
+ipcMain.handle('getKeyWords', async (_, text: string) => {
+  return prepareFtsTokens(text)
+})
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
   const handle = knex('doc').where('spaceId', spaceId)
   handle.andWhere('deleted', !!deleted)
@@ -356,29 +358,13 @@ ipcMain.handle(
     await knex('doc')
       .where('id', id)
       .update(omit(doc, ['expand', 'children', 'id']))
-    if (ctx?.texts) {
-      const tokens = prepareFtsTokens(ctx.texts)
-      const exists = await knex('docFts').where('docId', id).first()
-      if (exists) {
-        await knex('docFts')
-          .where('docId', id)
-          .update({ words: tokens.join(' ') })
-      } else {
-        await knex('docFts').insert({
-          docId: id,
-          words: tokens.join(' '),
-          spaceId: doc.spaceId
-        })
-      }
-      await knex('doc').where('id', id).update({ text: ctx.texts })
-    }
 
     if (doc.deleted) {
       const table = await openTable(doc.spaceId!)
       if (table) {
         await table.delete(`doc_id = '${id}'`)
       }
-    } else if (ctx?.chunks.length) {
+    } else if (ctx?.chunks?.length) {
       const table = await openTable(doc.spaceId!)
       if (!table) return
       let rows = await table
@@ -497,29 +483,6 @@ ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: str
     }),
     ctx: data
   }
-})
-
-ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
-  const tokens = prepareFtsTokens(text)
-  const results = await knex.raw(
-    `
-    SELECT docId, bm25(docFts) AS score
-    FROM docFts
-    WHERE spaceId = ? AND words MATCH ? 
-    ORDER BY score ASC
-    LIMIT 30
-    `,
-    [spaceId, tokens.join(' OR ')]
-  )
-
-  const docs = await knex('doc')
-    .where('spaceId', spaceId)
-    .whereIn(
-      'id',
-      results.map((d) => d.docId)
-    )
-    .select(['id', 'schema'])
-  return { docs, tokens }
 })
 
 ipcMain.handle('deleteDoc', async (_, id: string) => {
