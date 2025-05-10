@@ -131,6 +131,13 @@ export class ModelApi {
     return ipcRenderer.invoke('deleteSetting', key)
   }
 
+  async searchVector(
+    query: string,
+    spaceId: string,
+    ids: string[]
+  ): Promise<{ path: number; doc_id: string; content: string; _distance: number }[]> {
+    return ipcRenderer.invoke('searchVector', { query, spaceId, ids })
+  }
   async getSettings(keys?: string[]): Promise<any> {
     return ipcRenderer.invoke('getSettings', keys).then((settings: ISetting[]) => {
       return Object.fromEntries(
@@ -236,9 +243,6 @@ export class ModelApi {
     )
   }
 
-  async getKeyWords(text: string): Promise<string[]> {
-    return ipcRenderer.invoke('getKeyWords', text)
-  }
   async deleteDoc(id: string): Promise<void> {
     return ipcRenderer.invoke('deleteDoc', id)
   }
@@ -283,17 +287,15 @@ export class ModelApi {
   async findDocName(data: { spaceId: string; name: string; parentId?: string }): Promise<number> {
     return ipcRenderer.invoke('findDocName', data)
   }
-  async searchDocs(spaceId: string, text: string): Promise<{ docs: IDoc[]; tokens: string[] }> {
-    return ipcRenderer.invoke('searchDocs', spaceId, text)
-  }
   async fetchSpaceContext(
     query: string,
-    spaceId: string
+    spaceId: string,
+    ids?: string[]
   ): Promise<{
     rows: { path: number; doc_id: string; space_id: string; content: string; _distance: string }[]
     ctx: { text: string; docId: string }[]
   } | null> {
-    return ipcRenderer.invoke('fetchSpaceContext', { query, spaceId })
+    return ipcRenderer.invoke('fetchSpaceContext', { query, spaceId, ids })
   }
   async getKeyboards(): Promise<IKeyboard[]> {
     return ipcRenderer.invoke('getKeyboards')

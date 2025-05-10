@@ -1,8 +1,3 @@
-import nlp from 'compromise'
-import { Jieba, TfIdf } from '@node-rs/jieba'
-import { dict, idf } from '@node-rs/jieba/dict'
-const jieba = Jieba.withDict(dict)
-const tfIdf = TfIdf.withDict(idf)
 export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
   const result = {} as Pick<T, K>
   keys.forEach((key) => {
@@ -19,37 +14,6 @@ export const omit = <T extends object, K extends keyof T>(obj: T, keys: K[]): Om
     delete result[key]
   })
   return result as Omit<T, K>
-}
-
-const chineseSegment = (text: string): string[] => {
-  return tfIdf.extractKeywords(jieba, text, 10).map((keyword) => keyword.keyword)
-}
-
-const englishSegment = (text: string): string[] => {
-  const doc = nlp(text)
-  return doc
-    .match('#Noun|#Verb|#Adjective')
-    .not('#Pronoun|#Determiner')
-    .not('(a|an|the)')
-    .out('array')
-}
-
-const mixedSegment = (text: string): string[] => {
-  const chineseRegex = /[\u4e00-\u9fa5]+/g
-  const englishRegex = /[a-zA-Z]+/g
-
-  const chineseParts = text.match(chineseRegex) || []
-  const englishParts = text.match(englishRegex) || []
-
-  const chineseSegments = chineseParts.flatMap((part: string) => chineseSegment(part))
-  const englishSegments = englishParts.flatMap((part: string) => englishSegment(part))
-
-  return [...chineseSegments, ...englishSegments].filter(Boolean)
-}
-
-export const prepareFtsTokens = (text: string) => {
-  const tokens = [...new Set(mixedSegment(text))]
-  return tokens
 }
 
 export const formatDate = (timestamp: number): string => {

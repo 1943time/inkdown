@@ -11,7 +11,7 @@ import {
   IFile,
   IKeyboard
 } from 'types/model'
-import { omit, prepareFtsTokens } from '../utils'
+import { omit } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
@@ -305,9 +305,6 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
   } catch (e) {}
 })
 
-ipcMain.handle('getKeyWords', async (_, text: string) => {
-  return prepareFtsTokens(text)
-})
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
   const handle = knex('doc').where('spaceId', spaceId)
   handle.andWhere('deleted', !!deleted)
@@ -439,51 +436,45 @@ ipcMain.handle('updateDocs', async (_, docs: Partial<IDoc>[]) => {
     })
   )
 })
-
-ipcMain.handle('fetchSpaceContext', async (_, ctx: { query: string; spaceId: string }) => {
-  if (!extractor) return null
-  if (!ctx.query) return []
-  const db = await openTable(ctx.spaceId)
-  if (!db) return []
-  const queryVec = await extractor(ctx.query, {
-    pooling: 'mean',
-    normalize: true
-  })
-  const queryVector = Array.from(queryVec.data)
-  let results = await db
-    .search(queryVector)
-    .select(['path', 'doc_id', 'content'])
-    .limit(20)
-    .toArray()
-  results = results.filter((r) => r._distance < 1.4)
-  const text = new Map<string, { path: number; text: string }[]>()
-  for (const r of results) {
-    if (text.has(r.doc_id)) {
-      text.set(r.doc_id, [...text.get(r.doc_id)!, { path: r.path, text: r.content }])
-    } else {
-      text.set(r.doc_id, [{ path: r.path, text: r.content }])
+ipcMain.handle(
+  'searchVector',
+  async (_, ctx: { query: string; spaceId: string; ids: string[] }) => {
+    return queryVector({ query: ctx.query, spaceId: ctx.spaceId, limit: 50, ids: ctx.ids })
+  }
+)
+ipcMain.handle(
+  'fetchSpaceContext',
+  async (_, ctx: { query: string; spaceId: string; ids?: string[] }) => {
+    let results = await queryVector({
+      query: ctx.query,
+      spaceId: ctx.spaceId,
+      limit: 20,
+      ids: ctx.ids
+    })
+    const text = new Map<string, { path: number; text: string }[]>()
+    for (const r of results) {
+      if (text.has(r.doc_id)) {
+        text.set(r.doc_id, [...text.get(r.doc_id)!, { path: r.path, text: r.content }])
+      } else {
+        text.set(r.doc_id, [{ path: r.path, text: r.content }])
+      }
+    }
+    const data: { text: string; docId: string }[] = []
+    for (const [docId, chunks] of text.entries()) {
+      data.push({
+        docId,
+        text: chunks
+          .sort((a, b) => a.path - b.path)
+          .map((c) => c.text)
+          .join('\n\n')
+      })
+    }
+    return {
+      rows: results,
+      ctx: data
     }
   }
-  const data: { text: string; docId: string }[] = []
-  for (const [docId, chunks] of text.entries()) {
-    data.push({
-      docId,
-      text: chunks
-        .sort((a, b) => a.path - b.path)
-        .map((c) => c.text)
-        .join('\n\n')
-    })
-  }
-  return {
-    rows: results.map((r) => {
-      return {
-        ...r,
-        _distance: String(r._distance)
-      }
-    }),
-    ctx: data
-  }
-})
+)
 
 ipcMain.handle('deleteDoc', async (_, id: string) => {
   return knex('doc').where('id', id).update({ deleted: 1 })
@@ -606,3 +597,40 @@ ipcMain.handle(
       .then((res) => res[0].count)
   }
 )
+
+const queryVector = async ({
+  query,
+  spaceId,
+  limit,
+  distance = 1.4,
+  ids
+}: {
+  query: string
+  spaceId: string
+  limit: number
+  distance?: number
+  ids?: string[]
+}): Promise<{ path: number; doc_id: string; content: string; _distance: number }[]> => {
+  if (!extractor) return []
+  if (!query) return []
+  if (ids && !ids?.length) return []
+  const db = await openTable(spaceId)
+  if (!db) return []
+  const queryVec = await extractor(query, {
+    pooling: 'mean',
+    normalize: true
+  })
+  const queryVector = Array.from(queryVec.data)
+  let handle = db.search(queryVector).select(['path', 'doc_id', 'content'])
+  if (ids?.length) {
+    handle = handle.where(`doc_id IN (${ids.map((id) => `'${id}'`).join(',')})`)
+  }
+  handle = handle.limit(limit)
+  let results = await handle.limit(limit).toArray()
+  return results
+    .filter((r) => r._distance < distance)
+    .map((r) => ({
+      ...r,
+      _distance: String(r._distance)
+    }))
+}
