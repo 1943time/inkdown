@@ -218,6 +218,8 @@ export class ModelApi {
     doc: Partial<IDoc>,
     ctx?: { texts?: string; chunks?: { text: string; path: number; type: string }[] }
   ): Promise<void> {
+    console.log('ctx', ctx)
+
     return ipcRenderer.invoke('updateDoc', id, this.serializeDoc(doc), ctx)
   }
 

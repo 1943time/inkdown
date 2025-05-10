@@ -362,15 +362,15 @@ ipcMain.handle(
       if (exists) {
         await knex('docFts')
           .where('docId', id)
-          .update({ text: ctx.texts, words: tokens.join(' ') })
+          .update({ words: tokens.join(' ') })
       } else {
         await knex('docFts').insert({
           docId: id,
-          text: ctx.texts,
           words: tokens.join(' '),
           spaceId: doc.spaceId
         })
       }
+      await knex('doc').where('id', id).update({ text: ctx.texts })
     }
 
     if (doc.deleted) {
@@ -505,8 +505,7 @@ ipcMain.handle('searchDocs', async (_, spaceId: string, text: string) => {
     `
     SELECT docId, bm25(docFts) AS score
     FROM docFts
-    WHERE spaceId = ?
-    AND words MATCH ?
+    WHERE spaceId = ? AND words MATCH ? 
     ORDER BY score ASC
     LIMIT 30
     `,

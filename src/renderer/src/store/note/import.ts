@@ -78,6 +78,7 @@ export class ImportNote {
     const assetsPath = await this.store.system.getAssetsPath()
     const deepDenceLink = new Map<string, string[]>()
     const deepMedias = new Map<string, string[]>()
+    const insertedMap = new Map<string, string>()
     for (const [path, links] of linkMap) {
       if (links.links.length) {
         for (const item of links.links) {
@@ -116,6 +117,7 @@ export class ImportNote {
           }
         }
       }
+
       if (links.medias.length) {
         for (const item of links.medias) {
           const name = item.url.split(window.api.path.sep).pop()
@@ -128,18 +130,26 @@ export class ImportNote {
             ])
             delete item.url
           } else {
-            const id = nid() + extname(name)
-            item.id = id
+            let id = ''
+            if (insertedMap.has(item.url)) {
+              id = insertedMap.get(item.url)!
+              item.id = id
+            } else {
+              const id = nid() + extname(name)
+              item.id = id
+              const filePath = join(assetsPath, id)
+              await window.api.fs.cp(item.url, filePath)
+              await this.store.model.createFiles([
+                {
+                  name: id,
+                  spaceId: this.store.note.state.currentSpace!.id,
+                  created: Date.now(),
+                  size: window.api.fs.statSync(filePath)?.size || 0
+                }
+              ])
+              insertedMap.set(item.url, id)
+            }
             delete item.url
-            await window.api.fs.cp(item.url, target)
-            await this.store.model.createFiles([
-              {
-                name: id,
-                spaceId: this.store.note.state.currentSpace!.id,
-                created: Date.now(),
-                size: window.api.fs.statSync(target)?.size || 0
-              }
-            ])
             deepMedias.set(pathMap.get(path)!.id, [
               ...(deepMedias.get(pathMap.get(path)!.id) || []),
               id

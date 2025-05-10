@@ -27,7 +27,6 @@ const state = {
   deleted: false,
   tabIndex: 0,
   selectedDoc: null as null | IDoc,
-  searchKeyWord: '',
   selectedSpaceId: null as null | string,
   selectedSpace: null as null | ISpace,
   openExportSpace: false,

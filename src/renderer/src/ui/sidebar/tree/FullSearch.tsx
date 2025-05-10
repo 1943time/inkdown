@@ -7,6 +7,7 @@ import { useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ArrowLeft, ChevronRight } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { EditorUtils } from '@/editor/utils/editorUtils'
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
     cb(c)
@@ -26,6 +27,7 @@ export const FullSearch = observer(() => {
       results: { el: any; text: ''; codeLine?: number }[]
       fold?: boolean
     }[],
+    keyword: '',
     foldIndex: [] as number[],
     searching: false
   })
@@ -106,26 +108,34 @@ export const FullSearch = observer(() => {
     clearTimeout(timer.current)
     setState({ searching: true })
     timer.current = window.setTimeout(
-      () => {
-        const state = store.note.state
-        if (!state.searchKeyWord.trim() || !state.nodes['root'].children?.length) {
+      async () => {
+        const keyword = state().keyword.trim().toLowerCase()
+        if (!keyword || !store.note.state.root.children?.length) {
           return setState({ searchResults: [] })
         }
+        const res = await store.model.searchDocs(store.note.state.currentSpace?.id!, keyword)
+        for (let d of res.docs) {
+          const doc = await store.model.getDoc(d.id)
+          if (!doc) continue
+          if (!doc.folder && !doc.schema) {
+            doc.schema = d.schema ? JSON.parse(d.schema as any) : EditorUtils.p
+          }
+        }
+        console.log('res', res)
         let results: any[] = []
-        for (let f of Object.values(state.nodes)) {
+        for (let f of res.docs) {
           let res: {
             file: IDoc
             results: { el: any; text: string; codeLine?: number }[]
           } | null = null
-          let matchText = state.searchKeyWord.toLowerCase()
-          if (!f.folder && f.name.toLowerCase().includes(matchText)) {
+          if (!f.folder && f.name.toLowerCase().includes(keyword)) {
             if (!res) res = { file: f, results: [] }
             res.results.push({
               el: null,
               text: f.name
                 .toLowerCase()
                 .replaceAll(
-                  matchText,
+                  keyword,
                   '<span class="text-blue-500 dark:group-hover:text-blue-400 group-hover:text-blue-600">$&</span>'
                 )
             })
@@ -137,12 +147,12 @@ export const FullSearch = observer(() => {
                   const lines = ((node.code as string) || '').split('\n')
                   lines.map((l, i) => {
                     const str = l.toLowerCase()
-                    if (str && str.includes(matchText)) {
+                    if (str && str.includes(keyword)) {
                       if (!res) res = { file: f, results: [] }
                       res.results.push({
                         el: node,
                         text: str.replaceAll(
-                          matchText,
+                          keyword,
                           '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
                         ),
                         codeLine: i
@@ -152,12 +162,12 @@ export const FullSearch = observer(() => {
                 } else {
                   let str = Node.string(node)
                   str = str.toLowerCase()
-                  if (str && str.includes(matchText)) {
+                  if (str && str.includes(keyword)) {
                     if (!res) res = { file: f, results: [] }
                     res.results.push({
                       el: node,
                       text: str.replaceAll(
-                        matchText,
+                        keyword,
                         '<span class="text-indigo-500 dark:group-hover:text-indigo-400 group-hover:text-indigo-600">$&</span>'
                       )
                     })
@@ -176,8 +186,7 @@ export const FullSearch = observer(() => {
   useEffect(() => {
     if (store.note.state.view === 'search') {
       input.current?.focus()
-      const { searchKeyWord } = store.note.state
-      if (searchKeyWord) {
+      if (state().keyword) {
         search()
       }
     }
@@ -203,22 +212,22 @@ export const FullSearch = observer(() => {
         />
         <input
           ref={input}
-          value={store.note.state.searchKeyWord}
+          value={state().keyword}
           autoFocus={true}
           className={'input h-8 w-full pl-7'}
           onChange={(e) => {
-            store.note.setState({ searchKeyWord: e.target.value })
+            setState({ keyword: e.target.value })
             search()
           }}
           placeholder={true ? '搜索' : 'Search'}
         />
       </div>
       <div className={'pt-3 pb-10 space-y-3 flex-1 h-0 flex-shrink-0 overflow-y-auto'}>
-        {!state().searching && !state().searchResults.length && store.note.state.searchKeyWord && (
+        {!state().searching && !state().searchResults.length && state().keyword && (
           <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
             <span>
               {true ? '未找到相关内容' : 'No content found for'}{' '}
-              <span className={'text-blue-500 inline'}>{store.note.state.searchKeyWord}</span>
+              <span className={'text-blue-500 inline'}>{state().keyword}</span>
             </span>
           </div>
         )}

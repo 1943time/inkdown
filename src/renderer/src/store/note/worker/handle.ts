@@ -2,7 +2,7 @@ import Worker from './main?worker'
 import { nanoid } from 'nanoid'
 import { INode } from './main'
 import { Store } from '@/store/store'
-import { copy } from '@/utils/common'
+import { encode, decode } from '@msgpack/msgpack'
 export class WorkerHandle {
   private worker = new Worker()
   private callbacks = new Map<string, Function>()
@@ -24,17 +24,18 @@ export class WorkerHandle {
   }
   async getSchemaText(schema: any[] = []): Promise<string> {
     const id = nanoid()
-    this.worker.postMessage({
+    const binary = encode({
       type: 'getSchemaText',
       schema,
       id
     })
+    this.worker.postMessage(binary, [binary.buffer])
     return new Promise((resolve) => {
       this.callbacks.set(id, resolve)
     })
   }
   private handleMessage(e: MessageEvent) {
-    const { id, data } = e.data
+    const { id, data } = decode(e.data) as { id: string; data: any }
     const callback = this.callbacks.get(id)
     if (callback) {
       callback(data)
@@ -46,13 +47,14 @@ export class WorkerHandle {
     doc: INode
   ): Promise<{ text: string; path: number; type: string }[]> {
     const id = nanoid()
-    this.worker.postMessage({
+    const binary = encode({
       type: 'getChunks',
       schema,
       doc,
       nodes: this.getSpaceNodes(),
       id
     })
+    this.worker.postMessage(binary, [binary.buffer])
     return new Promise((resolve) => {
       this.callbacks.set(id, resolve)
     })
@@ -69,7 +71,7 @@ export class WorkerHandle {
     exportRootPath?: string
   }): Promise<{ md: string; medias: string[] }> {
     const id = nanoid()
-    this.worker.postMessage({
+    const binary = encode({
       type: 'toMarkdown',
       schema: schema,
       doc,
@@ -77,6 +79,7 @@ export class WorkerHandle {
       exportRootPath,
       id
     })
+    this.worker.postMessage(binary, [binary.buffer])
     return new Promise((resolve) => {
       this.callbacks.set(id, resolve)
     })

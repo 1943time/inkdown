@@ -6,6 +6,7 @@ import { mediaType } from '@/editor/utils/dom'
 import { getTokens } from '@/utils/ai'
 import dayjs from 'dayjs'
 import { join } from 'path-browserify'
+import { decode, encode } from '@msgpack/msgpack'
 export type INode = { id: string; name: string; folder: boolean; parentId: string; updated: number }
 
 function relative(from: string, to: string): string {
@@ -484,40 +485,48 @@ class Output {
 const output = new Output()
 
 onmessage = async (e) => {
-  if (e.data.type === 'getSchemaText') {
+  const data = decode(e.data) as any
+  if (data.type === 'getSchemaText') {
     let text = ''
     try {
-      text = output.getSchemaText(e.data.schema)
+      text = output.getSchemaText(data.schema)
     } catch (e) {
       console.error('getSchemaText error', e)
     }
-    postMessage({
+    const binary = encode({
       data: text,
-      id: e.data.id
+      id: data.id
     })
+    // @ts-ignore
+    postMessage(binary, [binary.buffer])
   }
-  if (e.data.type === 'parseMarkdown') {
+  if (data.type === 'parseMarkdown') {
     try {
-      postMessage({
-        data: parse(e.data.md),
-        id: e.data.id
+      const binary = encode({
+        data: parse(data.md),
+        id: data.id
       })
+      postMessage(binary, '*', [binary.buffer])
     } catch (error) {
-      postMessage({
+      const binary = encode({
         data: [{ type: 'paragraph', children: [{ text: '' }] }],
-        id: e.data.id
+        id: data.id
       })
+      // @ts-ignore
+      postMessage(binary, [binary.buffer])
       console.error('parseMarkdown error', error)
     }
   }
-  if (e.data.type === 'getChunks') {
+  if (data.type === 'getChunks') {
     try {
-      output.nodes = e.data.nodes
-      const chunks = output.getChunks(e.data.schema, e.data.doc)
-      postMessage({
+      output.nodes = data.nodes
+      const chunks = output.getChunks(data.schema, data.doc)
+      const binary = encode({
         data: chunks,
-        id: e.data.id
+        id: data.id
       })
+      // @ts-ignore
+      postMessage(binary, [binary.buffer])
     } catch (e) {
       console.error('getChunks error', e)
     }
@@ -530,11 +539,15 @@ onmessage = async (e) => {
         node: e.data.doc,
         exportRootPath: e.data.exportRootPath
       })
-
-      postMessage({
-        data: { md, medias: Array.from(medias.values()) },
+      const binary = encode({
+        data: {
+          md,
+          medias: Array.from(medias.values())
+        },
         id: e.data.id
       })
+      // @ts-ignore
+      postMessage(binary, [binary.buffer])
     } catch (e) {
       console.error('toMarkdown error', e)
     }
