@@ -19,7 +19,6 @@ import { delayRun } from '@/utils/common'
 export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
   const settings = tab.store.settings.state
-  const changedMark = useRef(false)
   const value = useRef<any[]>([EditorUtils.p])
   const high = useHighlight(tab)
   const saveTimer = useRef(0)
@@ -36,7 +35,6 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const save = useCallback(async (ipc = false) => {
     clearTimeout(saveTimer.current)
     const node = nodeRef.current
-    changedMark.current = false
     if (node?.schema && tab.state.docChanged) {
       const now = Date.now()
       const links = Array.from(
@@ -66,27 +64,31 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         state.docChanged = false
       })
       delayRun(async () => {
-        store.model.updateDoc(
-          node.id,
-          {
-            schema: node.schema,
-            name: node.name,
-            updated: now,
-            spaceId: node.spaceId,
-            links: docs.filter((d) => !!d).map((d) => d.id),
-            medias: links.filter(([el]) => el.type === 'media' && el.id).map(([el]) => el.id)
-          },
-          {
-            chunks: await store.worker.getChunks(node.schema!, {
-              folder: node.folder,
-              id: node.id,
-              name: node.name,
-              parentId: node.parentId,
-              updated: now
-            })
-          }
-        )
         store.local.writeDoc(node)
+        store.model
+          .updateDoc(
+            node.id,
+            {
+              schema: node.schema,
+              name: node.name,
+              updated: now,
+              spaceId: node.spaceId,
+              links: docs.filter((d) => !!d).map((d) => d.id),
+              medias: links.filter(([el]) => el.type === 'media' && el.id).map(([el]) => el.id)
+            },
+            {
+              chunks: await store.worker.getChunks(node.schema!, {
+                folder: node.folder,
+                id: node.id,
+                name: node.name,
+                parentId: node.parentId,
+                updated: now
+              })
+            }
+          )
+          .then(() => {
+            store.system.docChange(false)
+          })
       })
       if (!ipc) {
         // core.ipc.sendMessage({
@@ -153,12 +155,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
         } catch (e) {}
       }
       if (!tab.editor.operations?.every((o) => o.type === 'set_selection')) {
-        if (!changedMark.current) {
-          changedMark.current = true
-        }
         tab.setState((state) => {
           state.docChanged = true
         })
+        store.system.docChange(true)
         clearTimeout(changeTimer.current)
         changeTimer.current = window.setTimeout(() => {
           tab.docChanged$.next(null)
@@ -216,8 +216,10 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.selChange$.next(null)
     }
     window.addEventListener('blur', blur)
+    store.system.onIpcMessage('save-doc', save)
     return () => {
       window.removeEventListener('blur', blur)
+      store.system.offIpcMessage('save-doc', save)
     }
   }, [])
 

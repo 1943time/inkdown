@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, nativeTheme, MenuItem, Menu, shell } from 'electron'
+import { BrowserWindow, screen, nativeTheme, MenuItem, Menu, shell, dialog } from 'electron'
 import { is } from '@electron-toolkit/utils'
 import { join } from 'path'
 export type Bound = {
@@ -13,6 +13,7 @@ export let lastCloseWindow: Bound | null = null
 export const winMap = new WeakMap<BrowserWindow, string>()
 
 export function createWindow(bound?: Bound | null) {
+  let changed = false
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
   const window = new BrowserWindow({
     width: bound?.width || width,
@@ -39,6 +40,21 @@ export function createWindow(bound?: Bound | null) {
   })
   window.on('enter-full-screen', () => {
     window.webContents?.send('enter-full-screen')
+  })
+  window.webContents.on('ipc-message', (_, channel, ...args) => {
+    if (channel === 'docChange') {
+      changed = args[0]
+    }
+  })
+  window.on('close', async (e) => {
+    if (changed) {
+      e.preventDefault()
+      window.webContents.send('save-doc')
+      setTimeout(() => {
+        changed = false
+        window.close()
+      }, 200)
+    }
   })
   window.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     if (details.responseHeaders?.['x-frame-options']) {

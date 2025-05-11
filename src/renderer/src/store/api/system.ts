@@ -46,4 +46,16 @@ export class SystemApi {
   ): Promise<{ name?: string; exceed?: boolean } | null> {
     return ipcRenderer.invoke('downloadImage', url, name)
   }
+  async docChange(changed: boolean) {
+    return ipcRenderer.send('docChange', changed)
+  }
+  async closeWindow() {
+    return ipcRenderer.send('close')
+  }
+  onIpcMessage(channel: string, callback: (...args: any[]) => void) {
+    return ipcRenderer.on(channel, callback)
+  }
+  offIpcMessage(channel: string, callback: (...args: any[]) => void) {
+    ipcRenderer.removeListener(channel, callback)
+  }
 }

@@ -4,13 +4,11 @@ import { useEffect, useMemo } from 'react'
 import { HistoryOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { toJS } from 'mobx'
-
 import { IDoc, IHistory } from 'types/model'
 import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState'
 import { Webview } from './Webview'
 import { TextHelp } from '@/ui/common/HelpText'
-import { CircleHelp } from 'lucide-react'
 export const History = observer((props: { open: boolean; doc?: IDoc; onClose: () => void }) => {
   const store = useStore()
   const [state, setState] = useLocalState({
@@ -39,6 +37,8 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
       const node = props.doc
       if (node) {
         store.model.getHistory(node.id).then((records) => {
+          console.log('records', records)
+
           setState({
             name: node.name,
             selectIndex: 0,
@@ -97,10 +97,10 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
                   }}
                 >
                   <div>
-                    <Tag>{dayjs(r.updated).format('MM-DD HH:mm')}</Tag>
+                    <Tag>{dayjs(r.created).format('MM-DD HH:mm')}</Tag>
                   </div>
                   <div className={'text-xs dark:text-white/60 text-black/60 mt-0.5 pl-1'}>
-                    {dayjs(r.updated).fromNow()}
+                    {dayjs(r.created).fromNow()}
                   </div>
                 </div>
               ))}

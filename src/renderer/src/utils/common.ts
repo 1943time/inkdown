@@ -170,7 +170,7 @@ export const toUnixPath = (path: string) => {
   return path.replace(/\\/g, '/')
 }
 
-export const getRemoteMediaType = async (url: string): Promise<[string, string] | null> => {
+export const getRemoteMediaExt = async (url: string): Promise<[string, string] | null> => {
   try {
     const controller = new AbortController()
     const res = await fetch(url, {

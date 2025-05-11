@@ -1,16 +1,6 @@
 import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
-import {
-  IChat,
-  IMessage,
-  ISetting,
-  IClient,
-  ISpace,
-  IDoc,
-  IHistory,
-  IFile,
-  IKeyboard
-} from 'types/model'
+import { IChat, IMessage, ISetting, IClient, ISpace, IDoc, IFile, IKeyboard } from 'types/model'
 import { omit } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
@@ -488,7 +478,7 @@ ipcMain.handle('getHistory', async (_, docId: string) => {
   return await knex('history')
     .where('docId', docId)
     .orderBy('created', 'desc')
-    .select(['id', 'created', 'schema', 'created'])
+    .select(['id', 'created', 'schema'])
 })
 
 ipcMain.handle('clearHistory', async (_, docId: string) => {

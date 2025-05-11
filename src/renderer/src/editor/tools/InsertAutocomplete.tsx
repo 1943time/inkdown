@@ -101,9 +101,7 @@ const getInsertOptions = ({ isTop, tab }: { isTop: boolean; tab: TabStore }) => 
         {
           label: ['远程媒体', 'Media link'],
           key: 'media-link',
-          run() {
-            // tab.keyboard.media()
-          },
+          run() {},
           args: ['', true],
           icon: <Icon icon={'ic:round-perm-media'} className={'text-base'} />
         }
@@ -290,21 +288,21 @@ export const InsertAutocomplete = observer(() => {
         tab.store.msg.info('Please enter a valid link.')
         throw new Error()
       }
-      // const type = await core.getRemoteMediaType(url)
-      // if (!type) {
-      //   core.message.info('The resource could not be loaded.')
-      //   throw new Error()
-      // }
-      // Transforms.insertText(store.editor, '', {
-      //   at: {
-      //     anchor: Editor.start(store.editor, ctx.current.path),
-      //     focus: Editor.end(store.editor, ctx.current.path)
-      //   }
-      // })
-      // const node = { type: 'media', url, children: [{ text: '' }], mediaType: type }
-      // Transforms.setNodes(store.editor, node, { at: ctx.current.path })
-      // EditorUtils.focus(store.editor)
-      // selChange$.next(ctx.current.path)
+      const type = await tab.store.getRemoteMediaType(url)
+      if (!type) {
+        tab.store.msg.info('The resource could not be loaded.')
+        throw new Error()
+      }
+      Transforms.insertText(tab.editor, '', {
+        at: {
+          anchor: Editor.start(tab.editor, ctx.current.path),
+          focus: Editor.end(tab.editor, ctx.current.path)
+        }
+      })
+      const node = { type: 'media', url, children: [{ text: '' }], mediaType: type }
+      Transforms.setNodes(tab.editor, node, { at: ctx.current.path })
+      EditorUtils.focus(tab.editor)
+      tab.selChange$.next(ctx.current.path)
       close()
     } finally {
       setState({ loading: false })
@@ -349,8 +347,8 @@ export const InsertAutocomplete = observer(() => {
   }, [])
 
   const run = useCallback((op: InsertOptions['children'][number]) => {
-    if (op.key === 'media' || op.key === 'attach') {
-      if (op.key === 'media') {
+    if (op.key === 'media-link' || op.key === 'attach') {
+      if (op.key === 'media-link') {
         setState({ insertLink: true })
         setTimeout(() => {
           dom.current?.querySelector('input')?.focus()

@@ -1,5 +1,5 @@
-import { memo, useCallback, useEffect, useRef } from 'react'
-import { Editor, Element, Transforms } from 'slate'
+import { useCallback, useEffect, useRef } from 'react'
+import { Editor, Element } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { langIconMap } from './langIconMap'
 import { getOffsetLeft, getOffsetTop } from '../../utils/dom'

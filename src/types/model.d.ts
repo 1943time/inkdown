@@ -144,7 +144,7 @@ export interface IHistory {
   docId: string
   schema: any[]
   spaceId: string
-  updated: number
+  created: number
   links?: string[]
   medias?: string[]
 }

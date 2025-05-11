@@ -12,7 +12,7 @@ import { KeyboardTask } from './keyboard'
 import { Subject } from 'rxjs'
 import { TableLogic } from './table'
 import { StructStore } from '../struct'
-import { getRemoteMediaType, nid } from '@/utils/common'
+import { getRemoteMediaExt, nid } from '@/utils/common'
 import { MediaNode } from '@/editor'
 import { getImageData } from '@/editor/utils'
 
@@ -693,8 +693,8 @@ export class TabStore extends StructStore<typeof state> {
     const insertFiles: IFile[] = []
     for (const [el, path] of medias) {
       const url = el.url as string
-      const res = await getRemoteMediaType(url)
-      if (res) {
+      const res = await getRemoteMediaExt(url)
+      if (res?.[1]) {
         const name = nid() + '.' + res[1]
         const data = await this.store.system.downloadImage(url, name)
         if (data?.name) {
