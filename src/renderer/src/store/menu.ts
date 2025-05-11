@@ -35,8 +35,16 @@ export class ContextMenu {
       },
       {
         text: '下载网络图片至空间',
+        disabled: !this.store.note.state.opendDoc,
         click: () => {
           this.store.note.state.currentTab.downloadDocImage()
+        }
+      },
+      {
+        text: '文件历史',
+        disabled: !this.store.note.state.opendDoc,
+        click: () => {
+          this.store.note.setState({ openHistory: true })
         }
       },
       { hr: true },

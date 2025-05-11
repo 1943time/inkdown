@@ -268,19 +268,7 @@ ipcMain.handle('sortSpaces', async (_, ids: string[]) => {
 
 ipcMain.handle('deleteSpace', async (_, id: string) => {
   await knex.transaction(async (trx) => {
-    const docs = await trx('doc').where('spaceId', id).select(['id'])
-    await trx('docTag')
-      .whereIn(
-        'docId',
-        docs.map((d) => d.id)
-      )
-      .delete()
-    await trx('history')
-      .whereIn(
-        'docId',
-        docs.map((d) => d.id)
-      )
-      .delete()
+    await trx('history').where('spaceId', id).delete()
     await trx('doc').where('spaceId', id).delete()
     await trx('space').where('id', id).delete()
     const files = await trx('file').where('spaceId', id).select(['name'])
@@ -327,7 +315,10 @@ ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
 })
 
 ipcMain.handle('clearDocs', async (_, spaceId: string, ids: string[]) => {
-  return knex('doc').where('spaceId', spaceId).whereIn('id', ids).delete()
+  await knex.transaction(async (trx) => {
+    await trx('history').where('spaceId', spaceId).whereIn('id', ids).delete()
+    await trx('doc').where('spaceId', spaceId).whereIn('id', ids).delete()
+  })
 })
 
 ipcMain.handle('getDocsByParentId', async (_, parentId: string) => {
@@ -355,7 +346,6 @@ ipcMain.handle(
     await knex('doc')
       .where('id', id)
       .update(omit(doc, ['expand', 'children', 'id']))
-
     if (doc.deleted) {
       const table = await openTable(doc.spaceId!)
       if (table) {
@@ -423,6 +413,15 @@ ipcMain.handle(
       if (remove.length > 0) {
         await table.delete(`doc_id = '${id}' AND path IN (${remove.join(',')})`)
       }
+      if (doc.schema) {
+        insertHistory({
+          schema: doc.schema as unknown as string,
+          spaceId: doc.spaceId!,
+          docId: id,
+          medias: doc.medias as unknown as string,
+          links: doc.links as unknown as string
+        })
+      }
     }
   }
 )
@@ -486,12 +485,10 @@ ipcMain.handle('getDoc', async (_, id: string) => {
 })
 
 ipcMain.handle('getHistory', async (_, docId: string) => {
-  const history = await knex('history').where('docId', docId).select(['id', 'created'])
-  return history
-})
-
-ipcMain.handle('createHistory', async (_, history: IHistory) => {
-  return knex('history').insert(history)
+  return await knex('history')
+    .where('docId', docId)
+    .orderBy('created', 'desc')
+    .select(['id', 'created', 'schema', 'created'])
 })
 
 ipcMain.handle('clearHistory', async (_, docId: string) => {
@@ -633,4 +630,39 @@ const queryVector = async ({
       ...r,
       _distance: String(r._distance)
     }))
+}
+
+const insertHistory = async (data: {
+  schema: string
+  spaceId: string
+  docId: string
+  medias?: string
+  links?: string
+}) => {
+  const lastHistory = await knex('history')
+    .where('docId', data.docId)
+    .orderBy('created', 'desc')
+    .select(['id', 'created'])
+    .first()
+  const now = Date.now()
+  if (lastHistory && now - lastHistory.created < 1000 * 60 * 10) {
+    return
+  }
+  await knex('history').insert({
+    id: nid(),
+    ...data,
+    created: Date.now()
+  })
+  const res = await knex('history').where('docId', data.docId).count('id', { as: 'count' }).first()
+
+  if (+res?.count! > 50) {
+    const first = await knex('history')
+      .where('docId', data.docId)
+      .orderBy('created', 'asc')
+      .select(['id'])
+      .first()
+    if (first) {
+      await knex('history').where('id', first.id).delete()
+    }
+  }
 }

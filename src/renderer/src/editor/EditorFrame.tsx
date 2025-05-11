@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
 import { ChooseWikiLink } from './tools/Links'
 import { InsertLink } from './tools/InsertLink'
+import { History } from './History'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
@@ -82,6 +83,13 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
           tab.setState((state) => {
             state.previewImage.index = i
           })
+        }}
+      />
+      <History
+        doc={store.note.state.opendDoc}
+        open={store.note.state.openHistory}
+        onClose={() => {
+          store.note.setState({ openHistory: false })
         }}
       />
     </TabContext>

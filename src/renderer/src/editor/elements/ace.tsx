@@ -105,8 +105,9 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
       wrap: settings.codeAutoBreak ? true : 'off',
       tabSize: settings.codeTabSize,
       showPrintMargin: false,
-      readOnly: tab.state.historyView
+      readOnly: ReactEditor.isReadOnly(tab.editor)
     })
+
     editor.commands.addCommand({
       name: 'disableFind',
       bindKey: { win: 'Ctrl-F', mac: 'Command-F' },
@@ -212,8 +213,8 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
           }
         }
       }
-      const newEvent = new KeyboardEvent(e.type, e)
-      window.dispatchEvent(newEvent)
+      // const newEvent = new KeyboardEvent(e.type, e)
+      // window.dispatchEvent(newEvent)
     })
     let lang = state().lang as string
     setTimeout(() => {
@@ -300,7 +301,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
               arrow={false}
               open={state().openSelectMenu}
               onOpenChange={(v) => {
-                if (element.katex || element.render) {
+                if (element.katex || element.render || ReactEditor.isReadOnly(tab.editor)) {
                   return
                 }
                 setState({ openSelectMenu: v })
@@ -384,6 +385,7 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
                 onClick={(e) => {
                   e.stopPropagation()
                   const code = element.code || ''
+                  window.api.writeToClipboard(code)
                   setState({ copied: true })
                   setTimeout(() => {
                     setState({ copied: false })

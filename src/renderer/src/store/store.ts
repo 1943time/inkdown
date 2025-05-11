@@ -24,8 +24,10 @@ export class Store {
   public readonly worker = new WorkerHandle(this)
   public readonly import = new ImportNote(this)
   public readonly keyboard = new KeyboardStore(this)
+  public readonly msg: MessageInstance
   userDataPath = ''
-  constructor(public readonly msg: MessageInstance) {
+  constructor(msg?: MessageInstance) {
+    this.msg = msg!
     this.system.userDataPath().then((path) => {
       this.userDataPath = path
     })

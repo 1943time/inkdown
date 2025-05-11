@@ -18,6 +18,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
     tip: false,
     tipMessage: ''
   })
+
   const nodeRef = useRef<IDoc | undefined>(tab.state.doc)
   const setName = useCallback((name: string = '') => {
     if (inputRef.current) {

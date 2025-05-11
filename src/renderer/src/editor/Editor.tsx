@@ -100,25 +100,25 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
     save()
   })
   const reset = useCallback((data: any[] | null, ipc = false) => {
-    // if (data && nodeRef.current) {
-    //   store.initializing = true
-    //   editor.selection = null
-    //   EditorUtils.reset(editor, data, nodeRef.current.history)
-    //   store.doRefreshHighlight()
-    //   store.docChanged$.next(true)
-    //   setTimeout(() => {
-    //     save(ipc)
-    //     store.initializing = false
-    //   }, 60)
-    // } else {
-    //   save()
-    // }
+    if (data && nodeRef.current) {
+      tab.editor.selection = null
+      tab.setState((state) => {
+        state.docChanged = true
+      })
+      EditorUtils.reset(tab.editor, data, tab.editor.history)
+      tab.docChanged$.next(true)
+      setTimeout(() => {
+        save(ipc)
+      }, 60)
+    } else {
+      save()
+    }
   }, [])
-  // useSubject(core.ipc.updateDoc$, (data) => {
-  //   if (data.cid === nodeRef.current?.cid && data.schema) {
-  //     reset(data.schema, true)
-  //   }
-  // })
+  useSubject(store.note.updateDoc$, (data) => {
+    if (data.id === nodeRef.current?.id && data.schema) {
+      reset(data.schema, data.ipc)
+    }
+  })
   const change = useCallback(
     (v: any[]) => {
       if (first.current) {
@@ -205,7 +205,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   }, [tab.state.doc])
 
   useEffect(() => {
-    // save()
+    save()
     initialNote()
   }, [tab.state.doc])
 

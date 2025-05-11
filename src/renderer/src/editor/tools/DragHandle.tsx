@@ -1,10 +1,12 @@
 import { CSSProperties, memo, useRef } from 'react'
 import { GripVertical } from 'lucide-react'
 import { useTab } from '@/store/note/TabCtx'
+import { ReactEditor } from 'slate-react'
 
 export const DragHandle = memo((props: { style?: CSSProperties }) => {
   const ref = useRef<HTMLDivElement>(null)
   const tab = useTab()
+  if (ReactEditor.isReadOnly(tab.editor)) return null
   return (
     <span
       className={'drag-handle'}

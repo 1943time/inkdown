@@ -345,7 +345,7 @@ export class KeyboardStore {
           if (isHotkey(value.system, e)) {
             if (value.scene === 'note') {
               const container = this.currentTab?.container
-              if (!container || !ReactEditor.isFocused(this.currentTab?.editor)) {
+              if (!container || !container.contains(document.activeElement)) {
                 continue
               }
             }

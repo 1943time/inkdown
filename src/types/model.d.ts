@@ -145,7 +145,8 @@ export interface IHistory {
   schema: any[]
   spaceId: string
   updated: number
-  depFiles?: string[]
+  links?: string[]
+  medias?: string[]
 }
 export interface IFile {
   name: string

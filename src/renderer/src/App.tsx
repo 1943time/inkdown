@@ -7,7 +7,11 @@ import { observer } from 'mobx-react-lite'
 
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
-  const store = useMemo(() => new Store(messageApi), [])
+  const store = useMemo(() => {
+    const store = new Store(messageApi)
+    store.note.init()
+    return store
+  }, [])
   if (!store.settings.state.ready) {
     return null
   }

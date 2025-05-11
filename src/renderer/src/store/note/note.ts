@@ -31,6 +31,7 @@ const state = {
   selectedSpace: null as null | ISpace,
   openExportSpace: false,
   openSpaceFiles: false,
+  openHistory: false,
   dragStatus: null as null | {
     mode: 'enter' | 'top' | 'bottom'
     dropNode: null | IDoc
@@ -61,6 +62,7 @@ export class NoteStore extends StructStore<typeof state> {
   openSpaceExport$ = new Subject()
   openImportFolder$ = new Subject<string | null>()
   externalChange$ = new Subject<string>()
+  updateDoc$ = new Subject<{ id: string; schema: any[]; ipc: boolean }>()
   openConfirmDialog$ = new Subject<{
     onClose?: () => void
     title: string
@@ -96,7 +98,6 @@ export class NoteStore extends StructStore<typeof state> {
       })
     )
     this.refactor = new Refactor(this.store)
-    this.init()
     window.addEventListener('keydown', (e) => {
       if (this.store.settings.state.fullChatBot) return
       const editor = this.state.currentTab.editor
