@@ -62,6 +62,7 @@ export class NoteStore extends StructStore<typeof state> {
   openSpaceExport$ = new Subject()
   openImportFolder$ = new Subject<string | null>()
   externalChange$ = new Subject<string>()
+  refreshNav$ = new Subject()
   updateDoc$ = new Subject<{ id: string; schema: any[]; ipc: boolean }>()
   openConfirmDialog$ = new Subject<{
     onClose?: () => void
@@ -335,6 +336,7 @@ export class NoteStore extends StructStore<typeof state> {
       newTab?: boolean
     }
   ) {
+    if (this.state.opendDoc?.id === doc.id) return
     if (!this.state.nodes[doc.id]) return
     const tab = this.state.currentTab
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc.id)
@@ -489,6 +491,7 @@ export class NoteStore extends StructStore<typeof state> {
         if (changed) {
           this.refactor.refactor(dragNode, oldPath)
           this.store.local.localRename(oldPath, dragNode)
+          this.refreshNav$.next(null)
         }
         if (!ipc) {
           // this.core.ipc.sendMessage({

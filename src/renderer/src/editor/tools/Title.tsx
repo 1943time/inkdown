@@ -87,6 +87,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
         })
         store.note.refactor.refactor(doc, oldPath)
         store.local.localRename(oldPath, doc)
+        store.note.refreshNav$.next(null)
         setState({ tip: false, tipMessage: '' })
       }
     }

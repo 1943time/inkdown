@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, nativeTheme, MenuItem, Menu, shell, dialog } from 'electron'
+import { BrowserWindow, screen, nativeTheme, MenuItem, Menu, shell } from 'electron'
 import { is } from '@electron-toolkit/utils'
 import { join } from 'path'
 export type Bound = {
@@ -152,7 +152,7 @@ export function createWindow(bound?: Bound | null) {
   if (bound?.focus) {
     setTimeout(() => {
       window.show()
-    }, 100)
+    }, 300)
   }
   window.show()
   return window

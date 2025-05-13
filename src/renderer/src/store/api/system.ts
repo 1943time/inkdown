@@ -58,4 +58,7 @@ export class SystemApi {
   offIpcMessage(channel: string, callback: (...args: any[]) => void) {
     ipcRenderer.removeListener(channel, callback)
   }
+  async printPdf(data: { docId: string }) {
+    return ipcRenderer.send('print-pdf', data)
+  }
 }

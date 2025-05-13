@@ -75,6 +75,12 @@ a {
   min-height: calc(100vh - 180px);
   outline: none !important;
 }
+body.webview {
+  .edit-area {
+    padding-bottom: 50px;
+  }
+}
+
 .mini {
   @apply border-b dark:border-gray-200/10 border-gray-200;
   .page-title {

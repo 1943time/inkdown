@@ -48,6 +48,7 @@ export const EditFolderDialog = observer(() => {
           ctx.updated = now
         })
         store.local.localRename(oldPath, ctx)
+        store.note.refreshNav$.next(null)
         delayRun(() => {
           store.note.refactor.refactor(ctx, oldPath)
         })

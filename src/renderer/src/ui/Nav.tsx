@@ -1,13 +1,18 @@
 import { useStore } from '@/store/store'
 import { IFold } from '@/icons/IFold'
 import { os } from '@/utils/common'
-import { Fragment, useMemo } from 'react'
+import { Fragment, useCallback, useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Bot, ChevronLeft, ChevronRight, Ellipsis, FileText } from 'lucide-react'
 import { Popover } from 'antd'
 import { IBackLink } from '@/icons/IBackLink'
+import { useUpdate } from 'react-use'
+import { useSubject } from '@/hooks/common'
 export const Nav = observer(() => {
   const store = useStore()
+  const update = useUpdate()
+  useSubject(store.note.refreshNav$, update)
+  const path = !store.note.state.opendDoc ? [] : store.note.getDocPath(store.note.state.opendDoc)
   const { foldSideBar: fold } = store.settings.state
   const [iconLeft, navLeft] = useMemo(() => {
     const osType = os()
@@ -21,10 +26,6 @@ export const Nav = observer(() => {
     return Object.values(store.note.state.nodes).filter((d) =>
       d.links?.includes(store.note.state.opendDoc.id)
     )
-  }, [store.note.state.opendDoc])
-  const path = useMemo(() => {
-    if (!store.note.state.opendDoc) return []
-    return store.note.getDocPath(store.note.state.opendDoc)
   }, [store.note.state.opendDoc])
   return (
     <div

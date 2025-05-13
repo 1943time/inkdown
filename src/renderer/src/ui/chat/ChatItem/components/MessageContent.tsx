@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { Flexbox } from 'react-layout-kit'
-import { ChatItemProps, MarkdownProps } from '@lobehub/ui'
+import { MarkdownProps } from '@lobehub/ui'
 import { Reasoning } from '../../message/Reasion'
 import EditableMessage from './EditableMessage'
 import { IMessage } from 'types/model'
@@ -12,11 +12,6 @@ export interface MessageContentProps {
   message?: ReactNode
   reasoning?: string
   duration?: number
-  placement?: ChatItemProps['placement']
-  primary?: ChatItemProps['primary']
-  renderMessage?: ChatItemProps['renderMessage']
-  text?: ChatItemProps['text']
-  type?: ChatItemProps['type']
 }
 
 const MessageContent = observer<{ msg: IMessage }>(({ msg }) => {

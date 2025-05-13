@@ -5,9 +5,12 @@ import {
   SaveDialogOptions,
   app,
   nativeImage,
-  clipboard
+  clipboard,
+  BrowserWindow,
+  shell,
+  WebContentsView
 } from 'electron'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
 
@@ -72,5 +75,51 @@ ipcMain.handle('downloadImage', async (_, url: string, name: string) => {
   } catch (e) {
     console.error('download image error:', e)
     return null
+  }
+})
+
+ipcMain.on('print-pdf', async (e, data: { docId: string }) => {
+  const win = BrowserWindow.fromWebContents(e.sender)
+  if (win) {
+    const view = new WebContentsView({
+      webPreferences: {
+        webviewTag: true,
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false
+      }
+    })
+    await view.webContents.loadFile(join(__dirname, '../renderer/worker.html'))
+    // view.webContents.openDevTools()
+    win.contentView.addChildView(view)
+    view.setBounds({ x: 0, y: 0, width: 1, height: 1 })
+    ipcMain.handleOnce('get-print-data', () => {
+      return data
+    })
+    const ready = async () => {
+      try {
+        const save = await dialog.showSaveDialog({
+          filters: [{ name: 'pdf', extensions: ['pdf'] }]
+        })
+        if (save.filePath) {
+          const buffer = await view.webContents.printToPDF({
+            printBackground: true,
+            displayHeaderFooter: true,
+            generateDocumentOutline: true,
+            margins: {
+              marginType: 'custom',
+              bottom: 0,
+              left: 0,
+              top: 0,
+              right: 0
+            }
+          })
+          writeFileSync(save.filePath, buffer as any)
+          shell.showItemInFolder(save.filePath)
+        }
+      } finally {
+        win.contentView.removeChildView(view)
+      }
+    }
+    ipcMain.once('print-pdf-ready', ready)
   }
 })

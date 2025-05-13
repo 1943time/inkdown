@@ -147,13 +147,15 @@ export const FullSearch = observer(() => {
       })
     })
   }, [])
-  const toPath = useCallback((docId: string, path: number) => {
+  const toVectorPath = useCallback((docId: string, path: number) => {
     const doc = store.note.state.nodes[docId]
     store.note.openDoc(doc)
     delayRun(() => {
-      const el = doc.schema?.[path]
-      if (el) {
-        toNode({ el, doc, codeLine: 0 })
+      const dom = ReactEditor.toDOMNode(store.note.state.currentTab.editor!, doc.schema?.[path])
+      if (dom) {
+        dom.scrollIntoView({
+          behavior: 'instant'
+        })
       }
     })
   }, [])
@@ -236,7 +238,7 @@ export const FullSearch = observer(() => {
         setState({ foldIndex: [] })
         const keyword = state().keyword.trim().toLowerCase()
         if (!keyword || !store.note.state.root.children?.length) {
-          return setState({ searchResults: [] })
+          return setState({ searchResults: [], vectorResults: [] })
         }
         if (state().vector) {
           searchVector(keyword)
@@ -311,7 +313,7 @@ export const FullSearch = observer(() => {
         {state().vector && (
           <div className={'space-y-3'}>
             {state().vectorResults.map((s, i) => (
-              <div key={i}>
+              <div key={s.doc.id}>
                 <div
                   className={
                     'flex justify-between items-center dark:text-gray-300 text-gray-700 text-sm cursor-pointer select-none'
@@ -349,11 +351,12 @@ export const FullSearch = observer(() => {
                     }
                   >
                     {s.results.slice(0, 50).map((r, j) => (
-                      <div className={'rounded-sm p-1 dark:bg-white/5 bg-gray-300/50'}>
+                      <div className={'rounded-sm p-1 dark:bg-white/5 bg-gray-300/50'} key={r.path}>
                         <div
                           key={j}
-                          onClick={() => {
-                            toPath(s.doc.id, r.path)
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toVectorPath(s.doc.id, r.path)
                           }}
                           title={r.text}
                           className={
@@ -413,7 +416,9 @@ export const FullSearch = observer(() => {
                     {s.results.slice(0, 50).map((r, j) => (
                       <div
                         key={j}
-                        onClick={() => toNode({ el: r.el, doc: s.doc, codeLine: r.codeLine })}
+                        onClick={() => {
+                          toNode({ el: r.el, doc: s.doc, codeLine: r.codeLine })
+                        }}
                         className={
                           'cursor-pointer dark:hover:text-white hover:text-black group break-all ellipsis-10'
                         }

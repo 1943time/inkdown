@@ -5,56 +5,47 @@ import { Flexbox } from 'react-layout-kit'
 import { MermaidProps } from './type'
 import { ActionIcon, CopyButton } from '@lobehub/ui'
 
-export const MermaidFullFeatured = memo<Omit<MermaidProps, 'children'> & { children: ReactNode; content: string }>(
-  ({ showLanguage, content, children, className, style, ...rest }) => {
-    const [expand, setExpand] = useState(true)
-    const size = { blockSize: 24, fontSize: 14, strokeWidth: 2 }
-    return (
-      <div
-        className={`relative overflow-hidden rounded-md transition-colors ${className || ''}`}
-        data-code-type="mermaid"
-        style={style}
-        {...rest}
+export const MermaidFullFeatured = memo<
+  Omit<MermaidProps, 'children'> & { children: ReactNode; content: string }
+>(({ showLanguage, content, children, className, style, ...rest }) => {
+  const [expand, setExpand] = useState(true)
+  const size = { blockSize: 24, fontSize: 14, strokeWidth: 2 }
+  return (
+    <div
+      className={`relative overflow-hidden rounded-md transition-colors ${className || ''}`}
+      data-code-type="mermaid"
+      style={style}
+      {...rest}
+    >
+      <Flexbox
+        align={'center'}
+        className="relative py-1 px-2 bg-[rgba(0,0,0,0.04)]"
+        horizontal
+        justify={'space-between'}
       >
-        <Flexbox
-          align={'center'}
-          className="relative py-1 px-2 bg-[rgba(0,0,0,0.04)]"
-          horizontal
-          justify={'space-between'}
-        >
-          <ActionIcon
-            icon={expand ? ChevronDown : ChevronRight}
-            onClick={() => setExpand(!expand)}
-            size={{ blockSize: 24, fontSize: 14, strokeWidth: 3 }}
-          />
-          {showLanguage && (
-            <Flexbox
-              align={'center'}
-              className="absolute left-1/2 transform -translate-x-1/2 min-w-[100px] text-sm text-center select-none text-gray-500"
-              gap={2}
-              horizontal
-              justify={'center'}
-            >
-              <span>mermaid</span>
-            </Flexbox>
-          )}
+        <ActionIcon
+          icon={expand ? ChevronDown : ChevronRight}
+          onClick={() => setExpand(!expand)}
+          size={{ blockSize: 24, size: 14, strokeWidth: 3 }}
+        />
+        {showLanguage && (
           <Flexbox
             align={'center'}
-            flex={'none'}
-            gap={4}
+            className="absolute left-1/2 transform -translate-x-1/2 min-w-[100px] text-sm text-center select-none text-gray-500"
+            gap={2}
             horizontal
+            justify={'center'}
           >
-            <CopyButton
-              content={content}
-              placement="left"
-              size={size}
-            />
+            <span>mermaid</span>
           </Flexbox>
+        )}
+        <Flexbox align={'center'} flex={'none'} gap={4} horizontal>
+          <CopyButton content={content} size={size} />
         </Flexbox>
-        <div style={expand ? {} : { height: 0, overflow: 'hidden' }}>{children}</div>
-      </div>
-    )
-  }
-)
+      </Flexbox>
+      <div style={expand ? {} : { height: 0, overflow: 'hidden' }}>{children}</div>
+    </div>
+  )
+})
 
 export default MermaidFullFeatured

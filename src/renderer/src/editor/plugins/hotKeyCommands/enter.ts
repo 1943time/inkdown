@@ -250,6 +250,7 @@ export class EnterKey {
               path: node[1],
               match: m,
               el: node[0],
+              tab: this.tab,
               sel,
               startText: m[0]
             })

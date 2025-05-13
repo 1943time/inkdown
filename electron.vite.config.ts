@@ -16,6 +16,16 @@ export default defineConfig({
         '@': resolve('src/renderer/src') // Alias for src folder
       }
     },
+    build: {
+      minify: true,
+      cssMinify: true,
+      rollupOptions: {
+        input: {
+          index: resolve(__dirname, 'src/renderer/index.html'),
+          worker: resolve(__dirname, 'src/renderer/worker.html')
+        }
+      }
+    },
     plugins: [tailwindcss(), react()]
   }
 })

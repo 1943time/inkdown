@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { FlexboxProps } from 'react-layout-kit'
 
-import { AlertProps, AvatarProps, DivProps, MetaData } from '@lobehub/ui'
+import { AlertProps, AvatarProps, DivProps } from '@lobehub/ui'
 import { MarkdownProps } from '@/ui/markdown/Markdown'
 import { EditableMessageProps } from './components/EditableMessage'
 

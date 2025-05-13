@@ -38,63 +38,45 @@ export const Webview = observer((props: { doc: IDoc }) => {
   )
   const renderLeaf = useCallback((props: any) => <MLeaf {...props} children={props.children} />, [])
   return (
-    <ThemeProvider
-      themeMode={store.settings.state.dark ? 'dark' : 'light'}
-      theme={{
-        components: {
-          Checkbox: {
-            colorBorder: store.settings.state.dark
-              ? 'rgba(255, 255, 255, 0.2)'
-              : 'rgba(0, 0, 0, 0.2)'
-          },
-          Radio: {
-            colorBorder: store.settings.state.dark
-              ? 'rgba(255, 255, 255, 0.2)'
-              : 'rgba(0, 0, 0, 0.2)'
-          }
-        }
-      }}
-    >
-      <StoreContext value={store}>
-        <TabContext value={tab}>
-          <div className={'content'}>
-            <ErrorBoundary fallback={(e) => <ErrorFallback error={e} />}>
-              <Slate editor={tab.editor} initialValue={[EditorUtils.p]}>
+    <StoreContext value={store}>
+      <TabContext value={tab}>
+        <div className={'content'}>
+          <ErrorBoundary fallback={(e) => <ErrorFallback error={e} />}>
+            <Slate editor={tab.editor} initialValue={[EditorUtils.p]}>
+              <div
+                className={`${store.settings.state.reduceFileName ? 'mini mt-4 flex items-baseline mb-6 ' : 'mt-6 mb-4'}`}
+              >
+                {store.settings.state.reduceFileName && (
+                  <File
+                    className={
+                      'mr-1 relative top-0.5 text-sm flex-shrink-0 w-4 h-4 dark:text-white/60 text-black/60'
+                    }
+                  />
+                )}
                 <div
-                  className={`${store.settings.state.reduceFileName ? 'mini mt-4 flex items-baseline mb-6 ' : 'mt-6 mb-4'}`}
-                >
-                  {store.settings.state.reduceFileName && (
-                    <File
-                      className={
-                        'mr-1 relative top-0.5 text-sm flex-shrink-0 w-4 h-4 dark:text-white/60 text-black/60'
-                      }
-                    />
-                  )}
-                  <div
-                    contentEditable={false}
-                    spellCheck={false}
-                    suppressContentEditableWarning={true}
-                    className={`page-title`}
-                  >
-                    {props.doc.name}
-                  </div>
-                </div>
-                <Editable
-                  decorate={high}
-                  onDragOver={(e) => e.preventDefault()}
+                  contentEditable={false}
                   spellCheck={false}
-                  readOnly={true}
-                  className={`edit-area ${tab.state.focus ? 'focus' : ''}`}
-                  style={{ fontSize: 16 }}
-                  onContextMenu={(e) => e.stopPropagation()}
-                  renderElement={renderElement}
-                  renderLeaf={renderLeaf}
-                />
-              </Slate>
-            </ErrorBoundary>
-          </div>
-        </TabContext>
-      </StoreContext>
-    </ThemeProvider>
+                  suppressContentEditableWarning={true}
+                  className={`page-title`}
+                >
+                  {props.doc.name}
+                </div>
+              </div>
+              <Editable
+                decorate={high}
+                onDragOver={(e) => e.preventDefault()}
+                spellCheck={false}
+                readOnly={true}
+                className={`edit-area ${tab.state.focus ? 'focus' : ''}`}
+                style={{ fontSize: 16 }}
+                onContextMenu={(e) => e.stopPropagation()}
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+              />
+            </Slate>
+          </ErrorBoundary>
+        </div>
+      </TabContext>
+    </StoreContext>
   )
 })

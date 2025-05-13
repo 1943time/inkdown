@@ -47,6 +47,15 @@ export class ContextMenu {
           this.store.note.setState({ openHistory: true })
         }
       },
+      {
+        text: '导出PDF',
+        disabled: !this.store.note.state.opendDoc,
+        click: () => {
+          this.store.system.printPdf({
+            docId: this.store.note.state.opendDoc!.id
+          })
+        }
+      },
       { hr: true },
       {
         text: '设置',

@@ -15,6 +15,9 @@ html {
   background-color: transparent !important;
   background-color: var(--primary-bg-color) !important;
   -webkit-font-smoothing: antialiased;
+}
+
+body:not(.webview) {
   height: 100vh;
   overflow: hidden !important;
 }
