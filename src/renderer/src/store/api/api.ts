@@ -73,9 +73,11 @@ export class ModelApi {
       messages.map((m) => {
         return {
           ...m,
-          context: typeof m.context === 'string' ? m.context : JSON.stringify(m.context),
-          docs: typeof m.docs === 'string' ? m.docs : JSON.stringify(m.docs),
-          files: typeof m.files === 'string' ? m.files : JSON.stringify(m.files)
+          context: m.context ? JSON.stringify(m.context) : null,
+          docs: m.docs ? JSON.stringify(m.docs) : null,
+          files: m.files ? JSON.stringify(m.files) : null,
+          images: m.images ? JSON.stringify(m.images) : null,
+          error: m.error ? JSON.stringify(m.error) : null
         }
       })
     )
@@ -83,10 +85,11 @@ export class ModelApi {
   async updateMessage(id: string, message: Partial<IMessage>): Promise<void> {
     return ipcRenderer.invoke('updateMessage', id, {
       ...message,
-      context:
-        typeof message.context === 'string' ? message.context : JSON.stringify(message.context),
-      docs: typeof message.docs === 'string' ? message.docs : JSON.stringify(message.docs),
-      files: typeof message.files === 'string' ? message.files : JSON.stringify(message.files)
+      context: message.context ? JSON.stringify(message.context) : null,
+      docs: message.docs ? JSON.stringify(message.docs) : null,
+      files: message.files ? JSON.stringify(message.files) : null,
+      images: message.images ? JSON.stringify(message.images) : null,
+      error: message.error ? JSON.stringify(message.error) : null
     })
   }
 

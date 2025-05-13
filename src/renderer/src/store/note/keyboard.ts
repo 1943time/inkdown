@@ -3,6 +3,7 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 import { TabStore } from './tab'
 import { ReactEditor } from 'slate-react'
 import { getDomRect, getOffsetLeft, getOffsetTop } from '@/utils/dom'
+import { IMessage } from 'types/model'
 export class KeyboardTask {
   constructor(private readonly tab: TabStore) {}
   get store() {
@@ -182,10 +183,28 @@ export class KeyboardTask {
     if (!md) return
     this.insertMarkdown(md)
   }
-
+  async insertMessages(messages: IMessage[]) {
+    const md = messages
+      .map((m) => {
+        if (m.role === 'user') {
+          return `> ${m.content}\n`
+        } else {
+          return `${m.content}\n`
+        }
+      })
+      .join('\n')
+    this.insertMarkdown(md)
+  }
   async insertMarkdown(md: string) {
-    const [node] = this.curNodes
+    let [node] = this.curNodes
     const res = await this.store.worker.parseMarkdown(md)
+    if (!node) {
+      Transforms.insertNodes(this.editor, res, {
+        at: [this.editor.children.length],
+        select: true
+      })
+      return
+    }
     if (node[0].type === 'paragraph' && !Node.string(node[0]) && node[0].children.length === 1) {
       Transforms.delete(this.editor, { at: node[1] })
       Transforms.insertNodes(this.editor, res, { at: node[1], select: true })

@@ -78,7 +78,7 @@ ipcMain.handle('downloadImage', async (_, url: string, name: string) => {
   }
 })
 
-ipcMain.on('print-pdf', async (e, data: { docId: string }) => {
+ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => {
   const win = BrowserWindow.fromWebContents(e.sender)
   if (win) {
     const view = new WebContentsView({

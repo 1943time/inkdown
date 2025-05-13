@@ -279,7 +279,7 @@ export const ChatInput = observer(() => {
               spellCheck={false}
               onDrop={drop}
               className={
-                'outline-none min-h-6 leading-6 w-full resize-none overflow-hidden h-auto text-base'
+                'outline-none min-h-5 leading-5 w-full resize-none overflow-hidden h-auto text-[15px]'
               }
               onCompositionStart={compositionStart}
               placeholder="问一问 AI 助手吧"

@@ -106,17 +106,7 @@ ipcMain.handle('deleteChat', async (_, id: string) => {
 })
 
 ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
-  return knex('message').insert(
-    messages.map((m) => {
-      return {
-        ...m,
-        files: m.files ? JSON.stringify(m.files) : null,
-        images: m.images ? JSON.stringify(m.images) : null,
-        error: m.error ? JSON.stringify(m.error) : null,
-        docs: m.docs ? JSON.stringify(m.docs) : null
-      }
-    })
-  )
+  return knex('message').insert(messages)
 })
 
 ipcMain.handle('updateMessage', async (_, id: string, message: Partial<IMessage>) => {

@@ -16,7 +16,17 @@ export const ChatEmpty = observer(() => {
         </div>
         {!store.settings.state.models.length && (
           <div className={'mt-5 px-10'}>
-            <Button block={true} type={'primary'} icon={<GlobalOutlined />}>
+            <Button
+              block={true}
+              type={'primary'}
+              icon={<GlobalOutlined />}
+              onClick={() => {
+                store.settings.setData((state) => {
+                  state.open = true
+                  state.setTab = 2
+                })
+              }}
+            >
               设置模型
             </Button>
           </div>

@@ -4,11 +4,12 @@ import { ChatInput } from './ChatInput/ChatInput'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { SwitchModel } from './SwitchModel'
-import { Fullscreen, History, Minimize, Plus, Scan, X } from 'lucide-react'
+import { Download, FileOutput, Fullscreen, History, Minimize, PenLine, Plus, X } from 'lucide-react'
 import { ChatEmpty } from './Empty'
 import { ChatSearch } from './Search'
 import { os } from '@/utils/common'
 import { ChatNotes } from './ChatNotes'
+import { Dropdown } from 'antd'
 export const Chat = observer(() => {
   const store = useStore()
   const chat = store.chat.state.activeChat
@@ -47,12 +48,12 @@ export const Chat = observer(() => {
         width: store.settings.state.fullChatBot ? '' : store.settings.state.chatWidth
       }}
     >
-      <div className={'chat'}>
+      <div className={`chat ${chat?.pending ? 'pending' : ''}`}>
         <div className={'h-10 relative z-10 drag-nav'}>
           <div
             className={`flex pl-1 pr-2 justify-between items-center h-full ${store.settings.state.fullChatBot && os() === 'mac' ? 'pl-20' : ''}`}
           >
-            <div className={'flex items-center drag-none flex-1 w-0'}>
+            <div className={'flex items-center drag-none'}>
               <div
                 className={'nav-action'}
                 onClick={() => {
@@ -65,9 +66,9 @@ export const Chat = observer(() => {
                   <Fullscreen size={16} />
                 )}
               </div>
-              <SwitchModel />
+              <SwitchModel maxWidth={store.settings.state.chatWidth - 220} />
             </div>
-            <div className={'drag-none flex items-center space-x-1.5'}>
+            <div className={'drag-none flex items-center space-x-1'}>
               <div
                 className={'nav-action'}
                 onClick={() => {
@@ -76,6 +77,44 @@ export const Chat = observer(() => {
               >
                 <Plus size={19} />
               </div>
+              <Dropdown
+                trigger={['click']}
+                menu={{
+                  items: [
+                    {
+                      key: '1',
+                      icon: <PenLine size={14} />,
+                      label: '写入当前文档',
+                      disabled: !store.note.state.opendDoc,
+                      onClick: () => {
+                        if (!chat?.messages?.length) {
+                          store.msg.info('暂无对话记录')
+                          return
+                        } else {
+                          store.note.state.currentTab?.keyboard.insertMessages(chat!.messages!)
+                        }
+                      }
+                    },
+                    {
+                      key: 'pdf',
+                      icon: <Download size={14} />,
+                      label: '导出PDF',
+                      onClick: () => {
+                        if (!chat?.messages?.length) {
+                          store.msg.info('暂无对话记录')
+                          return
+                        } else {
+                          store.system.printPdf({ chatId: chat!.id })
+                        }
+                      }
+                    }
+                  ]
+                }}
+              >
+                <div className={'nav-action'}>
+                  <FileOutput size={15} />
+                </div>
+              </Dropdown>
               <div
                 className={'nav-action'}
                 onClick={() => {

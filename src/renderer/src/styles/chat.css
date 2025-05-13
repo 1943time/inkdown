@@ -61,6 +61,9 @@
   pointer-events: auto;
 }
 
+.pending .ai-message:last-child .ai-msg-actions {
+  pointer-events: none;
+}
 .switch-model-menu {
   .ant-dropdown-menu-item {
     padding: 5px 10px !important;

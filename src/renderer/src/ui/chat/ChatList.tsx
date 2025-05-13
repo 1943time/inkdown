@@ -83,7 +83,7 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
     return (
       <div className={'relative h-full'}>
         <div
-          className={'overflow-y-auto h-full pt-4 pb-10 relative'}
+          className={`overflow-y-auto h-full pt-4 pb-10 relative`}
           ref={scrollRef}
           onScroll={scroll}
         >

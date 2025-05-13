@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import { OpenAI } from '@lobehub/icons'
 import { useSetState } from 'react-use'
 import { observer } from 'mobx-react-lite'
-export const SwitchModel = observer(() => {
+export const SwitchModel = observer((props: { maxWidth?: number }) => {
   const store = useStore()
   const chat = store.chat.state.activeChat
   const { model, models, ready } = store.settings.state
@@ -79,16 +79,21 @@ export const SwitchModel = observer(() => {
         }))
       }}
     >
-      <div className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer w-full'}>
+      <div className={'flex items-center justify-between p-2 rounded-lg h-7 cursor-pointer'}>
         {ready && (
           <>
-            <div className={'flex items-center flex-1 w-0'}>
+            <div className={'flex items-center flex-1'}>
               {chatModel ? (
                 <ModelIcon mode={chatModel.mode} size={17} />
               ) : (
                 <OpenAI.Avatar size={20} />
               )}
-              <span className={'ml-1.5 text-sm dark:text-white/90 max-w-full truncate'}>
+              <span
+                className={'ml-1.5 text-sm dark:text-white/90 truncate'}
+                style={{
+                  maxWidth: props.maxWidth
+                }}
+              >
                 {chatModel ? modelToLabel(chatModel.model) : '您暂未添加模型'}
               </span>
             </div>

@@ -66,7 +66,6 @@ export class ChatStore extends StructStore<typeof state> {
     const now = Date.now()
     if (id) {
       const chat = await this.store.model.getChat(id)
-
       if (chat) {
         obj = {
           id: chat.id,

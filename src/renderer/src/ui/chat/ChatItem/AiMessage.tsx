@@ -76,7 +76,9 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
               系统已停止这条回答
             </div>
           )}
-          <div className="flex items-center justify-between dark:text-white/50 text-gray-500 text-sm ai-msg-actions h-8 pb-1 mt-1">
+          <div
+            className={`flex items-center justify-between dark:text-white/50 text-gray-500 text-sm ai-msg-actions h-8 pb-1 mt-1`}
+          >
             <div className="flex items-center gap-2 relative select-none">
               <div
                 className={

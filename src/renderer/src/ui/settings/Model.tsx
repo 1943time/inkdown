@@ -5,8 +5,8 @@ import { useGetSetState } from 'react-use'
 import { IClient } from 'types/model'
 import { AiModeLabel, openAiModels } from '@/store/llm/data/data'
 import { ModelIcon } from '../chat/ModelIcon'
-import { ChevronRight, CircleCheckBig, CircleX } from 'lucide-react'
-import { copy, nid } from '@/utils/common'
+import { CircleCheckBig, CircleX } from 'lucide-react'
+import { nid } from '@/utils/common'
 import { observer } from 'mobx-react-lite'
 import { useLocalState } from '@/hooks/useLocalState'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
@@ -175,7 +175,7 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
               </div>
             )}
           </div>
-          <div className={'space-x-3 flex-shrink-0'}>
+          <div className={'space-x-3 flex-shrink-0 flex items-center'}>
             <Button type={'default'} size={'middle'} onClick={check} loading={state().checking}>
               检查
             </Button>
@@ -262,7 +262,7 @@ export const ModelSettings = observer(() => {
           )}
         />
       </div>
-      <div className={'mt-5'}>
+      <div className={'mt-6 px-20'}>
         <Button
           block={true}
           type={'primary'}
