@@ -12,6 +12,7 @@ import { MarkdownOutput } from './note/output'
 import { WorkerHandle } from './note/worker/handle'
 import { ImportNote } from './note/import'
 import { KeyboardStore } from './keyboard'
+import { HookAPI } from 'antd/es/modal/useModal'
 export class Store {
   public readonly model = new ModelApi(this)
   public readonly settings = new SettingsStore(this)
@@ -25,9 +26,11 @@ export class Store {
   public readonly import = new ImportNote(this)
   public readonly keyboard = new KeyboardStore(this)
   public readonly msg: MessageInstance
+  public readonly modal: HookAPI
   userDataPath = ''
-  constructor(msg?: MessageInstance) {
-    this.msg = msg!
+  constructor(api: { msg?: MessageInstance; modal?: HookAPI }) {
+    this.msg = api.msg!
+    this.modal = api.modal!
     this.system.userDataPath().then((path) => {
       this.userDataPath = path
     })

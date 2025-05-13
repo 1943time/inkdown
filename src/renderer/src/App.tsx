@@ -1,14 +1,18 @@
 import { useMemo } from 'react'
 import { Store, StoreContext } from './store/store'
-import { message } from 'antd'
+import { message, Modal } from 'antd'
 import { ThemeProvider } from '@lobehub/ui'
 import Entry from './ui/Entry'
 import { observer } from 'mobx-react-lite'
 
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
+  const [modalApi, modalContextHolder] = Modal.useModal()
   const store = useMemo(() => {
-    const store = new Store(messageApi)
+    const store = new Store({
+      msg: messageApi,
+      modal: modalApi
+    })
     store.note.init()
     return store
   }, [])
@@ -35,6 +39,7 @@ const App = observer(() => {
     >
       <StoreContext value={store}>
         {contextHolder}
+        {modalContextHolder}
         <Entry />
       </StoreContext>
     </ThemeProvider>

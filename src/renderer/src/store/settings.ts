@@ -31,6 +31,7 @@ const state = {
   fullChatBot: false,
   spellCheck: false,
   codeAutoBreak: false,
+  maxMessageRounds: 8,
   codeTabSize: 2,
   showChatBot: false,
   get dark() {
@@ -107,7 +108,6 @@ export class SettingsStore extends StructStore<typeof state> {
     }
   }
   async init() {
-    await this.getModels()
     const settings = await this.store.model.getSettings()
     await this.getModels()
     this.setState((state) => {
@@ -195,6 +195,7 @@ export class SettingsStore extends StructStore<typeof state> {
         this.store.chat.setChatModel(data.id, data.model)
       }
     }
+    await this.setDefaultModel(undefined)
   }
 
   getAvailableUseModel(id?: string, model?: string): ClientModel {
@@ -214,9 +215,17 @@ export class SettingsStore extends StructStore<typeof state> {
     }
     return this.state.model!
   }
-  async setDefaultModel(id: string, model: string) {
-    this.setState({ defaultModel: { providerId: id, model } })
-    await this.store.model.putSetting({ key: 'defaultModel', value: { providerId: id, model } })
+  async setDefaultModel(data: { providerId: string; model: string } | undefined) {
+    if (data) {
+      this.setState({ defaultModel: { providerId: data.providerId, model: data.model } })
+      await this.store.model.putSetting({
+        key: 'defaultModel',
+        value: { providerId: data.providerId, model: data.model }
+      })
+    } else {
+      const model = this.getAvailableUseModel()
+      this.setState({ defaultModel: model ? { providerId: model.id, model: model.model } : null })
+    }
   }
   async ready(callback: Function) {
     if (this.state.ready) {

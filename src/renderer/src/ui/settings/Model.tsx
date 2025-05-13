@@ -1,4 +1,4 @@
-import { Form, Select, Input, Popconfirm } from 'antd'
+import { Form, Select, Input, Popconfirm, InputNumber, Slider } from 'antd'
 import { useStore } from '@/store/store'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useGetSetState } from 'react-use'
@@ -66,7 +66,7 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
         store.settings.setState((state) => {
           state.models = [...models, model]
         })
-        store.settings.setDefaultModel(model.id, model.models[0])
+        store.settings.setDefaultModel({ providerId: model.id, model: model.models[0] })
       } else {
         await store.settings.getModels()
         store.chat.setChatModel(
@@ -130,7 +130,14 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
           label={'Api 提供方'}
           name={'mode'}
           rules={[{ required: true }]}
-          tooltip={'很多模型都与OpenAi 的api兼容，如果未列出您所使用的模型，可以考虑使用OpenAi模式'}
+          tooltip={{
+            title: '很多模型都与OpenAi 的api兼容，如果未列出您所使用的模型，可以考虑使用OpenAi模式',
+            styles: {
+              root: {
+                zIndex: 2210
+              }
+            }
+          }}
         >
           <Select
             options={Array.from(AiModeLabel.entries()).map(([key, value]) => ({
@@ -231,6 +238,30 @@ export const ModelSettings = observer(() => {
   }, [])
   return (
     <div className={'py-5 max-w-[500px] mx-auto'}>
+      <div>
+        <Form className={'w-full'} layout={'horizontal'} labelAlign={'left'}>
+          <Form.Item
+            label={'最大对话轮数'}
+            tooltip={{
+              title: '一次问答视为一轮，超过最大对话轮数将在上下文中忽略更早的对话记录',
+              styles: {
+                root: {
+                  zIndex: 2210
+                }
+              }
+            }}
+          >
+            <div className={'ml-5'}>
+              <Slider
+                min={4}
+                max={20}
+                value={store.settings.state.maxMessageRounds}
+                tooltip={{ zIndex: 2210, arrow: false }}
+              />
+            </div>
+          </Form.Item>
+        </Form>
+      </div>
       <div className={'space-y-5'}>
         <SortableList
           gap={2}

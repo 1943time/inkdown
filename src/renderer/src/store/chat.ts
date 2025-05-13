@@ -11,6 +11,7 @@ import { observable, toJS } from 'mobx'
 import { withReact } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { createEditor } from 'slate'
+import { Subject } from 'rxjs'
 
 const state = {
   chats: [] as IChat[],
@@ -37,6 +38,7 @@ export class ChatStore extends StructStore<typeof state> {
   writeClient: AiClient | null = null
   private chatAbort = new Map<string, AbortController>()
   generateTopicChat = new Set<string>()
+  scrollToActiveMessage$ = new Subject<void>()
   constructor(private readonly store: Store) {
     super(state)
     this.init()
@@ -92,15 +94,17 @@ export class ChatStore extends StructStore<typeof state> {
     }
 
     const model = this.store.settings.getAvailableUseModel(obj?.clientId, obj?.model)
-    this.refreshClient(model)
-    obj.model = model.model
-    obj.clientId = model.id
-    this.store.model.updateChat(obj!.id, {
-      model: model.model,
-      clientId: model.id,
-      websearch: obj.websearch,
-      docContext: obj.docContext
-    })
+    if (model) {
+      this.refreshClient(model)
+      obj.model = model.model
+      obj.clientId = model.id
+      this.store.model.updateChat(obj!.id, {
+        model: model.model,
+        clientId: model.id,
+        websearch: obj.websearch,
+        docContext: obj.docContext
+      })
+    }
     if (!id) {
       await this.store.model.createChat(obj!)
       this.setState((state) => {
@@ -139,22 +143,24 @@ export class ChatStore extends StructStore<typeof state> {
         })
       }
     }
-    this.store.settings.setDefaultModel(id, useModel)
+    this.store.settings.setDefaultModel({ providerId: id, model: useModel })
   }
 
-  private refreshClient(model: ClientModel) {
+  private refreshClient(model?: ClientModel) {
     if (
-      model.id !== this.activeClient?.config.id ||
-      model.model !== this.activeClient?.config.model
+      model?.id !== this.activeClient?.config.id ||
+      model?.model !== this.activeClient?.config.model
     ) {
-      this.activeClient = new AiClient({
-        model: model.model,
-        mode: model.mode,
-        apiKey: model.apiKey,
-        baseUrl: model.baseUrl || openAiModels.get(model.mode),
-        id: model.id,
-        options: model.options
-      })
+      if (model) {
+        this.activeClient = new AiClient({
+          model: model.model,
+          mode: model.mode,
+          apiKey: model.apiKey,
+          baseUrl: model.baseUrl || openAiModels.get(model.mode),
+          id: model.id,
+          options: model.options
+        })
+      }
     }
   }
   async stopCompletion(id: string) {
@@ -212,6 +218,7 @@ export class ChatStore extends StructStore<typeof state> {
         state.activeChat!.messages!.push(msg)
         this.store.model.updateMessage(msg.id, msg)
       })
+      this.scrollToActiveMessage$.next()
       this.startCompletion(activeChat, sendMessages)
     }
   }
@@ -229,8 +236,10 @@ export class ChatStore extends StructStore<typeof state> {
     }
     const model = this.store.settings.getAvailableUseModel(activeChat.clientId, activeChat.model)
     if (!model) {
-      this.store.msg.error('请先设置模型')
       return
+    }
+    if (!this.activeClient) {
+      this.refreshClient(model)
     }
     let tokens = getTokens(text)
     if (opts?.files) {
@@ -307,6 +316,7 @@ export class ChatStore extends StructStore<typeof state> {
       }
     }
     this.refresh()
+    this.scrollToActiveMessage$.next()
     this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)])
     const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     this.startCompletion(activeChat, sendMessages)
@@ -484,25 +494,27 @@ export class ChatStore extends StructStore<typeof state> {
     //     }
     //   }
     // }
-    const newMessages = chat.messages!.slice(-10).reduce((acc, m) => {
-      if (m.role === 'assistant' && m.content === '...') {
+    const newMessages = chat
+      .messages!.slice(-(this.store.settings.state.maxMessageRounds * 2))
+      .reduce((acc, m) => {
+        if (m.role === 'assistant' && m.content === '...') {
+          return acc
+        }
+        let content = m.content
+        if (m.files?.length) {
+          content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
+        } else if (m.context?.length) {
+          content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')} \n ${content}`
+        }
+        if (m.docs?.length) {
+          content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')} \n ${content}`
+        }
+        acc.push({
+          role: m.role,
+          content: content
+        })
         return acc
-      }
-      let content = m.content
-      if (m.files?.length) {
-        content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
-      } else if (m.context?.length) {
-        content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')} \n ${content}`
-      }
-      if (m.docs?.length) {
-        content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')} \n ${content}`
-      }
-      acc.push({
-        role: m.role,
-        content: content
-      })
-      return acc
-    }, [] as IMessageModel[])
+      }, [] as IMessageModel[])
     let prompt = 'You are an AI assistant, please answer in the language used by the user'
     // if (summaryText) {
     //   prompt = `${prompt}\n[Conversation History Summary Reference]:\n ${summaryText}`
@@ -548,12 +560,11 @@ export class ChatStore extends StructStore<typeof state> {
         success: true,
         message: `${provider} API连接成功`
       }
-    } catch (error) {
-      console.error(error)
+    } catch (error: any) {
       return {
         success: false,
         error,
-        message: `连接测试出错: ${error instanceof Error ? error.message : '未知错误'}`
+        message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
       }
     }
   }

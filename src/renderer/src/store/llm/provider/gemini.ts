@@ -15,7 +15,10 @@ export class GeminiModel implements BaseModel {
       }
     })
   }
-  async completion<T = GenerateContentResponse>(messages: IMessageModel[], opts?:CompletionOptions): Promise<[string, T]> {
+  async completion<T = GenerateContentResponse>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     const res = await this.gemini.models.generateContent({
       model: this.config.model,
       contents: messages.map((m) => {
@@ -28,7 +31,7 @@ export class GeminiModel implements BaseModel {
     try {
       if (messages[0].role === 'system') {
         const first = messages.shift()
-        messages[0].content = `${first?.content}\n\n${messages[0].content}` 
+        messages[0].content = `${first?.content}\n\n${messages[0].content}`
       }
       // const image = await this.gemini.files.upload({
       //   file: "/path/to/organ.png",
@@ -37,15 +40,25 @@ export class GeminiModel implements BaseModel {
       //   "Tell me about this instrument",
       //   createPartFromUri(image.uri!, image.mimeType!),
       // ])
-      const data:CreateChatParameters = {
+      const data: CreateChatParameters = {
         model: this.config.model,
+        // config: {
+        //   presencePenalty: 0.5,
+        //   frequencyPenalty: 0.5,
+        //   topP: 0.95,
+        //   topK: 40,
+        //   temperature: 0.5
+        // },
         history: messages.slice(0, -1).map((m) => {
-          return { role: m.role === 'system' ? 'user' : m.role === 'assistant' ? 'model' : m.role, parts: [{text: m.content}]} 
+          return {
+            role: m.role === 'system' ? 'user' : m.role === 'assistant' ? 'model' : m.role,
+            parts: [{ text: m.content }]
+          }
         })
       }
       if (opts.enable_search) {
         data.config = {
-          tools: [{googleSearch: {}}]
+          tools: [{ googleSearch: {} }]
         }
       }
       const chat = this.gemini.chats.create(data)
@@ -60,8 +73,10 @@ export class GeminiModel implements BaseModel {
       }
       opts.onFinish?.(text)
     } catch (e: any) {
-      const errorMessage = e.response?.data?.error?.message || e.error?.message || e.message || 'Connection Error'
+      const errorMessage =
+        e.response?.data?.error?.message || e.error?.message || e.message || 'Connection Error'
       opts.onError?.('Connection Error', errorMessage, e)
+      throw e
     }
   }
 }

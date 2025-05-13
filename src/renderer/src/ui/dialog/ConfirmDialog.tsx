@@ -81,7 +81,9 @@ export function ConfirmDialog() {
       footer: params.footer,
       onClose: params.onClose
     }
-    window.addEventListener('keydown', enter)
+    setTimeout(() => {
+      window.addEventListener('keydown', enter)
+    })
   })
   return (
     <Dialog open={state().open} manualClose={!state().allowClose} onClose={close}>
@@ -96,7 +98,7 @@ export function ConfirmDialog() {
           block={true}
           danger={!state().okType || state().okType === 'danger'}
           className={'mt-5'}
-          type={state().okType === 'primary' ? 'primary' : undefined}
+          type={'primary'}
           loading={state().loading}
           onClick={confirm}
         >
@@ -107,6 +109,7 @@ export function ConfirmDialog() {
           <Button
             block={true}
             className={'mt-3'}
+            type={'text'}
             onClick={(e) => {
               e.stopPropagation()
               paramsRef.current.onCancel?.()

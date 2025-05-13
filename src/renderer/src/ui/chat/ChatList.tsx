@@ -4,9 +4,12 @@ import { useGetSetState } from 'react-use'
 import ChatItem from './ChatItem'
 import { ChevronDown } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useStore } from '@/store/store'
+import { useSubject } from '@/hooks/common'
 
 export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
   ({ messages, chat }) => {
+    const store = useStore()
     const scrollRef = useRef<HTMLDivElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
     const scrollTimer = useRef(0)
@@ -55,6 +58,14 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
         })
       }, 100)
     }, [])
+
+    useSubject(store.chat.scrollToActiveMessage$, () => {
+      setTimeout(() => {
+        if (store.chat.state.activeChat?.messages?.length) {
+          scrollToChat(store.chat.state.activeChat.messages.length - 1, 'smooth')
+        }
+      }, 30)
+    })
     useLayoutEffect(() => {
       if (preChatId.current !== chat?.id) {
         setState({ visible: false, showScrollToBottom: false })
@@ -71,14 +82,6 @@ export const AiMessageList = observer<{ messages: IMessage[]; chat: IChat }>(
         }, 30)
       }
     }, [chat?.id])
-
-    useEffect(() => {
-      if (state().visible) {
-        setTimeout(() => {
-          scrollToChat(messages.length - 1, 'smooth')
-        }, 30)
-      }
-    }, [messages.length])
 
     return (
       <div className={'relative h-full'}>

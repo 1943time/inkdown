@@ -200,7 +200,18 @@ ipcMain.handle('sortClients', async (_, ids: string[]) => {
 })
 
 ipcMain.handle('deleteClient', async (_, id: string) => {
-  return knex.delete().from('client').where('id', id)
+  await knex.delete().from('client').where('id', id)
+  try {
+    const defaultModel = await knex('setting').where('key', 'defaultModel').first()
+    if (defaultModel?.value && defaultModel?.value !== 'undefined') {
+      const data = JSON.parse(defaultModel.value)
+      if (data.providerId === id) {
+        await knex('setting').where('key', 'defaultModel').update({ value: undefined })
+      }
+    }
+  } catch (e) {
+    console.error(e)
+  }
 })
 
 ipcMain.handle('getSpaces', async () => {

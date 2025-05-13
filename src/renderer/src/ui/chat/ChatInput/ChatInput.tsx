@@ -1,6 +1,6 @@
 import { useStore } from '@/store/store'
 import { Tooltip } from '@lobehub/ui'
-import { Popover } from 'antd'
+import { Modal, Popover } from 'antd'
 import isHotkey from 'is-hotkey'
 import {
   CircleX,
@@ -59,8 +59,22 @@ export const ChatInput = observer(() => {
   const compositionEnd = useCallback((e: React.CompositionEvent<HTMLDivElement>) => {
     setState((state) => (state.inputComposition = false))
   }, [])
-
   const send = useCallback(() => {
+    if (!store.settings.state.defaultModel?.model) {
+      store.note.openConfirmDialog$.next({
+        title: '提示',
+        description: '您暂未设置模型，是否去设置？',
+        okText: '前往设置',
+        okType: 'primary',
+        onConfirm: () => {
+          store.settings.setData((state) => {
+            state.open = true
+            state.setTab = 2
+          })
+        }
+      })
+      return
+    }
     if (activeChat?.pending) {
       store.chat.stopCompletion(activeChat.id)
       return
