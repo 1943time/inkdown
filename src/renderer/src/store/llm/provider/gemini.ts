@@ -81,7 +81,6 @@ export class GeminiModel implements BaseModel {
       const errorMessage =
         e.response?.data?.error?.message || e.error?.message || e.message || 'Connection Error'
       opts.onError?.('Connection Error', errorMessage, e)
-      throw e
     }
   }
 }

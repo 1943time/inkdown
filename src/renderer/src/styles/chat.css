@@ -35,7 +35,7 @@
   display: none;
 }
 .chat-list .ai-message:last-child {
-  min-height: calc(100vh - 220px);
+  min-height: calc(100vh - 260px);
   .last {
     display: flex;
   }

@@ -549,27 +549,35 @@ export class ChatStore extends StructStore<typeof state> {
     apiKey: string
     model: string
     mode: string
-  }) {
+  }): Promise<{ success: boolean; message: string; error?: any }> {
     try {
-      const client = new AiClient({
-        mode: provider,
-        baseUrl: baseUrl || openAiModels.get(mode),
-        apiKey: apiKey,
-        model: model,
-        id: nid(),
-        options: {}
+      return await new Promise(async (resolve, reject) => {
+        const client = new AiClient({
+          mode: provider,
+          baseUrl: baseUrl || openAiModels.get(mode),
+          apiKey: apiKey,
+          model: model,
+          id: nid(),
+          options: {}
+        })
+        await client.completionStream([{ role: 'user', content: 'Hello' }], {
+          onFinish: (content) => {
+            console.log('test finish', content)
+            resolve({
+              success: true,
+              message: `${provider} API连接成功`
+            })
+          },
+          max_tokens: 5,
+          onError: (code, message, e) => {
+            resolve({
+              success: false,
+              error: e,
+              message: `${code}: ${message}`
+            })
+          }
+        })
       })
-      await client.completionStream([{ role: 'user', content: 'Hello' }], {
-        onFinish: (content) => {
-          console.log('test finish', content)
-        },
-        max_tokens: 5
-      })
-      // 检查响应状态
-      return {
-        success: true,
-        message: `${provider} API连接成功`
-      }
     } catch (error: any) {
       return {
         success: false,

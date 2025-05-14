@@ -19,7 +19,8 @@ export class ClaudeModel implements BaseModel {
     this.config = config
     this.anthropic = new Anthropic({
       apiKey: this.config.apiKey,
-      baseURL: this.config.baseUrl
+      baseURL: this.config.baseUrl,
+      dangerouslyAllowBrowser: true
     })
   }
 
@@ -49,7 +50,7 @@ export class ClaudeModel implements BaseModel {
       const completion = await this.anthropic.messages.create(
         {
           model: this.config.model,
-          max_tokens: 4096,
+          max_tokens: opts.max_tokens || 4096,
           temperature: opts.modelOptions?.temperature,
           top_p: opts.modelOptions?.top_p,
           messages: messages.map((m) => ({

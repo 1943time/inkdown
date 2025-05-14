@@ -4,6 +4,7 @@ import { OpenaiModel } from './provider/openai'
 import { GeminiModel } from './provider/gemini'
 import { CompletionOptions, ModelConfig, StreamOptions } from './type'
 import { OpenRouterModel } from './provider/openRouter'
+import { ClaudeModel } from './provider/claude'
 const openAiMode = new Set(['openai', 'qwen', 'deepseek'])
 export class AiClient implements BaseModel {
   client!: BaseModel
@@ -16,9 +17,14 @@ export class AiClient implements BaseModel {
       this.client = new GeminiModel(config)
     } else if (config.mode === 'openrouter') {
       this.client = new OpenRouterModel(config)
+    } else if (config.mode === 'claude') {
+      this.client = new ClaudeModel(config)
     }
   }
-  async completion<T = any>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
+  async completion<T = any>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     return this.client.completion<T>(messages, opts)
   }
   async completionStream(messages: IMessageModel[], opts: StreamOptions) {
@@ -27,8 +33,7 @@ export class AiClient implements BaseModel {
   getSummaryMessage(messages: IMessageModel[]) {
     return [
       {
-        content:
-          `You are a conversational assistant and you need to summarize the user's conversation into a title of 10 words or less., The summary needs to maintain the original language.`,
+        content: `You are a conversational assistant and you need to summarize the user's conversation into a title of 10 words or less., The summary needs to maintain the original language.`,
         role: 'system'
       },
       {

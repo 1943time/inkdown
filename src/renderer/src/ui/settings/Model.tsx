@@ -3,7 +3,7 @@ import { useStore } from '@/store/store'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { IClient } from 'types/model'
-import { AiModeLabel, openAiModels } from '@/store/llm/data/data'
+import { AiModeLabel, openAiModels, providerOptions } from '@/store/llm/data/data'
 import { ModelIcon } from '../chat/ModelIcon'
 import { CircleCheckBig, CircleX } from 'lucide-react'
 import { nid } from '@/utils/common'
@@ -18,7 +18,9 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
     loading: false,
     error: '',
     checking: false,
-    checked: false
+    checked: false,
+    defaultUrl: '',
+    modelOptions: [] as string[]
   })
   const check = useCallback(() => {
     form.validateFields().then((data) => {
@@ -93,6 +95,10 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
       if (props.id) {
         store.model.getClient(props.id).then((model) => {
           if (model) {
+            setState({
+              defaultUrl: providerOptions.get(model.mode)?.baseUrl || '',
+              modelOptions: providerOptions.get(model.mode)?.models || []
+            })
             form.setFieldsValue({
               name: model.name,
               mode: model.mode,
@@ -149,6 +155,12 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
               ),
               value: key
             }))}
+            onChange={(value) => {
+              setState({
+                defaultUrl: providerOptions.get(value)?.baseUrl || '',
+                modelOptions: providerOptions.get(value)?.models || []
+              })
+            }}
             dropdownStyle={{ zIndex: 2210 }}
             placeholder={'请选择Api 提供方'}
           />
@@ -161,11 +173,19 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
             mode="tags"
             dropdownStyle={{ zIndex: 2210 }}
             style={{ width: '100%' }}
+            options={state().modelOptions.map((v) => {
+              return {
+                label: v,
+                value: v
+              }
+            })}
             placeholder="使用回车添加模型，可添加多个"
           />
         </Form.Item>
         <Form.Item rules={[{ type: 'url' }]} label={'Api Base Url'} name={'baseUrl'}>
-          <Input placeholder={'Default use: https://api.openai.com'} />
+          <Input
+            placeholder={`${state().defaultUrl ? `Default use: ${state().defaultUrl}` : ''}`}
+          />
         </Form.Item>
         <div className={'flex justify-between items-center space-x-3'}>
           <div>
