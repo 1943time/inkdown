@@ -21,6 +21,12 @@ export class GeminiModel implements BaseModel {
   ): Promise<[string, T]> {
     const res = await this.gemini.models.generateContent({
       model: this.config.model,
+      config: {
+        presencePenalty: opts?.modelOptions?.presence_penalty,
+        frequencyPenalty: opts?.modelOptions?.frequency_penalty,
+        topP: opts?.modelOptions?.top_p,
+        temperature: opts?.modelOptions?.temperature
+      },
       contents: messages.map((m) => {
         return { role: m.role === 'system' ? 'user' : m.role, content: m.content }
       })
@@ -42,13 +48,12 @@ export class GeminiModel implements BaseModel {
       // ])
       const data: CreateChatParameters = {
         model: this.config.model,
-        // config: {
-        //   presencePenalty: 0.5,
-        //   frequencyPenalty: 0.5,
-        //   topP: 0.95,
-        //   topK: 40,
-        //   temperature: 0.5
-        // },
+        config: {
+          presencePenalty: opts.modelOptions?.presence_penalty,
+          frequencyPenalty: opts.modelOptions?.frequency_penalty,
+          topP: opts.modelOptions?.top_p,
+          temperature: opts.modelOptions?.temperature
+        },
         history: messages.slice(0, -1).map((m) => {
           return {
             role: m.role === 'system' ? 'user' : m.role === 'assistant' ? 'model' : m.role,

@@ -324,11 +324,21 @@ export class ChatStore extends StructStore<typeof state> {
   private async startCompletion(activeChat: IChat, sendMessages: IMessageModel[]) {
     const controller = new AbortController()
     this.chatAbort.set(activeChat.id, controller)
-    // 检测如果已有10条message未总结，则先总结前6条，保持后四条不总结
     const startTime = Date.now()
     let lastUpdate = Date.now()
+    const modelOptions = this.store.settings.state.modelOptions
     this.activeClient!.completionStream(sendMessages, {
       enable_search: activeChat.websearch,
+      modelOptions: {
+        temperature: modelOptions.temperature.enable ? modelOptions.temperature.value : undefined,
+        top_p: modelOptions.top_p.enable ? modelOptions.top_p.value : undefined,
+        presence_penalty: modelOptions.presence_penalty.enable
+          ? modelOptions.presence_penalty.value
+          : undefined,
+        frequency_penalty: modelOptions.frequency_penalty.enable
+          ? modelOptions.frequency_penalty.value
+          : undefined
+      },
       onChunk: (fullText) => {
         this.setState((state) => {
           const msg = state.activeChat!.messages![state.activeChat!.messages!.length - 1]

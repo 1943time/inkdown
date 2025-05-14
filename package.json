@@ -38,7 +38,7 @@
   "devDependencies": {
     "@ant-design/icons": "^5.6.1",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
-    "@anthropic-ai/sdk": "^0.39.0",
+    "@anthropic-ai/sdk": "^0.50.4",
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@google/genai": "^0.13.0",
     "@iconify/react": "^5.2.1",

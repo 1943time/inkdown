@@ -15,7 +15,10 @@ export class OpenaiModel implements BaseModel {
       dangerouslyAllowBrowser: true
     })
   }
-  async completion<T = OpenAI.ChatCompletion>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
+  async completion<T = OpenAI.ChatCompletion>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     // @ts-ignore
     const completion = await this.openai.chat.completions.create(
       {
@@ -24,6 +27,10 @@ export class OpenaiModel implements BaseModel {
           return { role: m.role, content: m.content || '' }
         }),
         enable_search: opts?.enable_search,
+        frequency_penalty: opts?.modelOptions?.frequency_penalty,
+        presence_penalty: opts?.modelOptions?.presence_penalty,
+        top_p: opts?.modelOptions?.top_p,
+        temperature: opts?.modelOptions?.temperature,
         stream: false
       },
       { signal: opts?.signal }
@@ -37,7 +44,11 @@ export class OpenaiModel implements BaseModel {
         messages: messages.map((m) => {
           return { role: m.role, content: m.content }
         }),
-        stream: true
+        stream: true,
+        frequency_penalty: opts.modelOptions?.frequency_penalty,
+        presence_penalty: opts.modelOptions?.presence_penalty,
+        top_p: opts.modelOptions?.top_p,
+        temperature: opts.modelOptions?.temperature
       }
       if (opts.enable_search) {
         const searchOptions = webSearchOptions.find((o) => o.models.includes(this.config.model))

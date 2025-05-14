@@ -34,6 +34,24 @@ const state = {
   maxMessageRounds: 8,
   codeTabSize: 2,
   showChatBot: false,
+  modelOptions: {
+    temperature: {
+      value: 0.7,
+      enable: false
+    },
+    top_p: {
+      value: 0.7,
+      enable: false
+    },
+    presence_penalty: {
+      value: 0,
+      enable: false
+    },
+    frequency_penalty: {
+      value: 0,
+      enable: false
+    }
+  },
   get dark() {
     return this.theme === 'system' ? this.systemDark : this.theme === 'dark'
   },

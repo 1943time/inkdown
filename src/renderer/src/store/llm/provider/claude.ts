@@ -6,9 +6,9 @@ import { TextBlock } from '@anthropic-ai/sdk/resources/index.mjs'
 
 interface ClaudeMessage {
   content: Array<{
-    type: string;
-    text: string;
-  }>;
+    type: string
+    text: string
+  }>
 }
 
 export class ClaudeModel implements BaseModel {
@@ -23,32 +23,45 @@ export class ClaudeModel implements BaseModel {
     })
   }
 
-  async completion<T = ClaudeMessage>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
-    const completion = await this.anthropic.messages.create({
-      model: this.config.model,
-      max_tokens: 4096,
-      messages: messages.map((m) => ({
-        role: m.role === 'system' ? 'user' : m.role,
-        content: m.content || ''
-      })),
-      stream: false
-    }, { signal: opts?.signal })
-    return [(completion.content?.[0] as TextBlock)?.text || '', completion as T]
-  }
-
-  async completionStream(messages: IMessageModel[], opts: StreamOptions) {
-    try {
-      const completion = await this.anthropic.messages.create({
+  async completion<T = ClaudeMessage>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
+    const completion = await this.anthropic.messages.create(
+      {
         model: this.config.model,
         max_tokens: 4096,
         messages: messages.map((m) => ({
           role: m.role === 'system' ? 'user' : m.role,
           content: m.content || ''
         })),
-        stream: true
-      }, {
-        signal: opts.signal
-      })
+        stream: false,
+        top_p: opts?.modelOptions?.top_p,
+        temperature: opts?.modelOptions?.temperature
+      },
+      { signal: opts?.signal }
+    )
+    return [(completion.content?.[0] as TextBlock)?.text || '', completion as T]
+  }
+
+  async completionStream(messages: IMessageModel[], opts: StreamOptions) {
+    try {
+      const completion = await this.anthropic.messages.create(
+        {
+          model: this.config.model,
+          max_tokens: 4096,
+          temperature: opts.modelOptions?.temperature,
+          top_p: opts.modelOptions?.top_p,
+          messages: messages.map((m) => ({
+            role: m.role === 'system' ? 'user' : m.role,
+            content: m.content || ''
+          })),
+          stream: true
+        },
+        {
+          signal: opts.signal
+        }
+      )
       let fullContent = ''
 
       for await (const chunk of completion) {
@@ -70,4 +83,4 @@ export class ClaudeModel implements BaseModel {
       }
     }
   }
-} 
+}

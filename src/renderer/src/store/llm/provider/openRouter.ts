@@ -16,7 +16,10 @@ export class OpenRouterModel implements BaseModel {
     }
   }
 
-  async completion<T = any>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
+  async completion<T = any>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     const response = await fetch(`${this.baseURL}/chat/completions`, {
       method: 'POST',
       headers: this.headers,
@@ -28,7 +31,11 @@ export class OpenRouterModel implements BaseModel {
         })),
         stream: false,
         ...this.config.options,
-        max_tokens: opts?.max_tokens
+        max_tokens: opts?.max_tokens,
+        frequency_penalty: opts?.modelOptions?.frequency_penalty,
+        presence_penalty: opts?.modelOptions?.presence_penalty,
+        top_p: opts?.modelOptions?.top_p,
+        temperature: opts?.modelOptions?.temperature
       }),
       signal: opts?.signal
     })
@@ -51,6 +58,10 @@ export class OpenRouterModel implements BaseModel {
           content: m.content
         })),
         stream: true,
+        frequency_penalty: opts.modelOptions?.frequency_penalty,
+        presence_penalty: opts.modelOptions?.presence_penalty,
+        top_p: opts.modelOptions?.top_p,
+        temperature: opts.modelOptions?.temperature,
         max_tokens: opts.max_tokens,
         ...this.config.options
       }

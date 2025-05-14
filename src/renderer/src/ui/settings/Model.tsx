@@ -1,6 +1,6 @@
-import { Form, Select, Input, Popconfirm, InputNumber, Slider } from 'antd'
+import { Form, Select, Input, Popconfirm, InputNumber, Slider, Collapse, Checkbox } from 'antd'
 import { useStore } from '@/store/store'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { IClient } from 'types/model'
 import { AiModeLabel, openAiModels } from '@/store/llm/data/data'
@@ -226,6 +226,7 @@ const ModelItem = observer(
 
 export const ModelSettings = observer(() => {
   const store = useStore()
+  const timer = useRef(0)
   const [state, setState] = useLocalState({
     openEdit: false,
     selectedId: null as string | null
@@ -236,32 +237,14 @@ export const ModelSettings = observer(() => {
       store.settings.removeModel(id)
     }
   }, [])
+  const updateSettings = useCallback((key: keyof typeof store.settings.state) => {
+    clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => {
+      store.settings.setSetting(key, store.settings.state[key])
+    }, 500)
+  }, [])
   return (
     <div className={'py-5 max-w-[500px] mx-auto'}>
-      <div>
-        <Form className={'w-full'} layout={'horizontal'} labelAlign={'left'}>
-          <Form.Item
-            label={'最大对话轮数'}
-            tooltip={{
-              title: '一次问答视为一轮，超过最大对话轮数将在上下文中忽略更早的对话记录',
-              styles: {
-                root: {
-                  zIndex: 2210
-                }
-              }
-            }}
-          >
-            <div className={'ml-5'}>
-              <Slider
-                min={4}
-                max={20}
-                value={store.settings.state.maxMessageRounds}
-                tooltip={{ zIndex: 2210, arrow: false }}
-              />
-            </div>
-          </Form.Item>
-        </Form>
-      </div>
       <div className={'space-y-5'}>
         <SortableList
           gap={2}
@@ -307,6 +290,210 @@ export const ModelSettings = observer(() => {
           添加模型
         </Button>
       </div>
+      <div className={'mt-10'}>
+        <Form className={'w-full'} layout={'horizontal'} labelAlign={'left'}>
+          <Form.Item
+            label={'最大对话轮数'}
+            tooltip={{
+              title: '一次问答视为一轮，超过最大对话轮数将在上下文中忽略更早的对话记录',
+              styles: {
+                root: {
+                  zIndex: 2210
+                }
+              }
+            }}
+          >
+            <div className={'ml-5'}>
+              <Slider
+                min={4}
+                max={20}
+                onChange={(value) => {
+                  store.settings.setState((state) => {
+                    state.maxMessageRounds = value
+                  })
+                  updateSettings('maxMessageRounds')
+                }}
+                value={store.settings.state.maxMessageRounds}
+                tooltip={{ zIndex: 2210, arrow: false }}
+              />
+            </div>
+          </Form.Item>
+        </Form>
+      </div>
+      <div className={'mt-5'}>
+        <Collapse
+          size={'small'}
+          items={[
+            {
+              key: 'more',
+              label: '更多设置',
+              children: (
+                <div>
+                  <div className={'text-xs text-gray-500 mb-5 text-center'}>
+                    如对参数不是特别了解，不建议配置或勾选
+                  </div>
+                  <Form
+                    layout={'horizontal'}
+                    className={'w-full'}
+                    labelAlign={'left'}
+                    size={'small'}
+                    labelCol={{ span: 12 }}
+                  >
+                    <Form.Item
+                      label={'创意活跃度'}
+                      tooltip={{
+                        title: '数值越大，回答越有创意和想象力；数值越小，回答越严谨',
+                        styles: {
+                          root: { zIndex: 2210 }
+                        }
+                      }}
+                    >
+                      <div className={'flex items-center'}>
+                        <Slider
+                          min={0}
+                          max={2}
+                          value={store.settings.state.modelOptions.temperature.value}
+                          step={0.1}
+                          onChange={(value) => {
+                            store.settings.setState((state) => {
+                              state.modelOptions.temperature.value = value
+                            })
+                            updateSettings('modelOptions')
+                          }}
+                          style={{ width: '120px' }}
+                          tooltip={{ zIndex: 2210 }}
+                        />
+                        <div className={'ml-5'}>
+                          <Checkbox
+                            checked={store.settings.state.modelOptions.temperature.enable}
+                            onChange={(e) => {
+                              store.settings.setState((state) => {
+                                state.modelOptions.temperature.enable = e.target.checked
+                              })
+                              updateSettings('modelOptions')
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </Form.Item>
+                    <Form.Item
+                      label={'思维开放度 (top_p)'}
+                      name={'top_p'}
+                      tooltip={{
+                        title:
+                          '考虑多少种可能性，值越大，接受更多可能的回答；值越小，倾向选择最可能的回答。不推荐和创意活跃度一起更改',
+                        styles: { root: { zIndex: 2210 } }
+                      }}
+                    >
+                      <div className={'flex items-center'}>
+                        <Slider
+                          min={0}
+                          max={1}
+                          value={store.settings.state.modelOptions.top_p.value}
+                          step={0.1}
+                          style={{ width: '120px' }}
+                          tooltip={{ zIndex: 2210 }}
+                          onChange={(value) => {
+                            store.settings.setState((state) => {
+                              state.modelOptions.top_p.value = value
+                            })
+                            updateSettings('modelOptions')
+                          }}
+                        />
+                        <div className={'ml-5'}>
+                          <Checkbox
+                            checked={store.settings.state.modelOptions.top_p.enable}
+                            onChange={(e) => {
+                              store.settings.setState((state) => {
+                                state.modelOptions.top_p.enable = e.target.checked
+                              })
+                              updateSettings('modelOptions')
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </Form.Item>
+                    <Form.Item
+                      label={'表述发散度 (presencePenalty)'}
+                      name={'presence_penalty'}
+                      tooltip={{
+                        title:
+                          '值越大，越倾向不同的表达方式，避免概念重复；值越小，越倾向使用重复的概念或叙述，表达更具一致性',
+                        styles: { root: { zIndex: 2210 } }
+                      }}
+                    >
+                      <div className={'flex items-center'}>
+                        <Slider
+                          min={-2}
+                          max={2}
+                          value={store.settings.state.modelOptions.presence_penalty.value}
+                          step={0.1}
+                          onChange={(value) => {
+                            store.settings.setState((state) => {
+                              state.modelOptions.presence_penalty.value = value
+                            })
+                            updateSettings('modelOptions')
+                          }}
+                          style={{ width: '120px' }}
+                          tooltip={{ zIndex: 2210 }}
+                        />
+                        <div className={'ml-5'}>
+                          <Checkbox
+                            checked={store.settings.state.modelOptions.presence_penalty.enable}
+                            onChange={(e) => {
+                              store.settings.setState((state) => {
+                                state.modelOptions.presence_penalty.enable = e.target.checked
+                              })
+                              updateSettings('modelOptions')
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </Form.Item>
+                    <Form.Item
+                      label={'词汇丰富度 (frequencyPenalty)'}
+                      name={'frequency_penalty'}
+                      tooltip={{
+                        title: '值越大，用词越丰富多样；值越低，用词更朴实简单',
+                        styles: { root: { zIndex: 2210 } }
+                      }}
+                    >
+                      <div className={'flex items-center'}>
+                        <Slider
+                          min={-2}
+                          max={2}
+                          value={store.settings.state.modelOptions.frequency_penalty.value}
+                          step={0.1}
+                          onChange={(value) => {
+                            store.settings.setState((state) => {
+                              state.modelOptions.frequency_penalty.value = value
+                            })
+                            updateSettings('modelOptions')
+                          }}
+                          style={{ width: '120px' }}
+                          tooltip={{ zIndex: 2210 }}
+                        />
+                        <div className={'ml-5'}>
+                          <Checkbox
+                            checked={store.settings.state.modelOptions.frequency_penalty.enable}
+                            onChange={(e) => {
+                              store.settings.setState((state) => {
+                                state.modelOptions.frequency_penalty.enable = e.target.checked
+                              })
+                              updateSettings('modelOptions')
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </Form.Item>
+                  </Form>
+                </div>
+              )
+            }
+          ]}
+        />
+      </div>
+
       <ModalForm
         open={state.openEdit}
         id={state.selectedId}

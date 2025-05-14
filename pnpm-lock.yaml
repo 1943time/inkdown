@@ -50,8 +50,8 @@ devDependencies:
     specifier: ^1.0.3
     version: 1.0.3(antd@5.24.6)(react-dom@19.1.0)(react@19.1.0)
   '@anthropic-ai/sdk':
-    specifier: ^0.39.0
-    version: 0.39.0
+    specifier: ^0.50.4
+    version: 0.50.4
   '@electron-toolkit/tsconfig':
     specifier: ^1.0.1
     version: 1.0.1(@types/node@22.14.0)
@@ -431,18 +431,10 @@ packages:
     resolution: {integrity: sha512-Mex9nXf9vR6AhcXmMrlz/HVgYYZpVGJ6YlPgwl7UnaFpnshXs6EK/oa5Gpf3CzENMjkvEx2tQtntGnb7UtSTOQ==}
     dev: true
 
-  /@anthropic-ai/sdk@0.39.0:
-    resolution: {integrity: sha512-eMyDIPRZbt1CCLErRCi3exlAvNkBtRe+kW5vvJyef93PmNr/clstYgHhtvmkxN82nlKgzyGPCyGxrm0JQ1ZIdg==}
-    dependencies:
-      '@types/node': 18.19.86
-      '@types/node-fetch': 2.6.12
-      abort-controller: 3.0.0
-      agentkeepalive: 4.6.0
-      form-data-encoder: 1.7.2
-      formdata-node: 4.4.1
-      node-fetch: 2.7.0
-    transitivePeerDependencies:
-      - encoding
+  /@anthropic-ai/sdk@0.50.4:
+    resolution: {integrity: sha512-zZOWyIuznx2uqiRcCNuidkAsLC8IBHgS9lTwSVEB29sUCwEcqL95MWpWP1nccHSKfiZga+hbZaI0btR2zjuMmw==}
+    engines: {node: '>= 20'}
+    hasBin: true
     dev: true
 
   /@babel/code-frame@7.26.2:
