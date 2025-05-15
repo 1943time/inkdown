@@ -175,6 +175,12 @@ export class ContextMenu {
             this.store.note.createTab(node)
           },
           key: 'cmd+click'
+        },
+        {
+          text: os() === 'mac' ? 'Reveal in Finder' : 'Show in Explorer',
+          click: () => {
+            this.store.local.showInFinder(node)
+          }
         }
       ]
       if (this.store.note.state.currentSpace?.writeFolderPath) {

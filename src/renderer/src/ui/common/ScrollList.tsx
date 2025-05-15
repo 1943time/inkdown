@@ -7,7 +7,7 @@ interface ScrollListProps<T> {
   items: T[]
   style?: CSSProperties
   renderItem: (item: T, index: number) => React.ReactNode
-  onSelect?: (item: T, index: number) => void
+  onSelect?: (item: T, index: number, mod?: boolean) => void
   className?: string
   onClose?: () => void
   onTab?: (item: T, index: number) => void
@@ -59,9 +59,9 @@ export const ScrollList = observer(
           }
         }
 
-        if (items.length && isHotkey('enter', e)) {
+        if (items.length && (isHotkey('enter', e) || isHotkey('mod+enter', e))) {
           e.preventDefault()
-          onSelect?.(items[state.activeIndex], state.activeIndex)
+          onSelect?.(items[state.activeIndex], state.activeIndex, e.ctrlKey || e.metaKey)
         }
         if (items.length && isHotkey('tab', e)) {
           e.preventDefault()
@@ -92,9 +92,9 @@ export const ScrollList = observer(
             onMouseEnter={() => {
               setState({ activeIndex: index })
             }}
-            onClick={() => {
+            onClick={(e) => {
               setState({ activeIndex: index })
-              onSelect?.(item, index)
+              onSelect?.(item, index, e.ctrlKey || e.metaKey)
             }}
           >
             {renderItem(item, index)}

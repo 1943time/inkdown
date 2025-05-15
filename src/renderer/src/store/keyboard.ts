@@ -136,6 +136,15 @@ export class KeyboardStore {
       }
     ],
     [
+      'deleteFile',
+      {
+        system: 'mod+backspace',
+        custom: undefined,
+        scene: 'global',
+        disabled: true
+      }
+    ],
+    [
       'closeCurrentTab',
       {
         system: 'mod+w',
@@ -506,6 +515,11 @@ export class KeyboardStore {
         break
       case 'quickOpenNote':
         this.store.note.setState({ showQuickOpen: true })
+        break
+      case 'deleteFile':
+        if (this.store.note.state.selectedDoc && this.store.note.state.selectedDoc.id !== 'root') {
+          this.store.note.moveToTrash(this.store.note.state.selectedDoc)
+        }
         break
     }
   }

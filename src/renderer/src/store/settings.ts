@@ -139,12 +139,12 @@ export class SettingsStore extends StructStore<typeof state> {
         }
       }
     })
-    this.setState({ ready: true })
     if (this.state.language === 'zh') {
       i18next.changeLanguage('zh')
     } else {
       i18next.changeLanguage('en')
     }
+    this.setState({ ready: true })
     if (this.callbacks.length) {
       for (const callback of this.callbacks) {
         callback()

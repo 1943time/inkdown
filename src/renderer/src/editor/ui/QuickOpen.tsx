@@ -84,9 +84,13 @@ export const QuickOpen = observer(() => {
             items={state().filterRecords}
             style={{ maxHeight: 300 }}
             onClose={close}
-            onSelect={(item) => {
+            onSelect={(item, index, mod) => {
               close()
-              store.note.openDoc(store.note.state.nodes[item.id])
+              if (mod) {
+                store.note.createTab(store.note.state.nodes[item.id])
+              } else {
+                store.note.openDoc(store.note.state.nodes[item.id])
+              }
             }}
             renderItem={(item, index) => (
               <div

@@ -199,9 +199,14 @@ export class NoteStore extends StructStore<typeof state> {
   }
   removeTab(i: number) {
     if (this.state.tabs.length < 2) return
+    this.state.currentTab.saveDoc$.next(null)
     this.setState((state) => {
       state.tabs.splice(i, 1)
-      if (i <= state.tabIndex && i > 0) {
+      if (i === state.tabIndex) {
+        if (!state.tabs[state.tabIndex]) {
+          state.tabIndex--
+        }
+      } else if (i < state.tabIndex) {
         state.tabIndex--
       }
     })
