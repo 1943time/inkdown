@@ -7,7 +7,6 @@ import { nanoid } from 'nanoid'
 import { nid } from '@/utils/common'
 
 const programmingFileExtensions = [
-  // 主流编程语言
   '.py',
   '.pyi',
   '.pyx', // Python

@@ -6,9 +6,12 @@ import { ScrollList } from '../common/ScrollList'
 import { getOffsetLeft } from '@/utils/dom'
 import { useGetSetState } from 'react-use'
 import { Editor, Node, Transforms } from 'slate'
+import { useTranslation } from 'react-i18next'
+
 const width = 300
 export const ChatNotes = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     nodes: [] as { folder: string[]; name: string; fullPath: string; docId: string }[],
     filterNodes: [] as { folder: string[]; name: string; fullPath: string; docId: string }[],
@@ -148,7 +151,9 @@ export const ChatNotes = observer(() => {
           )}
         />
         {!state().filterNodes.length && (
-          <div className={'py-4 text-center text-gray-400 text-sm'}>没有匹配的内容</div>
+          <div className={'py-4 text-center text-gray-400 text-sm'}>
+            {t('chat.no_matching_content')}
+          </div>
         )}
       </div>
     </div>

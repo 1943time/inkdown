@@ -7,8 +7,10 @@ import { EditorUtils } from '../utils/editorUtils'
 import { Replace, X } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useTab } from '@/store/note/TabCtx'
+import { useTranslation } from 'react-i18next'
 
 export const Search = observer(() => {
+  const { t } = useTranslation()
   const tab = useTab()
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
@@ -109,7 +111,7 @@ export const Search = observer(() => {
             <div className={'flex-1 relative'}>
               <input
                 value={tab.state.search.keyword}
-                placeholder={'查找'}
+                placeholder={t('search')}
                 autoFocus={true}
                 ref={inputRef}
                 onFocus={() => {
@@ -137,7 +139,7 @@ export const Search = observer(() => {
                 <ArrowRightOutlined className={'px-2 text-sm text-gray-500 dark:text-gray-300'} />
                 <input
                   value={tab.state.search.replaceText}
-                  placeholder={'替换'}
+                  placeholder={t('replace')}
                   className={'w-full input px-2'}
                   onChange={(e) =>
                     tab.setState({ search: { ...tab.state.search, replaceText: e.target.value } })
@@ -158,7 +160,7 @@ export const Search = observer(() => {
                     }
                     onClick={() => tab.prevSearch()}
                   >
-                    {'上一个'}
+                    {t('previous')}
                   </div>
                   <div
                     className={
@@ -166,7 +168,7 @@ export const Search = observer(() => {
                     }
                     onClick={() => tab.nextSearch()}
                   >
-                    {'下一个'}
+                    {t('next')}
                   </div>
                 </>
               )}
@@ -196,7 +198,7 @@ export const Search = observer(() => {
                     }
                     onClick={replace}
                   >
-                    {'替换'}
+                    {t('replace')}
                   </div>
                   <div
                     className={
@@ -204,7 +206,7 @@ export const Search = observer(() => {
                     }
                     onClick={replaceAll}
                   >
-                    {'替换所有'}
+                    {t('replaceAll')}
                   </div>
                 </>
               )}
@@ -218,7 +220,7 @@ export const Search = observer(() => {
                 </div>
               )}
               {!tab.searchRanges.length && !!tab.state.search.keyword && (
-                <div className={'text-gray-500 text-sm'}>{'没有结果'}</div>
+                <div className={'text-gray-500 text-sm'}>{t('noResults')}</div>
               )}
             </div>
           </div>

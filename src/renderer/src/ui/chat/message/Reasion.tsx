@@ -6,6 +6,7 @@ import { rgba } from 'polished'
 import { CSSProperties, memo, useEffect, useState } from 'react'
 import { Flexbox } from 'react-layout-kit'
 import { CitationItem } from '@lobehub/ui/es/types/citation'
+import { useTranslation } from 'react-i18next'
 
 const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   container: css`
@@ -26,7 +27,12 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   shinyText: css`
     color: ${rgba(token.colorText, 0.45)};
 
-    background: linear-gradient(120deg, ${rgba(token.colorTextBase, 0)} 40%, ${token.colorTextSecondary} 50%, ${rgba(token.colorTextBase, 0)} 60%);
+    background: linear-gradient(
+      120deg,
+      ${rgba(token.colorTextBase, 0)} 40%,
+      ${token.colorTextSecondary} 50%,
+      ${rgba(token.colorTextBase, 0)} 60%
+    );
     background-clip: text;
     background-size: 200% 100%;
 
@@ -63,6 +69,7 @@ interface ThinkingProps {
 
 export const Thinking = memo<ThinkingProps>(({ content, duration, thinking, style, citations }) => {
   const { styles, cx } = useStyles()
+  const { t } = useTranslation()
 
   const [showDetail, setShowDetail] = useState(false)
 
@@ -87,44 +94,32 @@ export const Thinking = memo<ThinkingProps>(({ content, duration, thinking, styl
         style={{ cursor: 'pointer' }}
       >
         {thinking ? (
-          <Flexbox
-            align={'center'}
-            gap={8}
-            horizontal
-          >
+          <Flexbox align={'center'} gap={8} horizontal>
             <Icon icon={AtomIcon} />
-            <Flexbox
-              className={styles.shinyText}
-              horizontal
-            >
-              深度思考中...
+            <Flexbox className={styles.shinyText} horizontal>
+              {t('reasoning.thinking')}
             </Flexbox>
           </Flexbox>
         ) : (
-          <Flexbox
-            align={'center'}
-            gap={8}
-            horizontal
-          >
+          <Flexbox align={'center'} gap={8} horizontal>
             <Icon icon={AtomIcon} />
-            <Flexbox>{!duration ? '已深度思考' : `已深度思考（用时 ${((duration || 0) / 1000).toFixed(1)} 秒）`}</Flexbox>
+            <Flexbox>
+              {!duration
+                ? t('reasoning.hasThought')
+                : t('reasoning.hasThoughtWithDuration', {
+                    duration: ((duration || 0) / 1000).toFixed(1)
+                  })}
+            </Flexbox>
           </Flexbox>
         )}
-        <Flexbox
-          gap={4}
-          horizontal
-        >
+        <Flexbox gap={4} horizontal>
           {showDetail && content && (
             <div
               onClick={(event) => {
                 event.stopPropagation()
               }}
             >
-              <CopyButton
-                content={content}
-                size={'small'}
-                title={'复制'}
-              />
+              <CopyButton content={content} size={'small'} title={t('reasoning.copy')} />
             </div>
           )}
           <Icon icon={showDetail ? ChevronDown : ChevronRight} />
@@ -148,10 +143,7 @@ export const Thinking = memo<ThinkingProps>(({ content, duration, thinking, styl
             }}
           >
             {typeof content === 'string' ? (
-              <Markdown
-                citations={citations}
-                variant={'chat'}
-              >
+              <Markdown citations={citations} variant={'chat'}>
                 {content}
               </Markdown>
             ) : (
@@ -171,11 +163,5 @@ interface ReasoningProps {
 }
 
 export const Reasoning = memo<ReasoningProps>(({ content = '', duration, thinking }) => {
-  return (
-    <Thinking
-      content={content}
-      duration={duration}
-      thinking={thinking}
-    />
-  )
+  return <Thinking content={content} duration={duration} thinking={thinking} />
 })

@@ -5,6 +5,7 @@ import { IDoc } from 'types/model'
 import { IMenu, openMenus } from '@/ui/common/Menu'
 import { copy, nid, os } from '@/utils/common'
 import { EditorUtils } from '@/editor/utils/editorUtils'
+import i18next from 'i18next'
 
 export class ContextMenu {
   constructor(private readonly store: Store) {}
@@ -22,33 +23,33 @@ export class ContextMenu {
   openGlobalMenu(e: React.MouseEvent) {
     openMenus(e, [
       {
-        text: '导出空间至本机',
+        text: i18next.t('menu.exportWorkspace'),
         click: () => {
           this.store.note.setState({ openExportSpace: true })
         }
       },
       {
-        text: '查看空间附件',
+        text: i18next.t('menu.viewAttachments'),
         click: () => {
           this.store.note.setState({ openSpaceFiles: true })
         }
       },
       {
-        text: '下载网络图片至空间',
+        text: i18next.t('menu.downloadImages'),
         disabled: !this.store.note.state.opendDoc,
         click: () => {
           this.store.note.state.currentTab.downloadDocImage()
         }
       },
       {
-        text: '文件历史',
+        text: i18next.t('menu.fileHistory'),
         disabled: !this.store.note.state.opendDoc,
         click: () => {
           this.store.note.setState({ openHistory: true })
         }
       },
       {
-        text: '导出PDF',
+        text: i18next.t('menu.exportPDF'),
         disabled: !this.store.note.state.opendDoc,
         click: () => {
           this.store.system.printPdf({
@@ -58,7 +59,7 @@ export class ContextMenu {
       },
       { hr: true },
       {
-        text: '设置',
+        text: i18next.t('menu.settings'),
         key: 'cmd+,',
         click: () => {
           this.store.settings.setData((state) => {
@@ -154,13 +155,13 @@ export class ContextMenu {
     if (!node.folder) {
       const menus: IMenu[] = [
         {
-          text: '新副本',
+          text: i18next.t('menu.newCopy'),
           click: async () => {
             this.createDoc(node.parentId || 'root', node.name, node.schema)
           }
         },
         {
-          text: '复制Markdown源码',
+          text: i18next.t('menu.copyMarkdown'),
           click: async () => {
             const res = await this.store.output.toMarkdown({
               node
@@ -169,7 +170,7 @@ export class ContextMenu {
           }
         },
         {
-          text: '在新标签页打开',
+          text: i18next.t('menu.openInNewTab'),
           click: () => {
             this.store.note.createTab(node)
           },
@@ -181,7 +182,7 @@ export class ContextMenu {
           ...[
             { hr: true },
             {
-              text: '在Finder中显示',
+              text: i18next.t('menu.showInFinder'),
               click: () => {
                 this.store.local.showInFinder(node)
               }
@@ -193,7 +194,7 @@ export class ContextMenu {
         ...[
           { hr: true },
           {
-            text: '移动到废纸篓',
+            text: i18next.t('menu.moveToTrash'),
             click: () => this.store.note.moveToTrash(node),
             key: 'cmd+backspace'
           }
@@ -205,13 +206,13 @@ export class ContextMenu {
     } else {
       const menus: IMenu[] = [
         {
-          text: '新文档',
+          text: i18next.t('menu.newDocument'),
           click: () => {
             this.createDoc(node.id)
           }
         },
         {
-          text: '新文件夹',
+          text: i18next.t('menu.newFolder'),
           click: () => {
             this.store.note.setState({ selectedDoc: null })
             this.store.note.openEditFolderDialog$.next({
@@ -222,7 +223,7 @@ export class ContextMenu {
       ]
       if (node.id !== 'root') {
         menus.push({
-          text: '重命名',
+          text: i18next.t('menu.rename'),
           click: () => {
             this.store.note.setState({ selectedDoc: null })
             this.store.note.openEditFolderDialog$.next({
@@ -245,13 +246,13 @@ export class ContextMenu {
             hr: true
           },
           {
-            text: '导入Markdown文档',
+            text: i18next.t('menu.importMarkdown'),
             click: () => {
               this.store.local.newDocFromlocal(node)
             }
           },
           {
-            text: '导入文件夹',
+            text: i18next.t('menu.importFolder'),
             click: () => {
               this.store.note.openImportFolder$.next(node.id)
             }
@@ -263,7 +264,7 @@ export class ContextMenu {
           ...[
             { hr: true },
             {
-              text: '移动到废纸篓',
+              text: i18next.t('menu.moveToTrash'),
               click: () => this.store.note.moveToTrash(node),
               key: 'cmd+backspace'
             }

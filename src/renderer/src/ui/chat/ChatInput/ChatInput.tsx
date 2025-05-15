@@ -26,9 +26,11 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 import { observer } from 'mobx-react-lite'
 import { useLocalState } from '@/hooks/useLocalState'
 import { getDomRect } from '@/utils/dom'
+import { useTranslation } from 'react-i18next'
 
 export const ChatInput = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const { activeChat, webSearch } = store.chat.state
 
   const ableWebSearch = useMemo(() => {
@@ -62,9 +64,9 @@ export const ChatInput = observer(() => {
   const send = useCallback(() => {
     if (!store.settings.state.defaultModel?.model) {
       store.note.openConfirmDialog$.next({
-        title: '提示',
-        description: '您暂未设置模型，是否去设置？',
-        okText: '前往设置',
+        title: t('chat.input.tip'),
+        description: t('chat.input.noModel'),
+        okText: t('chat.input.goToSettings'),
         okType: 'primary',
         onConfirm: () => {
           store.settings.setData((state) => {
@@ -262,7 +264,9 @@ export const ChatInput = observer(() => {
                     </button>
                   </div>
                 </div>
-                {f.status === 'error' && <div className="text-xs text-red-500">文件解析失败</div>}
+                {f.status === 'error' && (
+                  <div className="text-xs text-red-500">{t('chat.input.parseError')}</div>
+                )}
               </div>
             ))}
           </div>
@@ -296,7 +300,7 @@ export const ChatInput = observer(() => {
                 'outline-none min-h-5 leading-5 w-full resize-none overflow-hidden h-auto text-[15px]'
               }
               onCompositionStart={compositionStart}
-              placeholder="问一问 AI 助手吧"
+              placeholder={t('chat.input.placeholder')}
               onCompositionEnd={compositionEnd}
               renderElement={renderElement}
               onKeyDown={keydown}
@@ -329,7 +333,7 @@ export const ChatInput = observer(() => {
                     onClick={addFile}
                   >
                     <Paperclip size={16} />
-                    <span>文件</span>
+                    <span>{t('chat.input.file')}</span>
                   </div>
                   <div
                     className={
@@ -337,7 +341,7 @@ export const ChatInput = observer(() => {
                     }
                   >
                     <Image size={16} />
-                    <span>图片</span>
+                    <span>{t('chat.input.image')}</span>
                   </div>
                 </div>
               }
@@ -351,7 +355,7 @@ export const ChatInput = observer(() => {
                 <Plus size={20} className={'stroke-inherit'} />
               </div>
             </Popover>
-            <Tooltip title={'使用互联网搜索，部分模型可用'} mouseEnterDelay={1}>
+            <Tooltip title={t('chat.input.webSearchTip')} mouseEnterDelay={1}>
               <div
                 className={`rounded-full w-7 h-7 flex items-center justify-center cursor-pointer duration-200 ${ableWebSearch ? 'dark:bg-blue-500/50 bg-blue-500/80 stroke-white' : 'dark:hover:dark:bg-white/10 hover:bg-black/10'}`}
                 onClick={() =>
@@ -361,7 +365,7 @@ export const ChatInput = observer(() => {
                 <Earth size={15} className={'stroke-inherit'} />
               </div>
             </Tooltip>
-            <Tooltip title={'将空间中匹配的文档片段作为对话上下文'} mouseEnterDelay={1}>
+            <Tooltip title={t('chat.input.docContextTip')} mouseEnterDelay={1}>
               <div
                 className={`rounded-full w-7 h-7 flex items-center justify-center cursor-pointer duration-200 ${(activeChat ? activeChat.docContext : store.chat.state.docContext) ? 'dark:bg-blue-500/50 bg-blue-500/80 stroke-white' : 'dark:hover:dark:bg-white/10 hover:bg-black/10'}`}
                 onClick={() => {
@@ -374,11 +378,6 @@ export const ChatInput = observer(() => {
                       state.docContext = !state.docContext
                     })
                   }
-                  store.model
-                    .fetchSpaceContext('开源收费有哪些可能', store.note.state.currentSpace?.id!)
-                    .then((res) => {
-                      console.log('res', res)
-                    })
                 }}
               >
                 <SquareLibrary size={15} className={'stroke-inherit'} />

@@ -5,51 +5,53 @@ import dayjs from 'dayjs'
 import { Ellipsis, MessageSquarePlus, Search } from 'lucide-react'
 import { useMemo } from 'react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 export const Chats = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const { chats, activeChat } = store.chat.state
   const data = useMemo(() => {
     const chatsMap = new Map<string, IChat[]>()
     for (const c of chats) {
       const today = dayjs().startOf('day').valueOf()
       if (c.updated >= today) {
-        const formatTime = '今日'
+        const formatTime = t('time.today')
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
           chatsMap.set(formatTime, [c])
         }
       } else if (c.updated >= dayjs().subtract(1, 'day').startOf('day').valueOf()) {
-        const formatTime = '昨日'
+        const formatTime = t('time.yesterday')
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
           chatsMap.set(formatTime, [c])
         }
       } else if (c.updated >= dayjs().subtract(7, 'day').startOf('day').valueOf()) {
-        const formatTime = '前7天'
+        const formatTime = t('time.last7Days')
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
           chatsMap.set(formatTime, [c])
         }
       } else if (c.updated >= dayjs().subtract(30, 'day').startOf('day').valueOf()) {
-        const formatTime = '前30天'
+        const formatTime = t('time.last30Days')
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
           chatsMap.set(formatTime, [c])
         }
       } else if (c.updated >= dayjs().startOf('year').valueOf()) {
-        const formatTime = `${dayjs().month() + 1}月`
+        const formatTime = t('time.monthFormat', { month: dayjs().month() + 1 })
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
           chatsMap.set(formatTime, [c])
         }
       } else if (c.updated >= dayjs().subtract(1, 'year').startOf('year').valueOf()) {
-        const formatTime = `${dayjs().subtract(1, 'year').year()}年`
+        const formatTime = t('time.yearFormat', { year: dayjs().subtract(1, 'year').year() })
         if (chatsMap.has(formatTime)) {
           chatsMap.get(formatTime)!.push(c)
         } else {
@@ -58,7 +60,7 @@ export const Chats = observer(() => {
       }
     }
     return chatsMap
-  }, [chats, store.chat.state.refresh])
+  }, [chats, store.chat.state.refresh, t])
   return (
     <div className={'flex flex-col h-full'}>
       <div className={'px-2 space-y-1 font-medium text-sm text-white'}>
@@ -69,11 +71,11 @@ export const Chats = observer(() => {
           }}
         >
           <MessageSquarePlus className={'w-4 h-4 mr-2'} />
-          New Chat
+          {t('chat.newChat')}
         </div>
         <div className={'flex items-center rounded-lg px-2 h-8 action-btn'}>
           <Search className={'w-4 h-4 mr-2'} />
-          Search
+          {t('chat.search')}
         </div>
       </div>
       <div className={'space-y-6 mt-4 flex-1 overflow-y-auto overscroll-contain min-h-0 pb-5'}>
@@ -91,7 +93,7 @@ export const Chats = observer(() => {
                     store.chat.createChat(c.id)
                   }}
                 >
-                  <span className={'flex-1 truncate'}>{c.topic || 'New Chat'}</span>
+                  <span className={'flex-1 truncate'}>{c.topic || t('chat.newChat')}</span>
                   <div
                     className={
                       'flex-shrink-0 p-0.5 rounded dark:hover:bg-white/5 hidden group-hover:block ml-0.5'
@@ -100,7 +102,7 @@ export const Chats = observer(() => {
                       e.stopPropagation()
                       openMenus(e, [
                         {
-                          text: 'Delete',
+                          text: t('chat.delete'),
                           click: () => {
                             store.chat.deleteChat(c.id)
                           }

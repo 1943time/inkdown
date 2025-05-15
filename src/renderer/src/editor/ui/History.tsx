@@ -9,8 +9,11 @@ import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState'
 import { Webview } from './Webview'
 import { TextHelp } from '@/ui/common/HelpText'
+import { useTranslation } from 'react-i18next'
+
 export const History = observer((props: { open: boolean; doc?: IDoc; onClose: () => void }) => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     name: '',
     selectIndex: 0,
@@ -37,8 +40,6 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
       const node = props.doc
       if (node) {
         store.model.getHistory(node.id).then((records) => {
-          console.log('records', records)
-
           setState({
             name: node.name,
             selectIndex: 0,
@@ -68,9 +69,9 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
     >
       <div className={'h-14 border-b b2 px-5 text-sm font-semibold'}>
         <div className={'flex items-center h-full'}>
-          <TextHelp text={'保存时间超过10分钟将添加新的历史记录'} />
+          <TextHelp text={t('editor.history.saveTimeTip')} />
           <span className={'ml-1'}>
-            {'文件历史'}{' '}
+            {t('editor.history.fileHistory')}{' '}
             <span className={'ml-1 dark:text-white/70 text-black/70'}>{props.doc.name}</span>
           </span>
         </div>
@@ -82,7 +83,9 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
           }
         >
           {!state.records.length ? (
-            <div className={'text-gray-400 text-sm mt-10 text-center'}>{'暂无记录'}</div>
+            <div className={'text-gray-400 text-sm mt-10 text-center'}>
+              {t('editor.history.noRecords')}
+            </div>
           ) : (
             <>
               {state.records.map((r, i) => (
@@ -128,11 +131,11 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
               }
             }}
           >
-            Clear History
+            {t('editor.history.clearHistory')}
           </Button>
         </div>
         <div>
-          <Button onClick={props.onClose}>{'取消'}</Button>
+          <Button onClick={props.onClose}>{t('editor.history.cancel')}</Button>
           <Button
             icon={<HistoryOutlined />}
             type={'primary'}
@@ -149,7 +152,7 @@ export const History = observer((props: { open: boolean; doc?: IDoc; onClose: ()
               props.onClose()
             }}
           >
-            {'重置到此记录'}
+            {t('editor.history.resetToThis')}
           </Button>
         </div>
       </div>

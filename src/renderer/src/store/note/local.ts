@@ -2,6 +2,8 @@ import { makeAutoObservable } from 'mobx'
 import { Store } from '../store'
 import { copy, nid } from '@/utils/common'
 import { IDoc } from 'types/model'
+import i18next from 'i18next'
+
 export interface ImportTree {
   id: string
   name: string
@@ -127,9 +129,9 @@ export class LocalFile {
   async showInFinder(doc: IDoc) {
     if (!this.saveLocal) {
       this.store.note.openConfirmDialog$.next({
-        title: '提示',
-        description: '设置工作区绑定文件夹后，您可以使用"在访达中显示"功能',
-        okText: '前往设置',
+        title: i18next.t('tip'),
+        description: i18next.t('workspace.bindFolderTip'),
+        okText: i18next.t('workspace.goToSettings'),
         okType: 'primary',
         onConfirm: () => {
           this.store.note.openEditSpace$.next(this.store.note.state.currentSpace?.id!)

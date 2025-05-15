@@ -6,26 +6,28 @@ import { Keyboard } from './Keyboard'
 import { ModelSettings } from './Model'
 import { useTranslation } from 'react-i18next'
 
-const tabs = [
-  {
-    key: 1,
-    label: 'Editor',
-    icon: <PenLine size={16} />
-  },
-  {
-    key: 2,
-    label: 'Model',
-    icon: <FileBox size={16} />
-  },
-  {
-    key: 3,
-    label: 'Keyboard',
-    icon: <KeyboardIcon size={16} />
-  }
-]
 export const Settings = observer(() => {
   const core = useStore()
   const { t } = useTranslation()
+
+  const tabs = [
+    {
+      key: 1,
+      label: t('settings.tabs.editor'),
+      icon: <PenLine size={16} />
+    },
+    {
+      key: 2,
+      label: t('settings.tabs.model'),
+      icon: <FileBox size={16} />
+    },
+    {
+      key: 3,
+      label: t('settings.tabs.keyboard'),
+      icon: <KeyboardIcon size={16} />
+    }
+  ]
+
   if (!core.settings.data.open) return null
   return (
     <div className={`fixed inset-0 z-[2200] dark:bg-black/30 bg-black/10`}>

@@ -1,37 +1,28 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import en from '../locales/en_US.json'
+import zh from '../locales/zh_CN.json'
 
-const loadLocales = async () => {
-  const zh = await import('../locales/zh.json')
-  return {
+i18n.use(initReactI18next).init({
+  resources: {
     en: {
-      translation: {
-        test: 'Welcome to React and react-i18next'
-      }
+      translation: en
     },
     zh: {
-      translation: zh.default
+      translation: zh
     }
+  },
+  lng: 'en_US',
+  fallbackLng: 'en_US',
+  interpolation: {
+    escapeValue: false
   }
-}
-
-const initI18n = async () => {
-  const resources = await loadLocales()
-  i18n.use(initReactI18next).init({
-    resources,
-    lng: 'zh',
-    fallbackLng: 'zh',
-    interpolation: {
-      escapeValue: false
-    }
-  })
-}
-initI18n()
+})
 
 declare module 'i18next' {
   interface CustomTypeOptions {
     resources: {
-      translation: typeof import('../locales/zh.json')
+      translation: typeof import('../locales/zh_CN.json')
     }
   }
 }

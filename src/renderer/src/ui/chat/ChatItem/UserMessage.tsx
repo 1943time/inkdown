@@ -10,6 +10,8 @@ import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
 import { observer } from 'mobx-react-lite'
 import { runInAction } from 'mobx'
+import { useTranslation } from 'react-i18next'
+
 const fileTypeIconMap = [
   [/\.pdf$/i, 'pdf', '#F54838'],
   [/\.docx$/i, 'doc', '#0078D4'],
@@ -22,6 +24,7 @@ const fileTypeIconMap = [
 export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const { themeMode } = useTheme()
   const store = useStore()
+  const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const [state, setState] = useGetSetState({
     copied: false,
@@ -135,10 +138,10 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
               type={'text'}
               shape={'round'}
             >
-              取消
+              {t('chat.message.cancel')}
             </Button>
             <Button type={'primary'} shape={'round'}>
-              更新
+              {t('chat.message.update')}
             </Button>
           </div>
         </div>

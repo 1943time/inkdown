@@ -9,9 +9,11 @@ import { useStore } from '@/store/store'
 import { TabStore } from '@/store/note/tab'
 import { File } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 export const Title = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
+  const { t } = useTranslation()
   const inputRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useGetSetState({
     name: '',
@@ -48,7 +50,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
     if (name.includes('/')) {
       setState({
         tip: true,
-        tipMessage: 'Please do not include special characters "/" in the file name.'
+        tipMessage: t('editor.title.noSpecialChar')
       })
       return false
     }
@@ -99,7 +101,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
   // })
   return (
     <Tooltip
-      title={state().tipMessage || '已经有一个同名的文件'}
+      title={state().tipMessage || t('editor.title.duplicateFileName')}
       color={'magenta'}
       open={state().tip}
       placement={'bottom'}

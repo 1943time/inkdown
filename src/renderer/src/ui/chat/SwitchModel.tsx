@@ -8,8 +8,11 @@ import { useMemo } from 'react'
 import { OpenAI } from '@lobehub/icons'
 import { useSetState } from 'react-use'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
+
 export const SwitchModel = observer((props: { maxWidth?: number }) => {
   const store = useStore()
+  const { t } = useTranslation()
   const chat = store.chat.state.activeChat
   const { model, models, ready } = store.settings.state
 
@@ -60,7 +63,7 @@ export const SwitchModel = observer((props: { maxWidth?: number }) => {
                   {item.name}
                 </span>
               </div>
-              <Tooltip title={'前往设置'} mouseEnterDelay={0.5}>
+              <Tooltip title={t('chat.go_to_settings')} mouseEnterDelay={0.5}>
                 <div
                   className={'action p-1'}
                   onClick={() => {
@@ -94,7 +97,7 @@ export const SwitchModel = observer((props: { maxWidth?: number }) => {
                   maxWidth: props.maxWidth
                 }}
               >
-                {chatModel ? modelToLabel(chatModel.model) : '您暂未添加模型'}
+                {chatModel ? modelToLabel(chatModel.model) : t('chat.no_models_added')}
               </span>
             </div>
             <div className={'flex items-center ml-1 text-white/50'}>

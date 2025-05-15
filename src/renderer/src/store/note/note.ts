@@ -15,6 +15,7 @@ import { Refactor } from './refactor'
 import { delayRun } from '@/utils/common'
 import { MediaNode } from '@/editor'
 import { getImageData } from '@/editor/utils'
+import i18next from 'i18next'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -88,16 +89,15 @@ export class NoteStore extends StructStore<typeof state> {
   }>()
   deleteDialog(item: IDoc) {
     this.openConfirmDialog$.next({
-      title: true
-        ? `确认删除${item.folder ? '文件夹' : '文件'} '${item.name}'`
-        : `Are you sure you want to delete '${item.name}' ${item.folder ? 'and its contents?' : '?'}`,
-      description: true
-        ? '您可以从垃圾箱中恢复此文件。'
-        : 'You can restore this file from the Trash.',
+      title: i18next.t('note.confirmDelete', {
+        type: item.folder ? i18next.t('note.folder') : i18next.t('note.file'),
+        name: item.name
+      }),
+      description: i18next.t('note.restoreFromTrash'),
       onConfirm: async () => {
         this.moveToTrash(item, false)
       },
-      okText: true ? '移入垃圾箱' : 'Move To Trash'
+      okText: i18next.t('note.moveToTrash')
     })
   }
   constructor(private readonly store: Store) {
@@ -461,7 +461,7 @@ export class NoteStore extends StructStore<typeof state> {
             targetList.find((c) => c.name === dragNode.name)) ||
           (mode === 'enter' && dropNode!.children?.find((c) => c.name === dragNode.name))
         ) {
-          this.store.msg.info('A file with the same name exists in the target folder')
+          this.store.msg.info(i18next.t('note.fileExistsInTarget'))
           return
         }
         if (mode === 'top' && targetList[index - 1] === dragNode) return

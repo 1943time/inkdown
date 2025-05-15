@@ -50,7 +50,7 @@ const Item = observer(
           return false
         })
         if (exist) {
-          store.msg.open({ type: 'warning', content: '快捷键已存在' })
+          store.msg.open({ type: 'warning', content: t('keyboard.shortcut_exists') })
           return
         }
       }
@@ -262,7 +262,9 @@ export const Keyboard = observer(() => {
         <Item task={'increaseHead'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'decreaseHead'} labelMap={labelMap} refresh={state.refresh} />
       </div>
-      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>格式化</div>
+      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>
+        {t('keyboard.format')}
+      </div>
       <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 space-y-2'}>
         <Item task={'bold'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'italic'} labelMap={labelMap} refresh={state.refresh} />
@@ -270,14 +272,18 @@ export const Keyboard = observer(() => {
         <Item task={'inlineCode'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'clear'} labelMap={labelMap} refresh={state.refresh} />
       </div>
-      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>选择文本</div>
+      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>
+        {t('keyboard.select_text')}
+      </div>
       <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 space-y-2'}>
         <Item task={'selectAll'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'selectLine'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'selectWord'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'selectFormat'} labelMap={labelMap} refresh={state.refresh} />
       </div>
-      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>系统</div>
+      <div className={'text-sm font-bold mb-2 text-black dark:text-white mt-5'}>
+        {t('keyboard.system')}
+      </div>
       <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 space-y-2'}>
         <Item task={'save'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'newTab'} labelMap={labelMap} refresh={state.refresh} />

@@ -9,6 +9,8 @@ import { IEnter } from '@/icons/keyboard/Enter'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { ScrollList } from '../common/ScrollList'
+import { useTranslation } from 'react-i18next'
+
 dayjs.extend(relativeTime)
 const hightText = (text: string, keyword: string) => {
   if (!text || !keyword) return text
@@ -19,6 +21,7 @@ const hightText = (text: string, keyword: string) => {
 }
 export const ChatSearch = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     activeIndex: 0,
     filterRecords: [] as IChat[],
@@ -58,7 +61,7 @@ export const ChatSearch = observer(() => {
           className={
             'bg-transparent outline-none h-10 w-full px-4 dark:text-gray-200 text-gray-600 dark:placeholder-gray-200/50 placeholder-gray-400'
           }
-          placeholder={'查找最近的对话'}
+          placeholder={t('chat.search_recent_chat')}
           autoFocus={true}
           value={state.keyword}
           onChange={(e) => {
@@ -126,7 +129,7 @@ export const ChatSearch = observer(() => {
           }}
         />
         <div className={`px-4 py-2 ${!state.filterRecords.length ? '' : 'hidden'}`}>
-          <div className={'text-gray-500 text-center text-sm'}>没有最近打开的记录</div>
+          <div className={'text-gray-500 text-center text-sm'}>{t('chat.no_recent_records')}</div>
         </div>
         <div
           className={
@@ -134,11 +137,11 @@ export const ChatSearch = observer(() => {
           }
         >
           <ArrowUpDown size={12} />
-          <span className={'text-xs ml-1'}>导航</span>
+          <span className={'text-xs ml-1'}>{t('chat.navigation')}</span>
           <IEnter className={'ml-4 text-xs'} />
-          <span className={'text-xs ml-1'}>打开</span>
+          <span className={'text-xs ml-1'}>{t('chat.open')}</span>
           <span className={'text-xs ml-4'}>
-            <span className={'font-bold'}>esc</span> 关闭
+            <span className={'font-bold'}>esc</span> {t('chat.close')}
           </span>
         </div>
       </div>

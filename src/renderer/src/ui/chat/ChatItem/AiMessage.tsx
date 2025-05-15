@@ -9,9 +9,13 @@ import { useGetSetState } from 'react-use'
 import { useStore } from '@/store/store'
 import { observer } from 'mobx-react-lite'
 import { runInAction } from 'mobx'
+import { useTranslation } from 'react-i18next'
+
 dayjs.extend(relativeTime)
+
 export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const store = useStore()
+  const { t } = useTranslation()
   const ref = useRef<HTMLDivElement>(null)
   const [state, setState] = useGetSetState({
     copied: false,
@@ -73,7 +77,7 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
           )}
           {!!msg.terminated && (
             <div className={'dark:text-gray-300 italic text-sm mt-1 text-gray-400'}>
-              系统已停止这条回答
+              {t('chat.message.systemStopped')}
             </div>
           )}
           <div
@@ -97,7 +101,7 @@ export const AiMessage = observer<{ msg: IMessage }>(({ msg }) => {
                 >
                   {state().copied ? <Check size={14} /> : <Clipboard size={14} />}
                 </div>
-                <Tooltip title={'写入当前文档'} mouseEnterDelay={1}>
+                <Tooltip title={t('chat.message.writeToDoc')} mouseEnterDelay={1}>
                   <div
                     className={'duration-150 dark:hover:bg-white/10 flex hover:bg-black/10'}
                     onClick={() => {

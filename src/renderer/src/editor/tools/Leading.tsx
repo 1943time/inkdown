@@ -7,6 +7,8 @@ import { getOffsetTop } from '../../utils/dom'
 import { TabStore } from '@/store/note/tab'
 import { observer } from 'mobx-react-lite'
 import { useSubject } from '@/hooks/common'
+import { useTranslation } from 'react-i18next'
+
 type Leading = {
   title: string
   level: number
@@ -25,6 +27,7 @@ const levelClass = new Map([
 ])
 
 export const Heading = observer(({ tab }: { tab: TabStore }) => {
+  const { t } = useTranslation()
   const timer = useRef<number>(null)
   const [state, setState] = useGetSetState({
     headings: [] as Leading[],
@@ -111,7 +114,7 @@ export const Heading = observer(({ tab }: { tab: TabStore }) => {
         className={`h-full pt-10 pb-10 pr-4 overflow-y-auto hide-scrollbar overflow-x-hidden`}
         style={{ width: tab.store.settings.state.headingWidth }}
       >
-        <div className={'text-gray-500 text-sm mb-4'}>{'大纲'}</div>
+        <div className={'text-gray-500 text-sm mb-4'}>{t('editor.outline')}</div>
         <div className={'space-y-1 dark:text-gray-400 text-gray-600/90 text-sm break-words'}>
           {!!tab.state.doc && (
             <div

@@ -10,8 +10,11 @@ import { ChatSearch } from './Search'
 import { os } from '@/utils/common'
 import { ChatNotes } from './ChatNotes'
 import { Dropdown } from 'antd'
+import { useTranslation } from 'react-i18next'
+
 export const Chat = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const chat = store.chat.state.activeChat
   const move = useCallback((e: React.MouseEvent) => {
     const startX = e.clientX
@@ -84,11 +87,11 @@ export const Chat = observer(() => {
                     {
                       key: '1',
                       icon: <PenLine size={14} />,
-                      label: '写入当前文档',
+                      label: t('chat.write_to_current_doc'),
                       disabled: !store.note.state.opendDoc,
                       onClick: () => {
                         if (!chat?.messages?.length) {
-                          store.msg.info('暂无对话记录')
+                          store.msg.info(t('chat.no_conversation'))
                           return
                         } else {
                           store.note.state.currentTab?.keyboard.insertMessages(chat!.messages!)
@@ -98,10 +101,10 @@ export const Chat = observer(() => {
                     {
                       key: 'pdf',
                       icon: <Download size={14} />,
-                      label: '导出PDF',
+                      label: t('chat.export_pdf'),
                       onClick: () => {
                         if (!chat?.messages?.length) {
-                          store.msg.info('暂无对话记录')
+                          store.msg.info(t('chat.no_conversation'))
                           return
                         } else {
                           store.system.printPdf({ chatId: chat!.id })

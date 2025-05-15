@@ -9,6 +9,7 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { useTab } from '@/store/note/TabCtx'
 import { getImageData, useSelStatus } from '../utils'
 import { AlignLeft, AlignRight, Download, ScanEye } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const alignType = new Map([
   ['left', 'justify-start'],
@@ -16,6 +17,7 @@ const alignType = new Map([
 ])
 export function Media({ element, attributes, children }: ElementProps<MediaNode>) {
   const tab = useTab()
+  const { t } = useTranslation()
   const [selected, path, store] = useSelStatus(element)
   const ref = useRef<HTMLElement>(null)
   const [state, setState] = useGetSetState({
@@ -106,7 +108,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           {state().type === 'image' && (
             <>
               <div
-                title={'Valid when the image width is not full'}
+                title={t('editor.media.alignTip')}
                 className={`p-0.5 ${element.align === 'left' ? 'text-blue-500' : 'hover:text-gray-300'}`}
                 onClick={() =>
                   updateElement({ align: element.align === 'left' ? undefined : 'left' })
@@ -115,7 +117,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
                 <AlignLeft size={16} />
               </div>
               <div
-                title={'Valid when the image width is not full'}
+                title={t('editor.media.alignTip')}
                 className={`p-0.5 ${element.align === 'right' ? 'text-blue-500' : 'hover:text-gray-300'}`}
                 onClick={() =>
                   updateElement({ align: element.align === 'right' ? undefined : 'right' })

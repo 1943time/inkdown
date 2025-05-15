@@ -9,9 +9,11 @@ import { IEnter } from '@/icons/keyboard/Enter'
 import Command from '@/icons/keyboard/Command'
 import { os } from '@/utils/common'
 import { ScrollList } from '@/ui/common/ScrollList'
+import { useTranslation } from 'react-i18next'
 
 export const QuickOpen = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     records: [] as (IDoc & { path: string })[],
     filterRecords: [] as (IDoc & { path: string })[],
@@ -55,7 +57,7 @@ export const QuickOpen = observer(() => {
           className={
             'bg-transparent outline-none h-10 w-full px-4 dark:text-gray-200 text-gray-600 dark:placeholder-gray-200/50 placeholder-gray-400'
           }
-          placeholder={'Find recent open note'}
+          placeholder={t('editor.quickOpen.findRecentNote')}
           autoFocus={true}
           value={state().query}
           onChange={(e) => {
@@ -97,7 +99,9 @@ export const QuickOpen = observer(() => {
           />
         </div>
         <div className={`px-4 py-2 ${!state().filterRecords.length ? '' : 'hidden'}`}>
-          <div className={'text-gray-500 text-center text-sm'}>没有相关记录</div>
+          <div className={'text-gray-500 text-center text-sm'}>
+            {t('editor.quickOpen.noRecords')}
+          </div>
         </div>
         <div
           className={
@@ -105,18 +109,18 @@ export const QuickOpen = observer(() => {
           }
         >
           <ISort />
-          <span className={'text-xs ml-1'}>导航</span>
+          <span className={'text-xs ml-1'}>{t('editor.quickOpen.navigation')}</span>
           <IEnter className={'ml-4'} />
-          <span className={'text-xs ml-1'}>打开</span>
+          <span className={'text-xs ml-1'}>{t('editor.quickOpen.open')}</span>
           {os() === 'mac' ? (
             <Command className={'ml-4 text-sm'} />
           ) : (
             <span className={'ml-4 text-xs'}>Ctrl</span>
           )}
           <IEnter className={'ml-0.5'} />
-          <span className={'text-xs ml-1'}>在新标签页中打开</span>
+          <span className={'text-xs ml-1'}>{t('editor.quickOpen.openInNewTab')}</span>
           <span className={'text-xs ml-4'}>
-            <span className={'font-bold'}>esc</span> 关闭
+            <span className={'font-bold'}>esc</span> {t('editor.quickOpen.close')}
           </span>
         </div>
       </div>

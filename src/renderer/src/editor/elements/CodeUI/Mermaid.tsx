@@ -4,9 +4,11 @@ import { EditorUtils } from '../../utils/editorUtils'
 import { CodeNode } from '@/editor'
 import { useTab } from '@/store/note/TabCtx'
 import { useSubject } from '@/hooks/common'
+import { useTranslation } from 'react-i18next'
 
 export default function Mermaid(props: { el: CodeNode }) {
   const tab = useTab()
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     code: '',
     error: ''
@@ -73,7 +75,9 @@ export default function Mermaid(props: { el: CodeNode }) {
         className={`w-full flex justify-center ${state().code && !state().error ? '' : 'hidden'}`}
       ></div>
       {state().error && <div className={'text-center text-red-500/80'}>{state().error}</div>}
-      {!state().code && !state().error && <div className={'text-center text-gray-500'}>Empty</div>}
+      {!state().code && !state().error && (
+        <div className={'text-center text-gray-500'}>{t('editor.mermaid.empty')}</div>
+      )}
     </div>
   )
 }

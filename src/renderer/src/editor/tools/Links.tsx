@@ -6,6 +6,7 @@ import { useCallback, useEffect } from 'react'
 import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '../utils/editorUtils'
 import { ScrollList } from '@/ui/common/ScrollList'
+import { Trans, useTranslation } from 'react-i18next'
 
 const headIcon = new Map<number, React.ReactNode>([
   [1, <Heading1 size={16} />],
@@ -15,6 +16,7 @@ const headIcon = new Map<number, React.ReactNode>([
   [5, <Heading5 size={16} />]
 ])
 export const ChooseWikiLink = observer(() => {
+  const { t } = useTranslation()
   const tab = useTab()
   const [state, setState] = useLocalState({
     nodes: [] as { folder: string[]; name: string; fullPath: string }[],
@@ -251,7 +253,7 @@ export const ChooseWikiLink = observer(() => {
           )}
           {((state.showAnchor && !state.filterAnchors.length) ||
             (!state.showAnchor && !state.filterNodes.length)) && (
-            <div className={'py-4 text-center text-gray-400 text-sm'}>没有匹配的内容</div>
+            <div className={'py-4 text-center text-gray-400 text-sm'}>{t('noMatchingContent')}</div>
           )}
         </>
       </div>
@@ -261,10 +263,20 @@ export const ChooseWikiLink = observer(() => {
         }
       >
         <span>
-          Type <span className={'font-bold mx-0.5'}>#</span> to link heading
+          <Trans
+            i18nKey={'wikilink.typeToLinkHeading'}
+            components={{
+              symbol: <span className={'font-bold mx-0.5'}>#</span>
+            }}
+          />
         </span>
         <span className={''}>
-          Type <span className={'font-bold mx-0.5'}>|</span> to change display text
+          <Trans
+            i18nKey={'wikilink.typeToChangeDisplay'}
+            components={{
+              symbol: <span className={'font-bold mx-0.5'}>|</span>
+            }}
+          />
         </span>
         <span className={'inline-flex items-center'}>
           <span className={'font-bold'}>esc</span>

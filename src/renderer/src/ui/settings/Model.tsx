@@ -255,6 +255,7 @@ const ModelItem = observer(
 export const ModelSettings = observer(() => {
   const store = useStore()
   const timer = useRef(0)
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     openEdit: false,
     selectedId: null as string | null
@@ -272,7 +273,7 @@ export const ModelSettings = observer(() => {
     }, 500)
   }, [])
   return (
-    <div className={'py-5 max-w-[500px] mx-auto'}>
+    <div className={'py-5 max-w-[560px] mx-auto'}>
       <div className={'space-y-5'}>
         <SortableList
           gap={2}
@@ -315,15 +316,15 @@ export const ModelSettings = observer(() => {
             })
           }}
         >
-          添加模型
+          {t('model.add_model')}
         </Button>
       </div>
       <div className={'mt-10'}>
         <Form className={'w-full'} layout={'horizontal'} labelAlign={'left'}>
           <Form.Item
-            label={'最大对话轮数'}
+            label={t('model.max_rounds')}
             tooltip={{
-              title: '一次问答视为一轮，超过最大对话轮数将在上下文中忽略更早的对话记录',
+              title: t('model.max_rounds_help'),
               styles: {
                 root: {
                   zIndex: 2210
@@ -354,23 +355,23 @@ export const ModelSettings = observer(() => {
           items={[
             {
               key: 'more',
-              label: '更多设置',
+              label: t('model.more_settings'),
               children: (
                 <div>
                   <div className={'text-xs text-gray-500 mb-5 text-center'}>
-                    如对参数不是特别了解，不建议配置或勾选
+                    {t('model.advanced_settings_tip')}
                   </div>
                   <Form
                     layout={'horizontal'}
                     className={'w-full'}
                     labelAlign={'left'}
                     size={'small'}
-                    labelCol={{ span: 12 }}
+                    labelCol={{ span: 14 }}
                   >
                     <Form.Item
-                      label={'创意活跃度'}
+                      label={t('model.creativity')}
                       tooltip={{
-                        title: '数值越大，回答越有创意和想象力；数值越小，回答越严谨',
+                        title: t('model.creativity_help'),
                         styles: {
                           root: { zIndex: 2210 }
                         }
@@ -405,11 +406,10 @@ export const ModelSettings = observer(() => {
                       </div>
                     </Form.Item>
                     <Form.Item
-                      label={'思维开放度 (top_p)'}
+                      label={t('model.top_p')}
                       name={'top_p'}
                       tooltip={{
-                        title:
-                          '考虑多少种可能性，值越大，接受更多可能的回答；值越小，倾向选择最可能的回答。不推荐和创意活跃度一起更改',
+                        title: t('model.top_p_help'),
                         styles: { root: { zIndex: 2210 } }
                       }}
                     >
@@ -442,11 +442,10 @@ export const ModelSettings = observer(() => {
                       </div>
                     </Form.Item>
                     <Form.Item
-                      label={'表述发散度 (presencePenalty)'}
+                      label={t('model.presence_penalty')}
                       name={'presence_penalty'}
                       tooltip={{
-                        title:
-                          '值越大，越倾向不同的表达方式，避免概念重复；值越小，越倾向使用重复的概念或叙述，表达更具一致性',
+                        title: t('model.presence_penalty_help'),
                         styles: { root: { zIndex: 2210 } }
                       }}
                     >
@@ -479,10 +478,10 @@ export const ModelSettings = observer(() => {
                       </div>
                     </Form.Item>
                     <Form.Item
-                      label={'词汇丰富度 (frequencyPenalty)'}
+                      label={t('model.frequency_penalty')}
                       name={'frequency_penalty'}
                       tooltip={{
-                        title: '值越大，用词越丰富多样；值越低，用词更朴实简单',
+                        title: t('model.frequency_penalty_help'),
                         styles: { root: { zIndex: 2210 } }
                       }}
                     >

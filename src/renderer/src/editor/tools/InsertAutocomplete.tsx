@@ -13,6 +13,7 @@ import { useGetSetState } from 'react-use'
 import { useTab } from '@/store/note/TabCtx'
 import IMermaid from '../icons/IMermaid'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 type InsertOptions = {
   label: [string, string]
@@ -232,6 +233,8 @@ const getInsertOptions = ({ isTop, tab }: { isTop: boolean; tab: TabStore }) => 
 export const InsertAutocomplete = observer(() => {
   const dom = useRef<HTMLDivElement>(null)
   const tab = useTab()
+  const { t, i18n } = useTranslation()
+
   const ctx = useRef<{
     path: number[]
     isTop: boolean
@@ -285,12 +288,12 @@ export const InsertAutocomplete = observer(() => {
         }
       }
       if (!/^(\w+\:)?\/\//.test(url)) {
-        tab.store.msg.info('Please enter a valid link.')
+        tab.store.msg.info(t('editor.insertMedia.invalidLink'))
         throw new Error()
       }
       const type = await tab.store.getRemoteMediaType(url)
       if (!type) {
-        tab.store.msg.info('The resource could not be loaded.')
+        tab.store.msg.info(t('editor.insertMedia.resourceLoadFailed'))
         throw new Error()
       }
       Transforms.insertText(tab.editor, '', {
@@ -509,7 +512,7 @@ export const InsertAutocomplete = observer(() => {
       {!state().insertLink && !state().insertAttach && (
         <>
           <div className={'text-xs leading-6 pl-1 dark:text-white/60 text-black/60 mb-1'}>
-            {'Quick Actions'}
+            {t('quickActions')}
           </div>
           {state().filterOptions.map((l, i) => (
             <div key={l.key}>
@@ -533,7 +536,7 @@ export const InsertAutocomplete = observer(() => {
                 `}
                   >
                     {el.icon}
-                    <span>{el.label[0]}</span>
+                    <span>{el.label[i18n.language === 'zh' ? 0 : 1]}</span>
                   </div>
                 ))}
               </div>
@@ -545,11 +548,11 @@ export const InsertAutocomplete = observer(() => {
         <div className={'py-3 px-1'}>
           <div className={'text-sm flex items-center mb-2 dark:text-white/70 text-black/70'}>
             <IPlanet className={'text-sm'} />
-            <span className={'mx-1'}>Embed media link</span>
-            <TextHelp text={'Please note whether the link allows access from other domains'} />
+            <span className={'mx-1'}>{t('editor.insertMedia.embedMediaLink')}</span>
+            <TextHelp text={t('editor.insertMedia.domainAccessNote')} />
           </div>
           <Input
-            placeholder={'Paste media link'}
+            placeholder={t('editor.insertMedia.pasteMediaLink')}
             onMouseDown={(e) => e.stopPropagation()}
             value={state().insertUrl}
             onKeyDown={(e) => {
@@ -568,7 +571,7 @@ export const InsertAutocomplete = observer(() => {
             onClick={insertMedia}
             disabled={!state().insertUrl}
           >
-            Embed
+            {t('editor.insertMedia.embed')}
           </Button>
         </div>
       )}

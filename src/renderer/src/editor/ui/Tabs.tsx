@@ -3,8 +3,11 @@ import { useCallback, useRef } from 'react'
 import { useStore } from '@/store/store'
 import { useLocalState } from '@/hooks/useLocalState'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
 export const Tabs = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     dragIndex: 0,
     dragging: false,
@@ -38,7 +41,7 @@ export const Tabs = observer(() => {
         {/*    transform: `translateX(${state.markLeft}px)`*/}
         {/*  }}*/}
         {/*/>*/}
-        {store.note.state.tabs.map((t, i) => (
+        {store.note.state.tabs.map((tab, i) => (
           <div
             draggable={true}
             onDragStart={(e) => {
@@ -78,7 +81,9 @@ export const Tabs = observer(() => {
               <X size={14} />
             </div>
             <div className={'w-full truncate text-center select-none'}>
-              {t.state.doc ? t.state.doc.name || 'Untitled' : 'New Tab'}
+              {tab.state.doc
+                ? tab.state.doc.name || t('editor.tabs.untitled')
+                : t('editor.tabs.newTab')}
             </div>
           </div>
         ))}

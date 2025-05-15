@@ -12,12 +12,14 @@ import { IPlanet } from '../icons/IPlanet'
 import { isLink, parsePath } from '../utils'
 import { IDoc } from 'types/model'
 import { useLocalState } from '@/hooks/useLocalState'
+import { useTranslation } from 'react-i18next'
 
 type ShowDoc = { doc: IDoc; path: string }
 type ShowAnchor = { doc: IDoc; path: string; value: string }
 const width = 380
 export const InsertLink = observer(() => {
   const tab = useTab()
+  const { t } = useTranslation()
   const selRef = useRef<Selection>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -337,10 +339,10 @@ export const InsertLink = observer(() => {
                 index: 0
               })
             }}
-            placeholder={'Link or search docs'}
+            placeholder={t('editor.insertLink.placeholder')}
             className={`flex-1 text-sm border rounded dark:border-gray-200/30 border-gray-300 h-8 px-2 outline-none bg-zinc-100 dark:bg-black/30`}
           />
-          <Tooltip title={'移除链接'} mouseEnterDelay={0.5}>
+          <Tooltip title={t('editor.insertLink.removeLink')} mouseEnterDelay={0.5}>
             <div
               className={
                 'p-1 text-base rounded ml-1 hover:bg-gray-200/70 cursor-pointer dark:hover:bg-gray-100/10 text-gray-600 dark:text-gray-300'
@@ -456,23 +458,27 @@ export const InsertLink = observer(() => {
               {((!!state.anchors.length && !state.filterAnchors.length) ||
                 (!!state.docs.length && !state.filterDocs.length) ||
                 (!state.anchors.length && !state.docs.length)) && (
-                <div className={'py-4 text-center text-gray-400 text-sm'}>没有相关文档</div>
+                <div className={'py-4 text-center text-gray-400 text-sm'}>
+                  {t('editor.insertLink.noRelatedDocs')}
+                </div>
               )}
             </>
           )}
         </div>
         <div
           className={
-            'flex items-center h-7 leading-7 border-t dark:border-white/5 dark:text-white/60 px-3 text-black/60 border-black/5'
+            'flex items-center justify-around h-7 leading-7 border-t dark:border-white/5 dark:text-white/60 px-3 text-black/60 border-black/5'
           }
         >
-          <ISort className={'mr-1'} />
-          <span className={'text-xs'}>to navigate</span>
-          <span className={'text-xs ml-2.5'}>
-            <span className={'font-bold'}>tab</span> to complete
+          <span className={'text-xs flex items-center'}>
+            <ISort className={'mr-1'} />
+            {t('editor.insertLink.navigate')}
           </span>
           <span className={'text-xs ml-2.5'}>
-            <span className={'font-bold'}>#</span> to link heading
+            <span className={'font-bold'}>tab</span> {t('editor.insertLink.complete')}
+          </span>
+          <span className={'text-xs ml-2.5'}>
+            <span className={'font-bold'}>#</span> {t('editor.insertLink.linkHeading')}
           </span>
           <span className={'text-xs ml-2.5 flex items-center'}>
             <span className={'font-bold'}>esc</span>
