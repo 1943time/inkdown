@@ -246,6 +246,7 @@
   "settings": {
     "code_auto_break": "Code Auto Break",
     "code_fence_tabsize": "Code Fence TabSize",
+    "language": "Language",
     "outline_max_width": "Outline Maximum Width",
     "reduce_filename_input": "Reduce Filename Input Box Size in Editor",
     "show_outline": "Show Outline",

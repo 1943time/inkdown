@@ -7,6 +7,8 @@ import { observable, runInAction } from 'mobx'
 import isHotkey from 'is-hotkey'
 import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
+import { getSystemLanguage } from '@/utils/i18n'
+import i18next from 'i18next'
 
 const data = {
   open: false,
@@ -34,6 +36,7 @@ const state = {
   maxMessageRounds: 8,
   codeTabSize: 2,
   showChatBot: false,
+  language: getSystemLanguage() as 'zh' | 'en',
   modelOptions: {
     temperature: {
       value: 0.7,
@@ -137,6 +140,11 @@ export class SettingsStore extends StructStore<typeof state> {
       }
     })
     this.setState({ ready: true })
+    if (this.state.language === 'zh') {
+      i18next.changeLanguage('zh')
+    } else {
+      i18next.changeLanguage('en')
+    }
     if (this.callbacks.length) {
       for (const callback of this.callbacks) {
         callback()
@@ -194,6 +202,9 @@ export class SettingsStore extends StructStore<typeof state> {
     }
     if (key === 'codeTabSize') {
       this.setCodeOptions('tabSize', value)
+    }
+    if (key === 'language') {
+      i18next.changeLanguage(value as string)
     }
   }
   async getModels() {

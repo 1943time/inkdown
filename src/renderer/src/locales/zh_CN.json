@@ -65,7 +65,8 @@
     "fileWritten": "文件已写入。"
   },
   "settings": {
-    "title": "Settings",
+    "title": "设置",
+    "language": "语言",
     "theme": "主题",
     "theme_system": "系统",
     "theme_light": "亮色",

@@ -26,3 +26,8 @@ declare module 'i18next' {
     }
   }
 }
+export const getSystemLanguage = () => {
+  const systemLang = navigator.language
+  const lang = systemLang.split('-')[0]
+  return lang === 'zh' ? 'zh' : 'en'
+}

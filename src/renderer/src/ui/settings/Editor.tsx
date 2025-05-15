@@ -3,12 +3,37 @@ import { Checkbox, Radio, Slider } from 'antd'
 import { useStore } from '@/store/store'
 import { TextHelp } from '../common/HelpText'
 import { useTranslation } from 'react-i18next'
+import { Select } from '@lobehub/ui'
 
 export const SetEditor = observer(() => {
   const store = useStore()
   const { t } = useTranslation()
   return (
     <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 px-2'}>
+      <div className={'flex justify-between items-center py-3'}>
+        <div className={'text-sm'}>
+          <span className={'mr-1'}>{t('settings.language')}</span>
+        </div>
+        <div>
+          <Select
+            value={store.settings.state.language}
+            dropdownStyle={{ zIndex: 2210 }}
+            onChange={(e) => {
+              store.settings.setSetting('language', e)
+            }}
+            options={[
+              {
+                label: 'English',
+                value: 'en'
+              },
+              {
+                label: '简体中文',
+                value: 'zh'
+              }
+            ]}
+          />
+        </div>
+      </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
           <span className={'mr-1'}>{t('settings.theme')}</span>
