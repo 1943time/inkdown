@@ -309,6 +309,10 @@ ipcMain.handle('clearDocs', async (_, spaceId: string, ids: string[]) => {
   await knex.transaction(async (trx) => {
     await trx('history').where('spaceId', spaceId).whereIn('id', ids).delete()
     await trx('doc').where('spaceId', spaceId).whereIn('id', ids).delete()
+    const table = await openTable(spaceId)
+    if (table) {
+      await table.delete(`doc_id IN (${ids.map((id) => `'${id}'`).join(',')})`)
+    }
   })
 })
 
@@ -337,12 +341,7 @@ ipcMain.handle(
     await knex('doc')
       .where('id', id)
       .update(omit(doc, ['expand', 'children', 'id']))
-    if (doc.deleted) {
-      const table = await openTable(doc.spaceId!)
-      if (table) {
-        await table.delete(`doc_id = '${id}'`)
-      }
-    } else if (ctx?.chunks?.length) {
+    if (ctx?.chunks?.length) {
       const table = await openTable(doc.spaceId!)
       if (!table) return
       let rows = await table

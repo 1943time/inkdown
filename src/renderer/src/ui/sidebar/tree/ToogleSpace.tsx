@@ -126,6 +126,7 @@ export const ToggleSpace = observer(() => {
               </div>
               <div
                 onClick={() => {
+                  store.note.openEditSpace$.next(null)
                   setState({ open: false })
                 }}
                 className={

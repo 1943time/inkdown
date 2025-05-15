@@ -3,7 +3,15 @@ import { Fragment, useCallback } from 'react'
 import { IDoc } from 'types/model'
 import { useGetSetState } from 'react-use'
 import { useStore } from '@/store/store'
-import { ChevronRight, FileText, FolderClosed, TicketSlash, Trash2, Undo2 } from 'lucide-react'
+import {
+  ChevronRight,
+  Delete,
+  FileText,
+  FolderClosed,
+  TicketSlash,
+  Trash2,
+  Undo2
+} from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { observable } from 'mobx'
 
@@ -45,12 +53,12 @@ export const Trash = observer(() => {
     })
   }, [])
 
-  const getAllIds = useCallback(async (docs: DocTree[]) => {
+  const getAllIds = useCallback((docs: DocTree[]) => {
     const ids: string[] = []
     for (let d of docs) {
       ids.push(d.id)
       if (d.folder) {
-        ids.push(...(await store.model.getDocsByParentId(d.id)).map((d) => d.id))
+        ids.push(...getAllIds(d.children || []))
       }
     }
     return ids
@@ -60,7 +68,7 @@ export const Trash = observer(() => {
     if (state().removeDocs) {
       try {
         setState({ loading: true })
-        const ids = await getAllIds(state().removeDocs)
+        const ids = getAllIds(state().removeDocs)
         if (!ids.length) return
         await store.model.clearDocs(store.note.state.currentSpace!.id, ids)
         setState({ removeDocs: [] })
@@ -78,7 +86,7 @@ export const Trash = observer(() => {
   }, [])
 
   const deleteDoc = useCallback(async (doc: IDoc) => {
-    const ids = await getAllIds([doc])
+    const ids = getAllIds([doc])
     await doDelete(ids)
     setState({
       removeDocs: state().removeDocs.filter((d) => d.id !== doc.id)
@@ -281,16 +289,16 @@ const RenderItem = observer(
                 }
               }}
               className={
-                'flex select-none items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-100/10 rounded h-6 px-1'
+                'flex select-none items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-100/10 rounded h-6 px-1 group'
               }
             >
               <div className={'flex items-center text-sm max-w-[236px]'}>
                 {d.folder ? (
                   <>
                     <ChevronRight
-                      size={16}
+                      size={14}
                       strokeWidth={3}
-                      className={`w-[11px] h-[11px] mr-1 dark:text-gray-500 text-gray-400 duration-200 ${
+                      className={`mr-1 dark:text-gray-500 text-gray-400 duration-200 ${
                         d.folder && props.expands.includes(d.id) ? 'rotate-90' : ''
                       }`}
                     />
@@ -304,14 +312,26 @@ const RenderItem = observer(
               {props.top && (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className={'flex items-center text-base space-x-0.5 flex-shrink-0'}
+                  className={
+                    'flex items-center text-base space-x-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100'
+                  }
                 >
+                  <div
+                    onClick={(e) => {
+                      props.onDelete?.(d)
+                    }}
+                    className={
+                      'p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-100/10 cursor-pointer'
+                    }
+                  >
+                    <Delete size={16} />
+                  </div>
                   <div
                     onClick={(e) => {
                       props.onRestore?.(d)
                     }}
                     className={
-                      'p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-100/10 cursor-pointer'
+                      'p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-100/10 cursor-pointer'
                     }
                   >
                     <Undo2 size={16} />

@@ -1,10 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import {
-  CloseCircleOutlined,
-  FolderOpenOutlined,
-  SaveFilled,
-  SaveOutlined
-} from '@ant-design/icons'
+import { CloseCircleOutlined, FolderOpenOutlined, SaveOutlined } from '@ant-design/icons'
 import { useCallback } from 'react'
 import { runInAction } from 'mobx'
 import { useStore } from '@/store/store'
@@ -105,32 +100,16 @@ export const EditSpace = observer(() => {
       } else {
         try {
           const id = nid()
-          const res = await store.model.createSpace({
+          const now = Date.now()
+          await store.model.createSpace({
             id,
             name: state.spaceName,
             writeFolderPath: state.filePath,
             sort: 0,
-            created: Date.now(),
-            lastOpenTime: Date.now()
+            created: now,
+            lastOpenTime: now
           })
-          // await core.api.createSpace
-          //   .mutate({
-          //     background: state.background,
-          //     name: state.spaceName,
-          //     cid: id
-          //   })
-          // const count = await db.space.count()
-          const now = Date.now()
-          // await db.space.add({
-          //   cid: id,
-          //   name: state.spaceName,
-          //   filePath: state.filePath,
-          //   sort: count,
-          //   lastOpenTime: now,
-          //   created: now,
-          //   background: state.background,
-          //   opt: {}
-          // })
+          store.note.init(id)
           setState({ open: false })
         } catch (e) {
           console.error(e)
@@ -161,7 +140,22 @@ export const EditSpace = observer(() => {
                 onChange={(e) => setState({ spaceName: e.target.value })}
                 maxLength={50}
               />
-              <Button icon={<SaveOutlined />} />
+              {!!state.spaceId && (
+                <Button
+                  icon={<SaveOutlined />}
+                  onClick={() => {
+                    store.model
+                      .updateSpace(state.spaceId, {
+                        name: state.spaceName
+                      })
+                      .then(() => {
+                        store.note.setState((draft) => {
+                          draft.currentSpace!.name = state.spaceName
+                        })
+                      })
+                  }}
+                />
+              )}
             </Space.Compact>
           </Form.Item>
           <Form.Item label={'空间目录'} tooltip={'选择文件夹后，文档与附件将实时写入文件夹内'}>
@@ -250,7 +244,6 @@ export const EditSpace = observer(() => {
                         {store.note.state.spaces.length > 1 && (
                           <Input
                             placeholder={'Enter space name to delete'}
-                            className={'mb-4'}
                             value={state.inputDeleteName}
                             onChange={(e) => setState({ inputDeleteName: e.target.value })}
                           />
@@ -259,6 +252,7 @@ export const EditSpace = observer(() => {
                           type={'primary'}
                           danger={true}
                           block={true}
+                          className={'mt-4'}
                           onClick={() => {
                             store.note.openConfirmDialog$.next({
                               title: '确认删除空间',

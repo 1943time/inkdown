@@ -33,8 +33,6 @@ export const QuickOpen = observer(() => {
             path: store.note.getDocPath(r).join('/')
           }
         })
-      console.log('data', data)
-
       setState({
         records: data,
         filterRecords: data.filter((q) => !state().query || q.path.includes(state().query))

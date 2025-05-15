@@ -140,15 +140,19 @@ export class NoteStore extends StructStore<typeof state> {
       }
     })
   }
-  init() {
+  init(spaceId?: string) {
     this.store.model.getSpaces().then((spaces) => {
       this.setState((state) => {
+        state.tabs = []
         const lastOpenSpaceId = localStorage.getItem('lastOpenSpaceId')
         state.spaces = spaces
         state.selectedSpaceId =
-          lastOpenSpaceId && spaces.find((space) => space.id === lastOpenSpaceId)
+          spaceId || (lastOpenSpaceId && spaces.find((space) => space.id === lastOpenSpaceId))
             ? lastOpenSpaceId
             : spaces[0]?.id || null
+        if (spaceId) {
+          localStorage.setItem('lastOpenSpaceId', spaceId)
+        }
         if (state.selectedSpaceId) {
           this.getDocs(state.selectedSpaceId)
         }
@@ -156,8 +160,10 @@ export class NoteStore extends StructStore<typeof state> {
     })
   }
   selectSpace(spaceId?: string) {
+    if (spaceId === this.state.selectedSpaceId) return
     this.docStatus.clear()
     this.setState((state) => {
+      state.tabs = []
       if (spaceId) {
         state.selectedSpaceId = spaceId!
       } else {
@@ -166,6 +172,12 @@ export class NoteStore extends StructStore<typeof state> {
       }
       this.getDocs(spaceId)
     })
+    if (spaceId) {
+      this.store.model.updateSpace(spaceId, {
+        lastOpenTime: Date.now()
+      })
+      localStorage.setItem('lastOpenSpaceId', spaceId)
+    }
   }
   createTab(doc?: IDoc) {
     const index = this.state.tabs.findIndex((t) => t.state.doc?.id === doc?.id)
