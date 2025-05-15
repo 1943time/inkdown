@@ -67,7 +67,7 @@ export const SpaceFiles = observer(() => {
     })
     if (res.filePath) {
       await window.api.fs.cp(path, res.filePath)
-      window.api.fs.showInFinder(res.filePath)
+      store.system.showInFinder(res.filePath)
     }
   }, [])
   useEffect(() => {

@@ -48,7 +48,7 @@ export const ExportSpace = observer(() => {
                 .initialRewrite(store.note.state.nodes, true)
                 .then(() => {
                   store.msg.success(t('export.fileWritten'))
-                  window.api.fs.showInFinder(window.api.path.join(path.filePaths[0]))
+                  store.system.showInFinder(window.api.path.join(path.filePaths[0]))
                 })
                 .finally(() => {
                   store.local.manualWritePath = null

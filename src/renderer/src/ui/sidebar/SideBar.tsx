@@ -4,6 +4,7 @@ import { Chats } from './Chats'
 import { Bot, PenLine } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Tree } from './tree/Tree'
+import { os } from '@/utils/common'
 export const SideBar = observer(() => {
   const store = useStore()
   const { sidePanelWidth, foldSideBar: fold, fullChatBot } = store.settings.state
@@ -37,7 +38,7 @@ export const SideBar = observer(() => {
       className={
         'border-r dark:border-white/10 border-black/10 bg-sidebar pt-10 overflow-hidden side-move-transition flex flex-col h-full'
       }
-      style={{ width: fold ? 0 : sidePanelWidth }}
+      style={{ width: fold ? 0 : sidePanelWidth, paddingTop: os() === 'mac' ? 40 : 6 }}
     >
       <div
         className={'fixed w-1 h-screen top-0 z-10 cursor-col-resize'}

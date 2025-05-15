@@ -61,4 +61,7 @@ export class SystemApi {
   async printPdf(data: { docId?: string; chatId?: string }) {
     return ipcRenderer.send('print-pdf', data)
   }
+  showInFinder(path: string) {
+    ipcRenderer.send('showInFinder', path)
+  }
 }

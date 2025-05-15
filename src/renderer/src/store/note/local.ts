@@ -139,7 +139,9 @@ export class LocalFile {
       })
     } else {
       const path = this.store.note.getDocPath(doc)
-      window.api.fs.showInFinder(window.api.path.join(this.writePath!, path.join('/') + '.md'))
+      this.store.system.showInFinder(
+        window.api.path.join(this.writePath!, path.join('/') + (doc.folder ? '' : '.md'))
+      )
     }
   }
 

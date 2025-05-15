@@ -532,20 +532,20 @@ onmessage = async (e) => {
       console.error('getChunks error', e)
     }
   }
-  if (e.data.type === 'toMarkdown') {
+  if (data.type === 'toMarkdown') {
     try {
-      output.nodes = e.data.nodes
+      output.nodes = data.nodes
       const { md, medias } = output.toMarkdown({
-        schema: e.data.schema,
-        node: e.data.doc,
-        exportRootPath: e.data.exportRootPath
+        schema: data.schema,
+        node: data.doc,
+        exportRootPath: data.exportRootPath
       })
       const binary = encode({
         data: {
           md,
           medias: Array.from(medias.values())
         },
-        id: e.data.id
+        id: data.id
       })
       // @ts-ignore
       postMessage(binary, [binary.buffer])

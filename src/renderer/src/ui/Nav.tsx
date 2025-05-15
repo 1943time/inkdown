@@ -15,11 +15,11 @@ export const Nav = observer(() => {
   const path = !store.note.state.opendDoc ? [] : store.note.getDocPath(store.note.state.opendDoc)
   const { foldSideBar: fold } = store.settings.state
   const [iconLeft, navLeft] = useMemo(() => {
-    const osType = os()
+    const isMac = os() === 'mac'
     if (!fold) {
-      return [-44, 10]
+      return [isMac ? -44 : 10, isMac ? 10 : 46]
     }
-    return [os() === 'mac' ? 76 : 10, osType === 'mac' ? 120 : 40]
+    return [isMac ? 76 : 10, isMac ? 120 : 40]
   }, [fold])
   const backLinks = useMemo(() => {
     if (!store.note.state.opendDoc) return []

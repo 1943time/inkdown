@@ -43,9 +43,6 @@ export const Api = {
     openFile: (path: string) => {
       ipcRenderer.send('open-in-default-app', path)
     },
-    showInFinder: (path: string) => {
-      shell.showItemInFolder(path)
-    },
     writeBuffer(filePath: string, buffer: ArrayBuffer) {
       return writeFile(filePath, Buffer.from(buffer))
     },
