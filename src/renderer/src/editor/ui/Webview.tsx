@@ -3,10 +3,10 @@ import { ErrorBoundary, ErrorFallback } from '@/ui/error/ErrorBoundary'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import { Editable, Slate } from 'slate-react'
-import { EditorUtils } from './utils/editorUtils'
-import { Title } from './tools/Title'
-import { useHighlight } from './plugins/useHighlight'
-import { MElement, MLeaf } from './elements'
+import { EditorUtils } from '../utils/editorUtils'
+import { Title } from '../tools/Title'
+import { useHighlight } from '../plugins/useHighlight'
+import { MElement, MLeaf } from '../elements'
 import { ThemeProvider } from '@lobehub/ui'
 import { TabContext } from '@/store/note/TabCtx'
 import { useUpdate } from 'react-use'
@@ -16,7 +16,7 @@ import { File } from 'lucide-react'
 export const Webview = observer((props: { doc: IDoc }) => {
   const update = useUpdate()
   const store = useMemo(() => {
-    const store = new Store()
+    const store = new Store({})
     store.note.createTab()
     return store
   }, [])

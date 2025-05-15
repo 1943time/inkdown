@@ -213,7 +213,8 @@ export const Keyboard = observer(() => {
       ['strikethrough', '删除线'],
       ['inlineCode', '行内代码'],
       ['clear', '清除格式'],
-      ['openChat', '打开对话']
+      ['openChat', '打开对话'],
+      ['newDoc', '新建文档']
     ])
   }, [])
 
@@ -275,6 +276,7 @@ export const Keyboard = observer(() => {
       <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 space-y-2'}>
         <Item task={'save'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'newTab'} labelMap={labelMap} refresh={state.refresh} />
+        <Item task={'newDoc'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'closeCurrentTab'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'quickOpenNote'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'openChat'} labelMap={labelMap} refresh={state.refresh} />

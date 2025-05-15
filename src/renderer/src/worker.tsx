@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { ThemeProvider } from 'antd-style'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { IChat, IDoc } from 'types/model'
-import { Webview } from './editor/Webview'
+import { Webview } from './editor/ui/Webview'
 import { delayRun } from './utils/common'
 import { ChatViewList } from './ui/chat/ViewList'
 

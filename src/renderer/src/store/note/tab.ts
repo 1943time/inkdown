@@ -14,7 +14,6 @@ import { TableLogic } from './table'
 import { StructStore } from '../struct'
 import { getRemoteMediaExt, nid } from '@/utils/common'
 import { MediaNode } from '@/editor'
-import { getImageData } from '@/editor/utils'
 
 const state = {
   path: null as null | Path,
@@ -45,11 +44,6 @@ const state = {
   },
   domRect: null as null | DOMRect,
   refreshHighlight: false,
-  previewImage: {
-    open: false,
-    index: 0,
-    images: [] as { src: string }[]
-  },
   get hasPrev() {
     return this.currentIndex > 0
   },
@@ -647,33 +641,7 @@ export class TabStore extends StructStore<typeof state> {
       }
     }
   }
-  async openPreviewImages(el: MediaNode) {
-    const nodes = Array.from(
-      Editor.nodes<MediaNode>(this.editor, {
-        at: [],
-        match: (n) => n.type === 'media' && n.mediaType === 'image'
-      })
-    )
-    let index = nodes.findIndex((n) => n[0] === el)
-    if (index < 0) {
-      index = 0
-    }
-    if (nodes.length) {
-      const urls: { src: string }[] = []
-      for (const n of nodes) {
-        if (n[0].id) {
-          urls.push({ src: getImageData(await this.store.system.getFilePath(n[0].id)) })
-        } else {
-          urls.push({ src: n[0].url! })
-        }
-      }
-      this.setState((state) => {
-        state.previewImage.open = true
-        state.previewImage.index = index
-        state.previewImage.images = urls
-      })
-    }
-  }
+
   async downloadDocImage() {
     if (!this.state.doc) return
     const medias = Array.from(

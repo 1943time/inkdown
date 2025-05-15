@@ -6,7 +6,6 @@ import { FloatBar } from './tools/FloatBar'
 import { Search } from './tools/Search'
 import { LangAutocomplete } from './tools/LangAutocomplete'
 import { InsertAutocomplete } from './tools/InsertAutocomplete'
-// import { InsertLink } from './tools/InsertLink'
 import { PhotoSlider } from 'react-photo-view'
 import { useStore } from '@/store/store'
 import { isMod } from '@/utils/common'
@@ -15,7 +14,7 @@ import { observer } from 'mobx-react-lite'
 import { TabStore } from '@/store/note/tab'
 import { ChooseWikiLink } from './tools/Links'
 import { InsertLink } from './tools/InsertLink'
-import { History } from './History'
+import { History } from './ui/History'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
@@ -68,30 +67,6 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
         <LangAutocomplete tab={tab} />
         <InsertAutocomplete />
       </div>
-      <PhotoSlider
-        maskOpacity={0.5}
-        className={'desktop-img-view'}
-        images={tab.state.previewImage.images.map((item) => ({ src: item.src, key: item.src }))}
-        visible={tab.state.previewImage.open}
-        onClose={() => {
-          tab.setState((state) => {
-            state.previewImage.open = false
-          })
-        }}
-        index={tab.state.previewImage.index}
-        onIndexChange={(i) => {
-          tab.setState((state) => {
-            state.previewImage.index = i
-          })
-        }}
-      />
-      <History
-        doc={store.note.state.opendDoc}
-        open={store.note.state.openHistory}
-        onClose={() => {
-          store.note.setState({ openHistory: false })
-        }}
-      />
     </TabContext>
   )
 })

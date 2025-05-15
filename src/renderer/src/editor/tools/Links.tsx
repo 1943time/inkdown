@@ -166,11 +166,14 @@ export const ChooseWikiLink = observer(() => {
         width: 390
       }}
     >
-      <div className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}>
+      <div className={'flex-1 py-2 px-2 text-[15px] relative'}>
         <>
           {!!state.showAnchor && (
             <ScrollList
               items={state.filterAnchors}
+              style={{
+                maxHeight: 200
+              }}
               onClose={() => {
                 tab.setState((state) => {
                   state.wikilink.open = false
@@ -197,6 +200,9 @@ export const ChooseWikiLink = observer(() => {
           {!state.showAnchor && (
             <ScrollList
               items={state.filterNodes}
+              style={{
+                maxHeight: 200
+              }}
               onSelect={(item, i) => {
                 insert({
                   node: item

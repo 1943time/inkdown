@@ -122,7 +122,7 @@ export class KeyboardStore {
       {
         system: 'mod+s',
         custom: undefined,
-        scene: 'note',
+        scene: 'global',
         disabled: true
       }
     ],
@@ -148,6 +148,14 @@ export class KeyboardStore {
       'quickOpenNote',
       {
         system: 'mod+o',
+        custom: undefined,
+        scene: 'global'
+      }
+    ],
+    [
+      'newDoc',
+      {
+        system: 'mod+n',
         custom: undefined,
         scene: 'global'
       }
@@ -492,6 +500,12 @@ export class KeyboardStore {
         break
       case 'openChat':
         this.store.settings.toggleChatBot()
+        break
+      case 'newDoc':
+        this.store.menu.createDoc(this.store.note.state.opendDoc?.parentId || 'root')
+        break
+      case 'quickOpenNote':
+        this.store.note.setState({ showQuickOpen: true })
         break
     }
   }

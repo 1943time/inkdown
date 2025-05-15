@@ -126,7 +126,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
               <div
                 className={'p-0.5 hover:text-gray-300'}
                 onClick={() => {
-                  tab.openPreviewImages(element)
+                  tab.store.note.openPreviewImages(element)
                 }}
               >
                 <ScanEye size={16} />

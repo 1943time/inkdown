@@ -13,6 +13,8 @@ import { EditorUtils } from '@/editor/utils/editorUtils'
 import { slugify } from '@/editor/utils/dom'
 import { Refactor } from './refactor'
 import { delayRun } from '@/utils/common'
+import { MediaNode } from '@/editor'
+import { getImageData } from '@/editor/utils'
 
 const state = {
   view: 'folder' as 'folder' | 'search',
@@ -26,12 +28,18 @@ const state = {
   // 空间已被删除
   deleted: false,
   tabIndex: 0,
+  showQuickOpen: false,
   selectedDoc: null as null | IDoc,
   selectedSpaceId: null as null | string,
   selectedSpace: null as null | ISpace,
   openExportSpace: false,
   openSpaceFiles: false,
   openHistory: false,
+  previewImage: {
+    open: false,
+    index: 0,
+    images: [] as { src: string }[]
+  },
   dragStatus: null as null | {
     mode: 'enter' | 'top' | 'bottom'
     dropNode: null | IDoc
@@ -654,6 +662,34 @@ export class NoteStore extends StructStore<typeof state> {
           el.scrollIntoView({ behavior: 'smooth' })
         }
       }, 100)
+    }
+  }
+  async openPreviewImages(el: MediaNode) {
+    if (!this.state.currentTab) return
+    const nodes = Array.from(
+      Editor.nodes<MediaNode>(this.state.currentTab.editor, {
+        at: [],
+        match: (n) => n.type === 'media' && n.mediaType === 'image'
+      })
+    )
+    let index = nodes.findIndex((n) => n[0] === el)
+    if (index < 0) {
+      index = 0
+    }
+    if (nodes.length) {
+      const urls: { src: string }[] = []
+      for (const n of nodes) {
+        if (n[0].id) {
+          urls.push({ src: getImageData(await this.store.system.getFilePath(n[0].id)) })
+        } else {
+          urls.push({ src: n[0].url! })
+        }
+      }
+      this.setState((state) => {
+        state.previewImage.open = true
+        state.previewImage.index = index
+        state.previewImage.images = urls
+      })
     }
   }
 }

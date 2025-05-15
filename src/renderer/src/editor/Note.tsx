@@ -3,6 +3,9 @@ import { observer } from 'mobx-react-lite'
 import { Tabs } from './ui/Tabs'
 import { EditorFrame } from './EditorFrame'
 import { Characters } from './ui/Characters'
+import { QuickOpen } from './ui/QuickOpen'
+import { PhotoSlider } from 'react-photo-view'
+import { History } from './ui/History'
 
 export const Note = observer(() => {
   const store = useStore()
@@ -29,8 +32,37 @@ export const Note = observer(() => {
               </div>
             ))}
           </>
-          {/* <Tools /> */}
           <Characters />
+          <QuickOpen />
+          <PhotoSlider
+            maskOpacity={0.5}
+            className={'desktop-img-view'}
+            images={
+              store.note.state.previewImage.images.map((item) => ({
+                src: item.src,
+                key: item.src
+              })) || []
+            }
+            visible={store.note.state.previewImage.open}
+            onClose={() => {
+              store.note.setState((state) => {
+                state.previewImage.open = false
+              })
+            }}
+            index={store.note.state.previewImage.index}
+            onIndexChange={(i) => {
+              store.note.setState((state) => {
+                state.previewImage.index = i
+              })
+            }}
+          />
+          <History
+            doc={store.note.state.opendDoc}
+            open={store.note.state.openHistory}
+            onClose={() => {
+              store.note.setState({ openHistory: false })
+            }}
+          />
         </div>
       )}
     </div>
