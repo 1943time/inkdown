@@ -10,6 +10,8 @@ import { observer } from 'mobx-react-lite'
 import { getOffsetTop } from '@/utils/dom'
 import { delayRun } from '@/utils/common'
 import { Tooltip } from '@lobehub/ui'
+import { useTranslation } from 'react-i18next'
+
 const visitSchema = (schema: any[], cb: (node: any) => void) => {
   for (let c of schema) {
     cb(c)
@@ -20,6 +22,7 @@ const visitSchema = (schema: any[], cb: (node: any) => void) => {
 }
 
 export const FullSearch = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const input = useRef<HTMLInputElement>(null)
   const [state, setState] = useGetSetState({
@@ -267,7 +270,7 @@ export const FullSearch = observer(() => {
           }
         >
           <ArrowLeft size={18} />
-          <span className={'ml-1'}>返回</span>
+          <span className={'ml-1'}>{t('back')}</span>
         </div>
       </div>
       <div className={'px-2 relative'}>
@@ -285,9 +288,9 @@ export const FullSearch = observer(() => {
             setState({ keyword: e.target.value })
             search()
           }}
-          placeholder={true ? '搜索' : 'Search'}
+          placeholder={t('search')}
         />
-        <Tooltip title={'使用文本向量进行语义化模糊搜索'} mouseEnterDelay={1}>
+        <Tooltip title={t('semanticSearch')} mouseEnterDelay={1}>
           <div
             className={`absolute rounded-sm duration-150 cursor-pointer p-0.5 dark:hover:bg-white/10 right-3.5 top-1/2 -translate-y-1/2 z-10 ${
               state().vector ? 'text-blue-500' : 'dark:text-white/70 text-black/70'
@@ -305,8 +308,7 @@ export const FullSearch = observer(() => {
           state().keyword && (
             <div className={'text-center text-sm text-gray-400 px-5 w-full break-all'}>
               <span>
-                {true ? '未找到相关内容' : 'No content found for'}{' '}
-                <span className={'text-blue-500 inline'}>{state().keyword}</span>
+                {t('noResults')} <span className={'text-blue-500 inline'}>{state().keyword}</span>
               </span>
             </div>
           )}

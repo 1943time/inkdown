@@ -73,6 +73,7 @@
     "framer-motion": "^12.5.0",
     "gpt-tokenizer": "^2.9.0",
     "i18next": "^24.2.3",
+    "i18next-browser-languagedetector": "^8.1.0",
     "is-hotkey": "^0.2.0",
     "katex": "^0.16.21",
     "lodash-es": "^4.17.21",

@@ -9,16 +9,16 @@ import { useSubject } from '@/hooks/common'
 import { nid } from '@/utils/common'
 import { IWorkspace } from '@/icons/IWorkspace'
 import { Space, Form, Input, Modal, Collapse, Button } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 export const EditSpace = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useLocalState({
     open: false,
     spaceId: '',
     filePath: '',
     spaceName: '',
-    cloud: false,
-    background: 'sky',
     inputDeleteName: '',
     submitting: false,
     space: null as null | ISpace,
@@ -63,7 +63,7 @@ export const EditSpace = observer(() => {
     if (state.filePath && !(await validatePath(state.filePath, state.spaceId))) {
       store.msg.open({
         type: 'info',
-        content: 'This directory is already included in another space'
+        content: t('workspace.directoryUsed')
       })
       return
     }
@@ -88,13 +88,13 @@ export const EditSpace = observer(() => {
         if (exist.name === state.spaceName) {
           store.msg.open({
             type: 'info',
-            content: 'Space name already exists'
+            content: t('workspace.nameExists')
           })
         }
         if (state.filePath && exist.writeFolderPath === state.filePath) {
           store.msg.open({
             type: 'info',
-            content: 'The folder is already used by another space'
+            content: t('workspace.directoryUsed')
           })
         }
       } else {
@@ -125,17 +125,17 @@ export const EditSpace = observer(() => {
       title={
         <div className={'flex items-center'}>
           <IWorkspace className={'mr-1 text-lg'} />
-          <span className={'text-sm'}>{'创建工作空间'}</span>
+          <span className={'text-sm'}>{t('workspace.create')}</span>
         </div>
       }
       onCancel={() => setState({ open: false })}
     >
       <div className={'py-3'}>
         <Form layout={'vertical'}>
-          <Form.Item label={'空间名称'}>
+          <Form.Item label={t('workspace.name')}>
             <Space.Compact className={'w-full'}>
               <Input
-                placeholder={'输入名称'}
+                placeholder={t('workspace.enterName')}
                 value={state.spaceName}
                 onChange={(e) => setState({ spaceName: e.target.value })}
                 maxLength={50}
@@ -158,17 +158,21 @@ export const EditSpace = observer(() => {
               )}
             </Space.Compact>
           </Form.Item>
-          <Form.Item label={'空间目录'} tooltip={'选择文件夹后，文档与附件将实时写入文件夹内'}>
+          <Form.Item label={t('workspace.directory')} tooltip={t('workspace.directoryTip')}>
             <Space.Compact className={'w-full'}>
-              <Input readOnly={true} value={state.filePath} placeholder={'请选择文件夹'} />
+              <Input
+                readOnly={true}
+                value={state.filePath}
+                placeholder={t('workspace.selectFolder')}
+              />
               <Button
                 icon={state.filePath ? <CloseCircleOutlined /> : <FolderOpenOutlined />}
                 onClick={async () => {
                   if (state.filePath) {
                     store.note.openConfirmDialog$.next({
-                      title: 'Note',
-                      description: '取消后，文件将不再实时写入到该文件夹。',
-                      okText: 'Confirm',
+                      title: t('tip'),
+                      description: t('workspace.cancelWriteHint'),
+                      okText: t('workspace.confirmDelete'),
                       onConfirm: () => {
                         setState({ filePath: '' })
                         store.model.updateSpace(state.space!.id, {
@@ -191,7 +195,7 @@ export const EditSpace = observer(() => {
                         if (includeSpace && (!state.spaceId || includeSpace.id !== state.spaceId)) {
                           store.msg.open({
                             type: 'info',
-                            content: 'This directory is already included in another space'
+                            content: t('workspace.directoryUsed')
                           })
                           return
                         }
@@ -209,7 +213,7 @@ export const EditSpace = observer(() => {
                         if (state.space) {
                           setState({ startWriting: true })
                           store.local.initialRewrite(store.note.state.nodes).then(() => {
-                            store.msg.success('文件已写入')
+                            store.msg.success(t('workspace.filesWritten'))
                           })
                         }
                       }
@@ -228,7 +232,7 @@ export const EditSpace = observer(() => {
                 disabled={!state.spaceName}
                 loading={state.submitting}
               >
-                {'创建'}
+                {t('create')}
               </Button>
             )}
             {!!state.space && (
@@ -243,7 +247,7 @@ export const EditSpace = observer(() => {
                       <div>
                         {store.note.state.spaces.length > 1 && (
                           <Input
-                            placeholder={'Enter space name to delete'}
+                            placeholder={t('workspace.enterName')}
                             value={state.inputDeleteName}
                             onChange={(e) => setState({ inputDeleteName: e.target.value })}
                           />
@@ -255,8 +259,8 @@ export const EditSpace = observer(() => {
                           className={'mt-4'}
                           onClick={() => {
                             store.note.openConfirmDialog$.next({
-                              title: '确认删除空间',
-                              okText: 'Delete',
+                              title: t('workspace.confirmDelete'),
+                              okText: t('workspace.delete'),
                               onConfirm: async () => {
                                 await store.model.deleteSpace(state.space!.id)
                                 store.note.setState((draft) => {
@@ -266,8 +270,7 @@ export const EditSpace = observer(() => {
                                   store.note.selectSpace(draft.spaces[0].id)
                                 })
                                 setState({ open: false })
-                                store.msg.success('Workspace deleted')
-                                // core.ipc.sendMessage({ type: 'deleteSpace', data: cid })
+                                store.msg.success(t('workspace.deleted'))
                               }
                             })
                           }}
@@ -276,7 +279,7 @@ export const EditSpace = observer(() => {
                             store.note.state.spaces.length === 1
                           }
                         >
-                          Delete
+                          {t('workspace.delete')}
                         </Button>
                         <div
                           className={
@@ -284,8 +287,8 @@ export const EditSpace = observer(() => {
                           }
                         >
                           {store.note.state.spaces.length > 1
-                            ? '永久删除空间文档和相关媒体文件'
-                            : '至少需要保留一个工作空间'}
+                            ? t('workspace.deleteHint')
+                            : t('workspace.minSpaceHint')}
                         </div>
                       </div>
                     )

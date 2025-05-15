@@ -6,9 +6,11 @@ import { Popconfirm } from 'antd'
 import { Download, TicketSlash } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IFile } from 'types/model'
 
 export const SpaceFiles = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useLocalState({
     page: 1,
@@ -84,9 +86,9 @@ export const SpaceFiles = observer(() => {
     <Modal
       title={
         <div className={'flex items-center'}>
-          <span>空间附件</span>
+          <span>{t('spaceFiles.title')}</span>
           <Popconfirm
-            title={'清除未被文档使用的附件'}
+            title={t('spaceFiles.clearUnused')}
             placement={'bottom'}
             onConfirm={clearAttachFiles}
           >
@@ -137,7 +139,7 @@ export const SpaceFiles = observer(() => {
         ))}
         {!state.files.length && (
           <div className={'py-5 text-center dark:text-white/50 text-black/50 text-sm'}>
-            暂无空间附件
+            {t('spaceFiles.noFiles')}
           </div>
         )}
       </div>

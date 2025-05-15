@@ -14,12 +14,14 @@ import {
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { observable } from 'mobx'
+import { useTranslation } from 'react-i18next'
 
 interface DocTree extends Omit<IDoc, 'children'> {
   children?: DocTree[]
   expand?: boolean
 }
 export const Trash = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useGetSetState({
     removeDocs: [] as DocTree[],
@@ -225,8 +227,8 @@ export const Trash = observer(() => {
           </div>
           {!!state().removeDocs.length && (
             <Popconfirm
-              title={'提示'}
-              description={'是否确定要永久删除所有文档？'}
+              title={t('tip')}
+              description={t('confirmDeleteAll')}
               okButtonProps={{ danger: true, type: 'default' }}
               styles={{ root: { width: 260 } }}
               onConfirm={clearDocs}
@@ -259,9 +261,7 @@ export const Trash = observer(() => {
           }
         >
           <Trash2 size={16} />
-          <span className={'ml-2 text-[13px] leading-5 select-none'}>
-            {true ? '废纸篓' : 'Trash'}
-          </span>
+          <span className={'ml-2 text-[13px] leading-5 select-none'}>{t('trash')}</span>
         </div>
       </div>
     </Popover>

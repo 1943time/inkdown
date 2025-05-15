@@ -4,6 +4,7 @@ import { useStore } from '@/store/store'
 import { SetEditor } from './Editor'
 import { Keyboard } from './Keyboard'
 import { ModelSettings } from './Model'
+import { useTranslation } from 'react-i18next'
 
 const tabs = [
   {
@@ -24,6 +25,7 @@ const tabs = [
 ]
 export const Settings = observer(() => {
   const core = useStore()
+  const { t } = useTranslation()
   if (!core.settings.data.open) return null
   return (
     <div className={`fixed inset-0 z-[2200] dark:bg-black/30 bg-black/10`}>
@@ -59,7 +61,7 @@ export const Settings = observer(() => {
             >
               <div className={'flex-1 px-2'}>
                 <div className={'mb-4 px-2 text-black/70 dark:text-white/70 text-sm font-semibold'}>
-                  Settings
+                  {t('settings.title')}
                 </div>
                 <div className={'space-y-1'}>
                   {tabs.map((item) => (

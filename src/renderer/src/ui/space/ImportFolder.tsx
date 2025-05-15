@@ -8,8 +8,10 @@ import { useLocalState } from '@/hooks/useLocalState'
 import { useSubject } from '@/hooks/common.js'
 import { FolderInput } from 'lucide-react'
 import { IDoc } from 'types/model'
+import { useTranslation } from 'react-i18next'
 
 export const ImportFolder = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useLocalState({
     loading: false,
@@ -45,7 +47,7 @@ export const ImportFolder = observer(() => {
       setState({ loading: true })
       await store.import.insertFiles()
       store.note.selectSpace(store.note.state.currentSpace!.id)
-      store.msg.success('导入成功')
+      store.msg.success(t('importFolder.success'))
       setState({ open: false })
     } catch (e) {
       console.error(e)
@@ -66,18 +68,18 @@ export const ImportFolder = observer(() => {
       footer={null}
       title={
         <div className={'flex items-center'}>
-          {'导入'} <FolderInput className={'ml-2'} size={16} />
+          {t('importFolder.import')} <FolderInput className={'ml-2'} size={16} />
         </div>
       }
     >
       {!state.tree.length && (
         <>
           <div className={'text-sm text-black/80 dark:text-white/80 my-2'}>
-            批量导入 markdown 文档到
+            {t('importFolder.batchImport')}
             <Tag className={'ml-2'} color={'pink'}>
-              {state.parent?.name || '当前工作区'}
+              {state.parent?.name || t('importFolder.currentWorkspace')}
             </Tag>
-            。Inkdown 将自动转换文件路径链接和依赖图片。
+            {t('importFolder.autoConvert')}
           </div>
           <Button
             type={`primary`}
@@ -87,7 +89,7 @@ export const ImportFolder = observer(() => {
             loading={state.loading}
             onClick={selectFolder}
           >
-            {'打开文件夹'}
+            {t('importFolder.openFolder')}
           </Button>
         </>
       )}
@@ -104,7 +106,7 @@ export const ImportFolder = observer(() => {
               {
                 title: (
                   <div className={'flex items-center'}>
-                    <span>导入文件：</span>
+                    <span>{t('importFolder.importFiles')}</span>
                     <div className={'flex items-center space-x-0.5 ml-2'}>
                       <Icon icon={'f7:doc-text'} className={'text-blue-500'} />
                       <span className={'text-gray-600 dark:text-gray-300 textsm font-normal'}>
@@ -131,14 +133,14 @@ export const ImportFolder = observer(() => {
             ]}
           />
           <div className={'mt-4 text-sm text-black/60 dark:text-white/60'}>
-            已存在的文件路径将被忽略
+            {t('importFolder.existingIgnored')}
           </div>
           <div className={'flex space-x-4 mt-2'}>
             <Button block={true} onClick={() => setState({ open: false })} disabled={state.loading}>
-              取消
+              {t('importFolder.cancel')}
             </Button>
             <Button type={'primary'} block={true} loading={state.loading} onClick={insert}>
-              导入
+              {t('importFolder.importAction')}
             </Button>
           </div>
         </>

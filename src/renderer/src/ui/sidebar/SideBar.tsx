@@ -47,11 +47,6 @@ export const SideBar = observer(() => {
         onMouseDown={move}
       />
       <div style={{ width: sidePanelWidth }} className={'flex-1 flex-shrink-0 min-h-0'}>
-        {/* <div
-          className={`h-full ${fullChatBot ? '' : 'opacity-0 fixed w-0 h-0 pointer-events-none'}`}
-        >
-          <Chats />
-        </div> */}
         <div className={`h-full`}>
           <Tree />
         </div>

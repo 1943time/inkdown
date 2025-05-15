@@ -11,9 +11,12 @@ import { observer } from 'mobx-react-lite'
 import { useLocalState } from '@/hooks/useLocalState'
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { Button, Modal, SortableList } from '@lobehub/ui'
+import { useTranslation } from 'react-i18next'
+
 const ModalForm = observer((props: { open: boolean; id: string | null; onClose: () => void }) => {
   const [form] = Form.useForm()
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     loading: false,
     error: '',
@@ -78,7 +81,7 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
             model.models[0]
         )
       }
-      store.msg.success('保存成功')
+      store.msg.success(t('model.save_success'))
       props.onClose()
     })
   }, [form, props.id])
@@ -115,7 +118,7 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
 
   return (
     <Modal
-      title={'添加模型'}
+      title={t('model.add_model')}
       open={props.open}
       footer={null}
       width={500}
@@ -126,18 +129,18 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
       }}
     >
       <Form form={form} layout={'vertical'} labelAlign={'right'} size={'middle'}>
-        <Form.Item label={'名称'} name={'id'} hidden={true}>
+        <Form.Item label={t('model.name')} name={'id'} hidden={true}>
           <Input />
         </Form.Item>
-        <Form.Item label={'名称'} name={'name'} rules={[{ required: true }]}>
-          <Input placeholder={'自定义名称'} />
+        <Form.Item label={t('model.name')} name={'name'} rules={[{ required: true }]}>
+          <Input placeholder={t('model.custom_name')} />
         </Form.Item>
         <Form.Item
-          label={'Api 提供方'}
+          label={t('model.api_provider')}
           name={'mode'}
           rules={[{ required: true }]}
           tooltip={{
-            title: '很多模型都与OpenAi 的api兼容，如果未列出您所使用的模型，可以考虑使用OpenAi模式',
+            title: t('model.api_provider_help'),
             styles: {
               root: {
                 zIndex: 2210
@@ -162,13 +165,17 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
               })
             }}
             dropdownStyle={{ zIndex: 2210 }}
-            placeholder={'请选择Api 提供方'}
+            placeholder={t('model.select_provider')}
           />
         </Form.Item>
-        <Form.Item rules={[{ required: true }]} label={'Api Key'} name={'apiKey'}>
-          <Input placeholder={'请输入Api Key'} />
+        <Form.Item rules={[{ required: true }]} label={t('model.api_key')} name={'apiKey'}>
+          <Input placeholder={t('model.enter_api_key')} />
         </Form.Item>
-        <Form.Item rules={[{ required: true, type: 'array' }]} label={'模型'} name={'models'}>
+        <Form.Item
+          rules={[{ required: true, type: 'array' }]}
+          label={t('model.model')}
+          name={'models'}
+        >
           <Select
             mode="tags"
             dropdownStyle={{ zIndex: 2210 }}
@@ -179,12 +186,12 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
                 value: v
               }
             })}
-            placeholder="使用回车添加模型，可添加多个"
+            placeholder={t('model.model_placeholder')}
           />
         </Form.Item>
-        <Form.Item rules={[{ type: 'url' }]} label={'Api Base Url'} name={'baseUrl'}>
+        <Form.Item rules={[{ type: 'url' }]} label={t('model.api_base_url')} name={'baseUrl'}>
           <Input
-            placeholder={`${state().defaultUrl ? `Default use: ${state().defaultUrl}` : ''}`}
+            placeholder={`${state().defaultUrl ? `${t('model.default_use')} ${state().defaultUrl}` : ''}`}
           />
         </Form.Item>
         <div className={'flex justify-between items-center space-x-3'}>
@@ -192,7 +199,7 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
             {state().checked && (
               <div className={'flex items-center'}>
                 <CircleCheckBig className={'w-4 h-4 mr-2 text-green-500'} />
-                检查通过
+                {t('model.check_passed')}
               </div>
             )}
             {!state().checked && !!state().error && (
@@ -204,10 +211,10 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
           </div>
           <div className={'space-x-3 flex-shrink-0 flex items-center'}>
             <Button type={'default'} size={'middle'} onClick={check} loading={state().checking}>
-              检查
+              {t('model.check')}
             </Button>
             <Button size={'middle'} onClick={save} loading={state().loading} type={'primary'}>
-              保存
+              {t('model.save')}
             </Button>
           </div>
         </div>
@@ -218,11 +225,12 @@ const ModalForm = observer((props: { open: boolean; id: string | null; onClose: 
 
 const ModelItem = observer(
   ({ model, onRemove, onEdit }: { model: IClient; onRemove: () => void; onEdit: () => void }) => {
+    const { t } = useTranslation()
     const label = useMemo(() => {
       return (
         <div className={'flex items-center select-none'}>
           {model.mode && <ModelIcon mode={model.mode as any} size={16} />}
-          <div className={'flex-1 truncate w-0 ml-1'}>{model.name || '未命名'}</div>
+          <div className={'flex-1 truncate w-0 ml-1'}>{model.name || t('model.unnamed')}</div>
         </div>
       )
     }, [model])
@@ -232,7 +240,7 @@ const ModelItem = observer(
         <div className={'flex items-center space-x-1'}>
           <Button type={'text'} icon={<EditOutlined />} size={'small'} onClick={onEdit}></Button>
           <Popconfirm
-            title={'确定删除吗？'}
+            title={t('model.confirm_delete')}
             onConfirm={() => onRemove()}
             styles={{ root: { zIndex: 2200 } }}
           >

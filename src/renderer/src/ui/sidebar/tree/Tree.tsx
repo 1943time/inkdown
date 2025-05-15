@@ -7,9 +7,11 @@ import { useStore } from '@/store/store'
 import { useGetSetState } from 'react-use'
 import { observer } from 'mobx-react-lite'
 import { Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export const Tree = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const { nodes, view } = store.note.state
   const [state, setState] = useGetSetState({
     scroll: false
@@ -42,7 +44,7 @@ export const Tree = observer(() => {
               }
             >
               <Search size={16} />
-              <span className={'ml-2 text-[13px] leading-5'}>Search</span>
+              <span className={'ml-2 text-[13px] leading-5'}>{t('search')}</span>
             </div>
           </div>
           <div className={`flex-1 flex-shrink-0 h-0`}>

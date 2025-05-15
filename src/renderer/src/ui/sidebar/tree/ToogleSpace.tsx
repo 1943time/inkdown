@@ -9,6 +9,8 @@ import { useGetSetState } from 'react-use'
 import { ISpace } from 'types/model'
 import { observer } from 'mobx-react-lite'
 import { ISwitch } from '@/icons/ISwitch'
+import { useTranslation } from 'react-i18next'
+
 export const SpaceList = observer(
   (props: {
     spaces: ISpace[]
@@ -54,7 +56,9 @@ export const SpaceList = observer(
     )
   }
 )
+
 export const ToggleSpace = observer(() => {
+  const { t } = useTranslation()
   const [state, setState] = useGetSetState({
     open: false,
     dragging: '',
@@ -101,7 +105,7 @@ export const ToggleSpace = observer(() => {
                 'flex justify-between items-center text-sm h-7 dark:text-gray-400 text-gray-500'
               }
             >
-              <span className={'pl-3 text-xs'}>Select Workspace</span>
+              <span className={'pl-3 text-xs'}>{t('selectWorkspace')}</span>
             </div>
             {!!spaces.length && (
               <SpaceList
@@ -122,7 +126,7 @@ export const ToggleSpace = observer(() => {
                 className={`flex items-center h-8 px-2 duration-200 dark:hover:bg-gray-200/10 hover:bg-gray-100 cursor-pointer rounded`}
               >
                 <Settings size={15} />
-                <span className={'text-xs ml-2'}>Workspace Settings</span>
+                <span className={'text-xs ml-2'}>{t('workspaceSettings')}</span>
               </div>
               <div
                 onClick={() => {
@@ -134,7 +138,7 @@ export const ToggleSpace = observer(() => {
                 }
               >
                 <Plus size={16} />
-                <span className={'text-xs ml-2'}>Create Workspace</span>
+                <span className={'text-xs ml-2'}>{t('createWorkspace')}</span>
               </div>
             </div>
           </div>

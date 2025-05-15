@@ -5,7 +5,10 @@ import isHotkey from 'is-hotkey'
 import { useGetSetState } from 'react-use'
 import { useSubject } from '@/hooks/common'
 import { useStore } from '@/store/store'
+import { useTranslation } from 'react-i18next'
+
 export function ConfirmDialog() {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useGetSetState({
     open: false,
@@ -102,7 +105,7 @@ export function ConfirmDialog() {
           loading={state().loading}
           onClick={confirm}
         >
-          {state().okText || 'Ok'}
+          {state().okText || t('ok')}
         </Button>
         {}
         {!state().hideCancelButton && (
@@ -116,7 +119,7 @@ export function ConfirmDialog() {
               close()
             }}
           >
-            {state().cancelText || 'Cancel'}
+            {state().cancelText || t('cancel')}
           </Button>
         )}
         {paramsRef.current.footer}

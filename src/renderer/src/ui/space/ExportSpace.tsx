@@ -4,9 +4,11 @@ import { ExportOutlined } from '@ant-design/icons'
 import { useStore } from '@/store/store'
 import { FolderDown } from 'lucide-react'
 import { useLocalState } from '@/hooks/useLocalState'
+import { Trans, useTranslation } from 'react-i18next'
 
 export const ExportSpace = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     loading: false
   })
@@ -24,8 +26,12 @@ export const ExportSpace = observer(() => {
       width={420}
     >
       <div className={'text-sm text-black/80 dark:text-white/80 mt-3'}>
-        Inkdown将以 <Tag>GitHub Flavored Markdown Spec</Tag>格式导出至本机文件夹。 文件附件将保存至{' '}
-        <Tag>.files</Tag> 文件夹中。
+        <Trans
+          i18nKey={'export.description'}
+          components={{
+            tag: <Tag />
+          }}
+        />
       </div>
       <Button
         block={true}
@@ -41,7 +47,7 @@ export const ExportSpace = observer(() => {
               store.local
                 .initialRewrite(store.note.state.nodes, true)
                 .then(() => {
-                  store.msg.success('文件已写入。')
+                  store.msg.success(t('export.fileWritten'))
                   window.api.fs.showInFinder(window.api.path.join(path.filePaths[0]))
                 })
                 .finally(() => {
@@ -52,7 +58,7 @@ export const ExportSpace = observer(() => {
           })
         }}
       >
-        {state.loading ? '正在导出...' : '选择文件夹'}
+        {state.loading ? t('export.exporting') : t('export.selectFolder')}
       </Button>
     </Modal>
   )

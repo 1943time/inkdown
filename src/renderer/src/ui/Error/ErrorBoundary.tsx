@@ -1,5 +1,5 @@
-import React, {ReactNode} from 'react'
-import {InfoCircleOutlined} from '@ant-design/icons'
+import React, { ReactNode } from 'react'
+import { InfoCircleOutlined } from '@ant-design/icons'
 
 interface Props {
   fallback: (e: any) => ReactNode
@@ -31,9 +31,7 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 }
 
-export function ErrorFallback(props: {
-  error: any
-}) {
+export function ErrorFallback(props: { error: any }) {
   let message = ''
   if (props.error instanceof Error) message = props.error.message
   if (typeof props.error === 'string') message = props.error
@@ -44,20 +42,20 @@ export function ErrorFallback(props: {
           <InfoCircleOutlined />
           <span className={'ml-2'}>Oops, something went wrong.</span>
         </div>
-        <div className={'max-w-[500px] text-sm mt-4 text-center'}>
-          system: {message}
-        </div>
+        <div className={'max-w-[500px] text-sm mt-4 text-center'}>system: {message}</div>
         <div className={'mt-5'}>
           <span
             className={'link underline cursor-pointer'}
             onClick={() => {
-              window.open('mailto:service@inkdown.me?subject=BUG&body=' + encodeURIComponent(`system message: ${message}\n\nyour operation process: `))
+              window.open('https://github.com/1943time/inkdown/issues')
             }}
           >
             Send report
           </span>
           <span className={'mx-3'}>|</span>
-          <span className={'link underline cursor-pointer'} onClick={() => location.reload()}>Reload</span>
+          <span className={'link underline cursor-pointer'} onClick={() => location.reload()}>
+            Reload
+          </span>
         </div>
       </div>
     </div>

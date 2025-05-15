@@ -5,6 +5,8 @@ import { action } from 'mobx'
 import { Store, useStore } from '@/store/store'
 import { IDoc } from 'types/model'
 import { ChevronRight, FileText, FolderClosed, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
 export const getClass = (tree: Store, c: IDoc) => {
   if (tree.note.state.selectedDoc?.id === c.id) return 'dark:bg-blue-500/20 bg-blue-500/20'
   if (tree.note.state.opendDoc?.id === c.id) return 'dark:bg-gray-200/10 bg-gray-200'
@@ -14,6 +16,7 @@ export const getClass = (tree: Store, c: IDoc) => {
 
 export const TreeRender = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   return (
     <>
       <div
@@ -21,7 +24,7 @@ export const TreeRender = observer(() => {
         className={`py-1 flex justify-between items-center pl-4 pr-2.5 dark:text-gray-400 text-gray-500`}
       >
         <span className={'font-semibold text-[13px] flex items-center'}>
-          <span>Folders</span>
+          <span>{t('folders')}</span>
         </span>
         <div
           className={`duration-100 p-0.5 rounded dark:hover:text-gray-300 hover:text-gray-600 cursor-pointer ${
@@ -40,7 +43,7 @@ export const TreeRender = observer(() => {
         <RenderItem items={store.note.state.root.children || []} level={0} />
         {!store.note.state.root.children?.length && (
           <div className={'mt-10  text-sm'}>
-            <div className={'text-gray-400 text-center'}>No space document yet</div>
+            <div className={'text-gray-400 text-center'}>{t('noSpaceDocuments')}</div>
             <div
               className={
                 'mt-2 flex justify-center items-center link cursor-pointer hover:text-white text-gray-400 duration-200'
@@ -50,7 +53,7 @@ export const TreeRender = observer(() => {
               }}
             >
               <FileText size={16} />
-              <span className={'ml-1'}>New doc</span>
+              <span className={'ml-1'}>{t('newDoc')}</span>
             </div>
           </div>
         )}

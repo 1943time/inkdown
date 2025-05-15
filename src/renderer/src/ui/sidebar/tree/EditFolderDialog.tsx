@@ -9,8 +9,10 @@ import { Dialog } from '@/ui/dialog/Dialog'
 import { FolderClosed } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { delayRun } from '@/utils/common'
+import { useTranslation } from 'react-i18next'
 
 export const EditFolderDialog = observer(() => {
+  const { t } = useTranslation()
   const store = useStore()
   const [state, setState] = useGetSetState({
     open: false,
@@ -26,19 +28,19 @@ export const EditFolderDialog = observer(() => {
     const nodes = store.note.state.nodes
     if (name) {
       if (/[.\/\\]/.test(name)) {
-        return setState({ message: 'Please do not include special characters' })
+        return setState({ message: t('specialCharError') })
       }
       if (state().mode === 'create') {
         const stack = state().ctxNode ? state().ctxNode!.children! : nodes['root']!.children!
         if (stack.some((s) => s.name === name && s.folder)) {
-          return setState({ message: 'The folder already exists' })
+          return setState({ message: t('folderExists') })
         }
         store.menu.createFolder(name, state().ctxNode?.id || 'root')
       } else if (state().ctxNode) {
         const ctx = state().ctxNode!
         const stack = ctx.parentId ? nodes[ctx.parentId]!.children! : nodes['root']!.children!
         if (stack.some((s) => s.name === name && s.folder && s.id !== ctx.id)) {
-          return setState({ message: 'The folder already exists' })
+          return setState({ message: t('folderExists') })
         }
         const oldPath = store.note.getDocPath(ctx).join('/')
         const now = Date.now()
@@ -55,7 +57,7 @@ export const EditFolderDialog = observer(() => {
       }
       close()
     }
-  }, [])
+  }, [t])
 
   const enter = useCallback((e: KeyboardEvent) => {
     if (isHotkey('enter', e)) {
@@ -89,14 +91,14 @@ export const EditFolderDialog = observer(() => {
         <div className={'flex items-center'}>
           <FolderClosed size={16} />
           <span className={'ml-2'}>
-            {state().mode === 'create' ? 'Create New Folder' : 'Update'}
+            {state().mode === 'create' ? t('createNewFolder') : t('update')}
           </span>
         </div>
       }
     >
       <div className={'w-[300px] p-5 flex flex-col items-center'}>
         <Input
-          placeholder={'Folder Name'}
+          placeholder={t('folderName')}
           data-type={'folderInputName'}
           value={state().name}
           onChange={(e) => {
@@ -116,7 +118,7 @@ export const EditFolderDialog = observer(() => {
           className={'mt-4'}
           onClick={confirm}
         >
-          {state().mode === 'create' ? 'Create' : 'Update'}
+          {state().mode === 'create' ? t('create') : t('update')}
         </Button>
       </div>
     </Dialog>

@@ -2,14 +2,16 @@ import { observer } from 'mobx-react-lite'
 import { Checkbox, Radio, Slider } from 'antd'
 import { useStore } from '@/store/store'
 import { TextHelp } from '../common/HelpText'
+import { useTranslation } from 'react-i18next'
 
 export const SetEditor = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   return (
     <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 px-2'}>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          <span className={'mr-1'}>主题</span>
+          <span className={'mr-1'}>{t('settings.theme')}</span>
         </div>
         <div>
           <Radio.Group
@@ -19,15 +21,15 @@ export const SetEditor = observer(() => {
             }}
             options={[
               {
-                label: '系统',
+                label: t('settings.theme_system'),
                 value: 'system'
               },
               {
-                label: '亮色',
+                label: t('settings.theme_light'),
                 value: 'light'
               },
               {
-                label: '暗色',
+                label: t('settings.theme_dark'),
                 value: 'dark'
               }
             ]}
@@ -36,12 +38,8 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm flex items-center'}>
-          <span className={'mr-1'}>显示大纲</span>
-          <TextHelp
-            text={
-              'The document level 1-4 headings will be generated as an outline on the right side of the editing area.'
-            }
-          />
+          <span className={'mr-1'}>{t('settings.show_outline')}</span>
+          <TextHelp text={t('settings.show_outline_help')} />
         </div>
         <div>
           <Checkbox
@@ -53,7 +51,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>大纲最大宽度</div>
+        <div className={'text-sm'}>{t('settings.outline_max_width')}</div>
         <div>
           <Slider
             className={'w-64'}
@@ -73,7 +71,7 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm'}>
-          <span>减小编辑器中文件名的输入框大小</span>
+          <span>{t('settings.reduce_filename_input')}</span>
         </div>
         <div>
           <Checkbox
@@ -85,7 +83,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{'代码围栏 TabSize'}</div>
+        <div className={'text-sm'}>{t('settings.code_fence_tabsize')}</div>
         <div>
           <Radio.Group
             value={store.settings.state.codeTabSize}
@@ -99,7 +97,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>{'代码自动换行'}</div>
+        <div className={'text-sm'}>{t('settings.code_auto_break')}</div>
         <div>
           <Checkbox
             checked={store.settings.state.codeAutoBreak}
@@ -110,7 +108,7 @@ export const SetEditor = observer(() => {
         </div>
       </div>
       <div className={'flex justify-between items-center py-3'}>
-        <div className={'text-sm'}>拼写检查</div>
+        <div className={'text-sm'}>{t('settings.spell_check')}</div>
         <div>
           <Checkbox
             checked={store.settings.state.spellCheck}
@@ -122,12 +120,8 @@ export const SetEditor = observer(() => {
       </div>
       <div className={'flex justify-between items-center py-3'}>
         <div className={'text-sm flex items-center'}>
-          <span className={'mr-1'}>{'Use $ to convert inline formulas'}</span>
-          <TextHelp
-            text={
-              'Enter $content$ and convert the content into an inline formula using the last $ character.'
-            }
-          />
+          <span className={'mr-1'}>{t('settings.use_dollar_formula')}</span>
+          <TextHelp text={t('settings.use_dollar_formula_help')} />
         </div>
         <div>
           <Checkbox

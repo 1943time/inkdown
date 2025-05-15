@@ -8,10 +8,12 @@ import { os } from '@/utils/common'
 import { useLocalState } from '@/hooks/useLocalState'
 import isHotkey from 'is-hotkey'
 import { RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const Item = observer(
   ({ task, labelMap }: { task: string; labelMap: Map<string, string>; refresh: boolean }) => {
     const store = useStore()
+    const { t } = useTranslation()
     const update = useUpdate()
     const inputRef = useRef<HTMLDivElement>(null)
     const [state, setState] = useLocalState({
@@ -20,7 +22,7 @@ const Item = observer(
     })
     const getKeyText = useCallback(
       (item: { custom: string | undefined | null; system: string }) => {
-        if (item.custom === null) return '未设置'
+        if (item.custom === null) return t('keyboard.not_set')
         return (item.custom || item.system)
           .split('+')
           .map((item) => {
@@ -148,7 +150,7 @@ const Item = observer(
                     type={'primary'}
                     onClick={() => save(task, state.input)}
                   >
-                    保存
+                    {t('keyboard.save')}
                   </Button>
                 </div>
               </div>
@@ -171,59 +173,60 @@ const Item = observer(
 )
 export const Keyboard = observer(() => {
   const store = useStore()
+  const { t } = useTranslation()
   const [state, setState] = useLocalState({
     refresh: false
   })
   const labelMap = useMemo(() => {
     return new Map<string, string>([
-      ['insertTable', '插入Table'],
-      ['insertCode', '插入代码围栏'],
-      ['insertFormulaBlock', '插入公式块'],
-      ['insertFormulaInline', '插入行内公式'],
-      ['insertQuote', '插入引用'],
-      ['selectAll', '全选'],
-      ['selectLine', '选择行'],
-      ['selectWord', '选择单词'],
-      ['selectFormat', '选择格式'],
-      ['pastePlainText', '粘贴纯文本'],
-      ['pasteMarkdownCode', '粘贴Markdown代码'],
-      ['newNote', '新建笔记'],
-      ['openSearch', '打开搜索'],
-      ['save', '保存'],
-      ['newTab', '新建标签页'],
-      ['closeCurrentTab', '关闭当前标签页'],
-      ['quickOpenNote', '快速打开笔记'],
-      ['lineBreakWithinParagraph', '段落内换行'],
-      ['undo', '撤销'],
-      ['redo', '重做'],
-      ['localImage', '插入本地图片'],
-      ['bulletedList', '无序列表'],
-      ['numberedList', '有序列表'],
-      ['taskList', '任务列表'],
-      ['horizontalLine', '水平分割线'],
-      ['head1', '一级标题'],
-      ['head2', '二级标题'],
-      ['head3', '三级标题'],
-      ['head4', '四级标题'],
-      ['paragraph', '段落'],
-      ['increaseHead', '增加标题级别'],
-      ['decreaseHead', '降低标题级别'],
-      ['bold', '加粗'],
-      ['italic', '斜体'],
-      ['strikethrough', '删除线'],
-      ['inlineCode', '行内代码'],
-      ['clear', '清除格式'],
-      ['openChat', '打开对话'],
-      ['newDoc', '新建文档']
+      ['insertTable', t('keyboard.shortcuts.insertTable')],
+      ['insertCode', t('keyboard.shortcuts.insertCode')],
+      ['insertFormulaBlock', t('keyboard.shortcuts.insertFormulaBlock')],
+      ['insertFormulaInline', t('keyboard.shortcuts.insertFormulaInline')],
+      ['insertQuote', t('keyboard.shortcuts.insertQuote')],
+      ['selectAll', t('keyboard.shortcuts.selectAll')],
+      ['selectLine', t('keyboard.shortcuts.selectLine')],
+      ['selectWord', t('keyboard.shortcuts.selectWord')],
+      ['selectFormat', t('keyboard.shortcuts.selectFormat')],
+      ['pastePlainText', t('keyboard.shortcuts.pastePlainText')],
+      ['pasteMarkdownCode', t('keyboard.shortcuts.pasteMarkdownCode')],
+      ['newNote', t('keyboard.shortcuts.newNote')],
+      ['openSearch', t('keyboard.shortcuts.openSearch')],
+      ['save', t('keyboard.shortcuts.save')],
+      ['newTab', t('keyboard.shortcuts.newTab')],
+      ['closeCurrentTab', t('keyboard.shortcuts.closeCurrentTab')],
+      ['quickOpenNote', t('keyboard.shortcuts.quickOpenNote')],
+      ['lineBreakWithinParagraph', t('keyboard.shortcuts.lineBreakWithinParagraph')],
+      ['undo', t('keyboard.shortcuts.undo')],
+      ['redo', t('keyboard.shortcuts.redo')],
+      ['localImage', t('keyboard.shortcuts.localImage')],
+      ['bulletedList', t('keyboard.shortcuts.bulletedList')],
+      ['numberedList', t('keyboard.shortcuts.numberedList')],
+      ['taskList', t('keyboard.shortcuts.taskList')],
+      ['horizontalLine', t('keyboard.shortcuts.horizontalLine')],
+      ['head1', t('keyboard.shortcuts.head1')],
+      ['head2', t('keyboard.shortcuts.head2')],
+      ['head3', t('keyboard.shortcuts.head3')],
+      ['head4', t('keyboard.shortcuts.head4')],
+      ['paragraph', t('keyboard.shortcuts.paragraph')],
+      ['increaseHead', t('keyboard.shortcuts.increaseHead')],
+      ['decreaseHead', t('keyboard.shortcuts.decreaseHead')],
+      ['bold', t('keyboard.shortcuts.bold')],
+      ['italic', t('keyboard.shortcuts.italic')],
+      ['strikethrough', t('keyboard.shortcuts.strikethrough')],
+      ['inlineCode', t('keyboard.shortcuts.inlineCode')],
+      ['clear', t('keyboard.shortcuts.clear')],
+      ['openChat', t('keyboard.shortcuts.openChat')],
+      ['newDoc', t('keyboard.shortcuts.newDoc')]
     ])
-  }, [])
+  }, [t])
 
   return (
     <div className={'px-10 py-2 dark:text-white/80 text-black/80'}>
       <div className={'text-xs text-center mb-2 flex justify-between items-center'}>
-        <span>使用组合键[⌘/Ctrl/Alt/Shift] + 字母或数字 自定义快捷键</span>
+        <span>{t('keyboard.shortcut_tip')}</span>
         <Popconfirm
-          title={'确认重置所有快捷键吗'}
+          title={t('keyboard.reset_confirm')}
           styles={{
             root: { zIndex: 2200 }
           }}
@@ -233,11 +236,13 @@ export const Keyboard = observer(() => {
           }}
         >
           <Button size={'small'} type={'text'} icon={<RotateCcw size={14} />}>
-            恢复默认
+            {t('keyboard.reset')}
           </Button>
         </Popconfirm>
       </div>
-      <div className={'text-sm font-bold mb-2 text-black dark:text-white'}>插入元素</div>
+      <div className={'text-sm font-bold mb-2 text-black dark:text-white'}>
+        {t('keyboard.insert_elements')}
+      </div>
       <div className={'divide-y divide-gray-200 dark:divide-gray-200/10 space-y-2'}>
         <Item task={'insertTable'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'insertCode'} labelMap={labelMap} refresh={state.refresh} />
