@@ -46,7 +46,9 @@ export default function Katex(props: { el: CodeNode }) {
   }, [props.el])
   return (
     <div
-      className={'mb-3 cursor-default select-none text-center bg-gray-500/5 py-4 rounded'}
+      className={
+        'mb-3 cursor-default select-none text-center dark:bg-white/5 bg-gray-600/5 py-4 rounded'
+      }
       onClick={() => {
         const editor = tab.codeMap.get(props.el)
         if (editor) {

@@ -51,27 +51,6 @@ export class LocalFile {
     })
   }
 
-  private async parseLocalNodes(node: IDoc) {
-    this.rewriteNode.clear()
-    const path = this.getDocLocalPath(node)
-    if (node.folder) {
-      window.api.fs.mkdirSync(path, { recursive: true })
-      if (node.children?.length) {
-        for (const item of node.children) {
-          // await this.localWriteNode(item)
-        }
-      }
-    } else {
-      this.rewriteNode.add(node.id)
-      // const depLinks = this.store.tree.depMap.get(node.cid)
-      // if (depLinks?.size) {
-      //   for (const item of depLinks) {
-      //     this.rewriteNode.add(item)
-      //   }
-      // }
-    }
-  }
-
   async localDeleteAssetsFile(name: string) {
     if (!this.saveLocal) return
     const { join } = window.api.path

@@ -9,7 +9,9 @@ import { Editor, Element, Node, Transforms } from 'slate'
 import { EditorUtils } from '@/editor/utils/editorUtils'
 import { getSystemLanguage } from '@/utils/i18n'
 import i18next from 'i18next'
+import { Mermaid } from 'mermaid'
 
+let mermaid: Mermaid | null = null
 const data = {
   open: false,
   setTab: 1
@@ -146,6 +148,12 @@ export class SettingsStore extends StructStore<typeof state> {
       i18next.changeLanguage('en')
     }
     this.setState({ ready: true })
+    import('mermaid').then((res) => {
+      mermaid = res.default
+      mermaid.initialize({
+        theme: this.state.dark ? 'dark' : 'default'
+      })
+    })
     if (this.callbacks.length) {
       for (const callback of this.callbacks) {
         callback()
@@ -197,6 +205,9 @@ export class SettingsStore extends StructStore<typeof state> {
       }
       localStorage.setItem('theme', value as string)
       this.setCodeOptions('theme', this.state.dark ? 'cloud_editor_dark' : 'cloud_editor')
+      mermaid?.initialize({
+        theme: this.state.dark ? 'dark' : 'default'
+      })
     }
     if (key === 'codeAutoBreak') {
       this.setCodeOptions('autoWrap', value)

@@ -18,9 +18,8 @@ export const useKeyboard = (tab: TabStore) => {
     return (e: React.KeyboardEvent) => {
       const state = tab.state
       if (
-        ((state.openInsertCompletion || tab.state.wikilink.open) &&
-          (isHotkey('up', e) || isHotkey('down', e) || isHotkey('enter', e))) ||
-        isHotkey('tab', e)
+        (state.openInsertCompletion || tab.state.wikilink.open) &&
+        (isHotkey('up', e) || isHotkey('down', e) || isHotkey('enter', e))
       ) {
         e.preventDefault()
         return
@@ -73,6 +72,7 @@ export const useKeyboard = (tab: TabStore) => {
           EditorUtils.clearMarks(tab.editor)
         }
       }
+
       if (e.key.toLowerCase().startsWith('arrow')) {
         if (state.openLangCompletion && ['ArrowUp', 'ArrowDown'].includes(e.key)) return
         keyArrow(tab, e)

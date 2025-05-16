@@ -83,6 +83,7 @@ export class TabKey {
   private tableCell(node: TableCellNode, nodePath: Path, shift = false) {
     const sel = this.editor.selection!
     const text = Node.string(node)
+
     if (shift) {
       if (Path.hasPrevious(nodePath)) {
         Transforms.select(this.editor, Editor.end(this.editor, Path.previous(nodePath)))

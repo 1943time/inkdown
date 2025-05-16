@@ -213,8 +213,8 @@ export const AceElement = memo(({ element, attributes, children }: ElementProps<
           }
         }
       }
-      // const newEvent = new KeyboardEvent(e.type, e)
-      // window.dispatchEvent(newEvent)
+      const newEvent = new KeyboardEvent(e.type, e)
+      window.dispatchEvent(newEvent)
     })
     let lang = state().lang as string
     setTimeout(() => {

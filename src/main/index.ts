@@ -10,8 +10,21 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
-  createWindow()
+  knex('setting')
+    .where('key', 'windows')
+    .first()
+    .then((row) => {
+      if (row) {
+        try {
+          const data = JSON.parse(row.value)
+          for (const item of data) {
+            createWindow(item)
+          }
+        } catch (e) {
+          createWindow()
+        }
+      }
+    })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

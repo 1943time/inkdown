@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { EditorUtils } from '../../utils/editorUtils'
 import { CodeNode } from '@/editor'
 import { useTab } from '@/store/note/TabCtx'
-import { useSubject } from '@/hooks/common'
+import { useObserveKey } from '@/hooks/common'
 import { useTranslation } from 'react-i18next'
 
 export default function Mermaid(props: { el: CodeNode }) {
@@ -34,7 +34,7 @@ export default function Mermaid(props: { el: CodeNode }) {
         })
     })
   }, [])
-  useSubject(tab.store.settings.darkChanged$, () => {
+  useObserveKey(tab.store.settings.state, 'dark', () => {
     setTimeout(() => {
       render()
     })
@@ -76,7 +76,7 @@ export default function Mermaid(props: { el: CodeNode }) {
       ></div>
       {state().error && <div className={'text-center text-red-500/80'}>{state().error}</div>}
       {!state().code && !state().error && (
-        <div className={'text-center text-gray-500'}>{t('editor.mermaid.empty')}</div>
+        <div className={'text-center '}>{t('editor.mermaid.empty')}</div>
       )}
     </div>
   )
