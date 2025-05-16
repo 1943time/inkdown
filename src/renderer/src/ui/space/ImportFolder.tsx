@@ -46,7 +46,6 @@ export const ImportFolder = observer(() => {
     try {
       setState({ loading: true })
       await store.import.insertFiles()
-      store.note.selectSpace(store.note.state.currentSpace!.id)
       store.msg.success(t('importFolder.success'))
       setState({ open: false })
     } catch (e) {

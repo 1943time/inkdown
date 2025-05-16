@@ -159,8 +159,7 @@ export class NoteStore extends StructStore<typeof state> {
       })
     })
   }
-  selectSpace(spaceId?: string) {
-    if (spaceId === this.state.selectedSpaceId) return
+  async selectSpace(spaceId?: string) {
     this.docStatus.clear()
     this.setState((state) => {
       state.tabs = []
@@ -170,8 +169,8 @@ export class NoteStore extends StructStore<typeof state> {
         spaceId = this.state.spaces[0]!.id
         state.selectedSpaceId = spaceId!
       }
-      this.getDocs(spaceId)
     })
+    await this.getDocs(this.state.selectedSpaceId!)
     if (spaceId) {
       this.store.model.updateSpace(spaceId, {
         lastOpenTime: Date.now()
@@ -213,8 +212,8 @@ export class NoteStore extends StructStore<typeof state> {
     })
     this.recordTabs()
   }
-  getDocs(spaceId: string) {
-    this.store.model.getDocs(spaceId).then((docs) => {
+  async getDocs(spaceId: string) {
+    return this.store.model.getDocs(spaceId).then((docs) => {
       const nodes: Record<string, IDoc> = {}
       const foldersMap = new Map<string, IDoc[]>()
       for (const doc of docs) {

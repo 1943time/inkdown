@@ -1,6 +1,6 @@
 import { makeAutoObservable } from 'mobx'
 import { Store } from '../store'
-import { copy, nid } from '@/utils/common'
+import { nid } from '@/utils/common'
 import { IDoc } from 'types/model'
 import i18next from 'i18next'
 
@@ -36,35 +36,12 @@ export class LocalFile {
     return Boolean(this.writePath)
   }
 
-  getMdParser() {
-    return import('@/editor/parser/worker').then((res) => res.parse)
-  }
   getDocLocalPath(doc: IDoc) {
     const { join } = window.api.path
     return join(
       this.writePath!,
       this.store.note.getDocPath(doc).join('/') + (doc.folder ? '' : '.md')
     )
-  }
-  async deleteDocByIds(docs: string[]) {
-    if (this.saveLocal) {
-      try {
-        // const space = await db.space.get(spaceCid)
-        // if (this.store.desktop && space?.filePath) {
-        //   for (const cid of docs) {
-        //     const path = await this.getDocPath(cid)
-        //     if (path) {
-        //       const filePath = window.api.path.join(space.filePath, path)
-        //       if (window.api.fs.existsSync(filePath)) {
-        //         window.api.fs.moveToTrash(filePath)
-        //       }
-        //     }
-        //   }
-        // }
-      } catch (e) {
-        console.error(e)
-      }
-    }
   }
 
   chooseLocalFolder(defaultFilePath?: string) {
@@ -100,7 +77,7 @@ export class LocalFile {
     const { join } = window.api.path
     const path = join(this.writePath!, '.files', name)
     if (window.api.fs.existsSync(path)) {
-      window.api.fs.moveToTrash(path)
+      this.store.system.moveToTrash(path)
     }
   }
 

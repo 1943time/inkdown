@@ -34,9 +34,6 @@ export const Api = {
     renameSync,
     mkdirSync,
     readFile,
-    moveToTrash: (path: string) => {
-      return ipcRenderer.invoke('move-to-trash', path)
-    },
     lookup(filePath: string) {
       return lookup(filePath)
     },

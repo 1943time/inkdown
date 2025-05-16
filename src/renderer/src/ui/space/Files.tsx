@@ -14,7 +14,7 @@ export const SpaceFiles = observer(() => {
   const store = useStore()
   const [state, setState] = useLocalState({
     page: 1,
-    pageSize: 20,
+    pageSize: 30,
     files: [] as IFile[],
     loading: false,
     assetsPath: '',
@@ -54,7 +54,7 @@ export const SpaceFiles = observer(() => {
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
-      if (scrollHeight - scrollTop - clientHeight < 50 && !state.loading) {
+      if (scrollHeight - scrollTop - clientHeight < 50 && !state.loading && !state.loadEnd) {
         setState({ page: state.page + 1 })
         getFiles()
       }
@@ -101,7 +101,7 @@ export const SpaceFiles = observer(() => {
           </Popconfirm>
         </div>
       }
-      width={726}
+      width={740}
       footer={null}
       open={store.note.state.openSpaceFiles}
       onCancel={() => {
@@ -137,12 +137,12 @@ export const SpaceFiles = observer(() => {
             </div>
           </div>
         ))}
-        {!state.files.length && (
-          <div className={'py-5 text-center dark:text-white/50 text-black/50 text-sm'}>
-            {t('spaceFiles.noFiles')}
-          </div>
-        )}
       </div>
+      {!state.files.length && (
+        <div className={'py-5 dark:text-white/50 text-black/50 text-sm text-center'}>
+          {t('spaceFiles.noFiles')}
+        </div>
+      )}
     </Modal>
   )
 })

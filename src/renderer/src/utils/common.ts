@@ -165,6 +165,11 @@ export const delayRun = (fn: Function) => {
     setTimeout(fn, 16)
   }
 }
+export const sleep = (ms: number) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
 
 export const toUnixPath = (path: string) => {
   return path.replace(/\\/g, '/')

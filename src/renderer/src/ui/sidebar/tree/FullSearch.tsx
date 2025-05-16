@@ -153,14 +153,16 @@ export const FullSearch = observer(() => {
   const toVectorPath = useCallback((docId: string, path: number) => {
     const doc = store.note.state.nodes[docId]
     store.note.openDoc(doc)
-    delayRun(() => {
-      const dom = ReactEditor.toDOMNode(store.note.state.currentTab.editor!, doc.schema?.[path])
-      if (dom) {
-        dom.scrollIntoView({
-          behavior: 'instant'
-        })
-      }
-    })
+    if (path !== 0) {
+      delayRun(() => {
+        const dom = ReactEditor.toDOMNode(store.note.state.currentTab.editor!, doc.schema?.[path])
+        if (dom) {
+          dom.scrollIntoView({
+            behavior: 'instant'
+          })
+        }
+      })
+    }
   }, [])
   const searchKeyword = useCallback(async (keyword: string) => {
     const docs = Object.values(store.note.state.nodes)

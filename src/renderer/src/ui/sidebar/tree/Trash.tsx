@@ -66,6 +66,23 @@ export const Trash = observer(() => {
     return ids
   }, [])
 
+  const removeLocal = useCallback(
+    async (docs: DocTree[]) => {
+      if (store.note.state.currentSpace?.writeFolderPath) {
+        for (let d of docs) {
+          let path = store.note.getDocPath(d).join('/')
+          if (!d.folder) {
+            path += '.md'
+          }
+          path = window.api.path.join(store.note.state.currentSpace?.writeFolderPath!, path)
+          if (path) {
+            store.system.moveToTrash(path)
+          }
+        }
+      }
+    },
+    [store.note.state.currentSpace?.writeFolderPath]
+  )
   const clearDocs = useCallback(async () => {
     if (state().removeDocs) {
       try {
@@ -73,6 +90,7 @@ export const Trash = observer(() => {
         const ids = getAllIds(state().removeDocs)
         if (!ids.length) return
         await store.model.clearDocs(store.note.state.currentSpace!.id, ids)
+        await removeLocal(state().removeDocs)
         setState({ removeDocs: [] })
       } catch (e) {
         console.error('e')
@@ -90,6 +108,7 @@ export const Trash = observer(() => {
   const deleteDoc = useCallback(async (doc: IDoc) => {
     const ids = getAllIds([doc])
     await doDelete(ids)
+    await removeLocal([doc])
     setState({
       removeDocs: state().removeDocs.filter((d) => d.id !== doc.id)
     })

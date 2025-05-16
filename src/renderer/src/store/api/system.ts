@@ -64,4 +64,7 @@ export class SystemApi {
   showInFinder(path: string) {
     ipcRenderer.send('showInFinder', path)
   }
+  moveToTrash(path: string) {
+    return ipcRenderer.send('move-to-trash', path)
+  }
 }

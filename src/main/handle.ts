@@ -125,5 +125,13 @@ ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => 
 })
 
 ipcMain.on('showInFinder', (_, path: string) => {
-  shell.showItemInFolder(path)
+  if (existsSync(path)) {
+    shell.showItemInFolder(path)
+  }
+})
+
+ipcMain.on('move-to-trash', (_, path: string) => {
+  if (existsSync(path)) {
+    shell.trashItem(path)
+  }
 })

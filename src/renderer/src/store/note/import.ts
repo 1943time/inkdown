@@ -13,6 +13,36 @@ export class ImportNote {
     insertNodes: ImportDoc[]
     pathMap: Map<string, IDoc>
   }
+  private udpateNodes: IDoc[] = []
+  async delayUpdate() {
+    const now = Date.now()
+    for (const doc of this.udpateNodes) {
+      try {
+        if (doc.spaceId !== this.store.note.state.currentSpace?.id) continue
+        const node = this.store.note.state.nodes[doc.id]
+        if (!node) continue
+        await this.store.model.updateDoc(
+          doc.id,
+          {
+            updated: now,
+            spaceId: doc.spaceId
+          },
+          {
+            chunks: await this.store.worker.getChunks(node.schema || doc.schema!, {
+              folder: false,
+              id: doc.id,
+              name: doc.name,
+              parentId: doc.parentId,
+              updated: now
+            })
+          }
+        )
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    this.udpateNodes = []
+  }
   constructor(private readonly store: Store) {}
   findDocLinks(
     schema: any[],
@@ -175,7 +205,13 @@ export class ImportNote {
         links: deepDenceLink.get(doc.id) || [],
         medias: deepMedias.get(doc.id) || []
       })
+
+      if (!doc.folder) {
+        this.udpateNodes.push(doc)
+      }
     }
+    await this.store.note.selectSpace(this.store.note.state.currentSpace!.id)
+    await this.delayUpdate()
   }
   async importFolder(parentDoc?: IDoc | null) {
     const parent = parentDoc || this.store.note.state.root

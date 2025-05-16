@@ -148,6 +148,7 @@ export class ContextMenu {
           sel?.addRange(range)
         }
       }, 30)
+      state.selectedDoc = null
     })
   }
   openContextMenu(e: React.MouseEvent, node: IDoc) {
