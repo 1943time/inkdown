@@ -305,6 +305,7 @@ export const ModelSettings = observer(() => {
           )}
         />
       </div>
+      {!models.length && <div className={'text-center text-sm'}>{t('model.add_model_tip')}</div>}
       <div className={'mt-6 px-20'}>
         <Button
           block={true}
@@ -347,6 +348,33 @@ export const ModelSettings = observer(() => {
               />
             </div>
           </Form.Item>
+          <Form.Item
+            label={t('model.max_history_count')}
+            tooltip={{
+              title: t('model.max_history_count_help'),
+              styles: {
+                root: {
+                  zIndex: 2210
+                }
+              }
+            }}
+          >
+            <div className={'ml-5'}>
+              <Slider
+                min={50}
+                max={500}
+                step={50}
+                onChange={(value) => {
+                  store.settings.setState((state) => {
+                    state.maxHistoryChats = value
+                  })
+                  updateSettings('maxHistoryChats')
+                }}
+                value={store.settings.state.maxHistoryChats}
+                tooltip={{ zIndex: 2210, arrow: false }}
+              />
+            </div>
+          </Form.Item>
         </Form>
       </div>
       <div className={'mt-5'}>
@@ -369,7 +397,7 @@ export const ModelSettings = observer(() => {
                     labelCol={{ span: 14 }}
                   >
                     <Form.Item
-                      label={t('model.creativity')}
+                      label={t('model.creativity') + ' (temperature)'}
                       tooltip={{
                         title: t('model.creativity_help'),
                         styles: {

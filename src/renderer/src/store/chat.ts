@@ -110,6 +110,13 @@ export class ChatStore extends StructStore<typeof state> {
       this.setState((state) => {
         state.chats.unshift(obj!)
       })
+      const chats = this.store.chat.state.chats.length
+      if (chats > this.store.settings.state.maxHistoryChats) {
+        this.store.model.deleteChat(this.store.chat.state.chats[chats - 1].id)
+        this.setState((state) => {
+          state.chats.pop()
+        })
+      }
     }
     this.setState({ activeChat: obj! })
     return obj!

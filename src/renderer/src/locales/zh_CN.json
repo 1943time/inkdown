@@ -1,5 +1,6 @@
 {
-  "search": "查找",
+  "search": "搜索",
+  "find": "查找",
   "noDocuments": "尚未创建文档",
   "specialCharError": "请不要包含特殊字符",
   "folderExists": "文件夹已存在",
@@ -116,7 +117,10 @@
     "presence_penalty_help": "值越大，越倾向不同的表达方式，避免概念重复；值越小，越倾向使用重复的概念或叙述，表达更具一致性",
     "frequency_penalty": "词汇丰富度 (frequencyPenalty)",
     "frequency_penalty_help": "值越大，用词越丰富多样；值越低，用词更朴实简单",
-    "more_settings": "更多设置"
+    "more_settings": "更多设置",
+    "add_model_tip": "添加模型可使用LLM对话能力，可以将文档、工作区、或本地文件作为上下文。",
+    "max_history_count": "最大历史记录数",
+    "max_history_count_help": "根据最后更新时间，仅保留最新的对话记录"
   },
   "keyboard": {
     "shortcut_tip": "使用组合键[⌘/Ctrl/Alt/Shift] + 其他热键来自定义快捷键",
@@ -204,7 +208,12 @@
     },
     "newChat": "新建对话",
     "search": "搜索",
-    "delete": "删除"
+    "delete": "删除",
+    "greeting": {
+      "morning": "早上好",
+      "afternoon": "下午好",
+      "evening": "晚上好"
+    }
   },
   "reasoning": {
     "thinking": "深度思考中...",

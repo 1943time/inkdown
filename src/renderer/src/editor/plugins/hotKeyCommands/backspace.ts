@@ -11,8 +11,6 @@ export class BackspaceKey {
     const sel = this.editor.selection
     if (!sel) return
     let [start, end] = Range.edges(sel)
-    console.log('run', start, end)
-
     if (
       Point.equals(start, Editor.start(this.editor, [])) &&
       Point.equals(end, Editor.end(this.editor, []))

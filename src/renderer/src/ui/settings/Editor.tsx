@@ -18,6 +18,7 @@ export const SetEditor = observer(() => {
           <Select
             value={store.settings.state.language}
             dropdownStyle={{ zIndex: 2210 }}
+            className={'w-36'}
             onChange={(e) => {
               store.settings.setSetting('language', e)
             }}

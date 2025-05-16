@@ -34,6 +34,7 @@ const state = {
   spellCheck: false,
   codeAutoBreak: false,
   maxMessageRounds: 8,
+  maxHistoryChats: 100,
   codeTabSize: 2,
   showChatBot: false,
   language: getSystemLanguage() as 'zh' | 'en',

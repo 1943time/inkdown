@@ -90,65 +90,81 @@ export const ChatInput = observer(() => {
     setState({ text: '', files: [], images: [] })
   }, [editor, state.text, activeChat?.pending])
 
-  const keydown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (isHotkey('mod+backspace', e)) {
-      EditorUtils.deleteLine(editor)
-    }
-    if (isHotkey('enter', e)) {
-      e.preventDefault()
-      if (!store.chat.state.reference.open) {
-        send()
-      }
-    }
-    if (isHotkey('shift+enter', e) || isHotkey('mod+enter', e)) {
-      e.preventDefault()
-      Transforms.insertNodes(editor, {
-        type: 'paragraph',
-        children: [{ text: '' }]
-      })
-    }
-    if (isHotkey('backspace', e)) {
-      const str = Editor.string(editor, [])
-      if (!str) {
-        if (editor.children.length > 1 && editor.selection?.anchor.path[0] === 0) {
-          Transforms.delete(editor, {
-            at: [0]
-          })
-        } else if (editor.children.length === 1 && store.chat.state.cacheDocs.length) {
-          store.chat.setState((state) => {
-            state.cacheDocs.pop()
-          })
-        }
-      }
-    }
-    if (e.key === '@') {
-      setTimeout(() => {
-        const domRect = getDomRect()
-        if (domRect) {
-          store.chat.setState((state) => {
-            state.reference.open = true
-            state.reference.domRect = domRect
-          })
-        }
-      }, 16)
-    } else if (store.chat.state.reference.open) {
-      setTimeout(() => {
-        const [node] = Editor.nodes(editor, {
+  const keydown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      e.stopPropagation()
+      if (isHotkey('mod+backspace', e)) {
+        const [p] = Editor.nodes(editor, {
           match: (n) => Element.isElement(n) && n.type === 'paragraph'
         })
-
-        if (node) {
-          const text = Node.string(node[0])
-          if (!/@[^\n]*$/.test(text) || /\s{2,}$/.test(text)) {
+        if (p) {
+          Transforms.delete(editor, {
+            at: {
+              anchor: Editor.start(editor, p[1]),
+              focus: Editor.end(editor, p[1])
+            }
+          })
+          e.preventDefault()
+        }
+        return
+      }
+      if (isHotkey('enter', e)) {
+        e.preventDefault()
+        if (!store.chat.state.reference.open) {
+          send()
+        }
+      }
+      if (isHotkey('shift+enter', e) || isHotkey('mod+enter', e)) {
+        e.preventDefault()
+        Transforms.insertNodes(editor, {
+          type: 'paragraph',
+          children: [{ text: '' }]
+        })
+      }
+      if (isHotkey('backspace', e)) {
+        const str = Editor.string(editor, [])
+        if (!str) {
+          if (editor.children.length > 1 && editor.selection?.anchor.path[0] === 0) {
+            Transforms.delete(editor, {
+              at: [0]
+            })
+          } else if (editor.children.length === 1 && store.chat.state.cacheDocs.length) {
             store.chat.setState((state) => {
-              state.reference.open = false
-              state.reference.domRect = null
+              state.cacheDocs.pop()
             })
           }
         }
-      }, 16)
-    }
-  }, [])
+      }
+      if (e.key === '@') {
+        setTimeout(() => {
+          const domRect = getDomRect()
+          if (domRect) {
+            store.chat.setState((state) => {
+              state.reference.open = true
+              state.reference.domRect = domRect
+            })
+          }
+        }, 16)
+      } else if (store.chat.state.reference.open) {
+        setTimeout(() => {
+          const [node] = Editor.nodes(editor, {
+            match: (n) => Element.isElement(n) && n.type === 'paragraph'
+          })
+
+          if (node) {
+            const text = Node.string(node[0])
+            if (!/@[^\n]*$/.test(text) || /\s{2,}$/.test(text)) {
+              store.chat.setState((state) => {
+                state.reference.open = false
+                state.reference.domRect = null
+              })
+            }
+          }
+        }, 16)
+      }
+    },
+    [editor]
+  )
 
   const onChange = useCallback(() => {
     const text = editor.children.map((n) => Node.string(n)).join('\n')

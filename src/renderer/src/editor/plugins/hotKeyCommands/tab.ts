@@ -54,9 +54,6 @@ export class TabKey {
       }
     } else {
       const [start, end] = Range.edges(sel)
-      const [code] = Editor.nodes(this.editor, {
-        match: (n) => n?.type === 'code'
-      })
       if (e.shiftKey) {
         const [node] = Editor.nodes<any>(this.editor, {
           match: (n) => n.type === 'list'

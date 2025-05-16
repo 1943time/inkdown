@@ -7,6 +7,11 @@
     "delete": "Delete",
     "export_pdf": "Export PDF",
     "go_to_settings": "Go to settings",
+    "greeting": {
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "morning": "Good morning"
+    },
     "input": {
       "docContextTip": "Use matched document fragments from the workspace as the conversation context",
       "file": "File",
@@ -97,6 +102,7 @@
     "fileWritten": "File written.",
     "selectFolder": "Select Folder"
   },
+  "find": "Find",
   "folderExists": "Folder already exists",
   "folderName": "Folder Name",
   "folders": "Folders",
@@ -185,6 +191,7 @@
   },
   "model": {
     "add_model": "Add Model",
+    "add_model_tip": "Adding a model enables LLM conversation capabilities, and you can use documents, workspaces, or local files as context.",
     "advanced_settings_tip": "If you are not very familiar with the parameters, it is not recommended to configure or check them.",
     "api_base_url": "Api Base Url",
     "api_key": "Api Key",
@@ -200,6 +207,8 @@
     "enter_api_key": "Please enter Api Key",
     "frequency_penalty": "Richness of vocabulary (frequencyPenalty)",
     "frequency_penalty_help": "The higher the value, the more diverse and rich the vocabulary; the lower the value, the more simple and straightforward the vocabulary.",
+    "max_history_count": "Maximum history count",
+    "max_history_count_help": "Based on the last update time, only the most recent conversation records are retained.",
     "max_rounds": "Maximum number of conversation rounds",
     "max_rounds_help": "One question and answer is considered one round. If the number of rounds exceeds the maximum, earlier conversation records will be ignored in the context.",
     "model": "Model",

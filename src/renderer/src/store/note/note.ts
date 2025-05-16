@@ -196,6 +196,7 @@ export class NoteStore extends StructStore<typeof state> {
       }
       state.tabIndex = state.tabs.length - 1
     })
+    this.recordTabs()
   }
   removeTab(i: number) {
     if (this.state.tabs.length < 2) return

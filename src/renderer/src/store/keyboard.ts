@@ -366,7 +366,9 @@ export class KeyboardStore {
                 continue
               }
             }
-            e.preventDefault()
+            if (value.scene === 'note') {
+              e.preventDefault()
+            }
             this.run(key)
           }
         } else if (isHotkey(value.custom, e)) {

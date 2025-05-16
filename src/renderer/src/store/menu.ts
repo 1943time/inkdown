@@ -183,19 +183,6 @@ export class ContextMenu {
           }
         }
       ]
-      if (this.store.note.state.currentSpace?.writeFolderPath) {
-        menus.push(
-          ...[
-            { hr: true },
-            {
-              text: i18next.t('menu.showInFinder'),
-              click: () => {
-                this.store.local.showInFinder(node)
-              }
-            }
-          ]
-        )
-      }
       menus.push(
         ...[
           { hr: true },
