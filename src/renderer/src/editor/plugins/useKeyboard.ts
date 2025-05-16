@@ -19,7 +19,7 @@ export const useKeyboard = (tab: TabStore) => {
       const state = tab.state
       if (
         (state.openInsertCompletion || tab.state.wikilink.open) &&
-        (isHotkey('up', e) || isHotkey('down', e) || isHotkey('enter', e))
+        (isHotkey('up', e) || isHotkey('down', e) || isHotkey('enter', e) || isHotkey('tab', e))
       ) {
         e.preventDefault()
         return
