@@ -7,7 +7,6 @@ import { ThemeProvider } from 'antd-style'
 import { useLayoutEffect, useMemo, useState } from 'react'
 import { IChat, IDoc } from 'types/model'
 import { Webview } from './editor/ui/Webview'
-import { delayRun } from './utils/common'
 import { ChatViewList } from './ui/chat/ViewList'
 
 const Worker = observer(() => {
@@ -49,9 +48,9 @@ const Worker = observer(() => {
         }
       })
       .finally(() => {
-        delayRun(() => {
+        setTimeout(() => {
           window.electron.ipcRenderer.send('print-pdf-ready')
-        })
+        }, 300)
       })
   }, [])
   return (
@@ -69,12 +68,12 @@ const Worker = observer(() => {
       }}
     >
       {doc && (
-        <div className={'px-8 h-auto'}>
+        <div className={'px-8 h-auto w-[760px]'}>
           <Webview doc={doc} />
         </div>
       )}
       {chat && (
-        <div className={'py-8 px-5'}>
+        <div className={'py-8 px-5 w-[760px]'}>
           <ChatViewList chat={chat} />
         </div>
       )}

@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync } from 'fs'
 import { writeFile, readFile, cp, rename } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
-import { app, shell } from 'electron'
+import { app } from 'electron'
 import { ipcRenderer, clipboard, nativeImage } from 'electron'
 import { lookup } from 'mime-types'
 const dev = process.env.NODE_ENV === 'development'

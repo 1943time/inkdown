@@ -1,6 +1,5 @@
 import { useStore } from '@/store/store'
 import { GlobalOutlined } from '@ant-design/icons'
-import { Hero } from '@lobehub/ui/awesome'
 import { Button } from 'antd'
 import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'

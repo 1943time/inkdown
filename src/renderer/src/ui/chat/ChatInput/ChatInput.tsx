@@ -250,7 +250,7 @@ export const ChatInput = observer(() => {
             {state.files.map((f, i) => (
               <div
                 className={
-                  'max-w-[200px] py-1.5 rounded-xl mr-2 mb-1 bg-white/10 pl-2 pr-1 relative group'
+                  'max-w-[200px] py-1 rounded-xl mr-2 mb-1 dark:bg-white/10 bg-black/10 pl-2 pr-1 relative group'
                 }
                 key={i}
               >
@@ -263,13 +263,13 @@ export const ChatInput = observer(() => {
                       <ILoad />
                     </span>
                   ) : (
-                    <span className={'px-2 py-1 bg-black/20 rounded-full text-xs scale-90 ml-2'}>
+                    <span className={'px-2 py-1 bg-black/20 rounded-full text-xs scale-90 ml-1'}>
                       {getFileExtension(f.name)}
                     </span>
                   )}
                   <div className="absolute -right-1 -top-1 h-5 w-5 flex items-center pr-2 group-hover:opacity-100 opacity-0">
                     <button
-                      className="p-1 hover:bg-white/10 rounded-lg transition-colors stroke-gray-400"
+                      className="p-1 dark:hover:bg-white/10 hover:bg-black/10 rounded-lg transition-colors dark:stroke-gray-400 stroke-gray-600 cursor-pointer"
                       onClick={() => {
                         setState((state) => {
                           state.files.splice(i, 1)

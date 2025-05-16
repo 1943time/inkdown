@@ -1,9 +1,5 @@
-import { excelToCsv } from '@/parser/excelParser'
-import { PDFParser } from '@/parser/pdfParser'
-import { WordParser } from '@/parser/wordParser'
 import { IMessageFile } from 'types/model'
 import { fileOpen } from 'browser-fs-access'
-import { nanoid } from 'nanoid'
 import { nid } from '@/utils/common'
 
 const programmingFileExtensions = [
@@ -140,14 +136,20 @@ export const chooseFile = async (onParsed: (id: string, content: string | null) 
           continue
         }
         if (/\.(pdf)$/.test(item.name)) {
-          const res = await PDFParser.parsePDF(file)
-          onParsed(item.id, res.text)
+          import('@/parser/pdfParser').then(async ({ PDFParser }) => {
+            const res = await PDFParser.parsePDF(file)
+            onParsed(item.id, res.text)
+          })
         } else if (/\.(xlsx|xls|csv)$/.test(item.name)) {
-          const res = await excelToCsv(file, { format: 'markdown' })
-          onParsed(item.id, res.map((v) => v.content).join('\n\n'))
+          import('@/parser/excelParser').then(async ({ excelToCsv }) => {
+            const res = await excelToCsv(file, { format: 'markdown' })
+            onParsed(item.id, res.map((v) => v.content).join('\n\n'))
+          })
         } else if (/\.docx$/.test(item.name)) {
-          const res = await WordParser.processForLLM(file)
-          onParsed(item.id, res)
+          import('@/parser/wordParser').then(async ({ WordParser }) => {
+            const res = await WordParser.processForLLM(file)
+            onParsed(item.id, res)
+          })
         }
       } catch (error) {
         console.error(`Parse file ${item.name} error`, error)

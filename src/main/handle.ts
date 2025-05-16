@@ -124,6 +124,6 @@ ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => 
   }
 })
 
-ipcMain.on('showInFinder', (e, path: string) => {
+ipcMain.on('showInFinder', (_, path: string) => {
   shell.showItemInFolder(path)
 })
