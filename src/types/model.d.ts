@@ -15,6 +15,7 @@ export interface IMessageModel {
   role: MessageRole
   content: string
   summary?: string
+  images?: IMessageFile[]
 }
 
 export interface IMessage extends IMessageModel {
@@ -81,8 +82,8 @@ export interface IMessageFile {
   name: string
   size: number
   url?: string
+  // open ai base64
   content?: string
-  path?: string
   status?: 'pending' | 'success' | 'error'
 }
 
@@ -152,7 +153,8 @@ export interface IFile {
   name: string
   created: number
   size: number
-  spaceId: string
+  spaceId?: string
+  messageId?: string
 }
 
 export interface IKeyboard {

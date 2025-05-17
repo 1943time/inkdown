@@ -27,6 +27,8 @@ import { observer } from 'mobx-react-lite'
 import { useLocalState } from '@/hooks/useLocalState'
 import { getDomRect } from '@/utils/dom'
 import { useTranslation } from 'react-i18next'
+import { mb, nid } from '@/utils/common'
+import { fileOpen } from 'browser-fs-access'
 
 export const ChatInput = observer(() => {
   const store = useStore()
@@ -43,7 +45,7 @@ export const ChatInput = observer(() => {
     text: '',
     menuVisible: false,
     files: [] as IMessageFile[],
-    images: [] as IMessageFile[],
+    images: [] as File[],
     docs: [] as IMessageDoc[]
   })
   const drop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -61,7 +63,7 @@ export const ChatInput = observer(() => {
   const compositionEnd = useCallback((e: React.CompositionEvent<HTMLDivElement>) => {
     setState((state) => (state.inputComposition = false))
   }, [])
-  const send = useCallback(() => {
+  const send = useCallback(async () => {
     if (!store.settings.state.defaultModel?.model) {
       store.note.openConfirmDialog$.next({
         title: t('chat.input.tip'),
@@ -82,9 +84,25 @@ export const ChatInput = observer(() => {
       return
     }
     if (!state.text || state.files.find((f) => f.status === 'pending')) return
+    const imageData: IMessageFile[] = []
+    if (state.images.length) {
+      for (const f of state.images) {
+        const id = nid() + '.' + f.name.split('.').pop()
+        const target = window.api.path.join(store.userDataPath, 'assets', id)
+        const buffer = await f.arrayBuffer()
+        await window.api.fs.writeBuffer(target, buffer)
+        imageData.push({
+          id,
+          name: f.name,
+          size: f.size,
+          status: 'success',
+          content: target
+        })
+      }
+    }
     store.chat.completion(state.text, {
       files: state.files,
-      images: state.images
+      images: imageData
     })
     EditorUtils.reset(editor)
     setState({ text: '', files: [], images: [] })
@@ -206,6 +224,24 @@ export const ChatInput = observer(() => {
       setState({ files })
     })
   }, [])
+  const addImage = useCallback(() => {
+    fileOpen({
+      extensions: ['.jpeg', '.jpg', '.png', '.gif', '.webp'],
+      multiple: false
+    })
+      .then((res) => {
+        if (res.size > 1 * mb) {
+          store.msg.info('请不要上传大于1MB的图片')
+          return
+        }
+        setState((state) => {
+          state.images.push(res)
+        })
+      })
+      .finally(() => {
+        setState({ menuVisible: false })
+      })
+  }, [])
   useEffect(() => {
     if (store.settings.state.showChatBot) {
       setTimeout(() => {
@@ -287,25 +323,37 @@ export const ChatInput = observer(() => {
             ))}
           </div>
         )}
-        {/* <div className={'pb-4 space-x-2'}>
-          <div className={'w-16 h-16 rounded-xl overflow-hidden bg-white/10 flex items-center justify-between relative group flex-wrap group'}>
-            <img
-              src={''}
-              className={'w-full h-full object-cover'}
-              alt=""
-            />
-            <div
-              className={
-                'absolute p-1 right-1 top-1 bg-white/10 rounded-lg flex items-center justify-center group-hover:opacity-100 opacity-0 stroke-gray-400 duration-200 cursor-pointer'
-              }
-            >
-              <CircleX
-                size={16}
-                className={'stroke-inherit'}
-              />
-            </div>
+        {!!state.images.length && (
+          <div className={'pb-2 space-x-2 flex flex-wrap'}>
+            {state.images.map((item, i) => (
+              <div
+                key={i}
+                className={
+                  'w-16 mb-0.5 h-16 rounded-xl overflow-hidden bg-white/10 flex items-center justify-between relative group flex-wrap group'
+                }
+              >
+                <img
+                  src={URL.createObjectURL(item)}
+                  className={'w-full h-full object-cover'}
+                  alt=""
+                />
+                <div
+                  onClick={() => {
+                    setState((state) => {
+                      state.images.splice(i, 1)
+                    })
+                  }}
+                  className={
+                    'absolute p-1 right-0 top-0 bg-black/30 dark:bg-white/30 rounded-lg flex items-center justify-center group-hover:opacity-100 opacity-0 stroke-white/60 dark:stroke-black/60 duration-200 cursor-pointer'
+                  }
+                >
+                  <CircleX size={16} className={'stroke-inherit'} />
+                </div>
+              </div>
+            ))}
           </div>
-        </div> */}
+        )}
+
         <div className={'max-h-[260px] overflow-y-auto overscroll-contain w-full py-1'}>
           <Slate editor={editor} initialValue={[EditorUtils.p]} onChange={onChange}>
             <Editable
@@ -352,6 +400,7 @@ export const ChatInput = observer(() => {
                     <span>{t('chat.input.file')}</span>
                   </div>
                   <div
+                    onClick={addImage}
                     className={
                       'flex items-center space-x-3 h-8 px-4 cursor-pointer dark:hover:bg-white/10 hover:bg-black/5 duration-100'
                     }

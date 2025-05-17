@@ -1,11 +1,11 @@
 import { memo, ReactNode } from 'react'
 import { Flexbox } from 'react-layout-kit'
 import { Check, ChevronDown, Copy } from 'lucide-react'
-import { ActionIconProps, DivProps } from '@lobehub/ui'
+import { ActionIconProps } from '@lobehub/ui'
 import SyntaxHighlighter from './SyntaxHighlighter'
 import { useSetState } from 'react-use'
 
-export interface HighlighterProps extends DivProps {
+export interface HighlighterProps {
   actionsRender?: (props: {
     actionIconSize: ActionIconProps['size']
     content: string
@@ -44,8 +44,6 @@ export const Highlighter = memo<HighlighterProps>(
   ({
     children,
     language = 'markdown',
-    className,
-    style,
     type = 'block',
     fileName,
     fullFeatured,
@@ -65,9 +63,8 @@ export const Highlighter = memo<HighlighterProps>(
     return (
       <div
         className={
-          'relative overflow-hidden rounded-md border border-gray-200/60 dark:border-white/10'
+          'relative overflow-hidden rounded-md border border-gray-200/60 dark:border-white/10 mb-4'
         }
-        style={style}
         {...rest}
       >
         <div className={'justify-between flex items-center h-8 dark:bg-gray-100/5 px-2 bg-gray-50'}>

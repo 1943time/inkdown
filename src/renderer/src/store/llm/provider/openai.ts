@@ -1,8 +1,8 @@
-import { IMessageModel } from '@/types/ai'
 import { BaseModel } from './struct'
 import OpenAI from 'openai'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
 import { webSearchOptions } from '../data/data'
+import { IMessageModel } from 'types/model'
 
 export class OpenaiModel implements BaseModel {
   config: ModelConfig
@@ -23,6 +23,7 @@ export class OpenaiModel implements BaseModel {
     const completion = await this.openai.chat.completions.create(
       {
         model: this.config.model,
+        // @ts-ignore
         messages: messages.map((m) => {
           return { role: m.role, content: m.content || '' }
         }),
@@ -39,11 +40,32 @@ export class OpenaiModel implements BaseModel {
   }
   async completionStream(messages: IMessageModel[], opts: StreamOptions) {
     try {
+      const msgData: any[] = []
+      for (const m of messages) {
+        let content: any = m.content || ''
+        if (m.images?.length) {
+          content = [{ type: 'text', text: m.content || '' }]
+          for (const i of m.images) {
+            const base64 = window.api.fs.readFileSync(i.content!, { encoding: 'base64' })
+            const mimeType = window.api.fs.lookup(i.content!) || 'image/png'
+            const dataUrl = `data:${mimeType};base64,${base64}`
+            content.push({
+              type: 'image_url',
+              image_url: {
+                url: dataUrl
+              }
+            })
+          }
+        }
+        msgData.push({
+          role: m.role,
+          content
+        })
+      }
       let options: OpenAI.Chat.ChatCompletionCreateParamsStreaming = {
         model: this.config.model,
-        messages: messages.map((m) => {
-          return { role: m.role, content: m.content }
-        }),
+        // @ts-ignore
+        messages: msgData,
         stream: true,
         frequency_penalty: opts.modelOptions?.frequency_penalty,
         presence_penalty: opts.modelOptions?.presence_penalty,

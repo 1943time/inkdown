@@ -1,3 +1,5 @@
+import { customAlphabet } from 'nanoid'
+
 export const pick = <T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> => {
   const result = {} as Pick<T, K>
   keys.forEach((key) => {
@@ -23,3 +25,8 @@ export const formatDate = (timestamp: number): string => {
   const day = String(date.getDate()).padStart(2, '0')
   return `${year} ${month} ${day}`
 }
+
+export const nid = customAlphabet(
+  '1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  15
+)

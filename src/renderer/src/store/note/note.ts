@@ -681,6 +681,15 @@ export class NoteStore extends StructStore<typeof state> {
       }, 100)
     }
   }
+  async openPreviewImageByData(images: { path?: string; url?: string }[], index?: number) {
+    this.setState((state) => {
+      state.previewImage.open = true
+      state.previewImage.index = index || 0
+      state.previewImage.images = images.map((i) => ({
+        src: i.path ? getImageData(i.path) : i.url!
+      }))
+    })
+  }
   async openPreviewImages(el: MediaNode) {
     if (!this.state.currentTab) return
     const nodes = Array.from(

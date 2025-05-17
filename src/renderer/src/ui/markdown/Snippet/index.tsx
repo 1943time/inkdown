@@ -4,10 +4,10 @@ import { Flexbox } from 'react-layout-kit'
 import Spotlight from './Splotlight'
 
 import { useStyles } from './style'
-import { CopyButton, DivProps } from '@lobehub/ui'
+import { CopyButton } from '@lobehub/ui'
 import SyntaxHighlighter from '../Code/SyntaxHighlighter'
 
-export interface SnippetProps extends DivProps {
+export interface SnippetProps {
   /**
    * @description The content to be displayed inside the Snippet component
    */
@@ -39,28 +39,13 @@ export interface SnippetProps extends DivProps {
 }
 
 const Snippet = memo<SnippetProps>(
-  ({
-    symbol,
-    language = 'tsx',
-    children,
-    copyable = true,
-    type = 'ghost',
-    spotlight,
-    className,
-    ...rest
-  }) => {
+  ({ symbol, language = 'tsx', children, copyable = true, type = 'ghost', spotlight, ...rest }) => {
     const { styles, cx } = useStyles(type)
 
     const tirmedChildren = children.trim()
 
     return (
-      <Flexbox
-        align={'center'}
-        className={cx(styles.container, className)}
-        gap={8}
-        horizontal
-        {...rest}
-      >
+      <Flexbox align={'center'} className={cx(styles.container)} gap={8} horizontal {...rest}>
         {spotlight && <Spotlight />}
         <SyntaxHighlighter language={language}>
           {[symbol, tirmedChildren].filter(Boolean).join(' ')}

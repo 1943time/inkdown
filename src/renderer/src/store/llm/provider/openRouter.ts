@@ -1,6 +1,6 @@
-import { IMessageModel } from '@/types/ai'
 import { BaseModel } from './struct'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
+import { IMessageModel } from 'types/model'
 
 export class OpenRouterModel implements BaseModel {
   config: ModelConfig

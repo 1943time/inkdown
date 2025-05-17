@@ -1,9 +1,9 @@
 import { ReactNode } from 'react'
-import { DivProps } from '@lobehub/ui'
 
-export interface MermaidProps extends DivProps {
+export interface MermaidProps {
   bodyRender?: (props: { content: string; originalNode: ReactNode }) => ReactNode
   children: string
   showLanguage?: boolean
+  className?: string
   type?: 'ghost' | 'block' | 'pure'
 }

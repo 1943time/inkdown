@@ -1,16 +1,14 @@
 import { ipcMain, app } from 'electron'
 import { initModel, knex } from './model'
 import { IChat, IMessage, ISetting, IClient, ISpace, IDoc, IFile, IKeyboard } from 'types/model'
-import { omit } from '../utils'
+import { nid, omit } from '../utils'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import { unlink } from 'fs/promises'
-import { customAlphabet } from 'nanoid'
 import * as lancedb from '@lancedb/lancedb'
 import * as arrow from 'apache-arrow'
 import { pipeline, env, FeatureExtractionPipeline } from '@xenova/transformers'
 env.remoteHost = 'https://hf-mirror.com'
-const nid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 15)
 let vdb: lancedb.Connection | null = null
 let extractor: null | FeatureExtractionPipeline = null
 const tableMap = new Map<string, lancedb.Table>()
@@ -100,12 +98,28 @@ ipcMain.handle('updateChat', async (_, id: string, chat: Partial<IChat>) => {
 
 ipcMain.handle('deleteChat', async (_, id: string) => {
   return knex.transaction(async (trx) => {
+    const msgs = await trx.select(['id']).from('message').where('chatId', id)
+    const msgIds = msgs.map((m) => m.id)
+    const files = await trx.select(['name']).from('file').whereIn('messageId', msgIds)
+    for (const file of files) {
+      try {
+        const filePath = join(assetsPath, file.name)
+        if (existsSync(filePath)) {
+          await unlink(filePath)
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    await trx.delete().from('file').whereIn('messageId', msgIds)
     await trx.delete().from('message').where('chatId', id)
     await trx.delete().from('chat').where('id', id)
   })
 })
 
 ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
+  console.log('insert', JSON.parse(JSON.stringify(messages)))
+
   return knex('message').insert(messages)
 })
 

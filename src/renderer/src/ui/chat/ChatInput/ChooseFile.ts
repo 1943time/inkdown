@@ -1,6 +1,6 @@
 import { IMessageFile } from 'types/model'
 import { fileOpen } from 'browser-fs-access'
-import { nid } from '@/utils/common'
+import { fileToBase64, nid } from '@/utils/common'
 
 const programmingFileExtensions = [
   '.py',

@@ -1,7 +1,7 @@
-import { IMessageModel } from '@/types/ai'
 import { BaseModel } from './struct'
-import { GoogleGenAI, GenerateContentResponse, CreateChatParameters } from '@google/genai'
+import { GoogleGenAI, GenerateContentResponse, CreateChatParameters, Content } from '@google/genai'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
+import { IMessageModel } from 'types/model'
 
 export class GeminiModel implements BaseModel {
   config: ModelConfig
@@ -33,19 +33,37 @@ export class GeminiModel implements BaseModel {
     })
     return [res.text || '', res as T]
   }
+
+  private createMessageData(m: IMessageModel) {
+    const part: Content = {
+      role: m.role === 'system' ? 'user' : m.role === 'assistant' ? 'model' : m.role,
+      parts: [{ text: m.content }]
+    }
+    if (m.images?.length) {
+      for (const image of m.images) {
+        const base64 = window.api.fs.readFileSync(image.content!, { encoding: 'base64' })
+        const mimeType = window.api.fs.lookup(image.content!) || 'image/png'
+        part.parts!.push({
+          inlineData: {
+            mimeType,
+            data: base64
+          }
+        })
+      }
+    }
+    return part
+  }
   async completionStream(messages: IMessageModel[], opts: StreamOptions) {
     try {
       if (messages[0].role === 'system') {
         const first = messages.shift()
         messages[0].content = `${first?.content}\n\n${messages[0].content}`
       }
-      // const image = await this.gemini.files.upload({
-      //   file: "/path/to/organ.png",
-      // });
-      // const msg = createUserContent([
-      //   "Tell me about this instrument",
-      //   createPartFromUri(image.uri!, image.mimeType!),
-      // ])
+      const messageData: CreateChatParameters['history'] = []
+      for (const m of messages.slice(0, -1)) {
+        messageData.push(this.createMessageData(m))
+      }
+
       const data: CreateChatParameters = {
         model: this.config.model,
         config: {
@@ -54,12 +72,7 @@ export class GeminiModel implements BaseModel {
           topP: opts.modelOptions?.top_p,
           temperature: opts.modelOptions?.temperature
         },
-        history: messages.slice(0, -1).map((m) => {
-          return {
-            role: m.role === 'system' ? 'user' : m.role === 'assistant' ? 'model' : m.role,
-            parts: [{ text: m.content }]
-          }
-        })
+        history: messageData
       }
       if (opts.enable_search) {
         data.config = {
@@ -68,7 +81,7 @@ export class GeminiModel implements BaseModel {
       }
       const chat = this.gemini.chats.create(data)
       const stream = await chat.sendMessageStream({
-        message: messages[messages.length - 1].content
+        message: this.createMessageData(messages[messages.length - 1]).parts!
       })
       let text = ''
       for await (const chunk of stream) {

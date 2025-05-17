@@ -11,6 +11,7 @@ import { getFileName } from '@/utils/string'
 import { observer } from 'mobx-react-lite'
 import { runInAction } from 'mobx'
 import { useTranslation } from 'react-i18next'
+import { getImageData } from '@/editor/utils'
 
 const fileTypeIconMap = [
   [/\.pdf$/i, 'pdf', '#F54838'],
@@ -171,26 +172,6 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           </div>
         </div>
       )}
-
-      {!!msg.files?.length && (
-        <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
-          {msg.files.map((f) => {
-            const [type, color] = getFileTypeIcon(f.name)
-            return (
-              <div
-                key={f.id}
-                title={f.name}
-                className={
-                  'max-w-[300px] flex items-center truncate rounded-lg bg-blue-500/20 text-[13px] px-2 py-1.5 mb-0.5'
-                }
-              >
-                <FileTypeIcon size={20} filetype={type} color={color} />
-                <span className={'truncate w-full ml-1'}>{getFileName(f.name)}</span>
-              </div>
-            )
-          })}
-        </div>
-      )}
       {!!msg.docs?.length && (
         <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
           {msg.docs.map((f) => {
@@ -211,7 +192,51 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           })}
         </div>
       )}
-      <div></div>
+      {!!msg.files?.length && (
+        <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
+          {msg.files.map((f) => {
+            const [type, color] = getFileTypeIcon(f.name)
+            return (
+              <div
+                key={f.id}
+                title={f.name}
+                className={
+                  'max-w-[300px] flex items-center truncate rounded-lg bg-blue-500/20 text-[13px] px-2 py-1.5 mb-0.5'
+                }
+              >
+                <FileTypeIcon size={20} filetype={type} color={color} />
+                <span className={'truncate w-full ml-1'}>{getFileName(f.name)}</span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+      {!!msg.images?.length && (
+        <div className={'mt-2 space-x-2 flex justify-end flex-wrap'}>
+          {msg.images.map((f, i) => {
+            return (
+              <div
+                key={f.id}
+                onClick={() => {
+                  store.note.openPreviewImageByData(
+                    msg.images!.map((i) => ({ path: i.content })),
+                    i
+                  )
+                }}
+                className={
+                  'w-16 h-16 flex items-center rounded-lg text-[13px] mb-0.5 overflow-hidden cursor-pointer'
+                }
+              >
+                <img
+                  src={getImageData(f.content!)}
+                  className={'w-full h-full object-cover'}
+                  alt=""
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 })

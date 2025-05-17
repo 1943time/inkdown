@@ -33,6 +33,26 @@ export class ModelApi {
       medias: doc.medias ? JSON.stringify(doc.medias) : undefined
     }
   }
+  private serializeMessage(message: Partial<IMessage>) {
+    return {
+      ...message,
+      context: message.context ? JSON.stringify(message.context) : undefined,
+      docs: message.docs ? JSON.stringify(message.docs) : undefined,
+      files: message.files ? JSON.stringify(message.files) : undefined,
+      images: message.images ? JSON.stringify(message.images) : undefined,
+      error: message.error ? JSON.stringify(message.error) : undefined
+    }
+  }
+  private deserializeMessage(message: IMessage) {
+    return {
+      ...message,
+      context: message.context ? JSON.parse(message.context as unknown as string) : undefined,
+      docs: message.docs ? JSON.parse(message.docs as unknown as string) : undefined,
+      files: message.files ? JSON.parse(message.files as unknown as string) : undefined,
+      images: message.images ? JSON.parse(message.images as unknown as string) : undefined,
+      error: message.error ? JSON.parse(message.error as unknown as string) : undefined
+    }
+  }
   async getChats(): Promise<IChatTable[]> {
     return ipcRenderer.invoke('getChats')
   }
@@ -43,12 +63,7 @@ export class ModelApi {
         ...chat,
         messages: chat.messages
           ? chat.messages.map((m: any) => {
-              return {
-                ...m,
-                files: m.files ? JSON.parse(m.files) : [],
-                context: m.context ? JSON.parse(m.context) : [],
-                docs: m.docs ? JSON.parse(m.docs) : []
-              }
+              return this.deserializeMessage(m)
             })
           : []
       }
@@ -68,29 +83,17 @@ export class ModelApi {
   }
 
   async createMessages(messages: IMessage[]): Promise<void> {
+    console.log('addmsg', messages)
+
     return ipcRenderer.invoke(
       'createMessages',
       messages.map((m) => {
-        return {
-          ...m,
-          context: m.context ? JSON.stringify(m.context) : null,
-          docs: m.docs ? JSON.stringify(m.docs) : null,
-          files: m.files ? JSON.stringify(m.files) : null,
-          images: m.images ? JSON.stringify(m.images) : null,
-          error: m.error ? JSON.stringify(m.error) : null
-        }
+        return this.serializeMessage(m)
       })
     )
   }
   async updateMessage(id: string, message: Partial<IMessage>): Promise<void> {
-    return ipcRenderer.invoke('updateMessage', id, {
-      ...message,
-      context: message.context ? JSON.stringify(message.context) : null,
-      docs: message.docs ? JSON.stringify(message.docs) : null,
-      files: message.files ? JSON.stringify(message.files) : null,
-      images: message.images ? JSON.stringify(message.images) : null,
-      error: message.error ? JSON.stringify(message.error) : null
-    })
+    return ipcRenderer.invoke('updateMessage', id, this.serializeMessage(message))
   }
 
   async deleteMessages(ids: string[]): Promise<void> {
@@ -277,6 +280,8 @@ export class ModelApi {
   }
 
   async createFiles(files: IFile[]): Promise<void> {
+    console.log('add', files)
+
     return ipcRenderer.invoke('createFiles', files)
   }
 

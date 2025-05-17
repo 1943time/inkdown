@@ -21,8 +21,8 @@ export const initModel = async () => {
         t.string('mode')
         t.integer('sort').defaultTo(0)
         t.string('apiKey').nullable()
-        t.string('models').nullable()
-        t.string('options').nullable()
+        t.text('models').nullable()
+        t.text('options').nullable()
       })
     }
   })
@@ -60,11 +60,11 @@ export const initModel = async () => {
         t.boolean('terminated').defaultTo(false)
         t.string('model').nullable()
         t.integer('height').nullable()
-        t.string('error').nullable()
-        t.string('files').nullable()
-        t.string('docs').nullable()
-        t.string('context').nullable()
-        t.string('images').nullable()
+        t.text('error').nullable()
+        t.text('files').nullable()
+        t.text('docs').nullable()
+        t.text('context').nullable()
+        t.text('images').nullable()
         t.foreign('chatId').references('id').inTable('chat').onDelete('CASCADE')
       })
     }
@@ -98,8 +98,8 @@ export const initModel = async () => {
         t.integer('created').defaultTo(Date.now())
         t.integer('lastOpenTime').defaultTo(Date.now())
         t.integer('sort').defaultTo(0)
-        t.string('writeFolderPath').nullable()
-        t.string('opt').nullable()
+        t.text('writeFolderPath').nullable()
+        t.text('opt').nullable()
       })
     }
   })
@@ -132,7 +132,9 @@ export const initModel = async () => {
         t.string('name').primary()
         t.integer('created').defaultTo(Date.now())
         t.integer('size').defaultTo(0)
-        t.string('spaceId')
+        t.string('spaceId').nullable()
+        t.string('messageId').nullable()
+        t.foreign('messageId').references('id').inTable('message').onDelete('CASCADE')
         t.foreign('spaceId').references('id').inTable('space').onDelete('CASCADE')
       })
     }
@@ -161,17 +163,4 @@ export const initModel = async () => {
       })
     }
   })
-
-  // await knex.schema.hasTable('docFts').then(async (exists) => {
-  //   if (!exists) {
-  //     await knex.raw(`
-  //         CREATE VIRTUAL TABLE docFts USING fts5(
-  //           spaceId UNINDEXED,
-  //           docId UNINDEXED,
-  //           deleted UNINDEXED,
-  //           words
-  //         )
-  //       `)
-  //   }
-  // })
 }

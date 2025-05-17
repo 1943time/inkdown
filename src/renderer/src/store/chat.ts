@@ -267,6 +267,7 @@ export class ChatStore extends StructStore<typeof state> {
       id: nid(),
       content: text,
       files: opts?.files,
+      images: opts?.images,
       docs: this.state.cacheDocs.length ? this.state.cacheDocs.slice() : undefined,
       tokens: tokens
     })
@@ -324,7 +325,18 @@ export class ChatStore extends StructStore<typeof state> {
     }
     this.refresh()
     this.scrollToActiveMessage$.next()
-    this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)])
+    this.store.model.createMessages([toJS(userMsg), toJS(aiMsg)]).then(() => {
+      if (userMsg.images?.length) {
+        this.store.model.createFiles(
+          userMsg.images.map((i) => ({
+            name: i.id,
+            size: i.size,
+            messageId: userMsg.id,
+            created: now
+          }))
+        )
+      }
+    })
     const sendMessages = await this.getHistoryMessages(this.state.activeChat!)
     this.startCompletion(activeChat, sendMessages)
   }
@@ -517,19 +529,22 @@ export class ChatStore extends StructStore<typeof state> {
         if (m.role === 'assistant' && m.content === '...') {
           return acc
         }
-        let content = m.content
+        const data: IMessageModel = {
+          role: m.role,
+          content: m.content
+        }
         if (m.files?.length) {
-          content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${content}`
+          data.content = `Given the following file contents as context, Content is sent in markdown format:\n${m.files.map((f) => `File ${f.name}:\n ${f.content}`).join('\n')} \n ${data.content}`
         } else if (m.context?.length) {
-          content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')} \n ${content}`
+          data.content = `Given the following notes snippet as context, Content is sent in markdown format:\n ${m.context.map((c) => `${c.content}`).join('\n')} \n ${data.content}`
         }
         if (m.docs?.length) {
-          content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')} \n ${content}`
+          data.content = `Given the following notes, Content is sent in markdown format:\n ${m.docs.map((d) => `[FileName]: ${d.name}\n ${d.content}`).join('\n\n')} \n ${data.content}`
         }
-        acc.push({
-          role: m.role,
-          content: content
-        })
+        if (m.images?.length) {
+          data.images = m.images
+        }
+        acc.push(data)
         return acc
       }, [] as IMessageModel[])
     let prompt = 'You are an AI assistant, please answer in the language used by the user'
@@ -541,7 +556,7 @@ export class ChatStore extends StructStore<typeof state> {
       role: 'system',
       content: prompt
     })
-    return newMessages.filter((m) => !!m.content)
+    return newMessages
   }
 
   async checkLLMApiConnection({

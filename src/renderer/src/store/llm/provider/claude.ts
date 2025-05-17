@@ -1,8 +1,9 @@
-import { IMessageModel } from '@/types/ai'
 import { BaseModel } from './struct'
 import Anthropic from '@anthropic-ai/sdk'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
 import { TextBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import { IMessageModel } from 'types/model'
+import { ContentBlockParam, MessageParam } from '@anthropic-ai/sdk/resources/messages'
 
 interface ClaudeMessage {
   content: Array<{
@@ -47,16 +48,35 @@ export class ClaudeModel implements BaseModel {
 
   async completionStream(messages: IMessageModel[], opts: StreamOptions) {
     try {
+      const messageData: MessageParam[] = []
+      for (const m of messages) {
+        const part: MessageParam = {
+          role: m.role === 'system' ? 'user' : m.role,
+          content: m.images?.length ? [{ type: 'text', text: m.content || '' }] : m.content || ''
+        }
+        if (m.images?.length) {
+          for (const image of m.images) {
+            const base64 = window.api.fs.readFileSync(image.content!, { encoding: 'base64' })
+            const mimeType = window.api.fs.lookup(image.content!) || 'image/png'
+            ;(part.content as ContentBlockParam[]).unshift({
+              type: 'image',
+              source: {
+                type: 'base64',
+                media_type: mimeType as 'image/png',
+                data: base64
+              }
+            })
+          }
+        }
+        messageData.push(part)
+      }
       const completion = await this.anthropic.messages.create(
         {
           model: this.config.model,
           max_tokens: opts.max_tokens || 4096,
           temperature: opts.modelOptions?.temperature,
           top_p: opts.modelOptions?.top_p,
-          messages: messages.map((m) => ({
-            role: m.role === 'system' ? 'user' : m.role,
-            content: m.content || ''
-          })),
+          messages: messageData,
           stream: true
         },
         {

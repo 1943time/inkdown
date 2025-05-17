@@ -6,11 +6,6 @@ export type IMessageProps = ChatMessage & {
   reasoning?: string
   duration?: number
 }
-export interface IMessageModel {
-  role: MessageRole
-  content: string
-  summary?: string
-}
 
 export type IChatTable = Pick<
   IChat,

@@ -1,4 +1,12 @@
-import { readFileSync, readdirSync, statSync, existsSync, renameSync, mkdirSync } from 'fs'
+import {
+  readFileSync,
+  readdirSync,
+  statSync,
+  existsSync,
+  renameSync,
+  mkdirSync,
+  writeFileSync
+} from 'fs'
 import { writeFile, readFile, cp, rename } from 'fs/promises'
 import { join, basename, relative, extname, sep, isAbsolute } from 'path'
 import { app } from 'electron'
@@ -30,6 +38,7 @@ export const Api = {
     writeFile,
     existsSync,
     cp,
+    writeFileSync,
     rename,
     renameSync,
     mkdirSync,
