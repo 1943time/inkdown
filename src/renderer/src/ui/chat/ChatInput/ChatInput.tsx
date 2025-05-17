@@ -29,6 +29,8 @@ import { getDomRect } from '@/utils/dom'
 import { useTranslation } from 'react-i18next'
 import { mb, nid } from '@/utils/common'
 import { fileOpen } from 'browser-fs-access'
+import { isImageModel } from '@/store/llm/data/data'
+import { useSubject } from '@/hooks/common'
 
 export const ChatInput = observer(() => {
   const store = useStore()
@@ -60,6 +62,36 @@ export const ChatInput = observer(() => {
     },
     [editor]
   )
+  const checkModel = useCallback((type: 'image' | 'web') => {
+    const activeChat = store.chat.state.activeChat
+    const client = store.settings.getAvailableUseModel(activeChat?.clientId, activeChat?.model)
+
+    if (!client) {
+      return true
+    }
+    if (type === 'image') {
+      if (!isImageModel(client.model)) {
+        return false
+      }
+    } else if (type === 'web') {
+      if (['deepseek', 'claude', 'gemini'].includes(client.mode)) {
+        return false
+      }
+    }
+    return true
+  }, [])
+  useSubject(store.chat.modelChange$, () => {
+    if (state.images.length && !checkModel('image')) {
+      setState((state) => {
+        state.images = []
+      })
+    }
+    const { activeChat, webSearch } = store.chat.state
+    const ableWebSearch = (activeChat && activeChat?.websearch) || (!activeChat && webSearch)
+    if (ableWebSearch && !checkModel('web')) {
+      store.chat.setWebSearch(activeChat ? !activeChat.websearch : !webSearch)
+    }
+  })
   const compositionEnd = useCallback((e: React.CompositionEvent<HTMLDivElement>) => {
     setState((state) => (state.inputComposition = false))
   }, [])
@@ -222,16 +254,21 @@ export const ChatInput = observer(() => {
       })
     }).then((files) => {
       setState({ files })
+      EditorUtils.focus(editor)
     })
   }, [])
   const addImage = useCallback(() => {
+    if (!checkModel('image')) {
+      store.msg.info(t('chat.input.modelNotSupported'))
+      return
+    }
     fileOpen({
-      extensions: ['.jpeg', '.jpg', '.png', '.gif', '.webp'],
+      extensions: ['.jpeg', '.jpg', '.png', '.webp'],
       multiple: false
     })
       .then((res) => {
         if (res.size > 1 * mb) {
-          store.msg.info('请不要上传大于1MB的图片')
+          store.msg.info(t('chat.input.imageSizeLimit'))
           return
         }
         setState((state) => {
@@ -240,6 +277,7 @@ export const ChatInput = observer(() => {
       })
       .finally(() => {
         setState({ menuVisible: false })
+        EditorUtils.focus(editor)
       })
   }, [])
   useEffect(() => {
@@ -423,9 +461,13 @@ export const ChatInput = observer(() => {
             <Tooltip title={t('chat.input.webSearchTip')} mouseEnterDelay={1}>
               <div
                 className={`rounded-full w-7 h-7 flex items-center justify-center cursor-pointer duration-200 ${ableWebSearch ? 'dark:bg-blue-500/50 bg-blue-500/80 stroke-white' : 'dark:hover:dark:bg-white/10 hover:bg-black/10'}`}
-                onClick={() =>
-                  store.chat.setWebSearch(activeChat ? !activeChat.websearch : !webSearch)
-                }
+                onClick={() => {
+                  if (checkModel('web')) {
+                    store.chat.setWebSearch(activeChat ? !activeChat.websearch : !webSearch)
+                  } else {
+                    store.msg.info(t('chat.input.modelNotSupported'))
+                  }
+                }}
               >
                 <Earth size={15} className={'stroke-inherit'} />
               </div>

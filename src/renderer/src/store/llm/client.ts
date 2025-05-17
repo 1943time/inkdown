@@ -1,10 +1,10 @@
-import { IMessageModel } from '../../types/ai'
 import { BaseModel } from './provider/struct'
 import { OpenaiModel } from './provider/openai'
 import { GeminiModel } from './provider/gemini'
 import { CompletionOptions, ModelConfig, StreamOptions } from './type'
 import { OpenRouterModel } from './provider/openRouter'
 import { ClaudeModel } from './provider/claude'
+import { IMessageModel } from 'types/model'
 const openAiMode = new Set(['openai', 'qwen', 'deepseek'])
 export class AiClient implements BaseModel {
   client!: BaseModel

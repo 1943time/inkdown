@@ -4,7 +4,7 @@ export type AiMode =
   | 'qwen'
   | 'deepseek'
   | 'openai'
-  | 'anthropic'
+  | 'claude'
   | 'lmstudio'
   | 'ollama'
   | 'custom'

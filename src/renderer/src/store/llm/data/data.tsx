@@ -1,3 +1,5 @@
+import imageModels from './image-models.json'
+
 export const modelTokens = new Map([['qwen-max', 32 * 1000]])
 
 export const openAiModels = new Map([
@@ -117,3 +119,14 @@ export const webSearchOptions = [
   },
   { models: ['qwen-max', 'qwq-plus'], options: { enable_search: true } }
 ]
+
+const inputImageModel = new Set(imageModels)
+export const isImageModel = (model: string) => {
+  if (model.includes('claude') || model.includes('gemini') || model.includes('qwen-vl')) {
+    return true
+  }
+  if (model.includes('/')) {
+    model = model.split('/').pop()!
+  }
+  return inputImageModel.has(model)
+}

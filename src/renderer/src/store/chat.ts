@@ -39,6 +39,7 @@ export class ChatStore extends StructStore<typeof state> {
   private chatAbort = new Map<string, AbortController>()
   generateTopicChat = new Set<string>()
   scrollToActiveMessage$ = new Subject<void>()
+  modelChange$ = new Subject<void>()
   constructor(private readonly store: Store) {
     super(state)
     this.init()

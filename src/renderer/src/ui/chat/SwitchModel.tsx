@@ -46,6 +46,7 @@ export const SwitchModel = observer((props: { maxWidth?: number }) => {
         onClick: (item) => {
           const [id, model] = item.key.split('::')
           store.chat.setChatModel(id, model)
+          store.chat.modelChange$.next()
         },
         items: models.map((item) => ({
           children: item.models.map((m) => {

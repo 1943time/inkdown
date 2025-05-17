@@ -204,7 +204,10 @@
       "file": "文件",
       "image": "图片",
       "webSearchTip": "使用互联网搜索，部分模型可用",
-      "docContextTip": "将空间中匹配的文档片段作为对话上下文"
+      "modelNotSupported": "该模型暂不支持开启该功能",
+      "docContextTip": "将空间中匹配的文档片段作为对话上下文",
+      "imageNotSupported": "当前模型不支持图片输入",
+      "imageSizeLimit": "请不要上传大于1MB的图片"
     },
     "newChat": "新建对话",
     "search": "搜索",
