@@ -118,8 +118,6 @@ ipcMain.handle('deleteChat', async (_, id: string) => {
 })
 
 ipcMain.handle('createMessages', async (_, messages: IMessage[]) => {
-  console.log('insert', JSON.parse(JSON.stringify(messages)))
-
   return knex('message').insert(messages)
 })
 

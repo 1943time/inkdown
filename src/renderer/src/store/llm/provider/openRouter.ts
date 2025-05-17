@@ -50,13 +50,32 @@ export class OpenRouterModel implements BaseModel {
   }
 
   async completionStream(messages: IMessageModel[], opts: StreamOptions) {
+    const msgData: any[] = []
+    for (const m of messages) {
+      let content: any = m.content || ''
+      if (m.images?.length) {
+        content = [{ type: 'text', text: m.content || '' }]
+        for (const i of m.images) {
+          const base64 = window.api.fs.readFileSync(i.content!, { encoding: 'base64' })
+          const mimeType = window.api.fs.lookup(i.content!) || 'image/png'
+          const dataUrl = `data:${mimeType};base64,${base64}`
+          content.push({
+            type: 'image_url',
+            image_url: {
+              url: dataUrl
+            }
+          })
+        }
+      }
+      msgData.push({
+        role: m.role,
+        content
+      })
+    }
     try {
       let options: any = {
         model: this.config.model,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content
-        })),
+        messages: msgData,
         stream: true,
         frequency_penalty: opts.modelOptions?.frequency_penalty,
         presence_penalty: opts.modelOptions?.presence_penalty,

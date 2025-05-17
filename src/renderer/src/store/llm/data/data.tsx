@@ -82,6 +82,7 @@ export const providerOptions = new Map([
         'qwen-plus',
         'qwen-plus-latest',
         'qwen-turbo-latest',
+        'qwen-vl-max',
         'qwen3-235b-a22b',
         'qwen3-32b'
       ],
