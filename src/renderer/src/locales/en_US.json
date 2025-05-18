@@ -298,6 +298,10 @@
   "tip": "Tip",
   "trash": "Trash",
   "update": "Update",
+  "updateApp": {
+    "available": "A new version is available, update now?",
+    "now": "Update Now"
+  },
   "wikilink": {
     "typeToChangeDisplay": "Type <symbol/> to change display text",
     "typeToLinkHeading": "Type <symbol/> to link to heading"

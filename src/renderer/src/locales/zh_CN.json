@@ -6,6 +6,10 @@
   "folderExists": "文件夹已存在",
   "createNewFolder": "创建新文件夹",
   "update": "更新",
+  "updateApp": {
+    "available": "有新的版本可用，是否立即更新？",
+    "now": "立即更新"
+  },
   "folderName": "文件夹名称",
   "create": "创建",
   "back": "返回",

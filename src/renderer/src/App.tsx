@@ -4,8 +4,10 @@ import { message, Modal, notification, Space } from 'antd'
 import { Button, ThemeProvider } from '@lobehub/ui'
 import Entry from './ui/Entry'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 const App = observer(() => {
+  const { t } = useTranslation()
   const [messageApi, contextHolder] = message.useMessage()
   const [modalApi, modalContextHolder] = Modal.useModal()
   const [notifyApi, notifyContextHolder] = notification.useNotification()
@@ -20,11 +22,11 @@ const App = observer(() => {
   useEffect(() => {
     store.system.onIpcMessage('update-ready', () => {
       notifyApi.info({
-        message: '有新的版本可用，是否立即更新？',
+        message: t('updateApp.available'),
         actions: (
           <Space>
             <Button type="link" size="small" onClick={() => notifyApi.destroy()}>
-              关闭
+              {t('close')}
             </Button>
             <Button
               type="primary"
@@ -34,7 +36,7 @@ const App = observer(() => {
                 notifyApi.destroy()
               }}
             >
-              立即更新
+              {t('updateApp.now')}
             </Button>
           </Space>
         )
