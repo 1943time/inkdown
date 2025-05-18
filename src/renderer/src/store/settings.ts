@@ -130,6 +130,11 @@ export class SettingsStore extends StructStore<typeof state> {
     } catch (e) {
       console.error(e)
     }
+    this.store.system.onIpcMessage('awake', () => {
+      this.setState({
+        systemDark: isDark()
+      })
+    })
   }
   async init() {
     const settings = await this.store.model.getSettings()

@@ -1,24 +1,24 @@
-import { IMessageModel } from '@/types/ai'
 import { BaseModel } from './struct'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
+import { IMessageModel } from 'types/model'
 
 interface LMStudioResponse {
-  model: string;
-  created: number;
-  object: string;
+  model: string
+  created: number
+  object: string
   choices: Array<{
-    index: number;
+    index: number
     message: {
-      role: string;
-      content: string;
-    };
-    finish_reason: string;
-  }>;
+      role: string
+      content: string
+    }
+    finish_reason: string
+  }>
   usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
 }
 
 export class LMStudioModel implements BaseModel {
@@ -30,11 +30,14 @@ export class LMStudioModel implements BaseModel {
     this.baseUrl = this.config.baseUrl || 'http://localhost:1234/v1'
   }
 
-  async completion<T = LMStudioResponse>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
+  async completion<T = LMStudioResponse>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: this.config.model,
@@ -60,7 +63,7 @@ export class LMStudioModel implements BaseModel {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: this.config.model,
@@ -90,7 +93,7 @@ export class LMStudioModel implements BaseModel {
         if (done) break
 
         const chunk = decoder.decode(value)
-        const lines = chunk.split('\n').filter(line => line.trim() && line !== 'data: [DONE]')
+        const lines = chunk.split('\n').filter((line) => line.trim() && line !== 'data: [DONE]')
 
         for (const line of lines) {
           try {
@@ -115,4 +118,4 @@ export class LMStudioModel implements BaseModel {
       }
     }
   }
-} 
+}

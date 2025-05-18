@@ -8,7 +8,8 @@ import {
   clipboard,
   BrowserWindow,
   shell,
-  WebContentsView
+  WebContentsView,
+  powerMonitor
 } from 'electron'
 import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { writeFile } from 'fs/promises'
@@ -134,4 +135,10 @@ ipcMain.on('move-to-trash', (_, path: string) => {
   if (existsSync(path)) {
     shell.trashItem(path)
   }
+})
+
+powerMonitor.on('resume', () => {
+  BrowserWindow.getAllWindows().forEach((win) => {
+    win.webContents?.send('awake')
+  })
 })

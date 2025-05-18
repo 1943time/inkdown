@@ -4,6 +4,7 @@ import { Bound, createWindow, lastCloseWindow, winMap } from './window'
 import { knex } from './database/model'
 import { modelReady } from './database/api'
 import './handle'
+import { registerUpdate } from './update'
 app.whenReady().then(() => {
   modelReady()
   electronApp.setAppUserModelId('com.inkdown')
@@ -31,6 +32,7 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+  registerUpdate()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

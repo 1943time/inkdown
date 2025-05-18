@@ -1,20 +1,20 @@
-import { IMessageModel } from '@/types/ai'
+import { IMessageModel } from 'types/model'
 import { BaseModel } from './struct'
 import { CompletionOptions, ModelConfig, StreamOptions } from '../type'
 
 interface OllamaResponse {
-  model: string;
-  created_at: string;
+  model: string
+  created_at: string
   message: {
-    role: string;
-    content: string;
-  };
-  done: boolean;
+    role: string
+    content: string
+  }
+  done: boolean
 }
 
 interface OllamaConfig extends ModelConfig {
-  port?: number;
-  host?: string;
+  port?: number
+  host?: string
 }
 
 export class OllamaModel implements BaseModel {
@@ -46,12 +46,15 @@ export class OllamaModel implements BaseModel {
     }
   }
 
-  async completion<T = OllamaResponse>(messages: IMessageModel[], opts?: CompletionOptions): Promise<[string, T]> {
+  async completion<T = OllamaResponse>(
+    messages: IMessageModel[],
+    opts?: CompletionOptions
+  ): Promise<[string, T]> {
     try {
       const response = await this.fetchWithTimeout(`${this.baseUrl}/api/chat`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: this.config.model,
@@ -67,7 +70,9 @@ export class OllamaModel implements BaseModel {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}))
-        throw new Error(`Ollama API error: ${response.statusText}${error.error ? ` - ${error.error}` : ''}`)
+        throw new Error(
+          `Ollama API error: ${response.statusText}${error.error ? ` - ${error.error}` : ''}`
+        )
       }
 
       const completion = await response.json()
@@ -85,7 +90,7 @@ export class OllamaModel implements BaseModel {
       const response = await this.fetchWithTimeout(`${this.baseUrl}/api/chat`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: this.config.model,
@@ -101,7 +106,9 @@ export class OllamaModel implements BaseModel {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}))
-        throw new Error(`Ollama API error: ${response.statusText}${error.error ? ` - ${error.error}` : ''}`)
+        throw new Error(
+          `Ollama API error: ${response.statusText}${error.error ? ` - ${error.error}` : ''}`
+        )
       }
 
       let fullContent = ''
@@ -117,7 +124,7 @@ export class OllamaModel implements BaseModel {
         if (done) break
 
         const chunk = decoder.decode(value)
-        const lines = chunk.split('\n').filter(line => line.trim())
+        const lines = chunk.split('\n').filter((line) => line.trim())
 
         for (const line of lines) {
           try {

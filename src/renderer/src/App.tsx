@@ -1,13 +1,14 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Store, StoreContext } from './store/store'
-import { message, Modal } from 'antd'
-import { ThemeProvider } from '@lobehub/ui'
+import { message, Modal, notification, Space } from 'antd'
+import { Button, ThemeProvider } from '@lobehub/ui'
 import Entry from './ui/Entry'
 import { observer } from 'mobx-react-lite'
 
 const App = observer(() => {
   const [messageApi, contextHolder] = message.useMessage()
   const [modalApi, modalContextHolder] = Modal.useModal()
+  const [notifyApi, notifyContextHolder] = notification.useNotification()
   const store = useMemo(() => {
     const store = new Store({
       msg: messageApi,
@@ -15,6 +16,30 @@ const App = observer(() => {
     })
     store.note.init()
     return store
+  }, [])
+  useEffect(() => {
+    store.system.onIpcMessage('update-ready', () => {
+      notifyApi.info({
+        message: '有新的版本可用，是否立即更新？',
+        actions: (
+          <Space>
+            <Button type="link" size="small" onClick={() => notifyApi.destroy()}>
+              关闭
+            </Button>
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                store.system.updateAndRestart()
+                notifyApi.destroy()
+              }}
+            >
+              立即更新
+            </Button>
+          </Space>
+        )
+      })
+    })
   }, [])
   if (!store.settings.state.ready) {
     return null
@@ -40,6 +65,7 @@ const App = observer(() => {
       <StoreContext value={store}>
         {contextHolder}
         {modalContextHolder}
+        {notifyContextHolder}
         <Entry />
       </StoreContext>
     </ThemeProvider>

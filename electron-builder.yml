@@ -1,46 +1,73 @@
-appId: com.electron.app
-productName: app
+appId: bluestone
+productName: Inkdown
+copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
+afterSign: scripts/notarize.js
+protocols:
+  name: bluestone deeplink
+  schemes:
+    - bluestone
 files:
   - '!**/.vscode/*'
   - '!src/*'
+  - '!unpackage/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!scripts/*'
+  - '!web/*'
+  - '!docs/*'
+  - '!dist.zip'
 asarUnpack:
-  - resources/**
+  - resources/*
+artifactName: 'Inkdown-${os}-${arch}.${ext}'
+fileAssociations:
+  ext: md
+  role: Editor
 win:
-  executableName: app
+  verifyUpdateCodeSignature: false
+  target:
+    - nsis
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  oneClick: false
+  perMachine: true
 mac:
-  identity: null
+  # identity: null
+  notarize: true
   entitlementsInherit: build/entitlements.mac.plist
+  minimumSystemVersion: 12.0
+  #  category: public.app-category.productivity
+  hardenedRuntime: true
   extendInfo:
+    - ElectronTeamID: GPJ86B8H94
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - arm64
+        - x64
 linux:
   target:
     - AppImage
-    - snap
     - deb
-  maintainer: electronjs.org
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+  maintainer: 1943dejavu
+  description: Markdown Editor
+  category: Office;Markdown
+  executableName: Inkdown
+  mimeTypes:
+    - text/markdown
+    - text/x-markdown;
 npmRebuild: false
 publish:
   provider: generic
-  url: https://example.com/auto-updates
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/
+  url: http://localhost:3000/update

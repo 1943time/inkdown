@@ -7,14 +7,13 @@ import { ActionIcon, CopyButton } from '@lobehub/ui'
 
 export const MermaidFullFeatured = memo<
   Omit<MermaidProps, 'children'> & { children: ReactNode; content: string }
->(({ showLanguage, content, children, className, style, ...rest }) => {
+>(({ showLanguage, content, children, className, ...rest }) => {
   const [expand, setExpand] = useState(true)
   const size = { blockSize: 24, fontSize: 14, strokeWidth: 2 }
   return (
     <div
       className={`relative overflow-hidden rounded-md transition-colors ${className || ''}`}
       data-code-type="mermaid"
-      style={style}
       {...rest}
     >
       <Flexbox

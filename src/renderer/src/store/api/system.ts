@@ -67,4 +67,7 @@ export class SystemApi {
   moveToTrash(path: string) {
     return ipcRenderer.send('move-to-trash', path)
   }
+  updateAndRestart() {
+    return ipcRenderer.send('udpate-and-restart')
+  }
 }
