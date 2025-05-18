@@ -259,7 +259,7 @@ export const ChooseWikiLink = observer(() => {
       </div>
       <div
         className={
-          'flex items-center justify-between h-7 text-xs border-t dark:border-white/5 dark:text-white/60 px-3 text-black/60 border-black/5'
+          'flex items-center space-x-3 h-7 text-xs border-t dark:border-white/5 dark:text-white/60 px-3 text-black/60 border-black/5'
         }
       >
         <span>

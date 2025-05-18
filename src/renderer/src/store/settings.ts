@@ -118,22 +118,17 @@ export class SettingsStore extends StructStore<typeof state> {
         })
       }
     })
-    try {
-      const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
-      setTimeout(() => {
-        darkModePreference.addEventListener('change', (e) => {
-          this.setState({
-            systemDark: e.matches
-          })
-        })
-      }, 1000)
-    } catch (e) {
-      console.error(e)
-    }
     this.store.system.onIpcMessage('awake', () => {
       this.setState({
         systemDark: isDark()
       })
+      this.changeTheme()
+    })
+    this.store.system.onIpcMessage('system-theme-changed', () => {
+      this.setState({
+        systemDark: isDark()
+      })
+      this.changeTheme()
     })
   }
   async init() {
@@ -194,6 +189,17 @@ export class SettingsStore extends StructStore<typeof state> {
       this.setSetting('showChatBot', true)
     }
   }
+  private changeTheme() {
+    if (this.state.dark) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+    this.setCodeOptions('theme', this.state.dark ? 'cloud_editor_dark' : 'cloud_editor')
+    mermaid?.initialize({
+      theme: this.state.dark ? 'dark' : 'default'
+    })
+  }
   async setSetting<T extends typeof state, U extends keyof T>(key: U, value: T[U]) {
     await this.store.model.putSetting({ key: key as string, value })
     this.setState((state) => {
@@ -203,16 +209,8 @@ export class SettingsStore extends StructStore<typeof state> {
       }
     })
     if (key === 'theme') {
-      if (this.state.dark) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
+      this.changeTheme()
       localStorage.setItem('theme', value as string)
-      this.setCodeOptions('theme', this.state.dark ? 'cloud_editor_dark' : 'cloud_editor')
-      mermaid?.initialize({
-        theme: this.state.dark ? 'dark' : 'default'
-      })
     }
     if (key === 'codeAutoBreak') {
       this.setCodeOptions('autoWrap', value)

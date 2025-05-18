@@ -9,7 +9,8 @@ import {
   BrowserWindow,
   shell,
   WebContentsView,
-  powerMonitor
+  powerMonitor,
+  nativeTheme
 } from 'electron'
 import { existsSync, mkdirSync, writeFileSync } from 'fs'
 import { writeFile } from 'fs/promises'
@@ -140,5 +141,11 @@ ipcMain.on('move-to-trash', (_, path: string) => {
 powerMonitor.on('resume', () => {
   BrowserWindow.getAllWindows().forEach((win) => {
     win.webContents?.send('awake')
+  })
+})
+
+nativeTheme.on('updated', () => {
+  BrowserWindow.getAllWindows().forEach((win) => {
+    win.webContents?.send('system-theme-changed')
   })
 })

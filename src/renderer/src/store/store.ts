@@ -14,12 +14,12 @@ import { ImportNote } from './note/import'
 import { KeyboardStore } from './keyboard'
 import { HookAPI } from 'antd/es/modal/useModal'
 export class Store {
+  public readonly system = new SystemApi()
   public readonly model = new ModelApi(this)
   public readonly settings = new SettingsStore(this)
   public readonly chat = new ChatStore(this)
   public readonly note = new NoteStore(this)
   public readonly menu = new ContextMenu(this)
-  public readonly system = new SystemApi()
   public readonly local = new LocalFile(this)
   public readonly output = new MarkdownOutput(this)
   public readonly worker = new WorkerHandle(this)
