@@ -44,7 +44,7 @@ export const ScrollList = observer(
           const target = scrollRef.current?.children[state.activeIndex] as HTMLDivElement
           if (target && scrollRef.current) {
             const { scrollTop, clientHeight } = scrollRef.current
-            if (target.offsetTop > scrollTop + clientHeight - target.clientHeight) {
+            if (target.offsetTop > scrollTop + clientHeight - target.offsetHeight) {
               scrollRef.current.scroll({
                 top: target.offsetTop - clientHeight + target.clientHeight + 60,
                 behavior: 'instant'
@@ -84,7 +84,7 @@ export const ScrollList = observer(
       }
     }, [items, onSelect, onClose])
     return (
-      <div ref={scrollRef} style={style} className={`overflow-y-auto ${className}`}>
+      <div ref={scrollRef} style={style} className={`overflow-y-auto relative ${className}`}>
         {items.map((item, index) => (
           <div
             key={index}

@@ -44,6 +44,7 @@
     "set_model": "Set model",
     "write_to_current_doc": "Write to current document"
   },
+  "close": "Close",
   "confirmDeleteAll": "Are you sure you want to permanently delete all documents?",
   "create": "Create",
   "createNewFolder": "Create New Folder",
@@ -231,6 +232,7 @@
   "next": "Next",
   "noDocuments": "No documents have been created yet",
   "noMatchingContent": "No matching content",
+  "noOpenFiles": "No open files",
   "noResults": "No results found",
   "noSpaceDocuments": "No space documents",
   "note": {
@@ -250,6 +252,7 @@
     "hasThoughtWithDuration": "Deep thinking completed (took {{duration}} seconds)",
     "thinking": "Deep thinking in progress..."
   },
+  "recentlyOpenedFiles": "Recently opened files",
   "replace": "replace",
   "replaceAll": "Replace all",
   "search": "Search",

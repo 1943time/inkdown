@@ -13,6 +13,7 @@
   "tip": "提示",
   "ok": "确定",
   "cancel": "取消",
+  "close": "关闭",
   "confirmDeleteAll": "是否确定要永久删除所有文档？",
   "trash": "废纸篓",
   "noSpaceDocuments": "暂无空间文档",
@@ -318,5 +319,7 @@
     "last30Days": "前30天",
     "monthFormat": "{{month}}月",
     "yearFormat": "{{year}}年"
-  }
+  },
+  "noOpenFiles": "没有打开的文件",
+  "recentlyOpenedFiles": "最近打开的文档"
 }

@@ -91,7 +91,7 @@ export const ChatSearch = observer(() => {
         </div>
         <div className={'h-[1px] bg-gray-200 dark:bg-gray-200/20'} />
         <ScrollList
-          className={`relative overflow-y-auto p-2 max-h-[300px] ${!!state.filterRecords.length ? '' : 'hidden'} space-y-1`}
+          className={`p-2 max-h-[300px] ${!!state.filterRecords.length ? '' : 'hidden'} space-y-1`}
           items={state.filterRecords}
           onSelect={select}
           onClose={closeModal}

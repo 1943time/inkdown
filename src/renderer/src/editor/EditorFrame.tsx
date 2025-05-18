@@ -1,6 +1,5 @@
 import { MEditor } from './Editor'
 import { Heading } from './tools/Leading'
-// import { Empty } from '../components/Empty'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { FloatBar } from './tools/FloatBar'
 import { Search } from './tools/Search'
@@ -15,6 +14,7 @@ import { TabStore } from '@/store/note/tab'
 import { ChooseWikiLink } from './tools/Links'
 import { InsertLink } from './tools/InsertLink'
 import { History } from './ui/History'
+import { Empty } from './ui/Empty'
 export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
   const timer = useRef(0)
   const store = useStore()
@@ -61,7 +61,7 @@ export const EditorFrame = observer(({ tab }: { tab: TabStore }) => {
             </div>
           </>
         )}
-        {/* {!tab.docIds[tab.index] && <Empty />} */}
+        {!tab.state.doc && <Empty />}
         <FloatBar />
         <InsertLink />
         <LangAutocomplete tab={tab} />

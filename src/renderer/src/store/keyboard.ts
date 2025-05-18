@@ -400,7 +400,7 @@ export class KeyboardStore {
       }
     }
   }
-  private run(task: string) {
+  run(task: string) {
     switch (task) {
       case 'insertTable':
         this.currentTab?.keyboard.insertTable()
