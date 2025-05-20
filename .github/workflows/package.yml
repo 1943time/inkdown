@@ -3,8 +3,6 @@ name: Package
 on:
   push:
     tags: v*
-    branches:
-      - 2.0-feature
   workflow_dispatch:
 
 jobs:
@@ -61,17 +59,19 @@ jobs:
         run: |
           npm run build:win
 
-      # - name: Build App
-      #   run: |
-      #     if [ "${{ matrix.platform }}" = "mac" ]; then
-      #       npm run build:mac
-      #     fi
-      #     if [ "${{ matrix.platform }}" = "win" ]; then
-      #       npm run build:win
-      #     fi
-
       - name: List dist files
         run: ls -R dist
+
+      - name: Upload to Aliyun OSS
+        uses: manyuanrong/setup-ossutil@v2.0
+        with:
+          endpoint: ${{ secrets.OSS_ENDPOINT }}
+          access-key-id: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          access-key-secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+
+      - name: Sync files to Aliyun OSS
+        run: |
+          ossutil cp -r dist/ oss://${{ secrets.OSS_BUCKET }}/release/${{ github.ref_name }}/ --update
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
