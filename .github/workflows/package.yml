@@ -57,7 +57,9 @@ jobs:
           if [ "${{ matrix.platform }}" == "mac" ]; then
             npm run build:mac
           elif [ "${{ matrix.platform }}" == "win" ]; then
-            npm run build:win
+            if ($env:matrix.platform -eq "win") {
+              npm run build:win
+            }
           # elif [ "${{ matrix.platform }}" == "linux" ]; then
           #   npm run build:linux
           fi
