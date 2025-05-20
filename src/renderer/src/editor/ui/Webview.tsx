@@ -1,5 +1,5 @@
 import { Store, StoreContext } from '@/store/store'
-import { ErrorBoundary, ErrorFallback } from '@/ui/error/ErrorBoundary'
+import { ErrorBoundary, ErrorFallback } from '../../ui/error/ErrorBoundary'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useLayoutEffect, useMemo } from 'react'
 import { Editable, Slate } from 'slate-react'
