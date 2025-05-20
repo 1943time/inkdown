@@ -25,7 +25,7 @@ async function uploadAllFiles() {
       // 只上传符合 release 定义的文件类型
       if (file.match(/^Inkdown.*\..*$/) || file.match(/^latest.*\.yml$/)) {
         const ossPath = `release/${process.env.REF_NAME}/${platform}/${arch}/${file}`
-        await client.put(ossPath, join(distPath, file))
+        await client.put(ossPath, path.join(distPath, file))
         console.log(`Uploaded: ${relativePath}`)
       }
     }
