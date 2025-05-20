@@ -31,7 +31,6 @@ async function uploadAllFiles() {
   try {
     const files = getAllFiles(distPath)
     for (const file of files) {
-      // 获取相对路径作为OSS存储路径
       const relativePath = path.relative(distPath, file)
       const ossPath = `release/${process.env.REF_NAME}/${relativePath}`
 
