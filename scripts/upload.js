@@ -21,13 +21,11 @@ const client = new OSS({
 async function uploadAllFiles() {
   try {
     const files = fs.readdirSync(distPath)
-    console.log('files', files)
     for (const file of files) {
-      let relativePath = path.relative(distPath, file)
       // 只上传符合 release 定义的文件类型
-      if (relativePath.match(/^Inkdown.*\..*$/) || relativePath.match(/^latest.*\.yml$/)) {
-        const ossPath = `release/${process.env.REF_NAME}/${platform}/${arch}/${relativePath}`
-        await client.put(ossPath, file)
+      if (file.match(/^Inkdown.*\..*$/) || file.match(/^latest.*\.yml$/)) {
+        const ossPath = `release/${process.env.REF_NAME}/${platform}/${arch}/${file}`
+        await client.put(ossPath, join(distPath, file))
         console.log(`Uploaded: ${relativePath}`)
       }
     }
