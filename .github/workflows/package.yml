@@ -62,13 +62,24 @@ jobs:
       - name: List dist files
         run: ls -R dist
 
-      - name: Set env for mac Aliyun OSS
+      - name: Set env for Aliyun OSS
+        if: matrix.platform == 'mac'
         run: |
           echo "OSS_ENDPOINT=${{ secrets.OSS_ENDPOINT }}" >> $GITHUB_ENV
           echo "OSS_ACCESS_KEY_ID=${{ secrets.OSS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "OSS_ACCESS_KEY_SECRET=${{ secrets.OSS_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
           echo "OSS_BUCKET=${{ secrets.OSS_BUCKET }}" >> $GITHUB_ENV
           echo "REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - name: Set env for Aliyun OSS (Windows)
+        if: matrix.platform == 'win'
+        shell: pwsh
+        run: |
+          echo "OSS_ENDPOINT=${{ secrets.OSS_ENDPOINT }}" >> $env:GITHUB_ENV
+          echo "OSS_ACCESS_KEY_ID=${{ secrets.OSS_ACCESS_KEY_ID }}" >> $env:GITHUB_ENV
+          echo "OSS_ACCESS_KEY_SECRET=${{ secrets.OSS_ACCESS_KEY_SECRET }}" >> $env:GITHUB_ENV
+          echo "OSS_BUCKET=${{ secrets.OSS_BUCKET }}" >> $env:GITHUB_ENV
+          echo "REF_NAME=${{ github.ref_name }}" >> $env:GITHUB_ENV
 
       - name: Upload to Aliyun OSS
         run: |
