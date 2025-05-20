@@ -3,6 +3,8 @@ name: Package
 on:
   push:
     tags: v*
+    branches:
+      - 2.0-feature
   workflow_dispatch:
 
 jobs:
@@ -12,6 +14,10 @@ jobs:
         include:
           - os: macos-latest
             platform: 'mac'
+          - os: windows-latest
+            platform: 'win'
+          - os: ubuntu-latest
+            platform: 'linux'
 
     runs-on: ${{ matrix.os }}
     env:
@@ -26,7 +32,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: 20.x
+          node-version: 22.x
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -45,15 +51,21 @@ jobs:
           echo "CSC_LINK=${{ secrets.CERTIFICATE_OSX_APPLICATION }}" >> $GITHUB_ENV
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
+
       - name: Build
         run: |
           npm run build
+
       - name: Build App
-        if: matrix.platform == 'mac'
         run: |
-          npm run build:mac
-          npm run build:win
-          npm run build:linux
+          if [ "${{ matrix.platform }}" == "mac" ]; then
+            npm run build:mac
+          elif [ "${{ matrix.platform }}" == "win" ]; then
+            npm run build:win
+          elif [ "${{ matrix.platform }}" == "linux" ]; then
+            npm run build:linux
+          fi
+
       - name: GH Release
         uses: softprops/action-gh-release@v1
         env:
