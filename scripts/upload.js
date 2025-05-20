@@ -30,11 +30,15 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
 async function uploadAllFiles() {
   try {
     const files = getAllFiles(distPath)
+
     for (const file of files) {
       const relativePath = path.relative(distPath, file)
-      const ossPath = `release/${process.env.REF_NAME}/${relativePath}`
-
-      await client.put(ossPath, file)
+      // 只上传符合 release 定义的文件类型
+      if (relativePath.match(/^Inkdown.*\..*$/) || relativePath.match(/^latest.*\.yml$/)) {
+        const ossPath = `release/${process.env.REF_NAME}/${relativePath}`
+        await client.put(ossPath, file)
+        console.log(`Uploaded: ${relativePath}`)
+      }
     }
 
     console.log('All files uploaded successfully')
