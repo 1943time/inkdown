@@ -1,5 +1,5 @@
 // pre-build to enable parse to run in the worker
-import parser from './bundle'
+import parser from './bundle.js'
 import { Element, Node } from 'slate'
 import { Content, Table } from 'mdast'
 import { CustomLeaf, Elements, InlineKatexNode, MediaNode, TableCellNode, TableNode } from '../..'
