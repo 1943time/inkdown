@@ -58,15 +58,25 @@ jobs:
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
 
-      - name: Electron-Mac
-        if: matrix.platform == 'mac'
+      - name: Electron-Mac-x64
+        if: matrix.platform == 'mac' && matrix.arch == 'x64'
         run: |
-          npm run build:mac:${{ matrix.arch }}
+          npm run build:mac:x64
 
-      - name: Electron-Win
-        if: matrix.platform == 'win'
+      - name: Electron-Mac-arm64
+        if: matrix.platform == 'mac' && matrix.arch == 'arm64'
         run: |
-          npm run build:win:${{ matrix.arch }}
+          npm run build:mac:arm64
+
+      - name: Electron-Win-x64
+        if: matrix.platform == 'win' && matrix.arch == 'x64'
+        run: |
+          npm run build:win:x64
+
+      - name: Electron-Win-arm64
+        if: matrix.platform == 'win' && matrix.arch == 'arm64'
+        run: |
+          npm run build:win:arm64
 
       - name: List dist files
         run: ls -R dist
