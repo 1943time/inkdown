@@ -16,8 +16,6 @@ jobs:
             platform: 'mac'
           - os: windows-latest
             platform: 'win'
-          # - os: ubuntu-latest
-          #   platform: 'linux'
 
     runs-on: ${{ matrix.os }}
     env:
@@ -29,8 +27,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Setup Node.js environment
-        uses: actions/setup-node@v2.1.2
+        uses: actions/setup-node@v4
         with:
           node-version: 22.x
 
@@ -39,12 +38,11 @@ jobs:
         with:
           version: 8
 
-      - name: Install
-        run: |
-          pnpm install --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Set env
-        if: matrix.platform == 'mac'
+      - name: Set env for mac
+        if: ${{ matrix.platform == 'mac' }}
         run: |
           echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
           echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
@@ -54,22 +52,22 @@ jobs:
 
       - name: Build App
         run: |
-          if [ "${{ matrix.platform }}" == "mac" ]; then
+          if [ "${{ matrix.platform }}" = "mac" ]; then
             npm run build:mac
-          elif [ "${{ matrix.platform }}" == "win" ]; then
-            if ($env:matrix.platform -eq "win") {
-              npm run build:win
-            }
-          # elif [ "${{ matrix.platform }}" == "linux" ]; then
-          #   npm run build:linux
           fi
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            npm run build:win
+          fi
+
+      - name: List dist files
+        run: ls -R dist
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          draft: ''
+          draft: false
           prerelease: true
           files: |
             dist/Inkdown*.*
