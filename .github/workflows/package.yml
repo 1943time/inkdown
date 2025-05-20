@@ -19,7 +19,7 @@ jobs:
           - os: windows-latest
             platform: 'win'
             arch: 'x64'
-          - os: windows-11-arm
+          - os: windows-latest
             platform: 'win'
             arch: 'arm64'
 

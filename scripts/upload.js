@@ -9,6 +9,8 @@ console.log('platform', platform, 'arch', arch)
 // 根据平台和架构设置正确的路径
 const distPath = path.join(__dirname, '..', 'dist', platform, arch)
 
+console.log('distPath', distPath)
+
 const client = new OSS({
   region: process.env.OSS_ENDPOINT,
   accessKeyId: process.env.OSS_ACCESS_KEY_ID,
@@ -19,7 +21,7 @@ const client = new OSS({
 async function uploadAllFiles() {
   try {
     const files = fs.readdirSync(distPath)
-
+    console.log('files', files)
     for (const file of files) {
       let relativePath = path.relative(distPath, file)
       // 只上传符合 release 定义的文件类型
