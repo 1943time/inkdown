@@ -1,6 +1,7 @@
 const OSS = require('ali-oss')
 const path = require('path')
 const fs = require('fs')
+const os = require('os')
 
 const client = new OSS({
   region: process.env.OSS_ENDPOINT,
