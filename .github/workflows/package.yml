@@ -16,8 +16,8 @@ jobs:
             platform: 'mac'
           - os: windows-latest
             platform: 'win'
-          - os: ubuntu-latest
-            platform: 'linux'
+          # - os: ubuntu-latest
+          #   platform: 'linux'
 
     runs-on: ${{ matrix.os }}
     env:
@@ -62,8 +62,8 @@ jobs:
             npm run build:mac
           elif [ "${{ matrix.platform }}" == "win" ]; then
             npm run build:win
-          elif [ "${{ matrix.platform }}" == "linux" ]; then
-            npm run build:linux
+          # elif [ "${{ matrix.platform }}" == "linux" ]; then
+          #   npm run build:linux
           fi
 
       - name: GH Release
