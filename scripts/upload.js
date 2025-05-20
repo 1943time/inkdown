@@ -26,7 +26,7 @@ async function uploadAllFiles() {
       if (file.match(/^Inkdown.*\..*$/) || file.match(/^latest.*\.yml$/)) {
         const ossPath = `release/${process.env.REF_NAME}/${platform}/${arch}/${file}`
         await client.put(ossPath, path.join(distPath, file))
-        console.log(`Uploaded: ${relativePath}`)
+        console.log(`Uploaded: ${path.join(distPath, file)}`)
       }
     }
 
