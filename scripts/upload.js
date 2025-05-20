@@ -2,9 +2,12 @@ const OSS = require('ali-oss')
 const path = require('path')
 const fs = require('fs')
 const os = require('os')
-const args = process.argv.slice(2)
-const platform = args[0]
-const arch = args[1]
+
+const platform = os.platform()
+const arch = os.arch()
+
+// 根据平台和架构设置正确的路径
+const distPath = path.join(__dirname, '..', 'dist', platform, arch)
 
 const client = new OSS({
   region: process.env.OSS_ENDPOINT,
@@ -13,11 +16,9 @@ const client = new OSS({
   bucket: process.env.OSS_BUCKET
 })
 
-const distPath = path.join(__dirname, '../dist', platform, arch)
-
 async function uploadAllFiles() {
   try {
-    const files = fs.readdirSync(dirPath)
+    const files = fs.readdirSync(distPath)
 
     for (const file of files) {
       let relativePath = path.relative(distPath, file)
