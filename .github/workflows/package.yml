@@ -12,13 +12,22 @@ jobs:
         include:
           - os: macos-latest
             platform: 'mac'
+            arch: 'x64'
+          - os: macos-latest
+            platform: 'mac'
+            arch: 'arm64'
           - os: windows-latest
             platform: 'win'
+            arch: 'x64'
+          - os: windows-latest
+            platform: 'win'
+            arch: 'arm64'
 
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       NODE_OPTIONS: --max-old-space-size=4096
+      TARGET_ARCH: ${{ matrix.arch }}
 
     permissions:
       contents: write
@@ -52,12 +61,12 @@ jobs:
       - name: Electron-Mac
         if: matrix.platform == 'mac'
         run: |
-          npm run build:mac
+          npm run build:mac:${{ matrix.arch }}
 
       - name: Electron-Win
         if: matrix.platform == 'win'
         run: |
-          npm run build:win
+          npm run build:win:${{ matrix.arch }}
 
       - name: List dist files
         run: ls -R dist

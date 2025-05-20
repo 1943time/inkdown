@@ -3,7 +3,7 @@ productName: Inkdown
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
-afterSign: scripts/notarize.js
+# afterSign: scripts/notarize.js
 protocols:
   name: bluestone deeplink
   schemes:
@@ -35,7 +35,7 @@ nsis:
   oneClick: false
   perMachine: true
 mac:
-  # identity: null
+  identity: null
   notarize: true
   entitlementsInherit: build/entitlements.mac.plist
   minimumSystemVersion: 12.0
@@ -47,15 +47,6 @@ mac:
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  target:
-    - target: dmg
-      arch:
-        - x64
-        - arm64
-    - target: zip
-      arch:
-        - arm64
-        - x64
 linux:
   target:
     - AppImage

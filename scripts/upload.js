@@ -32,10 +32,13 @@ async function uploadAllFiles() {
     const files = getAllFiles(distPath)
 
     for (const file of files) {
-      const relativePath = path.relative(distPath, file)
+      let relativePath = path.relative(distPath, file)
       // 只上传符合 release 定义的文件类型
       if (relativePath.match(/^Inkdown.*\..*$/) || relativePath.match(/^latest.*\.yml$/)) {
-        const ossPath = `release/${process.env.REF_NAME}/${relativePath}`
+        if (relativePath.startsWith('latest') && relativePath.endsWith('.yml')) {
+          relativePath = relativePath.split('.')[0] + '-' + os.arch() + '.yml'
+        }
+        const ossPath = `release/${relativePath}`
         await client.put(ossPath, file)
         console.log(`Uploaded: ${relativePath}`)
       }

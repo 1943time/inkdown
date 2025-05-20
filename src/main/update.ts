@@ -8,7 +8,7 @@ autoUpdater.logger = log
 log.transports.file.level = 'info'
 export const registerUpdate = () => {
   if (app.isPackaged) {
-    const feedUrl = `http://localhost:3000/update/${os.platform()}/${app.getVersion()}`
+    const feedUrl = `http://localhost:3000/update/${os.platform()}/${os.arch()}/${app.getVersion()}`
     try {
       autoUpdater.setFeedURL({
         provider: 'generic',

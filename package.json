@@ -16,8 +16,10 @@
     "build": "npm run typecheck && electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win --config",
-    "build:mac": "npm run build && electron-builder --mac --config",
+    "build:win:x64": "npm run build && electron-builder --win --x64 --config",
+    "build:win:arm64": "npm run build && electron-builder --win --arm64 --config",
+    "build:mac:x64": "npm run build && electron-builder --mac --x64 --config",
+    "build:mac:arm64": "npm run build && electron-builder --mac --arm64 --config",
     "build:linux": "electron-vite build && electron-builder --linux --config",
     "postpack": "electron-rebuild -f -w sqlite3",
     "build:parser": "node src/renderer/src/editor/parser/worker/compiler.js"
