@@ -99,6 +99,7 @@ jobs:
           echo "OSS_ACCESS_KEY_SECRET=${{ secrets.OSS_ACCESS_KEY_SECRET }}" >> $env:GITHUB_ENV
           echo "OSS_BUCKET=${{ secrets.OSS_BUCKET }}" >> $env:GITHUB_ENV
           echo "REF_NAME=${{ github.ref_name }}" >> $env:GITHUB_ENV
+          echo "OS_ARCH=${{ matrix.arch }}" >> $env:GITHUB_ENV
 
       - name: Upload to Aliyun OSS
         run: |

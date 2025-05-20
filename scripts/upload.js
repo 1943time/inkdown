@@ -4,7 +4,7 @@ const fs = require('fs')
 const os = require('os')
 
 const platform = os.platform()
-const arch = os.arch()
+const arch = process.env.OS_ARCH
 
 // 根据平台和架构设置正确的路径
 const distPath = path.join(__dirname, '..', 'dist', platform, arch)
