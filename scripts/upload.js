@@ -5,7 +5,7 @@ const os = require('os')
 
 const platform = os.platform()
 const arch = process.env.OS_ARCH
-
+console.log('platform', platform, 'arch', arch)
 // 根据平台和架构设置正确的路径
 const distPath = path.join(__dirname, '..', 'dist', platform, arch)
 
