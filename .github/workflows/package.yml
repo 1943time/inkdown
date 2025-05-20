@@ -62,16 +62,14 @@ jobs:
       - name: List dist files
         run: ls -R dist
 
-      - name: Upload to Aliyun OSS
-        uses: manyuanrong/setup-ossutil@v2.0
-        with:
-          endpoint: ${{ secrets.OSS_ENDPOINT }}
-          access-key-id: ${{ secrets.OSS_ACCESS_KEY_ID }}
-          access-key-secret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
-
       - name: Sync files to Aliyun OSS
         run: |
-          ossutil cp -r dist/ oss://${{ secrets.OSS_BUCKET }}/release/${{ github.ref_name }}/ --update
+          echo "OSS_ENDPOINT=${{ secrets.OSS_ENDPOINT }}" >> $GITHUB_ENV
+          echo "OSS_ACCESS_KEY_ID=${{ secrets.OSS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          echo "OSS_ACCESS_KEY_SECRET=${{ secrets.OSS_ACCESS_KEY_SECRET }}" >> $GITHUB_ENV
+          echo "OSS_BUCKET=${{ secrets.OSS_BUCKET }}" >> $GITHUB_ENV
+          echo "REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          node scripts/upload.js
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
