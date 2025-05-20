@@ -42,7 +42,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Set env for mac
-        if: ${{ matrix.platform == 'mac' }}
+        if: matrix.platform == 'mac'
         run: |
           echo "APPLEID=${{ secrets.APPLEID }}" >> $GITHUB_ENV
           echo "APPLEIDPASS=${{ secrets.APPLEIDPASS }}" >> $GITHUB_ENV
@@ -50,14 +50,24 @@ jobs:
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
 
-      - name: Build App
+      - name: Electron-Mac
+        if: matrix.platform == 'mac'
         run: |
-          if [ "${{ matrix.platform }}" = "mac" ]; then
-            npm run build:mac
-          fi
-          if [ "${{ matrix.platform }}" = "win" ]; then
-            npm run build:win
-          fi
+          npm run build:mac
+
+      - name: Electron-Win
+        if: matrix.platform == 'win'
+        run: |
+          npm run build:win
+
+      # - name: Build App
+      #   run: |
+      #     if [ "${{ matrix.platform }}" = "mac" ]; then
+      #       npm run build:mac
+      #     fi
+      #     if [ "${{ matrix.platform }}" = "win" ]; then
+      #       npm run build:win
+      #     fi
 
       - name: List dist files
         run: ls -R dist
