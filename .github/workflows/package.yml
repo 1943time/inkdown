@@ -52,10 +52,6 @@ jobs:
           echo "CSC_KEY_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}" >> $GITHUB_ENV
           echo "APPLETEAMID=${{ secrets.APPLETEAMID }}" >> $GITHUB_ENV
 
-      - name: Build
-        run: |
-          npm run build
-
       - name: Build App
         run: |
           if [ "${{ matrix.platform }}" == "mac" ]; then
