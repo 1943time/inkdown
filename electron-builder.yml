@@ -3,6 +3,7 @@ productName: Inkdown
 copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
+  output: 'dist/${platform}/${arch}'
 # afterSign: scripts/notarize.js
 protocols:
   name: bluestone deeplink

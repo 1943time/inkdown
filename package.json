@@ -22,6 +22,7 @@
     "build:mac:arm64": "npm run build && electron-builder --mac --arm64 --config",
     "build:linux": "electron-vite build && electron-builder --linux --config",
     "postpack": "electron-rebuild -f -w sqlite3",
+    "de": "electron-builder --win --x64 --config",
     "build:parser": "node src/renderer/src/editor/parser/worker/compiler.js"
   },
   "dependencies": {

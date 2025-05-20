@@ -92,7 +92,7 @@ jobs:
 
       - name: Upload to Aliyun OSS
         run: |
-          node scripts/upload.js
+          node scripts/upload.js ${{ matrix.platform }} ${{ matrix.arch }}
 
       - name: GH Release
         uses: softprops/action-gh-release@v1
@@ -101,6 +101,3 @@ jobs:
         with:
           draft: false
           prerelease: true
-          files: |
-            dist/Inkdown*.*
-            dist/latest*.yml
