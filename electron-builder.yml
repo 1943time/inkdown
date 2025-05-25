@@ -34,6 +34,7 @@ fileAssociations:
   role: Editor
 win:
   verifyUpdateCodeSignature: false
+  sign: false
   target:
     - nsis
 nsis:
