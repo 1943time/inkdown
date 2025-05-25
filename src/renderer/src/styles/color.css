@@ -16,7 +16,6 @@
   --chat-user-message-bg-color: #eaeef5;
 }
 .dark {
-  color-scheme: dark;
   --primary-bg-color: #1a1b1b;
   --side-panel-bg-color: #232425;
   --chat-user-message-bg-color: #333537;
@@ -49,6 +48,9 @@ body {
 }
 html.dark {
   color-scheme: dark;
+}
+.lucide {
+  stroke: var(--md-text);
 }
 
 .dark {

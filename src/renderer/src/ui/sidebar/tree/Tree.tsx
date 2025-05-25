@@ -30,7 +30,7 @@ export const Tree = observer(() => {
   }, [nodes])
   if (!nodes['root']) return null
   return (
-    <div className={`h-full width-duration duration-200`}>
+    <div className={`h-full width-duration`}>
       <div className={'h-full flex flex-col'}>
         <div className={'flex-1 flex-shrink-0 overflow-hidden flex flex-col'}>
           <ToggleSpace />
@@ -44,7 +44,7 @@ export const Tree = observer(() => {
               }
             >
               <Search size={16} />
-              <span className={'ml-2 text-[13px] leading-5'}>{t('search')}</span>
+              <span className={'ml-2 text-[13px] leading-5 '}>{t('search')}</span>
             </div>
           </div>
           <div className={`flex-1 flex-shrink-0 h-0`}>

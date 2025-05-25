@@ -15,15 +15,21 @@ app.whenReady().then(async () => {
     .where('key', 'windows')
     .first()
     .then((row) => {
+      let created = false
       if (row) {
         try {
           const data = JSON.parse(row.value)
           for (const item of data) {
+            created = true
             createWindow(item)
           }
         } catch (e) {
+          created = true
           createWindow()
         }
+      }
+      if (!created) {
+        createWindow()
       }
     })
   app.on('activate', function () {

@@ -36,7 +36,7 @@ export const SideBar = observer(() => {
   return (
     <div
       className={
-        'border-r dark:border-white/10 border-black/10 bg-sidebar pt-10 overflow-hidden side-move-transition flex flex-col h-full'
+        'border-r dark:border-white/10 border-black/10 bg-sidebar pt-10 overflow-hidden side-move-transition flex flex-col h-full md-text'
       }
       style={{ width: fold ? 0 : sidePanelWidth, paddingTop: os() === 'mac' ? 40 : 6 }}
     >
