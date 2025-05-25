@@ -90,7 +90,8 @@ export class KeyboardStore {
       {
         system: 'mod+shift+v',
         custom: undefined,
-        scene: 'note'
+        scene: 'note',
+        disabled: true
       }
     ],
     [
@@ -98,7 +99,8 @@ export class KeyboardStore {
       {
         system: 'mod+option+v',
         custom: undefined,
-        scene: 'note'
+        scene: 'note',
+        disabled: true
       }
     ],
     [

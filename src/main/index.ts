@@ -5,8 +5,8 @@ import { knex } from './database/model'
 import { modelReady } from './database/api'
 import './handle'
 import { registerUpdate } from './update'
-app.whenReady().then(() => {
-  modelReady()
+app.whenReady().then(async () => {
+  await modelReady()
   electronApp.setAppUserModelId('com.inkdown')
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
@@ -26,7 +26,7 @@ app.whenReady().then(() => {
         }
       }
     })
-
+  createWindow()
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

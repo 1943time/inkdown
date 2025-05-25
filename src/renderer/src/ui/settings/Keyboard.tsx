@@ -217,7 +217,9 @@ export const Keyboard = observer(() => {
       ['inlineCode', t('keyboard.shortcuts.inlineCode')],
       ['clear', t('keyboard.shortcuts.clear')],
       ['openChat', t('keyboard.shortcuts.openChat')],
-      ['newDoc', t('keyboard.shortcuts.newDoc')]
+      ['newDoc', t('keyboard.shortcuts.newDoc')],
+      ['pasteMarkdownCode', t('keyboard.shortcuts.pasteMarkdownCode')],
+      ['pastePlainText', t('keyboard.shortcuts.pastePlainText')]
     ])
   }, [t])
 
@@ -290,6 +292,8 @@ export const Keyboard = observer(() => {
         <Item task={'newDoc'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'closeCurrentTab'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'quickOpenNote'} labelMap={labelMap} refresh={state.refresh} />
+        <Item task={'pasteMarkdownCode'} labelMap={labelMap} refresh={state.refresh} />
+        <Item task={'pastePlainText'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'openChat'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'lineBreakWithinParagraph'} labelMap={labelMap} refresh={state.refresh} />
         <Item task={'undo'} labelMap={labelMap} refresh={state.refresh} />

@@ -4,17 +4,23 @@ copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
   output: 'dist/${platform}/${arch}'
-# afterSign: scripts/notarize.js
+  # afterSign: scripts/notarize.js
+afterPack: './scripts/afterPack.js'
 protocols:
-  name: bluestone deeplink
+  name: inkdown deeplink
   schemes:
-    - bluestone
+    - inkdown
 files:
   - '!**/.vscode/*'
+  - '!**/.cursor/*'
+  - '!.env'
+  - '!.VSCodeCounter'
+  - '!.i18nrc.cjs'
+  - '!electron.vite.config.*.mjs'
   - '!src/*'
   - '!unpackage/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
+  - '!{.npmrc,.js.map,.ts,.eslintignore,.eslintrc.cjs,.prettierignore,LICENSE,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md,postcss.config.js,tailwind.config.js,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!scripts/*'
   - '!web/*'

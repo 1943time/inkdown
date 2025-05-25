@@ -5,6 +5,7 @@ unpackage
 resources/lib/current.html
 resources/lib/current.json
 .env
+app/
 electron.vite.config.*.mjs
 mdparser/index.js
 dist

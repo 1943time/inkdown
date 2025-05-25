@@ -22,6 +22,7 @@ const App = observer(() => {
   useEffect(() => {
     store.system.onIpcMessage('update-ready', () => {
       notifyApi.info({
+        duration: null,
         message: t('updateApp.available'),
         actions: (
           <Space>
