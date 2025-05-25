@@ -4,7 +4,7 @@ copyright: 'Copyright © 2023 1943dejavu@gmail.com'
 directories:
   buildResources: build
   output: 'dist/${platform}/${arch}'
-  # afterSign: scripts/notarize.js
+afterSign: scripts/notarize.js
 afterPack: './scripts/afterPack.js'
 protocols:
   name: inkdown deeplink
@@ -43,7 +43,7 @@ nsis:
   oneClick: false
   perMachine: true
 mac:
-  identity: null
+  # identity: null
   notarize: true
   entitlementsInherit: build/entitlements.mac.plist
   minimumSystemVersion: 12.0
