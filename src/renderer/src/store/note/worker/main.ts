@@ -324,12 +324,11 @@ class Output {
       path: number
       type: string
     }[] = []
-    const meta = `# Doc: ${doc.name}, Updated time ${dayjs(doc.updated!).format('YYYY MM DD HH mm')}`
     let currentChunk = {
-      text: meta,
+      text: '',
       path: 0,
-      type: 'meta',
-      size: getTokens(meta)
+      type: schema[0]?.type,
+      size: 0
     }
     for (let i = 0; i < schema.length; i++) {
       try {
@@ -366,7 +365,10 @@ class Output {
       const last = chunks.pop()!
       chunks[chunks.length - 1].text += last.text
     }
-    return chunks
+    return chunks.filter((c) => {
+      c.text = c.text.replace(/^\n*|\n*$/g, '')
+      return c
+    })
   }
 
   private parse(tree: any[], preString = '', parent: any[] = [{ root: true }]) {

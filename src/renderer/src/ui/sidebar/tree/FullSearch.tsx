@@ -294,8 +294,10 @@ export const FullSearch = observer(() => {
         />
         <Tooltip title={t('semanticSearch')} mouseEnterDelay={1}>
           <div
-            className={`absolute rounded-sm duration-150 cursor-pointer p-0.5 dark:hover:bg-white/10 right-3.5 top-1/2 -translate-y-1/2 z-10 ${
-              state().vector ? 'text-blue-500' : 'dark:text-white/70 text-black/70'
+            className={`absolute rounded-sm duration-150 cursor-pointer p-0.5 right-3.5 top-1/2 -translate-y-1/2 z-10 ${
+              state().vector
+                ? 'bg-blue-500/70 dark:bg-blue-500'
+                : 'dark:text-white/70 text-black/70 dark:hover:bg-white/10 hover:bg-black/10'
             }`}
             onClick={toggleVector}
           >
@@ -355,7 +357,12 @@ export const FullSearch = observer(() => {
                     }
                   >
                     {s.results.slice(0, 50).map((r, j) => (
-                      <div className={'rounded-sm p-1 dark:bg-white/5 bg-gray-300/50'} key={r.path}>
+                      <div
+                        className={
+                          'rounded-sm p-1 dark:bg-white/5 bg-gray-300/50 overflow-y-auto whitespace-pre-wrap max-h-28'
+                        }
+                        key={r.path}
+                      >
                         <div
                           key={j}
                           onClick={(e) => {
@@ -364,7 +371,7 @@ export const FullSearch = observer(() => {
                           }}
                           title={r.text}
                           className={
-                            'cursor-pointer dark:hover:text-white hover:text-black group line-clamp-5'
+                            'cursor-pointer dark:hover:text-white hover:text-black group leading-[1.1]'
                           }
                         >
                           {r.text}

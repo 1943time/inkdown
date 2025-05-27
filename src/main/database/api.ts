@@ -375,6 +375,7 @@ ipcMain.handle(
       const remove: number[] = Array.from(pathMap)
         .filter(([k]) => !chunkMap.has(k))
         .map(([k]) => k)
+      let i = 0
       for (const chunk of ctx.chunks) {
         if (!chunk.text) continue
         if (pathMap.has(chunk.path) && pathMap.get(chunk.path) === chunk.text) {
@@ -396,7 +397,11 @@ ipcMain.handle(
               values: { type: chunk.type, content: chunk.text, vector: Array.from(res.data) }
             })
           } else {
-            const res = await extractor!(chunk.text, {
+            let text = chunk.text
+            if (i === 0) {
+              text = `# ${doc.name}\n` + text
+            }
+            const res = await extractor!(text, {
               pooling: 'mean',
               normalize: true
             })
@@ -413,6 +418,7 @@ ipcMain.handle(
         } catch (e) {
           console.error(e)
         }
+        i++
       }
       if (remove.length > 0) {
         await table.delete(`doc_id = '${id}' AND path IN (${remove.join(',')})`)

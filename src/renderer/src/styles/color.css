@@ -49,9 +49,6 @@ body {
 html.dark {
   color-scheme: dark;
 }
-.lucide {
-  stroke: var(--md-text);
-}
 
 .dark {
   .ant-popover-inner {

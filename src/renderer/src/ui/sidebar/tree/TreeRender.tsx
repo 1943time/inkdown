@@ -21,7 +21,7 @@ export const TreeRender = observer(() => {
     <>
       <div
         onContextMenu={(e) => e.stopPropagation()}
-        className={`py-1 flex justify-between items-center pl-4 pr-2.5 dark:text-gray-400 text-gray-500`}
+        className={`py-1 flex justify-between items-center pl-4 pr-2.5 dark:text-gray-300 text-gray-500`}
       >
         <span className={'font-semibold text-[13px] flex items-center'}>
           <span>{t('folders')}</span>
@@ -128,7 +128,7 @@ const Item = observer(({ item, level }: { item: IDoc; level: number }) => {
           className={`rounded group relative ${getClass(store, item)}`}
         >
           <div
-            className={`${store.note.state.opendDoc?.id === item.id ? 'dark:text-zinc-100 text-zinc-900' : 'dark:text-zinc-100/80 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
+            className={`${store.note.state.opendDoc?.id === item.id ? 'dark:text-white text-zinc-900' : 'dark:text-zinc-100 dark:hover:text-zinc-100/90 text-zinc-600 hover:text-zinc-700'}
            text-sm cursor-default select-none h-7 pr-2 group`}
             style={{ paddingLeft: item.folder ? 2 : 17 }}
             onDragEnd={() => {
