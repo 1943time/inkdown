@@ -77,13 +77,7 @@ export const Title = observer(({ tab }: { tab: TabStore }) => {
       if (!name) {
         setName(doc.name)
       } else {
-        tab.store.model.updateDoc(
-          doc.id,
-          { name },
-          {
-            chunks: await store.output.getChunks(doc.schema!, doc)
-          }
-        )
+        tab.store.model.updateDoc(doc.id, { name })
         store.note.setState((state) => {
           state.nodes[doc.id].name = name
         })

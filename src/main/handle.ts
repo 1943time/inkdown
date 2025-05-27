@@ -93,7 +93,7 @@ ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => 
     await view.webContents.loadFile(join(__dirname, '../renderer/worker.html'))
     // view.webContents.openDevTools()
     win.contentView.addChildView(view)
-    view.setBounds({ x: 0, y: 0, width: 1, height: 1 })
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 })
     ipcMain.handleOnce('get-print-data', () => {
       return data
     })
@@ -106,7 +106,6 @@ ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => 
           const buffer = await view.webContents.printToPDF({
             printBackground: true,
             displayHeaderFooter: true,
-            generateDocumentOutline: true,
             margins: {
               marginType: 'custom',
               bottom: 0,

@@ -96,6 +96,7 @@ export interface IMessageDoc {
 export interface IMessageContext {
   name: string
   content: string
+  id: string
 }
 
 export type IChatTable = Pick<

@@ -308,7 +308,7 @@ export class ChatStore extends StructStore<typeof state> {
             })
             .filter((d) => !!d.doc)
           if (docs.length) {
-            userMsg.context = docs.map((d) => ({ name: d.doc.name, content: d.text }))
+            userMsg.context = docs.map((d) => ({ name: d.doc.name, content: d.text, id: d.doc.id }))
           }
         }
         if (!userMsg.context) {
@@ -316,7 +316,8 @@ export class ChatStore extends StructStore<typeof state> {
             {
               name: 'System',
               content:
-                'The system did not find the corresponding context note. Can you remind me to describe it more accurately?'
+                'The system did not find the corresponding context note. Can you remind me to describe it more accurately?',
+              id: 'system'
             }
           ]
         }

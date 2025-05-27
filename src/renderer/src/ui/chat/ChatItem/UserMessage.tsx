@@ -4,7 +4,7 @@ import { FileTypeIcon, TextArea } from '@lobehub/ui'
 import { Button } from 'antd'
 import { useTheme } from 'antd-style'
 import isHotkey from 'is-hotkey'
-import { Check, Copy, FileText, Pencil } from 'lucide-react'
+import { Check, Copy, FileText, Pencil, TableOfContents, Text } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
@@ -178,9 +178,12 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
             return (
               <div
                 key={f.docId}
+                onClick={() => {
+                  store.note.openDocById(f.docId)
+                }}
                 title={store.note.state.nodes[f.docId]?.name || f.name}
                 className={
-                  'max-w-[300px] flex items-center truncate rounded-sm bg-black/10 dark:bg-white/10 text-[13px] px-1.5 py-0.5 mb-0.5'
+                  'max-w-[300px] cursor-pointer flex items-center truncate rounded-sm bg-black/10 dark:bg-white/10 text-[13px] px-1.5 py-0.5 mb-0.5'
                 }
               >
                 <FileText size={15} />
@@ -192,6 +195,25 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           })}
         </div>
       )}
+      {!!msg.context?.length && (
+        <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
+          {msg.context.map((c) => (
+            <div
+              key={c.id}
+              onClick={() => {
+                store.note.openDocById(c.id)
+              }}
+              className={
+                'max-w-[300px] cursor-pointer flex items-center truncate rounded-sm bg-black/10 dark:bg-white/10 text-[13px] px-1.5 py-0.5 mb-0.5'
+              }
+            >
+              <Text size={15} />
+              <span className={'truncate w-full ml-1'}>{c.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {!!msg.files?.length && (
         <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
           {msg.files.map((f) => {

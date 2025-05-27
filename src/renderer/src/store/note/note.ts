@@ -354,6 +354,12 @@ export class NoteStore extends StructStore<typeof state> {
       }
     })
   }
+  openDocById(id: string) {
+    const doc = this.state.nodes[id]
+    if (doc) {
+      this.openDoc(doc)
+    }
+  }
   openDoc(
     doc: IDoc,
     opt?: {

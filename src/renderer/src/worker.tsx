@@ -36,9 +36,11 @@ const Worker = observer(() => {
                   ? chat.messages.map((m: any) => {
                       return {
                         ...m,
-                        files: m.files ? JSON.parse(m.files) : [],
-                        context: m.context ? JSON.parse(m.context) : [],
-                        docs: m.docs ? JSON.parse(m.docs) : []
+                        context: m.context ? JSON.parse(m.context) : undefined,
+                        docs: m.docs ? JSON.parse(m.docs) : undefined,
+                        files: m.files ? JSON.parse(m.files) : undefined,
+                        images: m.images ? JSON.parse(m.images) : undefined,
+                        error: m.error ? JSON.parse(m.error) : undefined
                       }
                     })
                   : []
