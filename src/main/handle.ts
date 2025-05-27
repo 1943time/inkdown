@@ -106,6 +106,7 @@ ipcMain.on('print-pdf', async (e, data: { docId?: string; chatId?: string }) => 
           const buffer = await view.webContents.printToPDF({
             printBackground: true,
             displayHeaderFooter: true,
+            pageSize: 'A4',
             margins: {
               marginType: 'custom',
               bottom: 0,

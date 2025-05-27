@@ -70,12 +70,12 @@ const Worker = observer(() => {
       }}
     >
       {doc && (
-        <div className={'px-8 h-auto w-[760px]'}>
+        <div className={'px-8 h-auto w-[800px]'}>
           <Webview doc={doc} />
         </div>
       )}
       {chat && (
-        <div className={'py-8 px-5 w-[760px]'}>
+        <div className={'py-8 px-5 w-[800px]'}>
           <ChatViewList chat={chat} />
         </div>
       )}
