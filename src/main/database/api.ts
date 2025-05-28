@@ -229,9 +229,10 @@ ipcMain.handle('deleteClient', async (_, id: string) => {
 ipcMain.handle('getSpaces', async () => {
   let spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
   if (spaces.length === 0) {
+    const isZhCN = app.getLocale() === 'zh-CN'
     await knex('space').insert({
       id: nid(),
-      name: 'My Space',
+      name: isZhCN ? '我的空间' : 'My Space',
       sort: 0
     })
     spaces = await knex.select('*').orderBy('sort', 'asc').from('space')
@@ -457,7 +458,7 @@ ipcMain.handle(
     let results = await queryVector({
       query: ctx.query,
       spaceId: ctx.spaceId,
-      limit: 20,
+      limit: 12,
       ids: ctx.ids
     })
     const text = new Map<string, { path: number; text: string }[]>()

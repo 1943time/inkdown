@@ -1,10 +1,10 @@
 import { useStore } from '@/store/store'
 import { IMessage } from 'types/model'
 import { FileTypeIcon, TextArea } from '@lobehub/ui'
-import { Button } from 'antd'
+import { Button, Dropdown } from 'antd'
 import { useTheme } from 'antd-style'
 import isHotkey from 'is-hotkey'
-import { Check, Copy, FileText, Pencil, TableOfContents, Text } from 'lucide-react'
+import { Check, Copy, File, FileText, Pencil, TableOfContents, Text } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 import { useGetSetState } from 'react-use'
 import { getFileName } from '@/utils/string'
@@ -67,6 +67,8 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
   const update = useCallback(() => {
     if (state().inputText) {
       setState({ isEditing: false })
+      const lastUserMsg =
+        store.chat.state.activeChat?.messages?.[store.chat.state.activeChat.messages.length - 2]
       store.chat.setState((draft) => {
         if (draft.activeChat) {
           const remove = draft.activeChat.messages!.slice(-2)!
@@ -74,7 +76,13 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           draft.activeChat.messages = draft.activeChat!.messages!.slice(0, -2)
         }
       })
-      store.chat.completion(state().inputText)
+      if (lastUserMsg) {
+        runInAction(() => {
+          lastUserMsg.content = state().inputText
+          lastUserMsg.context = undefined
+        })
+      }
+      store.chat.completion(state().inputText, undefined, lastUserMsg)
     }
   }, [state])
   const hotKey = useCallback(
@@ -133,15 +141,15 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           />
           <div className={'flex justify-end mt-2 space-x-2'}>
             <Button
+              size={'small'}
               onClick={() => {
                 setState({ isEditing: false, inputText: msg.content || '' })
               }}
               type={'text'}
-              shape={'round'}
             >
               {t('chat.message.cancel')}
             </Button>
-            <Button type={'primary'} shape={'round'}>
+            <Button type={'primary'} size={'small'} onClick={update}>
               {t('chat.message.update')}
             </Button>
           </div>
@@ -196,22 +204,31 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
         </div>
       )}
       {!!msg.context?.length && (
-        <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
-          {msg.context.map((c) => (
+        <Dropdown
+          menu={{
+            onClick: (e) => {
+              store.note.openDocById(e.key)
+            },
+            items: msg.context.map((c) => {
+              return {
+                icon: <File size={13} />,
+                key: c.id,
+                label: c.name
+              }
+            })
+          }}
+        >
+          <div className={'mt-1.5 space-x-2 flex justify-end flex-wrap'}>
             <div
-              key={c.id}
-              onClick={() => {
-                store.note.openDocById(c.id)
-              }}
               className={
                 'max-w-[300px] cursor-pointer flex items-center truncate rounded-sm bg-black/10 dark:bg-white/10 text-[13px] px-1.5 py-0.5 mb-0.5'
               }
             >
               <Text size={15} />
-              <span className={'truncate w-full ml-1'}>{c.name}</span>
+              <span className={'truncate w-full ml-1'}>Context</span>
             </div>
-          ))}
-        </div>
+          </div>
+        </Dropdown>
       )}
 
       {!!msg.files?.length && (

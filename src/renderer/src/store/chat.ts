@@ -7,7 +7,7 @@ import { openAiModels } from './llm/data/data'
 import { escapeBrackets, escapeMhchem, fixMarkdownBold } from '@/ui/markdown/utils'
 import { StructStore } from './struct'
 import { nid } from '@/utils/common'
-import { observable, toJS } from 'mobx'
+import { observable, runInAction, toJS } from 'mobx'
 import { withReact } from 'slate-react'
 import { withHistory } from 'slate-history'
 import { createEditor } from 'slate'
@@ -235,7 +235,8 @@ export class ChatStore extends StructStore<typeof state> {
     opts?: {
       files?: IMessageFile[]
       images?: IMessageFile[]
-    }
+    },
+    lastUserMsg?: IMessage
   ) {
     const now = Date.now()
     let { activeChat } = this.state
@@ -260,18 +261,20 @@ export class ChatStore extends StructStore<typeof state> {
         state.activeChat!.messages = state.activeChat!.messages!.slice(0, -2)
       })
     }
-    const userMsg: IMessage = observable({
-      chatId: activeChat!.id,
-      created: now,
-      updated: now,
-      role: 'user',
-      id: nid(),
-      content: text,
-      files: opts?.files,
-      images: opts?.images,
-      docs: this.state.cacheDocs.length ? this.state.cacheDocs.slice() : undefined,
-      tokens: tokens
-    })
+    const userMsg: IMessage =
+      lastUserMsg ||
+      observable({
+        chatId: activeChat!.id,
+        created: now,
+        updated: now,
+        role: 'user',
+        id: nid(),
+        content: text,
+        files: opts?.files,
+        images: opts?.images,
+        docs: this.state.cacheDocs.length ? this.state.cacheDocs.slice() : undefined,
+        tokens: tokens
+      })
     this.setState((state) => {
       if (activeChat.id !== state.activeChat?.id) {
         state.activeChat = activeChat
@@ -301,26 +304,32 @@ export class ChatStore extends StructStore<typeof state> {
           text,
           this.store.note.state.currentSpace?.id!
         )
-        if (res?.ctx?.length) {
-          const docs = res.ctx
-            .map((c) => {
-              return { doc: this.store.note.state.nodes[c.docId], text: c.text }
-            })
-            .filter((d) => !!d.doc)
-          if (docs.length) {
-            userMsg.context = docs.map((d) => ({ name: d.doc.name, content: d.text, id: d.doc.id }))
-          }
-        }
-        if (!userMsg.context) {
-          userMsg.context = [
-            {
-              name: 'System',
-              content:
-                'The system did not find the corresponding context note. Can you remind me to describe it more accurately?',
-              id: 'system'
+        runInAction(() => {
+          if (res?.ctx?.length) {
+            const docs = res.ctx
+              .map((c) => {
+                return { doc: this.store.note.state.nodes[c.docId], text: c.text }
+              })
+              .filter((d) => !!d.doc)
+            if (docs.length) {
+              userMsg.context = docs.map((d) => ({
+                name: d.doc.name,
+                content: d.text,
+                id: d.doc.id
+              }))
             }
-          ]
-        }
+          }
+          if (!userMsg.context) {
+            userMsg.context = [
+              {
+                name: 'System',
+                content:
+                  'The system did not find the corresponding context note. Can you remind me to describe it more accurately?',
+                id: 'system'
+              }
+            ]
+          }
+        })
       } catch (e) {
         console.error(e)
       }
