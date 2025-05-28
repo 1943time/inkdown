@@ -22,7 +22,7 @@
       "modelNotSupported": "This model does not currently support this feature",
       "noModel": "You haven't set a model, would you like to set one?",
       "parseError": "File parsing failed",
-      "placeholder": "Ask the AI assistant",
+      "placeholder": "Ask the AI assistant, use @ to reference documents",
       "tip": "Tip",
       "webSearchTip": "Use the internet search, available for some models"
     },

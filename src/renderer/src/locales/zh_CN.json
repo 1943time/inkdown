@@ -205,7 +205,7 @@
       "noModel": "您暂未设置模型，是否去设置？",
       "goToSettings": "前往设置",
       "parseError": "文件解析失败",
-      "placeholder": "问一问 AI 助手吧",
+      "placeholder": "问一问 AI 助手吧，使用 @ 引用文档",
       "file": "文件",
       "image": "图片",
       "webSearchTip": "使用互联网搜索，部分模型可用",

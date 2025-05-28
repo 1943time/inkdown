@@ -172,7 +172,7 @@ export const EditSpace = observer(() => {
                     store.note.openConfirmDialog$.next({
                       title: t('tip'),
                       description: t('workspace.cancelWriteHint'),
-                      okText: t('workspace.confirmDelete'),
+                      okText: t('ok'),
                       onConfirm: () => {
                         setState({ filePath: '' })
                         store.model.updateSpace(state.space!.id, {

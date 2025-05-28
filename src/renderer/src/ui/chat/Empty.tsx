@@ -10,9 +10,9 @@ export const ChatEmpty = observer(() => {
   const { t } = useTranslation()
   const greeting = useMemo(() => {
     const hour = new Date().getHours()
-    if (hour < 12) {
+    if (hour < 12 && hour > 4) {
       return t('chat.greeting.morning')
-    } else if (hour < 18) {
+    } else if (hour > 12 && hour < 19) {
       return t('chat.greeting.afternoon')
     } else {
       return t('chat.greeting.evening')

@@ -1,7 +1,7 @@
 {
   "name": "inkdown",
   "version": "2.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "A writing tool and chat bot fully compatible with markdown",
   "main": "./out/main/index.js",
   "author": "1943time",
   "license": "AGPL-3.0",

@@ -37,7 +37,16 @@ export const SwitchModel = observer((props: { maxWidth?: number }) => {
     <Dropdown
       trigger={['click']}
       open={state.open}
-      onOpenChange={(v) => setState({ open: v })}
+      onOpenChange={(v) => {
+        if (v && !models.length) {
+          store.settings.setData((data) => {
+            data.open = true
+            data.setTab = 2
+          })
+          return
+        }
+        setState({ open: v })
+      }}
       menu={{
         className: 'switch-model-menu',
         style: {
@@ -70,6 +79,7 @@ export const SwitchModel = observer((props: { maxWidth?: number }) => {
                   onClick={() => {
                     store.settings.setData((data) => {
                       data.open = true
+                      data.setTab = 2
                     })
                     setState({ open: false })
                   }}
