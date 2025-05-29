@@ -203,7 +203,7 @@ export const UserMessage = observer<{ msg: IMessage }>(({ msg }) => {
           })}
         </div>
       )}
-      {!!msg.context?.length && (
+      {!!msg.context?.length && msg.context[0].id !== 'system' && (
         <Dropdown
           menu={{
             onClick: (e) => {

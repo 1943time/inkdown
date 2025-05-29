@@ -9,7 +9,6 @@ export const MermaidFullFeatured = memo<
   Omit<MermaidProps, 'children'> & { children: ReactNode; content: string }
 >(({ showLanguage, content, children, className, ...rest }) => {
   const [expand, setExpand] = useState(true)
-  const size = { blockSize: 24, fontSize: 14, strokeWidth: 2 }
   return (
     <div
       className={`relative overflow-hidden rounded-md transition-colors ${className || ''}`}
@@ -39,7 +38,7 @@ export const MermaidFullFeatured = memo<
           </Flexbox>
         )}
         <Flexbox align={'center'} flex={'none'} gap={4} horizontal>
-          <CopyButton content={content} size={size} />
+          <CopyButton content={content} size={14} />
         </Flexbox>
       </Flexbox>
       <div style={expand ? {} : { height: 0, overflow: 'hidden' }}>{children}</div>

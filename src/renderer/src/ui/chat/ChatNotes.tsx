@@ -116,10 +116,11 @@ export const ChatNotes = observer(() => {
         width
       }}
     >
-      <div className={'flex-1 overflow-y-auto py-2 max-h-[200px] px-2 text-[15px] relative'}>
+      <div className={'flex-1 py-2 h-[200px] px-2 text-[15px] relative'}>
         <ScrollList
           items={state().filterNodes}
           onSelect={select}
+          style={{ height: 200 }}
           onClose={() => {
             store.chat.setState((state) => {
               state.reference.open = false

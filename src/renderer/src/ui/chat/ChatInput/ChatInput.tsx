@@ -142,7 +142,6 @@ export const ChatInput = observer(() => {
 
   const keydown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      e.stopPropagation()
       if (isHotkey('mod+backspace', e)) {
         const [p] = Editor.nodes(editor, {
           match: (n) => Element.isElement(n) && n.type === 'paragraph'

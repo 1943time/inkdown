@@ -81,7 +81,8 @@ const MdElements: Record<string, MdNode> = {
         },
         { at: path }
       )
-      Transforms.select(editor, [...path, 1, 0, 0])
+      Transforms.select(editor, Editor.start(editor, path))
+      return true
     }
   },
   inlineKatex: {
