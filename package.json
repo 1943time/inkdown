@@ -1,6 +1,6 @@
 {
   "name": "inkdown",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A writing tool and chat bot fully compatible with markdown",
   "main": "./out/main/index.js",
   "author": "1943time",
