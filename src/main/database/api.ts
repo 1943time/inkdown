@@ -299,8 +299,8 @@ ipcMain.handle('deleteSpace', async (_, id: string) => {
 
 ipcMain.handle('getDocs', async (_, spaceId: string, deleted?: boolean) => {
   const handle = knex('doc').where('spaceId', spaceId)
-  if (deleted) {
-    handle.andWhere('deleted', !!deleted)
+  if (typeof deleted === 'boolean') {
+    handle.andWhere('deleted', deleted)
   }
   const docs = await handle
     .orderBy('sort', 'asc')
@@ -629,7 +629,7 @@ const queryVector = async ({
     normalize: true
   })
   const queryVector = Array.from(queryVec.data)
-  let handle = db.search(queryVector).select(['path', 'doc_id', 'content'])
+  let handle = db.search(queryVector).select(['path', 'doc_id', 'content']) as lancedb.VectorQuery
   if (ids?.length) {
     handle = handle.where(`doc_id IN (${ids.map((id) => `'${id}'`).join(',')})`)
   }

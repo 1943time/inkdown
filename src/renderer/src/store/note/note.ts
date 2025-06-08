@@ -213,7 +213,7 @@ export class NoteStore extends StructStore<typeof state> {
     this.recordTabs()
   }
   async getDocs(spaceId: string) {
-    return this.store.model.getDocs(spaceId).then((docs) => {
+    return this.store.model.getDocs(spaceId, false).then((docs) => {
       const nodes: Record<string, IDoc> = {}
       const foldersMap = new Map<string, IDoc[]>()
       for (const doc of docs) {
