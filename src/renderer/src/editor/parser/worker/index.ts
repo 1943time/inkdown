@@ -11,7 +11,13 @@ const findImageElement = (str: string) => {
       const url = match[0].match(/src="([^"\n]+)"/)
       const height = match[0].match(/height="(\d+)"/)
       const align = match[0].match(/data\-align="(\w+)"/)
-      return { url: url?.[1], height: height ? +height[1] : undefined, align: align?.[1] }
+      const id = match[0].match(/alt="id:([\w\.]+)"/)
+      return {
+        url: url?.[1],
+        height: height ? +height[1] : undefined,
+        align: align?.[1],
+        id: id?.[1]
+      }
     }
     return null
   } catch (e) {
@@ -133,6 +139,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
               type: 'media',
               align: media.align,
               height: media.height,
+              id: media.id,
               url: decodeURIComponent(media.url || ''),
               children: [{ text: '' }]
             }
@@ -208,6 +215,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
                   type: 'media',
                   align: img.align,
                   height: img.height,
+                  id: img.id,
                   url: img.url,
                   children: [{ text: '' }]
                 }
@@ -223,6 +231,7 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
           type: 'media',
           children: [{ text: '' }],
           url: decodeURIComponent(n.url),
+          id: n.alt?.match(/^id:([\w\.]+)$/i)?.[1],
           alt: n.alt
         } as MediaNode
         break
@@ -297,7 +306,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
             el.push({
               type: 'media',
               children: [{ text: '' }],
-              url: decodeURIComponent(c.url)
+              url: decodeURIComponent(c.url),
+              id: c.alt?.match(/^id:([\w\.]+)$/i)?.[1]
             })
           } else if (c.type === 'html') {
             const img = findImageElement(c.value)
@@ -307,7 +317,8 @@ const parserBlock = (nodes: Content[], top = false, parent?: Content) => {
                 align: img.align,
                 children: [{ text: '' }],
                 url: decodeURIComponent(img.url || ''),
-                height: img.height
+                height: img.height,
+                id: img.id
               })
             } else {
               textNodes.push({ type: 'html', value: c.value })

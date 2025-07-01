@@ -263,7 +263,7 @@ class Output {
           if (type === 'video') {
             str += `<video src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
           } else if (type === 'image') {
-            str += `<img src="${encodeURI(url)}" alt="" height="${node.height || ''}" ${node.align ? `data-align="${node.align}"` : ''}/>`
+            str += `<img src="${encodeURI(url)}" alt="${node.id ? `id:${node.id}` : ''}" height="${node.height || ''}" ${node.align ? `data-align="${node.align}"` : ''}/>`
           } else {
             str += `<iframe src="${encodeURI(url)}" alt="" height="${node.height || ''}"/>`
           }
@@ -272,9 +272,9 @@ class Output {
             str += `<video src="${encodeURI(url)}"/>`
           } else if (type === 'image') {
             if (node.align) {
-              str += `<img src="${encodeURI(url)}" alt="" ${node.align ? `data-align="${node.align}"` : ''}/>`
+              str += `<img src="${encodeURI(url)}" alt="${node.id ? `id:${node.id}` : ''}" ${node.align ? `data-align="${node.align}"` : ''}/>`
             } else {
-              str += `![${node.alt || ''}](${encodeURI(url)})`
+              str += `![${node.id ? `id:${node.id}` : ''}](${encodeURI(url)})`
             }
           } else {
             str += `<iframe src="${encodeURI(url)}"/>`

@@ -14,5 +14,22 @@ export const htmlToMarkdown = (html: string) => {
       return `\n\`\`\`${lang}\n${content}\n\`\`\`\n`
     }
   })
+  t.addRule('image', {
+    filter: ['img'],
+    replacement: function (content, node) {
+      const img = node as HTMLImageElement
+      const src = img.src || img.getAttribute('src') || ''
+      const alt = img.alt || img.getAttribute('alt') || ''
+      const height = img.height || img.getAttribute('height') || ''
+      const align = img.getAttribute('data-align') || ''
+      if (height) {
+        return `<img src="${src}" alt="${alt}" height="${height}" ${align ? `data-align="${align}"` : ''}/>`
+      } else if (align) {
+        return `<img src="${src}" alt="${alt}" ${align ? `data-align="${align}"` : ''}/>`
+      } else {
+        return `![${alt}](${src})`
+      }
+    }
+  })
   return t.turndown(html).replace(/\\\[/g, '[').replace(/\\\]/g, ']')
 }

@@ -280,8 +280,6 @@ export class ModelApi {
   }
 
   async createFiles(files: IFile[]): Promise<void> {
-    console.log('add', files)
-
     return ipcRenderer.invoke('createFiles', files)
   }
 

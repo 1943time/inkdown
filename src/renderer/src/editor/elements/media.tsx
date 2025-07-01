@@ -228,7 +228,7 @@ export function Media({ element, attributes, children }: ElementProps<MediaNode>
           {state().type === 'image' && !!state().url && (
             <img
               src={state().url}
-              alt={'image'}
+              alt={element.id ? `id:${element.id}` : ''}
               draggable={false}
               referrerPolicy={'no-referrer'}
               // @ts-ignore
