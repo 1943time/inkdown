@@ -15,6 +15,7 @@ import { observer } from 'mobx-react-lite'
 import { useSubject } from '@/hooks/common'
 import { htmlToMarkdown } from '@/parser/htmlToMarkdown'
 import { delayRun } from '@/utils/common'
+import { getPlainTextWithBlockBreaks, markdownToPureHtml } from './parser/worker/toHtml'
 
 export const MEditor = observer(({ tab }: { tab: TabStore }) => {
   const store = useStore()
@@ -292,32 +293,27 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
       tab.insertMultipleImages(Array.from(files))
       return
     }
+    let paste = e.clipboardData.getData('text/html')
+    if (paste) {
+      const md = htmlToMarkdown(paste)
+      if (md) {
+        tab.keyboard.insertMarkdown(md)
+      }
+      e.stopPropagation()
+      e.preventDefault()
+      return
+    }
     if (text) {
       const [node] = Editor.nodes<Element>(tab.editor, {
         match: (n) =>
           Element.isElement(n) &&
           (n.type === 'inline-katex' || n.type === 'table-cell' || n.type === 'wiki-link')
       })
-
       if (node) {
         Transforms.insertText(tab.editor, text.replace(/\r?\n/g, ' '))
         e.stopPropagation()
         e.preventDefault()
         return
-      }
-    }
-    let paste = e.clipboardData.getData('text/html')
-
-    if (paste) {
-      const parsed = new DOMParser().parseFromString(paste, 'text/html').body
-      const inner = !!parsed.querySelector('[data-be]')
-      if (!inner) {
-        const md = htmlToMarkdown(paste)
-        if (md) {
-          tab.keyboard.insertMarkdown(md)
-        }
-        e.stopPropagation()
-        e.preventDefault()
       }
     }
   }, [])
@@ -333,6 +329,28 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
 
   const compositionEnd = useCallback((e: React.CompositionEvent) => {
     tab.setState({ inputComposition: false })
+  }, [])
+  const copy = useCallback((e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (tab.state.doc) {
+      const fragment = Editor.fragment(tab.editor, tab.editor.selection!)
+      store.worker
+        .toMarkdown({
+          schema: fragment,
+          doc: {
+            id: tab.state.doc.id,
+            name: tab.state.doc.name,
+            folder: tab.state.doc.folder,
+            parentId: tab.state.doc.parentId,
+            updated: tab.state.doc.updated
+          }
+        })
+        .then(async (res) => {
+          if (fragment?.length) {
+            const html = await markdownToPureHtml(res.md)
+            window.api.writeToClipboardMix(html, getPlainTextWithBlockBreaks(html))
+          }
+        })
+    }
   }, [])
   if (!tab.state.doc) {
     return null
@@ -350,6 +368,7 @@ export const MEditor = observer(({ tab }: { tab: TabStore }) => {
           style={{
             fontSize: settings.editorFontSize || 16
           }}
+          onCopy={copy}
           onContextMenu={(e) => e.stopPropagation()}
           onMouseDown={checkEnd}
           onDrop={drop}

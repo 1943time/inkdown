@@ -210,7 +210,8 @@ export class ContextMenu {
           click: () => {
             this.store.note.setState({ selectedDoc: null })
             this.store.note.openEditFolderDialog$.next({
-              mode: 'create'
+              mode: 'create',
+              ctxNode: node
             })
           }
         }

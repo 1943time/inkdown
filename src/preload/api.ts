@@ -71,7 +71,13 @@ export const Api = {
     return clipboard.readText()
   },
   writeToClipboard(text: string) {
-    return clipboard.writeText(text)
+    return clipboard.writeText(text, 'clipboard')
+  },
+  writeToClipboardMix(html: string, text: string) {
+    clipboard.write({
+      text: text,
+      html: html
+    })
   },
   async downloadUrl(url: string) {
     const response = await fetch(url)

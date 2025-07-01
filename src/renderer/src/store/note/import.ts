@@ -1,6 +1,6 @@
 import { Store } from '../store'
 import { IDoc } from 'types/model'
-import { mb, nid, toUnixPath } from '@/utils/common'
+import { mb, nid } from '@/utils/common'
 import { Node } from 'slate'
 import { isLink } from '@/editor/utils'
 import { EditorUtils } from '@/editor/utils/editorUtils'
@@ -88,6 +88,8 @@ export class ImportNote {
               }
             }
           } else {
+            console.log('item.url', ctx.root, ctx.spacePath, item.url)
+
             if (existsSync(join(ctx.root, ctx.spacePath, '..', item.url))) {
               item.url = join(ctx.root, ctx.spacePath, '..', item.url)
               const size = window.api.fs.statSync(item.url)?.size || 0
@@ -233,15 +235,14 @@ export class ImportNote {
     const now = Date.now()
     const allMedias: any[] = []
     const linkMap = new Map<string, { links: any[]; wikiLinks: any[]; medias: any[] }>()
-    const parentPath = this.store.note.getDocPath(parent).join('/')
+    const parentPath = this.store.note.getDocPath(parent).join(window.api.path.sep)
     const readDir = async (dir: string, parent: IDoc) => {
       const files = window.api.fs.readdirSync(dir)
       for (const f of files) {
         if (f.startsWith('.')) continue
         const target = join(dir, f)
-        const unixPath = toUnixPath(target)
         const stat = window.api.fs.statSync(target)
-        let spacePath = join(parentPath, unixPath.replace(join(root) + '/', ''))
+        let spacePath = join(parentPath, target.replace(join(root) + window.api.path.sep, ''))
         if (stat?.folder) {
           if (!pathMap.get(spacePath)?.folder) {
             const node: ImportDoc = {
