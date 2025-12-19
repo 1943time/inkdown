@@ -1,8 +1,10 @@
 <h1><img src="resources/icon.png" width="25"/>Inkdown</h1>
 
-Inkdown Editor is a WYSIWYG editor and an LLM dialogue tool, fully compatible with GitHub Flavored Markdown Spec.
+## Inkdown Editor is a WYSIWYG editor and an LLM dialogue tool, fully compatible with GitHub Flavored Markdown Spec.
 
-[Documentation](https://www.inkdown.cn/docs)
+## ⚠️ Project Status: Development Paused
+
+> **This project is currently paused and no longer actively maintained.**
 
 | Mac                                                                                                     | Windows                                                                                                   | VsCode                                                                         |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
